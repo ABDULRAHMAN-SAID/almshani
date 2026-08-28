@@ -70,9 +70,9 @@
     position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
     align-items:center;justify-content:flex-end;padding:0 20px calc(34px + env(safe-area-inset-bottom));
     background:linear-gradient(180deg,rgba(42,35,51,0) 30%,rgba(42,35,51,.45) 100%);
-    opacity:1;transition:opacity .3s ease;
+    opacity:1;transition:opacity .3s ease, visibility .3s;
   }
-  .screen.hidden{opacity:0;pointer-events:none;}
+  .screen.hidden{opacity:0;pointer-events:none;visibility:hidden;}
   .card{
     width:min(430px,100%);background:var(--paper);border-radius:26px;
     box-shadow:0 18px 50px rgba(40,15,0,.35);padding:24px 22px 20px;text-align:center;
@@ -173,8 +173,8 @@
 
   <div id="boot-error">
     <div class="card">
-      <h1>تعذّر التحميل</h1>
-      <p class="sub">لم نستطع تحميل محرك الرسوميات. تأكد من اتصال الإنترنت ثم أعد المحاولة.</p>
+      <h1>تعذّر التشغيل</h1>
+      <p class="sub">لم نستطع تشغيل محرك الرسوميات ثلاثية الأبعاد. تأكد من اتصال الإنترنت ومن دعم متصفحك لتقنية WebGL ثم أعد المحاولة.</p>
     </div>
   </div>
 </div>
@@ -182,6 +182,8 @@
 <script>
 window.__startGame = function () {
 'use strict';
+if (window.__booted) return;
+window.__booted = true;
 
 /* ============================== helpers ============================== */
 var clamp = function (v, a, b) { return v < a ? a : (v > b ? b : v); };
@@ -214,7 +216,8 @@ var store = {
 var AudioFX = (function () {
   var ctx = null, master = null;
   function ensure() {
-    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return true; }
+    /* iOS can leave the context in a non-standard 'interrupted' state — resume on anything not running */
+    if (ctx) { if (ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } return true; }
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return false;
     ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.4; master.connect(ctx.destination);
@@ -351,29 +354,37 @@ function buildTerrain(length) {
     g.add(strip);
   });
 
+  /* rocks and trees are baked into one merged mesh per material (few draw calls) */
   var rng = mulberry32(991);
   var rockGeo = new THREE.DodecahedronGeometry(1, 0);
+  var trunkGeo = new THREE.CylinderGeometry(0.22, 0.3, 1.2, 6);
+  var coneGeo = new THREE.ConeGeometry(1.5, 3.4, 7);
+  var rocksLight = [], rocksDark = [], trunks = [], pines = [];
   for (var z = -30; z < length + 70; z += 12) {
     [-1, 1].forEach(function (side) {
       for (var k = 0; k < 2; k++) {
         var s = 5 + rng() * 6;
-        var m = new THREE.Mesh(rockGeo, rng() < 0.5 ? M.rock : M.rockDark);
-        m.position.set(side * (HW + 7.5 + k * 6 + rng() * 3), s * (0.45 + k * 0.45), z + rng() * 10);
-        m.scale.set(s, s * (1.2 + rng() * 0.7), s);
-        m.rotation.set(rng() * 0.4, rng() * Math.PI, rng() * 0.4);
-        g.add(m);
+        var baked = bakeGeom(rockGeo,
+          side * (HW + 7.5 + k * 6 + rng() * 3), s * (0.45 + k * 0.45), z + rng() * 10,
+          s, s * (1.2 + rng() * 0.7), s,
+          rng() * 0.4, rng() * Math.PI, rng() * 0.4);
+        (rng() < 0.5 ? rocksLight : rocksDark).push(baked);
       }
       if (rng() < 0.6) {
         var tz = z + rng() * 10;
-        var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 1.2, 6), M.trunk);
-        trunk.position.set(side * (HW + 2.1 + (rng() - 0.5)), 0.9, tz);
-        var cone = new THREE.Mesh(new THREE.ConeGeometry(1.5, 3.4, 7), M.pine);
-        cone.position.set(trunk.position.x, 3, tz);
-        cone.castShadow = true;
-        g.add(trunk, cone);
+        var tx = side * (HW + 2.1 + (rng() - 0.5));
+        trunks.push(bakeGeom(trunkGeo, tx, 0.9, tz, 1, 1, 1));
+        pines.push(bakeGeom(coneGeo, tx, 3, tz, 1, 1, 1));
       }
     });
   }
+  [[rocksLight, M.rock, false], [rocksDark, M.rockDark, false], [trunks, M.trunk, false], [pines, M.pine, true]].forEach(function (batch) {
+    if (!batch[0].length) return;
+    var m = new THREE.Mesh(mergeGeoms(batch[0]), batch[1]);
+    m.castShadow = batch[2];
+    g.add(m);
+    batch[0].forEach(function (bg) { bg.dispose(); });
+  });
   return g;
 }
 
@@ -404,7 +415,8 @@ function mergeGeoms(geoms) {
       pos.push(p.getX(i), p.getY(i), p.getZ(i));
       norm.push(n.getX(i), n.getY(i), n.getZ(i));
     }
-    for (var j = 0; j < ix.count; j++) idx.push(ix.getX(j) + off);
+    if (ix) { for (var j = 0; j < ix.count; j++) idx.push(ix.getX(j) + off); }
+    else    { for (var k = 0; k < p.count; k++) idx.push(k + off); }
     off += p.count;
   });
   var g = new THREE.BufferGeometry();
@@ -412,6 +424,17 @@ function mergeGeoms(geoms) {
   g.setAttribute('normal', new THREE.Float32BufferAttribute(norm, 3));
   g.setIndex(idx);
   return g;
+}
+/* clone geo, bake a transform into it (for static-mesh batching) */
+var _bake = new THREE.Object3D();
+function bakeGeom(geo, x, y, z, sx, sy, sz, rx, ry, rz) {
+  var g2 = geo.clone();
+  _bake.position.set(x, y, z);
+  _bake.scale.set(sx, sy, sz);
+  _bake.rotation.set(rx || 0, ry || 0, rz || 0);
+  _bake.updateMatrix();
+  g2.applyMatrix4(_bake.matrix);
+  return g2;
 }
 var unitGeo = (function () {
   var body = new THREE.CylinderGeometry(0.2, 0.3, 0.62, 7);
@@ -435,36 +458,32 @@ var OFFS = (function () {
 })();
 
 /* ============================== text sprites / banners ============================== */
-function textCanvas(text, opts) {
-  opts = opts || {};
-  var cv = document.createElement('canvas');
-  cv.width = opts.w || 256; cv.height = opts.h || 128;
-  var g = cv.getContext('2d');
+/* Each label owns one persistent canvas + texture; updates redraw in place
+   (no per-change canvas/texture allocation, no texture churn mid-battle). */
+function drawLabel(sp, text) {
+  var cv = sp.userData.cv, g = sp.userData.g;
   g.clearRect(0, 0, cv.width, cv.height);
-  g.font = '900 ' + (opts.size || 84) + 'px Rubik, "Arial Black", Arial, sans-serif';
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.lineJoin = 'round';
-  g.strokeStyle = opts.stroke || 'rgba(20,16,40,.85)';
-  g.lineWidth = opts.strokeW || 12;
-  g.strokeText(text, cv.width / 2, cv.height / 2 + (opts.dy || 6));
-  g.fillStyle = opts.fill || '#fff';
-  g.fillText(text, cv.width / 2, cv.height / 2 + (opts.dy || 6));
-  return cv;
+  g.font = '900 84px Rubik, "Arial Black", Arial, sans-serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  g.strokeStyle = 'rgba(20,16,40,.85)'; g.lineWidth = 12;
+  g.strokeText(text, cv.width / 2, cv.height / 2 + 6);
+  g.fillStyle = sp.userData.fill || '#fff';
+  g.fillText(text, cv.width / 2, cv.height / 2 + 6);
+  sp.material.map.needsUpdate = true;
 }
 function makeLabelSprite(text, scale, fill) {
-  var tex = new THREE.CanvasTexture(textCanvas(text, { fill: fill }));
+  var cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 128;
+  var tex = new THREE.CanvasTexture(cv);
   tex.minFilter = THREE.LinearFilter;
   var sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
   sp.scale.set(scale * 2, scale, 1);
   sp.renderOrder = 20;
+  sp.userData.cv = cv;
+  sp.userData.g = cv.getContext('2d');
+  sp.userData.fill = fill;
+  drawLabel(sp, text);
   return sp;
-}
-function updateLabelSprite(sp, text, fill) {
-  var tex = new THREE.CanvasTexture(textCanvas(text, { fill: fill }));
-  tex.minFilter = THREE.LinearFilter;
-  sp.material.map.dispose();
-  sp.material.map = tex;
-  sp.material.needsUpdate = true;
 }
 
 var GATE_THEMES = {
@@ -917,28 +936,32 @@ function gameWin() {
 
 /* ============================== input ============================== */
 (function () {
-  var dragging = false, lastX = 0;
+  var dragId = null, lastX = 0;
   var surface = renderer.domElement;
   surface.style.touchAction = 'none';
   surface.addEventListener('pointerdown', function (e) {
-    dragging = true; lastX = e.clientX;
+    if (dragId !== null) return; /* first finger only */
+    dragId = e.pointerId; lastX = e.clientX;
+    try { surface.setPointerCapture(e.pointerId); } catch (err) {}
     AudioFX.unlock();
   });
   window.addEventListener('pointermove', function (e) {
-    if (!dragging) return;
+    if (e.pointerId !== dragId) return;
     var dx = e.clientX - lastX; lastX = e.clientX;
-    crowd.targetX = clamp(crowd.targetX + dx * (2.6 * HW / window.innerWidth) * 1.35, -(HW - 1.4), HW - 1.4);
+    /* camera faces +Z, so screen-right is world -X */
+    crowd.targetX = clamp(crowd.targetX - dx * (2.6 * HW / window.innerWidth) * 1.35, -(HW - 1.4), HW - 1.4);
   });
-  window.addEventListener('pointerup', function () { dragging = false; });
-  window.addEventListener('pointercancel', function () { dragging = false; });
+  function endDrag(e) { if (e.pointerId === dragId) dragId = null; }
+  window.addEventListener('pointerup', endDrag);
+  window.addEventListener('pointercancel', endDrag);
   var keys = {};
-  window.addEventListener('keydown', function (e) { keys[e.key] = true; });
-  window.addEventListener('keyup', function (e) { keys[e.key] = false; });
+  window.addEventListener('keydown', function (e) { keys[e.code] = true; });
+  window.addEventListener('keyup', function (e) { keys[e.code] = false; });
   setInterval(function () {
     if (game.state !== 'run') return;
     var v = 0;
-    if (keys.ArrowLeft || keys.a) v -= 1;
-    if (keys.ArrowRight || keys.d) v += 1;
+    if (keys.ArrowLeft || keys.KeyA) v += 1;  /* screen-left is world +X */
+    if (keys.ArrowRight || keys.KeyD) v -= 1;
     if (v) crowd.targetX = clamp(crowd.targetX + v * 0.55, -(HW - 1.4), HW - 1.4);
   }, 33);
 })();
@@ -950,6 +973,7 @@ function beginRun() {
   el.screenStart.classList.add('hidden');
   el.screenWin.classList.add('hidden');
   el.screenLose.classList.add('hidden');
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
 document.getElementById('btn-start').addEventListener('click', function () { AudioFX.unlock(); beginRun(); });
 document.getElementById('btn-next').addEventListener('click', function () { AudioFX.unlock(); beginRun(); });
@@ -1014,9 +1038,10 @@ function updateSquadUnits(squad, dt, engaged) {
   }
   mesh.instanceMatrix.needsUpdate = true;
   var shown = Math.max(0, Math.ceil(squad.countF));
-  if (shown !== squad.labelShown) {
+  if (shown !== squad.labelShown && (shown === 0 || game.time - (squad.labelT || 0) > 0.1)) {
     squad.labelShown = shown;
-    updateLabelSprite(squad.label, String(shown), '#FFD9D2');
+    squad.labelT = game.time;
+    drawLabel(squad.label, String(shown));
   }
   squad.label.position.set(engaged ? crowd.x : 0, 4.6, engaged ? crowd.z + 3 : squad.z);
 }
@@ -1090,9 +1115,10 @@ function step(dt) {
       if (!REDUCED_MOTION) game.shake = Math.max(game.shake, 0.18);
     }
     var shownHP = Math.max(0, Math.ceil(game.hpF));
-    if (castle.shownHP !== shownHP) {
+    if (castle.shownHP !== shownHP && (shownHP === 0 || game.time - (castle.labelT || 0) > 0.1)) {
       castle.shownHP = shownHP;
-      updateLabelSprite(castle.hpLabel, String(shownHP), '#FFFFFF');
+      castle.labelT = game.time;
+      drawLabel(castle.hpLabel, String(shownHP));
     }
     if (game.hpF <= 0) {
       gameWin();
@@ -1107,11 +1133,19 @@ function step(dt) {
   }
 
   if (D) {
+    /* fog ends at 165: anything past it can be hidden entirely (saves draw + shadow passes) */
     for (var qi = 0; qi < D.squads.length; qi++) {
       var q = D.squads[qi];
       if (!q.alive) continue;
-      if (q.z < crowd.z - 30 || q.z > crowd.z + 130) continue;
+      var qVis = q.z > crowd.z - 40 && q.z < crowd.z + 170;
+      if (q.mesh.visible !== qVis) { q.mesh.visible = qVis; q.label.visible = qVis; }
+      if (!qVis) continue;
       updateSquadUnits(q, dt, !!q.engaged && game.state === 'battle');
+    }
+    for (var vgi = 0; vgi < D.gates.length; vgi++) {
+      var vg = D.gates[vgi];
+      var gVis = vg.z > crowd.z - 30 && vg.z < crowd.z + 175;
+      if (vg.node.visible !== gVis) vg.node.visible = gVis;
     }
   }
 
@@ -1175,15 +1209,19 @@ frame();
     'lib/three.min.js'
   ];
   var i = 0;
+  function fail() {
+    document.getElementById('boot-error').style.display = 'flex';
+  }
+  function boot() {
+    /* WebGLRenderer throws synchronously when WebGL is unavailable — surface it, don't die silently */
+    try { window.__startGame(); } catch (e) { fail(); }
+  }
   function next() {
-    if (window.THREE) { window.__startGame(); return; }
-    if (i >= urls.length) {
-      document.getElementById('boot-error').style.display = 'flex';
-      return;
-    }
+    if (window.THREE) { boot(); return; }
+    if (i >= urls.length) { fail(); return; }
     var s = document.createElement('script');
     s.src = urls[i++];
-    s.onload = function () { window.THREE ? window.__startGame() : next(); };
+    s.onload = function () { window.THREE ? boot() : next(); };
     s.onerror = next;
     document.head.appendChild(s);
   }
