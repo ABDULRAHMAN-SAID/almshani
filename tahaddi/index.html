@@ -418,8 +418,9 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .ebi:active{transform:scale(.9)}
 .ebub{position:absolute;top:-40px;right:8px;z-index:8;background:var(--paper,#fff);
  background:#FFF7E8;border-radius:14px 14px 14px 3px;padding:4px;animation:pop .25s ease;
- box-shadow:0 4px 14px rgba(0,0,0,.4)}
+ box-shadow:0 4px 14px rgba(0,0,0,.4);pointer-events:none}
 .ebub.op{right:auto;left:8px;border-radius:14px 14px 3px 14px}
+.scr.nofi{animation:none}
 </style>
 </head>
 <body>
@@ -15053,7 +15054,7 @@ function rankLabelAr(r){
 /** الوقت وعدد الخيارات يتغيران بالرتبة — القاعدة السادسة */
 /** كل نوع جولة له أرضية زمنية لا تُخترق مهما ارتفعت الرتبة */
 const TIME_FLOOR={quick:8,odd:12,link:12,belongs:14,timeline:18,story:14,reveal:14,map:12,match:16,estimate:10,twostage:14,reverse:14,
- image:12,map:12,match:18,estimate:12,duel:15,auction:15};
+ image:12,duel:15,auction:15};
 const TIME_MULT={quick:1,story:1.7,timeline:2.0,belongs:1.6,odd:1.4,link:1.5,
  image:1.4,reveal:1.6,map:1.4,match:2.0,estimate:1.4,twostage:1.8,reverse:1.7,duel:1.4,auction:1};
 function rankTime(r,type){
@@ -15190,7 +15191,7 @@ const CARDS=[
 {id:11,n:'العدّاد',r:'common',e:2,ph:'B',t:'deduce',need:['belongs','auction'],s:'كم إجابة صحيحة',
  d:'يخبرك بعدد الإجابات الصحيحة الموجودة، ولا يخبرك ما هي.',
  can:['في جولات متعددة الصحيح'],cant:['لا يحدد أيها'],pr:5},
-{id:12,n:'الراوي',r:'common',e:1,ph:'B',t:'deduce',need:['story'],s:'معلومة قصصية',
+{id:12,n:'الراوي',r:'common',e:1,ph:'B',t:'deduce',need:['story','reverse'],s:'معلومة قصصية',
  d:'اختر: الزمن · المكان · المسيرة — ويمنحك معلومة إضافية من النوع الذي اخترته.',
  can:['في صاحب القصة'],cant:['لا يعطي الاسم'],pr:5},
 {id:13,n:'المؤرّخ',r:'common',e:2,ph:'C',t:'deduce',need:['timeline'],s:'كم عنصرًا خاطئًا',
@@ -15277,7 +15278,7 @@ const CARDS=[
  can:['قبل بدء الجولة'],cant:['في الجولة الأخيرة'],pr:3},
 {id:39,n:'العهد',r:'legendary',e:4,ph:'A',t:'tactic',s:'المعرفة فقط',
  d:'تغلق البطاقات لدى الطرفين حتى نهاية المباراة. لا بطاقات ولا تراجع.',
- can:['في آخر جولتين'],cant:['قبل ذلك'],pr:2},
+ can:['عند التعادل أو التأخر','عند بقاء جولتين على الأقل'],cant:['للمتقدم — لا تُستخدم لقفل مباراة محسومة'],pr:2},
 {id:40,n:'قلب العالم',r:'legendary',e:4,ph:'A',t:'tactic',s:'اقلب التفكير',
  d:'تحوّل الجولة إلى Reverse Challenge — الإجابات أولًا ثم الأسئلة وعليك الربط.',
  can:['قبل بدء الجولة'],cant:['في الجولة الأخيرة'],pr:3}
@@ -15342,9 +15343,14 @@ function newCycle(deck){
 function consumeCard(cy,idx){
  const p=cy.hand[idx];
  cy.spent.push(p);
- cy.hand[idx]=cy.next<cy.order.length?cy.order[cy.next]:null;
- cy.next++;
+ if(cy.next<cy.order.length){cy.hand[idx]=cy.order[cy.next];cy.next++}
+ else cy.hand[idx]=null;   // لا نتجاوز نهاية الدورة — «الاسترجاع» يبقى قابلًا للسحب
  return p;
+}
+/** يسحب البطاقة التالية إلى خانة اليد إن وُجدت */
+function drawInto(cy,idx){
+ if(cy.next<cy.order.length){cy.hand[idx]=cy.order[cy.next];cy.next++}
+ else cy.hand[idx]=null;
 }
 /** التبديل المجاني قبل الجولة الأولى — يقلّل سوء الحظ */
 function freeMulligan(cy,idx){
@@ -15951,24 +15957,25 @@ const MATCHQ=[
 ];
 
 // ── التقدير: اسحب المؤشر نحو القيمة الصحيحة ──
+/* المدى مُزاح عن المنتصف عمدًا — من يترك المؤشر مكانه لا يفوز صدفة */
 const ESTIMATES=[
- {q:'كم يبلغ ارتفاع برج إيفل تقريبًا؟',min:100,max:600,ans:330,unit:'م',net:'geography'},
- {q:'كم عدد سور القرآن الكريم؟',min:80,max:150,ans:114,unit:'سورة',net:'religion'},
- {q:'كم يبلغ ارتفاع برج خليفة تقريبًا؟',min:500,max:1200,ans:828,unit:'م',net:'geography'},
- {q:'كم يبلغ طول نهر النيل تقريبًا؟',min:4000,max:9000,ans:6650,unit:'كم',net:'geography'},
- {q:'كم عدد الدول الأعضاء في جامعة الدول العربية؟',min:15,max:30,ans:22,unit:'دولة',net:'arab'},
- {q:'كم اتحادًا وطنيًا ينضوي تحت الفيفا تقريبًا؟',min:150,max:260,ans:211,unit:'اتحادًا',net:'football'},
+ {q:'كم يبلغ ارتفاع برج إيفل تقريبًا؟',min:100,max:700,ans:330,unit:'م',net:'geography'},
+ {q:'كم عدد سور القرآن الكريم؟',min:90,max:200,ans:114,unit:'سورة',net:'religion'},
+ {q:'كم يبلغ ارتفاع برج خليفة تقريبًا؟',min:500,max:1500,ans:828,unit:'م',net:'geography'},
+ {q:'كم يبلغ طول نهر النيل تقريبًا؟',min:3000,max:9000,ans:6650,unit:'كم',net:'geography'},
+ {q:'كم عدد الدول الأعضاء في جامعة الدول العربية؟',min:10,max:40,ans:22,unit:'دولة',net:'arab'},
+ {q:'كم اتحادًا وطنيًا ينضوي تحت الفيفا تقريبًا؟',min:150,max:400,ans:211,unit:'اتحادًا',net:'football'},
  {q:'كم عظمة في جسم الإنسان البالغ؟',min:150,max:300,ans:206,unit:'عظمة',net:'science'},
- {q:'كم تبعد الأرض عن القمر تقريبًا؟ (بآلاف الكيلومترات)',min:200,max:600,ans:384,unit:'ألف كم',net:'science'},
- {q:'كم يبلغ ارتفاع قمة إفرست تقريبًا؟',min:6000,max:12000,ans:8849,unit:'م',net:'geography'},
- {q:'كم عدد أيام السنة الهجرية تقريبًا؟',min:330,max:380,ans:354,unit:'يومًا',net:'religion'},
- {q:'كم تبلغ أقصى سرعة للفهد تقريبًا؟',min:60,max:180,ans:115,unit:'كم/س',net:'animals'},
- {q:'كم عدد ركعات الفروض الخمسة في اليوم؟',min:10,max:25,ans:17,unit:'ركعة',net:'religion'},
- {q:'كم هدفًا سُجل في مونديال قطر 2022؟',min:100,max:250,ans:172,unit:'هدفًا',net:'football'},
+ {q:'كم تبعد الأرض عن القمر تقريبًا؟ (بآلاف الكيلومترات)',min:100,max:800,ans:384,unit:'ألف كم',net:'science'},
+ {q:'كم يبلغ ارتفاع قمة إفرست تقريبًا؟',min:6000,max:14000,ans:8849,unit:'م',net:'geography'},
+ {q:'كم عدد أيام السنة الهجرية تقريبًا؟',min:300,max:450,ans:354,unit:'يومًا',net:'religion'},
+ {q:'كم تبلغ أقصى سرعة للفهد تقريبًا؟',min:50,max:250,ans:115,unit:'كم/س',net:'animals'},
+ {q:'كم عدد ركعات الفروض الخمسة في اليوم؟',min:10,max:30,ans:17,unit:'ركعة',net:'religion'},
+ {q:'كم هدفًا سُجل في مونديال قطر 2022؟',min:100,max:300,ans:172,unit:'هدفًا',net:'football'},
  {q:'كم غرامًا يزن قلب الإنسان البالغ تقريبًا؟',min:100,max:600,ans:300,unit:'غ',net:'science'},
- {q:'كم كيلومترًا يقطع الضوء في الثانية تقريبًا؟ (بآلاف الكيلومترات)',min:100,max:500,ans:300,unit:'ألف كم',net:'science'},
+ {q:'كم كيلومترًا يقطع الضوء في الثانية تقريبًا؟ (بآلاف الكيلومترات)',min:100,max:600,ans:300,unit:'ألف كم',net:'science'},
  {q:'كم يبلغ أقصى عمق لخندق ماريانا تقريبًا؟',min:5,max:20,ans:11,unit:'كم',net:'science'},
- {q:'كم لغة رسمية تعتمدها الأمم المتحدة؟',min:2,max:12,ans:6,unit:'لغات',net:'general'},
+ {q:'كم لغة رسمية تعتمدها الأمم المتحدة؟',min:2,max:14,ans:6,unit:'لغات',net:'general'},
  {q:'كم دقيقة يستغرق ضوء الشمس للوصول إلى الأرض تقريبًا؟',min:1,max:30,ans:8,unit:'دقائق',net:'science'}
 ];
 
@@ -16045,7 +16052,7 @@ function quitMatch(force){
  toast('انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} RP)`:''));
  rankedScr();
 }
-function toggleMenu(){M.menu=!M.menu;mDraw()}
+function toggleMenu(){M.menu=!M.menu;mDraw(1)}
 function closeQuit(){M.quitAsk=false;M.menu=false;mDraw()}
 
 function startRanked(intro){
@@ -16275,7 +16282,8 @@ function buildRound(k){
   const order=[...d.tiles.keys()].sort(()=>Math.random()-.5);
   const secs=rankTime(S.ranked,k);
   M.st={k,d,opts,correct:opts.indexOf(d.a),sel:null,
-        open:new Set([order[0]]),order,oi:1,gap:Math.max(2.2,secs*.09),lens:0};
+        open:new Set([order[0]]),order,oi:1,
+        gap:Math.max(1.2,secs*.75/8),lens:0};   // كل الخانات تنكشف ضمن ثلاثة أرباع الوقت
  }
  if(k==='map'){
   const d=pickMode('map',M.netOverride);
@@ -16298,6 +16306,9 @@ function buildRound(k){
    return {t:s.t,o:o.map(x=>x.v),c:o.findIndex(x=>x.i===s.c)}};
   M.st={k,d,s1:mk(d.s1),s2:mk(d.s2),stage:1,sel:null,s1ok:null};
  }
+ // «تحويل الفئة» بلا محتوى مطابق: نصارح اللاعب بدل التجاهل الصامت
+ if(M.netOverride&&M.st&&M.st.d&&M.st.d.net&&M.st.d.net!==M.netOverride)
+  setTimeout(()=>toast('لا محتوى كافٍ من الفئة المختارة — سؤال من فئة أخرى'),500);
  M.netOverride=null;
 }
 
@@ -16314,11 +16325,11 @@ function mTick(){
  if(st&&!M.ans){
   if((st.k==='story'||st.k==='reverse')&&st.shown<st.d.clues.length){
    const want=Math.min(st.d.clues.length,1+Math.floor(el/st.gap));
-   if(want>st.shown){st.shown=want;mDraw()}
+   if(want>st.shown){st.shown=want;mDraw(1)}
   }
   if(st.k==='reveal'&&st.oi<st.order.length){
    const want=Math.min(st.order.length,1+Math.floor(el/st.gap));
-   if(want>st.oi){while(st.oi<want)st.open.add(st.order[st.oi++]);mDraw()}
+   if(want>st.oi){while(st.oi<want)st.open.add(st.order[st.oi++]);mDraw(1)}
   }
  }
 }
@@ -16352,7 +16363,9 @@ function mSubmit(val){
  if(k==='map'&&st.pin){
   const d=st.d,dlat=st.pin.lat-d.lat,dlon=(st.pin.lon-d.lon)*Math.cos(d.lat*Math.PI/180);
   st.dist=Math.round(111*Math.sqrt(dlat*dlat+dlon*dlon));
-  ok=st.dist<=d.tol;partial=Math.max(0,1-st.dist/(d.tol*2.2));
+  // هامش لمس إضافي: الإصبع على شاشة صغيرة لا يملك دقة الكيلومترات
+  st.tolEff=Math.round(d.tol*1.5);
+  ok=st.dist<=st.tolEff;partial=Math.max(0,1-st.dist/(st.tolEff*2.2));
  }
  if(k==='match'){
   const n=st.d.pairs.length;
@@ -16360,7 +16373,7 @@ function mSubmit(val){
   st.hit=hit;partial=hit/n;ok=hit===n;
  }
  if(k==='estimate'){
-  const d=st.d,tol=Math.max(1,Math.round((d.max-d.min)*.12));
+  const d=st.d,tol=Math.max(1,Math.round((d.max-d.min)*.08));
   st.tol=tol;st.diff=Math.abs(st.val-d.ans);
   const acted=!!(val!==null||st.moved);   // انتهاء الوقت دون لمس المؤشر لا يُحتسب
   ok=!!(acted&&st.diff<=tol);
@@ -16388,7 +16401,9 @@ function mSubmit(val){
   delete fx.bolt;
  }
  if(fx.silentBet){
-  if(ok&&partial>=.999){M.energy=Math.min(ENERGY_MAX,M.energy+2);
+  // في جولات الإجابة الواحدة partial يبقى صفرًا — الصحيح وحده يكفي «للجولة المثالية»
+  const perfect=ok&&(partial>=.999||partial===0);
+  if(perfect){M.energy=Math.min(ENERGY_MAX,M.energy+2);
    setTimeout(()=>toast(`${ico('dice',13)} الرهان الصامت نجح: +2 طاقة`),700)}
   else{M.energy=Math.max(0,M.energy-1);
    setTimeout(()=>toast('خسرت الرهان الصامت: −1 طاقة'),700)}
@@ -17905,10 +17920,12 @@ function oppDeckFor(rv){
 }
 /** يقرر الخصم الآلي لعب بطاقة في بداية الجولة */
 function oppPlayRound(){
+ M.oppSkillRound=0;   // لا يمتد أثر بطاقة الخصم لجولة لم يلعب فيها
  if(!M.rival||M.effects.covenant||M.oppPlayedRound)return;
  const k=M.rounds[M.i];
  let ch=.2+(S.ranked.tier||0)*.02+(M.rival.like===k?.3:0);
- const pool=M.oppHand.filter(id=>id!==M.oppBlocked);
+ const blocked=M.oppBlockedAt===M.i?M.oppBlocked:null;
+ const pool=M.oppHand.filter(id=>id!==blocked);
  if(!pool.length||Math.random()>=ch){M.oppSkillRound=0;return}
  const id=pool[Math.floor(Math.random()*pool.length)];
  M.oppHand.splice(M.oppHand.indexOf(id),1);
@@ -17940,12 +17957,14 @@ function cardPlayable(id){
   case 5:case 19:case 20:case 31:case 34:case 35:case 38:case 40:case 9:
    if(!nxt)return{ok:0,why:'لا جولة قادمة'};break;
   case 6:if(M.i+2>M.rounds.length-1)return{ok:0,why:'يلزم جولتان قادمتان'};break;
-  case 2:case 27:if(cardsLeft(M.cycle)<(id===27?2:1))return{ok:0,why:'لا بطاقات كافية في الدورة'};break;
+  case 2:if(cardsLeft(M.cycle)<1)return{ok:0,why:'لا بطاقات في الدورة'};break;
+  case 27:if(cardsLeft(M.cycle)<3)return{ok:0,why:'يلزم ثلاث بطاقات في الدورة — بديلك واثنتان للنظر'};break;
   case 3:case 23:{const dk=S.cards.decks[S.cards.active];
    const avail=(dk.side||[]).filter(x=>!(M.sideUsed||[]).includes(x));
    if(!avail.length)return{ok:0,why:'لا بطاقات احتياط متبقية'};
    if(M.cycle.hand.filter(x=>x&&x!==id).length<1)return{ok:0,why:'لا بطاقة أخرى في يدك'};break}
   case 4:case 32:
+   if(id===32&&M.vault!=null)return{ok:0,why:'الخزنة مشغولة — استرجعها أولًا'};
    if(M.cycle.hand.filter(x=>x&&x!==id).length<1)return{ok:0,why:'لا بطاقة أخرى في يدك'};break;
   case 11:if(k==='belongs'&&st.reveal!=null)return{ok:0,why:'العدد معروف أصلًا'};
    if(k==='auction'&&st.countHint)return{ok:0,why:'استُخدم'};break;
@@ -17955,7 +17974,7 @@ function cardPlayable(id){
   case 16:if(!st.moved)return{ok:0,why:'حرّك المؤشر أولًا'};
    if(st.scaleUsed)return{ok:0,why:'مرة واحدة في الجولة'};break;
   case 17:if(!M.oppHand.length)return{ok:0,why:'لا بطاقات لدى الخصم'};break;
-  case 18:if(!M.oppKnown.length)return{ok:0,why:'اكشف بطاقة أولًا بعين المنافس'};
+  case 18:if(!M.oppKnown.some(x=>M.oppHand.includes(x)))return{ok:0,why:'اكشف بطاقة في يده أولًا'};
    if(!nxt)return{ok:0,why:'لا جولة قادمة'};break;
   case 21:if(st.phase!=='bid')return{ok:0,why:'قبل بدء الإثبات فقط'};
    if(st.hintRange)return{ok:0,why:'استُخدم'};break;
@@ -17968,9 +17987,9 @@ function cardPlayable(id){
   case 29:return{ok:0,why:'تُستخدم من داخل المزايدة عند 11+'};
   case 30:{const lp=M.oppLastPlayed;
    if(!lp)return{ok:0,why:'لم يلعب الخصم بطاقة بعد'};
-   const r2=cardById(lp).r;
-   if(r2!=='common'&&r2!=='rare')return{ok:0,why:'تنسخ عادية أو نادرة فقط'};break}
-  case 32:if(M.vault!=null)return{ok:0,why:'الخزنة مشغولة — استرجعها أولًا'};break;
+   const cc=cardById(lp);
+   if(cc.r!=='common'&&cc.r!=='rare')return{ok:0,why:'تنسخ عادية أو نادرة فقط'};
+   if(cc.need&&!cc.need.includes(k))return{ok:0,why:`«${cc.n}» لا تصلح لهذه الجولة`};break}
   case 36:if(M.effects.rebuilt)return{ok:0,why:'مرة واحدة في المباراة'};break;
   case 37:if(M.me<3&&M.opp<3)return{ok:0,why:'عند نقطة الحسم فقط'};
    if(!nxt)return{ok:0,why:'لا جولة قادمة'};break;
@@ -17982,6 +18001,9 @@ function cardPlayable(id){
 /** تأثير كل بطاقة — مطابق لوصفها المعلن */
 function applyEffect(id){
  const fx=M.effects,st=M.st,k=M.rounds[M.i];
+ // حارس عام: البطاقات المرتبطة بجولة لا تعمل خارجها (يحمي مسار «المرآة» وغيره)
+ const cNeed=cardById(id)&&cardById(id).need;
+ if(cNeed&&!cNeed.includes(k)){toast(`«${cardById(id).n}» لا أثر لها في هذه الجولة`);return}
  const NET_KEYS=NETS.map(n=>n.id);
  const pick2=arr=>{const a=[...arr].sort(()=>Math.random()-.5);return [a[0],a[1]]};
  switch(id){
@@ -18012,26 +18034,32 @@ function applyEffect(id){
   case 15:st.hint=st.d.region;
    st.hintCircle={lat:st.d.lat+(Math.random()-.5)*6,lon:st.d.lon+(Math.random()-.5)*6,r:st.d.tol*1.9/111};
    toast(`${ico('map',14)} البوصلة: ${st.d.region}`);break;
-  case 16:st.scaleUsed=1;st.scaleHint=st.d.ans>st.val?'up':'down';break;
+  case 16:st.scaleUsed=1;
+   st.scaleHint=st.d.ans===st.val?'eq':st.d.ans>st.val?'up':'down';break;
   case 17:{const hid=M.oppHand[Math.floor(Math.random()*M.oppHand.length)];
    if(!M.oppKnown.includes(hid))M.oppKnown.push(hid);
    toast(`${ico('search',14)} عين المنافس: لديه «${cardById(hid).n}»`);break}
-  case 18:{const bid=M.oppKnown[M.oppKnown.length-1];
-   M.oppBlocked=bid;
-   toast(`${ico('lock',14)} القفل: «${cardById(bid).n}» ممنوعة عليه`);break}
+  case 18:{const cands=M.oppKnown.filter(x=>M.oppHand.includes(x));
+   if(!cands.length){toast('البطاقات المكشوفة لم تعد في يده');break}
+   const bid=cands[cands.length-1];
+   M.oppBlocked=bid;M.oppBlockedAt=M.i+1;   // المنع لجولة واحدة قادمة
+   toast(`${ico('lock',14)} القفل: «${cardById(bid).n}» ممنوعة عليه الجولة القادمة`);break}
   case 19:{const basket=[...new Set(M.rounds)].filter(x=>x!=='auction'&&x!=='duel');
    const [a,b]=pick2(basket.length>=2?basket:['quick','odd']);
    M.pick={mode:'fork',t:'اختر نوع الجولة القادمة',opts:[a,b]};break}
   case 20:{const [a,b]=pick2(NET_KEYS);
    M.pick={mode:'net',t:'اختر فئة الجولة القادمة',opts:[a,b]};break}
   case 21:{const n2=st.d.ok.length;
-   st.hintRange=n2<=15?'10–15':n2<=20?'16–20':'أكثر من 20';
+   st.hintRange=n2<10?'أقل من 10':n2<=15?'10–15':n2<=20?'16–20':'أكثر من 20';
    toast(`${ico('hammer',14)} قارئ الساحة: ${st.hintRange}`);break}
   case 22:fx.insurance=1;toast(`${ico('shield',14)} التأمين: النقص بواحد لن يسقطك`);break;
   case 24:M.pick={mode:'eng',t:'اسأل: هل الرابط متعلق بـ…'};break;
   case 25:st.traveler=1;toast(`${ico('map',14)} الرحّالة: ضع علامتين ثم اعتمد واحدة`);break;
   case 26:M.pick={mode:'retrieve',t:'اختر بطاقة عادية تعود لنهاية الدورة'};break;
-  case 27:M.pick={mode:'double',t:'انظر للبطاقتين — خذ واحدة والأخرى لنهاية الدورة'};break;
+  case 27:{const left=cardsLeft(M.cycle);
+   if(left<=0){toast('لا بطاقات متبقية في الدورة');break}
+   if(left===1){toast(`البطاقة الوحيدة المتبقية: «${cardById(M.cycle.order[M.cycle.next]).n}»`);break}
+   M.pick={mode:'double',t:'انظر للبطاقتين — خذ واحدة والأخرى لنهاية الدورة'};break}
   case 28:fx.chase={left:2,won:0};toast(`${ico('flame',14)} المطاردة: اربح الجولتين القادمتين`);break;
   case 30:{const cp=M.oppLastPlayed;toast(`${ico('cards',14)} المرآة تنسخ «${cardById(cp).n}»`);
    applyEffect(cp);break}
@@ -18069,7 +18097,7 @@ function playCard(i){
  M.playedThisRound=true;
  if(S.cards.owned[id])S.cards.owned[id].uses=(S.cards.owned[id].uses||0)+1;
  applyEffect(id);
- mDraw();
+ mDraw(1);
 }
 
 /* ── نافذة الاختيار داخل المباراة ── */
@@ -18099,26 +18127,29 @@ function pickOverlay(){
  else if(p.mode==='retrieve'){const list=[...new Set(M.cycle.spent.filter(x=>cardById(x).r==='common'))];
   body=`<div style="display:flex;gap:6px">${list.map(id2=>`<div style="flex:1">${gcard(id2,{sm:1,tap:`pickGo(${id2})`})}</div>`).join('')}</div>`}
  else if(p.mode==='double'){const cy=M.cycle,a=cy.order[cy.next],b=cy.order[cy.next+1];
-  body=`<div style="display:flex;gap:6px">${[a,b].map(id2=>`<div style="flex:1">${gcard(id2,{sm:1,tap:`pickGo(${id2})`})}</div>`).join('')}</div>`}
+  body=`<div style="display:flex;gap:6px">${[a,b].filter(x=>x!=null).map(id2=>`<div style="flex:1">${gcard(id2,{sm:1,tap:`pickGo(${id2})`})}</div>`).join('')}</div>`}
  else if(p.mode==='side2'){const dk=S.cards.decks[S.cards.active];
   const avail=dk.side.filter(x=>!(M.sideUsed||[]).includes(x));
   body=`<div style="display:flex;gap:6px">${avail.map(id2=>`<div style="flex:1">${gcard(id2,{sm:1,tap:`pickGo(${id2})`})}</div>`).join('')}</div>`}
  else{ // rotate | discard | side | vault | vaultOut — اختيار من اليد
   body=`<div style="display:flex;gap:6px">${M.cycle.hand.map((id2,j)=>id2?
    `<div style="flex:1">${gcard(id2,{sm:1,tap:`pickGo(${j})`})}</div>`:'').join('')}</div>`}
- return `<div class="povl"><div class="pcard">
- <div class="mtl" style="font-size:14px;margin-bottom:12px;text-align:center">${p.t}</div>${body}</div></div>`;
+ return `<div class="povl" onclick="if(event.target===this)pickCancel()"><div class="pcard">
+ <div class="mtl" style="font-size:14px;margin-bottom:12px;text-align:center">${p.t}</div>${body}
+ <button class="btn g" style="margin-top:12px;font-size:12.5px" onclick="pickCancel()">إغلاق بدون اختيار</button>
+ </div></div>`;
 }
+function pickCancel(){M.pick=null;mDraw(1)}
 function pickGo(v){
  const p=M.pick,cy=M.cycle,st=M.st;
  if(!p)return;
  M.pick=null;
  if(p.mode==='rotate'){const old=cy.hand[v];
-  cy.hand[v]=cy.next<cy.order.length?cy.order[cy.next]:null;cy.next++;
+  drawInto(cy,v);
   cy.order.push(old);toast('دُوِّرت البطاقة')}
  else if(p.mode==='discard'){const old=cy.hand[v];
   cy.spent.push(old);
-  cy.hand[v]=cy.next<cy.order.length?cy.order[cy.next]:null;cy.next++;
+  drawInto(cy,v);
   M.energy=Math.min(ENERGY_MAX,M.energy+2);toast(`${ico('energy',14)} +2 طاقة`)}
  else if(p.mode==='side'){M.pick={mode:'side2',t:'اختر بطاقة الاحتياط الداخلة',slot:v};mDraw();return}
  else if(p.mode==='side2'){
@@ -18128,7 +18159,7 @@ function pickGo(v){
   cy.order.push(old);
   toast(`دخلت «${cardById(v).n}» من الاحتياط`)}
  else if(p.mode==='vault'){M.vault=cy.hand[v];
-  cy.hand[v]=cy.next<cy.order.length?cy.order[cy.next]:null;cy.next++;
+  drawInto(cy,v);
   toast(`${ico('chest',14)} حُفظت في الخزنة`)}
  else if(p.mode==='vaultOut'){const old=cy.hand[v];
   cy.order.push(old);cy.hand[v]=M.vault;M.vault=null;
@@ -18153,7 +18184,12 @@ function pickGo(v){
  mDraw();
 }
 function vaultAsk(){if(M.vault==null)return;
- M.pick={mode:'vaultOut',t:`استرجاع «${cardById(M.vault).n}» — اختر بطاقة تخرج لنهاية الدورة`};mDraw()}
+ const empty=M.cycle.hand.findIndex(x=>!x);
+ if(empty>=0){ // خانة فارغة: تعود بطاقة الخزنة إليها مباشرة
+  M.cycle.hand[empty]=M.vault;M.vault=null;
+  toast('عادت بطاقة الخزنة إلى يدك');mDraw(1);return;
+ }
+ M.pick={mode:'vaultOut',t:`استرجاع «${cardById(M.vault).n}» — اختر بطاقة تخرج لنهاية الدورة`};mDraw(1)}
 
 /* ── التعبيرات داخل المباراة — فقاعة قصيرة لا تغطي السؤال ── */
 function myEmoteDeck(){
@@ -18161,14 +18197,14 @@ function myEmoteDeck(){
  if(!S.emoteDeck||!S.emoteDeck.filter(Boolean).length)S.emoteDeck=[...S.emotes].slice(0,8);
  return S.emoteDeck.filter(Boolean);
 }
-function emoteBar(){M.emoteBar=!M.emoteBar;mDraw()}
+function emoteBar(){M.emoteBar=!M.emoteBar;mDraw(1)}
 function sendEmote(k){
  const now=Date.now();
  if(M.emoteCd&&now<M.emoteCd){toast('مهلة قصيرة بين التعبيرات');return}
  M.emoteCd=now+EMOTE_CD;
  M.myEmote={k,until:now+2000};
  M.emoteBar=false;
- mDraw();
+ mDraw(1);
  setTimeout(()=>{if(M&&M.myEmote&&Date.now()>=M.myEmote.until){M.myEmote=null;mDraw()}},2100);
 }
 function oppEmote(kind){
@@ -18191,6 +18227,8 @@ function mDraw(){
   return;
  }
  const st=M.st,k=st.k;
+ const soft=arguments.length&&arguments[0]===1;
+ const sy=soft?window.scrollY:0;
  let body='';
  if(k==='quick')    body=drawQuick(st);
  if(k==='odd')      body=drawOdd(st);
@@ -18205,12 +18243,13 @@ function mDraw(){
  if(k==='match')    body=drawMatch(st);
  if(k==='estimate') body=drawEstimate(st);
  if(k==='twostage') body=drawTwostage(st);
- go(`<div class="scr on">${mHeader()}${body}
+ go(`<div class="scr on${soft?' nofi':''}">${mHeader()}${body}
  ${M.ans?mFeedback():mHand()}
  ${M.ans?`<div style="margin-top:14px"><button class="rbtn" onclick="mNext()">
   <span>${M.i>=M.rounds.length-1?'النتيجة النهائية':'الجولة التالية'}</span></button></div>`:''}
  ${M.pick?pickOverlay():''}
  </div>`);
+ if(soft)window.scrollTo(0,sy);
 }
 
 function mFeedback(){
@@ -18268,7 +18307,7 @@ function drawTimeline(st){
 function tlMove(i,d){
  const o=M.st.order,j=i+d;
  if(j<0||j>=o.length)return;
- [o[i],o[j]]=[o[j],o[i]];mDraw();
+ [o[i],o[j]]=[o[j],o[i]];mDraw(1);
 }
 
 function drawBelongs(st){
@@ -18377,7 +18416,9 @@ function auctionBid(st){
  <div class="btns"><button class="btn g" onclick="aCancel()">إلغاء</button>
  <button class="rbtn" onclick="aWordGo()"><span>تأكيد كلمة الفصل</span></button></div></div>`;
 
- const hasWord=M.cycle.hand.includes(29)&&M.energy>=4&&!M.playedThisRound;
+ // كلمة الفصل تتطلب 11+ إثباتًا — لا تُعرض على مجموعات لا تتسع لذلك، ولا تحت العهد
+ const hasWord=M.cycle.hand.includes(29)&&M.energy>=4&&!M.playedThisRound
+  &&st.d.ok.length>=11&&!M.effects.covenant;
  const cHint=st.countHint?`<div class="hint">${ico('counter',13)} العدّاد: في المجموعة ${st.countHint} إجابة صحيحة</div>`:'';
  const nums=[];
  for(let i=st.myBid+1;i<=Math.min(st.myBid+6,st.d.ok.length);i++)nums.push(i);
@@ -18510,10 +18551,29 @@ function aPassGo(){
  M.lastPts=iWin?1:0;M.lastOppPts=iWin?0:1;
  if(iWin)M.me++;else M.opp++;
  M.log.push({k:'auction',ok:iWin,pts:M.lastPts,oppPts:M.lastOppPts});
+ // «روح» ليست إجابة: تسقط رهانات الإجابة وتُحسم رهانات الجولة
+ const fx=M.effects;
+ delete fx.bolt;delete fx.silentBet;delete fx.insurance;
+ if(fx.openBet){
+  if(iWin)M.energy=Math.min(ENERGY_MAX,M.energy+2);
+  else M.energy=Math.max(0,M.energy-1);
+  delete fx.openBet;
+ }
+ if(fx.chase){
+  if(iWin)fx.chase.won++;
+  fx.chase.left--;
+  if(fx.chase.left<=0){
+   if(fx.chase.won>=2){M.energy=Math.min(ENERGY_MAX,M.energy+4);M.chaseBonus=1}
+   delete fx.chase;
+  }
+ }
  st.phase='done';st.hit=0;st.miss=0;st.pool=st.pool||[];st.passed=1;st.oppHit=oppHit;
  mDraw();
 }
-function aWordAsk(){M.st.pending=Math.max(11,M.st.myBid+1);M.st.confirm='word';mDraw()}
+function aWordAsk(){
+ if(M.st.d.ok.length<11||M.effects.covenant)return;
+ M.st.pending=Math.min(M.st.d.ok.length,Math.max(11,M.st.myBid+1));
+ M.st.confirm='word';mDraw()}
 function aWordGo(){
  const st=M.st;st.myBid=st.pending;st.confirm=null;
  M.energy-=4;M.playedThisRound=true;
@@ -18619,7 +18679,7 @@ function drawStory(st){
  ${st.reverse?optsHtml+cluesHtml:cluesHtml+optsHtml}
  ${M.ans?`<div class="note">الإجابة: ${st.d.a}</div>`:''}`;
 }
-function rawiPick(k){M.st.rawi=k;M.st.rawiAsk=false;mDraw()}
+function rawiPick(k){M.st.rawi=k;M.st.rawiAsk=false;mDraw(1)}
 
 // ── كشف الفسيفساء ──
 function drawReveal(st){
@@ -18640,7 +18700,7 @@ function lensOpen(i){const st=M.st;if(!st.lens||st.open.has(i))return;
  st.lens--;st.open.add(i);
  const oi=st.order.indexOf(i);
  if(oi>=st.oi){st.order.splice(oi,1);st.order.splice(st.oi,0,i);st.oi++}
- mDraw()}
+ mDraw(1)}
 
 // ── الخريطة: قارات مبسطة بإسقاط متساوي المستطيلات ──
 /* قارات مبسطة على إسقاط متساوي المستطيلات: x = خط الطول + 180 · y = 90 − خط العرض */
@@ -18661,8 +18721,8 @@ const WORLD_PATHS=[
  'M215,60 L222,60 L228,61 L239,67 L235,73 L223,77 L219,72 Z',
  // أرخبيل جنوب شرق آسيا
  'M275,95 L290,97 L305,99 L318,98 L316,102 L300,103 L282,100 Z M296,84 L302,88 L298,92 L292,88 Z',
- // اليابان
- 'M320,52 L324,47 L327,42 L329,45 L324,52 L321,57 Z',
+ // اليابان — قوس من كيوشو (130° شرقًا) إلى هوكايدو (143° شرقًا)
+ 'M310,60 L315,55 L320,50 L323,46 L326,47 L321,54 L316,59 L311,62 Z',
  // أستراليا ونيوزيلندا
  'M294,112 L310,102 L323,101 L333,115 L327,128 L310,122 L296,122 Z M340,132 L344,138 L340,141 L337,135 Z'
 ];
@@ -18691,7 +18751,7 @@ function drawMap(st){
   ${M.ans?`<g><circle cx="${ansPin.x}" cy="${ansPin.y}" r="6" fill="#2ECC71" fill-opacity=".3"/>
    <circle cx="${ansPin.x}" cy="${ansPin.y}" r="2.6" fill="#2ECC71"/></g>`:''}
  </svg></div>
- ${M.ans?`<div class="note">${st.pin?`بعدت عن الهدف ${st.dist} كم — المسموح ${st.d.tol} كم`:'لم تضع علامة'}</div>`
+ ${M.ans?`<div class="note">${st.pin?`بعدت عن الهدف ${st.dist} كم — المسموح ${st.tolEff||st.d.tol} كم`:'لم تضع علامة'}</div>`
  :st.traveler&&st.pin&&st.pin2?`<div style="display:flex;gap:8px;margin-top:10px">
    <button class="btn g" style="flex:1" onclick="travKeep(1)">اعتماد A</button>
    <button class="btn g" style="flex:1" onclick="travKeep(2)">اعتماد B</button></div>`
@@ -18706,7 +18766,7 @@ function mapTap(ev){
  const lon=x/360*360-180,lat=90-y/180*180;
  const p={lat,lon};
  if(st.traveler&&st.pin&&!st.pin2)st.pin2=p;else{st.pin=p;st.pin2=null}
- mDraw();
+ mDraw(1);
 }
 function travKeep(which){const st=M.st;if(which===2)st.pin=st.pin2;st.pin2=null;st.traveler=0;mapGo()}
 function mapGo(){if(!M.st.pin)return;mSubmit('pin')}
@@ -18732,7 +18792,8 @@ function drawMatch(st){
    style="${c?`border-color:${c}`:''}">
    ${st.d.pairs[pi][1]}${c?`<span class="mdot" style="background:${c}"></span>`:''}</div>`}).join('')}</div>
  </div>
- ${M.ans?`<div class="note">أصبت ${st.hit} من ${n}</div>`
+ ${M.ans?`<div class="note">أصبت ${st.hit} من ${n}<br>
+  <span style="color:var(--tx2)">الصحيح: ${st.d.pairs.map(p2=>p2[0]+' ← '+p2[1]).join(' · ')}</span></div>`
  :`<div style="display:flex;gap:8px;margin-top:10px;align-items:center">
   <div style="flex:1;font-size:11px;color:var(--tx2)">${st.selL!==null?'الآن اختر المقابل من العمود الثاني':'اختر من العمود الأول ثم قابله'}</div>
   <button class="rbtn" style="width:auto;padding:10px 22px" ${Object.keys(st.linkMap).length===n?'':'disabled'}
@@ -18741,17 +18802,17 @@ function drawMatch(st){
 function mSelL(r){const st=M.st;
  if(st.linkMap[r]!==undefined){delete st.linkMap[r];st.selL=null}
  else st.selL=st.selL===r?null:r;
- mDraw()}
+ mDraw(1)}
 function mSelR(r){const st=M.st;
  if(st.selL===null)return;
  for(const k of Object.keys(st.linkMap))if(st.linkMap[k]===r)delete st.linkMap[k];
- st.linkMap[st.selL]=r;st.selL=null;mDraw()}
+ st.linkMap[st.selL]=r;st.selL=null;mDraw(1)}
 
 // ── التقدير ──
 function drawEstimate(st){
  const d=st.d;
  return `<div class="qbox"><div class="qboxi" style="font-size:15px">${d.q}</div></div>
- ${st.scaleHint?`<div class="hint">${ico('scale',14)} الميزان: القيمة الصحيحة ${st.scaleHint==='up'?'أعلى من':'أقل من'} تقديرك السابق — عدّل مرة واحدة</div>`:''}
+ ${st.scaleHint?`<div class="hint">${ico('scale',14)} الميزان: ${st.scaleHint==='eq'?'تقديرك مطابق تمامًا — اعتمده!':`القيمة الصحيحة ${st.scaleHint==='up'?'أعلى من':'أقل من'} تقديرك السابق — عدّل مرة واحدة`}</div>`:''}
  <div style="text-align:center;margin:18px 0 6px">
  <span class="mtl" id="estv" style="font-size:44px">${st.val.toLocaleString('en-US')}</span>
  <span style="color:var(--tx2);font-size:14px;margin-right:6px">${d.unit}</span></div>
@@ -18775,11 +18836,13 @@ function drawTwostage(st){
  <div class="qbox"><div class="qboxi">${s.t}</div></div>
  <div class="ops">${s.o.map((o,i)=>{
   let cl='qop2';
-  if(M.ans&&st.stage===2){if(i===st.s2.c)cl+=' ok2';else if(i===st.sel)cl+=' no2'}
+  const cc=st.stage===2?st.s2.c:st.s1.c;
+  if(M.ans){if(i===cc)cl+=' ok2';else if(i===st.sel)cl+=' no2'}
   return `<div class="${cl}" onclick="${M.ans?'':`tsSel(${i})`}"><div class="qop2i">
-   <span class="qop2n">${M.ans&&st.stage===2&&i===st.s2.c?ico('check',14):i+1}</span>
+   <span class="qop2n">${M.ans&&i===cc?ico('check',14):i+1}</span>
    <span class="qop2t">${o}</span></div></div>`}).join('')}</div>
- ${M.ans&&st.s1ok===false?`<div class="note">سقطت في المرحلة الأولى — الإجابة: ${st.s1.o[st.s1.c]}</div>`:''}`;
+ ${M.ans&&st.s1ok===false?`<div class="note">سقطت في المرحلة الأولى — الإجابة: ${st.s1.o[st.s1.c]}</div>`:''}
+ ${M.ans&&st.s1ok!==false&&st.stage===1?`<div class="note">انتهى الوقت في المرحلة الأولى — الإجابة: ${st.s1.o[st.s1.c]}</div>`:''}`;
 }
 function tsSel(i){const st=M.st;
  if(st.stage===1){
