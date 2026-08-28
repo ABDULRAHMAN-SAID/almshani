@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Rubik:wght@400;600;800;900&display=swap">
 <style>
   :root{
-    --sand:#EDCA86; --ink:#2A2333; --ink-soft:rgba(30,24,48,.55);
+    --ink:#2A2333; --ink-soft:rgba(30,24,48,.55);
     --blue:#2F7BFF; --blue-deep:#1E56C8; --red:#E8452F; --gold:#FFC53D;
     --paper:#FFF7E8; --fog:#F6DFB8;
   }
@@ -26,6 +26,7 @@
   #app{position:fixed;inset:0;direction:rtl;}
   #gl{position:absolute;inset:0;}
   #gl canvas{display:block;width:100%;height:100%;touch-action:none;}
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:8;transition:opacity .12s ease;}
 
   /* ---------- HUD ---------- */
   #hud{position:absolute;inset:0;pointer-events:none;z-index:5;}
@@ -35,11 +36,14 @@
   }
   .pill{
     background:var(--ink-soft);color:#fff;backdrop-filter:blur(6px);
-    border-radius:999px;padding:6px 14px;font-weight:800;font-size:15px;
+    border-radius:999px;padding:6px 14px;font-weight:800;font-size:14px;
     font-variant-numeric:tabular-nums;box-shadow:0 2px 8px rgba(40,20,0,.18);
     white-space:nowrap;
   }
-  .pill small{font-weight:600;opacity:.8;margin-inline-start:4px;font-size:12px;}
+  .pill small{font-weight:600;opacity:.85;margin-inline-start:4px;font-size:11px;}
+  .pill .coin-ico{display:inline-block;width:13px;height:13px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#FFE9A8,#E09E12);vertical-align:-2px;margin-inline-end:5px;
+    border:1.5px solid #B37800;}
   #progress{
     position:absolute;top:calc(52px + env(safe-area-inset-top));right:24px;left:24px;height:8px;
     background:rgba(30,24,48,.25);border-radius:999px;
@@ -68,40 +72,40 @@
   /* ---------- screens ---------- */
   .screen{
     position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;
-    align-items:center;justify-content:flex-end;padding:0 20px calc(34px + env(safe-area-inset-bottom));
-    background:linear-gradient(180deg,rgba(42,35,51,0) 30%,rgba(42,35,51,.45) 100%);
+    align-items:center;justify-content:flex-end;padding:0 16px calc(24px + env(safe-area-inset-bottom));
+    background:linear-gradient(180deg,rgba(42,35,51,0) 20%,rgba(42,35,51,.5) 100%);
     opacity:1;transition:opacity .3s ease, visibility .3s;
+    overflow-y:auto;
   }
   .screen.hidden{opacity:0;pointer-events:none;visibility:hidden;}
   .card{
-    width:min(430px,100%);background:var(--paper);border-radius:26px;
-    box-shadow:0 18px 50px rgba(40,15,0,.35);padding:24px 22px 20px;text-align:center;
+    width:min(440px,100%);background:var(--paper);border-radius:26px;
+    box-shadow:0 18px 50px rgba(40,15,0,.35);padding:20px 20px 18px;text-align:center;
+    flex-shrink:0;
   }
   .card h1{
-    font-family:'Lalezar', 'Rubik',sans-serif;font-weight:400;margin:0 0 2px;
-    font-size:clamp(34px,9vw,46px);color:var(--ink);text-wrap:balance;line-height:1.15;
+    font-family:'Lalezar','Rubik',sans-serif;font-weight:400;margin:0 0 2px;
+    font-size:clamp(32px,8.5vw,44px);color:var(--ink);text-wrap:balance;line-height:1.15;
   }
-  .card .sub{margin:0 0 14px;font-size:15px;font-weight:600;color:#6B5E52;}
-  .chips{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+  .card .sub{margin:0 0 12px;font-size:14px;font-weight:600;color:#6B5E52;}
+  .chips{display:flex;gap:7px;justify-content:center;margin-bottom:12px;flex-wrap:wrap;}
   .chip{
-    border-radius:12px;padding:7px 11px;font-size:13px;font-weight:800;color:#fff;
+    border-radius:12px;padding:6px 10px;font-size:12.5px;font-weight:800;color:#fff;
     display:flex;align-items:center;gap:6px;
   }
   .chip b{direction:ltr;font-variant-numeric:tabular-nums;}
   .chip.c-blue{background:var(--blue);}
   .chip.c-gold{background:var(--gold);color:#5B4200;}
   .chip.c-red{background:var(--red);}
-  .stats{display:flex;gap:10px;justify-content:center;margin-bottom:16px;}
-  .stat{
-    background:#F3E7CE;border-radius:14px;padding:10px 16px;min-width:96px;
-  }
-  .stat .v{font-weight:900;font-size:24px;font-variant-numeric:tabular-nums;direction:ltr;}
-  .stat .k{font-size:12px;font-weight:600;color:#6B5E52;}
+  .stats{display:flex;gap:10px;justify-content:center;margin-bottom:12px;}
+  .stat{background:#F3E7CE;border-radius:14px;padding:9px 14px;min-width:88px;}
+  .stat .v{font-weight:900;font-size:22px;font-variant-numeric:tabular-nums;direction:ltr;}
+  .stat .k{font-size:11.5px;font-weight:600;color:#6B5E52;}
   .btn{
     display:block;width:100%;border:none;cursor:pointer;
-    font-family:'Lalezar','Rubik',sans-serif;font-size:clamp(24px,6vw,30px);color:#fff;
+    font-family:'Lalezar','Rubik',sans-serif;font-size:clamp(23px,5.6vw,29px);color:#fff;
     background:linear-gradient(180deg,#4E90FF,var(--blue) 45%,var(--blue-deep));
-    border-radius:18px;padding:14px 10px 12px;
+    border-radius:18px;padding:13px 10px 11px;
     box-shadow:0 6px 0 #16409A,0 12px 24px rgba(30,86,200,.4);
     transition:transform .08s ease, box-shadow .08s ease;
   }
@@ -112,25 +116,66 @@
     box-shadow:0 6px 0 #9C6B00,0 12px 24px rgba(224,158,18,.4);color:#4A3400;
   }
   .btn.gold:active{box-shadow:0 2px 0 #9C6B00,0 6px 14px rgba(224,158,18,.4);}
-  .hint{margin-top:12px;font-size:13px;font-weight:600;color:#6B5E52;}
+  .btn.small{font-size:17px;padding:9px 8px 8px;border-radius:13px;box-shadow:0 4px 0 #16409A;}
+  .row2{display:flex;gap:10px;}
+  .row2 .btn{flex:1;}
+  .hint{margin-top:10px;font-size:12.5px;font-weight:600;color:#6B5E52;}
   .brand{
-    font-family:'Lalezar','Rubik',sans-serif;color:#fff;font-size:clamp(44px,12vw,64px);
-    line-height:1;margin-bottom:14px;text-shadow:0 3px 0 var(--blue-deep),0 8px 24px rgba(30,40,90,.5);
+    font-family:'Lalezar','Rubik',sans-serif;color:#fff;font-size:clamp(40px,11vw,60px);
+    line-height:1;margin:14px 0 12px;text-shadow:0 3px 0 var(--blue-deep),0 8px 24px rgba(30,40,90,.5);
+    flex-shrink:0;
   }
+  .biome-tag{
+    display:inline-flex;align-items:center;gap:6px;background:#F3E7CE;border-radius:999px;
+    padding:5px 13px;font-size:13px;font-weight:800;color:#6B5E52;margin-bottom:10px;
+  }
+  .stars-big{font-size:clamp(34px,10vw,46px);letter-spacing:6px;line-height:1.1;margin:2px 0 6px;direction:ltr;}
+  .stars-big .on{color:#F5B01B;text-shadow:0 2px 0 #B37800,0 4px 12px rgba(245,176,27,.45);}
+  .stars-big .off{color:#D9CCB4;}
+
+  /* ---------- shop ---------- */
+  .shop{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .up{
+    background:#F3E7CE;border-radius:14px;padding:9px 8px 8px;text-align:center;cursor:pointer;
+    border:2px solid transparent;transition:transform .08s ease;
+  }
+  .up:active{transform:scale(.96);}
+  .up.max{opacity:.6;cursor:default;}
+  .up .ic{font-size:21px;line-height:1.2;}
+  .up .nm{font-size:12px;font-weight:800;margin-top:2px;}
+  .up .lv{font-size:10.5px;font-weight:700;color:#6B5E52;}
+  .up .cost{
+    margin-top:5px;display:inline-flex;align-items:center;gap:4px;background:#FFD971;
+    border-radius:999px;padding:2px 9px;font-size:11.5px;font-weight:900;color:#4A3400;direction:ltr;
+  }
+  .up .cost.no{background:#E5D8C0;color:#9A8B74;}
+
+  /* ---------- level map ---------- */
+  .map-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;max-height:44vh;overflow-y:auto;padding:2px;}
+  .lv{
+    background:#F3E7CE;border-radius:13px;padding:8px 4px 6px;text-align:center;cursor:pointer;
+    border:2px solid transparent;
+  }
+  .lv.cur{border-color:var(--blue);}
+  .lv.lock{opacity:.45;cursor:default;}
+  .lv .n{font-weight:900;font-size:17px;direction:ltr;}
+  .lv .b{font-size:13px;line-height:1.3;}
+  .lv .s{font-size:10.5px;letter-spacing:1px;direction:ltr;color:#F5B01B;font-weight:900;}
+  .lv .s .off{color:#D9CCB4;}
+
   #boot-error{display:none;position:absolute;inset:0;z-index:50;align-items:center;justify-content:center;background:var(--fog);}
   #boot-error .card{max-width:340px;}
-  @media (prefers-reduced-motion: reduce){
-    .screen{transition:none;}
-  }
+  @media (prefers-reduced-motion: reduce){ .screen{transition:none;} }
 </style>
 
 <div id="app">
   <div id="gl"></div>
+  <div id="flash"></div>
 
   <div id="hud">
     <div class="hud-top">
       <div class="pill" id="pill-level">المستوى 1</div>
-      <div class="pill" id="pill-best">أفضل جيش <small dir="ltr">0</small></div>
+      <div class="pill" id="pill-coins"><span class="coin-ico"></span><span id="coins-v" dir="ltr">0</span></div>
     </div>
     <div id="progress"><div class="bar" id="progress-bar"></div><div class="castle-ico">🏰</div></div>
   </div>
@@ -140,26 +185,44 @@
   <div class="screen" id="screen-start">
     <div class="brand">قائد الحشود</div>
     <div class="card">
-      <p class="sub">اجمع جيشاً أزرق جراراً، اعبر البوابات الرابحة، واسحق قلعة العدو!</p>
+      <div class="biome-tag" id="start-biome">🏜️ الصحراء</div>
+      <p class="sub">قُد جيشك عبر الوديان، اسحق الزعيم، وحطّم قلعة العدو!</p>
       <div class="chips">
-        <div class="chip c-blue"><b>×2</b> يضاعف جيشك</div>
-        <div class="chip c-gold"><b>+99</b> مدد ذهبي</div>
-        <div class="chip c-red"><b>−25</b> فخ ينقصك</div>
+        <div class="chip c-blue"><b>×2</b> بوابات</div>
+        <div class="chip c-red">⚔️ زعيم</div>
+        <div class="chip c-gold">★ نجوم</div>
       </div>
+      <div class="shop" id="shop"></div>
       <button class="btn" id="btn-start">تشغيل اللعبة</button>
-      <p class="hint">اسحب يميناً ويساراً لتقود جيشك</p>
+      <div class="row2" style="margin-top:9px">
+        <button class="btn small" id="btn-map">🗺️ الخريطة</button>
+      </div>
+      <p class="hint">اسحب يميناً ويساراً — واحذر المطارق والنيازك!</p>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="screen-map">
+    <div class="card">
+      <h1>خريطة الحملة</h1>
+      <p class="sub">أعد أي مستوى لترفع نجومه وتجمع الذهب</p>
+      <div class="map-grid" id="map-grid"></div>
+      <button class="btn small" id="btn-map-close">إغلاق</button>
     </div>
   </div>
 
   <div class="screen hidden" id="screen-win">
     <div class="card">
       <h1>نصر مبين! 🎉</h1>
-      <p class="sub">سقطت قلعة العدو تحت أقدام جيشك</p>
+      <div class="stars-big" id="win-stars"></div>
+      <p class="sub" id="win-sub">سقطت قلعة العدو</p>
       <div class="stats">
         <div class="stat"><div class="v" id="win-survivors">0</div><div class="k">الناجون</div></div>
-        <div class="stat"><div class="v" id="win-level">1</div><div class="k">المستوى القادم</div></div>
+        <div class="stat"><div class="v" id="win-coins" style="color:#B37800">+0</div><div class="k">ذهب</div></div>
       </div>
-      <button class="btn gold" id="btn-next">المستوى التالي</button>
+      <div class="row2">
+        <button class="btn small" id="btn-win-home">القائمة</button>
+        <button class="btn gold" style="flex:2" id="btn-next">التالي</button>
+      </div>
     </div>
   </div>
 
@@ -167,7 +230,13 @@
     <div class="card">
       <h1>سقط الجيش! 💥</h1>
       <p class="sub" id="lose-reason">اختر البوابات الأذكى في المحاولة القادمة</p>
-      <button class="btn" id="btn-retry">حاول مجدداً</button>
+      <div class="stats">
+        <div class="stat"><div class="v" id="lose-coins" style="color:#B37800">+0</div><div class="k">ذهب مواساة</div></div>
+      </div>
+      <div class="row2">
+        <button class="btn small" id="btn-lose-home">القائمة</button>
+        <button class="btn" style="flex:2" id="btn-retry">حاول مجدداً</button>
+      </div>
     </div>
   </div>
 
@@ -216,7 +285,6 @@ var store = {
 var AudioFX = (function () {
   var ctx = null, master = null;
   function ensure() {
-    /* iOS can leave the context in a non-standard 'interrupted' state — resume on anything not running */
     if (ctx) { if (ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } return true; }
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return false;
@@ -233,7 +301,7 @@ var AudioFX = (function () {
     g.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
     o.connect(g); g.connect(master); o.start(t0); o.stop(t0 + dur + 0.02);
   }
-  function noise(dur, vol, when) {
+  function noise(dur, vol, when, cutoff) {
     if (!ctx) return;
     var t0 = ctx.currentTime + (when || 0);
     var len = Math.floor(ctx.sampleRate * dur);
@@ -242,7 +310,7 @@ var AudioFX = (function () {
     for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
     var src = ctx.createBufferSource(); src.buffer = buf;
     var g = ctx.createGain(); g.gain.value = vol || 0.15;
-    var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 900;
+    var f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = cutoff || 900;
     src.connect(f); f.connect(g); g.connect(master); src.start(t0);
   }
   return {
@@ -252,21 +320,58 @@ var AudioFX = (function () {
     gateBad:  function () { tone(300, 0.14, 'sawtooth', 0.14, 0, 140); },
     clash:    function () { noise(0.12, 0.12); tone(160 + Math.random() * 60, 0.06, 'square', 0.05); },
     thud:     function () { tone(120, 0.16, 'sine', 0.3, 0, 60); noise(0.1, 0.1); },
+    slam:     function () { tone(70, 0.4, 'sine', 0.4, 0, 35); noise(0.3, 0.25, 0, 400); },
+    roar:     function () { tone(90, 0.5, 'sawtooth', 0.2, 0, 55); tone(140, 0.4, 'sawtooth', 0.12, 0.05, 70); },
+    meteor:   function () { tone(900, 0.7, 'sawtooth', 0.06, 0, 180); },
+    boom:     function () { tone(60, 0.5, 'sine', 0.45, 0, 30); noise(0.4, 0.3, 0, 500); },
+    thunder:  function () { noise(0.8, 0.22, 0, 300); tone(55, 0.6, 'sine', 0.2, 0.05, 35); },
+    hammerHit:function () { tone(200, 0.08, 'square', 0.18, 0, 90); noise(0.06, 0.1); },
+    coin:     function () { tone(1100, 0.07, 'triangle', 0.14); tone(1500, 0.1, 'triangle', 0.12, 0.06); },
+    buy:      function () { tone(700, 0.08, 'triangle', 0.18); tone(1050, 0.12, 'triangle', 0.16, 0.07); },
+    star:     function (i) { tone(880 + i * 220, 0.18, 'triangle', 0.22); },
     win:      function () { [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.22, 'triangle', 0.22, i * 0.13); }); },
     lose:     function () { tone(300, 0.3, 'sawtooth', 0.16, 0, 150); tone(220, 0.45, 'sawtooth', 0.14, 0.22, 90); }
   };
 })();
 
-/* ============================== renderer / scene ============================== */
-var COL = {
-  sand: 0xEDCA86, sandDark: 0xD9B26E, rock: 0x8A7581, rockDark: 0x6E5C6A,
-  grass: 0x83C960, pine: 0x3E9C55, trunk: 0x8A6239,
-  blue: 0x2F7BFF, blueDeep: 0x1E56C8, red: 0xE8452F, redDeep: 0xB32B1E,
-  gold: 0xFFC53D, stone: 0x8F8F9C, stoneDark: 0x6E6E7C, wood: 0x9C6B3F, fog: 0xF6DFB8
+/* ============================== biomes ============================== */
+var BIOMES = {
+  desert: { name: 'الصحراء', ico: '🏜️',
+    sky: ['#FFC98B', '#FFE7C2', '#FFF6E3'], fog: 0xF6DFB8, fogN: 55, fogF: 165,
+    ground: 0xD9B26E, path: 0xEDCA86, rockA: 0x8A7581, rockB: 0x6E5C6A,
+    edge: 0x83C960, foliage: 0x3E9C55, trunk: 0x8A6239,
+    hemiSky: 0xFFF2D9, hemiGnd: 0xCAA06A, sun: 0xFFE9C4, sunI: 1.0,
+    weather: null, hazard: null },
+  snow: { name: 'الثلوج', ico: '🌨️',
+    sky: ['#9FB8D8', '#D7E4F2', '#F2F7FC'], fog: 0xE6EEF6, fogN: 50, fogF: 150,
+    ground: 0xC9D9E8, path: 0xEDF3F8, rockA: 0x7C8BA0, rockB: 0x5E6B80,
+    edge: 0xBFD4E6, foliage: 0x2F7A55, trunk: 0x6B4B33, snowCap: 0xF4F9FD,
+    hemiSky: 0xEAF2FB, hemiGnd: 0x9FB2C8, sun: 0xDCE9F8, sunI: 0.9,
+    weather: 'snow', hazard: null },
+  volcano: { name: 'البراكين', ico: '🌋',
+    sky: ['#33161F', '#5A2A22', '#8A3A25'], fog: 0x4A2620, fogN: 40, fogF: 140,
+    ground: 0x3A2C2C, path: 0x5C4747, rockA: 0x4A3A3A, rockB: 0x332828,
+    edge: 0xFF5A26, edgeGlow: true, foliage: 0x2A2220, trunk: 0x241C1C,
+    hemiSky: 0xFFB08A, hemiGnd: 0x38201C, sun: 0xFF9A6A, sunI: 0.85,
+    weather: 'ember', hazard: 'meteor' },
+  rain: { name: 'الغابة الماطرة', ico: '⛈️',
+    sky: ['#5E6E7E', '#8C9BA8', '#B9C4CC'], fog: 0xA8B4BC, fogN: 45, fogF: 150,
+    ground: 0x567E4A, path: 0x8A7B5E, rockA: 0x687488, rockB: 0x4C5668,
+    edge: 0x4E7E42, foliage: 0x2E6E42, trunk: 0x5E4630,
+    hemiSky: 0xC9D4DC, hemiGnd: 0x62705E, sun: 0xCFDAE2, sunI: 0.75,
+    weather: 'rain', hazard: 'lightning' }
 };
-var HW = 11;            // half width of playable path
-var MAXR = 400;         // max rendered player units
-var MAXR_SQ = 200;      // max rendered units per enemy squad
+var BIOME_ORDER = ['desert', 'snow', 'volcano', 'rain'];
+function biomeOf(L) { return BIOMES[BIOME_ORDER[(L - 1) % 4]]; }
+
+/* ============================== renderer / scene ============================== */
+var COL = { blue: 0x2F7BFF, blueDark: 0x1B47A8, blueLight: 0x7FB2FF,
+  red: 0xE8452F, redDark: 0x8E2318, redLight: 0xFF8A72,
+  gold: 0xFFC53D, goldDark: 0xB37800, skin: 0xE8B080,
+  wood: 0x9C6B3F, steel: 0xC9CDD6, stone: 0x8F8F9C, stoneDark: 0x6E6E7C };
+var HW = 11;
+var MAXR = 400;
+var MAXR_SQ = 200;
 var RUN_SPEED = 9.5;
 
 var container = document.getElementById('gl');
@@ -278,15 +383,15 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
 var scene = new THREE.Scene();
-scene.fog = new THREE.Fog(COL.fog, 55, 165);
-(function makeSky() {
+function makeSky(cols) {
   var cv = document.createElement('canvas'); cv.width = 2; cv.height = 256;
   var g = cv.getContext('2d');
   var gr = g.createLinearGradient(0, 0, 0, 256);
-  gr.addColorStop(0, '#FFC98B'); gr.addColorStop(0.55, '#FFE7C2'); gr.addColorStop(1, '#FFF6E3');
+  gr.addColorStop(0, cols[0]); gr.addColorStop(0.55, cols[1]); gr.addColorStop(1, cols[2]);
   g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
-  scene.background = new THREE.CanvasTexture(cv);
-})();
+  var tex = new THREE.CanvasTexture(cv);
+  return tex;
+}
 
 var camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.5, 260);
 var camCfg = { h: 26, d: 31, ahead: 24 };
@@ -313,107 +418,20 @@ sun.shadow.camera.near = 5; sun.shadow.camera.far = 160;
 sun.shadow.bias = -0.001;
 scene.add(sun); scene.add(sun.target);
 
-/* materials */
-var M = {
-  sand: new THREE.MeshLambertMaterial({ color: COL.sand }),
-  grass: new THREE.MeshLambertMaterial({ color: COL.grass }),
-  rock: new THREE.MeshLambertMaterial({ color: COL.rock }),
-  rockDark: new THREE.MeshLambertMaterial({ color: COL.rockDark }),
-  pine: new THREE.MeshLambertMaterial({ color: COL.pine }),
-  trunk: new THREE.MeshLambertMaterial({ color: COL.trunk }),
-  blue: new THREE.MeshLambertMaterial({ color: COL.blue }),
-  red: new THREE.MeshLambertMaterial({ color: COL.red }),
-  stone: new THREE.MeshLambertMaterial({ color: COL.stone }),
-  stoneDark: new THREE.MeshLambertMaterial({ color: COL.stoneDark }),
-  wood: new THREE.MeshLambertMaterial({ color: COL.wood }),
-  gold: new THREE.MeshLambertMaterial({ color: COL.gold }),
-  post: new THREE.MeshLambertMaterial({ color: 0xC9CDD6 })
-};
-
-/* ============================== static world ============================== */
-var worldGroup = new THREE.Group();
-scene.add(worldGroup);
-
-function buildTerrain(length) {
-  var g = new THREE.Group();
-  var ground = new THREE.Mesh(new THREE.PlaneGeometry(300, length + 260), new THREE.MeshLambertMaterial({ color: COL.sandDark }));
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.set(0, 0, length / 2);
-  ground.receiveShadow = true;
-  g.add(ground);
-  var path = new THREE.Mesh(new THREE.PlaneGeometry(HW * 2 + 2.6, length + 160), M.sand);
-  path.rotation.x = -Math.PI / 2;
-  path.position.set(0, 0.02, length / 2);
-  path.receiveShadow = true;
-  g.add(path);
-
-  [-1, 1].forEach(function (side) {
-    var strip = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.5, length + 160), M.grass);
-    strip.position.set(side * (HW + 2.1), 0.25, length / 2);
-    strip.receiveShadow = true;
-    g.add(strip);
-  });
-
-  /* rocks and trees are baked into one merged mesh per material (few draw calls) */
-  var rng = mulberry32(991);
-  var rockGeo = new THREE.DodecahedronGeometry(1, 0);
-  var trunkGeo = new THREE.CylinderGeometry(0.22, 0.3, 1.2, 6);
-  var coneGeo = new THREE.ConeGeometry(1.5, 3.4, 7);
-  var rocksLight = [], rocksDark = [], trunks = [], pines = [];
-  for (var z = -30; z < length + 70; z += 12) {
-    [-1, 1].forEach(function (side) {
-      for (var k = 0; k < 2; k++) {
-        var s = 5 + rng() * 6;
-        var baked = bakeGeom(rockGeo,
-          side * (HW + 7.5 + k * 6 + rng() * 3), s * (0.45 + k * 0.45), z + rng() * 10,
-          s, s * (1.2 + rng() * 0.7), s,
-          rng() * 0.4, rng() * Math.PI, rng() * 0.4);
-        (rng() < 0.5 ? rocksLight : rocksDark).push(baked);
-      }
-      if (rng() < 0.6) {
-        var tz = z + rng() * 10;
-        var tx = side * (HW + 2.1 + (rng() - 0.5));
-        trunks.push(bakeGeom(trunkGeo, tx, 0.9, tz, 1, 1, 1));
-        pines.push(bakeGeom(coneGeo, tx, 3, tz, 1, 1, 1));
-      }
-    });
-  }
-  [[rocksLight, M.rock, false], [rocksDark, M.rockDark, false], [trunks, M.trunk, false], [pines, M.pine, true]].forEach(function (batch) {
-    if (!batch[0].length) return;
-    var m = new THREE.Mesh(mergeGeoms(batch[0]), batch[1]);
-    m.castShadow = batch[2];
-    g.add(m);
-    batch[0].forEach(function (bg) { bg.dispose(); });
-  });
-  return g;
-}
-
-/* decorative war cart (like the reference) */
-function buildCart(color) {
-  var g = new THREE.Group();
-  var body = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.2, 4.4), M.wood);
-  body.position.y = 1.8; body.castShadow = true;
-  var rim = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.5, 4.8), new THREE.MeshLambertMaterial({ color: color }));
-  rim.position.y = 3.0;
-  g.add(body, rim);
-  var wheelGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.4, 10);
-  [[-1.85, 1.6], [1.85, 1.6], [-1.85, -1.6], [1.85, -1.6]].forEach(function (p) {
-    var w = new THREE.Mesh(wheelGeo, M.stoneDark);
-    w.rotation.z = Math.PI / 2;
-    w.position.set(p[0], 0.75, p[1]);
-    g.add(w);
-  });
-  return g;
-}
-
-/* ============================== unit geometry ============================== */
-function mergeGeoms(geoms) {
-  var pos = [], norm = [], idx = [], off = 0;
-  geoms.forEach(function (geo) {
+/* ============================== geometry merge (with vertex colors) ============================== */
+function mergeGeoms(parts) { // parts: [{g: BufferGeometry, c: hexColor}]
+  var pos = [], norm = [], col = [], idx = [], off = 0;
+  var tc = new THREE.Color();
+  parts.forEach(function (part) {
+    var geo = part.g;
+    var vc = part.c === undefined && geo.attributes.color; // مرِّر ألوان الهندسة المدموجة سابقًا
+    tc.set(part.c === undefined ? 0xffffff : part.c);
     var p = geo.attributes.position, n = geo.attributes.normal, ix = geo.index;
     for (var i = 0; i < p.count; i++) {
       pos.push(p.getX(i), p.getY(i), p.getZ(i));
       norm.push(n.getX(i), n.getY(i), n.getZ(i));
+      if (vc) col.push(vc.getX(i), vc.getY(i), vc.getZ(i));
+      else col.push(tc.r, tc.g, tc.b);
     }
     if (ix) { for (var j = 0; j < ix.count; j++) idx.push(ix.getX(j) + off); }
     else    { for (var k = 0; k < p.count; k++) idx.push(k + off); }
@@ -422,29 +440,65 @@ function mergeGeoms(geoms) {
   var g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setAttribute('normal', new THREE.Float32BufferAttribute(norm, 3));
+  g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
   g.setIndex(idx);
   return g;
 }
-/* clone geo, bake a transform into it (for static-mesh batching) */
 var _bake = new THREE.Object3D();
-function bakeGeom(geo, x, y, z, sx, sy, sz, rx, ry, rz) {
+function bake(geo, x, y, z, sx, sy, sz, rx, ry, rz) {
   var g2 = geo.clone();
   _bake.position.set(x, y, z);
-  _bake.scale.set(sx, sy, sz);
+  _bake.scale.set(sx || 1, sy || 1, sz || 1);
   _bake.rotation.set(rx || 0, ry || 0, rz || 0);
   _bake.updateMatrix();
   g2.applyMatrix4(_bake.matrix);
   return g2;
 }
-var unitGeo = (function () {
-  var body = new THREE.CylinderGeometry(0.2, 0.3, 0.62, 7);
-  body.translate(0, 0.48, 0);
-  var head = new THREE.SphereGeometry(0.25, 8, 7);
-  head.translate(0, 1.0, 0);
-  var armL = new THREE.SphereGeometry(0.11, 5, 4); armL.translate(-0.33, 0.62, 0);
-  var armR = new THREE.SphereGeometry(0.11, 5, 4); armR.translate(0.33, 0.62, 0);
-  return mergeGeoms([body, head, armL, armR]);
+
+/* ============================== soldier geometry (helmet + shield + spear) ============================== */
+function soldierGeo(main, dark, light) {
+  var body = bake(new THREE.CylinderGeometry(0.2, 0.29, 0.55, 7), 0, 0.42, 0);
+  var head = bake(new THREE.SphereGeometry(0.155, 8, 7), 0, 0.85, 0);
+  var helm = bake(new THREE.SphereGeometry(0.185, 8, 5, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, 0.87, 0);
+  var crest = bake(new THREE.ConeGeometry(0.05, 0.16, 5), 0, 1.08, 0);
+  var shield = bake(new THREE.CylinderGeometry(0.17, 0.17, 0.05, 9), -0.3, 0.52, 0.04, 1, 1, 1, 0, 0, Math.PI / 2);
+  var boss1 = bake(new THREE.SphereGeometry(0.05, 6, 5), -0.34, 0.52, 0.04);
+  var shaft = bake(new THREE.CylinderGeometry(0.024, 0.024, 1.15, 5), 0.3, 0.62, 0);
+  var tip = bake(new THREE.ConeGeometry(0.055, 0.17, 5), 0.3, 1.26, 0);
+  return mergeGeoms([
+    { g: body, c: main }, { g: head, c: COL.skin }, { g: helm, c: dark }, { g: crest, c: light },
+    { g: shield, c: light }, { g: boss1, c: dark }, { g: shaft, c: COL.wood }, { g: tip, c: COL.steel }
+  ]);
+}
+var unitMat = new THREE.MeshLambertMaterial({ vertexColors: true });
+var blueGeo = soldierGeo(COL.blue, COL.blueDark, COL.blueLight);
+var redGeo  = soldierGeo(COL.red, COL.redDark, COL.redLight);
+/* البطل الذهبي حامل الراية */
+var heroGeo = (function () {
+  var s = soldierGeo(COL.gold, COL.goldDark, 0xFFE9A8);
+  var pole = bake(new THREE.CylinderGeometry(0.03, 0.03, 1.7, 5), -0.34, 1.1, -0.1);
+  var flag = bake(new THREE.BoxGeometry(0.52, 0.34, 0.02), -0.62, 1.72, -0.1);
+  return mergeGeoms([{ g: s }, { g: pole, c: COL.wood }, { g: flag, c: COL.blue }]);
 })();
+/* الزعيم: ضخم بقرون ومطرقة حرب */
+var bossGeo = (function () {
+  var body = bake(new THREE.CylinderGeometry(0.24, 0.34, 0.6, 8), 0, 0.44, 0);
+  var head = bake(new THREE.SphereGeometry(0.18, 9, 8), 0, 0.92, 0);
+  var helm = bake(new THREE.SphereGeometry(0.215, 9, 5, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, 0.94, 0);
+  var hornL = bake(new THREE.ConeGeometry(0.06, 0.28, 5), -0.16, 1.12, 0, 1, 1, 1, 0, 0, 0.5);
+  var hornR = bake(new THREE.ConeGeometry(0.06, 0.28, 5), 0.16, 1.12, 0, 1, 1, 1, 0, 0, -0.5);
+  var pauldL = bake(new THREE.SphereGeometry(0.14, 7, 6), -0.3, 0.72, 0);
+  var pauldR = bake(new THREE.SphereGeometry(0.14, 7, 6), 0.3, 0.72, 0);
+  var shaft = bake(new THREE.CylinderGeometry(0.035, 0.035, 1.1, 6), 0.42, 0.7, 0, 1, 1, 1, 0, 0, -0.25);
+  var hHead = bake(new THREE.BoxGeometry(0.34, 0.22, 0.22), 0.56, 1.3, 0);
+  return mergeGeoms([
+    { g: body, c: COL.redDark }, { g: head, c: COL.skin }, { g: helm, c: 0x3A1410 },
+    { g: hornL, c: 0xE8D8C0 }, { g: hornR, c: 0xE8D8C0 },
+    { g: pauldL, c: COL.red }, { g: pauldR, c: COL.red },
+    { g: shaft, c: COL.wood }, { g: hHead, c: 0x4A4A55 }
+  ]);
+})();
+var PROTECTED_GEO = [blueGeo, redGeo, heroGeo, bossGeo];
 
 /* phyllotaxis formation offsets */
 var OFFS = (function () {
@@ -457,9 +511,7 @@ var OFFS = (function () {
   return a;
 })();
 
-/* ============================== text sprites / banners ============================== */
-/* Each label owns one persistent canvas + texture; updates redraw in place
-   (no per-change canvas/texture allocation, no texture churn mid-battle). */
+/* ============================== labels ============================== */
 function drawLabel(sp, text) {
   var cv = sp.userData.cv, g = sp.userData.g;
   g.clearRect(0, 0, cv.width, cv.height);
@@ -513,7 +565,7 @@ function bannerTexture(label, theme) {
   return tex;
 }
 
-/* ============================== particles ============================== */
+/* ============================== particles (bursts) ============================== */
 var Particles = (function () {
   var N = 420;
   var geo = new THREE.BufferGeometry();
@@ -558,6 +610,60 @@ var Particles = (function () {
   return { burst: burst, update: update };
 })();
 
+/* ============================== weather (snow / rain / embers) ============================== */
+var Weather = (function () {
+  var N = 380;
+  var geo = new THREE.BufferGeometry();
+  var pos = new Float32Array(N * 3);
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  var mat = new THREE.PointsMaterial({ size: 0.4, color: 0xffffff, transparent: true, opacity: 0.8, depthWrite: false });
+  var pts = new THREE.Points(geo, mat);
+  pts.frustumCulled = false;
+  pts.visible = false;
+  scene.add(pts);
+  var phase = new Float32Array(N);
+  var mode = null;
+  function setMode(m) {
+    mode = m;
+    pts.visible = !!m;
+    if (!m) return;
+    if (m === 'snow')  { mat.size = 0.42; mat.color.set(0xFFFFFF); mat.opacity = 0.9; }
+    if (m === 'rain')  { mat.size = 0.22; mat.color.set(0xBFD8EE); mat.opacity = 0.55; }
+    if (m === 'ember') { mat.size = 0.3;  mat.color.set(0xFF8A3C); mat.opacity = 0.85; }
+    for (var i = 0; i < N; i++) respawn(i, true);
+  }
+  function respawn(i, anywhere) {
+    var cz = crowd ? crowd.z : 0;
+    pos[i * 3] = xc(cz) + (Math.random() - 0.5) * 56;
+    pos[i * 3 + 2] = cz - 15 + Math.random() * 75;
+    pos[i * 3 + 1] = mode === 'ember' ? Math.random() * 3 : (anywhere ? Math.random() * 28 : 24 + Math.random() * 6);
+    phase[i] = Math.random() * Math.PI * 2;
+  }
+  function update(dt, t) {
+    if (!mode) return;
+    for (var i = 0; i < N; i++) {
+      var y = pos[i * 3 + 1];
+      if (mode === 'snow') {
+        pos[i * 3 + 1] = y - (2.6 + (i % 5) * 0.4) * dt;
+        pos[i * 3] += Math.sin(t * 1.4 + phase[i]) * 0.8 * dt;
+        if (pos[i * 3 + 1] < 0) respawn(i);
+      } else if (mode === 'rain') {
+        pos[i * 3 + 1] = y - 34 * dt;
+        pos[i * 3] -= 5 * dt;
+        if (pos[i * 3 + 1] < 0) respawn(i);
+      } else {
+        pos[i * 3 + 1] = y + (1.6 + (i % 4) * 0.7) * dt;
+        pos[i * 3] += Math.sin(t * 2.2 + phase[i]) * 0.5 * dt;
+        if (pos[i * 3 + 1] > 16) respawn(i, false), pos[i * 3 + 1] = 0;
+      }
+      /* أبقِ الجسيمات حول الجيش */
+      if (pos[i * 3 + 2] < crowd.z - 20 || pos[i * 3 + 2] > crowd.z + 65) respawn(i, true);
+    }
+    geo.attributes.position.needsUpdate = true;
+  }
+  return { setMode: setMode, update: update };
+})();
+
 /* ============================== floating HTML text ============================== */
 var FloatTxt = (function () {
   var layer = document.getElementById('float-layer');
@@ -596,14 +702,45 @@ var FloatTxt = (function () {
   return { spawn: spawn, update: update };
 })();
 
+/* ============================== RPG state ============================== */
+var UPGRADES = [
+  { k: 'atk',   ic: '⚔️', nm: 'قوة الجندي', base: 60, gr: 1.7,  max: 10, d: 'كل جندي يقاتل أشرس' },
+  { k: 'army',  ic: '🛡️', nm: 'جيش البداية', base: 50, gr: 1.65, max: 10, d: '+2 جندي بداية' },
+  { k: 'armor', ic: '🪖', nm: 'الدروع', base: 70, gr: 1.7,  max: 8,  d: 'خسائر أقل' },
+  { k: 'gold',  ic: '💰', nm: 'مضاعف الذهب', base: 80, gr: 1.8,  max: 8,  d: 'ذهب أكثر' }
+];
+var S = {
+  level: store.get('level', 1),
+  coins: store.get('coins', 0),
+  up: store.get('up', { atk: 0, army: 0, armor: 0, gold: 0 }),
+  stars: store.get('stars', {}),
+  best: store.get('best', 0)
+};
+function upCost(u) { return Math.round(u.base * Math.pow(u.gr, S.up[u.k] || 0)); }
+function dmgMult() { return 1 + (S.up.atk || 0) * 0.12; }
+function armorCut() { return Math.min(0.5, (S.up.armor || 0) * 0.06); }
+function goldMult() { return 1 + (S.up.gold || 0) * 0.15; }
+function startArmy() { return 5 + (S.up.army || 0) * 2; }
+function saveS() {
+  store.set('level', S.level); store.set('coins', S.coins);
+  store.set('up', S.up); store.set('stars', S.stars); store.set('best', S.best);
+}
+
+/* ============================== curved path ============================== */
+var curveP = { a1: 0, f1: 0.01, p1: 0, a2: 0, f2: 0.02, p2: 0 };
+function xc(z) {
+  if (z < 14) return (curveP.a1 * Math.sin(14 * curveP.f1 + curveP.p1) + curveP.a2 * Math.sin(14 * curveP.f2 + curveP.p2)) * clamp(z / 14, 0, 1);
+  return clamp(curveP.a1 * Math.sin(z * curveP.f1 + curveP.p1) + curveP.a2 * Math.sin(z * curveP.f2 + curveP.p2), -7.5, 7.5);
+}
+
 /* ============================== level generation ============================== */
-function makeOp(kind, v, theme) {
-  var label, defTheme;
-  if (kind === 'mul') { label = '×' + v; defTheme = 'blue'; }
-  else if (kind === 'add') { label = '+' + v; defTheme = v >= 99 ? 'gold' : 'blue'; }
-  else if (kind === 'sub') { label = '−' + v; defTheme = 'red'; }
-  else { label = '÷' + v; defTheme = 'red'; }
-  return { kind: kind, v: v, label: label, theme: theme || defTheme };
+function makeOp(kind, v) {
+  var label, theme;
+  if (kind === 'mul') { label = '×' + v; theme = 'blue'; }
+  else if (kind === 'add') { label = '+' + v; theme = v >= 99 ? 'gold' : 'blue'; }
+  else if (kind === 'sub') { label = '−' + v; theme = 'red'; }
+  else { label = '÷' + v; theme = 'red'; }
+  return { kind: kind, v: v, label: label, theme: theme };
 }
 function applyOp(op, n) {
   if (op.kind === 'mul') return n * op.v;
@@ -613,102 +750,262 @@ function applyOp(op, n) {
 }
 function genLevel(L) {
   var rng = mulberry32(L * 7919 + 4051);
-  var startCount = 6 + Math.min(L, 6);
-  var Ebest = startCount;   // expectation with perfect gate choices
-  var Eplay = startCount;   // expectation with realistic (imperfect) choices
+  var hard = Math.min(L, 10);
+  var startCount = startArmy();
+  var Ebest = startCount, Eplay = startCount;
   var nRows = 5 + Math.min(5, Math.floor((L - 1) / 2));
-  var gates = [], squads = [];
+  var gates = [], squads = [], hammers = [];
   var z = 44;
-  var hard = Math.min(L, 8);
   for (var r = 0; r < nRows; r++) {
     var roll = rng(), a, b;
-    if (roll < 0.24)      { a = makeOp('mul', 2); b = makeOp('add', nice5(Eplay * 0.35)); }
-    else if (roll < 0.42) { a = makeOp('add', 99); b = makeOp('mul', 2); }
-    else if (roll < 0.56) { a = makeOp('mul', L >= 3 && rng() < 0.4 ? 3 : 2); b = makeOp('sub', nice5(Eplay * 0.4)); }
-    else if (roll < 0.72) { a = makeOp('add', nice5(Eplay * (0.5 + rng() * 0.5))); b = makeOp('sub', nice5(Eplay * 0.3)); }
-    else if (roll < 0.88) { a = makeOp('mul', 2); b = makeOp('div', 2); }
-    else                  { a = makeOp('add', 99); b = makeOp('sub', nice5(Eplay * 0.25)); }
+    if (roll < 0.22)      { a = makeOp('mul', 2); b = makeOp('add', nice5(Eplay * 0.3)); }
+    else if (roll < 0.38) { a = makeOp('add', 99); b = makeOp('mul', 2); }
+    else if (roll < 0.54) { a = makeOp('mul', L >= 3 && rng() < 0.4 ? 3 : 2); b = makeOp('sub', nice5(Eplay * 0.45)); }
+    else if (roll < 0.7)  { a = makeOp('add', nice5(Eplay * (0.4 + rng() * 0.4))); b = makeOp('sub', nice5(Eplay * 0.35)); }
+    else if (roll < 0.86) { a = makeOp('mul', 2); b = makeOp('div', 2); }
+    else                  { a = makeOp('add', 99); b = makeOp('div', 2); }
     if (rng() < 0.5) { var tmp = a; a = b; b = tmp; }
     gates.push({ z: z, left: a, right: b, consumed: false });
     var hi = Math.max(applyOp(a, Ebest), applyOp(b, Ebest));
     var lo = Math.min(applyOp(a, Eplay), applyOp(b, Eplay));
     Ebest = hi;
-    Eplay = Math.max(1, Math.round(0.62 * Math.max(applyOp(a, Eplay), applyOp(b, Eplay)) + 0.38 * lo));
+    Eplay = Math.max(1, Math.round(0.58 * Math.max(applyOp(a, Eplay), applyOp(b, Eplay)) + 0.42 * lo));
     z += 30;
+    /* مطرقة متأرجحة بين الصفوف */
+    if (r >= 1 && hammers.length < Math.min(3, 1 + Math.floor(L / 2)) && rng() < 0.55) {
+      hammers.push({ z: z + 2, phase: rng() * Math.PI * 2, speed: 1.5 + rng() * 0.9 + hard * 0.06 });
+      z += 18;
+    }
     var isLastRow = r === nRows - 1;
     if ((r % 2 === 1 && !isLastRow) || isLastRow) {
-      var sc = Math.max(3, Math.round(Eplay * (0.22 + hard * 0.025 + rng() * 0.08)));
-      squads.push({ z: z + 4, count: sc, alive: true });
+      var sc = Math.max(4, Math.round(Eplay * (0.3 + hard * 0.028 + rng() * 0.1)));
+      var charge = L >= 2 && rng() < 0.4;
+      squads.push({ z: z + 4, count: sc, alive: true, charge: charge });
       Ebest = Math.max(1, Ebest - sc);
       Eplay = Math.max(1, Eplay - sc);
       z += 30;
     }
   }
-  var castleZ = z + 26;
-  var castleHP = Math.max(20, Math.round(Eplay * (0.45 + hard * 0.04)));
+  var mega = L % 5 === 0;
+  var boss = {
+    hp: Math.round(Math.max(55 + L * 22, Eplay * (0.7 + hard * 0.055)) * (mega ? 1.6 : 1)),
+    mega: mega,
+    interval: Math.max(1.5, (mega ? 2.0 : 2.4) - hard * 0.07),
+    dead: false
+  };
+  var bossZ = z + 30;
+  var castleZ = bossZ + 26;
+  boss.z = bossZ;
+  var castleHP = Math.max(20, Math.round(Eplay * (0.5 + hard * 0.04)));
   return {
-    level: L, startCount: startCount, gates: gates, squads: squads,
+    level: L, biome: biomeOf(L), startCount: startCount,
+    gates: gates, squads: squads, hammers: hammers, boss: boss,
     castleZ: castleZ, castleHP: castleHP, length: castleZ
   };
 }
 
-/* ============================== level scene objects ============================== */
-var levelGroup = null;
-var crowdMesh = null;
-var castle = null;
+/* ============================== world building ============================== */
+var levelGroup = null, crowdMesh = null, heroMesh = null, castle = null, bossObj = null;
 var fxTweens = [];
+var levelMats = [];
+function LM(color, opts) {
+  var m = new THREE.MeshLambertMaterial(Object.assign({ color: color }, opts || {}));
+  levelMats.push(m);
+  return m;
+}
+function BM(color, opts) {
+  var m = new THREE.MeshBasicMaterial(Object.assign({ color: color }, opts || {}));
+  levelMats.push(m);
+  return m;
+}
+
+function buildRibbon(halfW, y, zStart, zEnd, step, mat) {
+  var pos = [], idx = [], n = 0;
+  for (var z = zStart; z <= zEnd; z += step) {
+    var c = xc(z);
+    pos.push(c - halfW, y, z, c + halfW, y, z);
+    if (n > 0) { var a = (n - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    n++;
+  }
+  var g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  var mesh = new THREE.Mesh(g, mat);
+  mesh.receiveShadow = true;
+  return mesh;
+}
+
+function buildTerrain(D) {
+  var B = D.biome, length = D.length;
+  var g = new THREE.Group();
+  var ground = new THREE.Mesh(new THREE.PlaneGeometry(320, length + 260), LM(B.ground));
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.set(0, -0.05, length / 2);
+  ground.receiveShadow = true;
+  g.add(ground);
+
+  g.add(buildRibbon(HW + 1.3, 0.02, -20, length + 30, 4, LM(B.path, { side: THREE.DoubleSide })));
+  var edgeMat = B.edgeGlow ? BM(B.edge) : LM(B.edge, { side: THREE.DoubleSide });
+  [-1, 1].forEach(function (side) {
+    var pos = [], idx = [], n = 0;
+    for (var z = -20; z <= length + 30; z += 4) {
+      var c = xc(z) + side * (HW + 2.3);
+      pos.push(c - 1.2, 0.06, z, c + 1.2, 0.06, z);
+      if (n > 0) { var a = (n - 1) * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+      n++;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setIndex(idx); geo.computeVertexNormals();
+    g.add(new THREE.Mesh(geo, edgeMat));
+  });
+
+  /* صخور وأشجار مدموجة — قليلة الاستدعاءات */
+  var rng = mulberry32(991 + D.level * 17);
+  var rockGeo = new THREE.DodecahedronGeometry(1, 0);
+  var trunkGeo = new THREE.CylinderGeometry(0.22, 0.3, 1.2, 6);
+  var coneGeo = new THREE.ConeGeometry(1.5, 3.4, 7);
+  var spikeGeo = new THREE.ConeGeometry(0.7, 3.8, 5);
+  var rocksA = [], rocksB = [], trees = [];
+  for (var z = -30; z < length + 70; z += 12) {
+    [-1, 1].forEach(function (side) {
+      var cx = xc(z);
+      for (var k = 0; k < 2; k++) {
+        var s = 5 + rng() * 6;
+        var baked = bake(rockGeo,
+          cx + side * (HW + 7.5 + k * 6 + rng() * 3), s * (0.45 + k * 0.45), z + rng() * 10,
+          s, s * (1.2 + rng() * 0.7), s,
+          rng() * 0.4, rng() * Math.PI, rng() * 0.4);
+        (rng() < 0.5 ? rocksA : rocksB).push({ g: baked, c: rng() < 0.5 ? B.rockA : B.rockB });
+      }
+      if (rng() < (B === BIOMES.rain ? 0.85 : 0.6)) {
+        var tz = z + rng() * 10;
+        var tx = cx + side * (HW + 2.3 + (rng() - 0.5));
+        if (B === BIOMES.volcano) {
+          trees.push({ g: bake(spikeGeo, tx, 1.6, tz, 1, 1, 1, (rng() - .5) * .3, 0, (rng() - .5) * .3), c: B.foliage });
+        } else {
+          trees.push({ g: bake(trunkGeo, tx, 0.9, tz), c: B.trunk });
+          trees.push({ g: bake(coneGeo, tx, 3, tz), c: B.foliage });
+          if (B.snowCap) trees.push({ g: bake(new THREE.ConeGeometry(1.1, 1.4, 7), tx, 4.1, tz), c: B.snowCap });
+        }
+      }
+    });
+  }
+  [[rocksA], [rocksB], [trees]].forEach(function (batch) {
+    if (!batch[0].length) return;
+    var m = new THREE.Mesh(mergeGeoms(batch[0]), unitMat);
+    m.castShadow = true;
+    g.add(m);
+    batch[0].forEach(function (bg) { bg.g.dispose(); });
+  });
+
+  /* براكين بعيدة متوهجة */
+  if (B === BIOMES.volcano) {
+    for (var i = 0; i < 5; i++) {
+      var vz = 30 + i * (length / 5), vx = xc(vz) + (i % 2 ? 1 : -1) * (HW + 22 + rng() * 8);
+      var cone = new THREE.Mesh(new THREE.ConeGeometry(9, 14, 8), LM(0x2E2020));
+      cone.position.set(vx, 7, vz);
+      var glow = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.6, 8), BM(0xFF6A2A));
+      glow.position.set(vx, 14.2, vz);
+      g.add(cone, glow);
+    }
+  }
+  return g;
+}
+
+function buildCart(color) {
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.2, 4.4), LM(COL.wood));
+  body.position.y = 1.8; body.castShadow = true;
+  var rim = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.5, 4.8), LM(color));
+  rim.position.y = 3.0;
+  g.add(body, rim);
+  var wheelGeo = new THREE.CylinderGeometry(0.75, 0.75, 0.4, 10);
+  [[-1.85, 1.6], [1.85, 1.6], [-1.85, -1.6], [1.85, -1.6]].forEach(function (p) {
+    var w = new THREE.Mesh(wheelGeo, LM(COL.stoneDark));
+    w.rotation.z = Math.PI / 2;
+    w.position.set(p[0], 0.75, p[1]);
+    g.add(w);
+  });
+  return g;
+}
 
 function buildGate(gate) {
   var group = new THREE.Group();
-  group.position.z = gate.z;
+  group.position.set(xc(gate.z), 0, gate.z);
+  var postMat = LM(COL.steel);
   function half(op, sideSign) {
     var hg = new THREE.Group();
     var x0 = sideSign * 0.9, x1 = sideSign * (HW - 0.4);
     var cx = (x0 + x1) / 2, w = Math.abs(x1 - x0);
     var postGeo = new THREE.CylinderGeometry(0.16, 0.16, 4.4, 8);
-    var p1 = new THREE.Mesh(postGeo, M.post); p1.position.set(x0, 2.2, 0);
-    var p2 = new THREE.Mesh(postGeo, M.post); p2.position.set(x1, 2.2, 0);
-    var bar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.26, 0.26), M.post);
+    var p1 = new THREE.Mesh(postGeo, postMat); p1.position.set(x0, 2.2, 0);
+    var p2 = new THREE.Mesh(postGeo, postMat); p2.position.set(x1, 2.2, 0);
+    var bar = new THREE.Mesh(new THREE.BoxGeometry(w + 0.4, 0.26, 0.26), postMat);
     bar.position.set(cx, 4.3, 0);
-    var banner = new THREE.Mesh(
-      new THREE.PlaneGeometry(w - 0.5, (w - 0.5) * 0.36),
-      new THREE.MeshBasicMaterial({ map: bannerTexture(op.label, op.theme), transparent: true, side: THREE.DoubleSide })
-    );
+    var bMat = new THREE.MeshBasicMaterial({ map: bannerTexture(op.label, op.theme), transparent: true, side: THREE.DoubleSide });
+    levelMats.push(bMat);
+    var banner = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.5, (w - 0.5) * 0.36), bMat);
     banner.position.set(cx, 2.9, 0);
-    banner.rotation.y = Math.PI; /* face the camera (which looks down +Z) */
+    banner.rotation.y = Math.PI; /* تواجه الكاميرا */
     hg.add(p1, p2, bar, banner);
     hg.userData.banner = banner;
     return hg;
   }
   var lg = half(gate.left, -1);
   var rg = half(gate.right, 1);
-  var mid = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 4.4, 8), M.post);
+  var mid = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 4.4, 8), postMat);
   mid.position.set(0, 2.2, 0);
   group.add(lg, rg, mid);
   gate.groupL = lg; gate.groupR = rg; gate.node = group;
   return group;
 }
 
+function buildHammer(h) {
+  var group = new THREE.Group();
+  group.position.set(xc(h.z), 0, h.z);
+  var mat = LM(0x5A5F6E), matW = LM(COL.wood);
+  [-1, 1].forEach(function (s) {
+    var post = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 7, 8), mat);
+    post.position.set(s * (HW - 0.5), 3.5, 0);
+    group.add(post);
+  });
+  var bar = new THREE.Mesh(new THREE.BoxGeometry(HW * 2, 0.3, 0.3), mat);
+  bar.position.y = 7;
+  group.add(bar);
+  var arm = new THREE.Group();
+  arm.position.y = 7;
+  var shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 5.0, 7), matW);
+  shaft.position.y = -2.5;
+  var head = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.3, 1.1), LM(0x3E4250));
+  head.position.y = -5.3;
+  head.castShadow = true;
+  arm.add(shaft, head);
+  group.add(arm);
+  h.arm = arm; h.node = group;
+  return group;
+}
+
 function buildSquad(squad) {
   var n = Math.min(squad.count, MAXR_SQ);
-  var mesh = new THREE.InstancedMesh(unitGeo, M.red, MAXR_SQ);
+  var mesh = new THREE.InstancedMesh(redGeo, unitMat, MAXR_SQ);
   mesh.count = n;
   mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   mesh.castShadow = true;
   mesh.frustumCulled = false;
-  squad.px = new Float32Array(MAXR_SQ);
-  squad.pz = new Float32Array(MAXR_SQ);
+  squad.offs = [];
   squad.phase = new Float32Array(MAXR_SQ);
   var rng = mulberry32(squad.z * 131 + 7);
   for (var i = 0; i < MAXR_SQ; i++) {
     var r = 0.38 * Math.sqrt(i);
     var th = i * 2.39996;
-    squad.px[i] = clamp(r * Math.cos(th), -(HW - 1), HW - 1);
-    squad.pz[i] = squad.z + r * Math.sin(th) * 0.8;
+    squad.offs.push([clamp(r * Math.cos(th), -(HW - 1), HW - 1), r * Math.sin(th) * 0.8]);
     squad.phase[i] = rng() * Math.PI * 2;
   }
   for (var j = 0; j < n; j++) {
-    dummy.position.set(squad.px[j], 0, squad.pz[j]);
+    dummy.position.set(xc(squad.z) + squad.offs[j][0], 0, squad.z + squad.offs[j][1]);
+    dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1);
     dummy.updateMatrix();
     mesh.setMatrixAt(j, dummy.matrix);
   }
@@ -716,34 +1013,54 @@ function buildSquad(squad) {
   squad.mesh = mesh;
   squad.countF = squad.count;
   squad.label = makeLabelSprite(String(squad.count), 3.2, '#FFD9D2');
-  squad.label.position.set(0, 4.6, squad.z);
+  squad.label.position.set(xc(squad.z), 4.6, squad.z);
   squad.labelShown = squad.count;
   var g = new THREE.Group();
   g.add(mesh, squad.label);
   return g;
 }
 
+function buildBoss(boss) {
+  var g = new THREE.Group();
+  var sc = boss.mega ? 7.4 : 5.6;
+  var mesh = new THREE.Mesh(bossGeo, unitMat);
+  mesh.scale.set(sc, sc, sc);
+  mesh.castShadow = true;
+  g.add(mesh);
+  var ring = new THREE.Mesh(new THREE.RingGeometry(1, 1.35, 24), BM(0xFF6A3C, { transparent: true, opacity: 0, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.y = 0.1;
+  g.add(ring);
+  var label = makeLabelSprite(String(boss.hp), boss.mega ? 5 : 4.2, '#FFB3A0');
+  label.position.set(0, sc * 1.35 + 1.5, 0);
+  g.add(label);
+  g.position.set(xc(boss.z), 0, boss.z);
+  boss.node = g; boss.mesh = mesh; boss.ring = ring; boss.label = label;
+  boss.hpF = boss.hp; boss.shown = boss.hp; boss.t = 0; boss.state = 'idle';
+  return g;
+}
+
 function buildCastle(hp, z) {
   var g = new THREE.Group();
-  g.position.z = z;
-  var keep = new THREE.Mesh(new THREE.BoxGeometry(15, 9, 10), M.stone);
+  g.position.set(xc(z), 0, z);
+  var keep = new THREE.Mesh(new THREE.BoxGeometry(15, 9, 10), LM(COL.stone));
   keep.position.y = 4.5; keep.castShadow = true; keep.receiveShadow = true;
   g.add(keep);
   for (var i = -3; i <= 3; i++) {
-    var b = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), M.stoneDark);
+    var b = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), LM(COL.stoneDark));
     b.position.set(i * 2.1, 9.7, -3.5);
     g.add(b);
   }
   [[-7.5, -1], [7.5, -1], [-7.5, 1], [7.5, 1]].forEach(function (p, i) {
-    var t = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 2.2, 12, 10), M.stoneDark);
+    var t = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 2.2, 12, 10), LM(COL.stoneDark));
     t.position.set(p[0], 6, p[1] * 3.4);
     t.castShadow = true;
     g.add(t);
-    var cap = new THREE.Mesh(new THREE.ConeGeometry(2.4, 2.6, 10), i % 2 ? M.gold : new THREE.MeshLambertMaterial({ color: COL.redDeep }));
+    var cap = new THREE.Mesh(new THREE.ConeGeometry(2.4, 2.6, 10), LM(i % 2 ? COL.gold : COL.redDark));
     cap.position.set(p[0], 13.2, p[1] * 3.4);
     g.add(cap);
   });
-  var door = new THREE.Mesh(new THREE.CircleGeometry(2.6, 20), new THREE.MeshBasicMaterial({ color: 0x241B22 }));
+  var door = new THREE.Mesh(new THREE.CircleGeometry(2.6, 20), BM(0x241B22));
   door.position.set(0, 2.6, -5.02);
   door.rotation.y = Math.PI;
   g.add(door);
@@ -755,7 +1072,7 @@ function buildCastle(hp, z) {
 
 /* ============================== crowd ============================== */
 var crowd = {
-  countF: 0, x: 0, targetX: 0, z: 0,
+  countF: 0, off: 0, targetOff: 0, z: 0,
   px: new Float32Array(MAXR), pz: new Float32Array(MAXR), phase: new Float32Array(MAXR),
   renderN: 0
 };
@@ -763,101 +1080,155 @@ var crowd = {
   var rng = mulberry32(42);
   for (var i = 0; i < MAXR; i++) crowd.phase[i] = rng() * Math.PI * 2;
 })();
-
+function crowdX() { return xc(crowd.z) + crowd.off; }
 function crowdSetCount(n) {
   var prev = crowd.renderN;
   crowd.countF = Math.max(0, n);
   var rn = Math.min(Math.round(crowd.countF), MAXR);
   for (var i = prev; i < rn; i++) {
-    crowd.px[i] = crowd.x + (Math.random() - 0.5) * 2;
+    crowd.px[i] = crowdX() + (Math.random() - 0.5) * 2;
     crowd.pz[i] = crowd.z - 1 - Math.random() * 2;
   }
   crowd.renderN = rn;
   if (crowdMesh) crowdMesh.count = rn;
 }
-
 var dummy = new THREE.Object3D();
 function writeUnitMatrix(mesh, i, x, y, z) {
   dummy.position.set(x, y, z);
+  dummy.rotation.set(0, 0, 0);
+  dummy.scale.set(1, 1, 1);
   dummy.updateMatrix();
   mesh.setMatrixAt(i, dummy.matrix);
 }
 
 /* ============================== game state ============================== */
 var game = {
-  state: 'menu',           // menu | run | battle | siege | win | lose
-  level: store.get('level', 1),
-  best: store.get('best', 0),
-  data: null,
-  battle: null,
-  hpF: 0,
-  time: 0,
-  shake: 0,
-  winTimer: 0
+  state: 'menu', playLevel: 1, data: null, battle: null,
+  hpF: 0, time: 0, shake: 0, meteor: null, meteorTimer: 4, boltTimer: 5,
+  earned: 0
 };
-
-var el = {
-  pillLevel: document.getElementById('pill-level'),
-  pillBest: document.getElementById('pill-best'),
-  progressBar: document.getElementById('progress-bar'),
-  countBadge: document.getElementById('count-badge'),
-  screenStart: document.getElementById('screen-start'),
-  screenWin: document.getElementById('screen-win'),
-  screenLose: document.getElementById('screen-lose'),
-  winSurvivors: document.getElementById('win-survivors'),
-  winLevel: document.getElementById('win-level'),
-  loseReason: document.getElementById('lose-reason')
-};
+var el = {};
+['pill-level','pill-coins','coins-v','progress-bar','count-badge','screen-start','screen-map','screen-win','screen-lose',
+ 'win-survivors','win-coins','win-stars','win-sub','lose-reason','lose-coins','start-biome','shop','map-grid','flash']
+ .forEach(function (id) { el[id.replace(/-([a-z])/g, function (m, c) { return c.toUpperCase(); })] = document.getElementById(id); });
 
 function refreshHUD() {
-  el.pillLevel.textContent = 'المستوى ' + game.level;
-  el.pillBest.innerHTML = 'أفضل جيش <small dir="ltr">' + fmt(game.best) + '</small>';
+  var B = biomeOf(game.playLevel);
+  el.pillLevel.textContent = B.ico + ' المستوى ' + game.playLevel;
+  el.coinsV.textContent = fmt(S.coins);
+}
+function renderShop() {
+  el.shop.innerHTML = UPGRADES.map(function (u, i) {
+    var lv = S.up[u.k] || 0, cost = upCost(u), maxed = lv >= u.max;
+    return '<div class="up' + (maxed ? ' max' : '') + '" data-i="' + i + '">' +
+      '<div class="ic">' + u.ic + '</div><div class="nm">' + u.nm + '</div>' +
+      '<div class="lv">مستوى ' + lv + '/' + u.max + '</div>' +
+      (maxed ? '<div class="cost no">مكتمل</div>'
+             : '<div class="cost' + (S.coins < cost ? ' no' : '') + '">🪙 ' + fmt(cost) + '</div>') +
+      '</div>';
+  }).join('');
+}
+el.shop.addEventListener('click', function (ev) {
+  var t = ev.target.closest('.up');
+  if (!t) return;
+  var u = UPGRADES[+t.dataset.i];
+  var lv = S.up[u.k] || 0, cost = upCost(u);
+  if (lv >= u.max) return;
+  if (S.coins < cost) { AudioFX.gateBad(); return; }
+  S.coins -= cost; S.up[u.k] = lv + 1; saveS();
+  AudioFX.buy();
+  renderShop(); refreshHUD();
+});
+function renderMap() {
+  var maxShow = Math.max(S.level + 3, 12);
+  var html = '';
+  for (var L = 1; L <= maxShow; L++) {
+    var B = biomeOf(L), locked = L > S.level, st = S.stars[L] || 0;
+    var stars = locked ? '' : '<div class="s">' +
+      [1,2,3].map(function (i) { return '<span class="' + (i <= st ? '' : 'off') + '">★</span>'; }).join('') + '</div>';
+    html += '<div class="lv' + (locked ? ' lock' : '') + (L === game.playLevel ? ' cur' : '') + '" data-l="' + L + '">' +
+      '<div class="n">' + L + '</div><div class="b">' + B.ico + (L % 5 === 0 ? '👑' : '') + '</div>' + stars + '</div>';
+  }
+  el.mapGrid.innerHTML = html;
+}
+el.mapGrid.addEventListener('click', function (ev) {
+  var t = ev.target.closest('.lv');
+  if (!t || t.classList.contains('lock')) return;
+  game.playLevel = +t.dataset.l;
+  el.screenMap.classList.add('hidden');
+  updateStart();
+  beginRun();
+});
+
+function updateStart() {
+  var B = biomeOf(game.playLevel);
+  el.startBiome.textContent = B.ico + ' ' + B.name + ' — المستوى ' + game.playLevel + (game.playLevel % 5 === 0 ? ' 👑 زعيم أسطوري' : '');
+  renderShop(); refreshHUD();
 }
 
+/* ============================== level load ============================== */
 function loadLevel(L) {
   if (levelGroup) {
     scene.remove(levelGroup);
     levelGroup.traverse(function (o) {
-      if (o.geometry && o.geometry !== unitGeo) o.geometry.dispose();
+      if (o.geometry && PROTECTED_GEO.indexOf(o.geometry) < 0) o.geometry.dispose();
       if (o.material && o.material.map) o.material.map.dispose();
     });
+    levelMats.forEach(function (m) { m.dispose(); });
+    levelMats = [];
   }
   fxTweens = [];
   game.data = genLevel(L);
-  game.hpF = game.data.castleHP;
+  var D = game.data, B = D.biome;
+  game.hpF = D.castleHP;
   game.battle = null;
-  game.winTimer = 0;
+  game.meteorTimer = 5; game.boltTimer = 4;
+  game.earned = 0;
+
+  /* منحنى المسار — بذرة المستوى */
+  var crng = mulberry32(L * 3331 + 77);
+  curveP = { a1: 2.5 + crng() * 3.5, f1: 0.010 + crng() * 0.008, p1: crng() * 6.28,
+             a2: 1.5 + crng() * 2.5, f2: 0.021 + crng() * 0.012, p2: crng() * 6.28 };
+
+  scene.background = makeSky(B.sky);
+  scene.fog = new THREE.Fog(B.fog, B.fogN, B.fogF);
+  hemi.color.set(B.hemiSky); hemi.groundColor.set(B.hemiGnd);
+  sun.color.set(B.sun); sun.intensity = B.sunI;
+  Weather.setMode(B.weather);
 
   levelGroup = new THREE.Group();
-  levelGroup.add(buildTerrain(game.data.length));
+  levelGroup.add(buildTerrain(D));
 
   var cart = buildCart(COL.blue);
-  cart.position.set(-6.5, 0, -4);
+  cart.position.set(xc(-4) - 6.5, 0, -4);
   cart.rotation.y = 0.4;
   levelGroup.add(cart);
 
-  game.data.gates.forEach(function (gate) { levelGroup.add(buildGate(gate)); });
-  game.data.squads.forEach(function (squad) { levelGroup.add(buildSquad(squad)); });
+  D.gates.forEach(function (gate) { levelGroup.add(buildGate(gate)); });
+  D.squads.forEach(function (squad) { levelGroup.add(buildSquad(squad)); });
+  D.hammers.forEach(function (h) { levelGroup.add(buildHammer(h)); });
+  levelGroup.add(buildBoss(D.boss));
+  bossObj = D.boss;
 
-  castle = buildCastle(game.data.castleHP, game.data.castleZ);
+  castle = buildCastle(D.castleHP, D.castleZ);
   levelGroup.add(castle.node);
 
-  var eCart = buildCart(COL.red);
-  eCart.position.set(8.5, 0, game.data.castleZ - 14);
-  eCart.rotation.y = -0.5;
-  levelGroup.add(eCart);
-
-  crowdMesh = new THREE.InstancedMesh(unitGeo, M.blue, MAXR);
+  crowdMesh = new THREE.InstancedMesh(blueGeo, unitMat, MAXR);
   crowdMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   crowdMesh.castShadow = true;
   crowdMesh.frustumCulled = false;
   levelGroup.add(crowdMesh);
 
+  heroMesh = new THREE.Mesh(heroGeo, unitMat);
+  heroMesh.scale.set(1.9, 1.9, 1.9);
+  heroMesh.castShadow = true;
+  levelGroup.add(heroMesh);
+
   scene.add(levelGroup);
 
-  crowd.x = 0; crowd.targetX = 0; crowd.z = 0;
+  crowd.off = 0; crowd.targetOff = 0; crowd.z = 0;
   crowd.renderN = 0;
-  crowdSetCount(game.data.startCount);
+  crowdSetCount(D.startCount);
   for (var i = 0; i < crowd.renderN; i++) {
     crowd.px[i] = OFFS[i][0] * 0.7;
     crowd.pz[i] = -2 + OFFS[i][1];
@@ -866,23 +1237,20 @@ function loadLevel(L) {
 }
 
 /* ============================== gameplay events ============================== */
-function crowdCenter() { return new THREE.Vector3(crowd.x, 1, crowd.z); }
-
 function consumeGate(gate) {
   gate.consumed = true;
-  var side = crowd.x < 0 ? 'left' : 'right';
+  var side = crowd.off < 0 ? 'left' : 'right';
   var op = gate[side];
   var before = Math.round(crowd.countF);
   var after = applyOp(op, before);
   crowdSetCount(after);
   var isGood = after >= before;
-  var pos = new THREE.Vector3(crowd.x, 2, gate.z);
+  var pos = new THREE.Vector3(crowdX(), 2, gate.z);
   FloatTxt.spawn(op.label, pos, op.theme === 'gold' ? '#FFC53D' : (isGood ? '#8FC7FF' : '#FF7A66'));
   Particles.burst(pos, op.theme === 'gold' ? COL.gold : (isGood ? COL.blue : COL.red), 26, isGood ? 4 : 3);
   if (op.theme === 'gold') AudioFX.gateGold();
   else if (isGood) AudioFX.gateGood();
   else AudioFX.gateBad();
-
   var hg = side === 'left' ? gate.groupL : gate.groupR;
   var banner = hg.userData.banner;
   fxTweens.push(function (dt) {
@@ -892,9 +1260,7 @@ function consumeGate(gate) {
     if (banner.material.opacity <= 0) { banner.visible = false; return false; }
     return true;
   });
-  if (after < 1) {
-    gameOver('أفنت البوابات الحمراء جيشك كله!');
-  }
+  if (after < 1) gameOver('أفنت البوابات الحمراء جيشك كله!');
 }
 
 function startBattle(squad) {
@@ -907,21 +1273,39 @@ function gameOver(reason) {
   if (game.state === 'lose' || game.state === 'win') return;
   game.state = 'lose';
   el.loseReason.textContent = reason;
+  var c = Math.round((6 + game.playLevel * 2) * goldMult());
+  S.coins += c; saveS();
+  el.loseCoins.textContent = '+' + fmt(c);
   AudioFX.lose();
-  setTimeout(function () { el.screenLose.classList.remove('hidden'); }, 550);
+  setTimeout(function () { el.screenLose.classList.remove('hidden'); refreshHUD(); }, 550);
 }
 
+function starsFor(survivors, castleHP) {
+  var ratio = survivors / Math.max(1, castleHP);
+  return ratio >= 1 ? 3 : ratio >= 0.45 ? 2 : 1;
+}
 function gameWin() {
   if (game.state === 'win') return;
   game.state = 'win';
   var survivors = Math.round(crowd.countF);
-  if (survivors > game.best) { game.best = survivors; store.set('best', game.best); }
-  game.level += 1;
-  store.set('level', game.level);
+  if (survivors > S.best) S.best = survivors;
+  var st = starsFor(survivors, game.data.castleHP);
+  var L = game.playLevel;
+  var replay = L < S.level;
+  if ((S.stars[L] || 0) < st) S.stars[L] = st;
+  if (L >= S.level) S.level = L + 1;
+  var coins = Math.round((30 + L * 12 + survivors * 0.5) * goldMult() * (replay ? 0.5 : 1));
+  S.coins += coins; saveS();
+
   el.winSurvivors.textContent = fmt(survivors);
-  el.winLevel.textContent = String(game.level);
+  el.winCoins.textContent = '+' + fmt(coins);
+  el.winSub.textContent = replay ? 'إعادة رائعة — الذهب نصفي في الإعادة' : 'سقطت قلعة العدو تحت أقدام جيشك';
+  el.winStars.innerHTML = [1,2,3].map(function (i) {
+    return '<span class="' + (i <= st ? 'on' : 'off') + '">★</span>';
+  }).join('');
   AudioFX.win();
-  var top = new THREE.Vector3(0, 12, game.data.castleZ);
+  [0,1,2].forEach(function (i) { if (i < st) setTimeout(function () { AudioFX.star(i); }, 500 + i * 280); });
+  var top = new THREE.Vector3(xc(game.data.castleZ), 12, game.data.castleZ);
   Particles.burst(top, COL.gold, 90, 7);
   Particles.burst(top, COL.blue, 60, 6);
   Particles.burst(top, 0xffffff, 60, 6);
@@ -940,7 +1324,7 @@ function gameWin() {
   var surface = renderer.domElement;
   surface.style.touchAction = 'none';
   surface.addEventListener('pointerdown', function (e) {
-    if (dragId !== null) return; /* first finger only */
+    if (dragId !== null) return;
     dragId = e.pointerId; lastX = e.clientX;
     try { surface.setPointerCapture(e.pointerId); } catch (err) {}
     AudioFX.unlock();
@@ -948,8 +1332,8 @@ function gameWin() {
   window.addEventListener('pointermove', function (e) {
     if (e.pointerId !== dragId) return;
     var dx = e.clientX - lastX; lastX = e.clientX;
-    /* camera faces +Z, so screen-right is world -X */
-    crowd.targetX = clamp(crowd.targetX - dx * (2.6 * HW / window.innerWidth) * 1.35, -(HW - 1.4), HW - 1.4);
+    /* الكاميرا تنظر باتجاه +Z: يمين الشاشة هو −X */
+    crowd.targetOff = clamp(crowd.targetOff - dx * (2.6 * HW / window.innerWidth) * 1.35, -(HW - 1.4), HW - 1.4);
   });
   function endDrag(e) { if (e.pointerId === dragId) dragId = null; }
   window.addEventListener('pointerup', endDrag);
@@ -958,33 +1342,53 @@ function gameWin() {
   window.addEventListener('keydown', function (e) { keys[e.code] = true; });
   window.addEventListener('keyup', function (e) { keys[e.code] = false; });
   setInterval(function () {
-    if (game.state !== 'run') return;
+    if (game.state !== 'run' && game.state !== 'battle' && game.state !== 'boss') return;
     var v = 0;
-    if (keys.ArrowLeft || keys.KeyA) v += 1;  /* screen-left is world +X */
+    if (keys.ArrowLeft || keys.KeyA) v += 1;   /* يسار الشاشة = +X */
     if (keys.ArrowRight || keys.KeyD) v -= 1;
-    if (v) crowd.targetX = clamp(crowd.targetX + v * 0.55, -(HW - 1.4), HW - 1.4);
+    if (v) crowd.targetOff = clamp(crowd.targetOff + v * 0.55, -(HW - 1.4), HW - 1.4);
   }, 33);
 })();
 
 /* ============================== screens wiring ============================== */
 function beginRun() {
-  loadLevel(game.level);
+  loadLevel(game.playLevel);
   game.state = 'run';
-  el.screenStart.classList.add('hidden');
-  el.screenWin.classList.add('hidden');
-  el.screenLose.classList.add('hidden');
+  ['screenStart','screenWin','screenLose','screenMap'].forEach(function (k) { el[k].classList.add('hidden'); });
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
+function toMenu() {
+  game.state = 'menu';
+  game.playLevel = Math.min(game.playLevel, S.level);
+  ['screenWin','screenLose','screenMap'].forEach(function (k) { el[k].classList.add('hidden'); });
+  el.screenStart.classList.remove('hidden');
+  updateStart();
+}
 document.getElementById('btn-start').addEventListener('click', function () { AudioFX.unlock(); beginRun(); });
-document.getElementById('btn-next').addEventListener('click', function () { AudioFX.unlock(); beginRun(); });
+document.getElementById('btn-next').addEventListener('click', function () {
+  AudioFX.unlock();
+  game.playLevel = Math.min(game.playLevel + 1, S.level);
+  beginRun();
+});
 document.getElementById('btn-retry').addEventListener('click', function () { AudioFX.unlock(); beginRun(); });
+document.getElementById('btn-map').addEventListener('click', function () { renderMap(); el.screenMap.classList.remove('hidden'); });
+document.getElementById('btn-map-close').addEventListener('click', function () { el.screenMap.classList.add('hidden'); });
+document.getElementById('btn-win-home').addEventListener('click', toMenu);
+document.getElementById('btn-lose-home').addEventListener('click', toMenu);
 
-/* preview scene behind the start screen */
-loadLevel(game.level);
-refreshHUD();
+game.playLevel = S.level;
+loadLevel(game.playLevel);
+updateStart();
 
-/* debug/cheat hook (also used by automated tests) */
-window.__TEST = { setCount: function (n) { crowdSetCount(n); } };
+window.__TEST = { setCount: function (n) { crowdSetCount(n); }, S: S, timeWarp: 1,
+  jumpToBoss: function () {
+    if (!game.data) return;
+    crowd.z = game.data.boss.z - 13;
+    game.data.gates.forEach(function (g2) { if (g2.z < crowd.z) g2.consumed = true; });
+    game.data.squads.forEach(function (s2) {
+      if (s2.z < crowd.z + 6 && s2.alive) { s2.alive = false; s2.mesh.count = 0; s2.label.visible = false; }
+    });
+  } };
 
 /* ============================== main loop ============================== */
 var clock = new THREE.Clock();
@@ -996,6 +1400,7 @@ function updateCrowdUnits(dt, mode, center) {
   var n = crowd.renderN;
   var kx = 1 - Math.exp(-dt * 6.5);
   var kz = 1 - Math.exp(-dt * 7.5);
+  var cx = crowdX();
   for (var i = 0; i < n; i++) {
     var tx, tz;
     if (mode === 'battle') {
@@ -1004,18 +1409,27 @@ function updateCrowdUnits(dt, mode, center) {
       tx = center.x + Math.cos(th) * r * 0.85;
       tz = center.z + Math.sin(th) * r * 0.7;
     } else if (mode === 'siege') {
-      tx = crowd.x + OFFS[i][0] * 0.5;
+      tx = cx + OFFS[i][0] * 0.5;
       tz = crowd.z + OFFS[i][1] - 1;
     } else {
-      tx = crowd.x + OFFS[i][0];
-      tz = crowd.z + OFFS[i][1] - 1.2;
+      var uz = crowd.z + OFFS[i][1] - 1.2;
+      tx = xc(uz) + crowd.off + OFFS[i][0];
+      tz = uz;
     }
     crowd.px[i] += (tx - crowd.px[i]) * kx;
     crowd.pz[i] += (tz - crowd.pz[i]) * kz;
     var bob = Math.abs(Math.sin(t * 11 + crowd.phase[i])) * (mode === 'idle' ? 0.05 : 0.16);
-    writeUnitMatrix(crowdMesh, i, clamp(crowd.px[i], -(HW - 0.4), HW - 0.4), bob, crowd.pz[i]);
+    writeUnitMatrix(crowdMesh, i, crowd.px[i], bob, crowd.pz[i]);
   }
   crowdMesh.instanceMatrix.needsUpdate = true;
+  /* البطل في مقدمة الجيش */
+  if (heroMesh) {
+    var hz = crowd.z + 1.6;
+    heroMesh.position.set(
+      lerp(heroMesh.position.x || cx, xc(hz) + crowd.off, kx),
+      Math.abs(Math.sin(t * 10)) * 0.18,
+      lerp(heroMesh.position.z || hz, hz, kz));
+  }
 }
 
 function updateSquadUnits(squad, dt, engaged) {
@@ -1024,16 +1438,17 @@ function updateSquadUnits(squad, dt, engaged) {
   mesh.count = Math.max(0, n);
   if (n <= 0) return;
   var t = game.time;
+  var sx = xc(squad.z);
   for (var i = 0; i < n; i++) {
-    var x = squad.px[i], z = squad.pz[i];
+    var x, z;
     if (engaged) {
-      var tx = crowd.x + (squad.px[i] - 0) * 0.35;
-      var tz = crowd.z + 2.2 + (squad.pz[i] - squad.z) * 0.4;
-      squad.px[i] += (tx - squad.px[i]) * (1 - Math.exp(-dt * 5));
-      squad.pz[i] += (tz - squad.pz[i]) * (1 - Math.exp(-dt * 5));
-      x = squad.px[i]; z = squad.pz[i];
+      x = crowdX() + squad.offs[i][0] * 0.35;
+      z = crowd.z + 2.2 + squad.offs[i][1] * 0.4;
+    } else {
+      x = sx + squad.offs[i][0];
+      z = squad.z + squad.offs[i][1];
     }
-    var bob = Math.abs(Math.sin(t * (engaged ? 12 : 5) + squad.phase[i])) * (engaged ? 0.16 : 0.06);
+    var bob = Math.abs(Math.sin(t * (engaged || squad.charging ? 12 : 5) + squad.phase[i])) * (engaged || squad.charging ? 0.16 : 0.06);
     writeUnitMatrix(mesh, i, x, bob, z);
   }
   mesh.instanceMatrix.needsUpdate = true;
@@ -1043,30 +1458,186 @@ function updateSquadUnits(squad, dt, engaged) {
     squad.labelT = game.time;
     drawLabel(squad.label, String(shown));
   }
-  squad.label.position.set(engaged ? crowd.x : 0, 4.6, engaged ? crowd.z + 3 : squad.z);
+  squad.label.position.set(engaged ? crowdX() : sx, 4.6, engaged ? crowd.z + 3 : squad.z);
+}
+
+function bossSlam() {
+  var boss = bossObj;
+  var armor = armorCut();
+  var kill = Math.ceil(crowd.countF * (boss.mega ? 0.11 : 0.09) + 3 + game.playLevel * 0.6);
+  kill = Math.max(1, Math.round(kill * (1 - armor * 0.7)));
+  crowdSetCount(crowd.countF - kill);
+  FloatTxt.spawn('−' + kill, new THREE.Vector3(crowdX(), 2, crowd.z), '#FF7A66');
+  Particles.burst(new THREE.Vector3(crowdX(), 1, crowd.z + 1), COL.red, 30, 4);
+  AudioFX.slam();
+  if (!REDUCED_MOTION) game.shake = Math.max(game.shake, boss.mega ? 0.6 : 0.4);
+  boss.ring.material.opacity = 0.85;
+  boss.ring.scale.set(1, 1, 1);
+  if (crowd.countF <= 0.5) { crowdSetCount(0); gameOver('سحقك الزعيم! ارفع ترقياتك وعُد إليه.'); }
+}
+
+function updateBoss(dt) {
+  var boss = bossObj;
+  if (!boss || boss.dead) return;
+  var mesh = boss.mesh;
+  /* حلقة الصدمة */
+  if (boss.ring.material.opacity > 0.01) {
+    boss.ring.material.opacity -= dt * 1.6;
+    boss.ring.scale.x += dt * 14; boss.ring.scale.y += dt * 14;
+  }
+  if (game.state === 'boss') {
+    boss.t += dt;
+    var cyc = boss.interval;
+    var ph = boss.t % cyc;
+    /* قفزة تنتهي بضربة أرضية — الالتفاف حول الدورة يطلقها مهما تدنّى معدل الإطارات */
+    if (boss.lastPh !== undefined && ph < boss.lastPh) bossSlam();
+    boss.lastPh = ph;
+    if (ph > cyc - 0.5) {
+      var jp = (ph - (cyc - 0.5)) / 0.5;
+      mesh.position.y = Math.sin(jp * Math.PI) * (boss.mega ? 3.2 : 2.4);
+    } else mesh.position.y = Math.abs(Math.sin(game.time * 6)) * 0.15;
+    /* جيشك يهاجمه */
+    var dps = Math.max(8, crowd.countF * 0.9) * dmgMult();
+    boss.hpF -= dps * dt;
+    if (Math.random() < dt * 6) {
+      tmpV.set(boss.node.position.x + (Math.random() - .5) * 3, 2 + Math.random() * 4, boss.z - 2);
+      Particles.burst(tmpV, Math.random() < .5 ? COL.blue : 0xFFD9A0, 6, 3);
+    }
+    var shown = Math.max(0, Math.ceil(boss.hpF));
+    if (shown !== boss.shown && (shown === 0 || game.time - (boss.labelT || 0) > 0.1)) {
+      boss.shown = shown; boss.labelT = game.time;
+      drawLabel(boss.label, String(shown));
+    }
+    if (boss.hpF <= 0) {
+      boss.dead = true;
+      AudioFX.roar();
+      FloatTxt.spawn('⚔️', new THREE.Vector3(boss.node.position.x, 4, boss.z), '#FFC53D');
+      Particles.burst(new THREE.Vector3(boss.node.position.x, 3, boss.z), COL.gold, 60, 6);
+      fxTweens.push(function (dt2) {
+        boss.mesh.rotation.x += dt2 * 2.2;
+        boss.node.position.y -= dt2 * 3;
+        return boss.node.position.y > -9;
+      });
+      boss.label.visible = false;
+      game.state = 'run';
+    }
+  } else if (!boss.dead) {
+    mesh.position.y = Math.abs(Math.sin(game.time * 3)) * 0.12;
+  }
+}
+
+function updateHammers(dt) {
+  var D = game.data;
+  var armor = armorCut();
+  for (var i = 0; i < D.hammers.length; i++) {
+    var h = D.hammers[i];
+    if (h.z < crowd.z - 25 || h.z > crowd.z + 175) { if (h.node.visible) h.node.visible = false; continue; }
+    if (!h.node.visible) h.node.visible = true;
+    var ang = Math.sin(game.time * h.speed + h.phase) * 1.05;
+    h.arm.rotation.z = ang;
+    if (game.state === 'run' && Math.abs(crowd.z - h.z) < 2.3 && crowd.countF > 0) {
+      var headX = xc(h.z) + Math.sin(ang) * 5.0;
+      var d = Math.abs(crowdX() - headX);
+      if (d < 2.4) {
+        var frac = 1 - d / 2.4;
+        var loss = 42 * frac * dt * (1 - armor * 0.6);
+        crowdSetCount(crowd.countF - loss);
+        h.hitT = (h.hitT || 0) + dt;
+        if (h.hitT > 0.18) {
+          h.hitT = 0;
+          AudioFX.hammerHit();
+          Particles.burst(new THREE.Vector3(headX, 1.4, h.z), COL.red, 8, 3);
+        }
+        if (crowd.countF <= 0.5) { crowdSetCount(0); gameOver('سحقتك المطرقة! راوغها من الجانب الآخر.'); }
+      }
+    }
+  }
+}
+
+/* نيازك البركان وصواعق الغابة */
+function updateHazards(dt) {
+  var B = game.data.biome;
+  if (game.state !== 'run' && game.state !== 'battle' && game.state !== 'boss') return;
+  if (B.hazard === 'meteor') {
+    if (!game.meteor) {
+      game.meteorTimer -= dt;
+      if (game.meteorTimer <= 0 && game.state === 'run') {
+        var tz = crowd.z + 17, txx = crowdX() + (Math.random() - 0.5) * 5;
+        var ring = new THREE.Mesh(new THREE.RingGeometry(2.2, 2.7, 20), BM(0xFF4A20, { transparent: true, opacity: 0.8, side: THREE.DoubleSide }));
+        ring.rotation.x = -Math.PI / 2; ring.position.set(txx, 0.12, tz);
+        var rock = new THREE.Mesh(new THREE.DodecahedronGeometry(1.1, 0), LM(0x3A2A24));
+        rock.position.set(txx + 6, 42, tz + 4);
+        levelGroup.add(ring, rock);
+        game.meteor = { ring: ring, rock: rock, tx: txx, tz: tz, t: 0 };
+        AudioFX.meteor();
+      }
+    } else {
+      var m = game.meteor;
+      m.t += dt;
+      m.ring.material.opacity = 0.5 + Math.sin(game.time * 14) * 0.3;
+      if (m.t > 0.6) {
+        var fall = clamp((m.t - 0.6) / 0.55, 0, 1);
+        m.rock.position.set(lerp(m.tx + 6, m.tx, fall), lerp(42, 1, fall), lerp(m.tz + 4, m.tz, fall));
+      }
+      if (m.t >= 1.15) {
+        AudioFX.boom();
+        Particles.burst(new THREE.Vector3(m.tx, 1, m.tz), 0xFF6A2A, 40, 6);
+        Particles.burst(new THREE.Vector3(m.tx, 1, m.tz), 0x3A2A24, 25, 5);
+        if (!REDUCED_MOTION) game.shake = Math.max(game.shake, 0.35);
+        if (Math.abs(crowd.z - m.tz) < 3.5 && Math.abs(crowdX() - m.tx) < 3.2 && game.state === 'run') {
+          var loss = Math.ceil(crowd.countF * 0.13 * (1 - armorCut() * 0.6)) + 3;
+          crowdSetCount(crowd.countF - loss);
+          FloatTxt.spawn('−' + loss, new THREE.Vector3(m.tx, 2, m.tz), '#FF7A66');
+          if (crowd.countF <= 0.5) { crowdSetCount(0); gameOver('نيزك بركاني أباد جيشك!'); }
+        }
+        levelGroup.remove(m.ring, m.rock);
+        m.ring.geometry.dispose(); m.rock.geometry.dispose();
+        game.meteor = null;
+        game.meteorTimer = 4.5 + Math.random() * 3.5;
+      }
+    }
+  } else if (B.hazard === 'lightning') {
+    game.boltTimer -= dt;
+    if (game.boltTimer <= 0) {
+      game.boltTimer = 5 + Math.random() * 5;
+      el.flash.style.opacity = 0.75;
+      setTimeout(function () { el.flash.style.opacity = 0; }, 130);
+      setTimeout(function () { AudioFX.thunder(); }, 200 + Math.random() * 400);
+    }
+  }
 }
 
 function step(dt) {
   game.time += dt;
   var D = game.data;
+  var armor = armorCut(), dm = dmgMult();
 
   if (game.state === 'run') {
     crowd.z += RUN_SPEED * dt;
-    crowd.x += (crowd.targetX - crowd.x) * (1 - Math.exp(-dt * 8));
+    crowd.off += (crowd.targetOff - crowd.off) * (1 - Math.exp(-dt * 8));
 
     for (var gi = 0; gi < D.gates.length; gi++) {
       var gate = D.gates[gi];
       if (!gate.consumed && crowd.z >= gate.z) consumeGate(gate);
     }
-    if (game.state !== 'run') { /* gate may have killed us */ }
-    else {
+    if (game.state === 'run') {
+      /* كمائن تركض نحوك */
       for (var si = 0; si < D.squads.length; si++) {
         var squad = D.squads[si];
-        if (squad.alive && !squad.engaged && crowd.z >= squad.z - 4.5) { startBattle(squad); break; }
+        if (!squad.alive || squad.engaged) continue;
+        if (squad.charge && squad.z - crowd.z < 42 && squad.z - crowd.z > 5) {
+          if (!squad.charging) { squad.charging = true; FloatTxt.spawn('!', new THREE.Vector3(xc(squad.z), 3, squad.z), '#FF7A66'); AudioFX.roar(); }
+          squad.z -= 12 * dt;
+        }
+        if (crowd.z >= squad.z - 4.5) { startBattle(squad); break; }
       }
-      if (game.state === 'run' && crowd.z >= D.castleZ - 13) {
-        game.state = 'siege';
+      if (game.state === 'run' && bossObj && !bossObj.dead && crowd.z >= bossObj.z - 9) {
+        game.state = 'boss';
+        bossObj.t = 0;
+        AudioFX.roar();
+        FloatTxt.spawn(bossObj.mega ? '👑 الزعيم الأسطوري!' : 'الزعيم!', new THREE.Vector3(xc(bossObj.z), 5, bossObj.z), '#FFC53D');
       }
+      if (game.state === 'run' && crowd.z >= D.castleZ - 13) game.state = 'siege';
     }
     updateCrowdUnits(dt, 'run', null);
   }
@@ -1074,13 +1645,14 @@ function step(dt) {
     var b = game.battle, sq = b.squad;
     b.t += dt; b.tick += dt;
     var rate = Math.max(crowd.countF, sq.countF) / 1.35;
-    var d = Math.min(rate * dt, crowd.countF, sq.countF);
-    crowd.countF -= d; sq.countF -= d;
+    var dMine = Math.min(rate * dt * (1 - armor), crowd.countF);
+    var dTheirs = Math.min(rate * dt * dm, sq.countF);
+    crowd.countF -= dMine; sq.countF -= dTheirs;
     crowdSetCount(crowd.countF);
     if (b.tick > 0.14) {
       b.tick = 0;
       AudioFX.clash();
-      tmpV.set(crowd.x + (Math.random() - 0.5) * 3, 1.2, crowd.z + 1.5 + (Math.random() - 0.5) * 2);
+      tmpV.set(crowdX() + (Math.random() - 0.5) * 3, 1.2, crowd.z + 1.5 + (Math.random() - 0.5) * 2);
       Particles.burst(tmpV, Math.random() < 0.5 ? COL.blue : COL.red, 8, 2.5);
     }
     if (sq.countF <= 0.5) {
@@ -1089,51 +1661,52 @@ function step(dt) {
       crowdSetCount(crowd.countF);
       game.state = 'run';
       game.battle = null;
-      FloatTxt.spawn('⚔', new THREE.Vector3(crowd.x, 2, crowd.z + 2), '#FFD9D2');
+      FloatTxt.spawn('⚔', new THREE.Vector3(crowdX(), 2, crowd.z + 2), '#FFD9D2');
     } else if (crowd.countF <= 0.5) {
       crowdSetCount(0);
       gameOver('كان جيش العدو أكبر… ضاعف صفوفك قبل المعركة!');
     }
-    updateCrowdUnits(dt, 'battle', tmpV.set(crowd.x, 0, crowd.z + 2));
+    updateCrowdUnits(dt, 'battle', tmpV.set(crowdX(), 0, crowd.z + 2));
+  }
+  else if (game.state === 'boss') {
+    crowd.off += (crowd.targetOff - crowd.off) * (1 - Math.exp(-dt * 8));
+    updateCrowdUnits(dt, 'battle', tmpV.set(bossObj.node.position.x, 0, bossObj.z - 4));
   }
   else if (game.state === 'siege') {
     crowd.z += RUN_SPEED * 0.55 * dt;
     crowd.z = Math.min(crowd.z, D.castleZ - 8);
-    crowd.x += (0 - crowd.x) * (1 - Math.exp(-dt * 3));
-    crowd.targetX = crowd.x;
-    var rate2 = Math.max(26, crowd.countF * 1.15);
+    crowd.off += (0 - crowd.off) * (1 - Math.exp(-dt * 3));
+    crowd.targetOff = crowd.off;
+    var rate2 = Math.max(26, crowd.countF * 1.15) * dm;
     var dd = Math.min(rate2 * dt, crowd.countF, game.hpF);
-    crowd.countF -= dd; game.hpF -= dd;
+    crowd.countF -= dd / dm; game.hpF -= dd;
     crowdSetCount(crowd.countF);
     game.siegeTick = (game.siegeTick || 0) + dt;
     if (dd > 0 && game.siegeTick > 0.2) {
       game.siegeTick = 0;
       AudioFX.thud();
-      tmpV.set((Math.random() - 0.5) * 6, 2.5 + Math.random() * 3, D.castleZ - 5);
+      tmpV.set(xc(D.castleZ) + (Math.random() - 0.5) * 6, 2.5 + Math.random() * 3, D.castleZ - 5);
       Particles.burst(tmpV, COL.stoneDark, 10, 3);
       Particles.burst(tmpV, COL.blue, 6, 3);
       if (!REDUCED_MOTION) game.shake = Math.max(game.shake, 0.18);
     }
     var shownHP = Math.max(0, Math.ceil(game.hpF));
     if (castle.shownHP !== shownHP && (shownHP === 0 || game.time - (castle.labelT || 0) > 0.1)) {
-      castle.shownHP = shownHP;
-      castle.labelT = game.time;
+      castle.shownHP = shownHP; castle.labelT = game.time;
       drawLabel(castle.hpLabel, String(shownHP));
     }
-    if (game.hpF <= 0) {
-      gameWin();
-    } else if (crowd.countF <= 0.5) {
+    if (game.hpF <= 0) gameWin();
+    else if (crowd.countF <= 0.5) {
       crowdSetCount(0);
       gameOver('صمدت القلعة! تحتاج جيشاً أكبر لتحطيمها.');
     }
     updateCrowdUnits(dt, 'siege', null);
   }
-  else if (game.state === 'menu' || game.state === 'win' || game.state === 'lose') {
+  else {
     updateCrowdUnits(dt, game.state === 'win' ? 'run' : 'idle', null);
   }
 
   if (D) {
-    /* fog ends at 165: anything past it can be hidden entirely (saves draw + shadow passes) */
     for (var qi = 0; qi < D.squads.length; qi++) {
       var q = D.squads[qi];
       if (!q.alive) continue;
@@ -1147,42 +1720,48 @@ function step(dt) {
       var gVis = vg.z > crowd.z - 30 && vg.z < crowd.z + 175;
       if (vg.node.visible !== gVis) vg.node.visible = gVis;
     }
+    updateHammers(dt);
+    updateBoss(dt);
+    updateHazards(dt);
   }
 
   for (var fi = fxTweens.length - 1; fi >= 0; fi--) {
     if (!fxTweens[fi](dt)) fxTweens.splice(fi, 1);
   }
   Particles.update(dt);
+  Weather.update(dt, game.time);
   FloatTxt.update(dt);
 
-  /* camera */
-  var cx = crowd.x * 0.3, cy = camCfg.h, cz = crowd.z - camCfg.d;
+  /* camera follows the curve */
+  var cx = xc(crowd.z - 4) + crowd.off * 0.35;
   var k = 1 - Math.exp(-dt * 5);
   camPos.x += (cx - camPos.x) * k;
-  camPos.y += (cy - camPos.y) * k;
-  camPos.z += (cz - camPos.z) * k;
+  camPos.y += (camCfg.h - camPos.y) * k;
+  camPos.z += ((crowd.z - camCfg.d) - camPos.z) * k;
   camera.position.copy(camPos);
   if (game.shake > 0.001) {
     game.shake *= Math.exp(-dt * 6);
     camera.position.x += (Math.random() - 0.5) * game.shake;
     camera.position.y += (Math.random() - 0.5) * game.shake;
   } else game.shake = 0;
-  camera.lookAt(crowd.x * 0.35, 1.5, crowd.z + camCfg.ahead);
+  camera.lookAt(xc(crowd.z + camCfg.ahead) * 0.85 + crowd.off * 0.25, 1.5, crowd.z + camCfg.ahead);
 
-  sun.position.set(crowd.x + 26, 55, crowd.z - 18);
-  sun.target.position.set(0, 0, crowd.z + 12);
+  sun.position.set(crowdX() + 26, 55, crowd.z - 18);
+  sun.target.position.set(crowdX(), 0, crowd.z + 12);
   sun.target.updateMatrixWorld();
 
   /* HUD */
   var count = Math.max(0, Math.round(crowd.countF));
   el.countBadge.textContent = fmt(count);
-  tmpV.set(crowd.x, 2.6, crowd.z);
+  tmpV.set(crowdX(), 2.6, crowd.z);
   tmpV.project(camera);
   el.countBadge.style.left = ((tmpV.x * 0.5 + 0.5) * window.innerWidth) + 'px';
   el.countBadge.style.top = ((-tmpV.y * 0.5 + 0.5) * window.innerHeight) + 'px';
   el.progressBar.style.width = (clamp(crowd.z / D.castleZ, 0, 1) * 100) + '%';
 
-  window.__DBG = { state: game.state, count: count, z: Math.round(crowd.z), hp: Math.ceil(game.hpF), level: game.level };
+  window.__DBG = { state: game.state, count: count, z: Math.round(crowd.z),
+    hp: Math.ceil(game.hpF), bossHp: bossObj ? Math.ceil(bossObj.hpF) : 0,
+    level: game.playLevel, coins: S.coins, biome: D.biome.name };
 }
 
 var running = true;
@@ -1193,8 +1772,8 @@ document.addEventListener('visibilitychange', function () {
 function frame() {
   requestAnimationFrame(frame);
   if (!running) return;
-  var dt = Math.min(clock.getDelta(), 0.05);
-  step(dt);
+  var dt = Math.min(clock.getDelta(), 0.05) * (window.__TEST.timeWarp || 1);
+  step(Math.min(dt, 0.14));
   renderer.render(scene, camera);
 }
 frame();
@@ -1209,11 +1788,8 @@ frame();
     'lib/three.min.js'
   ];
   var i = 0;
-  function fail() {
-    document.getElementById('boot-error').style.display = 'flex';
-  }
+  function fail() { document.getElementById('boot-error').style.display = 'flex'; }
   function boot() {
-    /* WebGLRenderer throws synchronously when WebGL is unavailable — surface it, don't die silently */
     try { window.__startGame(); } catch (e) { fail(); }
   }
   function next() {
