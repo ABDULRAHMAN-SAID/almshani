@@ -1,0 +1,18 @@
+{
+  "unit.spear_wall.name": "حملة الرماح",
+  "unit.shield_guard.name": "حرس الدروع",
+  "unit.axe_warriors.name": "محاربو الفؤوس",
+  "unit.archers.name": "رماة الأقواس",
+  "unit.light_slingers.name": "القاذفات الخفيفة",
+  "unit.flame_archers.name": "رماة اللهب",
+  "unit.raid_cavalry.name": "خيّالة الغارة",
+  "unit.north_wolves.name": "ذئاب الشمال",
+  "unit.field_medic.name": "ضمّاد الميدان",
+  "unit.frost_witch.name": "ساحرة الصقيع",
+  "unit.iron_ram.name": "الكبش الحديدي",
+  "unit.catapult.name": "المنجنيق",
+  "commander.sera.name": "القائدة سيرا",
+  "arena.border_fort.name": "حصن الحدود",
+  "hud.battle": "قــتــال",
+  "hud.commandPoints": "نقاط القيادة"
+}

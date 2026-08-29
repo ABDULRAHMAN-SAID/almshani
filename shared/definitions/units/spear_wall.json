@@ -1,0 +1,34 @@
+{
+  "id": "spear_wall",
+  "role": "frontline",
+  "faction": "kingdom_legion",
+  "squadSize": 10,
+  "costCP": 3,
+  "musterSec": 10,
+  "member": {
+    "hp": 90,
+    "dps": 4.0,
+    "range": 1.2,
+    "moveSpeed": 2.6
+  },
+  "targeting": "nearest_engaged",
+  "tags": [
+    "anti_cavalry"
+  ],
+  "counters": {
+    "cavalry": 2.0
+  },
+  "counteredBy": {
+    "ranged": 1.4
+  },
+  "levels": {
+    "hpPct": 10,
+    "dpsPct": 10
+  },
+  "trait3": "spear_wall_brace",
+  "trait5": "phalanx_step",
+  "ui": {
+    "medallion": "medallion_spear_wall",
+    "nameKey": "unit.spear_wall.name"
+  }
+}

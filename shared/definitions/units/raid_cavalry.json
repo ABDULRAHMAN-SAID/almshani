@@ -1,0 +1,34 @@
+{
+  "id": "raid_cavalry",
+  "role": "cavalry",
+  "faction": "kingdom_legion",
+  "squadSize": 4,
+  "costCP": 4,
+  "musterSec": 12,
+  "member": {
+    "hp": 140,
+    "dps": 16.25,
+    "range": 1.3,
+    "moveSpeed": 5.2
+  },
+  "targeting": "priority_ranged_siege",
+  "tags": [],
+  "counters": {
+    "ranged": 2.0,
+    "siege": 2.0,
+    "support": 1.5
+  },
+  "counteredBy": {
+    "anti_cavalry": 2.0
+  },
+  "levels": {
+    "hpPct": 10,
+    "dpsPct": 10
+  },
+  "trait3": "flank_instinct",
+  "trait5": "ride_through",
+  "ui": {
+    "medallion": "medallion_raid_cavalry",
+    "nameKey": "unit.raid_cavalry.name"
+  }
+}

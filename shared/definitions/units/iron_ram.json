@@ -1,0 +1,34 @@
+{
+  "id": "iron_ram",
+  "role": "siege",
+  "faction": "iron_clans",
+  "squadSize": 6,
+  "costCP": 6,
+  "musterSec": 20,
+  "member": {
+    "hp": 0,
+    "dps": 0.0,
+    "range": 0.5,
+    "moveSpeed": 1.6
+  },
+  "targeting": "buildings_only",
+  "tags": [
+    "structure"
+  ],
+  "counters": {},
+  "counteredBy": {},
+  "levels": {
+    "hpPct": 10,
+    "dpsPct": 10
+  },
+  "trait3": "plated_roof",
+  "trait5": "burning_head",
+  "ui": {
+    "medallion": "medallion_iron_ram",
+    "nameKey": "unit.iron_ram.name"
+  },
+  "structure": {
+    "hp": 700,
+    "dpsVsBuildings": 90
+  }
+}

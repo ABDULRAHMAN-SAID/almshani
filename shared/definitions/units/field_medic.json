@@ -1,0 +1,33 @@
+{
+  "id": "field_medic",
+  "role": "support",
+  "faction": "kingdom_legion",
+  "squadSize": 4,
+  "costCP": 4,
+  "musterSec": 14,
+  "member": {
+    "hp": 70,
+    "dps": 0.0,
+    "range": 4.0,
+    "moveSpeed": 2.5
+  },
+  "targeting": "ally_most_wounded",
+  "tags": [
+    "healer"
+  ],
+  "counters": {},
+  "counteredBy": {
+    "cavalry": 1.5
+  },
+  "levels": {
+    "hpPct": 10,
+    "dpsPct": 10
+  },
+  "trait3": "triage",
+  "trait5": "march_bandages",
+  "ui": {
+    "medallion": "medallion_field_medic",
+    "nameKey": "unit.field_medic.name"
+  },
+  "healPerSec": 25
+}

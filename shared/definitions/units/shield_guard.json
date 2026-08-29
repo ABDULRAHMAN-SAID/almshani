@@ -1,0 +1,35 @@
+{
+  "id": "shield_guard",
+  "role": "frontline",
+  "faction": "kingdom_legion",
+  "squadSize": 8,
+  "costCP": 4,
+  "musterSec": 12,
+  "member": {
+    "hp": 160,
+    "dps": 3.75,
+    "range": 1.1,
+    "moveSpeed": 2.2
+  },
+  "targeting": "nearest_engaged",
+  "tags": [
+    "shielded"
+  ],
+  "counters": {},
+  "counteredBy": {
+    "frontline": 1.2
+  },
+  "levels": {
+    "hpPct": 10,
+    "dpsPct": 10
+  },
+  "trait3": "tower_stance",
+  "trait5": "unbreakable_line",
+  "ui": {
+    "medallion": "medallion_shield_guard",
+    "nameKey": "unit.shield_guard.name"
+  },
+  "damageModifiers": {
+    "fromRanged": 0.6
+  }
+}

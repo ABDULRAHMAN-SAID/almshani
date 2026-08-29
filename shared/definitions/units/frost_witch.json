@@ -1,0 +1,34 @@
+{
+  "id": "frost_witch",
+  "role": "support",
+  "faction": "northern_tribes",
+  "squadSize": 3,
+  "costCP": 5,
+  "musterSec": 14,
+  "member": {
+    "hp": 65,
+    "dps": 1.0,
+    "range": 6.0,
+    "moveSpeed": 2.4
+  },
+  "targeting": "densest_enemy",
+  "tags": [
+    "slower"
+  ],
+  "counters": {},
+  "counteredBy": {
+    "cavalry": 1.5
+  },
+  "levels": {
+    "hpPct": 10,
+    "dpsPct": 10
+  },
+  "trait3": "deep_chill",
+  "trait5": "flash_freeze",
+  "ui": {
+    "medallion": "medallion_frost_witch",
+    "nameKey": "unit.frost_witch.name"
+  },
+  "slowPct": 35,
+  "slowRadius": 2.5
+}

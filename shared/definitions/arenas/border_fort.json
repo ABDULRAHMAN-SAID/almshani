@@ -1,0 +1,47 @@
+{
+  "id": "border_fort",
+  "trophyMin": 800,
+  "trophyMax": 1400,
+  "faction": "kingdom_legion",
+  "size": {
+    "length": 64,
+    "width": 36
+  },
+  "hqHp": 4000,
+  "sectors": [
+    "left",
+    "mid",
+    "right"
+  ],
+  "terrain": [
+    {
+      "type": "bridge",
+      "sector": "mid",
+      "narrowsToWidth": 6
+    }
+  ],
+  "commandPoints": {
+    "start": 4,
+    "cap": 10,
+    "capOvertime": 12,
+    "regenSec": 2.4,
+    "regenSecMidBonus": 2.0
+  },
+  "timers": {
+    "mainSec": 210,
+    "overtimeSec": 90,
+    "forwardDeployHoldSec": 10,
+    "reconnectSec": 30
+  },
+  "score": {
+    "hqDamagePctPts": 2,
+    "sectorSecPts": 0.2,
+    "midSectorSecPts": 0.3,
+    "squadKillPts": 3,
+    "winMarginMain": 15,
+    "winMarginOvertime": 25
+  },
+  "ui": {
+    "nameKey": "arena.border_fort.name"
+  }
+}

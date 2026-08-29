@@ -1,0 +1,20 @@
+{
+  "id": "sera",
+  "faction": "kingdom_legion",
+  "passive": {
+    "id": "hq_range",
+    "desc": "hqDefenseRangePct",
+    "value": 25
+  },
+  "active": {
+    "id": "kingdom_volley",
+    "chargeSec": 60,
+    "usesPerMatch": 1,
+    "areaRadius": 3.0,
+    "totalDamage": 220,
+    "maxVsHQPct": 0
+  },
+  "ui": {
+    "nameKey": "commander.sera.name"
+  }
+}

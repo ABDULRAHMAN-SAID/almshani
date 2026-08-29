@@ -1,0 +1,49 @@
+{
+  "currencies": [
+    "gold",
+    "crystals",
+    "unit_tokens",
+    "season_marks"
+  ],
+  "match": {
+    "winGold": [
+      60,
+      120
+    ],
+    "loseGold": [
+      20,
+      40
+    ],
+    "crushingBonusPct": 25,
+    "warChestWins": 3,
+    "warChestDailyCap": 2,
+    "dailyGoldSoftCap": 1200
+  },
+  "upgrade": {
+    "2": {
+      "gold": 400,
+      "tokens": 10,
+      "roleTokens": 0
+    },
+    "3": {
+      "gold": 1200,
+      "tokens": 25,
+      "roleTokens": 10
+    },
+    "4": {
+      "gold": 3000,
+      "tokens": 50,
+      "roleTokens": 25
+    },
+    "5": {
+      "gold": 7000,
+      "tokens": 100,
+      "roleTokens": 60
+    }
+  },
+  "levels": {
+    "hpPctPerLevel": 10,
+    "dpsPctPerLevel": 10,
+    "maxLevel": 5
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "unit.spear_wall.name": "Spear Wall",
+  "unit.shield_guard.name": "Shield Guard",
+  "unit.axe_warriors.name": "Axe Warriors",
+  "unit.archers.name": "Longbow Archers",
+  "unit.light_slingers.name": "Light Slingers",
+  "unit.flame_archers.name": "Flame Archers",
+  "unit.raid_cavalry.name": "Raid Cavalry",
+  "unit.north_wolves.name": "North Wolves",
+  "unit.field_medic.name": "Field Medic",
+  "unit.frost_witch.name": "Frost Witch",
+  "unit.iron_ram.name": "Iron Ram",
+  "unit.catapult.name": "Catapult",
+  "commander.sera.name": "Commander Sera",
+  "arena.border_fort.name": "Border Fort",
+  "hud.battle": "BATTLE",
+  "hud.commandPoints": "Command Points"
+}
