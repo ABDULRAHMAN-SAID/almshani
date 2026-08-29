@@ -163,6 +163,18 @@
   .lv .s{font-size:10.5px;letter-spacing:1px;direction:ltr;color:#F5B01B;font-weight:900;}
   .lv .s .off{color:#D9CCB4;}
 
+  .skins{display:flex;gap:9px;justify-content:center;margin:2px 0 12px;}
+  .sk{
+    width:46px;height:46px;border-radius:50%;cursor:pointer;position:relative;
+    border:3px solid transparent;box-shadow:0 2px 8px rgba(40,15,0,.25);
+  }
+  .sk.sel{border-color:var(--ink);}
+  .sk .price{
+    position:absolute;bottom:-8px;right:50%;transform:translateX(50%);
+    background:#FFD971;color:#4A3400;font-size:9.5px;font-weight:900;
+    border-radius:999px;padding:1px 7px;white-space:nowrap;direction:ltr;
+  }
+  .sk.lock{opacity:.75;}
   #boot-error{display:none;position:absolute;inset:0;z-index:50;align-items:center;justify-content:center;background:var(--fog);}
   #boot-error .card{max-width:340px;}
   @media (prefers-reduced-motion: reduce){ .screen{transition:none;} }
@@ -178,6 +190,7 @@
       <div class="pill" id="pill-coins"><span class="coin-ico"></span><span id="coins-v" dir="ltr">0</span></div>
     </div>
     <div id="progress"><div class="bar" id="progress-bar"></div><div class="castle-ico">🏰</div></div>
+    <div class="pill" id="btn-pause" style="position:absolute;top:calc(72px + env(safe-area-inset-top));left:12px;pointer-events:auto;cursor:pointer;display:none">⏸</div>
   </div>
   <div id="count-badge">0</div>
   <div id="float-layer"></div>
@@ -192,12 +205,28 @@
         <div class="chip c-red">⚔️ زعيم</div>
         <div class="chip c-gold">★ نجوم</div>
       </div>
+      <div id="gift-row" style="display:none;margin-bottom:10px">
+        <button class="btn gold small" id="btn-gift">🎁 هدية اليوم</button>
+      </div>
       <div class="shop" id="shop"></div>
+      <div class="skins" id="skins"></div>
       <button class="btn" id="btn-start">تشغيل اللعبة</button>
       <div class="row2" style="margin-top:9px">
         <button class="btn small" id="btn-map">🗺️ الخريطة</button>
+        <button class="btn small" id="btn-snd" style="flex:0 0 64px">🔊</button>
       </div>
       <p class="hint">اسحب يميناً ويساراً — واحذر المطارق والنيازك!</p>
+    </div>
+  </div>
+
+  <div class="screen hidden" id="screen-pause">
+    <div class="card">
+      <h1>استراحة محارب</h1>
+      <p class="sub">جيشك ينتظر إشارتك</p>
+      <div class="row2">
+        <button class="btn small" id="btn-quit">القائمة</button>
+        <button class="btn" style="flex:2" id="btn-resume">استئناف</button>
+      </div>
     </div>
   </div>
 
@@ -288,9 +317,12 @@ var AudioFX = (function () {
     if (ctx) { if (ctx.state !== 'running') { try { ctx.resume(); } catch (e) {} } return true; }
     var AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return false;
-    ctx = new AC(); master = ctx.createGain(); master.gain.value = 0.4; master.connect(ctx.destination);
+    ctx = new AC(); master = ctx.createGain();
+    master.gain.value = (window.__SND === 0) ? 0 : 0.4;
+    master.connect(ctx.destination);
     return true;
   }
+  function setOn(v) { window.__SND = v ? 1 : 0; if (master) master.gain.value = v ? 0.4 : 0; }
   function tone(freq, dur, type, vol, when, slide) {
     if (!ctx) return;
     var t0 = ctx.currentTime + (when || 0);
@@ -314,7 +346,7 @@ var AudioFX = (function () {
     src.connect(f); f.connect(g); g.connect(master); src.start(t0);
   }
   return {
-    unlock: ensure,
+    unlock: ensure, setOn: setOn,
     gateGood: function () { tone(520, 0.09, 'square', 0.16); tone(780, 0.12, 'square', 0.16, 0.07); },
     gateGold: function () { tone(660, 0.09, 'triangle', 0.22); tone(880, 0.1, 'triangle', 0.2, 0.07); tone(1320, 0.16, 'triangle', 0.18, 0.14); },
     gateBad:  function () { tone(300, 0.14, 'sawtooth', 0.14, 0, 140); },
@@ -338,25 +370,25 @@ var AudioFX = (function () {
 var BIOMES = {
   desert: { name: 'الصحراء', ico: '🏜️',
     sky: ['#FFC98B', '#FFE7C2', '#FFF6E3'], fog: 0xF6DFB8, fogN: 55, fogF: 165,
-    ground: 0xD9B26E, path: 0xEDCA86, rockA: 0x8A7581, rockB: 0x6E5C6A,
+    ground: 0xD9B26E, path: 0xEDCA86, high: 0x9A7E72, rockA: 0x8A7581, rockB: 0x6E5C6A,
     edge: 0x83C960, foliage: 0x3E9C55, trunk: 0x8A6239,
     hemiSky: 0xFFF2D9, hemiGnd: 0xCAA06A, sun: 0xFFE9C4, sunI: 1.0,
     weather: null, hazard: null },
   snow: { name: 'الثلوج', ico: '🌨️',
     sky: ['#9FB8D8', '#D7E4F2', '#F2F7FC'], fog: 0xE6EEF6, fogN: 50, fogF: 150,
-    ground: 0xC9D9E8, path: 0xEDF3F8, rockA: 0x7C8BA0, rockB: 0x5E6B80,
+    ground: 0xC9D9E8, path: 0xEDF3F8, high: 0xF5FAFF, rockA: 0x7C8BA0, rockB: 0x5E6B80,
     edge: 0xBFD4E6, foliage: 0x2F7A55, trunk: 0x6B4B33, snowCap: 0xF4F9FD,
     hemiSky: 0xEAF2FB, hemiGnd: 0x9FB2C8, sun: 0xDCE9F8, sunI: 0.9,
     weather: 'snow', hazard: null },
   volcano: { name: 'البراكين', ico: '🌋',
     sky: ['#33161F', '#5A2A22', '#8A3A25'], fog: 0x4A2620, fogN: 40, fogF: 140,
-    ground: 0x3A2C2C, path: 0x5C4747, rockA: 0x4A3A3A, rockB: 0x332828,
+    ground: 0x3A2C2C, path: 0x5C4747, high: 0x1E1414, rockA: 0x4A3A3A, rockB: 0x332828,
     edge: 0xFF5A26, edgeGlow: true, foliage: 0x2A2220, trunk: 0x241C1C,
     hemiSky: 0xFFB08A, hemiGnd: 0x38201C, sun: 0xFF9A6A, sunI: 0.85,
     weather: 'ember', hazard: 'meteor' },
   rain: { name: 'الغابة الماطرة', ico: '⛈️',
     sky: ['#5E6E7E', '#8C9BA8', '#B9C4CC'], fog: 0xA8B4BC, fogN: 45, fogF: 150,
-    ground: 0x567E4A, path: 0x8A7B5E, rockA: 0x687488, rockB: 0x4C5668,
+    ground: 0x567E4A, path: 0x8A7B5E, high: 0x6E7889, rockA: 0x687488, rockB: 0x4C5668,
     edge: 0x4E7E42, foliage: 0x2E6E42, trunk: 0x5E4630,
     hemiSky: 0xC9D4DC, hemiGnd: 0x62705E, sun: 0xCFDAE2, sunI: 0.75,
     weather: 'rain', hazard: 'lightning' }
@@ -455,50 +487,121 @@ function bake(geo, x, y, z, sx, sy, sz, rx, ry, rz) {
   return g2;
 }
 
-/* ============================== soldier geometry (helmet + shield + spear) ============================== */
-function soldierGeo(main, dark, light) {
-  var body = bake(new THREE.CylinderGeometry(0.2, 0.29, 0.55, 7), 0, 0.42, 0);
-  var head = bake(new THREE.SphereGeometry(0.155, 8, 7), 0, 0.85, 0);
-  var helm = bake(new THREE.SphereGeometry(0.185, 8, 5, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, 0.87, 0);
-  var crest = bake(new THREE.ConeGeometry(0.05, 0.16, 5), 0, 1.08, 0);
-  var shield = bake(new THREE.CylinderGeometry(0.17, 0.17, 0.05, 9), -0.3, 0.52, 0.04, 1, 1, 1, 0, 0, Math.PI / 2);
-  var boss1 = bake(new THREE.SphereGeometry(0.05, 6, 5), -0.34, 0.52, 0.04);
-  var shaft = bake(new THREE.CylinderGeometry(0.024, 0.024, 1.15, 5), 0.3, 0.62, 0);
-  var tip = bake(new THREE.ConeGeometry(0.055, 0.17, 5), 0.3, 1.26, 0);
-  return mergeGeoms([
-    { g: body, c: main }, { g: head, c: COL.skin }, { g: helm, c: dark }, { g: crest, c: light },
-    { g: shield, c: light }, { g: boss1, c: dark }, { g: shaft, c: COL.wood }, { g: tip, c: COL.steel }
-  ]);
+/* ============================== characters: soldiers with legs, capes & faces · orc enemies · animated boss ============================== */
+function eyesAt(parts, y, z, r, color, gap) {
+  parts.push({ g: bake(new THREE.SphereGeometry(r, 6, 5), -gap, y, z), c: color });
+  parts.push({ g: bake(new THREE.SphereGeometry(r, 6, 5), gap, y, z), c: color });
 }
+/* جندي: أرجل + عباءة ظهر + خوذة بعرف + درع ورمح + عينان */
+function soldierGeo(main, dark, light) {
+  var P = [];
+  P.push({ g: bake(new THREE.CylinderGeometry(0.065, 0.075, 0.3, 6), -0.09, 0.15, 0), c: dark });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.065, 0.075, 0.3, 6), 0.09, 0.15, 0), c: dark });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.19, 0.27, 0.5, 7), 0, 0.52, 0), c: main });
+  P.push({ g: bake(new THREE.BoxGeometry(0.4, 0.07, 0.3), 0, 0.32, 0), c: dark });          /* حزام */
+  P.push({ g: bake(new THREE.BoxGeometry(0.34, 0.52, 0.05), 0, 0.6, -0.17), c: light });     /* عباءة تُرى من الخلف */
+  P.push({ g: bake(new THREE.SphereGeometry(0.15, 8, 7), 0, 0.93, 0), c: COL.skin });
+  eyesAt(P, 0.95, 0.138, 0.032, 0x241A2E, 0.055);
+  P.push({ g: bake(new THREE.SphereGeometry(0.18, 8, 5, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, 0.95, 0), c: dark });
+  P.push({ g: bake(new THREE.BoxGeometry(0.05, 0.16, 0.3), 0, 1.13, 0), c: light });         /* عرف */
+  P.push({ g: bake(new THREE.CylinderGeometry(0.17, 0.17, 0.05, 9), -0.3, 0.58, 0.04, 1, 1, 1, 0, 0, Math.PI / 2), c: light });
+  P.push({ g: bake(new THREE.SphereGeometry(0.05, 6, 5), -0.34, 0.58, 0.04), c: dark });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.024, 0.024, 1.15, 5), 0.3, 0.68, 0), c: COL.wood });
+  P.push({ g: bake(new THREE.ConeGeometry(0.055, 0.17, 5), 0.3, 1.32, 0), c: COL.steel });
+  return mergeGeoms(P);
+}
+/* الأورك: جلد أخضر، عينان صفراوان، أنياب، قرون، فأس — يواجه اللاعب */
+var orcGeo = (function () {
+  var P = [];
+  var skin = 0x6FA542, skinD = 0x4E7A2C;
+  P.push({ g: bake(new THREE.CylinderGeometry(0.07, 0.085, 0.28, 6), -0.1, 0.14, 0), c: 0x3A2A22 });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.07, 0.085, 0.28, 6), 0.1, 0.14, 0), c: 0x3A2A22 });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.21, 0.3, 0.52, 7), 0, 0.51, 0), c: COL.red });
+  P.push({ g: bake(new THREE.SphereGeometry(0.1, 6, 5), -0.28, 0.74, 0), c: COL.redDark });
+  P.push({ g: bake(new THREE.ConeGeometry(0.05, 0.14, 5), -0.28, 0.88, 0), c: 0xE8D8C0 });   /* شوكة كتف */
+  P.push({ g: bake(new THREE.SphereGeometry(0.1, 6, 5), 0.28, 0.74, 0), c: COL.redDark });
+  P.push({ g: bake(new THREE.SphereGeometry(0.165, 8, 7), 0, 0.94, 0), c: skin });
+  eyesAt(P, 0.96, 0.152, 0.038, 0xFFE93C, 0.062);
+  P.push({ g: bake(new THREE.BoxGeometry(0.09, 0.03, 0.05), -0.06, 1.02, 0.16, 1, 1, 1, 0, 0, -0.35), c: skinD }); /* حاجب غاضب */
+  P.push({ g: bake(new THREE.BoxGeometry(0.09, 0.03, 0.05), 0.06, 1.02, 0.16, 1, 1, 1, 0, 0, 0.35), c: skinD });
+  P.push({ g: bake(new THREE.ConeGeometry(0.022, 0.07, 4), -0.05, 0.85, 0.158), c: 0xFFF6E0 }); /* نابان */
+  P.push({ g: bake(new THREE.ConeGeometry(0.022, 0.07, 4), 0.05, 0.85, 0.158), c: 0xFFF6E0 });
+  P.push({ g: bake(new THREE.ConeGeometry(0.05, 0.2, 5), -0.14, 1.08, 0, 1, 1, 1, 0, 0, 0.55), c: 0xE8D8C0 });
+  P.push({ g: bake(new THREE.ConeGeometry(0.05, 0.2, 5), 0.14, 1.08, 0, 1, 1, 1, 0, 0, -0.55), c: 0xE8D8C0 });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.026, 0.026, 0.95, 5), 0.3, 0.62, 0), c: COL.wood });
+  P.push({ g: bake(new THREE.BoxGeometry(0.2, 0.16, 0.045), 0.3, 1.05, 0), c: COL.steel });  /* نصل الفأس */
+  P.push({ g: bake(new THREE.BoxGeometry(0.12, 0.1, 0.05), 0.3, 0.9, 0), c: 0x8A8F9C });
+  return mergeGeoms(P);
+})();
 var unitMat = new THREE.MeshLambertMaterial({ vertexColors: true });
-var blueGeo = soldierGeo(COL.blue, COL.blueDark, COL.blueLight);
-var redGeo  = soldierGeo(COL.red, COL.redDark, COL.redLight);
-/* البطل الذهبي حامل الراية */
+var redGeo = orcGeo;
+
+/* مظاهر الجيش (RPG skins) */
+var SKINS = [
+  { k: 'blue',    n: 'الأزرق',      cost: 0,    main: COL.blue,  dark: COL.blueDark, light: COL.blueLight },
+  { k: 'emerald', n: 'الزمرّدي',    cost: 300,  main: 0x1FA05A,  dark: 0x0F6E3C,     light: 0x7FE0A8 },
+  { k: 'royal',   n: 'البنفسجي',    cost: 700,  main: 0x8B5CF0,  dark: 0x5B2FB8,     light: 0xC9A8FF },
+  { k: 'night',   n: 'ذهب الليل',   cost: 1400, main: 0x2A2F45,  dark: 0x151A2C,     light: 0xFFC53D }
+];
+var skinGeos = {};
+function armyGeo() {
+  var sk = SKINS.find(function (s2) { return s2.k === (S.skin || 'blue'); }) || SKINS[0];
+  if (!skinGeos[sk.k]) skinGeos[sk.k] = soldierGeo(sk.main, sk.dark, sk.light);
+  return skinGeos[sk.k];
+}
+/* البطل الذهبي حامل الراية — بوجه وعباءة حمراء */
 var heroGeo = (function () {
   var s = soldierGeo(COL.gold, COL.goldDark, 0xFFE9A8);
-  var pole = bake(new THREE.CylinderGeometry(0.03, 0.03, 1.7, 5), -0.34, 1.1, -0.1);
-  var flag = bake(new THREE.BoxGeometry(0.52, 0.34, 0.02), -0.62, 1.72, -0.1);
-  return mergeGeoms([{ g: s }, { g: pole, c: COL.wood }, { g: flag, c: COL.blue }]);
+  var P = [{ g: s }];
+  P.push({ g: bake(new THREE.BoxGeometry(0.42, 0.6, 0.05), 0, 0.58, -0.19), c: 0xC42B1E }); /* عباءة قرمزية */
+  P.push({ g: bake(new THREE.CylinderGeometry(0.03, 0.03, 1.7, 5), -0.34, 1.1, -0.1), c: COL.wood });
+  P.push({ g: bake(new THREE.BoxGeometry(0.52, 0.34, 0.02), -0.62, 1.72, -0.1), c: COL.blue });
+  return mergeGeoms(P);
 })();
-/* الزعيم: ضخم بقرون ومطرقة حرب */
-var bossGeo = (function () {
-  var body = bake(new THREE.CylinderGeometry(0.24, 0.34, 0.6, 8), 0, 0.44, 0);
-  var head = bake(new THREE.SphereGeometry(0.18, 9, 8), 0, 0.92, 0);
-  var helm = bake(new THREE.SphereGeometry(0.215, 9, 5, 0, Math.PI * 2, 0, Math.PI * 0.55), 0, 0.94, 0);
-  var hornL = bake(new THREE.ConeGeometry(0.06, 0.28, 5), -0.16, 1.12, 0, 1, 1, 1, 0, 0, 0.5);
-  var hornR = bake(new THREE.ConeGeometry(0.06, 0.28, 5), 0.16, 1.12, 0, 1, 1, 1, 0, 0, -0.5);
-  var pauldL = bake(new THREE.SphereGeometry(0.14, 7, 6), -0.3, 0.72, 0);
-  var pauldR = bake(new THREE.SphereGeometry(0.14, 7, 6), 0.3, 0.72, 0);
-  var shaft = bake(new THREE.CylinderGeometry(0.035, 0.035, 1.1, 6), 0.42, 0.7, 0, 1, 1, 1, 0, 0, -0.25);
-  var hHead = bake(new THREE.BoxGeometry(0.34, 0.22, 0.22), 0.56, 1.3, 0);
-  return mergeGeoms([
-    { g: body, c: COL.redDark }, { g: head, c: COL.skin }, { g: helm, c: 0x3A1410 },
-    { g: hornL, c: 0xE8D8C0 }, { g: hornR, c: 0xE8D8C0 },
-    { g: pauldL, c: COL.red }, { g: pauldR, c: COL.red },
-    { g: shaft, c: COL.wood }, { g: hHead, c: 0x4A4A55 }
-  ]);
+/* الزعيم: جذع بوجه شرس + ذراع مطرقة منفصلة تتحرك عند الضرب */
+var bossTorsoGeo = (function () {
+  var P = [];
+  var skin = 0x8A4A3A;
+  P.push({ g: bake(new THREE.CylinderGeometry(0.12, 0.14, 0.36, 7), -0.16, 0.18, 0), c: 0x2A1410 });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.12, 0.14, 0.36, 7), 0.16, 0.18, 0), c: 0x2A1410 });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.26, 0.38, 0.62, 8), 0, 0.62, 0), c: COL.redDark });
+  P.push({ g: bake(new THREE.BoxGeometry(0.56, 0.1, 0.42), 0, 0.4, 0), c: 0x1E1210 });
+  P.push({ g: bake(new THREE.SphereGeometry(0.2, 9, 8), 0, 1.14, 0), c: skin });
+  eyesAt(P, 1.16, 0.185, 0.052, 0xFFD93C, 0.08);
+  P.push({ g: bake(new THREE.BoxGeometry(0.11, 0.04, 0.06), -0.08, 1.24, 0.2, 1, 1, 1, 0, 0, -0.4), c: 0x1E0E0A });
+  P.push({ g: bake(new THREE.BoxGeometry(0.11, 0.04, 0.06), 0.08, 1.24, 0.2, 1, 1, 1, 0, 0, 0.4), c: 0x1E0E0A });
+  P.push({ g: bake(new THREE.ConeGeometry(0.03, 0.1, 4), -0.07, 1.02, 0.19), c: 0xFFF6E0 });
+  P.push({ g: bake(new THREE.ConeGeometry(0.03, 0.1, 4), 0.07, 1.02, 0.19), c: 0xFFF6E0 });
+  P.push({ g: bake(new THREE.SphereGeometry(0.23, 9, 5, 0, Math.PI * 2, 0, Math.PI * 0.5), 0, 1.19, -0.03), c: 0x3A1410 });
+  P.push({ g: bake(new THREE.ConeGeometry(0.07, 0.34, 5), -0.19, 1.38, 0, 1, 1, 1, 0, 0, 0.55), c: 0xE8D8C0 });
+  P.push({ g: bake(new THREE.ConeGeometry(0.07, 0.34, 5), 0.19, 1.38, 0, 1, 1, 1, 0, 0, -0.55), c: 0xE8D8C0 });
+  P.push({ g: bake(new THREE.SphereGeometry(0.17, 7, 6), -0.36, 0.95, 0), c: COL.red });
+  P.push({ g: bake(new THREE.ConeGeometry(0.06, 0.18, 5), -0.36, 1.14, 0), c: 0xE8D8C0 });
+  /* الذراع اليسرى ثابتة */
+  P.push({ g: bake(new THREE.CylinderGeometry(0.09, 0.11, 0.5, 7), -0.42, 0.62, 0, 1, 1, 1, 0, 0, 0.35), c: skin });
+  P.push({ g: bake(new THREE.SphereGeometry(0.12, 6, 5), -0.5, 0.38, 0), c: skin });
+  for (var i = 0; i < 3; i++)
+    P.push({ g: bake(new THREE.ConeGeometry(0.05, 0.16, 4), 0, 0.9 - i * 0.18, -0.34, 1, 1, 1, -0.5, 0, 0), c: 0xE8D8C0 });
+  return mergeGeoms(P);
 })();
-var PROTECTED_GEO = [blueGeo, redGeo, heroGeo, bossGeo];
+/* ذراع المطرقة: المحور عند الكتف */
+var bossArmGeo = (function () {
+  var P = [];
+  P.push({ g: bake(new THREE.SphereGeometry(0.17, 7, 6), 0, 0, 0), c: COL.red });
+  P.push({ g: bake(new THREE.ConeGeometry(0.06, 0.18, 5), 0, 0.16, 0), c: 0xE8D8C0 });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.09, 0.1, 0.55, 7), 0.08, -0.28, 0, 1, 1, 1, 0, 0, -0.35), c: 0x8A4A3A });
+  P.push({ g: bake(new THREE.SphereGeometry(0.11, 6, 5), 0.2, -0.52, 0), c: 0x8A4A3A });
+  P.push({ g: bake(new THREE.CylinderGeometry(0.045, 0.045, 1.25, 6), 0.2, -0.05, 0), c: COL.wood });
+  P.push({ g: bake(new THREE.BoxGeometry(0.44, 0.28, 0.28), 0.2, 0.68, 0), c: 0x4A4A55 });
+  P.push({ g: bake(new THREE.ConeGeometry(0.09, 0.2, 4), 0.2, 0.9, 0), c: 0x6E6E7C });
+  return mergeGeoms(P);
+})();
+var PROTECTED_GEO = [redGeo, heroGeo, bossTorsoGeo, bossArmGeo];
+function isProtectedGeo(g2) {
+  if (PROTECTED_GEO.indexOf(g2) >= 0) return true;
+  for (var k in skinGeos) if (skinGeos[k] === g2) return true;
+  return false;
+}
 
 /* phyllotaxis formation offsets */
 var OFFS = (function () {
@@ -714,7 +817,11 @@ var S = {
   coins: store.get('coins', 0),
   up: store.get('up', { atk: 0, army: 0, armor: 0, gold: 0 }),
   stars: store.get('stars', {}),
-  best: store.get('best', 0)
+  best: store.get('best', 0),
+  skin: store.get('skin', 'blue'),
+  skins: store.get('skins', ['blue']),
+  snd: store.get('snd', 1),
+  lastGift: store.get('lastGift', '')
 };
 function upCost(u) { return Math.round(u.base * Math.pow(u.gr, S.up[u.k] || 0)); }
 function dmgMult() { return 1 + (S.up.atk || 0) * 0.12; }
@@ -724,6 +831,8 @@ function startArmy() { return 5 + (S.up.army || 0) * 2; }
 function saveS() {
   store.set('level', S.level); store.set('coins', S.coins);
   store.set('up', S.up); store.set('stars', S.stars); store.set('best', S.best);
+  store.set('skin', S.skin); store.set('skins', S.skins);
+  store.set('snd', S.snd); store.set('lastGift', S.lastGift);
 }
 
 /* ============================== curved path ============================== */
@@ -804,6 +913,35 @@ function genLevel(L) {
   };
 }
 
+/* ============================== terrain noise ============================== */
+var _nz = null;
+function makeNoise(seed) {
+  var r = mulberry32(seed), N = 48;
+  var g = new Float32Array(N * N);
+  for (var i = 0; i < N * N; i++) g[i] = r();
+  return function (x, y) {
+    x = ((x % N) + N) % N; y = ((y % N) + N) % N;
+    var x0 = Math.floor(x), y0 = Math.floor(y);
+    var x1 = (x0 + 1) % N, y1 = (y0 + 1) % N;
+    var fx = x - x0, fy = y - y0;
+    fx = fx * fx * (3 - 2 * fx); fy = fy * fy * (3 - 2 * fy);
+    var a = g[y0 * N + x0], b2 = g[y0 * N + x1], c = g[y1 * N + x0], d2 = g[y1 * N + x1];
+    return a + (b2 - a) * fx + (c - a) * fy + (a - b2 - c + d2) * fx * fy;
+  };
+}
+function fbm(x, y) {
+  return _nz(x, y) * 0.6 + _nz(x * 2.1 + 7, y * 2.1 + 3) * 0.28 + _nz(x * 4.3 + 13, y * 4.3 + 9) * 0.12;
+}
+function sstep(a, b, v) { var t2 = clamp((v - a) / (b - a), 0, 1); return t2 * t2 * (3 - 2 * t2); }
+/* ارتفاع الأرض: ممرّ مستوٍ حول المسار، تلال ثم جدران وادٍ كلما ابتعدنا */
+function groundH(x, z) {
+  var d = Math.abs(x - xc(z)) - (HW + 2.2);
+  if (d <= 0) return 0;
+  var hill = fbm(x * 0.05, z * 0.05) * 9 * sstep(0, 14, d);
+  var wall = sstep(10, 30, d) * (8 + fbm(z * 0.05 + 31, x * 0.02) * 9);
+  return hill + wall;
+}
+
 /* ============================== world building ============================== */
 var levelGroup = null, crowdMesh = null, heroMesh = null, castle = null, bossObj = null;
 var fxTweens = [];
@@ -839,11 +977,40 @@ function buildRibbon(halfW, y, zStart, zEnd, step, mat) {
 function buildTerrain(D) {
   var B = D.biome, length = D.length;
   var g = new THREE.Group();
-  var ground = new THREE.Mesh(new THREE.PlaneGeometry(320, length + 260), LM(B.ground));
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.set(0, -0.05, length / 2);
-  ground.receiveShadow = true;
-  g.add(ground);
+
+  /* حقل ارتفاعات حقيقي: تلال وجدران وادٍ ملوّنة حسب الارتفاع */
+  (function () {
+    var W = 170, z0 = -45, z1 = length + 85, sx2 = 3.4, sz2 = 3.8;
+    var cols = Math.ceil(W / sx2), rows = Math.ceil((z1 - z0) / sz2);
+    var pos = [], col = [], idx = [];
+    var cLow = new THREE.Color(B.ground), cHigh = new THREE.Color(B.high || B.rockA), cc = new THREE.Color();
+    for (var iz = 0; iz <= rows; iz++) {
+      var z = z0 + iz * sz2;
+      for (var ix2 = 0; ix2 <= cols; ix2++) {
+        var x = -W / 2 + ix2 * sx2;
+        var y = groundH(x, z);
+        pos.push(x, y - 0.06, z);
+        var t2 = clamp(y / 13, 0, 1);
+        cc.copy(cLow).lerp(cHigh, t2 * t2 * (3 - 2 * t2));
+        var jit = 0.9 + fbm(x * 0.3 + 5, z * 0.3) * 0.2;
+        col.push(cc.r * jit, cc.g * jit, cc.b * jit);
+      }
+    }
+    for (var rz = 0; rz < rows; rz++) {
+      for (var rx = 0; rx < cols; rx++) {
+        var a = rz * (cols + 1) + rx, b3 = a + cols + 1;
+        idx.push(a, b3, a + 1, a + 1, b3, b3 + 1);
+      }
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    var mesh = new THREE.Mesh(geo, LM(0xffffff, { vertexColors: true }));
+    mesh.receiveShadow = true;
+    g.add(mesh);
+  })();
 
   g.add(buildRibbon(HW + 1.3, 0.02, -20, length + 30, 4, LM(B.path, { side: THREE.DoubleSide })));
   var edgeMat = B.edgeGlow ? BM(B.edge) : LM(B.edge, { side: THREE.DoubleSide });
@@ -872,22 +1039,24 @@ function buildTerrain(D) {
     [-1, 1].forEach(function (side) {
       var cx = xc(z);
       for (var k = 0; k < 2; k++) {
-        var s = 5 + rng() * 6;
+        var s = 4 + rng() * 5;
+        var rx3 = cx + side * (HW + 8 + k * 7 + rng() * 4), rz3 = z + rng() * 10;
         var baked = bake(rockGeo,
-          cx + side * (HW + 7.5 + k * 6 + rng() * 3), s * (0.45 + k * 0.45), z + rng() * 10,
-          s, s * (1.2 + rng() * 0.7), s,
+          rx3, groundH(rx3, rz3) + s * 0.35, rz3,
+          s, s * (1.1 + rng() * 0.6), s,
           rng() * 0.4, rng() * Math.PI, rng() * 0.4);
         (rng() < 0.5 ? rocksA : rocksB).push({ g: baked, c: rng() < 0.5 ? B.rockA : B.rockB });
       }
       if (rng() < (B === BIOMES.rain ? 0.85 : 0.6)) {
         var tz = z + rng() * 10;
         var tx = cx + side * (HW + 2.3 + (rng() - 0.5));
+        var ty = groundH(tx, tz);
         if (B === BIOMES.volcano) {
-          trees.push({ g: bake(spikeGeo, tx, 1.6, tz, 1, 1, 1, (rng() - .5) * .3, 0, (rng() - .5) * .3), c: B.foliage });
+          trees.push({ g: bake(spikeGeo, tx, ty + 1.6, tz, 1, 1, 1, (rng() - .5) * .3, 0, (rng() - .5) * .3), c: B.foliage });
         } else {
-          trees.push({ g: bake(trunkGeo, tx, 0.9, tz), c: B.trunk });
-          trees.push({ g: bake(coneGeo, tx, 3, tz), c: B.foliage });
-          if (B.snowCap) trees.push({ g: bake(new THREE.ConeGeometry(1.1, 1.4, 7), tx, 4.1, tz), c: B.snowCap });
+          trees.push({ g: bake(trunkGeo, tx, ty + 0.9, tz), c: B.trunk });
+          trees.push({ g: bake(coneGeo, tx, ty + 3, tz), c: B.foliage });
+          if (B.snowCap) trees.push({ g: bake(new THREE.ConeGeometry(1.1, 1.4, 7), tx, ty + 4.1, tz), c: B.snowCap });
         }
       }
     });
@@ -900,15 +1069,54 @@ function buildTerrain(D) {
     batch[0].forEach(function (bg) { bg.g.dispose(); });
   });
 
+  /* نباتات وتفاصيل خاصة بكل بيئة */
+  (function () {
+    var props = [], glow = [];
+    var trunkP = new THREE.CylinderGeometry(0.16, 0.2, 1.5, 6);
+    var armP = new THREE.CylinderGeometry(0.1, 0.11, 0.65, 6);
+    var shardP = new THREE.OctahedronGeometry(0.8, 0);
+    var bushP = new THREE.SphereGeometry(0.75, 6, 5);
+    var poolP = new THREE.CircleGeometry(1, 10);
+    for (var z2 = 0; z2 < length + 40; z2 += 9) {
+      var side2 = rng() < 0.5 ? -1 : 1;
+      var px2 = xc(z2) + side2 * (HW + 3.5 + rng() * 9);
+      var pz2 = z2 + rng() * 7;
+      var gy = groundH(px2, pz2);
+      if (B === BIOMES.desert && rng() < 0.5) {          /* صبّار */
+        props.push({ g: bake(trunkP, px2, gy + 0.75, pz2), c: 0x3E8C4A });
+        props.push({ g: bake(armP, px2 - 0.32, gy + 1.0, pz2), c: 0x4AA258 });
+        props.push({ g: bake(armP, px2 + 0.32, gy + 0.85, pz2), c: 0x4AA258 });
+      } else if (B === BIOMES.snow && rng() < 0.45) {    /* بلورات جليد */
+        props.push({ g: bake(shardP, px2, gy + 0.9, pz2, 0.8 + rng() * 0.6, 1.6 + rng() * 1.2, 0.8, rng() * 0.3, rng() * 3, rng() * 0.3), c: 0xBFE8F5 });
+      } else if (B === BIOMES.volcano && rng() < 0.5) {  /* برك حمم متوهجة */
+        glow.push({ g: bake(poolP, px2, gy + 0.07, pz2, 1 + rng() * 1.4, 1, 1 + rng(), -Math.PI / 2, 0, 0), c: 0xFF6A2A });
+      } else if (B === BIOMES.rain && rng() < 0.7) {     /* شجيرات */
+        props.push({ g: bake(bushP, px2, gy + 0.45, pz2, 1 + rng() * 0.5, 0.65, 1 + rng() * 0.5), c: 0x255E36 });
+      }
+    }
+    if (props.length) {
+      var pm = new THREE.Mesh(mergeGeoms(props), unitMat);
+      pm.castShadow = true;
+      g.add(pm);
+      props.forEach(function (bg) { bg.g.dispose(); });
+    }
+    if (glow.length) {
+      var gm = new THREE.Mesh(mergeGeoms(glow), BM(0xffffff, { vertexColors: true }));
+      g.add(gm);
+      glow.forEach(function (bg) { bg.g.dispose(); });
+    }
+  })();
+
   /* براكين بعيدة متوهجة */
   if (B === BIOMES.volcano) {
     for (var i = 0; i < 5; i++) {
-      var vz = 30 + i * (length / 5), vx = xc(vz) + (i % 2 ? 1 : -1) * (HW + 22 + rng() * 8);
+      var vz = 30 + i * (length / 5), vx = xc(vz) + (i % 2 ? 1 : -1) * (HW + 24 + rng() * 8);
+      var vy = groundH(vx, vz);
       var cone = new THREE.Mesh(new THREE.ConeGeometry(9, 14, 8), LM(0x2E2020));
-      cone.position.set(vx, 7, vz);
-      var glow = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.6, 8), BM(0xFF6A2A));
-      glow.position.set(vx, 14.2, vz);
-      g.add(cone, glow);
+      cone.position.set(vx, vy + 6.5, vz);
+      var glow2 = new THREE.Mesh(new THREE.ConeGeometry(2.2, 1.6, 8), BM(0xFF6A2A));
+      glow2.position.set(vx, vy + 13.7, vz);
+      g.add(cone, glow2);
     }
   }
   return g;
@@ -1004,10 +1212,7 @@ function buildSquad(squad) {
     squad.phase[i] = rng() * Math.PI * 2;
   }
   for (var j = 0; j < n; j++) {
-    dummy.position.set(xc(squad.z) + squad.offs[j][0], 0, squad.z + squad.offs[j][1]);
-    dummy.rotation.set(0, 0, 0); dummy.scale.set(1, 1, 1);
-    dummy.updateMatrix();
-    mesh.setMatrixAt(j, dummy.matrix);
+    writeUnitMatrix(mesh, j, xc(squad.z) + squad.offs[j][0], 0, squad.z + squad.offs[j][1], Math.PI, 0);
   }
   mesh.instanceMatrix.needsUpdate = true;
   squad.mesh = mesh;
@@ -1023,19 +1228,32 @@ function buildSquad(squad) {
 function buildBoss(boss) {
   var g = new THREE.Group();
   var sc = boss.mega ? 7.4 : 5.6;
-  var mesh = new THREE.Mesh(bossGeo, unitMat);
-  mesh.scale.set(sc, sc, sc);
-  mesh.castShadow = true;
-  g.add(mesh);
+  var body = new THREE.Group();          /* الجسد كله يقفز */
+  var torso = new THREE.Mesh(bossTorsoGeo, unitMat);
+  torso.scale.set(sc, sc, sc);
+  torso.castShadow = true;
+  body.add(torso);
+  var arm = new THREE.Group();           /* ذراع المطرقة تدور من الكتف */
+  var armMesh = new THREE.Mesh(bossArmGeo, unitMat);
+  armMesh.scale.set(sc, sc, sc);
+  armMesh.castShadow = true;
+  arm.add(armMesh);
+  arm.position.set(0.4 * sc, 0.95 * sc, 0);
+  arm.rotation.x = -0.2;
+  body.add(arm);
+  g.add(body);
   var ring = new THREE.Mesh(new THREE.RingGeometry(1, 1.35, 24), BM(0xFF6A3C, { transparent: true, opacity: 0, side: THREE.DoubleSide }));
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = 0.1;
   g.add(ring);
   var label = makeLabelSprite(String(boss.hp), boss.mega ? 5 : 4.2, '#FFB3A0');
-  label.position.set(0, sc * 1.35 + 1.5, 0);
+  label.position.set(0, sc * 1.6 + 1.5, 0);
   g.add(label);
   g.position.set(xc(boss.z), 0, boss.z);
-  boss.node = g; boss.mesh = mesh; boss.ring = ring; boss.label = label;
+  /* يواجه اللاعب */
+  body.rotation.y = Math.PI;
+  boss.node = g; boss.body = body; boss.mesh = body; boss.arm = arm;
+  boss.ring = ring; boss.label = label;
   boss.hpF = boss.hp; boss.shown = boss.hp; boss.t = 0; boss.state = 'idle';
   return g;
 }
@@ -1093,9 +1311,9 @@ function crowdSetCount(n) {
   if (crowdMesh) crowdMesh.count = rn;
 }
 var dummy = new THREE.Object3D();
-function writeUnitMatrix(mesh, i, x, y, z) {
+function writeUnitMatrix(mesh, i, x, y, z, ry, rx) {
   dummy.position.set(x, y, z);
-  dummy.rotation.set(0, 0, 0);
+  dummy.rotation.set(rx || 0, ry || 0, 0);
   dummy.scale.set(1, 1, 1);
   dummy.updateMatrix();
   mesh.setMatrixAt(i, dummy.matrix);
@@ -1109,7 +1327,8 @@ var game = {
 };
 var el = {};
 ['pill-level','pill-coins','coins-v','progress-bar','count-badge','screen-start','screen-map','screen-win','screen-lose',
- 'win-survivors','win-coins','win-stars','win-sub','lose-reason','lose-coins','start-biome','shop','map-grid','flash']
+ 'win-survivors','win-coins','win-stars','win-sub','lose-reason','lose-coins','start-biome','shop','map-grid','flash',
+ 'screen-pause','btn-pause','gift-row','skins','btn-snd']
  .forEach(function (id) { el[id.replace(/-([a-z])/g, function (m, c) { return c.toUpperCase(); })] = document.getElementById(id); });
 
 function refreshHUD() {
@@ -1164,6 +1383,7 @@ function updateStart() {
   var B = biomeOf(game.playLevel);
   el.startBiome.textContent = B.ico + ' ' + B.name + ' — المستوى ' + game.playLevel + (game.playLevel % 5 === 0 ? ' 👑 زعيم أسطوري' : '');
   renderShop(); refreshHUD();
+  if (typeof renderGift === 'function') { renderGift(); renderSkins(); renderSnd(); }
 }
 
 /* ============================== level load ============================== */
@@ -1171,7 +1391,7 @@ function loadLevel(L) {
   if (levelGroup) {
     scene.remove(levelGroup);
     levelGroup.traverse(function (o) {
-      if (o.geometry && PROTECTED_GEO.indexOf(o.geometry) < 0) o.geometry.dispose();
+      if (o.geometry && !isProtectedGeo(o.geometry)) o.geometry.dispose();
       if (o.material && o.material.map) o.material.map.dispose();
     });
     levelMats.forEach(function (m) { m.dispose(); });
@@ -1189,6 +1409,7 @@ function loadLevel(L) {
   var crng = mulberry32(L * 3331 + 77);
   curveP = { a1: 2.5 + crng() * 3.5, f1: 0.010 + crng() * 0.008, p1: crng() * 6.28,
              a2: 1.5 + crng() * 2.5, f2: 0.021 + crng() * 0.012, p2: crng() * 6.28 };
+  _nz = makeNoise(L * 51 + 9);
 
   scene.background = makeSky(B.sky);
   scene.fog = new THREE.Fog(B.fog, B.fogN, B.fogF);
@@ -1213,7 +1434,7 @@ function loadLevel(L) {
   castle = buildCastle(D.castleHP, D.castleZ);
   levelGroup.add(castle.node);
 
-  crowdMesh = new THREE.InstancedMesh(blueGeo, unitMat, MAXR);
+  crowdMesh = new THREE.InstancedMesh(armyGeo(), unitMat, MAXR);
   crowdMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
   crowdMesh.castShadow = true;
   crowdMesh.frustumCulled = false;
@@ -1273,6 +1494,7 @@ function gameOver(reason) {
   if (game.state === 'lose' || game.state === 'win') return;
   game.state = 'lose';
   el.loseReason.textContent = reason;
+  el.btnPause.style.display = 'none';
   var c = Math.round((6 + game.playLevel * 2) * goldMult());
   S.coins += c; saveS();
   el.loseCoins.textContent = '+' + fmt(c);
@@ -1287,6 +1509,7 @@ function starsFor(survivors, castleHP) {
 function gameWin() {
   if (game.state === 'win') return;
   game.state = 'win';
+  el.btnPause.style.display = 'none';
   var survivors = Math.round(crowd.countF);
   if (survivors > S.best) S.best = survivors;
   var st = starsFor(survivors, game.data.castleHP);
@@ -1354,11 +1577,13 @@ function gameWin() {
 function beginRun() {
   loadLevel(game.playLevel);
   game.state = 'run';
+  el.btnPause.style.display = 'block';
   ['screenStart','screenWin','screenLose','screenMap'].forEach(function (k) { el[k].classList.add('hidden'); });
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
 }
 function toMenu() {
   game.state = 'menu';
+  el.btnPause.style.display = 'none';
   game.playLevel = Math.min(game.playLevel, S.level);
   ['screenWin','screenLose','screenMap'].forEach(function (k) { el[k].classList.add('hidden'); });
   el.screenStart.classList.remove('hidden');
@@ -1375,6 +1600,68 @@ document.getElementById('btn-map').addEventListener('click', function () { rende
 document.getElementById('btn-map-close').addEventListener('click', function () { el.screenMap.classList.add('hidden'); });
 document.getElementById('btn-win-home').addEventListener('click', toMenu);
 document.getElementById('btn-lose-home').addEventListener('click', toMenu);
+
+/* ── الإيقاف المؤقت ── */
+function setPaused(v) {
+  game.paused = v;
+  el.screenPause.classList.toggle('hidden', !v);
+  if (!v) clock.getDelta();
+}
+el.btnPause.addEventListener('click', function () {
+  if (game.state === 'menu' || game.state === 'win' || game.state === 'lose') return;
+  setPaused(true);
+});
+document.getElementById('btn-resume').addEventListener('click', function () { setPaused(false); });
+document.getElementById('btn-quit').addEventListener('click', function () { setPaused(false); toMenu(); });
+
+/* ── الصوت ── */
+window.__SND = S.snd ? 1 : 0;
+function renderSnd() { el.btnSnd.textContent = S.snd ? '🔊' : '🔇'; }
+el.btnSnd.addEventListener('click', function () {
+  S.snd = S.snd ? 0 : 1; saveS();
+  AudioFX.setOn(S.snd); renderSnd();
+});
+
+/* ── هدية اليوم ── */
+function giftReady() { return S.lastGift !== new Date().toDateString(); }
+function renderGift() {
+  el.giftRow.style.display = giftReady() ? 'block' : 'none';
+  if (giftReady()) document.getElementById('btn-gift').textContent = '🎁 هدية اليوم: ' + fmt(40 + S.level * 8) + ' ذهب';
+}
+document.getElementById('btn-gift').addEventListener('click', function () {
+  if (!giftReady()) return;
+  var c = 40 + S.level * 8;
+  S.coins += c; S.lastGift = new Date().toDateString(); saveS();
+  AudioFX.unlock(); AudioFX.coin();
+  renderGift(); refreshHUD();
+});
+
+/* ── مظاهر الجيش ── */
+function renderSkins() {
+  el.skins.innerHTML = SKINS.map(function (sk, i) {
+    var owned = S.skins.indexOf(sk.k) >= 0;
+    var sel = S.skin === sk.k;
+    var cMain = '#' + sk.main.toString(16).padStart(6, '0');
+    var cLight = '#' + sk.light.toString(16).padStart(6, '0');
+    return '<div class="sk' + (sel ? ' sel' : '') + (owned ? '' : ' lock') + '" data-i="' + i + '"' +
+      ' style="background:linear-gradient(145deg,' + cLight + ',' + cMain + ')" title="' + sk.n + '">' +
+      (owned ? '' : '<div class="price">🪙' + sk.cost + '</div>') + '</div>';
+  }).join('');
+}
+el.skins.addEventListener('click', function (ev) {
+  var t = ev.target.closest('.sk');
+  if (!t) return;
+  var sk = SKINS[+t.dataset.i];
+  var owned = S.skins.indexOf(sk.k) >= 0;
+  if (!owned) {
+    if (S.coins < sk.cost) { AudioFX.gateBad(); return; }
+    S.coins -= sk.cost; S.skins.push(sk.k);
+    AudioFX.buy();
+  }
+  S.skin = sk.k; saveS();
+  renderSkins(); refreshHUD();
+  loadLevel(game.playLevel);   /* معاينة فورية خلف القائمة */
+});
 
 game.playLevel = S.level;
 loadLevel(game.playLevel);
@@ -1401,10 +1688,11 @@ function updateCrowdUnits(dt, mode, center) {
   var kx = 1 - Math.exp(-dt * 6.5);
   var kz = 1 - Math.exp(-dt * 7.5);
   var cx = crowdX();
+  var fighting = mode === 'battle' || mode === 'siege';
   for (var i = 0; i < n; i++) {
     var tx, tz;
     if (mode === 'battle') {
-      var th = i * 2.39996 + t * 1.6;
+      var th = i * 2.39996 + t * 0.9;
       var r = 0.42 * Math.sqrt(i % 140) + 0.4;
       tx = center.x + Math.cos(th) * r * 0.85;
       tz = center.z + Math.sin(th) * r * 0.7;
@@ -1418,8 +1706,18 @@ function updateCrowdUnits(dt, mode, center) {
     }
     crowd.px[i] += (tx - crowd.px[i]) * kx;
     crowd.pz[i] += (tz - crowd.pz[i]) * kz;
-    var bob = Math.abs(Math.sin(t * 11 + crowd.phase[i])) * (mode === 'idle' ? 0.05 : 0.16);
-    writeUnitMatrix(crowdMesh, i, crowd.px[i], bob, crowd.pz[i]);
+    var bob, lean = 0, lz = 0;
+    if (fighting) {
+      /* طعنة: اندفاع أمامي مع ميلان — كل جندي بإيقاعه */
+      var lunge = Math.max(0, Math.sin(t * 7 + crowd.phase[i] * 2));
+      lean = -lunge * 0.45;
+      lz = lunge * 0.5;
+      bob = Math.abs(Math.sin(t * 12 + crowd.phase[i])) * 0.08;
+    } else {
+      bob = Math.abs(Math.sin(t * 11 + crowd.phase[i])) * (mode === 'idle' ? 0.05 : 0.16);
+      lean = mode === 'idle' ? 0 : -0.1;
+    }
+    writeUnitMatrix(crowdMesh, i, crowd.px[i], bob, crowd.pz[i] + lz, 0, lean);
   }
   crowdMesh.instanceMatrix.needsUpdate = true;
   /* البطل في مقدمة الجيش */
@@ -1440,16 +1738,20 @@ function updateSquadUnits(squad, dt, engaged) {
   var t = game.time;
   var sx = xc(squad.z);
   for (var i = 0; i < n; i++) {
-    var x, z;
+    var x, z, lean = 0, lz = 0;
     if (engaged) {
       x = crowdX() + squad.offs[i][0] * 0.35;
       z = crowd.z + 2.2 + squad.offs[i][1] * 0.4;
+      var lunge = Math.max(0, Math.sin(t * 7 + squad.phase[i] * 2 + 1.6));
+      lean = -lunge * 0.45;         /* يواجهون −Z فالميلان معكوس بصريًا مع الدوران */
+      lz = -lunge * 0.5;
     } else {
       x = sx + squad.offs[i][0];
       z = squad.z + squad.offs[i][1];
+      if (squad.charging) lean = -0.18;
     }
-    var bob = Math.abs(Math.sin(t * (engaged || squad.charging ? 12 : 5) + squad.phase[i])) * (engaged || squad.charging ? 0.16 : 0.06);
-    writeUnitMatrix(mesh, i, x, bob, z);
+    var bob = Math.abs(Math.sin(t * (engaged || squad.charging ? 12 : 5) + squad.phase[i])) * (engaged || squad.charging ? 0.14 : 0.06);
+    writeUnitMatrix(mesh, i, x, bob, z + lz, Math.PI, lean);
   }
   mesh.instanceMatrix.needsUpdate = true;
   var shown = Math.max(0, Math.ceil(squad.countF));
@@ -1492,16 +1794,32 @@ function updateBoss(dt) {
     /* قفزة تنتهي بضربة أرضية — الالتفاف حول الدورة يطلقها مهما تدنّى معدل الإطارات */
     if (boss.lastPh !== undefined && ph < boss.lastPh) bossSlam();
     boss.lastPh = ph;
+    /* ذراع المطرقة: رفع للخلف ثم هوي ساحق */
+    var windup = cyc - 0.7;
+    if (ph > windup && ph <= cyc - 0.18) {
+      var wp = (ph - windup) / (cyc - 0.18 - windup);
+      boss.arm.rotation.x = lerp(-0.2, -1.35, wp);
+    } else if (ph > cyc - 0.18) {
+      var sp = (ph - (cyc - 0.18)) / 0.18;
+      boss.arm.rotation.x = lerp(-1.35, 1.65, Math.min(1, sp * 1.15));
+    } else {
+      boss.arm.rotation.x = lerp(boss.arm.rotation.x, -0.2 + Math.sin(game.time * 2) * 0.07, dt * 6);
+    }
     if (ph > cyc - 0.5) {
       var jp = (ph - (cyc - 0.5)) / 0.5;
       mesh.position.y = Math.sin(jp * Math.PI) * (boss.mega ? 3.2 : 2.4);
     } else mesh.position.y = Math.abs(Math.sin(game.time * 6)) * 0.15;
-    /* جيشك يهاجمه */
-    var dps = Math.max(8, crowd.countF * 0.9) * dmgMult();
-    boss.hpF -= dps * dt;
-    if (Math.random() < dt * 6) {
-      tmpV.set(boss.node.position.x + (Math.random() - .5) * 3, 2 + Math.random() * 4, boss.z - 2);
-      Particles.burst(tmpV, Math.random() < .5 ? COL.blue : 0xFFD9A0, 6, 3);
+    /* جيشك يضربه بموجات — رقم ضرر يطير مع كل موجة */
+    boss.strike = (boss.strike || 0) + dt;
+    while (boss.strike >= 0.5 && boss.hpF > 0) {
+      boss.strike -= 0.5;
+      var chunk = Math.max(3, Math.round(Math.min(crowd.countF * 0.22 * dmgMult(), boss.hp * 0.16)));
+      boss.hpF -= chunk;
+      FloatTxt.spawn('−' + chunk, tmpV.set(boss.node.position.x, 5.5, boss.z), '#FFE08A');
+      tmpV.set(boss.node.position.x + (Math.random() - .5) * 3, 2 + Math.random() * 3, boss.z - 2);
+      Particles.burst(tmpV, COL.blue, 9, 3);
+      Particles.burst(tmpV, 0xFFD9A0, 6, 3);
+      AudioFX.clash();
     }
     var shown = Math.max(0, Math.ceil(boss.hpF));
     if (shown !== boss.shown && (shown === 0 || game.time - (boss.labelT || 0) > 0.1)) {
@@ -1523,6 +1841,7 @@ function updateBoss(dt) {
     }
   } else if (!boss.dead) {
     mesh.position.y = Math.abs(Math.sin(game.time * 3)) * 0.12;
+    boss.arm.rotation.x = -0.2 + Math.sin(game.time * 1.6) * 0.08;
   }
 }
 
@@ -1642,18 +1961,23 @@ function step(dt) {
     updateCrowdUnits(dt, 'run', null);
   }
   else if (game.state === 'battle') {
+    /* موجات طعن كل نصف ثانية — قتال يُرى حتى ينزف الرقم */
     var b = game.battle, sq = b.squad;
     b.t += dt; b.tick += dt;
-    var rate = Math.max(crowd.countF, sq.countF) / 1.35;
-    var dMine = Math.min(rate * dt * (1 - armor), crowd.countF);
-    var dTheirs = Math.min(rate * dt * dm, sq.countF);
-    crowd.countF -= dMine; sq.countF -= dTheirs;
-    crowdSetCount(crowd.countF);
-    if (b.tick > 0.14) {
-      b.tick = 0;
+    while (b.tick >= 0.5 && sq.countF > 0.5 && crowd.countF > 0.5) {
+      b.tick -= 0.5;
+      var base = Math.max(crowd.countF, sq.countF);
+      var myLoss = Math.min(crowd.countF, Math.max(1, base * 0.085 * (1 - armor)));
+      var foeLoss = Math.min(sq.countF, Math.max(1, base * 0.098 * dm));
+      crowd.countF -= myLoss; sq.countF -= foeLoss;
+      crowdSetCount(crowd.countF);
+      FloatTxt.spawn('−' + Math.round(foeLoss), tmpV.set(crowdX() + 1.5, 2.4, crowd.z + 4), '#FF9C8A');
+      if (myLoss >= 1.5) FloatTxt.spawn('−' + Math.round(myLoss), tmpV.set(crowdX() - 2, 1.8, crowd.z - 1), '#9CC8FF');
       AudioFX.clash();
-      tmpV.set(crowdX() + (Math.random() - 0.5) * 3, 1.2, crowd.z + 1.5 + (Math.random() - 0.5) * 2);
-      Particles.burst(tmpV, Math.random() < 0.5 ? COL.blue : COL.red, 8, 2.5);
+      tmpV.set(crowdX() + (Math.random() - 0.5) * 3, 1.2, crowd.z + 2 + (Math.random() - 0.5) * 2);
+      Particles.burst(tmpV, COL.red, 9, 3);
+      Particles.burst(tmpV, COL.blue, 7, 2.5);
+      if (!REDUCED_MOTION) game.shake = Math.max(game.shake, 0.09);
     }
     if (sq.countF <= 0.5) {
       sq.alive = false; sq.mesh.count = 0; sq.label.visible = false;
@@ -1677,18 +2001,21 @@ function step(dt) {
     crowd.z = Math.min(crowd.z, D.castleZ - 8);
     crowd.off += (0 - crowd.off) * (1 - Math.exp(-dt * 3));
     crowd.targetOff = crowd.off;
-    var rate2 = Math.max(26, crowd.countF * 1.15) * dm;
-    var dd = Math.min(rate2 * dt, crowd.countF, game.hpF);
-    crowd.countF -= dd / dm; game.hpF -= dd;
-    crowdSetCount(crowd.countF);
+    /* حصار بموجات ضرب مرئية على الجدران */
     game.siegeTick = (game.siegeTick || 0) + dt;
-    if (dd > 0 && game.siegeTick > 0.2) {
-      game.siegeTick = 0;
+    while (game.siegeTick >= 0.5 && game.hpF > 0 && crowd.countF > 0.5) {
+      game.siegeTick -= 0.5;
+      var dd = Math.min(game.hpF, crowd.countF * dm,
+        Math.max(8, Math.min(crowd.countF * 0.32 * dm, game.data.castleHP * 0.22 + 4)));
+      game.hpF -= dd;
+      crowd.countF = Math.max(0, crowd.countF - dd / dm * 0.5);
+      crowdSetCount(crowd.countF);
+      FloatTxt.spawn('−' + Math.round(dd), tmpV.set(xc(D.castleZ), 8, D.castleZ - 3), '#FFE08A');
       AudioFX.thud();
       tmpV.set(xc(D.castleZ) + (Math.random() - 0.5) * 6, 2.5 + Math.random() * 3, D.castleZ - 5);
-      Particles.burst(tmpV, COL.stoneDark, 10, 3);
-      Particles.burst(tmpV, COL.blue, 6, 3);
-      if (!REDUCED_MOTION) game.shake = Math.max(game.shake, 0.18);
+      Particles.burst(tmpV, COL.stoneDark, 12, 3);
+      Particles.burst(tmpV, COL.blue, 7, 3);
+      if (!REDUCED_MOTION) game.shake = Math.max(game.shake, 0.2);
     }
     var shownHP = Math.max(0, Math.ceil(game.hpF));
     if (castle.shownHP !== shownHP && (shownHP === 0 || game.time - (castle.labelT || 0) > 0.1)) {
@@ -1732,19 +2059,23 @@ function step(dt) {
   Weather.update(dt, game.time);
   FloatTxt.update(dt);
 
-  /* camera follows the curve */
+  /* camera follows the curve — وتقترب أثناء القتال */
+  var wantZoom = (game.state === 'battle' || game.state === 'boss') ? 1 : 0;
+  game.zoom = lerp(game.zoom || 0, wantZoom, 1 - Math.exp(-dt * 2.5));
+  var cD = camCfg.d - 8 * game.zoom, cH = camCfg.h - 6 * game.zoom;
   var cx = xc(crowd.z - 4) + crowd.off * 0.35;
   var k = 1 - Math.exp(-dt * 5);
   camPos.x += (cx - camPos.x) * k;
-  camPos.y += (camCfg.h - camPos.y) * k;
-  camPos.z += ((crowd.z - camCfg.d) - camPos.z) * k;
+  camPos.y += (cH - camPos.y) * k;
+  camPos.z += ((crowd.z - cD) - camPos.z) * k;
   camera.position.copy(camPos);
   if (game.shake > 0.001) {
     game.shake *= Math.exp(-dt * 6);
     camera.position.x += (Math.random() - 0.5) * game.shake;
     camera.position.y += (Math.random() - 0.5) * game.shake;
   } else game.shake = 0;
-  camera.lookAt(xc(crowd.z + camCfg.ahead) * 0.85 + crowd.off * 0.25, 1.5, crowd.z + camCfg.ahead);
+  var ah = camCfg.ahead - 7 * game.zoom;
+  camera.lookAt(xc(crowd.z + ah) * 0.85 + crowd.off * 0.25, 1.5 + 1.5 * game.zoom, crowd.z + ah);
 
   sun.position.set(crowdX() + 26, 55, crowd.z - 18);
   sun.target.position.set(crowdX(), 0, crowd.z + 12);
@@ -1773,7 +2104,7 @@ function frame() {
   requestAnimationFrame(frame);
   if (!running) return;
   var dt = Math.min(clock.getDelta(), 0.05) * (window.__TEST.timeWarp || 1);
-  step(Math.min(dt, 0.14));
+  if (!game.paused) step(Math.min(dt, 0.14));
   renderer.render(scene, camera);
 }
 frame();
