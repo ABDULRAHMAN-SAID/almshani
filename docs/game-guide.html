@@ -1,0 +1,390 @@
+<title>دليل قائد الحشود</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lalezar&family=Rubik:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --bg:#FBF4E4; --card:#FFF9EC; --card2:#F3E7CE; --ink:#2A2333; --mut:#6B5E52;
+  --line:#E7D9BC; --blue:#1E56C8; --blue-soft:#2F7BFF; --gold:#B37800; --gold-bg:#FFF1CC;
+  --red:#C0392B; --green:#1E7E44; --code-bg:#2A2333; --code-ink:#F5EDDA;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#191521; --card:#241E30; --card2:#2E2740; --ink:#F0EAF6; --mut:#B4A9C4;
+    --line:#3A324C; --blue:#7FB2FF; --blue-soft:#5A93F5; --gold:#FFC53D; --gold-bg:#3A2F14;
+    --red:#FF8A72; --green:#5ACB8C; --code-bg:#120F1A; --code-ink:#EDE5F5;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#191521; --card:#241E30; --card2:#2E2740; --ink:#F0EAF6; --mut:#B4A9C4;
+  --line:#3A324C; --blue:#7FB2FF; --blue-soft:#5A93F5; --gold:#FFC53D; --gold-bg:#3A2F14;
+  --red:#FF8A72; --green:#5ACB8C; --code-bg:#120F1A; --code-ink:#EDE5F5;
+}
+html{color-scheme:light dark;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Rubik','Segoe UI',system-ui,sans-serif;
+  margin:0; direction:rtl; line-height:1.85; font-size:15.5px;
+}
+.wrap{max-width:860px; margin:0 auto; padding:28px 20px 80px;}
+header.hero{text-align:center; padding:34px 0 10px;}
+.hero h1{
+  font-family:'Lalezar','Rubik',sans-serif; font-weight:400; margin:0;
+  font-size:clamp(42px,8vw,64px); line-height:1.1; color:var(--ink); text-wrap:balance;
+}
+.hero h1 span{color:var(--blue);}
+.hero .tag{color:var(--mut); font-weight:600; font-size:16px; margin-top:6px;}
+.meta{
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:18px 0 6px;
+}
+.meta span{
+  background:var(--card2); border-radius:999px; padding:5px 14px;
+  font-size:12.5px; font-weight:800; color:var(--mut);
+}
+h2{
+  font-family:'Lalezar','Rubik',sans-serif; font-weight:400; font-size:30px;
+  margin:52px 0 6px; color:var(--ink); display:flex; align-items:center; gap:10px;
+  text-wrap:balance; scroll-margin-top:20px;
+}
+h2 .n{
+  font-family:'Rubik'; font-size:13px; font-weight:800; color:var(--blue);
+  background:var(--card2); border-radius:9px; padding:3px 10px; direction:ltr;
+}
+h3{font-size:18px; font-weight:800; margin:26px 0 4px;}
+p{margin:8px 0;}
+.lead{color:var(--mut); font-weight:600; margin-top:0;}
+strong{font-weight:800;}
+.card{
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  padding:16px 20px; margin:14px 0;
+}
+.toc{columns:2; column-gap:28px; padding:6px 4px; font-weight:600; font-size:14px;}
+.toc a{color:var(--blue); text-decoration:none; display:block; padding:3px 0;}
+.toc a:hover{text-decoration:underline;}
+@media (max-width:560px){.toc{columns:1;}}
+.tbl{overflow-x:auto; margin:12px 0; border:1px solid var(--line); border-radius:14px;}
+table{border-collapse:collapse; width:100%; min-width:520px; font-size:13.5px;}
+th,td{padding:8px 12px; text-align:right; border-bottom:1px solid var(--line);}
+th{background:var(--card2); font-weight:800; font-size:12.5px;}
+tr:last-child td{border-bottom:none;}
+td.num,th.num{direction:ltr; text-align:left; font-variant-numeric:tabular-nums;
+ font-family:'JetBrains Mono',monospace; font-size:12.5px;}
+pre{
+  direction:ltr; text-align:left; background:var(--code-bg); color:var(--code-ink);
+  border-radius:14px; padding:14px 18px; overflow-x:auto; font-size:12.5px; line-height:1.7;
+  font-family:'JetBrains Mono',ui-monospace,monospace; margin:12px 0;
+}
+code{
+  direction:ltr; unicode-bidi:embed; background:var(--card2); border-radius:6px;
+  padding:1px 7px; font-family:'JetBrains Mono',ui-monospace,monospace; font-size:12.5px;
+}
+pre code{background:none; padding:0;}
+.formula{
+  background:var(--gold-bg); border-radius:12px; padding:10px 16px; margin:10px 0;
+  font-weight:600; border-inline-start:4px solid var(--gold);
+}
+.formula code{background:rgba(0,0,0,.08);}
+.note{
+  background:var(--card2); border-radius:12px; padding:10px 16px; margin:10px 0;
+  font-size:13.5px; color:var(--mut); font-weight:600;
+}
+.note b{color:var(--ink);}
+.flow{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:14px 0; direction:rtl;}
+.flow .st{
+  background:var(--card); border:2px solid var(--blue-soft); color:var(--ink);
+  border-radius:12px; padding:7px 14px; font-weight:800; font-size:13px;
+}
+.flow .st.warn{border-color:var(--red);}
+.flow .st.win{border-color:var(--green);}
+.flow .ar{color:var(--mut); font-weight:800;}
+.flow .cond{font-size:10.5px; color:var(--mut); display:block; font-weight:600;}
+ul,ol{padding-inline-start:22px; margin:8px 0;}
+li{margin:4px 0;}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:620px){.grid2{grid-template-columns:1fr;}}
+.chip{display:inline-block; border-radius:8px; padding:1px 9px; font-size:12px; font-weight:800; color:#fff;}
+.footer{margin-top:60px; text-align:center; color:var(--mut); font-size:13px; font-weight:600;}
+a{color:var(--blue);}
+</style>
+
+<div class="wrap">
+<header class="hero">
+  <h1>دليل <span>قائد الحشود</span></h1>
+  <div class="tag">المرجع الدراسي الكامل — كيف تعمل اللعبة سطراً سطراً</div>
+  <div class="meta">
+    <span>ملف واحد · index.html · 2140 سطراً</span>
+    <span>Three.js r128</span>
+    <span>JavaScript خام — بلا مكتبات لعب</span>
+    <span>يعمل دون إنترنت</span>
+  </div>
+</header>
+
+<div class="card">
+  <h3 style="margin-top:2px">فهرس الدليل</h3>
+  <div class="toc">
+    <a href="#idea">1 · الفكرة والحلقة الأساسية</a>
+    <a href="#file">2 · بنية الملف وخريطة الكود</a>
+    <a href="#states">3 · آلة الحالات</a>
+    <a href="#input">4 · التحكم ودرس المحاور</a>
+    <a href="#curve">5 · المسار المتعرج</a>
+    <a href="#gen">6 · مولّد المستويات والتوازن</a>
+    <a href="#gates">7 · البوابات</a>
+    <a href="#combat">8 · القتال بالموجات</a>
+    <a href="#boss">9 · الزعيم</a>
+    <a href="#hazards">10 · العوائق والأحداث</a>
+    <a href="#biomes">11 · البيئات الأربع</a>
+    <a href="#terrain">12 · التضاريس الإجرائية</a>
+    <a href="#chars">13 · بناء الشخصيات</a>
+    <a href="#rpg">14 · اقتصاد RPG والحفظ</a>
+    <a href="#render">15 · الرسم والأداء</a>
+    <a href="#audio">16 · الصوت المُصنَّع</a>
+    <a href="#hud">17 · الواجهة فوق العالم</a>
+    <a href="#recipes">18 · وصفات التعديل</a>
+    <a href="#lessons">19 · أخطاء واجهناها ودروسها</a>
+  </div>
+</div>
+
+<h2 id="idea"><span class="n">1</span>الفكرة والحلقة الأساسية</h2>
+<p class="lead">لعبة «عدّاء حشود» (Crowd Runner) بعناصر RPG: رقمك هو جيشك، وكل شيء في المستوى إما يضاعفه أو يلتهمه.</p>
+<p>يركض جيش أزرق تلقائياً للأمام في وادٍ متعرج. أنت تتحكم بشيء واحد فقط: <strong>الانزياح يميناً ويساراً</strong>. بهذا القرار الوحيد تختار البوابات، تراوغ المطارق والنيازك، وتحدد مصير كل معركة قبل أن تبدأ — لأن نتيجة القتال دالة في حجم جيشك لحظة الاصطدام.</p>
+<div class="card">
+  <h3 style="margin-top:0">حلقة اللعب الكاملة</h3>
+  <div class="flow">
+    <div class="st">القائمة<span class="cond">متجر + خريطة + هدية</span></div><div class="ar">←</div>
+    <div class="st">الجري<span class="cond">بوابات · مطارق · نيازك</span></div><div class="ar">←</div>
+    <div class="st warn">معركة أورك</div><div class="ar">←</div>
+    <div class="st warn">الزعيم</div><div class="ar">←</div>
+    <div class="st warn">حصار القلعة</div><div class="ar">←</div>
+    <div class="st win">فوز: نجوم + ذهب</div><div class="ar">←</div>
+    <div class="st">ترقيات RPG</div><div class="ar">↩ مستوى أصعب</div>
+  </div>
+  <p style="font-size:13.5px;color:var(--mut);margin-bottom:0">الذهب من كل جولة يشتري ترقيات دائمة، فيسمح بتجاوز مستوى كان مستحيلاً — هذه هي «عجلة» الـ RPG التي تعيد اللاعب.</p>
+</div>
+
+<h2 id="file"><span class="n">2</span>بنية الملف وخريطة الكود</h2>
+<p>اللعبة كلها في <code>index.html</code> واحد: CSS للواجهة، ثم سكربت اللعبة، ثم مُحمِّل المكتبة. الترتيب مقصود — دالة <code>window.__startGame</code> تُعرَّف أولاً، والمحمِّل في الأسفل يستدعيها بعد نجاح تحميل Three.js من أحد ثلاثة مصادر بالتتابع (CDN رئيسي ← CDN بديل ← نسخة محلية <code>lib/three.min.js</code>) فتعمل اللعبة حتى بلا إنترنت.</p>
+<div class="tbl"><table>
+<tr><th>الأسطر</th><th>القسم</th><th>الوظيفة</th></tr>
+<tr><td class="num">1–283</td><td>HTML + CSS</td><td>شاشات البداية/الفوز/الخسارة/الخريطة/الإيقاف والمتجر وعناصر HUD</td></tr>
+<tr><td class="num">286–305</td><td>أدوات</td><td><code>clamp / lerp / mulberry32 / fmt / nice5</code></td></tr>
+<tr><td class="num">307–367</td><td>الحفظ والصوت</td><td><code>store</code> فوق localStorage · <code>AudioFX</code> مُصنِّع أصوات</td></tr>
+<tr><td class="num">369–397</td><td>البيئات</td><td>لوحات ألوان وأجواء البيئات الأربع</td></tr>
+<tr><td class="num">399–451</td><td>المشهد</td><td>Renderer · كاميرا متكيفة · إضاءة وظلال</td></tr>
+<tr><td class="num">453–615</td><td>الشخصيات</td><td>دمج الهندسات بألوان القمم · جندي/أورك/بطل/زعيم · المظاهر</td></tr>
+<tr><td class="num">617–806</td><td>مؤثرات</td><td>لافتات الأرقام · جسيمات · طقس · نصوص طائرة</td></tr>
+<tr><td class="num">808–836</td><td>RPG</td><td>الترقيات ومعادلاتها وحالة اللاعب <code>S</code></td></tr>
+<tr><td class="num">838–914</td><td>التوليد</td><td>منحنى المسار <code>xc</code> · مولّد المستوى <code>genLevel</code></td></tr>
+<tr><td class="num">916–1289</td><td>بناء العالم</td><td>ضجيج التضاريس · <code>buildTerrain/Gate/Hammer/Squad/Boss/Castle</code></td></tr>
+<tr><td class="num">1291–1458</td><td>الجيش والتحميل</td><td>تشكيل الحشد · <code>loadLevel</code> يبني المستوى ويهدم السابق</td></tr>
+<tr><td class="num">1460–1678</td><td>أحداث اللعب</td><td>البوابات · بدء المعارك · فوز/خسارة · الشاشات والمتجر</td></tr>
+<tr><td class="num">1680–2140</td><td>الحلقة</td><td><code>step</code> قلب اللعبة · تحديث الوحدات/الزعيم/العوائق · الكاميرا · <code>frame</code></td></tr>
+</table></div>
+<div class="note"><b>لماذا ملف واحد؟</b> سهولة النشر (يعمل من أي مكان)، وتوافق مع أدوات التغليف مثل Capacitor للنشر في المتاجر. الثمن: لا فصل ملفات — لذلك الأقسام مفصولة بتعليقات <code>==========</code> واضحة.</div>
+
+<h2 id="states"><span class="n">3</span>آلة الحالات</h2>
+<p>عقل اللعبة كله متغير واحد: <code>game.state</code>. دالة <code>step(dt)</code> (سطر 1929) تتفرع عليه كل إطار:</p>
+<div class="tbl"><table>
+<tr><th>الحالة</th><th>ماذا يحدث</th><th>شرط الدخول</th></tr>
+<tr><td><code>menu</code></td><td>مشهد حي خلف القائمة، الجيش يتمايل واقفاً</td><td>الإقلاع أو زر «القائمة»</td></tr>
+<tr><td><code>run</code></td><td>تقدّم بسرعة <code>RUN_SPEED = 9.5</code> · فحص بوابات/مطارق/كمائن/نيازك</td><td>زر التشغيل</td></tr>
+<tr><td><code>battle</code></td><td>الجيشان يدوران ويتطاعنان بموجات — الزحف متوقف</td><td class="num">crowd.z ≥ squad.z − 4.5</td></tr>
+<tr><td><code>boss</code></td><td>موجات ضرب على الزعيم مقابل ضرباته الأرضية</td><td class="num">crowd.z ≥ boss.z − 9</td></tr>
+<tr><td><code>siege</code></td><td>قصف الجدران بموجات حتى تصفير العداد</td><td class="num">crowd.z ≥ castleZ − 13 (والزعيم ميت)</td></tr>
+<tr><td><code>win / lose</code></td><td>نجوم وذهب وانهيار القلعة · أو سبب الخسارة</td><td>صفر صحة القلعة / صفر جيش</td></tr>
+</table></div>
+<p>لاحظ أن <strong>الزعيم بوابة إجبارية</strong>: فحص الحصار لا يتحقق إلا بعد <code>boss.dead</code>، فلا يمكن التسلل للقلعة من جانبه.</p>
+
+<h2 id="input"><span class="n">4</span>التحكم — ودرس المحاور المقلوبة</h2>
+<p>سحب إصبع (أو فأرة) يحرك هدف الانزياح، والجيش يلحقه بنعومة أسّية:</p>
+<pre><code>crowd.targetOff = clamp(crowd.targetOff − dx · (2.6·HW / عرض_الشاشة) · 1.35, ±(HW−1.4))
+crowd.off += (targetOff − off) · (1 − e^(−8·dt))   // لحاق ناعم مستقل عن معدل الإطارات</code></pre>
+<div class="note"><b>لماذا الطرح وليس الجمع؟</b> الكاميرا خلف الجيش تنظر باتجاه <code>+Z</code>، وفي هذه الوضعية يكون <b>يمين الشاشة هو −X في العالم</b>. في نسخة مبكرة كتبناها جمعاً فانعكس التحكم كاملاً — اكتشفنا ذلك باختبار آلي يقيس حركة الشارة على الشاشة بعد سحبة يمين. عبرة: اتجاهات الشاشة تتبع الكاميرا، لا محاور العالم.</div>
+<p>لوحة المفاتيح تستخدم <code>e.code</code> (أي <code>KeyA/KeyD</code> الفيزيائية) لا <code>e.key</code> — كي تعمل مع تخطيط لوحة عربي. أول لمسة تفتح أيضاً سياق الصوت <code>AudioFX.unlock()</code> لأن المتصفحات تمنع الصوت قبل إيماءة مستخدم.</p>
+
+<h2 id="curve"><span class="n">5</span>المسار المتعرج</h2>
+<p>سرّ الوادي المنحني دالة واحدة صغيرة (سطر 840): مجموع جيبيّتين ببذرة المستوى، فكل مستوى له تعرّج ثابت خاص:</p>
+<div class="formula"><code>xc(z) = clamp( a₁·sin(f₁z+p₁) + a₂·sin(f₂z+p₂), ±7.5 )</code><br>
+a₁∈[2.5,6] · f₁∈[0.010,0.018] · a₂∈[1.5,4] · f₂∈[0.021,0.033]</div>
+<p><strong>كل شيء</strong> يسأل هذه الدالة عن مركز الطريق عند أي عمق: شريط المسار يُبنى كشريط مثلثات يتبعها، البوابات توضع عند <code>xc(gate.z)</code>، الأعداء والزعيم والقلعة كذلك، وموضع الجيش الفعلي هو <code>xc(crowd.z) + off</code>، وحتى الكاميرا تنظر إلى <code>xc(crowd.z + 24)</code> فترى الطريق أمامها لا خطاً مستقيماً وهمياً. أول 14 متراً تُروَّض نحو الصفر كي تبدأ البداية مستقيمة.</p>
+
+<h2 id="gen"><span class="n">6</span>مولّد المستويات والتوازن الذاتي</h2>
+<p><code>genLevel(L)</code> (سطر 860) يبني المستوى من رقمه فقط عبر <code>mulberry32(L·7919+4051)</code> — عشوائية <strong>مبذورة</strong>: إعادة المحاولة تعطيك نفس المستوى بالضبط لتتقنه، مثل الألعاب الحقيقية.</p>
+<h3>المحاكاة المزدوجة — قلب التوازن</h3>
+<p>أذكى فكرة في المولد: أثناء توليد البوابات يتتبع رقمين افتراضيين:</p>
+<ul>
+<li><code>Ebest</code>: جيش لاعبٍ مثالي يختار الأفضل دائماً.</li>
+<li><code>Eplay</code>: لاعب واقعي — <strong>58%</strong> من الخيار الأفضل + <strong>42%</strong> من الأسوأ.</li>
+</ul>
+<p>ثم تُقاس كل الأخطار على <code>Eplay</code> لا على المثالي، فيظل المستوى قابلاً للفوز بلعب جيد وقابلاً للخسارة بلعب متهور:</p>
+<div class="tbl"><table>
+<tr><th>العنصر</th><th class="num">المعادلة (hard = min(L,10))</th></tr>
+<tr><td>عدد صفوف البوابات</td><td class="num">5 + min(5, ⌊(L−1)/2⌋)</td></tr>
+<tr><td>حجم كتيبة العدو</td><td class="num">Eplay · (0.30 + 0.028·hard + rng·0.10)</td></tr>
+<tr><td>كتيبة كمين (تركض نحوك)</td><td class="num">احتمال 40% من المستوى 2</td></tr>
+<tr><td>مطارق متأرجحة</td><td class="num">حتى min(3, 1+⌊L/2⌋) باحتمال 55% بعد كل صف</td></tr>
+<tr><td>صحة الزعيم</td><td class="num">max(55+22L, Eplay·(0.7+0.055·hard)) · ×1.6 للأسطوري (كل 5 مستويات)</td></tr>
+<tr><td>صحة القلعة</td><td class="num">max(20, Eplay·(0.5+0.04·hard))</td></tr>
+</table></div>
+<div class="note"><b>درس توازن:</b> في نسخة أولى كانت صحة الزعيم من <code>Eplay</code> فقط — فخرج زعيم «أسطوري» بـ 48 نقطة يموت بثانية أمام جيش مرقّى. الحد الأدنى <code>55+22L</code> يضمن مهابته مهما تضخم جيشك.</div>
+
+<h2 id="gates"><span class="n">7</span>البوابات</h2>
+<p>كل صف بوابتان (يسار/يمين) من قوالب مرجّحة. عند العبور، إشارة الانزياح تحسم الجهة: <code>off &lt; 0</code> يسار. العملية تُطبَّق على الرقم ثم تُطلق مؤثراتها:</p>
+<div class="tbl"><table>
+<tr><th>النوع</th><th>العملية</th><th>اللون</th><th>ملاحظة</th></tr>
+<tr><td><span class="chip" style="background:#2F7BFF">×2 / ×3</span></td><td class="num">count × v</td><td>أزرق</td><td>×3 من المستوى 3 فقط</td></tr>
+<tr><td><span class="chip" style="background:#FFC53D;color:#5B4200">+99</span></td><td class="num">count + 99</td><td>ذهبي</td><td>أقوى قيمة مطلقة مبكراً</td></tr>
+<tr><td><span class="chip" style="background:#2F7BFF">+N</span></td><td class="num">count + nice5(Eplay·0.3..0.8)</td><td>أزرق</td><td>تُقرَّب لمضاعفات 5</td></tr>
+<tr><td><span class="chip" style="background:#E8452F">−N</span></td><td class="num">max(0, count − N)</td><td>أحمر</td><td>قد تُفني الجيش ← خسارة</td></tr>
+<tr><td><span class="chip" style="background:#E8452F">÷2</span></td><td class="num">⌊count / 2⌋</td><td>أحمر</td><td>الفخ الأقسى مع جيش كبير</td></tr>
+</table></div>
+<p>لوحة كل بوابة نسيج Canvas يُرسم مرة واحدة (رقم كبير بحدود) على مستوى مُدار <code>rotation.y = π</code> ليواجه الكاميرا، وعند الاستهلاك تنقلب وتتلاشى عبر <code>fxTweens</code> — مصفوفة دوال حركية تعمل كل إطار وتحذف نفسها عند الانتهاء.</p>
+
+<h2 id="combat"><span class="n">8</span>القتال بالموجات — قتال تراه لا تُخبَر به</h2>
+<p>القاعدة الموحدة للمعارك الثلاث (كتيبة/زعيم/قلعة): لا استنزاف متصل خفي، بل <strong>موجة ضربٍ كل نصف ثانية</strong> تُنقص الأرقام قطعاً محسوسة، مع رقم ضرر يطير، شرر، صوت، وهزة. حلقة <code>while</code> تلتهم الزمن المتراكم فلا تضيع موجات عند هبوط معدل الإطارات:</p>
+<pre><code>b.tick += dt;
+while (b.tick >= 0.5 && الطرفان أحياء) {
+  b.tick -= 0.5;
+  base    = max(جيشي, جيشهم);
+  خسارتي  = min(جيشي,  max(1, base · 0.085 · (1 − armor)));
+  خسارتهم = min(جيشهم, max(1, base · 0.098 · dm));
+  // أرقام طائرة + جسيمات + صوت + هزة 0.09
+}</code></pre>
+<ul>
+<li><strong>معركة متكافئة ≈ 10–11 موجة ≈ 5–6 ثوانٍ</strong> ترى فيها الرقمين ينزفان. سحق كتيبة صغيرة ينتهي بموجة — وهذا مقصود للإيقاع.</li>
+<li>أفضلية اللاعب المدمجة: <code>0.098</code> ضد <code>0.085</code> (≈15%) تعني أن التعادل العددي فوز لك — وترقيات الهجوم <code>dm</code> والدروع <code>armor</code> توسع الفارق.</li>
+<li>الزعيم: قطعتك كل موجة <code>min(count·0.22·dm, bossHP·0.16)</code> — السقف الثاني يضمن ألا يموت بأقل من ~6 موجات مهما تضخمت.</li>
+<li>الحصار: <code>min(hp, count·dm, max(8, min(count·0.32·dm, castleHP·0.22+4)))</code> وتفقد أنت نصف قيمتها ÷ dm — الجدران «تأكل» جنوداً.</li>
+</ul>
+<p>وأثناء كل هذا تعمل حركة الطعن: كل جندي يميل للأمام ويندفع بجيبية بطوره الخاص <code>lunge = max(0, sin(7t + 2·phase))</code>، والكاميرا تقترب 8 وحدات وتنخفض 6 (متغير <code>game.zoom</code> بلحاق أسّي).</p>
+
+<h2 id="boss"><span class="n">9</span>الزعيم</h2>
+<p>الزعيم كائن من قطعتين (سطر 1228): <strong>جذع</strong> مدموج (وجه بعيون متوهجة وأنياب وقرون وأشواك ظهر) و<strong>ذراع مطرقة</strong> في مجموعة مستقلة محورها الكتف — لهذا تستطيع أن تتحرك وحدها بينما الجسد يقفز.</p>
+<h3>الجدول الزمني لدورة الضربة (interval = 2.4−0.07·hard ثانية، أسرع للأسطوري)</h3>
+<div class="tbl"><table>
+<tr><th>المرحلة</th><th>المدى</th><th>ماذا يحدث</th></tr>
+<tr><td>ترقّب</td><td class="num">0 → cyc−0.7</td><td>تمايل خفيف، الذراع تتأرجح حول −0.2 راديان</td></tr>
+<tr><td>شحن</td><td class="num">cyc−0.7 → cyc−0.18</td><td>الذراع تُرفع خلف الظهر حتى −1.35 راديان (تحذير بصري!)</td></tr>
+<tr><td>سحق</td><td class="num">آخر 0.18 ثانية</td><td>الذراع تهوي إلى +1.65 والجسد بذروة قفزته</td></tr>
+<tr><td>الارتطام</td><td class="num">لحظة التفاف الدورة</td><td><code>bossSlam()</code>: قتلى + حلقة صدمة تتمدد + هزة + صوت جهير</td></tr>
+</table></div>
+<div class="formula">قتلى الضربة = <code>⌈count·(0.09 أو 0.11 للأسطوري) + 3 + 0.6·L⌉ · (1 − 0.7·armor)</code></div>
+<div class="note"><b>درس معدل الإطارات:</b> أول تنفيذ أطلق الضربة عندما يمر التقدم بنافذة 4% من نهاية القفزة — على جهاز بطيء تقفز الإطارات فوق النافذة فلا تنطلق الضربة أبداً! الحل: كشف <b>التفاف الطور</b> (<code>ph &lt; lastPh</code>) — حدث لا يمكن للإطارات تخطيه.</div>
+<p>عند الصفر: زلزال ذهبي، الجذع يتقلب ويغوص عبر <code>fxTweens</code>، وتعود الحالة إلى <code>run</code>.</p>
+
+<h2 id="hazards"><span class="n">10</span>العوائق والأحداث</h2>
+<div class="grid2">
+<div class="card"><h3 style="margin-top:0">🔨 المطرقة المتأرجحة</h3>
+<p>بندول <code>angle = sin(t·speed+phase)·1.05</code> ورأسه عند <code>xc(hz)+sin(angle)·5</code>. داخل نافذة العبور <code>|crowd.z−hz|&lt;2.3</code> يُحسب التداخل مع مركز جيشك، والخسارة <code>42·frac·dt·(1−0.6·armor)</code> جندياً/ثانية — المرور من الجهة المرتفعة آمن تماماً.</p></div>
+<div class="card"><h3 style="margin-top:0">🏃 الكمائن</h3>
+<p>كتيبة موسومة <code>charge</code> تصرخ «!» وتنطلق نحوك بسرعة 12 (أسرع منك!) عندما تقل المسافة عن 42 — فتلتحم بك أبكر وأنت أضعف. تتوقف عن الركض إذا صرت في حالة قتال أخرى.</p></div>
+<div class="card"><h3 style="margin-top:0">☄️ نيازك البراكين</h3>
+<p>مؤقّت 4.5–8 ثوانٍ. تظهر <b>دائرة إنذار نابضة</b> عند نقطة أمامك (0.6ث) ثم يهوي الحجر (0.55ث). إن كنت داخل نصف قطر الانفجار: <code>⌈13%·count⌉+3</code> قتيلاً. الدرس التصميمي: كل خطر مفاجئ يحتاج «برقية» تسبق الضربة.</p></div>
+<div class="card"><h3 style="margin-top:0">⚡ عواصف الغابة</h3>
+<p>كل 5–10 ثوانٍ: وميض أبيض (div فوق الكانفس تتغير شفافيته) ثم هدير رعد متأخر 0.2–0.6ث — جو فقط بلا ضرر، ليبقى لكل بيئة إيقاعها.</p></div>
+</div>
+
+<h2 id="biomes"><span class="n">11</span>البيئات الأربع</h2>
+<p>البيئة تُختار حتمياً: <code>BIOME_ORDER[(L−1) % 4]</code>. كل بيئة كائن إعدادات واحد (سطر 370) يغذي كل شيء: تدرج السماء (نسيج Canvas)، لون وكثافة الضباب، ألوان الأرض والصخور والحواف، الإضاءة النصف كروية والشمس، نظام الطقس، والخطر الخاص:</p>
+<div class="tbl"><table>
+<tr><th>البيئة</th><th>الطابع</th><th>الطقس</th><th>الخطر</th><th>لمسات خاصة</th></tr>
+<tr><td>🏜️ الصحراء</td><td>ذهبية دافئة</td><td>—</td><td>—</td><td>صبّار بأذرع</td></tr>
+<tr><td>🌨️ الثلوج</td><td>زرقة جليدية</td><td>ندف تتهادى بجيبية</td><td>—</td><td>قمم أشجار مثلجة + بلورات</td></tr>
+<tr><td>🌋 البراكين</td><td>سماء دموية داكنة</td><td>جمرات تتصاعد</td><td>نيازك</td><td>حواف حمم متوهجة (BasicMaterial لا تتأثر بالإضاءة) + براكين بعيدة</td></tr>
+<tr><td>⛈️ الغابة الماطرة</td><td>رمادية مبللة</td><td>مطر مائل سريع</td><td>برق ورعد</td><td>شجيرات كثيفة</td></tr>
+</table></div>
+<p>الطقس نظام <code>Points</code> واحد بـ 380 جسيماً يُعاد تشكيله لكل نمط (حجم/لون/سلوك سقوط أو صعود)، والجسيمات تُعاد داخل صندوق يلاحق الجيش فلا تُهدر خارج الشاشة.</p>
+
+<h2 id="terrain"><span class="n">12</span>التضاريس الإجرائية</h2>
+<p>الأرض ليست صورة ولا مجسماً جاهزاً — إنها <strong>حقل ارتفاعات</strong> يولَّد رياضياً لكل مستوى:</p>
+<ol>
+<li><strong>ضجيج قيمي</strong>: شبكة 48×48 من أرقام عشوائية مبذورة، تُقرأ بينها باستيفاء ناعم <code>smoothstep</code>.</li>
+<li><strong>fbm بثلاث أوكتافات</strong>: <code>0.6·n(x) + 0.28·n(2.1x) + 0.12·n(4.3x)</code> — طبقة كبيرة للتلال وطبقات أدق للخشونة.</li>
+<li><strong>تشكيل الوادي</strong> حول المسار (d = البعد عن <code>xc</code> بعد خصم عرض الممر):</li>
+</ol>
+<div class="formula"><code>h(x,z) = 0 داخل الممر
+       + fbm·9·sstep(0,14,d)          ← تلال تصاعدية
+       + sstep(10,30,d)·(8 + fbm·9)   ← جدران الوادي</code></div>
+<ol start="4">
+<li><strong>شبكة مثلثات</strong> بخطوة 3.4×3.8م (≈7000 قمة)، لون كل قمة مزيج <code>ground→high</code> حسب الارتفاع مع رجرجة إضاءة ±10% تكسر الملل، ثم <code>computeVertexNormals</code> فيتظلل كل منحدر طبيعياً.</li>
+</ol>
+<p>الصخور والأشجار والنباتات تُزرع فوق التضاريس بسؤال نفس الدالة <code>groundH(x,z)</code> عن ارتفاع نقطتها — فلا شيء يطفو أو يغوص.</p>
+
+<h2 id="chars"><span class="n">13</span>بناء الشخصيات — مجسمات بلا ملفات</h2>
+<p>لا يوجد ملف نموذج واحد؛ كل شخصية تُركّب من هندسات Three.js الأولية (أسطوانة/كرة/مخروط/صندوق) عبر أداتين:</p>
+<ul>
+<li><code>bake(geo, x,y,z, s..., r...)</code>: ينسخ الهندسة ويخبز فيها موضعاً ودوراناً وحجماً.</li>
+<li><code>mergeGeoms([{g, c}...])</code>: يدمج القطع في هندسة واحدة ويصبغ كل قطعة بلونها في <strong>خاصية ألوان القمم</strong> — فتكفي خامة واحدة (<code>MeshLambertMaterial({vertexColors:true})</code>) لكل الكائنات، ويمرر ألوان هندسة مدموجة سابقاً كما هي (درس: أول نسخة من البطل خرجت بيضاء لأن الدمج الثاني طمس ألوان الأول!).</li>
+</ul>
+<div class="tbl"><table>
+<tr><th>الشخصية</th><th>القطع</th><th>التفصيلة المميزة</th></tr>
+<tr><td>الجندي (4 مظاهر)</td><td>رجلان، جذع، حزام، عباءة ظهر، رأس، عينان، خوذة، عرف، درع بنتوء، رمح</td><td>العباءة والعرف يُريان من الخلف — وجهة نظر اللاعب</td></tr>
+<tr><td>الأورك</td><td>جلد أخضر، عينان صفراوان، حاجبان مائلان، نابان، قرنان، شوكتا كتف، فأس</td><td>يواجهك (<code>ry=π</code>) فوجهه مُفصّل</td></tr>
+<tr><td>البطل</td><td>جندي ذهبي ×1.9 + عباءة قرمزية + سارية براية</td><td>يتقدم الجيش دائماً عند <code>crowd.z+1.6</code></td></tr>
+<tr><td>الزعيم</td><td>جذع (وجه شرس كامل + أشواك) + <b>ذراع مطرقة منفصلة</b> ×5.6 (أو ×7.4 أسطوري)</td><td>الانفصال يتيح تحريك الضربة</td></tr>
+</table></div>
+<div class="note"><b>درس هندسي:</b> العيون والأنياب يجب أن تجلس <i>على سطح</i> كرة الرأس: إزاحة z أصغر من نصف القطر تدفنها داخله. رأس نصف قطره 0.2 ← العين عند z≈0.185.</div>
+<h3>التشكيل والحركة</h3>
+<p>مواضع الجنود بترتيب <strong>زهرة الشمس</strong>: <code>r=0.38√i، θ=i·2.39996</code> (الزاوية الذهبية) — توزيع قرصي متساوي الكثافة مهما تغير العدد. كل إطار تُكتب مصفوفة كل جندي: موضع يلحق هدفه أسّياً + قفز جري + (في القتال) اندفاعة وميلان طعن.</p>
+
+<h2 id="rpg"><span class="n">14</span>اقتصاد RPG والحفظ</h2>
+<div class="tbl"><table>
+<tr><th>الترقية</th><th class="num">التكلفة (المستوى n)</th><th>الأثر لكل مستوى</th><th>الحد</th></tr>
+<tr><td>⚔️ قوة الجندي</td><td class="num">60 · 1.7ⁿ</td><td class="num">dm = 1 + 0.12n</td><td class="num">10</td></tr>
+<tr><td>🛡️ جيش البداية</td><td class="num">50 · 1.65ⁿ</td><td class="num">5 + 2n جندياً</td><td class="num">10</td></tr>
+<tr><td>🪖 الدروع</td><td class="num">70 · 1.7ⁿ</td><td class="num">armor = 0.06n (سقف 50%)</td><td class="num">8</td></tr>
+<tr><td>💰 مضاعف الذهب</td><td class="num">80 · 1.8ⁿ</td><td class="num">gold = 1 + 0.15n</td><td class="num">8</td></tr>
+</table></div>
+<div class="formula">ذهب الفوز = <code>(30 + 12·L + 0.5·الناجون) · gold · (نصفه عند إعادة مستوى منجز)</code><br>
+ذهب المواساة = <code>(6 + 2·L) · gold</code> · الهدية اليومية = <code>40 + 8·مستواك</code></div>
+<p><strong>النجوم</strong>: نسبة الناجين إلى صحة القلعة الأصلية — ≥1.0 ثلاث نجوم، ≥0.45 نجمتان، والفوز نجمة. تُحفظ أفضل نتيجة لكل مستوى وتظهر في خريطة الحملة (التي تتيح الإعادة للتحسين).</p>
+<p><strong>الحفظ</strong>: كائن <code>store</code> يغلف localStorage بمفاتيح <code>qh_*</code> (level, coins, up, stars, skin, skins, snd, lastGift, best) وكل قراءة/كتابة داخل try/catch — متصفح يمنع التخزين لا يكسر اللعبة، فقط لا يحفظ.</p>
+
+<h2 id="render"><span class="n">15</span>الرسم والأداء — 400 جندي على هاتف</h2>
+<ul>
+<li><strong>InstancedMesh</strong>: جيشك كله <em>نداء رسم واحد</em> (سقف 400 ممثلاً — الرقم المنطقي قد يبلغ الآلاف والعداد يعرضه، وكل كتيبة أورك نداء ثانٍ بسقف 200). تحديث = كتابة مصفوفة 4×4 لكل ممثل ثم <code>instanceMatrix.needsUpdate</code>.</li>
+<li><strong>دمج السكونيات</strong>: كل صخور المستوى مجسم واحد، وكل الأشجار آخر، وكل النباتات ثالث — بدل ~200 نداء.</li>
+<li><strong>إخفاء ما وراء الضباب</strong>: الكتائب والبوابات خارج نطاق <code>[crowd.z−40, +170]</code> تُخفى (الضباب ينتهي عند 165 فلا يلاحَظ الاختفاء) — فتوفر أيضاً ممر الظلال.</li>
+<li><strong>لافتات بلا نزيف</strong>: أرقام الكتائب/الزعيم/القلعة كانفس <em>واحد ثابت</em> لكل لافتة يعاد رسمه عند تغير الرقم فقط (وبخانق 0.1ث) — لا إنشاء نسيج كل إطار.</li>
+<li><strong>حزام أمان زمني</strong>: <code>dt = min(delta, 0.05)</code> فلا يقفز العالم بعد تجميد تبويب، وخطاف اختبار <code>timeWarp</code> يسرّع الاختبارات الآلية.</li>
+<li>ظلال PCF ناعمة بخريطة 1024 تلاحق الجيش، و<code>pixelRatio ≤ 2</code> لحرارة الهاتف.</li>
+</ul>
+
+<h2 id="audio"><span class="n">16</span>الصوت المُصنَّع — صفر ملفات</h2>
+<p>كل الأصوات تُبنى لحظياً بـ Web Audio: مذبذبات (مربع/مثلث/منشاري/جيبي) بمغلف اضمحلال أسّي، وضجيج أبيض مفلتر للاصطدامات. أمثلة من الكود:</p>
+<div class="tbl"><table>
+<tr><th>الصوت</th><th>الوصفة</th></tr>
+<tr><td>بوابة ذهبية</td><td>ثلاث نغمات مثلثية صاعدة 660←880←1320Hz</td></tr>
+<tr><td>ضربة الزعيم</td><td>جيبية 70Hz تنزلق لـ35 + ضجيج منخفض التردد 0.3ث</td></tr>
+<tr><td>نيزك</td><td>منشارية 900Hz تهبط لـ180 (صفير سقوط) ثم انفجار جيبية 60Hz</td></tr>
+<tr><td>سيوف</td><td>نبضة ضجيج 0.12ث + طنة مربعة عشوائية التردد</td></tr>
+</table></div>
+<p>مفتاح الكتم يصفّر كسب العقدة الرئيسية فقط — البنية تبقى حية ويعود الصوت فوراً.</p>
+
+<h2 id="hud"><span class="n">17</span>الواجهة فوق العالم</h2>
+<p>كل النصوص العربية عناصر DOM فوق الكانفس (خطوط حادة ومجانية الأداء). الجسر بين العالمين هو الإسقاط: نأخذ نقطة 3D، نسقطها بـ <code>vector.project(camera)</code> إلى مدى ±1، ثم نحولها بكسلات:</p>
+<pre><code>v.set(crowdX(), 2.6, crowd.z).project(camera);
+left = (v.x·0.5 + 0.5) · innerWidth;   top = (−v.y·0.5 + 0.5) · innerHeight;</code></pre>
+<p>هكذا يلاحق عدّاد الجيش رأس الحشد، وأرقام الضرر تطير من نقطة الإصابة (مجمع 12 عنصراً يُعاد تدويرها). الشاشات (بداية/فوز/خسارة/خريطة/إيقاف) طبقات يُتحكم بظهورها بفئة <code>hidden</code> تضبط الشفافية <em>و</em> <code>visibility</code> — كي لا تبقى أزرار خفية قابلة للتفعيل بلوحة المفاتيح.</p>
+
+<h2 id="recipes"><span class="n">18</span>وصفات تعديل — جرّب بنفسك</h2>
+<div class="card"><strong>أسهل/أصعب:</strong> غيّر نسب كتيبة العدو <code>0.30+0.028·hard</code> (سطر ~895) أو أفضلية القتال <code>0.098/0.085</code> (سطر ~1990) أو <code>RUN_SPEED</code>.</div>
+<div class="card"><strong>بيئة خامسة:</strong> أضف كائناً في <code>BIOMES</code> بنفس الحقول، واسمه في <code>BIOME_ORDER</code>، وإن أردت نباتاً خاصاً فأضف فرعاً في زارع النباتات داخل <code>buildTerrain</code>. كل شيء آخر تلقائي.</div>
+<div class="card"><strong>بوابة جديدة (مثل «تربيع» ²):</strong> فرع جديد في <code>makeOp/applyOp</code> + قالب في جدول احتمالات <code>genLevel</code> — الرسم واللون يعملان تلقائياً من <code>label/theme</code>.</div>
+<div class="card"><strong>زعيم لكل بيئة:</strong> اصنع <code>bossTorsoGeo2</code> بقطع مختلفة، واختر في <code>buildBoss</code> حسب <code>D.biome</code>. الحركة والقتال لن يتغيرا لأنهما يتعاملان مع <code>boss.arm/body</code> فقط.</div>
+<div class="card"><strong>ترقية خامسة:</strong> عنصر في <code>UPGRADES</code> + دالة قراءة مثل <code>dmgMult</code> + استعمالها حيث تريد — واجهة المتجر تتولد من المصفوفة.</div>
+<div class="card"><strong>تلميح للدراسة:</strong> افتح وحدة تحكم المتصفح وجرب <code>__TEST.setCount(500)</code> و<code>__TEST.jumpToBoss()</code> و<code>__TEST.timeWarp=3</code> و<code>__DBG</code> — خطافات بنيناها للاختبار الآلي وتصلح للتشريح اليدوي.</div>
+
+<h2 id="lessons"><span class="n">19</span>أخطاء واجهناها أثناء البناء — ودروسها</h2>
+<div class="tbl"><table>
+<tr><th>الخطأ</th><th>السبب</th><th>الدرس</th></tr>
+<tr><td>التحكم معكوس بالكامل</td><td>كاميرا تنظر +Z تجعل يمين الشاشة −X</td><td>اختبر الإدخال <b>بصرياً</b> على الشاشة، لا بمنطق المحاور</td></tr>
+<tr><td>ضربة الزعيم لا تنطلق على الأجهزة البطيئة</td><td>نافذة إطلاق 0.02ث تقفزها الإطارات</td><td>الأحداث الدورية تُكشف بالتفاف الطور، لا بنافذة لحظية</td></tr>
+<tr><td>البطل خرج أبيض</td><td>الدمج الثاني طمس ألوان قمم الدمج الأول</td><td>الأدوات العامة يجب أن تمرر البيانات الموجودة لا أن تفترض غيابها</td></tr>
+<tr><td>مكافآت مضاعفة بالنقر السريع</td><td>زر «التالي» قابل للنقر مرتين قبل إعادة الرسم</td><td>كل عملية تمنح شيئاً تحتاج حارس <code>ended</code></td></tr>
+<tr><td>الفوز صدفةً في وضع البداية</td><td>حالة افتراضية صادفت الحل (منتصف مدى التقدير)</td><td>القيم الافتراضية يجب ألا تكون إجابات صحيحة مجاناً</td></tr>
+<tr><td>تسريب نسيج كل إطار</td><td>لافتة الرقم أنشأت Canvas جديداً عند كل تغيير</td><td>خصص مرة، وارسم فوق نفس المورد</td></tr>
+</table></div>
+
+<div class="footer">
+دليل قائد الحشود · المستودع <span dir="ltr">almshani</span> — فرع <span dir="ltr">claude/3d-game-design-c59zac</span><br>
+اللعبة: index.html (2140 سطراً) · المحرك Three.js r128 · التقدم يُحفظ محلياً في متصفحك
+</div>
+</div>
