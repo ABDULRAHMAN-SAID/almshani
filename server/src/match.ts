@@ -25,6 +25,7 @@ export class MatchRoom {
   readonly ctx: SimContext;
   readonly seats: [Seat, Seat];
   readonly decks: [string[], string[]];
+  readonly unitLevels: [Record<string, number>, Record<string, number>];
   readonly tickMs: number;
   st: SimState;
   log: TickInput[] = [];                    // سجل الأوامر = الإعادة الحتمية
@@ -35,12 +36,14 @@ export class MatchRoom {
   onEnd: ((room: MatchRoom) => void) | null = null;
   desyncs = 0;
 
-  constructor(id: string, ctx: SimContext, seed: number, seats: [Seat, Seat], decks: [string[], string[]], tickMs: number) {
+  constructor(id: string, ctx: SimContext, seed: number, seats: [Seat, Seat], decks: [string[], string[]],
+              unitLevels: [Record<string, number>, Record<string, number>], tickMs: number) {
     this.id = id; this.ctx = ctx; this.seed = seed; this.seats = seats; this.decks = decks;
+    this.unitLevels = unitLevels;
     this.tickMs = tickMs;
     this.st = createMatch(ctx, seed, [
-      { name: seats[0].name, isBot: seats[0].isBot, deck: decks[0] },
-      { name: seats[1].name, isBot: seats[1].isBot, deck: decks[1] }
+      { name: seats[0].name, isBot: seats[0].isBot, deck: decks[0], unitLevels: unitLevels[0] },
+      { name: seats[1].name, isBot: seats[1].isBot, deck: decks[1], unitLevels: unitLevels[1] }
     ]);
     for (let p = 0; p < 2; p++) if (seats[p].isBot) this.bots[p] = createBot(seed * 17 + p);
   }
@@ -49,7 +52,7 @@ export class MatchRoom {
     return {
       matchId: this.id, seed: this.seed, youAre, arena: this.ctx.arena.id,
       players: this.seats.map(s => ({ name: s.name, isBot: s.isBot })),
-      decks: this.decks, tickMs: this.tickMs
+      decks: this.decks, unitLevels: this.unitLevels, tickMs: this.tickMs
     };
   }
 

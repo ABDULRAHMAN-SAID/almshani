@@ -14,6 +14,8 @@ import catapult from './units/catapult.json';
 import sera from './commanders/sera.json';
 import border_fort from './arenas/border_fort.json';
 import economy from './economy.json';
+import buildings from './buildings.json';
+import missions from './missions.json';
 import ar from './locales/ar.json';
 import en from './locales/en.json';
 
@@ -25,6 +27,9 @@ export const UNIT_IDS = Object.keys(UNIT_DEFS);
 export const COMMANDERS: Record<string, any> = { sera };
 export const ARENAS: Record<string, any> = { border_fort };
 export const ECONOMY = economy;
+export const BUILDINGS: Record<string, any> = (buildings as any).buildings;
+export const BUILDINGS_META: any = (buildings as any).meta;
+export const MISSIONS: any[] = missions as any[];
 export const LOCALES: Record<string, Record<string, string>> = { ar, en };
 export const DEFAULT_DECK = [
   'spear_wall', 'shield_guard', 'archers', 'flame_archers', 'raid_cavalry', 'field_medic', 'catapult'

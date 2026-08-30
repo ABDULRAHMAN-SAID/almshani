@@ -5,6 +5,11 @@ import { randomBytes } from 'node:crypto';
 import { UNIT_DEFS, DEFAULT_DECK } from '../../shared/definitions/index';
 import type { SimContext, PlayerIx, Command } from '../../shared/simulation/src/index';
 import { MatchRoom, type Seat } from './match';
+import {
+  newBase, baseView, startUpgrade, trainUnit, claimMission, openFreeChest,
+  battleReward, unlockedUnits, type BaseState
+} from './empire';
+import { loadState, saveStateSoon, saveNow } from './store';
 
 export interface Account {
   token: string;
@@ -12,6 +17,7 @@ export interface Account {
   deck: string[];
   wins: number;
   losses: number;
+  base: BaseState;
 }
 
 export interface Session {
@@ -36,6 +42,19 @@ export class Lobby {
 
   constructor(private ctx: SimContext) {
     this.botTimer = setInterval(() => this.fillWithBots(), 1000);
+    const saved = loadState<{ accounts: Account[] }>();
+    if (saved?.accounts) {
+      for (const a of saved.accounts) this.accounts.set(a.token, a);
+      console.log(`store: حُمّل ${saved.accounts.length} حساباً`);
+    }
+  }
+
+  private persist(): void {
+    saveStateSoon(() => ({ accounts: [...this.accounts.values()] }));
+  }
+
+  flush(): void {
+    saveNow({ accounts: [...this.accounts.values()] });
   }
 
   hello(send: (m: unknown) => void, token?: string, name?: string): Session {
@@ -46,7 +65,8 @@ export class Lobby {
         name: sanitizeName(name) ?? `قائد-${this.accounts.size + 1}`,
         deck: DEFAULT_DECK.slice(),
         wins: 0,
-        losses: 0
+        losses: 0,
+        base: newBase(Date.now())
       };
       this.accounts.set(account.token, account);
     } else if (name && sanitizeName(name)) {
@@ -59,6 +79,8 @@ export class Lobby {
     const session: Session = { account, send, inQueueSinceMs: 0, match: null, seatIx: null };
     this.sessions.add(session);
     send({ t: 'welcome', token: account.token, name: account.name, deck: account.deck, wins: account.wins, losses: account.losses });
+    send({ t: 'baseState', base: baseView(account.base, Date.now()) });
+    this.persist();
     // مباراة جارية لهذا الحساب؟ إعادة اتصال
     for (const room of this.matches.values()) {
       for (let p = 0 as PlayerIx; p <= 1; p = (p + 1) as PlayerIx) {
@@ -74,11 +96,13 @@ export class Lobby {
   setDeck(s: Session, deck: unknown): void {
     if (!Array.isArray(deck) || deck.length !== 7) return s.send({ t: 'error', code: 'deck_size' });
     const clean = deck.map(String);
-    if (new Set(clean).size !== 7 || clean.some(u => !UNIT_DEFS[u])) {
+    const unlocked = unlockedUnits(s.account.base);
+    if (new Set(clean).size !== 7 || clean.some(u => !UNIT_DEFS[u] || !unlocked.includes(u))) {
       return s.send({ t: 'error', code: 'deck_units' });
     }
     s.account.deck = clean;
     s.send({ t: 'deckSaved', deck: clean });
+    this.persist();
   }
 
   enqueue(s: Session): void {
@@ -106,6 +130,19 @@ export class Lobby {
   leaveResult(s: Session): void {
     if (s.match && s.match.st.phase === 'ended') { s.match = null; s.seatIx = null; }
   }
+
+  // ── أوامر الإمبراطورية: الخادم ينفّذ ويعيد اللقطة أو خطأً ──
+  private baseAction(s: Session, err: string | null): void {
+    if (err) s.send({ t: 'baseError', code: err });
+    s.send({ t: 'baseState', base: baseView(s.account.base, Date.now()) });
+    if (!err) this.persist();
+  }
+
+  sendBase(s: Session): void { this.baseAction(s, null); }
+  upgradeBuilding(s: Session, id: string): void { this.baseAction(s, startUpgrade(s.account.base, String(id), Date.now())); }
+  trainUnit(s: Session, id: string): void { this.baseAction(s, trainUnit(s.account.base, String(id), Date.now())); }
+  claimMission(s: Session, id: string): void { this.baseAction(s, claimMission(s.account.base, String(id), Date.now())); }
+  freeChest(s: Session): void { this.baseAction(s, openFreeChest(s.account.base, Date.now())); }
 
   drop(s: Session): void {
     this.sessions.delete(s);
@@ -147,7 +184,9 @@ export class Lobby {
     };
     const seats: [Seat, Seat] = [seatOf(a), b ? seatOf(b) : botSeat];
     const decks: [string[], string[]] = [a.account.deck.slice(), (b ? b.account.deck : DEFAULT_DECK).slice()];
-    const room = new MatchRoom(id, this.ctx, seed, seats, decks, TICK_MS);
+    const levels: [Record<string, number>, Record<string, number>] =
+      [{ ...a.account.base.unitLevels }, b ? { ...b.account.base.unitLevels } : {}];
+    const room = new MatchRoom(id, this.ctx, seed, seats, decks, levels, TICK_MS);
     this.matches.set(id, room);
     a.match = room; a.seatIx = 0;
     if (b) { b.match = room; b.seatIx = 1; }
@@ -163,14 +202,16 @@ export class Lobby {
       if (account) {
         if (res.winner === p) account.wins++;
         else if (res.winner !== -1) account.losses++;
+        const reward = battleReward(account.base, res.winner === p, Date.now());
         seat.send?.({
           t: 'matchEnd', result: res,
           scoreMilli: [room.st.players[0].scoreMilli, room.st.players[1].scoreMilli],
           hqHpCenti: [room.st.players[0].hqHpCenti, room.st.players[1].hqHpCenti],
-          wins: account.wins, losses: account.losses
+          wins: account.wins, losses: account.losses, reward
         });
       }
     }
+    this.persist();
     // سجل الأوامر يبقى في الذاكرة (بذرة نظام الإعادات) ثم يُطرح بعد 10 دقائق
     setTimeout(() => { this.matches.delete(room.id); }, 10 * 60 * 1000).unref?.();
   }
@@ -178,6 +219,7 @@ export class Lobby {
   shutdown(): void {
     clearInterval(this.botTimer);
     for (const room of this.matches.values()) room.stop();
+    this.flush();
   }
 }
 

@@ -41,6 +41,8 @@ export interface Squad {
   x: number;             // مم
   z: number;             // مم
   hpCenti: number;
+  memberHpCenti: number; // صحة الفرد الفعلية (بعد مستوى الوحدة)
+  dmgMill: number;       // معدِّل ضرر المستوى ‰
   landingTicks: number;  // >0: ما زال ينزل (لا يتحرك ولا يهاجم، لكنه يُستهدف)
   targetId: number;      // -1 لا هدف، -2 مقر الخصم، وإلا معرّف فرقة
   wayX: number | null;   // أمر Rally
@@ -53,6 +55,7 @@ export interface Squad {
 export interface PlayerState {
   name: string;
   isBot: boolean;
+  unitLevels: Record<string, number>; // مستوى كل وحدة (1..5) — من قاعدة اللاعب
   cp: number;
   regenCounter: number;
   deck: string[];                 // 7 وحدات

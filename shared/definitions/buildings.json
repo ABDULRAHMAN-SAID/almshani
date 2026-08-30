@@ -1,0 +1,233 @@
+{
+ "buildings": {
+  "hall": {
+   "id": "hall",
+   "maxLevel": 10,
+   "unlockHall": 1,
+   "start": 1,
+   "cost": {
+    "gold": 200,
+    "supplies": 150,
+    "growth": 1.75
+   },
+   "buildSec": {
+    "base": 15,
+    "growth": 1.8
+   },
+   "role": "hall"
+  },
+  "gold_mine": {
+   "id": "gold_mine",
+   "maxLevel": 10,
+   "unlockHall": 1,
+   "start": 1,
+   "cost": {
+    "gold": 100,
+    "supplies": 80,
+    "growth": 1.6
+   },
+   "buildSec": {
+    "base": 10,
+    "growth": 1.7
+   },
+   "role": "prod",
+   "prod": {
+    "res": "gold",
+    "perHour": 300,
+    "growth": 1.45
+   }
+  },
+  "gold_mine_2": {
+   "id": "gold_mine_2",
+   "maxLevel": 10,
+   "unlockHall": 3,
+   "start": 0,
+   "cost": {
+    "gold": 160,
+    "supplies": 120,
+    "growth": 1.6
+   },
+   "buildSec": {
+    "base": 14,
+    "growth": 1.7
+   },
+   "role": "prod",
+   "prod": {
+    "res": "gold",
+    "perHour": 300,
+    "growth": 1.45
+   }
+  },
+  "farm": {
+   "id": "farm",
+   "maxLevel": 10,
+   "unlockHall": 1,
+   "start": 1,
+   "cost": {
+    "gold": 90,
+    "supplies": 70,
+    "growth": 1.6
+   },
+   "buildSec": {
+    "base": 10,
+    "growth": 1.7
+   },
+   "role": "prod",
+   "prod": {
+    "res": "supplies",
+    "perHour": 260,
+    "growth": 1.45
+   }
+  },
+  "store": {
+   "id": "store",
+   "maxLevel": 10,
+   "unlockHall": 2,
+   "start": 0,
+   "cost": {
+    "gold": 140,
+    "supplies": 110,
+    "growth": 1.65
+   },
+   "buildSec": {
+    "base": 12,
+    "growth": 1.7
+   },
+   "role": "cap",
+   "cap": {
+    "base": 2000,
+    "growth": 1.55
+   }
+  },
+  "barracks": {
+   "id": "barracks",
+   "maxLevel": 5,
+   "unlockHall": 2,
+   "start": 1,
+   "cost": {
+    "gold": 220,
+    "supplies": 180,
+    "growth": 1.9
+   },
+   "buildSec": {
+    "base": 20,
+    "growth": 1.9
+   },
+   "role": "barracks",
+   "unlocks": {
+    "2": [
+     "light_slingers"
+    ],
+    "3": [
+     "north_wolves"
+    ],
+    "4": [
+     "frost_witch"
+    ]
+   }
+  },
+  "siege_shop": {
+   "id": "siege_shop",
+   "maxLevel": 5,
+   "unlockHall": 4,
+   "start": 0,
+   "cost": {
+    "gold": 400,
+    "supplies": 320,
+    "growth": 1.9
+   },
+   "buildSec": {
+    "base": 30,
+    "growth": 1.9
+   },
+   "role": "siege",
+   "unlocks": {
+    "1": [
+     "iron_ram"
+    ]
+   }
+  },
+  "lab": {
+   "id": "lab",
+   "maxLevel": 8,
+   "unlockHall": 5,
+   "start": 0,
+   "cost": {
+    "gold": 500,
+    "supplies": 400,
+    "growth": 1.8
+   },
+   "buildSec": {
+    "base": 40,
+    "growth": 1.85
+   },
+   "role": "lab",
+   "prodBonusPctPerLevel": 5
+  },
+  "gate": {
+   "id": "gate",
+   "maxLevel": 8,
+   "unlockHall": 3,
+   "start": 1,
+   "cost": {
+    "gold": 180,
+    "supplies": 140,
+    "growth": 1.7
+   },
+   "buildSec": {
+    "base": 15,
+    "growth": 1.75
+   },
+   "role": "gate",
+   "battleRewardBonusPctPerLevel": 10
+  },
+  "monument": {
+   "id": "monument",
+   "maxLevel": 1,
+   "unlockHall": 2,
+   "start": 0,
+   "cost": {
+    "gold": 250,
+    "supplies": 200,
+    "growth": 1
+   },
+   "buildSec": {
+    "base": 20,
+    "growth": 1
+   },
+   "role": "monument"
+  }
+ },
+ "meta": {
+  "startUnits": [
+   "spear_wall",
+   "shield_guard",
+   "archers",
+   "flame_archers",
+   "raid_cavalry",
+   "field_medic",
+   "catapult",
+   "axe_warriors"
+  ],
+  "startResources": {
+   "gold": 600,
+   "supplies": 500,
+   "tokens": 30,
+   "crystals": 0
+  },
+  "baseGoldCap": 2000,
+  "baseSuppliesCap": 2000,
+  "unitLevelCapBy": "barracks",
+  "battleReward": {
+   "winGold": 120,
+   "winTokens": 8,
+   "loseGold": 40,
+   "loseTokens": 3
+  },
+  "freeChest": {
+   "gold": 250,
+   "tokens": 10,
+   "everyHours": 20
+  }
+ }
+}

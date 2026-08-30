@@ -15,11 +15,12 @@ export interface SimContext {
 export function createMatch(
   ctx: SimContext,
   seed: number,
-  players: { name: string; isBot: boolean; deck: string[] }[]
+  players: { name: string; isBot: boolean; deck: string[]; unitLevels?: Record<string, number> }[]
 ): SimState {
-  const mk = (p: { name: string; isBot: boolean; deck: string[] }): PlayerState => ({
+  const mk = (p: { name: string; isBot: boolean; deck: string[]; unitLevels?: Record<string, number> }): PlayerState => ({
     name: p.name,
     isBot: p.isBot,
+    unitLevels: p.unitLevels ?? {},
     cp: ctx.arena.cpStart,
     regenCounter: 0,
     deck: p.deck.slice(0, 7),
@@ -77,7 +78,8 @@ function clampToField(s: { x: number; z: number }, a: RtArena): void {
 }
 
 export function membersAlive(sq: Squad, u: RtUnit): number {
-  return Math.max(0, Math.ceil(sq.hpCenti / u.memberHpCenti));
+  const per = sq.memberHpCenti || u.memberHpCenti;
+  return Math.max(0, Math.ceil(sq.hpCenti / per));
 }
 
 export function cpCap(st: SimState, a: RtArena): number {
@@ -120,13 +122,18 @@ export function applyCommand(
       if (!deployValid(st, ctx, cmd.player, cmd.x, cmd.z)) return reject(events, cmd.player, 'zone');
       P.cp -= u.cost;
       P.musterReadyTick[cmd.slot] = st.tick + u.musterTicks;
+      // مستوى الوحدة (من قاعدة اللاعب): +10% صحة وضرر لكل مستوى فوق الأول
+      const lvl = Math.max(1, Math.min(5, P.unitLevels[u.id] ?? 1));
+      const hpMill = 1000 + (lvl - 1) * 100;
       const sq: Squad = {
         id: st.nextSquadId++,
         player: cmd.player,
         unit: u.id,
         slot: cmd.slot,
         x: cmd.x, z: cmd.z,
-        hpCenti: u.squadHpCenti,
+        hpCenti: Math.floor((u.squadHpCenti * hpMill) / 1000),
+        memberHpCenti: Math.max(1, Math.floor((u.memberHpCenti * hpMill) / 1000)),
+        dmgMill: 1000 + (lvl - 1) * 100,
         landingTicks: a.landingTicks,
         targetId: -1,
         wayX: null, wayZ: null,
@@ -287,10 +294,10 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
         const d = dist(sq.x, sq.z, ally.x, ally.z);
         if (d > 4000) moveToward(sq, u, ally.x, ally.z, st, a);
         else {
-          const au = ctx.units[ally.unit];
           const alive = membersAlive(sq, u);
-          ally.hpCenti = Math.min(au.squadHpCenti,
-            ally.hpCenti + Math.floor((u.healCentiPerTick * alive) / u.size));
+          const allyMax = ally.memberHpCenti * ctx.units[ally.unit].size;
+          ally.hpCenti = Math.min(allyMax,
+            ally.hpCenti + Math.floor((u.healCentiPerTick * alive * sq.dmgMill) / (u.size * 1000)));
           sq.attackedThisTick = true;
         }
         continue;
@@ -316,7 +323,7 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
       if (hqDist <= Math.max(u.rangeMm, 600) && hqDist >= u.minRangeMm - a.hqRadiusMm) {
         const alive = membersAlive(sq, u);
         damageHq(st, ctx, (1 - sq.player) as PlayerIx,
-          Math.max(1, Math.floor((u.hqDmgCentiPerTick * alive) / u.size)), events);
+          Math.max(1, Math.floor((u.hqDmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000))), events);
         sq.attackedThisTick = true;
       } else {
         moveToward(sq, u, enemyHq.x, enemyHq.z, st, a);
@@ -431,7 +438,7 @@ function attack(
 ): void {
   const alive = membersAlive(sq, u);
   const tu = ctx.units[tgt.unit];
-  let dmg = Math.floor((u.dmgCentiPerTick * alive) / u.size);
+  let dmg = Math.floor((u.dmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000));
   dmg = Math.floor((dmg * counterMill(u, tu)) / 1000);
   if (u.role === 'ranged') dmg = Math.floor((dmg * tu.fromRangedMill) / 1000);
   sq.attackedThisTick = true;
@@ -442,7 +449,7 @@ function attack(
     const hit = st.squads.filter(s =>
       s.player !== sq.player && dist(s.x, s.z, cx, cz) <= u.areaRadiusMm);
     for (const h of hit.sort((x, y) => x.id - y.id)) {
-      let hd = Math.floor((u.dmgCentiPerTick * alive) / u.size);
+      let hd = Math.floor((u.dmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000));
       hd = Math.floor((hd * counterMill(u, ctx.units[h.unit])) / 1000);
       hd = Math.floor((hd * ctx.units[h.unit].fromRangedMill) / 1000);
       damageSquad(st, ctx, h, Math.max(1, hd), sq.player, events);

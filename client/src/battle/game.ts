@@ -32,8 +32,8 @@ export class MatchClient {
       arena: buildArena(ARENAS[info.arena] ?? ARENAS.border_fort, COMMANDERS.sera)
     };
     this.st = createMatch(this.ctx, info.seed, [
-      { name: info.players[0].name, isBot: info.players[0].isBot, deck: info.decks[0] },
-      { name: info.players[1].name, isBot: info.players[1].isBot, deck: info.decks[1] }
+      { name: info.players[0].name, isBot: info.players[0].isBot, deck: info.decks[0], unitLevels: info.unitLevels?.[0] ?? {} },
+      { name: info.players[1].name, isBot: info.players[1].isBot, deck: info.decks[1], unitLevels: info.unitLevels?.[1] ?? {} }
     ]);
     this.snapshot(this.prev); this.snapshot(this.curr);
   }

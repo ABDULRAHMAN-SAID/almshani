@@ -1,0 +1,43 @@
+[
+ {
+  "id": "daily_battle",
+  "goal": 1,
+  "reward": {
+   "gold": 300,
+   "tokens": 15
+  },
+  "nameKey": "mission.daily_battle",
+  "auto": true
+ },
+ {
+  "id": "daily_upgrade",
+  "goal": 1,
+  "reward": {
+   "gold": 200,
+   "supplies": 150
+  },
+  "nameKey": "mission.daily_upgrade",
+  "auto": true
+ },
+ {
+  "id": "daily_train",
+  "goal": 1,
+  "reward": {
+   "gold": 150,
+   "tokens": 10
+  },
+  "nameKey": "mission.daily_train",
+  "auto": true
+ },
+ {
+  "id": "daily_valley",
+  "goal": 1,
+  "reward": {
+   "tokens": 25
+  },
+  "nameKey": "mission.daily_valley",
+  "auto": false,
+  "openUrl": "/legacy/",
+  "needs": "monument"
+ }
+]

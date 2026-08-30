@@ -27,11 +27,19 @@ const MIME: Record<string, string> = {
   '.woff2': 'font/woff2'
 };
 
+const LEGACY_DIR = process.env.LEGACY_DIR ?? join(process.cwd(), 'legacy-prototype');
+
 const http = createServer((req, res) => {
   let path = (req.url ?? '/').split('?')[0];
+  // النموذج الأولي (مهمة وادي الحشود اليومية) يُقدَّم من /legacy/
+  let root = CLIENT_DIR;
+  if (path === '/legacy' || path.startsWith('/legacy/')) {
+    root = LEGACY_DIR;
+    path = path.replace(/^\/legacy\/?/, '/');
+  }
   if (path === '/') path = '/index.html';
-  const file = normalize(join(CLIENT_DIR, path));
-  if (!file.startsWith(CLIENT_DIR) || !existsSync(file)) {
+  const file = normalize(join(root, path));
+  if (!file.startsWith(root) || !existsSync(file)) {
     res.writeHead(404); res.end('not found'); return;
   }
   res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' });
@@ -58,6 +66,11 @@ wss.on('connection', (ws: WebSocket) => {
       case 'intent': if (msg.cmd && typeof msg.cmd.type === 'string') lobby.intent(session, msg.cmd); break;
       case 'hashReport': lobby.hashReport(session, msg.tick | 0, msg.hash >>> 0); break;
       case 'leaveResult': lobby.leaveResult(session); break;
+      case 'base': lobby.sendBase(session); break;
+      case 'upgradeBuilding': lobby.upgradeBuilding(session, msg.id); break;
+      case 'trainUnit': lobby.trainUnit(session, msg.id); break;
+      case 'claimMission': lobby.claimMission(session, msg.id); break;
+      case 'freeChest': lobby.freeChest(session); break;
     }
   });
   ws.on('close', () => { if (session) lobby.drop(session); });

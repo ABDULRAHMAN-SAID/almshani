@@ -47,7 +47,28 @@ const UI_AR: Record<string, string> = {
   deployHere: 'اسحب فرقة إلى الميدان',
   role_frontline: 'صدام', role_ranged: 'رمي', role_cavalry: 'فرسان',
   role_support: 'إسناد', role_siege: 'حصار', role_special: 'خاصة',
-  members: 'أفراد', cost: 'كلفة'
+  members: 'أفراد', cost: 'كلفة',
+  // ── قلب الإمبراطورية ──
+  tab_base: 'القاعدة', tab_units: 'الجنود', tab_battle: 'التحدي',
+  tab_shop: 'المتجر', tab_more: 'المزيد',
+  level: 'مستوى', upgrade: 'ترقية', build: 'بناء', maxed: 'الحد الأقصى',
+  perHour: '/ساعة', capacity: 'السعة', producing: 'الإنتاج',
+  upgrading: 'ترقية جارية…', done_in: 'يكتمل خلال',
+  needHall: 'يتطلب قاعة القيادة مستوى', needBarracks: 'يتطلب الثكنة مستوى',
+  err_busy: 'ترقية أخرى جارية', err_poor: 'موارد غير كافية',
+  err_hall_gate: 'ارفع قاعة القيادة أولاً', err_max_level: 'بلغ الحد الأقصى',
+  err_barracks_gate: 'ارفع الثكنة أولاً', err_unit_locked: 'الفيلق مقفول',
+  err_unit_max: 'الفيلق في أقصى مستواه', err_chest_wait: 'الصندوق ليس جاهزاً بعد',
+  err_mission_incomplete: 'المهمة لم تكتمل', err_mission_claimed: 'استُلمت من قبل',
+  missions: 'المهام اليومية', claim: 'استلام', claimed: 'استُلمت', open_it: 'افتح',
+  freeChest: 'صندوق المؤن المجاني', chest_ready: 'جاهز للفتح!', chest_in: 'يجهز خلال',
+  soon: 'قريباً', shop_note: 'العروض الحقيقية تأتي مع المتجر الكامل — لا صناديق حظ مدفوعة أبداً.',
+  train: 'ترقية الفيلق', locked: 'مقفول',
+  deck_edit: 'تعديل التشكيلة', deck_save: 'اعتماد التشكيلة', deck_current: 'تشكيلتك الحالية',
+  profile: 'الملف الشخصي', valley: 'وادي الحشود', valley_open: 'ادخل الوادي',
+  valley_note: 'أنهِ جولة في الوادي ثم استلم مكافأتك',
+  battle_reward: 'الغنيمة', tap_building: 'انقر مبنى لإدارته',
+  base_busy_banner: 'البنّاؤون يعملون…'
 };
 
 let lang: 'ar' | 'en' = 'ar';
