@@ -1,0 +1,31 @@
+{
+  "name": "almshani",
+  "version": "1.0.0",
+  "description": "لعبة موبايل تنافسية فورية قيد البناء من نوع **Real-Time Tactical Army Arena**: قائدان، ساحة بثلاثة قطاعات، فرق عسكرية تُنشر وتُرى وهي تفقد أفرادها، ومقرّ يسقط — في جولات من 3:30 إلى 5 دقائق. ليست لعبة أوراق، وليست نسخة من أي شيء.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ABDULRAHMAN-SAID/almshani.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ABDULRAHMAN-SAID/almshani/issues"
+  },
+  "homepage": "https://github.com/ABDULRAHMAN-SAID/almshani#readme",
+  "dependencies": {
+    "@types/node": "^26.4.0",
+    "@types/ws": "^8.18.1",
+    "esbuild": "^0.28.2",
+    "three": "^0.185.1",
+    "typescript": "^7.0.2",
+    "ws": "^8.21.3"
+  }
+}
