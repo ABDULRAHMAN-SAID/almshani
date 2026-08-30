@@ -7,6 +7,8 @@ import type { Net } from '../net';
 
 export class BattleInput {
   private dragSlot = -1;
+  private dragRangeMm = 0;
+  private dragColor = 0xd8b04a;
   private dragPos: { x: number; z: number } | null = null;
   private selected = -1;
   private skillArmed = false;
@@ -25,6 +27,11 @@ export class BattleInput {
   startSlotDrag(slot: number, ev: PointerEvent): void {
     this.dragSlot = slot;
     this.skillArmed = false;
+    const u = this.mc.ctx.units[this.mc.info.decks[this.mc.you][slot]];
+    this.dragRangeMm = u ? u.rangeMm : 0;
+    this.dragColor = u
+      ? (u.healCentiPerTick > 0 ? 0x9fb86a : u.slowMill > 0 ? 0x9fd0e8 : (u.role === 'ranged' || u.role === 'siege') ? 0xd8b04a : 0x8fb2dd)
+      : 0xd8b04a;
     this.move(ev);
   }
 
@@ -40,7 +47,7 @@ export class BattleInput {
     this.dragPos = w;
     if (w) {
       const ok = deployValid(this.mc.st, this.mc.ctx, this.mc.you, w.x, w.z);
-      this.render.setGhost(w.x, w.z, ok);
+      this.render.setGhost(w.x, w.z, ok, this.dragRangeMm, this.dragColor);
     } else this.render.setGhost(null, null);
   }
 

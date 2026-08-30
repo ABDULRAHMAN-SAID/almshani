@@ -156,6 +156,8 @@ export function showUnits(profile: Profile, base: any, on: Actions): void {
       <div class="med">${unitMark(id)}</div>
       <div class="nm">${unitName(id)}</div>
       <div class="meta">${t('role_' + u.role)} · ${u.squadSize} ${t('members')}</div>
+      <div class="meta">${t('range')} ${u.member.range <= 1.5 ? t('melee') : u.member.range + 'م'} · ${t('dps')} ${Math.round(u.member.dps * u.squadSize)} · ${t('speed')} ${u.member.moveSpeed}</div>
+      <div class="style">${t('style_' + id)}</div>
       ${!isUnlocked ? `<div class="req">${t('locked')}</div>` : deckEditing ? '' : nextCost
         ? `<button class="tr" data-train="${id}" ${gated ? 'disabled' : ''}>
              ${gated ? `${t('needBarracks')} ${lvl + 1}` : `${t('train')} — ${nextCost.gold}ذ ${nextCost.tokens + nextCost.roleTokens}ر`}

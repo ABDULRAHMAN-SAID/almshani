@@ -19,8 +19,11 @@ interface SquadView {
   group: THREE.Group;
   members: THREE.Object3D[];
   ring: THREE.Mesh;
+  frost: THREE.Mesh;      // هالة الإبطاء (ساحرة الصقيع)
   unit: string;
   mine: boolean;
+  lastHp: number;         // لكشف الشفاء بصرياً
+  healAt: number;
 }
 
 export class BattleRender {
@@ -35,6 +38,17 @@ export class BattleRender {
   private zoneFwd: THREE.Mesh[] = [];
   private ghost!: THREE.Mesh;
   private fx: { mesh: THREE.Mesh; born: number; life: number }[] = [];
+  // مقذوفات مرئية (سهام/حجارة) — عرض فقط، الضرر تحسمه المحاكاة
+  private shots: { mesh: THREE.Mesh; sx: number; sz: number; tx: number; tz: number; born: number; dur: number; arcH: number; color: number; impact: number }[] = [];
+  private volleyAt = new Map<number, number>();
+  private selectedId: number | null = null;
+  private selRange: THREE.Mesh | null = null;
+  private selMin: THREE.Mesh | null = null;
+  private ghostRange: THREE.Mesh | null = null;
+  private ghostRangeMm = 0;
+  private arrowGeo = new THREE.BoxGeometry(0.09, 0.09, 0.95);
+  private stoneGeo = new THREE.SphereGeometry(0.22, 6, 5);
+  private shotMats = new Map<number, THREE.MeshBasicMaterial>();
   private hqMeshes: THREE.Group[] = [];
   private mats = new Map<number, THREE.MeshLambertMaterial>();
   flipped = false; // اللاعب 1 يرى الميدان من جهته
@@ -203,7 +217,7 @@ export class BattleRender {
     return m;
   }
 
-  setGhost(x: number | null, z: number | null, valid = true): void {
+  setGhost(x: number | null, z: number | null, valid = true, rangeMm = 0, ringColor = 0xd8b04a): void {
     const dragging = x !== null && z !== null;
     this.ghost.visible = dragging;
     const op = dragging ? 0.16 : 0;
@@ -215,7 +229,33 @@ export class BattleRender {
     if (dragging) {
       this.ghost.position.set(x! * M, 0.4, z! * M);
       (this.ghost.material as THREE.MeshBasicMaterial).color.setHex(valid ? 0x5ac46a : 0xc9503e);
+      // دائرة مدى الوحدة المسحوبة — تخطيط الرمية قبل النشر
+      const r = Math.max(rangeMm, 1500) * M;
+      if (!this.ghostRange || Math.abs(this.ghostRangeMm - rangeMm) > 1) {
+        this.ghostRange?.geometry.dispose();
+        if (this.ghostRange) this.scene.remove(this.ghostRange);
+        this.ghostRange = new THREE.Mesh(
+          new THREE.RingGeometry(r - 0.18, r, 56),
+          new THREE.MeshBasicMaterial({ color: ringColor, transparent: true, opacity: 0.4, side: THREE.DoubleSide }));
+        this.ghostRange.rotation.x = -Math.PI / 2;
+        this.ghostRange.position.y = 0.35;
+        this.scene.add(this.ghostRange);
+        this.ghostRangeMm = rangeMm;
+      }
+      (this.ghostRange.material as THREE.MeshBasicMaterial).color.setHex(ringColor);
+      this.ghostRange.visible = true;
+      this.ghostRange.position.set(x! * M, 0.35, z! * M);
+    } else if (this.ghostRange) {
+      this.ghostRange.visible = false;
     }
+  }
+
+  private roleRingColor(unit: string): number {
+    const u = this.mc.ctx.units[unit];
+    if (u.healCentiPerTick > 0) return 0x9fb86a;
+    if (u.slowMill > 0) return 0x9fd0e8;
+    if (u.role === 'ranged' || u.role === 'siege') return 0xd8b04a;
+    return 0x8fb2dd;
   }
 
   screenToWorld(px: number, py: number): { x: number; z: number } | null {
@@ -263,15 +303,63 @@ export class BattleRender {
       new THREE.MeshBasicMaterial({ color: mine ? COL.mineRing : COL.foeRing, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
     ring.rotation.x = -Math.PI / 2; ring.position.y = 0.25;
     group.add(ring);
+    const frost = new THREE.Mesh(
+      new THREE.RingGeometry(1.4, 1.8, 24),
+      new THREE.MeshBasicMaterial({ color: 0x9fd0e8, transparent: true, opacity: 0.45, side: THREE.DoubleSide }));
+    frost.rotation.x = -Math.PI / 2; frost.position.y = 0.28; frost.visible = false;
+    group.add(frost);
     this.scene.add(group);
-    return { group, members, ring, unit: sq.unit, mine };
+    return { group, members, ring, frost, unit: sq.unit, mine, lastHp: sq.hpCenti, healAt: 0 };
   }
 
   selectSquad(id: number | null): void {
+    this.selectedId = id;
     for (const [sid, v] of this.views) {
       (v.ring.material as THREE.MeshBasicMaterial).opacity = sid === id ? 1 : 0.5;
       v.ring.scale.setScalar(sid === id ? 1.25 : 1);
     }
+    // دوائر مدى الفرقة المختارة (+ منطقة العمى الدنيا للمنجنيق)
+    if (this.selRange) { this.scene.remove(this.selRange); this.selRange.geometry.dispose(); this.selRange = null; }
+    if (this.selMin) { this.scene.remove(this.selMin); this.selMin.geometry.dispose(); this.selMin = null; }
+    if (id === null) return;
+    const sq = this.mc.st.squads.find(s => s.id === id);
+    if (!sq) return;
+    const u = this.mc.ctx.units[sq.unit];
+    const r = Math.max(u.rangeMm, 1500) * M;
+    this.selRange = new THREE.Mesh(
+      new THREE.RingGeometry(r - 0.2, r, 64),
+      new THREE.MeshBasicMaterial({ color: this.roleRingColor(sq.unit), transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
+    this.selRange.rotation.x = -Math.PI / 2; this.selRange.position.y = 0.32;
+    this.scene.add(this.selRange);
+    if (u.minRangeMm > 0) {
+      const mr = u.minRangeMm * M;
+      this.selMin = new THREE.Mesh(
+        new THREE.RingGeometry(mr - 0.18, mr, 40),
+        new THREE.MeshBasicMaterial({ color: 0xc9503e, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
+      this.selMin.rotation.x = -Math.PI / 2; this.selMin.position.y = 0.32;
+      this.scene.add(this.selMin);
+    }
+  }
+
+  private shotMat(color: number): THREE.MeshBasicMaterial {
+    let m = this.shotMats.get(color);
+    if (!m) { m = new THREE.MeshBasicMaterial({ color }); this.shotMats.set(color, m); }
+    return m;
+  }
+
+  private fireShot(sx: number, sz: number, tx: number, tz: number, kind: 'arrow' | 'flame' | 'stone' | 'boulder' | 'ice', delayMs = 0): void {
+    const spec = {
+      arrow: { geo: this.arrowGeo, color: 0xd8d2c2, dur: 380, arc: 2.2, impact: 1.2 },
+      flame: { geo: this.arrowGeo, color: 0xe8a45a, dur: 400, arc: 2.2, impact: 2.2 },
+      stone: { geo: this.stoneGeo, color: 0x8b8478, dur: 480, arc: 3.6, impact: 1.2 },
+      boulder: { geo: this.stoneGeo, color: 0x6e675c, dur: 950, arc: 9, impact: 2.8 },
+      ice: { geo: this.stoneGeo, color: 0x9fd0e8, dur: 420, arc: 1.6, impact: 2.0 }
+    }[kind];
+    const mesh = new THREE.Mesh(spec.geo, this.shotMat(spec.color));
+    if (kind === 'boulder') mesh.scale.setScalar(1.6);
+    mesh.visible = false;
+    this.scene.add(mesh);
+    this.shots.push({ mesh, sx, sz, tx, tz, born: performance.now() + delayMs, dur: spec.dur, arcH: spec.arc, color: spec.color, impact: spec.impact });
   }
 
   spawnFx(xMm: number, zMm: number, color: number, maxR = 3): void {
@@ -318,6 +406,63 @@ export class BattleRender {
       // اتجاه المسير العام
       const face = sq.player === 0 ? 0 : Math.PI;
       v.group.rotation.y = face;
+      // هالة الصقيع على المبطَّئين
+      v.frost.visible = sq.slowUntilTick > mc.st.tick;
+      // وميض شفاء أخضر عند ارتفاع الصحة
+      if (sq.hpCenti > v.lastHp + 5 && nowMs - v.healAt > 550) {
+        this.spawnFx(pose.x, pose.z, 0x9fb86a, 1.4);
+        v.healAt = nowMs;
+      }
+      v.lastHp = sq.hpCenti;
+      // رشقة مقذوفات مرئية من الرماة والحصار والساحرة
+      const uu = mc.ctx.units[sq.unit];
+      const shooter = uu.role === 'ranged' || uu.role === 'siege' || uu.slowMill > 0;
+      if (shooter && sq.attackedThisTick && !landing && nowMs - (this.volleyAt.get(sq.id) ?? 0) > 430) {
+        this.volleyAt.set(sq.id, nowMs);
+        let tx: number | null = null, tz: number | null = null;
+        if (sq.targetId >= 0) {
+          const tp = mc.pose(sq.targetId, alpha);
+          if (tp) { tx = tp.x * M; tz = tp.z * M; }
+        }
+        if (tx === null) {
+          tz = (sq.player === 0 ? 1 : -1) * mc.ctx.arena.hqZmm * M;
+          tx = 0;
+        }
+        const sxm = pose.x * M, szm = pose.z * M;
+        if (sq.unit === 'catapult') this.fireShot(sxm, szm, tx!, tz!, 'boulder');
+        else if (sq.unit === 'flame_archers') { this.fireShot(sxm, szm, tx!, tz!, 'flame'); this.fireShot(sxm + 0.5, szm, tx! + 0.4, tz!, 'flame', 90); }
+        else if (sq.unit === 'light_slingers') this.fireShot(sxm, szm, tx!, tz!, 'stone');
+        else if (uu.slowMill > 0) this.fireShot(sxm, szm, tx!, tz!, 'ice');
+        else if (uu.role === 'ranged') { this.fireShot(sxm, szm, tx!, tz!, 'arrow'); this.fireShot(sxm - 0.5, szm + 0.3, tx! + 0.5, tz! - 0.3, 'arrow', 110); }
+      }
+    }
+    // دوائر مدى الفرقة المختارة تلاحقها
+    if (this.selectedId !== null) {
+      const selPose = mc.pose(this.selectedId, alpha);
+      if (selPose && this.selRange) {
+        this.selRange.position.set(selPose.x * M, 0.32, selPose.z * M);
+        this.selMin?.position.set(selPose.x * M, 0.32, selPose.z * M);
+      } else if (!selPose) {
+        this.selectSquad(null);
+      }
+    }
+    // تحليق المقذوفات: قوس مكافئ + توجيه + أثر ارتطام
+    for (let i = this.shots.length - 1; i >= 0; i--) {
+      const sh = this.shots[i];
+      const k = (nowMs - sh.born) / sh.dur;
+      if (k < 0) { sh.mesh.visible = false; continue; }
+      if (k >= 1) {
+        this.scene.remove(sh.mesh);
+        this.shots.splice(i, 1);
+        this.spawnFx(sh.tx / M, sh.tz / M, sh.color, sh.impact);
+        continue;
+      }
+      sh.mesh.visible = true;
+      const x = sh.sx + (sh.tx - sh.sx) * k;
+      const z = sh.sz + (sh.tz - sh.sz) * k;
+      const y = 1.6 + Math.sin(k * Math.PI) * sh.arcH;
+      sh.mesh.position.set(x, y, z);
+      sh.mesh.lookAt(sh.tx, 1.2, sh.tz);
     }
     for (const [id, v] of this.views) {
       if (!live.has(id)) { this.scene.remove(v.group); this.views.delete(id); }
