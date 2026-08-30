@@ -5,7 +5,7 @@ import { MatchClient } from './battle/game';
 import { BattleRender } from './battle/render';
 import { BattleHud } from './battle/hud';
 import { BattleInput } from './battle/input';
-import { BaseScene } from './base/scene';
+import { PaintedBase } from './base/painted';
 import { Shell, type TabId } from './shell';
 import * as scr from './screens';
 import { t } from './i18n';
@@ -22,7 +22,7 @@ let mc: MatchClient | null = null;
 let render: BattleRender | null = null;
 let hud: BattleHud | null = null;
 let input: BattleInput | null = null;
-let baseScene: BaseScene | null = null;
+let baseScene: PaintedBase | null = null;
 let mode: 'boot' | 'tabs' | 'matchup' | 'battle' | 'result' = 'boot';
 let lastEnd: Extract<ServerMsg, { t: 'matchEnd' }> | null = null;
 let upgradeTimer = 0;
@@ -57,14 +57,16 @@ function renderTab(): void {
   scr.closeSheet();
   const tab = shell.active;
   const baseVisible = tab === 'base';
-  glBase.hidden = !baseVisible;
-  document.getElementById('baselabels')!.style.display = baseVisible ? '' : 'none';
+  glBase.hidden = true; // القاعدة الآن لوحة المالك التفاعلية لا مشهداً ثلاثي الأبعاد
+  document.getElementById('baselabels')!.style.display = 'none';
   if (baseVisible) {
-    if (!baseScene) baseScene = new BaseScene(glBase, id => scr.showBuildingSheet(base, id, actions));
+    if (!baseScene) baseScene = new PaintedBase(document.getElementById('app')!, id => scr.showBuildingSheet(base, id, actions));
+    baseScene.show(true);
     baseScene.setState(base);
     baseScene.resize();
     scr.showBaseOverlay(base, actions);
   } else {
+    baseScene?.show(false);
     if (tab === 'units') scr.showUnits(profile, base, actions);
     else if (tab === 'battle') scr.showBattleTab(profile, queued, actions);
     else if (tab === 'shop') scr.showShop(base, actions);

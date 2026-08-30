@@ -281,6 +281,21 @@ input.name {
 .artbg::after { content: ''; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(10,11,14,.45), rgba(10,11,14,.82)); }
 .artover { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+/* القاعدة المرسومة التفاعلية — لوحة المالك أرضُ اللعب */
+#paintedbase { position: absolute; inset: 0; overflow-x: auto; overflow-y: hidden; background: #0d0e12;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+#paintedbase::-webkit-scrollbar { display: none; }
+#paintedbase .pboard { position: relative; background-size: 100% 100%; }
+.pchip { position: absolute; transform: translate(-50%, -60%); cursor: pointer; text-align: center; z-index: 2; }
+.pchip .blabel { position: static; transform: none; pointer-events: none; display: inline-block;
+  background: rgba(10,11,14,.78); border: 1px solid var(--gold); border-radius: 9px;
+  padding: 3px 11px 4px; font-size: 12.5px; backdrop-filter: blur(3px);
+  box-shadow: 0 2px 10px rgba(0,0,0,.6); }
+.pchip .pcoin { display: block; font-size: 17px; margin-top: 2px; filter: drop-shadow(0 2px 3px #000);
+  animation: coinbob 1.6s ease-in-out infinite; }
+@keyframes coinbob { 50% { transform: translateY(-5px); } }
+.pchip.locked { opacity: .55; filter: grayscale(.7); }
 .errflash { position: fixed; top: 70px; inset-inline: 0; text-align: center; z-index: 60; pointer-events: none; }
 .errflash span {
   background: #6e2c1e; color: #f2d9cf; border: 1px solid #a4543f; border-radius: 10px;

@@ -53,6 +53,10 @@ def main() -> None:
     entries.append(('bg_battle', u))
 
     city = Image.open(os.path.join(REF, CITY)).convert('RGB')
+    # خريطة القاعدة التفاعلية: وسط اللوحة بلا لوحات الواجهة المرسومة على الأطراف
+    cmap = city.crop((255, 75, 1470, 845))
+    u = webp_uri(cmap, 78); total += len(u)
+    entries.append(('city_map', u))
     city.thumbnail((1280, 1280))
     u = webp_uri(city, 68); total += len(u)
     entries.append(('bg_city', u))
