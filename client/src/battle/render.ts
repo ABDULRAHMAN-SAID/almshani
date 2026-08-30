@@ -3,6 +3,8 @@
 import * as THREE from 'three';
 import type { MatchClient } from './game';
 import { membersAlive, sectorOf, type Squad } from '../../../shared/simulation/src/index';
+import { memberGeo, siegeProp, COLD, WARM } from './models';
+import { modelMat, merge, box as gbox, cyl as gcyl, cone as gcone } from '../gfx';
 
 const M = 0.001; // مم → متر
 
@@ -34,7 +36,6 @@ export class BattleRender {
   private ghost!: THREE.Mesh;
   private fx: { mesh: THREE.Mesh; born: number; life: number }[] = [];
   private hqMeshes: THREE.Group[] = [];
-  private memberGeos: Record<string, THREE.BufferGeometry> = {};
   private mats = new Map<number, THREE.MeshLambertMaterial>();
   flipped = false; // اللاعب 1 يرى الميدان من جهته
 
@@ -61,7 +62,7 @@ export class BattleRender {
 
   private setupCamera(): void {
     const s = this.flipped ? 1 : -1;
-    this.camera.position.set(0, 74, s * 40);
+    this.camera.position.set(0, 67, s * 37);
     this.camera.lookAt(0, 0, 0);
   }
 
@@ -106,15 +107,30 @@ export class BattleRender {
       pit.position.set(sx * (a.bridgeHalfWmm * M + pitW / 2), -1.05, 0);
       this.scene.add(pit);
     }
-    const bridge = new THREE.Mesh(
-      new THREE.BoxGeometry(a.bridgeHalfWmm * M * 2, 0.3, a.bridgeZmm * M * 2), this.mat(COL.bridge));
-    bridge.position.y = 0.3;
-    this.scene.add(bridge);
-    for (const sx of [-1, 1]) {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.5, a.bridgeZmm * M * 2), this.mat(COL.stone));
-      rail.position.set(sx * (a.bridgeHalfWmm * M - 0.15), 0.65, 0);
-      this.scene.add(rail);
+    // جسر خشبي بألواح متمايزة وأوتاد حبال + صخور مبعثرة على الميدان
+    const bw = a.bridgeHalfWmm * M * 2, bl = a.bridgeZmm * M * 2;
+    const planks: THREE.BufferGeometry[] = [];
+    const nP = Math.floor(bl / 0.62);
+    for (let i = 0; i < nP; i++) {
+      const tone = i % 3 === 0 ? 0x4a3d2f : i % 3 === 1 ? 0x55493c : 0x5e5142;
+      planks.push(gbox(bw, 0.22, 0.52, tone, 0, 0.28, -bl / 2 + 0.34 + i * 0.62));
     }
+    for (const sx of [-1, 1]) {
+      planks.push(gbox(0.22, 0.55, bl, 0x4a3b2a, sx * (bw / 2 - 0.12), 0.55, 0));
+      for (let i = 0; i < 5; i++) planks.push(gcyl(0.06, 0.08, 0.95, 0x3a2e22, sx * (bw / 2 - 0.12), 0.75, -bl / 2 + i * (bl / 4), 5));
+    }
+    this.scene.add(new THREE.Mesh(merge(planks), modelMat()));
+    const props: THREE.BufferGeometry[] = [];
+    let seedR = 7;
+    const rnd = () => { seedR = (seedR * 16807) % 2147483647; return seedR / 2147483647; };
+    for (let i = 0; i < 16; i++) {
+      const px = (rnd() * 2 - 1) * (a.halfWmm * M - 2.5);
+      const pz = (rnd() * 2 - 1) * (a.fieldZmm * M - 2.5);
+      if (Math.abs(px) < a.sectorEdgeMm * M + 2 && Math.abs(pz) < a.bridgeZmm * M + 2) continue;
+      const sc = 0.4 + rnd() * 0.8;
+      props.push(gbox(sc, sc * 0.7, sc * 0.85, rnd() > 0.5 ? 0x4c463c : 0x59523f, px, sc * 0.3, pz, rnd() * 3));
+    }
+    this.scene.add(new THREE.Mesh(merge(props), modelMat()));
 
     // خطا حدود القطاعات
     for (const sx of [-1, 1]) {
@@ -126,23 +142,33 @@ export class BattleRender {
       this.scene.add(line);
     }
 
-    // المقران
+    // المقران: حصنان بشرفات وبوابة مضيئة ورايات
     for (let p = 0; p < 2; p++) {
       const mine = p === this.mc.you;
       const hq = new THREE.Group();
       const c = mine ? COL.hqMine : COL.hqFoe;
-      const keep = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4.2, 5), this.mat(COL.stone));
-      keep.position.y = 2.1; hq.add(keep);
-      const roof = new THREE.Mesh(new THREE.BoxGeometry(7.3, 0.7, 5.8), this.mat(0x33363d));
-      roof.position.y = 4.5; hq.add(roof);
+      const stone = 0x6e6a60, stoneD = 0x565248;
+      const parts = [
+        gbox(6.5, 4.2, 5, stone, 0, 2.1, 0),
+        gbox(7.3, 0.6, 5.8, stoneD, 0, 4.5, 0)
+      ];
+      for (let i = -3; i <= 3; i++) parts.push(gbox(0.6, 0.55, 0.5, stone, i * 1.05, 5.05, 2.7));
+      for (let i = -3; i <= 3; i++) parts.push(gbox(0.6, 0.55, 0.5, stone, i * 1.05, 5.05, -2.7));
       for (const sx of [-1, 1]) {
-        const tower = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.2, 5.6, 8), this.mat(COL.stone));
-        tower.position.set(sx * 3.6, 2.8, 0); hq.add(tower);
+        parts.push(gcyl(1.0, 1.25, 5.6, stone, sx * 3.7, 2.8, 0, 8));
+        parts.push(gcone(1.3, 1.1, c, sx * 3.7, 6.15, 0, 8));
       }
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 3.2, 6), this.mat(0x2a2118));
-      pole.position.y = 6.4; hq.add(pole);
-      const flag = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.2), new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide }));
-      flag.position.set(1.15, 6.7, 0); hq.add(flag);
+      parts.push(gcyl(0.07, 0.07, 3.4, 0x2a2118, 0, 6.6, 0, 6));
+      hq.add(new THREE.Mesh(merge(parts), modelMat()));
+      const gate = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 2.6),
+        new THREE.MeshBasicMaterial({ color: mine ? 0x6d8db4 : 0xd88a3a }));
+      gate.position.set(0, 1.3, (p === 0 ? 1 : -1) * 2.51);
+      if (p === 1) gate.rotation.y = Math.PI;
+      hq.add(gate);
+      const flag = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.3),
+        new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide }));
+      flag.position.set(1.25, 7.25, 0);
+      hq.add(flag);
       hq.position.set(0, 0, (p === 0 ? -1 : 1) * a.hqZmm * M);
       this.scene.add(hq);
       this.hqMeshes.push(hq);
@@ -207,40 +233,30 @@ export class BattleRender {
     return { x: (v.x * 0.5 + 0.5) * r.width, y: (-v.y * 0.5 + 0.5) * r.height };
   }
 
-  private memberGeo(role: string): THREE.BufferGeometry {
-    if (this.memberGeos[role]) return this.memberGeos[role];
-    const h = role === 'frontline' ? 0.85 : role === 'siege' ? 0.66 : 0.78;
-    const w = role === 'frontline' ? 0.55 : 0.42;
-    const geo = new THREE.BoxGeometry(w, h, 0.34);
-    geo.translate(0, h / 2, 0);
-    this.memberGeos[role] = geo;
-    return geo;
-  }
-
   private mkView(sq: Squad): SquadView {
     const u = this.mc.ctx.units[sq.unit];
     const mine = sq.player === this.mc.you;
     const group = new THREE.Group();
     const members: THREE.Object3D[] = [];
-    const bodyMat = this.mat(mine ? COL.mineBody : COL.foeBody);
-    const headMat = this.mat(mine ? COL.mineHead : COL.foeHead);
-    const headGeo = new THREE.SphereGeometry(0.18, 8, 6);
+    const geo = memberGeo(sq.unit, mine);
+    const mat = modelMat();
+    const big = sq.unit === 'raid_cavalry';
     const siege = u.role === 'siege';
     for (let i = 0; i < u.size; i++) {
-      const m = new THREE.Group();
-      const body = new THREE.Mesh(this.memberGeo(u.role), bodyMat);
-      m.add(body);
-      const head = new THREE.Mesh(headGeo, headMat);
-      head.position.y = 1.0; m.add(head);
-      const r = 0.62 * Math.sqrt(i + 0.4), th = i * 2.39996;
-      m.position.set(Math.cos(th) * r, 0, Math.sin(th) * r);
+      const m = new THREE.Mesh(geo, mat);
+      m.scale.setScalar(1.35); // تكبير بصري: التفاصيل تُقرأ من ارتفاع كاميرا الميدان
+      const spread = big ? 1.05 : 0.78;
+      const r = spread * Math.sqrt(i + 0.4), th = i * 2.39996;
+      // طاقم الحصار يلتف حول الآلة بدل مركزها
+      const rr = siege ? r + 1.2 : r;
+      m.position.set(Math.cos(th) * rr, 0, Math.sin(th) * rr);
+      m.rotation.y = Math.sin(i * 7.3) * 0.2;
       group.add(m);
       members.push(m);
     }
     if (siege) {
-      const engine = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.1, 2.2), this.mat(0x4a3b2a));
-      engine.position.y = 0.55;
-      group.add(engine);
+      const prop = siegeProp(sq.unit, mine ? COLD : WARM);
+      if (prop) group.add(new THREE.Mesh(prop, mat));
     }
     const ring = new THREE.Mesh(
       new THREE.RingGeometry(1.1, 1.35, 24),
@@ -290,7 +306,13 @@ export class BattleRender {
         const m = v.members[i];
         m.visible = i < alive;
         if (m.visible && !landing) {
-          m.position.y = sq.attackedThisTick ? Math.abs(Math.sin(t * 14 + i)) * 0.12 : Math.abs(Math.sin(t * 6 + i * 1.3)) * 0.05;
+          if (sq.attackedThisTick) {
+            m.position.y = Math.abs(Math.sin(t * 14 + i)) * 0.12;
+            m.rotation.x = -0.22 * Math.abs(Math.sin(t * 14 + i));      // اندفاعة الضربة
+          } else {
+            m.position.y = Math.abs(Math.sin(t * 6 + i * 1.3)) * 0.05;
+            m.rotation.x = Math.sin(t * 6 + i * 1.3) * 0.05;            // تمايل المسير
+          }
         }
       }
       // اتجاه المسير العام
@@ -325,8 +347,8 @@ export class BattleRender {
     // بورتريه: كاميرا عالية مائلة تُظهر المقرين معاً
     const portrait = h > w;
     const s = this.flipped ? 1 : -1;
-    this.camera.position.set(0, portrait ? 74 : 52, s * (portrait ? 40 : 34));
-    this.camera.fov = portrait ? 60 : 52;
+    this.camera.position.set(0, portrait ? 67 : 50, s * (portrait ? 37 : 33));
+    this.camera.fov = portrait ? 62 : 53;
     this.camera.lookAt(0, 0, 0);
     this.camera.updateProjectionMatrix();
   }
