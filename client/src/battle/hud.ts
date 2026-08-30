@@ -3,6 +3,7 @@ import { cpCap, handOf, membersAlive, TICKS_PER_SEC, type SimEvent } from '../..
 import type { MatchClient } from './game';
 import type { BattleRender } from './render';
 import { t, unitName, unitMark } from '../i18n';
+import { ART } from '../art';
 
 export class BattleHud {
   private root: HTMLElement;
@@ -94,7 +95,7 @@ export class BattleHud {
       const u = this.mc.ctx.units[uid];
       const el = document.createElement('div');
       el.className = 'slot';
-      el.innerHTML = `<div class="med">${unitMark(uid)}</div><div class="cost">${u?.cost ?? '؟'}</div>`;
+      el.innerHTML = `<div class="med" style="background-image:url('${ART['m_' + uid] ?? ''}')">${ART['m_' + uid] ? '' : unitMark(uid)}</div><div class="cost">${u?.cost ?? '؟'}</div>`;
       el.title = unitName(uid);
       el.addEventListener('pointerdown', ev => { ev.preventDefault(); this.onSlotDrag?.(slot, ev); });
       this.slotsEl.appendChild(el);
@@ -105,7 +106,7 @@ export class BattleHud {
       const nextId = P.deck[P.order[4]];
       const nx = document.createElement('div');
       nx.className = 'slot next';
-      nx.innerHTML = `<div class="med">${unitMark(nextId)}</div><div class="cost">${this.mc.ctx.units[nextId]?.cost ?? '؟'}</div>`;
+      nx.innerHTML = `<div class="med" style="background-image:url('${ART['m_' + nextId] ?? ''}')">${ART['m_' + nextId] ? '' : unitMark(nextId)}</div><div class="cost">${this.mc.ctx.units[nextId]?.cost ?? '؟'}</div>`;
       nx.title = unitName(nextId);
       this.slotsEl.appendChild(nx);
     }

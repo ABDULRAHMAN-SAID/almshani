@@ -60,6 +60,11 @@ input.name {
   background: radial-gradient(circle at 35% 30%, #5a606b, #2c2f36 70%);
   border: 2px solid #6a6f79; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-head); font-weight: 800; font-size: 15px; color: var(--bone); }
+/* بورتريه الوحدة من لوحات المالك — أعلى البطاقة */
+.ucard .port { height: 118px; margin: -10px -8px 8px; border-radius: 9px 9px 0 0;
+  background-size: cover; background-position: center 10%; background-color: #171c28;
+  border-bottom: 1px solid #3a3f48; }
+.ucard.locked .port { filter: grayscale(1) brightness(.65); }
 .ucard .nm { font-size: 12px; font-weight: 600; color: var(--bone); }
 .ucard .meta { font-size: 10px; color: #868b94; margin-top: 3px; }
 .ucard .style { font-size: 9.5px; color: #a08339; margin-top: 4px; line-height: 1.5; min-height: 28px; }
@@ -117,8 +122,9 @@ input.name {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   touch-action: none; user-select: none;
 }
-.slot .med { width: 34px; height: 34px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #5a606b, #2c2f36 70%); border: 2px solid #6a6f79;
+.slot .med { width: 42px; height: 42px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #5a606b, #2c2f36 70%); border: 2px solid #8a7a4a;
+  background-size: cover; background-position: center;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-head); font-weight: 800; font-size: 13px; color: var(--bone); }
 .slot .cost { font-size: 11px; color: var(--gold); font-weight: 700; }
@@ -202,7 +208,7 @@ input.name {
 .ic.supplies { background: radial-gradient(circle at 35% 30%, #a8c47a, #4a6a2a); }
 .ic.tokens { background: radial-gradient(circle at 35% 30%, #9fb6d8, #3d5a80); }
 
-.tabwrap { position: absolute; inset: 0; overflow-y: auto; padding: 64px 14px 78px; }
+.tabwrap { position: absolute; inset: 0; overflow-y: auto; padding: 64px 14px 78px; z-index: 1; }
 .tabwrap h2 { font-family: var(--font-head); font-size: 22px; color: var(--bone); margin: 6px 2px 12px; }
 
 /* شاشة القاعدة */
@@ -264,11 +270,17 @@ input.name {
 .shopcard .d { font-size: 12px; color: #9aa0aa; margin-bottom: 12px; }
 .deckstrip { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
 .deckstrip .mini {
-  width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6a6f79; font-size: 11px;
+  width: 44px; height: 44px; border-radius: 50%; border: 2px solid #8a7a4a; font-size: 11px;
   background: radial-gradient(circle at 35% 30%, #5a606b, #2c2f36 70%);
+  background-size: cover; background-position: center;
   color: var(--bone); font-weight: 800; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-head);
 }
+/* لوحة فنية خلف الشاشة (من لوحات المالك) مع تعتيم للقراءة */
+.artbg { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; }
+.artbg::after { content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,11,14,.45), rgba(10,11,14,.82)); }
+.artover { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .errflash { position: fixed; top: 70px; inset-inline: 0; text-align: center; z-index: 60; pointer-events: none; }
 .errflash span {
   background: #6e2c1e; color: #f2d9cf; border: 1px solid #a4543f; border-radius: 10px;

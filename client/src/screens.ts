@@ -4,6 +4,7 @@ import { UNIT_DEFS, UNIT_IDS, ECONOMY } from '../../shared/definitions/index';
 import type { MatchInfo } from '../../shared/protocol/src/messages';
 import type { MatchResult } from '../../shared/simulation/src/index';
 import { t, unitName, unitMark } from './i18n';
+import { ART } from './art';
 
 export interface Profile { name: string; deck: string[]; wins: number; losses: number; }
 
@@ -33,7 +34,8 @@ function screen(html: string, cls = 'screen'): HTMLElement {
 }
 
 export function showConnecting(): void {
-  screen(`<h1>${t('title')}<small>${t('slice')}</small></h1><div class="sub">${t('connecting')}</div>`);
+  screen(`<div class="artbg" style="background-image:url('${ART.bg_city}')"></div>
+    <div class="artover"><h1>${t('title')}<small>${t('slice')}</small></h1><div class="sub">${t('connecting')}</div></div>`);
 }
 
 // ═══ تبويب القاعدة: المشهد خلفه؛ هنا لافتات فقط ═══
@@ -157,9 +159,9 @@ export function showUnits(profile: Profile, base: any, on: Actions): void {
     const gated = lvl + 1 > barracks;
     const inDeck = deckDraft.includes(id);
     return `<div class="ucard ${isUnlocked ? '' : 'locked'} ${deckEditing && inDeck ? 'sel' : ''}" data-id="${id}">
+      <div class="port" style="background-image:url('${ART['p_' + id] ?? ''}')"></div>
       <div class="cost">${u.costCP}</div>
       <div class="lvlb">م${lvl}</div>
-      <div class="med">${unitMark(id)}</div>
       <div class="nm">${unitName(id)}</div>
       <div class="meta">${t('role_' + u.role)} · ${u.squadSize} ${t('members')}</div>
       <div class="meta">${t('range')} ${u.member.range <= 1.5 ? t('melee') : u.member.range + 'م'} · ${t('dps')} ${Math.round(u.member.dps * u.squadSize)} · ${t('speed')} ${u.member.moveSpeed}</div>
@@ -176,7 +178,8 @@ export function showUnits(profile: Profile, base: any, on: Actions): void {
     <div class="tabwrap">
       <h2>${t('tab_units')}</h2>
       <div class="sub" style="text-align:start;margin-bottom:8px">${t('deck_current')} ${deckEditing ? `— ${deckDraft.length}/8` : ''}</div>
-      <div class="deckstrip">${(deckEditing ? deckDraft : profile.deck).map(id => `<div class="mini" title="${unitName(id)}">${unitMark(id)}</div>`).join('')}</div>
+      <div class="deckstrip">${(deckEditing ? deckDraft : profile.deck).map(id =>
+        `<div class="mini" title="${unitName(id)}" style="background-image:url('${ART['m_' + id] ?? ''}')">${ART['m_' + id] ? '' : unitMark(id)}</div>`).join('')}</div>
       <div class="row" style="margin-bottom:14px">
         <button class="btn ghost" id="b-deck">${deckEditing ? t('deck_save') : t('deck_edit')}</button>
         ${deckEditing ? `<button class="btn ghost" id="b-deck-cancel">${t('cancel')}</button>` : ''}
@@ -213,6 +216,7 @@ export function unitsResetEditing(): void { deckEditing = false; }
 // ═══ تبويب التحدي ═══
 export function showBattleTab(profile: Profile, queued: boolean, on: Actions): void {
   const el = screen(`
+    <div class="artbg" style="background-image:url('${ART.bg_battle}')"></div>
     <div class="tabwrap" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
       <h1 style="font-family:var(--font-head);font-size:30px">${t('tab_battle')}</h1>
       <div class="stats" style="margin:14px 0"><span>${t('wins')}: <b>${profile.wins}</b></span><span>${t('losses')}: <b>${profile.losses}</b></span></div>
