@@ -1,11 +1,13 @@
 // عميل الشبكة — WebSocket بإعادة اتصال تلقائية؛ الرمز يُحفظ محلياً.
 // (استثناء شريحة تطوير: الإنتاج يستبدل هذا بحسابات سحابية — ONLINE_ARCHITECTURE §4)
 import type { ClientMsg, ServerMsg } from '../../shared/protocol/src/messages';
+import { LocalServer } from './solo-server';
 
 export type NetHandler = (msg: ServerMsg) => void;
 
 export class Net {
   private ws: WebSocket | null = null;
+  private local: LocalServer | null = null;
   private handlers = new Set<NetHandler>();
   private retryMs = 500;
   connected = false;
@@ -13,6 +15,16 @@ export class Net {
   pendingName: string | null = null;
 
   connect(): void {
+    // نسخة فردية منشورة (بلا خادم): منطق الخادم يعمل داخل الصفحة
+    if ((window as any).SOLO) {
+      this.local = new LocalServer(msg => {
+        queueMicrotask(() => { for (const h of this.handlers) h(msg); });
+      });
+      this.connected = true;
+      this.onConnChange?.(true);
+      queueMicrotask(() => this.local!.handle({ t: 'hello', name: this.pendingName ?? undefined }));
+      return;
+    }
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
     this.ws = new WebSocket(`${proto}://${location.host}/ws`);
     this.ws.onopen = () => {
@@ -41,6 +53,7 @@ export class Net {
   }
 
   send(msg: ClientMsg): void {
+    if (this.local) { this.local.handle(msg); return; }
     if (this.ws && this.ws.readyState === WebSocket.OPEN) this.ws.send(JSON.stringify(msg));
   }
 

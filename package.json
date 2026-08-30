@@ -7,12 +7,13 @@
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
-    "build:client": "esbuild client/src/main.ts --bundle --format=iife --outfile=client/dist/bundle.js --log-level=warning && cp client/static/index.html client/static/styles.css client/dist/",
+    "build:client": "esbuild client/src/main.ts --bundle --format=iife --define:process.env.BASE_SPEED='\"1\"' --outfile=client/dist/bundle.js --log-level=warning && cp client/static/index.html client/static/styles.css client/dist/",
     "build:server": "esbuild server/src/index.ts --bundle --platform=node --format=esm --external:ws --outfile=server/dist/index.js --log-level=warning",
     "build": "npm run build:client && npm run build:server",
     "start": "node server/dist/index.js",
     "test:sim": "esbuild shared/simulation/test/sim.test.ts --bundle --platform=node --outfile=.build/sim.test.js --log-level=warning && node .build/sim.test.js",
-    "sim": "esbuild tools/sim-runner/run.ts --bundle --platform=node --outfile=.build/sim-runner.js --log-level=warning && node .build/sim-runner.js"
+    "sim": "esbuild tools/sim-runner/run.ts --bundle --platform=node --outfile=.build/sim-runner.js --log-level=warning && node .build/sim-runner.js",
+    "build:artifact": "esbuild client/src/main.ts --bundle --minify --format=iife --define:process.env.BASE_SPEED='\"1\"' --outfile=client/dist/bundle.solo.js --log-level=warning"
   },
   "repository": {
     "type": "git",
