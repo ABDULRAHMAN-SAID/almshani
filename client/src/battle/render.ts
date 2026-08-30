@@ -50,6 +50,8 @@ export class BattleRender {
   private stoneGeo = new THREE.SphereGeometry(0.22, 6, 5);
   private shotMats = new Map<number, THREE.MeshBasicMaterial>();
   private hqMeshes: THREE.Group[] = [];
+  private gateDoors: (THREE.Mesh | null)[] = [null, null];
+  private flagMarks: (THREE.Group | null)[] = [null, null];
   private mats = new Map<number, THREE.MeshLambertMaterial>();
   flipped = false; // اللاعب 1 يرى الميدان من جهته
 
@@ -186,6 +188,33 @@ export class BattleRender {
       hq.position.set(0, 0, (p === 0 ? -1 : 1) * a.hqZmm * M);
       this.scene.add(hq);
       this.hqMeshes.push(hq);
+
+      // سور البوابة (المرحلة الأولى من القلعة): جداران وبوابة خشبية قابلة للكسر
+      const gz = (p === 0 ? -1 : 1) * a.gateZmm * M;
+      const wallParts: THREE.BufferGeometry[] = [];
+      const wallHalf = a.halfWmm * M;
+      for (const side of [-1, 1]) {
+        const segW = wallHalf - 2.6;
+        wallParts.push(gbox(segW, 3.4, 1.6, stone, side * (2.6 + segW / 2), 1.7, 0));
+        for (let i = 0; i < Math.floor(segW / 1.4); i++) {
+          wallParts.push(gbox(0.7, 0.5, 1.0, stoneD, side * (2.9 + i * 1.4), 3.65, 0));
+        }
+        wallParts.push(gbox(1.4, 4.6, 1.9, stone, side * 2.7, 2.3, 0));
+        wallParts.push(gcone(1.0, 0.9, c, side * 2.7, 5.05, 0, 6));
+      }
+      const wall = new THREE.Mesh(merge(wallParts), modelMat());
+      wall.position.z = gz;
+      this.scene.add(wall);
+      const doors = new THREE.Mesh(
+        merge([
+          gbox(1.9, 3.6, 0.35, 0x5c4a38, -1.0, 1.8, 0),
+          gbox(1.9, 3.6, 0.35, 0x5c4a38, 1.0, 1.8, 0),
+          gbox(3.9, 0.28, 0.4, 0x3a2e22, 0, 1.2, 0),
+          gbox(3.9, 0.28, 0.4, 0x3a2e22, 0, 2.6, 0)
+        ]), modelMat());
+      doors.position.z = gz;
+      this.scene.add(doors);
+      this.gateDoors[p] = doors;
     }
 
     // منطقتا النشر (تظهران أثناء السحب)
@@ -280,7 +309,7 @@ export class BattleRender {
     const members: THREE.Object3D[] = [];
     const geo = memberGeo(sq.unit, mine);
     const mat = modelMat();
-    const big = sq.unit === 'raid_cavalry';
+    const big = sq.unit === 'hollow_knights' || sq.unit === 'stone_golem';
     const siege = u.role === 'siege';
     for (let i = 0; i < u.size; i++) {
       const m = new THREE.Mesh(geo, mat);
@@ -394,11 +423,12 @@ export class BattleRender {
         const m = v.members[i];
         m.visible = i < alive;
         if (m.visible && !landing) {
+          const flyBase = mc.ctx.units[sq.unit].flying ? 2.1 + Math.sin(t * 3 + i) * 0.25 : 0;
           if (sq.attackedThisTick) {
-            m.position.y = Math.abs(Math.sin(t * 14 + i)) * 0.12;
+            m.position.y = flyBase + Math.abs(Math.sin(t * 14 + i)) * 0.12;
             m.rotation.x = -0.22 * Math.abs(Math.sin(t * 14 + i));      // اندفاعة الضربة
           } else {
-            m.position.y = Math.abs(Math.sin(t * 6 + i * 1.3)) * 0.05;
+            m.position.y = flyBase + Math.abs(Math.sin(t * 6 + i * 1.3)) * 0.05;
             m.rotation.x = Math.sin(t * 6 + i * 1.3) * 0.05;            // تمايل المسير
           }
         }
@@ -429,11 +459,37 @@ export class BattleRender {
           tx = 0;
         }
         const sxm = pose.x * M, szm = pose.z * M;
-        if (sq.unit === 'catapult') this.fireShot(sxm, szm, tx!, tz!, 'boulder');
-        else if (sq.unit === 'flame_archers') { this.fireShot(sxm, szm, tx!, tz!, 'flame'); this.fireShot(sxm + 0.5, szm, tx! + 0.4, tz!, 'flame', 90); }
-        else if (sq.unit === 'light_slingers') this.fireShot(sxm, szm, tx!, tz!, 'stone');
+        if (sq.unit === 'flame_casters') { this.fireShot(sxm, szm, tx!, tz!, 'flame'); this.fireShot(sxm + 0.5, szm, tx! + 0.4, tz!, 'flame', 90); }
         else if (uu.slowMill > 0) this.fireShot(sxm, szm, tx!, tz!, 'ice');
         else if (uu.role === 'ranged') { this.fireShot(sxm, szm, tx!, tz!, 'arrow'); this.fireShot(sxm - 0.5, szm + 0.3, tx! + 0.5, tz! - 0.3, 'arrow', 110); }
+      }
+    }
+    // بوابتا القلعتين: تختفي الأبواب عند الكسر — يُفتح الفناء
+    for (let p = 0; p < 2; p++) {
+      const doors = this.gateDoors[p];
+      if (doors) doors.visible = mc.st.players[p].gateHpCenti > 0;
+      // راية القيادة النشطة
+      const P = mc.st.players[p];
+      const active = P.flagUntilTick > mc.st.tick;
+      let fm = this.flagMarks[p];
+      if (active && !fm) {
+        fm = new THREE.Group();
+        const mine = p === mc.you;
+        const col = mine ? COL.hqMine : COL.hqFoe;
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 3.4, 6), this.mat(0x54432f));
+        pole.position.y = 1.7; fm.add(pole);
+        const cloth = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.0),
+          new THREE.MeshLambertMaterial({ color: col, side: THREE.DoubleSide }));
+        cloth.position.set(0.85, 2.8, 0); fm.add(cloth);
+        const ring = new THREE.Mesh(new THREE.RingGeometry(mc.ctx.arena.flagRadiusMm * M - 0.2, mc.ctx.arena.flagRadiusMm * M, 48),
+          new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0.3, side: THREE.DoubleSide }));
+        ring.rotation.x = -Math.PI / 2; ring.position.y = 0.3; fm.add(ring);
+        this.scene.add(fm);
+        this.flagMarks[p] = fm;
+      }
+      if (fm) {
+        fm.visible = active;
+        if (active) fm.position.set(P.flagX * M, 0, P.flagZ * M);
       }
     }
     // دوائر مدى الفرقة المختارة تلاحقها

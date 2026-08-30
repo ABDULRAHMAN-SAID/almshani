@@ -1,0 +1,35 @@
+{
+  "id": "vale_archers",
+  "role": "ranged",
+  "faction": "kingdom_legion",
+  "squadSize": 8,
+  "costCP": 3,
+  "musterSec": 0,
+  "member": {
+    "hp": 55,
+    "dps": 6.9,
+    "range": 9.0,
+    "moveSpeed": 2.6
+  },
+  "targeting": "nearest_in_range",
+  "tags": [],
+  "counters": {
+    "frontline": 1.3,
+    "support": 1.4,
+    "flying": 2.0
+  },
+  "counteredBy": {
+    "cavalry": 2.0,
+    "assassin": 1.6
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_vale_archers",
+    "nameKey": "unit.vale_archers.name"
+  }
+}

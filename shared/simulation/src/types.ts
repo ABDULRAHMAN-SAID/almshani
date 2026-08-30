@@ -1,9 +1,11 @@
 // أنواع المحاكاة — كل القيم الجارية أعداد صحيحة (مليمتر / سنتي-صحة / ملي-نقطة / تكّات)
 // كي تكون النتيجة متطابقة بتاً على كل منصة (شرط الشبكة والإعادات).
+// آليات توجيه المالك: قلعة بمرحلتين (بوابة→قلب)، يد 4 من تشكيلة 8، راية قيادة،
+// طيران/اغتيال/هالة/Charge، مستويات 1–10.
 
 export type Role = 'frontline' | 'ranged' | 'cavalry' | 'support' | 'siege' | 'special';
 export type PlayerIx = 0 | 1;
-export type SectorIx = 0 | 1 | 2; // أيسر، أوسط، أيمن
+export type SectorIx = 0 | 1 | 2; // الممر الأيسر، الأوسط، الأيمن
 
 // تعريف وحدة محوَّل إلى وحدات صحيحة (من shared/definitions/units/*.json)
 export interface RtUnit {
@@ -11,11 +13,10 @@ export interface RtUnit {
   role: Role;
   size: number;
   cost: number;
-  musterTicks: number;
   memberHpCenti: number;      // صحة الفرد ×100
   squadHpCenti: number;       // صحة الفرقة الكاملة ×100
   dmgCentiPerTick: number;    // ضرر الفرقة الكاملة لكل تكّة (ضد الفرق)
-  hqDmgCentiPerTick: number;  // ضرر الفرقة الكاملة لكل تكّة ضد المقر
+  hqDmgCentiPerTick: number;  // ضرر الفرقة الكاملة لكل تكّة ضد المباني
   rangeMm: number;
   minRangeMm: number;
   seekMm: number;             // مدى الالتفات للأعداء
@@ -23,61 +24,73 @@ export interface RtUnit {
   tags: string[];
   counters: Record<string, number>;     // ‰ (بالألف)
   counteredBy: Record<string, number>;  // ‰
-  fromRangedMill: number;               // معدِّل الضرر الوارد من الرمي ‰ (حرس الدروع 600)
+  fromRangedMill: number;               // معدِّل الضرر الوارد من الرمي ‰
   healCentiPerTick: number;
-  slowMill: number;                     // إبطاء ساحرة الصقيع ‰ من السرعة المفقودة (350)
+  slowMill: number;
   slowRadiusMm: number;
-  areaRadiusMm: number;                 // ضرر منطقة (رماة اللهب)
+  areaRadiusMm: number;                 // ضرر منطقة (قاذفو اللهب)
   buildingsOnly: boolean;
-  priorityBackline: boolean;            // فرسان: الرمي/الحصار/الإسناد أولاً
+  priorityBackline: boolean;            // فرسان/ظلال/خفافيش: الخلف أولاً
   healer: boolean;
+  flying: boolean;                      // يتجاوز الهوة والبوابة؛ الالتحام الأرضي لا يطاله
+  charge: boolean;                      // ضربة أولى مضاعفة بعد مسير حر
+  auraRadiusMm: number;                 // هالة حماة الراية
+  auraMill: number;                     // ‰ إضافة الهالة (1150 = +15%)
 }
 
 export interface Squad {
   id: number;
   player: PlayerIx;
-  unit: string;          // مفتاح RtUnit
-  slot: number;          // خانة القيادة التي نُشر منها
-  x: number;             // مم
-  z: number;             // مم
+  unit: string;
+  slot: number;              // خانة اليد التي نُشر منها (للعرض)
+  x: number;                 // مم
+  z: number;                 // مم
   hpCenti: number;
-  memberHpCenti: number; // صحة الفرد الفعلية (بعد مستوى الوحدة)
-  dmgMill: number;       // معدِّل ضرر المستوى ‰
-  landingTicks: number;  // >0: ما زال ينزل (لا يتحرك ولا يهاجم، لكنه يُستهدف)
-  targetId: number;      // -1 لا هدف، -2 مقر الخصم، وإلا معرّف فرقة
-  wayX: number | null;   // أمر Rally
+  memberHpCenti: number;     // صحة الفرد الفعلية (بعد المستوى)
+  dmgMill: number;           // معدِّل المستوى ‰ (1000 + 30×(المستوى−1))
+  landingTicks: number;
+  targetId: number;          // -1 لا هدف، -2 بوابة/قلب الخصم، وإلا فرقة
+  wayX: number | null;
   wayZ: number | null;
   rallyReadyTick: number;
   slowUntilTick: number;
-  attackedThisTick: boolean; // للعميل: هل ضرب هذه التكّة (وميض/صوت)
+  chargeReady: boolean;      // فرسان الجوف: الضربة الأولى مضاعفة
+  noTargetTicks: number;     // لإعادة تعبئة الـCharge بعد مسير حر
+  buffMill: number;          // هالة الراية هذه التكّة (عابر — لا يدخل التجزئة)
+  attackedThisTick: boolean;
 }
 
 export interface PlayerState {
   name: string;
   isBot: boolean;
-  unitLevels: Record<string, number>; // مستوى كل وحدة (1..5) — من قاعدة اللاعب
+  unitLevels: Record<string, number>;   // 1..10
   cp: number;
   regenCounter: number;
-  deck: string[];                 // 7 وحدات
-  musterReadyTick: number[];      // لكل خانة
-  hqHpCenti: number;
-  hqDamageDealtCenti: number;     // مجموع ما ألحقه بمقر الخصم
+  deck: string[];                       // 8 وحدات
+  order: number[];                      // دورة التشكيلة: أول 4 = اليد
+  gateHpCenti: number;                  // بوابة القلعة — المرحلة الأولى
+  hqHpCenti: number;                    // قلب القلعة — تدميره نصر فوري
+  hqDamageDealtCenti: number;           // ما ألحقه بقلب الخصم (كسر التعادل)
+  flagX: number;                        // راية القيادة
+  flagZ: number;
+  flagUntilTick: number;
+  flagReadyTick: number;
   scoreMilli: number;
   skillUsed: boolean;
   surrendered: boolean;
-  forward: boolean[];             // فتح النشر المتقدم لكل قطاع
-  controlTicks: number[];         // سيطرة متواصلة لكل قطاع
+  forward: boolean[];
+  controlTicks: number[];
 }
 
 export type Phase = 'main' | 'overtime' | 'ended';
 
 export interface MatchResult {
-  winner: -1 | 0 | 1;             // -1 تعادل
+  winner: -1 | 0 | 1;
   reason: 'hq' | 'score' | 'overtime_margin' | 'hq_damage' | 'draw' | 'surrender' | 'timeout_forfeit';
 }
 
 export interface SimEvent {
-  t: 'deploy' | 'kill' | 'hq' | 'skill' | 'forward' | 'phase' | 'end' | 'reject';
+  t: 'deploy' | 'kill' | 'hq' | 'gate' | 'gate_down' | 'skill' | 'flag' | 'forward' | 'phase' | 'end' | 'reject';
   player?: PlayerIx;
   squadId?: number;
   unit?: string;
@@ -97,15 +110,16 @@ export interface SimState {
   nextSquadId: number;
   squads: Squad[];
   players: [PlayerState, PlayerState];
-  midController: -1 | 0 | 1;      // مَن يسيطر على الوسط هذه التكّة (لتجدد CP)
+  midController: -1 | 0 | 1;
   sectorController: (-1 | 0 | 1)[];
   result: MatchResult | null;
 }
 
 // أوامر اللاعب (النوايا بعد ختمها بالتكّة) — الشيء الوحيد الذي يعبر الشبكة
 export type Command =
-  | { type: 'deploy'; player: PlayerIx; slot: number; x: number; z: number }
+  | { type: 'deploy'; player: PlayerIx; slot: number; x: number; z: number }  // slot: خانة اليد 0..3
   | { type: 'rally'; player: PlayerIx; squadId: number; x: number; z: number }
+  | { type: 'flag'; player: PlayerIx; x: number; z: number }                  // راية القيادة
   | { type: 'skill'; player: PlayerIx; x: number; z: number }
   | { type: 'surrender'; player: PlayerIx };
 
@@ -114,21 +128,23 @@ export interface TickInput {
   commands: Command[];
 }
 
-// ثوابت الساحة (من shared/definitions/arenas/*.json) محوَّلة إلى وحدات صحيحة
 export interface RtArena {
   id: string;
-  halfWmm: number;          // نصف العرض
-  fieldZmm: number;         // حد أرض المعركة على محور z
-  hqZmm: number;            // موضع المقر
+  halfWmm: number;
+  fieldZmm: number;
+  hqZmm: number;            // موضع قلب القلعة
   hqRadiusMm: number;
-  hqHpCenti: number;
+  hqHpCenti: number;        // صحة القلب
+  gateZmm: number;          // موضع البوابة (أمام القلعة)
+  gateRadiusMm: number;
+  gateHpCenti: number;      // صحة البوابة
   hqDefDmgCentiPerTick: number;
-  hqDefRangeMm: number;     // بعد خاصية القائد
-  bridgeHalfWmm: number;    // نصف عرض الجسر في القطاع الأوسط
-  bridgeZmm: number;        // نطاق الجسر على z
-  sectorEdgeMm: number;     // حد القطاع الأوسط على x
-  deployOwnZmm: number;     // حد النشر الأساسي
-  deployForwardZmm: number; // حد النشر المتقدم
+  hqDefRangeMm: number;
+  bridgeHalfWmm: number;
+  bridgeZmm: number;
+  sectorEdgeMm: number;
+  deployOwnZmm: number;
+  deployForwardZmm: number;
   cpStart: number;
   cpCap: number;
   cpCapOvertime: number;
@@ -137,15 +153,20 @@ export interface RtArena {
   mainTicks: number;
   overtimeTicks: number;
   forwardHoldTicks: number;
-  graceTicks: number;       // لا نقاط سيطرة قبلها
+  graceTicks: number;
   landingTicks: number;
   maxLiveSquads: number;
   rallyCooldownTicks: number;
+  flagDurTicks: number;     // مدة راية القيادة
+  flagCdTicks: number;      // تبريدها
+  flagRadiusMm: number;     // نطاق تسريعها
   scoreSectorMilliPerTick: number;
   scoreMidMilliPerTick: number;
   scoreKillMilli: number;
+  scoreGateDownMilli: number;   // مكافأة كسر البوابة
   winMarginMainMilli: number;
   winMarginOvertimeMilli: number;
+  otVulnMill: number;           // ‰ زيادة ضرر المباني في الوقت الإضافي
   skillChargeTicks: number;
   skillRadiusMm: number;
   skillDmgCenti: number;

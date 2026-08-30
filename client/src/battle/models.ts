@@ -154,36 +154,63 @@ function wolf(p: Palette): THREE.BufferGeometry[] {
 
 // ── آلات الحصار (تُعرض كهيكل مركزي وطاقم حوله) ─────────────────
 export function siegeProp(unit: string, p: Palette): THREE.BufferGeometry | null {
-  if (unit === 'iron_ram') {
+  if (unit === 'siege_engineers') {
     return merge([
-      box(1.5, 0.14, 2.6, 0x6a5540, 0, 1.15, 0),                // سقف
+      box(1.5, 0.14, 2.6, 0x6a5540, 0, 1.15, 0),
       box(1.6, 0.1, 2.7, p.armorDark, 0, 1.24, 0),
       ...[-0.65, 0.65].flatMap(x => [-1.05, 1.05].map(z => cyl(0.06, 0.06, 1.1, 0x54432f, x, 0.6, z, 5))),
-      cyl(0.16, 0.16, 2.4, 0x54432f, 0, 0.7, 0, 7, 0, Math.PI / 2),  // جذع الكبش
-      box(0.4, 0.4, 0.34, p.metal, 0, 0.7, 1.3),                // رأس حديدي
+      cyl(0.16, 0.16, 2.4, 0x54432f, 0, 0.7, 0, 7, 0, Math.PI / 2),
+      box(0.4, 0.4, 0.34, p.metal, 0, 0.7, 1.3),
       ...[-0.7, 0.7].flatMap(x => [-0.9, 0.9].map(z => cyl(0.22, 0.22, 0.12, 0x4a3b2a, x, 0.22, z, 9, 0, Math.PI / 2)))
     ]);
   }
-  if (unit === 'catapult') {
-    return merge([
-      box(0.5, 0.16, 2.1, 0x6a5540, -0.55, 0.3, 0),
-      box(0.5, 0.16, 2.1, 0x6a5540, 0.55, 0.3, 0),
-      box(1.5, 0.14, 0.5, 0x6a5540, 0, 0.34, -0.7),
-      ...[-0.75, 0.75].flatMap(x => [-0.75, 0.75].map(z => cyl(0.26, 0.26, 0.14, 0x4a3b2a, x, 0.26, z, 9, 0, Math.PI / 2))),
-      box(0.4, 0.9, 0.4, p.armorDark, 0, 0.75, -0.6),           // ثقل
-      cyl(0.06, 0.06, 2.1, 0x54432f, 0, 1.0, 0.15, 6, 0, -0.85), // الذراع مائلة
-      ball(0.2, 0x3a3630, 0, 1.75, 0.95),                        // القذيفة في الكفة
-      cyl(0.05, 0.05, 1.4, 0x54432f, 0, 0.55, 0.2, 5, 0, Math.PI / 2)
-    ]);
-  }
   return null;
+}
+
+// خفاش يركبه جندي — طيران
+function batRider(p: Palette): THREE.BufferGeometry[] {
+  const bat = 0x3a3540, wing = 0x2e2a34;
+  return [
+    ball(0.34, bat, 0, 0.5, 0, 8, 6, 0.75),                       // جسد الخفاش
+    box(0.18, 0.16, 0.26, bat, 0, 0.62, 0.34),                    // رأس
+    box(0.04, 0.05, 0.03, 0xd8b04a, -0.06, 0.66, 0.46),
+    box(0.04, 0.05, 0.03, 0xd8b04a, 0.06, 0.66, 0.46),
+    ...[-0.07, 0.07].map(x => cone(0.045, 0.14, bat, x, 0.8, 0.3, 4)),
+    box(1.15, 0.04, 0.55, wing, -0.75, 0.6, -0.05, 0, 0.35),      // جناحان
+    box(1.15, 0.04, 0.55, wing, 0.75, 0.6, -0.05, 0, -0.35),
+    // الراكب
+    box(0.3, 0.36, 0.2, p.armor, 0, 0.95, -0.1),
+    ball(0.13, p.skin, 0, 1.24, -0.1),
+    ball(0.15, p.metal, 0, 1.29, -0.11, 8, 5, 0.8),
+    box(0.04, 0.04, 0.03, EYE, -0.05, 1.26, 0.02),
+    box(0.04, 0.04, 0.03, EYE, 0.05, 1.26, 0.02)
+  ];
+}
+
+// غولم حجري ضخم
+function golem(p: Palette): THREE.BufferGeometry[] {
+  const rock = 0x5e5850, rockD = 0x494440;
+  return [
+    box(1.15, 1.2, 0.75, rock, 0, 1.15, 0),
+    box(0.95, 0.5, 0.65, rockD, 0, 0.45, 0),
+    box(0.42, 0.9, 0.42, rockD, -0.42, 0.45, 0.05),
+    box(0.42, 0.9, 0.42, rockD, 0.42, 0.45, 0.05),
+    box(0.4, 1.1, 0.4, rock, -0.85, 1.15, 0, 0, 0.12),
+    box(0.4, 1.1, 0.4, rock, 0.85, 1.15, 0, 0, -0.12),
+    box(0.5, 0.45, 0.45, rockD, -0.9, 0.5, 0.1),
+    box(0.5, 0.45, 0.45, rockD, 0.9, 0.5, 0.1),
+    box(0.6, 0.5, 0.5, rock, 0, 2.05, 0.05),
+    box(0.07, 0.09, 0.04, 0xd88a3a, -0.14, 2.1, 0.31),            // عينان متوهجتان
+    box(0.07, 0.09, 0.04, 0xd88a3a, 0.14, 2.1, 0.31),
+    box(0.8, 0.25, 0.6, p.armorDark, 0, 1.82, 0)                  // كتف بلون الجهة
+  ];
 }
 
 // ── الفرد المكتمل لكل وحدة ──────────────────────────────────────
 function humanoid(p: Palette, opts: {
   helmet?: 'cap' | 'crest' | 'hood' | 'none';
   hoodHex?: number;
-  weapon?: 'spear' | 'axe' | 'bow' | 'staff' | 'sling' | 'none';
+  weapon?: 'spear' | 'axe' | 'bow' | 'staff' | 'hammer' | 'dagger' | 'banner' | 'none';
   glow?: number;
   shield?: 'round' | 'tower' | 'none';
   robe?: number;
@@ -206,7 +233,16 @@ function humanoid(p: Palette, opts: {
   else if (opts.weapon === 'axe') parts.push(...axe(p));
   else if (opts.weapon === 'bow') parts.push(...bow(p));
   else if (opts.weapon === 'staff') parts.push(...staff(opts.glow ?? p.accent));
-  else if (opts.weapon === 'sling') parts.push(cyl(0.02, 0.02, 0.55, p.leather, 0.32, 0.85, 0.05, 4, 0.5), ball(0.06, 0x3a3630, 0.32, 0.6, 0.15));
+  else if (opts.weapon === 'hammer') parts.push(
+    cyl(0.03, 0.03, 0.9, 0x6a5540, 0.32, 0.95, 0.08, 5),
+    box(0.16, 0.16, 0.3, p.metal, 0.32, 1.34, 0.12));
+  else if (opts.weapon === 'dagger') parts.push(
+    box(0.03, 0.3, 0.05, p.metal, 0.3, 0.72, 0.14, 0, -0.4),
+    box(0.03, 0.3, 0.05, p.metal, -0.3, 0.72, 0.14, 0, 0.4));
+  else if (opts.weapon === 'banner') parts.push(
+    cyl(0.035, 0.035, 2.5, 0x54432f, 0.32, 1.3, 0.05, 5),
+    box(0.65, 0.45, 0.03, p.armor, 0.62, 2.3, 0.05),
+    box(0.65, 0.06, 0.04, p.accent, 0.62, 2.06, 0.05));
   if (opts.shield === 'round') parts.push(...roundShield(p));
   else if (opts.shield === 'tower') parts.push(...towerShield(p));
   return merge(parts);
@@ -220,17 +256,17 @@ export function memberGeo(unit: string, mine: boolean): THREE.BufferGeometry {
   if (g) return g;
   const p = mine ? COLD : WARM;
   switch (unit) {
-    case 'spear_wall': g = humanoid(p, { helmet: 'cap', weapon: 'spear', shield: 'round' }); break;
-    case 'shield_guard': g = humanoid(p, { helmet: 'crest', shield: 'tower', weapon: 'none' }); break;
-    case 'axe_warriors': g = humanoid(p, { helmet: 'none', weapon: 'axe', cape: false }); break;
-    case 'archers': g = humanoid(p, { helmet: 'cap', weapon: 'bow' }); break;
-    case 'light_slingers': g = humanoid(p, { helmet: 'none', weapon: 'sling' }); break;
-    case 'flame_archers': g = humanoid(p, { helmet: 'hood', hoodHex: 0x3a2a24, weapon: 'bow', glow: 0xd88a3a }); break;
-    case 'raid_cavalry': g = merge([...horse(p, mine ? 0x4a3b2c : 0x3a2c22), ...rider(p)]); break;
-    case 'north_wolves': g = merge(wolf(p)); break;
-    case 'field_medic': g = humanoid(p, { helmet: 'hood', hoodHex: 0x8a8272, robe: 0x8a8272, weapon: 'staff', glow: 0x9fb86a }); break;
-    case 'frost_witch': g = humanoid(p, { helmet: 'hood', hoodHex: 0x31404f, robe: 0x31404f, weapon: 'staff', glow: 0x9fd0e8 }); break;
-    case 'iron_ram': case 'catapult': g = humanoid(p, { helmet: 'cap', weapon: 'none' }); break;
+    case 'steel_guard': g = humanoid(p, { helmet: 'crest', shield: 'tower', weapon: 'none' }); break;
+    case 'vale_archers': g = humanoid(p, { helmet: 'cap', weapon: 'bow' }); break;
+    case 'spear_bearers': g = humanoid(p, { helmet: 'cap', weapon: 'spear', shield: 'round' }); break;
+    case 'hollow_knights': g = merge([...horse(p, mine ? 0x4a3b2c : 0x3a2c22), ...rider(p),
+      ...spear(p, 0.42).map(x => x.translate(0, 0.55, 0.2) as any)]); break;
+    case 'flame_casters': g = humanoid(p, { helmet: 'hood', hoodHex: 0x3a2a24, weapon: 'staff', glow: 0xd88a3a }); break;
+    case 'bat_riders': g = merge(batRider(p)); break;
+    case 'siege_engineers': g = humanoid(p, { helmet: 'cap', weapon: 'hammer' }); break;
+    case 'banner_guards': g = humanoid(p, { helmet: 'cap', weapon: 'banner', shield: 'round' }); break;
+    case 'running_shadows': g = humanoid(p, { helmet: 'hood', hoodHex: 0x22202a, weapon: 'dagger', cape: true }); break;
+    case 'stone_golem': g = merge(golem(p)); break;
     default: g = humanoid(p, { helmet: 'cap', weapon: 'spear' });
   }
   cache.set(key, g);

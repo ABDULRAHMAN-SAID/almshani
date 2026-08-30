@@ -5,7 +5,7 @@ import { UNIT_DEFS, ARENAS, COMMANDERS, DEFAULT_DECK } from '../../shared/defini
 import { buildUnits, buildArena } from '../../shared/simulation/src/index';
 import {
   newBase, baseView, startUpgrade, trainUnit, claimMission, openFreeChest,
-  battleReward, unlockedUnits, type BaseState
+  battleReward, unlockedUnits, collectBuilding, type BaseState
 } from '../../server/src/empire';
 import { MatchRoom, type Seat } from '../../server/src/match';
 import type { ClientMsg, ServerMsg } from '../../shared/protocol/src/messages';
@@ -75,7 +75,7 @@ export class LocalServer {
       case 'setDeck': {
         const deck = Array.isArray(msg.deck) ? msg.deck.map(String) : [];
         const unlocked = unlockedUnits(this.acc.base);
-        if (deck.length !== 7 || new Set(deck).size !== 7 ||
+        if (deck.length !== 8 || new Set(deck).size !== 8 ||
             deck.some(u => !UNIT_DEFS[u] || !unlocked.includes(u))) {
           this.deliver({ t: 'error', code: 'deck_units' });
           break;
@@ -109,6 +109,7 @@ export class LocalServer {
       case 'trainUnit': this.sendBase(trainUnit(this.acc.base, String(msg.id), Date.now())); break;
       case 'claimMission': this.sendBase(claimMission(this.acc.base, String(msg.id), Date.now())); break;
       case 'freeChest': this.sendBase(openFreeChest(this.acc.base, Date.now())); break;
+      case 'collectBuilding': this.sendBase(collectBuilding(this.acc.base, String(msg.id), Date.now())); break;
     }
   }
 

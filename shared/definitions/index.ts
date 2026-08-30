@@ -1,16 +1,15 @@
 // المصدر الوحيد لتعريفات اللعبة — يُستهلك من العميل والخادم والأدوات معاً.
-import spear_wall from './units/spear_wall.json';
-import shield_guard from './units/shield_guard.json';
-import axe_warriors from './units/axe_warriors.json';
-import archers from './units/archers.json';
-import light_slingers from './units/light_slingers.json';
-import flame_archers from './units/flame_archers.json';
-import raid_cavalry from './units/raid_cavalry.json';
-import north_wolves from './units/north_wolves.json';
-import field_medic from './units/field_medic.json';
-import frost_witch from './units/frost_witch.json';
-import iron_ram from './units/iron_ram.json';
-import catapult from './units/catapult.json';
+// الوحدات العشر من توجيه المالك (docs/OWNER_DIRECTIVE.md §11).
+import steel_guard from './units/steel_guard.json';
+import vale_archers from './units/vale_archers.json';
+import spear_bearers from './units/spear_bearers.json';
+import hollow_knights from './units/hollow_knights.json';
+import flame_casters from './units/flame_casters.json';
+import bat_riders from './units/bat_riders.json';
+import siege_engineers from './units/siege_engineers.json';
+import banner_guards from './units/banner_guards.json';
+import running_shadows from './units/running_shadows.json';
+import stone_golem from './units/stone_golem.json';
 import sera from './commanders/sera.json';
 import border_fort from './arenas/border_fort.json';
 import economy from './economy.json';
@@ -20,8 +19,7 @@ import ar from './locales/ar.json';
 import en from './locales/en.json';
 
 export const UNIT_DEFS: Record<string, any> = {
-  spear_wall, shield_guard, axe_warriors, archers, light_slingers, flame_archers,
-  raid_cavalry, north_wolves, field_medic, frost_witch, iron_ram, catapult
+  steel_guard, vale_archers, spear_bearers, hollow_knights, flame_casters, bat_riders, siege_engineers, banner_guards, running_shadows, stone_golem
 };
 export const UNIT_IDS = Object.keys(UNIT_DEFS);
 export const COMMANDERS: Record<string, any> = { sera };
@@ -31,6 +29,8 @@ export const BUILDINGS: Record<string, any> = (buildings as any).buildings;
 export const BUILDINGS_META: any = (buildings as any).meta;
 export const MISSIONS: any[] = missions as any[];
 export const LOCALES: Record<string, Record<string, string>> = { ar, en };
+// تشكيلة الدخول: 8 وحدات (يد 4 + دورة) — البند 8 من التوجيه
 export const DEFAULT_DECK = [
-  'spear_wall', 'shield_guard', 'archers', 'flame_archers', 'raid_cavalry', 'field_medic', 'catapult'
+  'spear_bearers', 'vale_archers', 'steel_guard', 'hollow_knights',
+  'flame_casters', 'banner_guards', 'siege_engineers', 'stone_golem'
 ];

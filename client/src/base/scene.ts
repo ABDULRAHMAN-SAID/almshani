@@ -37,6 +37,10 @@ export class BaseScene {
   private embers!: THREE.Points;
   private emberVel: Float32Array = new Float32Array(0);
   private guards: { mesh: THREE.Mesh; angle: number; radius: number; speed: number }[] = [];
+  private sparring: THREE.Mesh[] = [];
+  private smoke!: THREE.Points;
+  private smokeVel: Float32Array = new Float32Array(0);
+  private coins = new Map<string, THREE.Mesh>();
   private lastMs = 0;
 
   constructor(private canvas: HTMLCanvasElement, private onPick: (id: string) => void) {
@@ -63,7 +67,7 @@ export class BaseScene {
   }
 
   private lights(): void {
-    this.scene.add(new THREE.HemisphereLight(0xa8b2c4, 0x453c2e, 1.1));
+    this.scene.add(new THREE.HemisphereLight(0xb4bdcd, 0x4c4234, 1.28)); // «داكنة لكن أوضح» — البند 4
     const mk = (hex: number, i: number, d: number, x: number, y: number, z: number) => {
       const l = new THREE.PointLight(hex, i, d, 1.5);
       l.position.set(x, y, z);
@@ -73,7 +77,7 @@ export class BaseScene {
     mk(0xe8a45a, 2.2, 55, 0, 8, -4);     // قاعة القيادة
     mk(0xe8a45a, 1.2, 30, -8.5, 5, 0);   // المنجم
     mk(0x7a96c0, 1.4, 50, 0, 9, 17);     // البوابة
-    const fill = new THREE.DirectionalLight(0xd8c9a8, 0.7);
+    const fill = new THREE.DirectionalLight(0xe0d2b2, 0.85);
     fill.position.set(-14, 34, 22);
     this.scene.add(fill);
   }
@@ -287,10 +291,43 @@ export class BaseScene {
     this.scene.add(this.embers);
     // حراس يطوفون حول القاعة (نماذج جنود المعركة نفسها)
     for (let i = 0; i < 3; i++) {
-      const mesh = new THREE.Mesh(memberGeo(i === 2 ? 'shield_guard' : 'spear_wall', true), modelMat());
+      const mesh = new THREE.Mesh(memberGeo(i === 2 ? 'steel_guard' : 'spear_bearers', true), modelMat());
       this.scene.add(mesh);
       this.guards.push({ mesh, angle: i * 2.1, radius: 6.5 + i * 1.3, speed: 0.14 + i * 0.03 });
     }
+    // متبارزان قرب الثكنة (البند 4: مناطق تدريب فيها جنود يتبارزون)
+    for (const [ux, sx] of [['spear_bearers', -1], ['steel_guard', 1]] as [string, number][]) {
+      const m = new THREE.Mesh(memberGeo(ux, true), modelMat());
+      m.position.set(-6.5 + sx * 1.1, 0, 11.3);
+      m.rotation.y = sx > 0 ? Math.PI / 2 : -Math.PI / 2;
+      this.scene.add(m);
+      this.sparring.push(m);
+    }
+    // دخان ورشة الحصار
+    const SN = 18;
+    const spos = new Float32Array(SN * 3);
+    this.smokeVel = new Float32Array(SN);
+    for (let i = 0; i < SN; i++) this.resetSmoke(spos, i, true);
+    const sgeo = new THREE.BufferGeometry();
+    sgeo.setAttribute('position', new THREE.BufferAttribute(spos, 3));
+    this.smoke = new THREE.Points(sgeo, new THREE.PointsMaterial({ color: 0x8a8478, size: 0.5, transparent: true, opacity: 0.35 }));
+    this.scene.add(this.smoke);
+    // مؤشرات الاستلام فوق مباني الإنتاج
+    for (const id of ['gold_mine', 'gold_mine_2', 'farm']) {
+      const spot = SPOTS.find(sp => sp.id === id)!;
+      const coin = new THREE.Mesh(new THREE.OctahedronGeometry(0.45), this.glowMat(id === 'farm' ? 0x9fb86a : 0xe8c56a));
+      coin.position.set(spot.x, 4.6, spot.z);
+      coin.visible = false;
+      this.scene.add(coin);
+      this.coins.set(id, coin);
+    }
+  }
+
+  private resetSmoke(pos: Float32Array, i: number, spread = false): void {
+    pos[i * 3] = 9.0 + (Math.random() * 2 - 1) * 0.4;   // فوق جمر الورشة
+    pos[i * 3 + 1] = spread ? Math.random() * 6 : 0.7;
+    pos[i * 3 + 2] = 9.9 + (Math.random() * 2 - 1) * 0.4;
+    this.smokeVel[i] = 0.5 + Math.random() * 0.7;
   }
 
   private resetEmber(pos: Float32Array, i: number, spread = false): void {
@@ -335,6 +372,28 @@ export class BaseScene {
       pos.setY(i, y);
     }
     pos.needsUpdate = true;
+    // الدخان يتصاعد
+    const spos = this.smoke.geometry.getAttribute('position') as THREE.BufferAttribute;
+    for (let i = 0; i < spos.count; i++) {
+      let y = spos.getY(i) + this.smokeVel[i] * dt;
+      if (y > 7) { this.resetSmoke(spos.array as Float32Array, i); y = 0.7; }
+      spos.setY(i, y);
+      spos.setX(i, spos.getX(i) + Math.sin(t01 + i) * 0.003);
+    }
+    spos.needsUpdate = true;
+    // المتبارزان يتضاربان
+    for (let i = 0; i < this.sparring.length; i++) {
+      const m = this.sparring[i];
+      m.rotation.x = -0.25 * Math.abs(Math.sin(t01 * 5 + i * Math.PI));
+      m.position.y = Math.abs(Math.sin(t01 * 5 + i * Math.PI)) * 0.06;
+    }
+    // مؤشر الاستلام يظهر عند تكدس ≥ ثلث السعة
+    for (const [id, coin] of this.coins) {
+      const bb = this.view?.buildings?.[id];
+      const show = !!bb && bb.level > 0 && bb.bufferCap > 0 && bb.pending >= bb.bufferCap / 3;
+      coin.visible = show;
+      if (show) { coin.rotation.y = t01 * 2; coin.position.y = 4.6 + Math.sin(t01 * 3) * 0.25; }
+    }
     // الحراس يطوفون
     for (const gd of this.guards) {
       gd.angle += gd.speed * dt;

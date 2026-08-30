@@ -115,14 +115,8 @@
    },
    "role": "barracks",
    "unlocks": {
-    "2": [
-     "light_slingers"
-    ],
     "3": [
-     "north_wolves"
-    ],
-    "4": [
-     "frost_witch"
+     "bat_riders"
     ]
    }
   },
@@ -141,11 +135,7 @@
     "growth": 1.9
    },
    "role": "siege",
-   "unlocks": {
-    "1": [
-     "iron_ram"
-    ]
-   }
+   "unlocks": {}
   },
   "lab": {
    "id": "lab",
@@ -200,14 +190,15 @@
  },
  "meta": {
   "startUnits": [
-   "spear_wall",
-   "shield_guard",
-   "archers",
-   "flame_archers",
-   "raid_cavalry",
-   "field_medic",
-   "catapult",
-   "axe_warriors"
+   "steel_guard",
+   "vale_archers",
+   "spear_bearers",
+   "hollow_knights",
+   "flame_casters",
+   "siege_engineers",
+   "banner_guards",
+   "running_shadows",
+   "stone_golem"
   ],
   "startResources": {
    "gold": 600,

@@ -1,6 +1,6 @@
 // إدخال المعركة: سحب شارة → شبح → نية نشر · نقرة فرقة ثم نقرة أرض → Rally ·
 // زر المهارة ثم نقرة → وابل. الخادم هو المصدّق النهائي؛ الفحص المحلي للمعاينة فقط.
-import { deployValid, TICKS_PER_SEC } from '../../../shared/simulation/src/index';
+import { deployValid, handOf, TICKS_PER_SEC } from '../../../shared/simulation/src/index';
 import type { MatchClient } from './game';
 import type { BattleRender } from './render';
 import type { Net } from '../net';
@@ -12,6 +12,7 @@ export class BattleInput {
   private dragPos: { x: number; z: number } | null = null;
   private selected = -1;
   private skillArmed = false;
+  private flagArmed = false;
 
   constructor(
     private mc: MatchClient,
@@ -27,7 +28,9 @@ export class BattleInput {
   startSlotDrag(slot: number, ev: PointerEvent): void {
     this.dragSlot = slot;
     this.skillArmed = false;
-    const u = this.mc.ctx.units[this.mc.info.decks[this.mc.you][slot]];
+    this.flagArmed = false;
+    const P = this.mc.st.players[this.mc.you];
+    const u = this.mc.ctx.units[P.deck[handOf(P)[slot]]];
     this.dragRangeMm = u ? u.rangeMm : 0;
     this.dragColor = u
       ? (u.healCentiPerTick > 0 ? 0x9fb86a : u.slowMill > 0 ? 0x9fd0e8 : (u.role === 'ranged' || u.role === 'siege') ? 0xd8b04a : 0x8fb2dd)
@@ -37,6 +40,14 @@ export class BattleInput {
 
   armSkill(): void {
     this.skillArmed = true;
+    this.flagArmed = false;
+    this.selected = -1;
+    this.render.selectSquad(null);
+  }
+
+  armFlag(): void {
+    this.flagArmed = true;
+    this.skillArmed = false;
     this.selected = -1;
     this.render.selectSquad(null);
   }
@@ -70,6 +81,11 @@ export class BattleInput {
     if (this.skillArmed) {
       this.skillArmed = false;
       this.net.send({ t: 'intent', cmd: { type: 'skill', player: this.mc.you, x: w.x, z: w.z } });
+      return;
+    }
+    if (this.flagArmed) {
+      this.flagArmed = false;
+      this.net.send({ t: 'intent', cmd: { type: 'flag', player: this.mc.you, x: w.x, z: w.z } });
       return;
     }
     // فرقة لي قرب النقرة؟ اختيار — وإلا Rally للفرقة المختارة

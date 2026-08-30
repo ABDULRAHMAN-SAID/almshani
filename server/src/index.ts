@@ -71,6 +71,7 @@ wss.on('connection', (ws: WebSocket) => {
       case 'trainUnit': lobby.trainUnit(session, msg.id); break;
       case 'claimMission': lobby.claimMission(session, msg.id); break;
       case 'freeChest': lobby.freeChest(session); break;
+      case 'collectBuilding': lobby.collect(session, msg.id); break;
     }
   });
   ws.on('close', () => { if (session) lobby.drop(session); });

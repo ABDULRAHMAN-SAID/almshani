@@ -80,12 +80,25 @@ input.name {
 #scorebar .fill { height: 100%; background: linear-gradient(90deg, var(--mine), #6d8db4); width: 50%; transition: width .3s; }
 
 .hqbar { position: absolute; inset-inline: 26%; height: 14px; border: 1px solid #14161a; border-radius: 4px; background: #101216; overflow: hidden; direction: ltr; }
-.hqbar.foe { top: 64px; } .hqbar.mine { bottom: 178px; }
+.hqbar.foe { top: 64px; } .hqbar.mine { bottom: 182px; }
 .hqbar .fill { height: 100%; transition: width .25s; }
 .hqbar.foe .fill { background: linear-gradient(180deg, #a4543f, #7c3527); }
 .hqbar.mine .fill { background: linear-gradient(180deg, #4a6b94, #33517a); }
 .hqbar span { position: absolute; inset: 0; font-size: 10px; font-weight: 700; color: var(--bone);
   display: flex; align-items: center; justify-content: center; text-shadow: 0 1px 2px #000; }
+.gatebar { position: absolute; inset-inline: 32%; height: 6px; border-radius: 3px; background: #101216;
+  border: 1px solid #14161a; overflow: hidden; direction: ltr; }
+.gatebar.foe { top: 80px; } .gatebar.mine { bottom: 172px; }
+.gatebar .fill { height: 100%; background: linear-gradient(180deg, #8a7f62, #5c5244); transition: width .25s; }
+#flagbtn {
+  position: absolute; bottom: 108px; inset-inline-start: 12px; width: 58px; height: 58px; border-radius: 50%;
+  pointer-events: auto; cursor: pointer; border: 2px solid #6a6f79; color: var(--bone);
+  background: radial-gradient(circle at 35% 30%, #565c68, #2c2f36 70%);
+  font-family: var(--font-head); font-weight: 700; font-size: 11px;
+}
+#flagbtn.ready { border-color: #6d8db4; color: #aecbec; box-shadow: 0 0 14px rgba(61,90,128,.5); }
+#flagbtn:disabled { opacity: .45; }
+.slot.next { opacity: .4; transform: scale(.8); pointer-events: none; }
 
 #hud .bottom {
   position: absolute; bottom: 0; inset-inline: 0; pointer-events: auto;

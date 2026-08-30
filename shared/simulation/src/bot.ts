@@ -1,8 +1,8 @@
-// بوت الشريحة العمودية — يُعلَن دائماً كبوت (قاعدة صارمة من الرؤية).
-// أوامره تمر عبر تيار الأوامر العادي فلا تمس حتمية المحاكاة.
+// بوت معلَن — أوامره تمر عبر تيار الأوامر العادي فلا تمس الحتمية.
+// يتعامل مع يد الأربع من دورة الثمانية، ويستخدم راية القيادة أحياناً.
 import type { Command, PlayerIx, SimState } from './types';
 import type { SimContext } from './sim';
-import { cpCap, deployValid, sectorOf } from './sim';
+import { deployValid, handOf, sectorOf } from './sim';
 import { rngInt } from './rng';
 
 export interface BotState { rng: number; nextThinkTick: number; }
@@ -23,9 +23,9 @@ export function botThink(
 
   const enemies = st.squads.filter(s => s.player !== player);
   const mine = st.squads.filter(s => s.player === player);
-  const sign = player === 0 ? -1 : 1; // جهة البوت على محور z
+  const sign = player === 0 ? -1 : 1;
 
-  // مهارة القائد: عنقود عدو متقدم
+  // مهارة القائد على عنقود متقدم
   if (!P.skillUsed && st.tick >= a.skillChargeTicks) {
     for (const e of enemies) {
       const advanced = player === 0 ? e.z < 0 : e.z > 0;
@@ -38,24 +38,38 @@ export function botThink(
     }
   }
 
-  // اختيار خانة نشر: كاونتر بسيط ثم عشوائي مستطاع
+  // راية القيادة: عند امتلاك 3+ فرق غير مشتبكة، اجمعها نحو الوسط الأمامي
+  if (st.tick >= P.flagReadyTick && mine.length >= 3 && r(3) === 0) {
+    out.push({ type: 'flag', player, x: 0, z: -sign * 2000 });
+  }
+
+  // اختيار خانة يد: كاونتر بسيط ثم عشوائي مستطاع
   const roleCount: Record<string, number> = {};
-  for (const e of enemies) roleCount[ctx.units[e.unit].role] = (roleCount[ctx.units[e.unit].role] ?? 0) + 1;
+  for (const e of enemies) {
+    const eu = ctx.units[e.unit];
+    roleCount[eu.role] = (roleCount[eu.role] ?? 0) + 1;
+    if (eu.flying) roleCount['flying'] = (roleCount['flying'] ?? 0) + 1;
+  }
+  const hand = handOf(P);
   const affordable: number[] = [];
-  for (let i = 0; i < P.deck.length; i++) {
-    const u = ctx.units[P.deck[i]];
-    if (u && P.cp >= u.cost && st.tick >= P.musterReadyTick[i]) affordable.push(i);
+  for (let slot = 0; slot < hand.length; slot++) {
+    const u = ctx.units[P.deck[hand[slot]]];
+    if (u && P.cp >= u.cost) affordable.push(slot);
   }
   if (affordable.length > 0 && mine.length < a.maxLiveSquads) {
     let slot = -1;
     const want = (pred: (id: string) => boolean) =>
-      affordable.find(i => pred(P.deck[i]));
+      affordable.find(s => pred(P.deck[hand[s]]));
     if ((roleCount['cavalry'] ?? 0) > 0) {
       const s = want(id => ctx.units[id].tags.indexOf('anti_cavalry') >= 0);
       if (s !== undefined) slot = s;
     }
+    if (slot < 0 && (roleCount['flying'] ?? 0) > 0) {
+      const s = want(id => ctx.units[id].role === 'ranged');
+      if (s !== undefined) slot = s;
+    }
     if (slot < 0 && (roleCount['ranged'] ?? 0) >= 2) {
-      const s = want(id => ctx.units[id].role === 'cavalry');
+      const s = want(id => ctx.units[id].role === 'cavalry' || ctx.units[id].tags.indexOf('assassin') >= 0);
       if (s !== undefined) slot = s;
     }
     if (slot < 0 && (roleCount['siege'] ?? 0) > 0) {
@@ -64,7 +78,6 @@ export function botThink(
     }
     if (slot < 0) slot = affordable[r(affordable.length)];
 
-    // الموضع: دفاعي إن كان عدو متوغلاً، وإلا هجوم على أثقل قطاع تماس
     const invader = enemies.find(e => (player === 0 ? e.z < -a.deployOwnZmm : e.z > a.deployOwnZmm));
     let x: number, z: number;
     if (invader) {
@@ -84,7 +97,6 @@ export function botThink(
     if (deployValid(st, ctx, player, x, z)) {
       out.push({ type: 'deploy', player, slot, x, z });
     } else {
-      // تراجع لموضع آمن مضمون
       const zSafe = sign * (a.deployOwnZmm + 4000);
       const xSafe = (r(2) === 0 ? -1 : 1) * 12000;
       if (deployValid(st, ctx, player, xSafe, zSafe)) {
@@ -92,7 +104,5 @@ export function botThink(
       }
     }
   }
-  // اكتناز CP بلا داعٍ؟ لا شيء — التكّة القادمة ستحاول مجدداً.
-  void cpCap;
   return out;
 }

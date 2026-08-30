@@ -1,16 +1,4 @@
 {
-  "unit.spear_wall.name": "Spear Wall",
-  "unit.shield_guard.name": "Shield Guard",
-  "unit.axe_warriors.name": "Axe Warriors",
-  "unit.archers.name": "Longbow Archers",
-  "unit.light_slingers.name": "Light Slingers",
-  "unit.flame_archers.name": "Flame Archers",
-  "unit.raid_cavalry.name": "Raid Cavalry",
-  "unit.north_wolves.name": "North Wolves",
-  "unit.field_medic.name": "Field Medic",
-  "unit.frost_witch.name": "Frost Witch",
-  "unit.iron_ram.name": "Iron Ram",
-  "unit.catapult.name": "Catapult",
   "commander.sera.name": "Commander Sera",
   "arena.border_fort.name": "Border Fort",
   "hud.battle": "BATTLE",
@@ -32,5 +20,15 @@
   "mission.daily_battle": "Play an online challenge",
   "mission.daily_upgrade": "Upgrade a building",
   "mission.daily_train": "Train a legion",
-  "mission.daily_valley": "Cross the Horde Valley"
+  "mission.daily_valley": "Cross the Horde Valley",
+  "unit.steel_guard.name": "Steel Guard",
+  "unit.vale_archers.name": "Vale Archers",
+  "unit.spear_bearers.name": "Spear Bearers",
+  "unit.hollow_knights.name": "Hollow Knights",
+  "unit.flame_casters.name": "Flame Casters",
+  "unit.bat_riders.name": "Bat Riders",
+  "unit.siege_engineers.name": "Siege Engineers",
+  "unit.banner_guards.name": "Banner Guards",
+  "unit.running_shadows.name": "Running Shadows",
+  "unit.stone_golem.name": "Stone Golem"
 }

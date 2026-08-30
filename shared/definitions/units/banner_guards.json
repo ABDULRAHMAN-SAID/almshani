@@ -1,0 +1,35 @@
+{
+  "id": "banner_guards",
+  "role": "support",
+  "faction": "kingdom_legion",
+  "squadSize": 4,
+  "costCP": 3,
+  "musterSec": 0,
+  "member": {
+    "hp": 95,
+    "dps": 3.0,
+    "range": 1.2,
+    "moveSpeed": 2.6
+  },
+  "targeting": "nearest_engaged",
+  "tags": [
+    "aura"
+  ],
+  "counters": {},
+  "counteredBy": {
+    "cavalry": 1.5,
+    "assassin": 1.6
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_banner_guards",
+    "nameKey": "unit.banner_guards.name"
+  },
+  "auraRadius": 5.0,
+  "auraPct": 15
+}

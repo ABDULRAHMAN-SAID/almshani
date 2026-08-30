@@ -1,0 +1,35 @@
+{
+  "id": "bat_riders",
+  "role": "cavalry",
+  "faction": "kingdom_legion",
+  "squadSize": 5,
+  "costCP": 4,
+  "musterSec": 0,
+  "member": {
+    "hp": 75,
+    "dps": 9.0,
+    "range": 1.4,
+    "moveSpeed": 4.6
+  },
+  "targeting": "priority_ranged_siege",
+  "tags": [
+    "flying"
+  ],
+  "counters": {
+    "support": 1.5,
+    "siege": 1.5
+  },
+  "counteredBy": {
+    "ranged": 2.0
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_bat_riders",
+    "nameKey": "unit.bat_riders.name"
+  }
+}

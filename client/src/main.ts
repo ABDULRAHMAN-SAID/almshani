@@ -40,6 +40,7 @@ const actions: scr.Actions = {
   trainUnit: id => net.send({ t: 'trainUnit', id }),
   claimMission: id => net.send({ t: 'claimMission', id }),
   freeChest: () => net.send({ t: 'freeChest' }),
+  collectBuilding: id => net.send({ t: 'collectBuilding', id }),
   openBuilding: id => scr.showBuildingSheet(base, id, actions)
 };
 
@@ -100,6 +101,7 @@ function startBattle(info: Extract<ServerMsg, { t: 'matchStart' }>['info'], log?
     input = new BattleInput(mc, render, net, glBattle);
     hud.onSlotDrag = (slot, ev) => input!.startSlotDrag(slot, ev);
     hud.onSkill = () => { input!.armSkill(); hud!.toast(t('deployHere')); };
+    hud.onFlag = () => { input!.armFlag(); hud!.toast(t('flag_hint')); };
     hud.onSurrender = () => net.send({ t: 'intent', cmd: { type: 'surrender', player: mc!.you } });
     mc.onEvents = evs => hud?.handleEvents(evs);
   }, log ? 300 : 2500);
@@ -230,5 +232,6 @@ setInterval(() => {
   train: (id: string) => net.send({ t: 'trainUnit', id }),
   claim: (id: string) => net.send({ t: 'claimMission', id }),
   chest: () => net.send({ t: 'freeChest' }),
+  collect: (id: string) => net.send({ t: 'collectBuilding', id }),
   fetchBase: () => net.send({ t: 'base' })
 };

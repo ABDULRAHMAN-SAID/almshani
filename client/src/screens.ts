@@ -16,6 +16,7 @@ export interface Actions {
   trainUnit: (id: string) => void;
   claimMission: (id: string) => void;
   freeChest: () => void;
+  collectBuilding: (id: string) => void;
   openBuilding: (id: string) => void;
 }
 
@@ -61,7 +62,10 @@ export function showBuildingSheet(base: any, id: string, on: Actions): void {
   const upgrading = base.upgrading?.id === id;
   const hallOk = base.hall >= b.unlockHall;
   const lines: string[] = [];
-  if (b.role === 'prod' && lvl > 0) lines.push(`${t('producing')}: <b>${b.prodPerHour}</b>${t('perHour')}`);
+  if (b.role === 'prod' && lvl > 0) {
+    lines.push(`${t('producing')}: <b>${b.prodPerHour}</b>${t('perHour')}`);
+    lines.push(`${t('pending')}: <b>${b.pending}</b> / ${b.bufferCap}`);
+  }
   if (b.role === 'cap') lines.push(`${t('capacity')}: <b>${base.caps.gold}</b>`);
   if (b.role === 'gate') lines.push(`${t('battle_reward')}: +${lvl * 10}%`);
   if (!hallOk) lines.push(`${t('needHall')} <b>${b.unlockHall}</b>`);
@@ -79,12 +83,14 @@ export function showBuildingSheet(base: any, id: string, on: Actions): void {
         <div class="pill"><span class="ic supplies"></span>${next.supplies}</div>
         <div class="pill">⏱ ${next.sec}s</div>
       </div>` : ''}
+    ${b.role === 'prod' && lvl > 0 ? `<button class="btn" id="b-collect" ${b.pending < 1 ? 'disabled' : ''} style="margin-inline-end:8px">${t('collect')} ${b.pending}</button>` : ''}
     <button class="btn" id="b-up" ${(!next || upgrading || !hallOk) ? 'disabled' : ''}>
       ${upgrading ? t('upgrading') : !next ? t('maxed') : locked ? t('build') : t('upgrade')}
     </button>`;
   document.getElementById('app')!.appendChild(sheet);
   sheet.querySelector('.x')!.addEventListener('click', closeSheet);
   sheet.querySelector('#b-up')?.addEventListener('click', () => { on.upgradeBuilding(id); closeSheet(); });
+  sheet.querySelector('#b-collect')?.addEventListener('click', () => { on.collectBuilding(id); closeSheet(); });
 }
 
 export function showMissionsSheet(base: any, on: Actions): void {
@@ -180,7 +186,7 @@ export function showUnits(profile: Profile, base: any, on: Actions): void {
 
   el.querySelector('#b-deck')!.addEventListener('click', () => {
     if (!deckEditing) { deckEditing = true; deckDraft = profile.deck.slice(); showUnits(profile, base, on); }
-    else if (deckDraft.length === 7) { deckEditing = false; on.saveDeck(deckDraft.slice()); }
+    else if (deckDraft.length === 8) { deckEditing = false; on.saveDeck(deckDraft.slice()); }
   });
   el.querySelector('#b-deck-cancel')?.addEventListener('click', () => {
     deckEditing = false;
@@ -193,7 +199,7 @@ export function showUnits(profile: Profile, base: any, on: Actions): void {
     if (!unlocked.includes(id)) return;
     const ix = deckDraft.indexOf(id);
     if (ix >= 0) deckDraft.splice(ix, 1);
-    else if (deckDraft.length < 7) deckDraft.push(id);
+    else if (deckDraft.length < 8) deckDraft.push(id);
     showUnits(profile, base, on);
   }));
   el.querySelectorAll('[data-train]').forEach(b => b.addEventListener('click', ev => {

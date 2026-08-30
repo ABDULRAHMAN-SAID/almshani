@@ -7,7 +7,7 @@ import type { SimContext, PlayerIx, Command } from '../../shared/simulation/src/
 import { MatchRoom, type Seat } from './match';
 import {
   newBase, baseView, startUpgrade, trainUnit, claimMission, openFreeChest,
-  battleReward, unlockedUnits, type BaseState
+  battleReward, unlockedUnits, collectBuilding, type BaseState
 } from './empire';
 import { loadState, saveStateSoon, saveNow } from './store';
 
@@ -94,10 +94,10 @@ export class Lobby {
   }
 
   setDeck(s: Session, deck: unknown): void {
-    if (!Array.isArray(deck) || deck.length !== 7) return s.send({ t: 'error', code: 'deck_size' });
+    if (!Array.isArray(deck) || deck.length !== 8) return s.send({ t: 'error', code: 'deck_size' });
     const clean = deck.map(String);
     const unlocked = unlockedUnits(s.account.base);
-    if (new Set(clean).size !== 7 || clean.some(u => !UNIT_DEFS[u] || !unlocked.includes(u))) {
+    if (new Set(clean).size !== 8 || clean.some(u => !UNIT_DEFS[u] || !unlocked.includes(u))) {
       return s.send({ t: 'error', code: 'deck_units' });
     }
     s.account.deck = clean;
@@ -143,6 +143,7 @@ export class Lobby {
   trainUnit(s: Session, id: string): void { this.baseAction(s, trainUnit(s.account.base, String(id), Date.now())); }
   claimMission(s: Session, id: string): void { this.baseAction(s, claimMission(s.account.base, String(id), Date.now())); }
   freeChest(s: Session): void { this.baseAction(s, openFreeChest(s.account.base, Date.now())); }
+  collect(s: Session, id: string): void { this.baseAction(s, collectBuilding(s.account.base, String(id), Date.now())); }
 
   drop(s: Session): void {
     this.sessions.delete(s);

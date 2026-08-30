@@ -1,10 +1,10 @@
 {
-  "id": "spear_wall",
+  "id": "spear_bearers",
   "role": "frontline",
   "faction": "kingdom_legion",
   "squadSize": 10,
   "costCP": 3,
-  "musterSec": 10,
+  "musterSec": 0,
   "member": {
     "hp": 90,
     "dps": 4.0,
@@ -22,13 +22,13 @@
     "ranged": 1.4
   },
   "levels": {
-    "hpPct": 10,
-    "dpsPct": 10
+    "hpPct": 3,
+    "dpsPct": 3
   },
-  "trait3": "spear_wall_brace",
-  "trait5": "phalanx_step",
+  "trait3": null,
+  "trait5": null,
   "ui": {
-    "medallion": "medallion_spear_wall",
-    "nameKey": "unit.spear_wall.name"
+    "medallion": "medallion_spear_bearers",
+    "nameKey": "unit.spear_bearers.name"
   }
 }

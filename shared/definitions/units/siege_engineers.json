@@ -1,0 +1,37 @@
+{
+  "id": "siege_engineers",
+  "role": "siege",
+  "faction": "kingdom_legion",
+  "squadSize": 3,
+  "costCP": 6,
+  "musterSec": 0,
+  "member": {
+    "hp": 150,
+    "dps": 0.0,
+    "range": 0.6,
+    "moveSpeed": 1.8
+  },
+  "targeting": "buildings_only",
+  "tags": [
+    "structure_crew"
+  ],
+  "counters": {},
+  "counteredBy": {
+    "cavalry": 2.0,
+    "assassin": 1.5
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_siege_engineers",
+    "nameKey": "unit.siege_engineers.name"
+  },
+  "structure": {
+    "hp": 450,
+    "dpsVsBuildings": 110
+  }
+}

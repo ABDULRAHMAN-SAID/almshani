@@ -15,6 +15,7 @@ export type ClientMsg =
   | { t: 'upgradeBuilding'; id: string }
   | { t: 'trainUnit'; id: string }
   | { t: 'claimMission'; id: string }
+  | { t: 'collectBuilding'; id: string }   // استلام إنتاج منجم/مزرعة (البند 3 من التوجيه)
   | { t: 'freeChest' };
 
 // ── خادم → عميل ──

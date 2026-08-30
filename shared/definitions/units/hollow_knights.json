@@ -1,0 +1,36 @@
+{
+  "id": "hollow_knights",
+  "role": "cavalry",
+  "faction": "kingdom_legion",
+  "squadSize": 4,
+  "costCP": 5,
+  "musterSec": 0,
+  "member": {
+    "hp": 150,
+    "dps": 15.0,
+    "range": 1.3,
+    "moveSpeed": 5.2
+  },
+  "targeting": "priority_ranged_siege",
+  "tags": [
+    "charge"
+  ],
+  "counters": {
+    "ranged": 2.0,
+    "support": 1.5,
+    "siege": 2.0
+  },
+  "counteredBy": {
+    "anti_cavalry": 2.0
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_hollow_knights",
+    "nameKey": "unit.hollow_knights.name"
+  }
+}

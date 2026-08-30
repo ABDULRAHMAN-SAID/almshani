@@ -1,0 +1,35 @@
+{
+  "id": "stone_golem",
+  "role": "special",
+  "faction": "kingdom_legion",
+  "squadSize": 1,
+  "costCP": 7,
+  "musterSec": 0,
+  "member": {
+    "hp": 1300,
+    "dps": 45.0,
+    "range": 1.5,
+    "moveSpeed": 1.6
+  },
+  "targeting": "nearest_engaged",
+  "tags": [
+    "heavy"
+  ],
+  "counters": {
+    "frontline": 1.2
+  },
+  "counteredBy": {},
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_stone_golem",
+    "nameKey": "unit.stone_golem.name"
+  },
+  "damageModifiers": {
+    "fromRanged": 0.8
+  }
+}

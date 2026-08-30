@@ -1,13 +1,13 @@
 {
-  "id": "shield_guard",
+  "id": "steel_guard",
   "role": "frontline",
   "faction": "kingdom_legion",
-  "squadSize": 8,
+  "squadSize": 6,
   "costCP": 4,
-  "musterSec": 12,
+  "musterSec": 0,
   "member": {
-    "hp": 160,
-    "dps": 3.75,
+    "hp": 200,
+    "dps": 4.5,
     "range": 1.1,
     "moveSpeed": 2.2
   },
@@ -17,17 +17,18 @@
   ],
   "counters": {},
   "counteredBy": {
-    "frontline": 1.2
+    "siege": 1.3,
+    "assassin": 1.3
   },
   "levels": {
-    "hpPct": 10,
-    "dpsPct": 10
+    "hpPct": 3,
+    "dpsPct": 3
   },
-  "trait3": "tower_stance",
-  "trait5": "unbreakable_line",
+  "trait3": null,
+  "trait5": null,
   "ui": {
-    "medallion": "medallion_shield_guard",
-    "nameKey": "unit.shield_guard.name"
+    "medallion": "medallion_steel_guard",
+    "nameKey": "unit.steel_guard.name"
   },
   "damageModifiers": {
     "fromRanged": 0.6

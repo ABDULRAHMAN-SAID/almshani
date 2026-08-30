@@ -1,5 +1,7 @@
 // قلب المحاكاة الحتمية — خطوة ثابتة 20Hz، أعداد صحيحة، بلا عرض.
 // نفس البذرة + نفس تسلسل الأوامر ⟹ نفس الحالة بتاً على العميل والخادم.
+// آليات توجيه المالك: بوابة→فناء→قلب، يد 4 بدورة من 8، راية القيادة،
+// طيران/Charge/هالة، مستويات 1–10 (+3%).
 import type {
   Command, MatchResult, Phase, PlayerIx, PlayerState, RtArena, RtUnit,
   SectorIx, SimEvent, SimState, Squad
@@ -23,10 +25,12 @@ export function createMatch(
     unitLevels: p.unitLevels ?? {},
     cp: ctx.arena.cpStart,
     regenCounter: 0,
-    deck: p.deck.slice(0, 7),
-    musterReadyTick: [0, 0, 0, 0, 0, 0, 0],
+    deck: p.deck.slice(0, 8),
+    order: p.deck.slice(0, 8).map((_, i) => i),
+    gateHpCenti: ctx.arena.gateHpCenti,
     hqHpCenti: ctx.arena.hqHpCenti,
     hqDamageDealtCenti: 0,
+    flagX: 0, flagZ: 0, flagUntilTick: 0, flagReadyTick: 0,
     scoreMilli: 0,
     skillUsed: false,
     surrendered: false,
@@ -46,6 +50,11 @@ export function createMatch(
   };
 }
 
+// اليد الحالية (أول 4 من الدورة) — يستعملها العميل والبوت والاختبارات
+export function handOf(P: PlayerState): number[] {
+  return P.order.slice(0, 4);
+}
+
 // ─── مساعدات هندسية ──────────────────────────────────────────────
 
 export function sectorOf(x: number, a: RtArena): SectorIx {
@@ -59,19 +68,15 @@ function dist(ax: number, az: number, bx: number, bz: number): number {
   return Math.round(Math.sqrt(dx * dx + dz * dz));
 }
 
-function hqPos(player: PlayerIx, a: RtArena): { x: number; z: number } {
-  return { x: 0, z: player === 0 ? -a.hqZmm : a.hqZmm };
-}
-
-function clampToField(s: { x: number; z: number }, a: RtArena): void {
+function clampToField(s: { x: number; z: number }, a: RtArena, flying: boolean): void {
   const m = a.halfWmm - 500;
   if (s.x < -m) s.x = -m;
   if (s.x > m) s.x = m;
   const zm = a.hqZmm - 500;
   if (s.z < -zm) s.z = -zm;
   if (s.z > zm) s.z = zm;
-  // الجسر: القطاع الأوسط يضيق عند عبور المنتصف
-  if (Math.abs(s.z) < a.bridgeZmm && Math.abs(s.x) <= a.sectorEdgeMm) {
+  // الجسر: الممر الأوسط يضيق عند عبور المنتصف — الطيران يتجاوز الهوة
+  if (!flying && Math.abs(s.z) < a.bridgeZmm && Math.abs(s.x) <= a.sectorEdgeMm) {
     if (s.x < -a.bridgeHalfWmm) s.x = -a.bridgeHalfWmm;
     if (s.x > a.bridgeHalfWmm) s.x = a.bridgeHalfWmm;
   }
@@ -87,13 +92,12 @@ export function cpCap(st: SimState, a: RtArena): number {
   return decisive ? a.cpCapOvertime : a.cpCap;
 }
 
-// صلاحية موضع النشر — تُستخدم أيضاً في العميل لتلوين شبح النشر
 export function deployValid(
   st: SimState, ctx: SimContext, player: PlayerIx, x: number, z: number
 ): boolean {
   const a = ctx.arena;
   if (Math.abs(x) > a.halfWmm - 500) return false;
-  const zSigned = player === 0 ? z : -z; // نطبّع: القيم السالبة جهة اللاعب
+  const zSigned = player === 0 ? z : -z;
   if (zSigned > a.deployForwardZmm) return false;
   if (zSigned < -(a.fieldZmm - 500)) return false;
   const sec = sectorOf(x, a);
@@ -102,7 +106,7 @@ export function deployValid(
   return true;
 }
 
-// ─── تطبيق الأوامر (نوايا مصدَّق عليها بالمحاكاة نفسها) ─────────
+// ─── تطبيق الأوامر ───────────────────────────────────────────────
 
 export function applyCommand(
   st: SimState, ctx: SimContext, cmd: Command, events: SimEvent[]
@@ -112,36 +116,41 @@ export function applyCommand(
   const P = st.players[cmd.player];
   switch (cmd.type) {
     case 'deploy': {
-      if (cmd.slot < 0 || cmd.slot >= P.deck.length) return reject(events, cmd.player, 'slot');
-      const u = ctx.units[P.deck[cmd.slot]];
+      // slot = خانة اليد (0..3) من دورة التشكيلة الثمانية
+      if (cmd.slot < 0 || cmd.slot >= 4 || cmd.slot >= P.order.length) return reject(events, cmd.player, 'slot');
+      const deckIx = P.order[cmd.slot];
+      const u = ctx.units[P.deck[deckIx]];
       if (!u) return reject(events, cmd.player, 'unit');
       if (P.cp < u.cost) return reject(events, cmd.player, 'cp');
-      if (st.tick < P.musterReadyTick[cmd.slot]) return reject(events, cmd.player, 'muster');
       const live = st.squads.filter(s => s.player === cmd.player).length;
       if (live >= a.maxLiveSquads) return reject(events, cmd.player, 'cap');
       if (!deployValid(st, ctx, cmd.player, cmd.x, cmd.z)) return reject(events, cmd.player, 'zone');
       P.cp -= u.cost;
-      P.musterReadyTick[cmd.slot] = st.tick + u.musterTicks;
-      // مستوى الوحدة (من قاعدة اللاعب): +10% صحة وضرر لكل مستوى فوق الأول
-      const lvl = Math.max(1, Math.min(5, P.unitLevels[u.id] ?? 1));
-      const hpMill = 1000 + (lvl - 1) * 100;
+      // الدورة: الوحدة المستعملة تذهب لآخر الطابور وتدخل التالية لليد
+      P.order.splice(cmd.slot, 1);
+      P.order.push(deckIx);
+      const lvl = Math.max(1, Math.min(10, P.unitLevels[u.id] ?? 1));
+      const lvlMill = 1000 + (lvl - 1) * 30;
       const sq: Squad = {
         id: st.nextSquadId++,
         player: cmd.player,
         unit: u.id,
         slot: cmd.slot,
         x: cmd.x, z: cmd.z,
-        hpCenti: Math.floor((u.squadHpCenti * hpMill) / 1000),
-        memberHpCenti: Math.max(1, Math.floor((u.memberHpCenti * hpMill) / 1000)),
-        dmgMill: 1000 + (lvl - 1) * 100,
+        hpCenti: Math.floor((u.squadHpCenti * lvlMill) / 1000),
+        memberHpCenti: Math.max(1, Math.floor((u.memberHpCenti * lvlMill) / 1000)),
+        dmgMill: lvlMill,
         landingTicks: a.landingTicks,
         targetId: -1,
         wayX: null, wayZ: null,
         rallyReadyTick: 0,
         slowUntilTick: 0,
+        chargeReady: u.charge,
+        noTargetTicks: 0,
+        buffMill: 1000,
         attackedThisTick: false
       };
-      clampToField(sq, a);
+      clampToField(sq, a, u.flying);
       st.squads.push(sq);
       events.push({ t: 'deploy', player: cmd.player, squadId: sq.id, unit: u.id, x: sq.x, z: sq.z });
       return true;
@@ -151,9 +160,20 @@ export function applyCommand(
       if (!sq || sq.landingTicks > 0) return reject(events, cmd.player, 'squad');
       if (st.tick < sq.rallyReadyTick) return reject(events, cmd.player, 'rally_cd');
       sq.wayX = cmd.x; sq.wayZ = cmd.z;
-      clampToField({ x: sq.wayX, z: sq.wayZ } as Squad, a);
+      clampToField({ x: sq.wayX, z: sq.wayZ } as Squad, a, ctx.units[sq.unit].flying);
       sq.rallyReadyTick = st.tick + a.rallyCooldownTicks;
       sq.targetId = -1;
+      return true;
+    }
+    case 'flag': {
+      // راية القيادة: تجمع غير المشتبكين وتسرّع من حولها — بمهلة تبريد
+      if (st.tick < P.flagReadyTick) return reject(events, cmd.player, 'flag_cd');
+      const pos = { x: cmd.x, z: cmd.z };
+      clampToField(pos, a, true);
+      P.flagX = pos.x; P.flagZ = pos.z;
+      P.flagUntilTick = st.tick + a.flagDurTicks;
+      P.flagReadyTick = st.tick + a.flagCdTicks;
+      events.push({ t: 'flag', player: cmd.player, x: pos.x, z: pos.z });
       return true;
     }
     case 'skill': {
@@ -182,7 +202,7 @@ function reject(events: SimEvent[], player: PlayerIx, reason: string): boolean {
   return false;
 }
 
-// ─── الضرر والقتل ────────────────────────────────────────────────
+// ─── الضرر ───────────────────────────────────────────────────────
 
 function damageSquad(
   st: SimState, ctx: SimContext, target: Squad, dmgCenti: number,
@@ -196,15 +216,29 @@ function damageSquad(
   }
 }
 
-function damageHq(
-  st: SimState, ctx: SimContext, defender: PlayerIx, dmgCenti: number, events: SimEvent[]
+// ضرر المباني: البوابة أولاً (إلا للطيران)، ثم القلب. الإضافي يزيد هشاشتها.
+function damageBuilding(
+  st: SimState, ctx: SimContext, defender: PlayerIx, rawCenti: number,
+  attackerFlying: boolean, events: SimEvent[]
 ): void {
+  const a = ctx.arena;
   const D = st.players[defender];
   const A = st.players[(1 - defender) as PlayerIx];
-  const applied = Math.min(dmgCenti, D.hqHpCenti);
+  let dmg = st.phase === 'overtime' ? Math.floor((rawCenti * a.otVulnMill) / 1000) : rawCenti;
+  if (D.gateHpCenti > 0 && !attackerFlying) {
+    const applied = Math.min(dmg, D.gateHpCenti);
+    D.gateHpCenti -= applied;
+    A.scoreMilli += applied >> 2;              // 0.25 ملي/سنتي لضرر البوابة
+    events.push({ t: 'gate', player: defender, dmgCenti: applied });
+    if (D.gateHpCenti <= 0) {
+      A.scoreMilli += a.scoreGateDownMilli;    // مكافأة كسر البوابة — يُفتح الفناء
+      events.push({ t: 'gate_down', player: defender });
+    }
+    return;
+  }
+  const applied = Math.min(dmg, D.hqHpCenti);
   if (applied <= 0) return;
   D.hqHpCenti -= applied;
-  // نقاط ضرر المقر: 1% = 2000 ملي-نقطة ⇒ 0.5 ملي لكل سنتي-صحة (مقر 4000)
   const before = A.hqDamageDealtCenti;
   A.hqDamageDealtCenti += applied;
   A.scoreMilli += (A.hqDamageDealtCenti >> 1) - (before >> 1);
@@ -214,7 +248,7 @@ function damageHq(
   }
 }
 
-// معدِّل الكاونتر: الأفضلية من أي من الجهتين (بلا مضاعفة مزدوجة) ‰
+// معدِّل الكاونتر ‰ — الأفضلية من أي جهة بلا مضاعفة مزدوجة
 function counterMill(att: RtUnit, tgt: RtUnit): number {
   let m = 1000;
   for (const k of Object.keys(att.counters)) {
@@ -226,11 +260,17 @@ function counterMill(att: RtUnit, tgt: RtUnit): number {
   return m;
 }
 
-// ─── اختيار الأهداف ──────────────────────────────────────────────
+// ─── اختيار الأهداف ─────────────────────────────────────────────
+// الالتحام الأرضي لا يستطيع استهداف الطيران (البند 12/6 من التوجيه)
+
+function canTarget(att: RtUnit, tgtU: RtUnit): boolean {
+  if (tgtU.flying && !att.flying && att.rangeMm <= 1500) return false;
+  return true;
+}
 
 function pickTarget(st: SimState, ctx: SimContext, sq: Squad, u: RtUnit): void {
   if (u.buildingsOnly) { sq.targetId = -2; return; }
-  const enemies = st.squads.filter(s => s.player !== sq.player);
+  const enemies = st.squads.filter(s => s.player !== sq.player && canTarget(u, ctx.units[s.unit]));
   let best: Squad | null = null;
   let bestD = Infinity;
   if (u.priorityBackline) {
@@ -250,7 +290,18 @@ function pickTarget(st: SimState, ctx: SimContext, sq: Squad, u: RtUnit): void {
   sq.targetId = best ? best.id : -1;
 }
 
-// ─── خطوة واحدة (تكّة 50ms) ──────────────────────────────────────
+// هدف المبنى الحالي لمهاجم: البوابة ما دامت قائمة (إلا الطيران) ثم القلب
+function buildingTarget(st: SimState, a: RtArena, attackerSide: PlayerIx, flying: boolean):
+  { x: number; z: number; radius: number } {
+  const defender = (1 - attackerSide) as PlayerIx;
+  const s = defender === 0 ? -1 : 1;
+  if (st.players[defender].gateHpCenti > 0 && !flying) {
+    return { x: 0, z: s * a.gateZmm, radius: a.gateRadiusMm };
+  }
+  return { x: 0, z: s * a.hqZmm, radius: a.hqRadiusMm };
+}
+
+// ─── الخطوة (تكّة 50ms) ─────────────────────────────────────────
 
 export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent[] {
   const events: SimEvent[] = [];
@@ -258,9 +309,9 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
   const a = ctx.arena;
 
   for (const cmd of inputs) applyCommand(st, ctx, cmd, events);
-  if ((st.phase as Phase) === 'ended') return events; // قد ينهيها انسحاب ضمن الأوامر
+  if ((st.phase as Phase) === 'ended') return events;
 
-  // 1) تجدد نقاط القيادة (مكافأة السيطرة على الوسط)
+  // 1) تجدد نقاط القيادة (مكافأة السيطرة على الوسط — «منجم الحرب»)
   for (let p = 0 as PlayerIx; p <= 1; p = (p + 1) as PlayerIx) {
     const P = st.players[p];
     const cap = cpCap(st, a);
@@ -271,23 +322,37 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
     } else P.regenCounter = 0;
   }
 
-  // 2) الفرق: هبوط، أهداف، حركة، هجوم — بترتيب معرّفات ثابت (حتمية)
+  // 2) هالة حماة الراية: تُحسب قبل حركة/هجوم التكّة
+  for (const sq of st.squads) sq.buffMill = 1000;
+  for (const banner of st.squads) {
+    const bu = ctx.units[banner.unit];
+    if (bu.auraRadiusMm <= 0 || banner.landingTicks > 0) continue;
+    for (const ally of st.squads) {
+      if (ally.player !== banner.player || ally.id === banner.id) continue;
+      if (dist(ally.x, ally.z, banner.x, banner.z) <= bu.auraRadiusMm) {
+        ally.buffMill = Math.max(ally.buffMill, bu.auraMill);
+      }
+    }
+  }
+
+  // 3) الفرق — بترتيب معرّفات ثابت (حتمية)
   const byId = st.squads.slice().sort((x, y) => x.id - y.id);
   for (const sq of byId) {
-    if (st.squads.indexOf(sq) < 0) continue; // قُتلت هذه التكّة
+    if (st.squads.indexOf(sq) < 0) continue;
     sq.attackedThisTick = false;
     const u = ctx.units[sq.unit];
     if (sq.landingTicks > 0) { sq.landingTicks--; continue; }
+    const P = st.players[sq.player];
 
-    // (أ) المعالج: تضميد أقرب حليف الأكثر تضرراً
+    // (أ) المعالج (لا معالج في العشرة الحالية — تبقى الآلية للوحدات القادمة)
     if (u.healer) {
       let ally: Squad | null = null, worst = 1001;
       for (const s of st.squads) {
         if (s.player !== sq.player || s.id === sq.id) continue;
-        const su = ctx.units[s.unit];
-        if (s.hpCenti >= su.squadHpCenti) continue;
+        const smax = s.memberHpCenti * ctx.units[s.unit].size;
+        if (s.hpCenti >= smax) continue;
         if (dist(sq.x, sq.z, s.x, s.z) > 10000) continue;
-        const frac = Math.floor((s.hpCenti * 1000) / su.squadHpCenti);
+        const frac = Math.floor((s.hpCenti * 1000) / smax);
         if (frac < worst || (frac === worst && ally && s.id < ally.id)) { worst = frac; ally = s; }
       }
       if (ally) {
@@ -302,7 +367,6 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
         }
         continue;
       }
-      // لا جرحى: يرافق التقدم
     }
 
     // (ب) أمر Rally يتقدم على كل شيء
@@ -315,19 +379,21 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
     if (sq.targetId >= 0 && !st.squads.some(s => s.id === sq.targetId)) sq.targetId = -1;
     if (sq.targetId === -1 || (st.tick & 3) === 0) pickTarget(st, ctx, sq, u);
 
-    const enemyHq = hqPos((1 - sq.player) as PlayerIx, a);
-    const hqDist = dist(sq.x, sq.z, enemyHq.x, enemyHq.z) - a.hqRadiusMm;
+    const bt = buildingTarget(st, a, sq.player, u.flying);
+    const btDist = dist(sq.x, sq.z, bt.x, bt.z) - bt.radius;
 
-    if (sq.targetId === -2 || (sq.targetId === -1 && hqDist <= u.rangeMm)) {
-      // مهاجمة المقر
-      if (hqDist <= Math.max(u.rangeMm, 600) && hqDist >= u.minRangeMm - a.hqRadiusMm) {
+    if (sq.targetId === -2 || (sq.targetId === -1 && btDist <= u.rangeMm)) {
+      if (btDist <= Math.max(u.rangeMm, 600) && btDist >= u.minRangeMm - bt.radius) {
         const alive = membersAlive(sq, u);
-        damageHq(st, ctx, (1 - sq.player) as PlayerIx,
-          Math.max(1, Math.floor((u.hqDmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000))), events);
+        let dmg = Math.max(1, Math.floor((u.hqDmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000)));
+        dmg = Math.floor((dmg * sq.buffMill) / 1000);
+        damageBuilding(st, ctx, (1 - sq.player) as PlayerIx, dmg, u.flying, events);
         sq.attackedThisTick = true;
+        if ((st.phase as Phase) === 'ended') return events;
       } else {
-        moveToward(sq, u, enemyHq.x, enemyHq.z, st, a);
+        moveToward(sq, u, bt.x, bt.z, st, a);
       }
+      if (u.charge) { sq.noTargetTicks = 0; }
       continue;
     }
 
@@ -338,49 +404,57 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
       const holdAt = melee ? u.rangeMm : Math.floor((u.rangeMm * 9) / 10);
       if (d <= holdAt && d >= u.minRangeMm) {
         attack(st, ctx, sq, u, tgt, events);
+        sq.noTargetTicks = 0;
       } else if (d < u.minRangeMm) {
-        // أعمى قريباً (منجنيق): يتراجع خطوة نحو مقره
-        const own = hqPos(sq.player, a);
-        moveToward(sq, u, own.x, own.z, st, a);
+        const s = sq.player === 0 ? -1 : 1;
+        moveToward(sq, u, 0, s * a.hqZmm, st, a);
       } else {
         moveToward(sq, u, tgt.x, tgt.z, st, a);
+        if (u.charge) { sq.noTargetTicks++; if (sq.noTargetTicks >= 60) sq.chargeReady = true; }
       }
     } else {
-      // لا عدو قريباً: تقدّم في قطاعك نحو مقر الخصم
-      const advZ = sq.player === 0 ? a.fieldZmm + 2000 : -(a.fieldZmm + 2000);
-      if (Math.abs(sq.z) < a.fieldZmm) moveToward(sq, u, sq.x, advZ, st, a);
-      else moveToward(sq, u, enemyHq.x, enemyHq.z, st, a);
+      // لا عدو: راية القيادة النشطة تجمع غير المشتبكين، وإلا تقدّم نحو القلعة
+      if (u.charge) { sq.noTargetTicks++; if (sq.noTargetTicks >= 60) sq.chargeReady = true; }
+      if (P.flagUntilTick > st.tick && dist(sq.x, sq.z, P.flagX, P.flagZ) > 2000) {
+        moveToward(sq, u, P.flagX, P.flagZ, st, a);
+      } else if (Math.abs(sq.z) < a.fieldZmm) {
+        const advZ = sq.player === 0 ? a.fieldZmm + 2000 : -(a.fieldZmm + 2000);
+        moveToward(sq, u, sq.x, advZ, st, a);
+      } else {
+        moveToward(sq, u, bt.x, bt.z, st, a);
+      }
     }
   }
 
-  // 3) دفاع المقرين الذاتي
+  // 4) دفاع القلعة الذاتي (يطال الطيران أيضاً)
   for (let p = 0 as PlayerIx; p <= 1; p = (p + 1) as PlayerIx) {
-    const hq = hqPos(p, a);
+    const s = p === 0 ? -1 : 1;
+    const hx = 0, hz = s * a.hqZmm;
     let near: Squad | null = null, nd = Infinity;
-    for (const s of st.squads) {
-      if (s.player === p) continue;
-      const d = dist(s.x, s.z, hq.x, hq.z);
-      if (d < nd || (d === nd && near && s.id < near.id)) { nd = d; near = s; }
+    for (const e of st.squads) {
+      if (e.player === p) continue;
+      const d = dist(e.x, e.z, hx, hz);
+      if (d < nd || (d === nd && near && e.id < near.id)) { nd = d; near = e; }
     }
     if (near && nd <= a.hqDefRangeMm + a.hqRadiusMm) {
       damageSquad(st, ctx, near, a.hqDefDmgCentiPerTick, p, events);
     }
   }
 
-  // 4) السيطرة على القطاعات + النشر المتقدم + النقاط
+  // 5) السيطرة على الممرات + النشر المتقدم + النقاط
   const counts: number[][] = [[0, 0, 0], [0, 0, 0]];
   for (const s of st.squads) {
     if (s.landingTicks > 0 || Math.abs(s.z) > a.fieldZmm) continue;
     counts[s.player][sectorOf(s.x, a)]++;
   }
   for (let sec = 0 as SectorIx; sec <= 2; sec = (sec + 1) as SectorIx) {
-    let ctrl: -1 | 0 | 1 = -1;
-    if (counts[0][sec] > 0 && counts[1][sec] === 0) ctrl = 0;
-    else if (counts[1][sec] > 0 && counts[0][sec] === 0) ctrl = 1;
-    st.sectorController[sec] = ctrl;
+    let ctl: -1 | 0 | 1 = -1;
+    if (counts[0][sec] > 0 && counts[1][sec] === 0) ctl = 0;
+    else if (counts[1][sec] > 0 && counts[0][sec] === 0) ctl = 1;
+    st.sectorController[sec] = ctl;
     for (let p = 0 as PlayerIx; p <= 1; p = (p + 1) as PlayerIx) {
       const P = st.players[p];
-      if (ctrl === p) {
+      if (ctl === p) {
         P.controlTicks[sec]++;
         if (!P.forward[sec] && P.controlTicks[sec] >= a.forwardHoldTicks) {
           P.forward[sec] = true;
@@ -397,7 +471,7 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
   }
   st.midController = st.sectorController[1];
 
-  // 5) المؤقت والأطوار وشروط النصر بالنقاط
+  // 6) المؤقت والأطوار وشروط النصر بالنقاط
   st.tick++;
   const diff = st.players[0].scoreMilli - st.players[1].scoreMilli;
   if (st.phase === 'main' && st.tick >= a.mainTicks) {
@@ -425,12 +499,25 @@ function moveToward(
   let speed = u.speedMmTick;
   if (sq.slowUntilTick > st.tick) speed = Math.floor((speed * 650) / 1000);
   speed = Math.floor((speed * extraMill) / 1000);
+  speed = Math.floor((speed * sq.buffMill) / 1000);
+  // راية القيادة تسرّع من في نطاقها
+  const P = st.players[sq.player];
+  if (P.flagUntilTick > st.tick && dist(sq.x, sq.z, P.flagX, P.flagZ) <= a.flagRadiusMm) {
+    speed = Math.floor((speed * 1200) / 1000);
+  }
   const dx = tx - sq.x, dz = tz - sq.z;
   const d = Math.sqrt(dx * dx + dz * dz);
   if (d < 1) return;
   sq.x += Math.round((dx * speed) / d);
   sq.z += Math.round((dz * speed) / d);
-  clampToField(sq, a);
+  // غير الطائر لا يتجاوز بوابة قائمة نحو الفناء
+  const enemy = (1 - sq.player) as PlayerIx;
+  if (!u.flying && st.players[enemy].gateHpCenti > 0) {
+    const lim = a.gateZmm - 1200;
+    if (sq.player === 0 && sq.z > lim) sq.z = lim;
+    if (sq.player === 1 && sq.z < -lim) sq.z = -lim;
+  }
+  clampToField(sq, a, u.flying);
 }
 
 function attack(
@@ -440,11 +527,16 @@ function attack(
   const tu = ctx.units[tgt.unit];
   let dmg = Math.floor((u.dmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000));
   dmg = Math.floor((dmg * counterMill(u, tu)) / 1000);
+  dmg = Math.floor((dmg * sq.buffMill) / 1000);
   if (u.role === 'ranged') dmg = Math.floor((dmg * tu.fromRangedMill) / 1000);
+  // Charge فرسان الجوف: الضربة الأولى بعد مسير حر ×1.8
+  if (u.charge && sq.chargeReady) {
+    dmg = Math.floor((dmg * 1800) / 1000);
+    sq.chargeReady = false;
+  }
   sq.attackedThisTick = true;
 
   if (u.areaRadiusMm > 0) {
-    // ضرر منطقة حول الهدف (رماة اللهب)
     const cx = tgt.x, cz = tgt.z;
     const hit = st.squads.filter(s =>
       s.player !== sq.player && dist(s.x, s.z, cx, cz) <= u.areaRadiusMm);
@@ -452,12 +544,12 @@ function attack(
       let hd = Math.floor((u.dmgCentiPerTick * alive * sq.dmgMill) / (u.size * 1000));
       hd = Math.floor((hd * counterMill(u, ctx.units[h.unit])) / 1000);
       hd = Math.floor((hd * ctx.units[h.unit].fromRangedMill) / 1000);
+      hd = Math.floor((hd * sq.buffMill) / 1000);
       damageSquad(st, ctx, h, Math.max(1, hd), sq.player, events);
     }
     return;
   }
   if (u.slowMill > 0) {
-    // ساحرة الصقيع: إبطاء منطقة حول الهدف + ضرر رمزي
     const hit = st.squads.filter(s =>
       s.player !== sq.player && dist(s.x, s.z, tgt.x, tgt.z) <= u.slowRadiusMm);
     for (const h of hit) h.slowUntilTick = st.tick + 20;
@@ -472,7 +564,7 @@ function endMatch(st: SimState, events: SimEvent[], result: MatchResult): void {
   events.push({ t: 'end', result });
 }
 
-// ─── التجزئة والتسلسل (كشف الانحراف + إعادة الاتصال) ─────────────
+// ─── التجزئة والتسلسل ───────────────────────────────────────────
 
 export function hashState(st: SimState): number {
   let h = 0x811c9dc5;
@@ -483,11 +575,14 @@ export function hashState(st: SimState): number {
   };
   mix(st.tick); mix(st.phase === 'main' ? 1 : st.phase === 'overtime' ? 2 : 3);
   for (const P of st.players) {
-    mix(P.cp); mix(P.hqHpCenti); mix(P.scoreMilli); mix(P.regenCounter);
+    mix(P.cp); mix(P.hqHpCenti); mix(P.gateHpCenti); mix(P.scoreMilli); mix(P.regenCounter);
+    mix(P.flagUntilTick); mix(P.flagReadyTick);
+    for (const o of P.order) mix(o + 11);
     mix((P.forward[0] ? 1 : 0) | (P.forward[1] ? 2 : 0) | (P.forward[2] ? 4 : 0));
   }
   for (const s of st.squads.slice().sort((a, b) => a.id - b.id)) {
     mix(s.id); mix(s.x); mix(s.z); mix(s.hpCenti); mix(s.landingTicks);
+    mix(s.chargeReady ? 7 : 3);
   }
   return h >>> 0;
 }

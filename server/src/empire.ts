@@ -11,12 +11,13 @@ export interface BaseState {
   tokens: number;
   crystals: number;
   buildings: Record<string, number>;               // المستوى (0 = غير مبني)
+  pending: Record<string, number>;                 // إنتاج متكدس في كل منجم/مزرعة — يُستلم يدوياً
   upgrading: { id: string; doneAt: number } | null;
   unitLevels: Record<string, number>;
   lastAccrueMs: number;
   missions: Record<string, { progress: number; claimed: boolean }>;
   missionsDay: string;
-  freeChestAt: number;                              // آخر فتح
+  freeChestAt: number;
 }
 
 export function newBase(now: number): BaseState {
@@ -25,7 +26,7 @@ export function newBase(now: number): BaseState {
   const s = BUILDINGS_META.startResources;
   return {
     gold: s.gold, supplies: s.supplies, tokens: s.tokens, crystals: s.crystals,
-    buildings: b, upgrading: null, unitLevels: {},
+    buildings: b, pending: {}, upgrading: null, unitLevels: {},
     lastAccrueMs: now, missions: {}, missionsDay: '', freeChestAt: 0
   };
 }
@@ -67,8 +68,17 @@ function todayKey(now: number): string {
   return new Date(now).toISOString().slice(0, 10);
 }
 
-// التحصيل الكسول + إنهاء الترقيات المستحقة + تصفير المهام اليومية
+// سعة تكدس مبنى إنتاج: ساعتا إنتاج (يفرض زيارة القاعدة للاستلام — البند 3)
+export function bufferCap(b: BaseState, id: string): number {
+  const d = BUILDINGS[id], lvl = b.buildings[id] ?? 0;
+  if (!d || d.role !== 'prod' || lvl <= 0) return 0;
+  const labPct = (b.buildings.lab ?? 0) * (BUILDINGS.lab.prodBonusPctPerLevel ?? 0);
+  return Math.round(growth(d.prod.perHour, d.prod.growth, lvl - 1) * (1 + labPct / 100) * SPEED * 2);
+}
+
+// التحصيل الكسول إلى مخازن المباني + إنهاء الترقيات + تصفير المهام اليومية
 export function tickBase(b: BaseState, now: number): void {
+  if (!b.pending) b.pending = {}; // حالات محفوظة قبل هذه الميزة
   const day = todayKey(now);
   if (b.missionsDay !== day) {
     b.missionsDay = day;
@@ -79,11 +89,34 @@ export function tickBase(b: BaseState, now: number): void {
     b.buildings[b.upgrading.id] = (b.buildings[b.upgrading.id] ?? 0) + 1;
     b.upgrading = null;
   }
-  const p = prodPerHour(b), c = caps(b);
   const hours = Math.max(0, now - b.lastAccrueMs) / 3600000;
-  b.gold = Math.min(c.gold, b.gold + p.gold * hours);
-  b.supplies = Math.min(c.supplies, b.supplies + p.supplies * hours);
+  const labPct = (b.buildings.lab ?? 0) * (BUILDINGS.lab.prodBonusPctPerLevel ?? 0);
+  const mul = (1 + labPct / 100) * SPEED;
+  for (const id of Object.keys(BUILDINGS)) {
+    const d = BUILDINGS[id], lvl = b.buildings[id] ?? 0;
+    if (d.role !== 'prod' || lvl <= 0) continue;
+    const rate = growth(d.prod.perHour, d.prod.growth, lvl - 1) * mul;
+    b.pending[id] = Math.min(bufferCap(b, id), (b.pending[id] ?? 0) + rate * hours);
+  }
   b.lastAccrueMs = now;
+}
+
+// استلام إنتاج مبنى واحد إلى المخزون (بحد سعة المخزن)
+export function collectBuilding(b: BaseState, id: string, now: number): EmpireError | null {
+  tickBase(b, now);
+  const d = BUILDINGS[id];
+  if (!d || d.role !== 'prod') return 'unknown';
+  const amount = Math.floor(b.pending[id] ?? 0);
+  if (amount < 1) return 'nothing';
+  const c = caps(b);
+  if (d.prod.res === 'gold') {
+    const take = Math.min(amount, Math.max(0, Math.floor(c.gold - b.gold)));
+    b.gold += take; b.pending[id] -= take;
+  } else {
+    const take = Math.min(amount, Math.max(0, Math.floor(c.supplies - b.supplies)));
+    b.supplies += take; b.pending[id] -= take;
+  }
+  return null;
 }
 
 export function progressMission(b: BaseState, id: string, n = 1): void {
@@ -93,7 +126,7 @@ export function progressMission(b: BaseState, id: string, n = 1): void {
 }
 
 export type EmpireError =
-  | 'busy' | 'unknown' | 'max_level' | 'hall_gate' | 'poor'
+  | 'busy' | 'unknown' | 'max_level' | 'hall_gate' | 'poor' | 'nothing'
   | 'unit_unknown' | 'unit_locked' | 'unit_max' | 'barracks_gate'
   | 'mission_unknown' | 'mission_incomplete' | 'mission_claimed' | 'chest_wait';
 
@@ -134,7 +167,8 @@ export function trainUnit(b: BaseState, unitId: string, now: number): EmpireErro
   const cur = b.unitLevels[unitId] ?? 1;
   const maxLvl = (ECONOMY as any).levels.maxLevel;
   if (cur >= maxLvl) return 'unit_max';
-  if (cur + 1 > (b.buildings.barracks ?? 1)) return 'barracks_gate';
+  // الثكنة تحدّ المستوى: كل مستوى ثكنة يفتح مستويي وحدة (حتى 10 عند ثكنة 5)
+  if (cur + 1 > (b.buildings.barracks ?? 1) * 2) return 'barracks_gate';
   const cost = (ECONOMY as any).upgrade[String(cur + 1)];
   if (b.gold < cost.gold || b.tokens < cost.tokens + cost.roleTokens) return 'poor';
   b.gold -= cost.gold;
@@ -199,7 +233,9 @@ export function baseView(b: BaseState, now: number): any {
       level: lvl, maxLevel: d.maxLevel, unlockHall: d.unlockHall, role: d.role,
       next,
       prodPerHour: d.role === 'prod' && lvl > 0
-        ? growth(d.prod.perHour, d.prod.growth, lvl - 1) : 0
+        ? growth(d.prod.perHour, d.prod.growth, lvl - 1) : 0,
+      pending: d.role === 'prod' ? Math.floor(b.pending?.[id] ?? 0) : 0,
+      bufferCap: d.role === 'prod' ? bufferCap(b, id) : 0
     };
   }
   return {

@@ -1,16 +1,4 @@
 {
-  "unit.spear_wall.name": "حملة الرماح",
-  "unit.shield_guard.name": "حرس الدروع",
-  "unit.axe_warriors.name": "محاربو الفؤوس",
-  "unit.archers.name": "رماة الأقواس",
-  "unit.light_slingers.name": "القاذفات الخفيفة",
-  "unit.flame_archers.name": "رماة اللهب",
-  "unit.raid_cavalry.name": "خيّالة الغارة",
-  "unit.north_wolves.name": "ذئاب الشمال",
-  "unit.field_medic.name": "ضمّاد الميدان",
-  "unit.frost_witch.name": "ساحرة الصقيع",
-  "unit.iron_ram.name": "الكبش الحديدي",
-  "unit.catapult.name": "المنجنيق",
   "commander.sera.name": "القائدة سيرا",
   "arena.border_fort.name": "حصن الحدود",
   "hud.battle": "قــتــال",
@@ -32,5 +20,15 @@
   "mission.daily_battle": "العب تحدياً أونلاين",
   "mission.daily_upgrade": "رقِّ مبنى",
   "mission.daily_train": "درّب فيلقاً",
-  "mission.daily_valley": "اقطع وادي الحشود"
+  "mission.daily_valley": "اقطع وادي الحشود",
+  "unit.steel_guard.name": "الحرس الفولاذي",
+  "unit.vale_archers.name": "رماة الوهدة",
+  "unit.spear_bearers.name": "حملة الرماح",
+  "unit.hollow_knights.name": "فرسان الجوف",
+  "unit.flame_casters.name": "قاذفو اللهب",
+  "unit.bat_riders.name": "راكبو الخفافيش",
+  "unit.siege_engineers.name": "مهندسو الحصار",
+  "unit.banner_guards.name": "حماة الراية",
+  "unit.running_shadows.name": "الظلال الراكضة",
+  "unit.stone_golem.name": "الغولم الحجري"
 }

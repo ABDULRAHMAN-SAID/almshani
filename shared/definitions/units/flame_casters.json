@@ -1,0 +1,36 @@
+{
+  "id": "flame_casters",
+  "role": "ranged",
+  "faction": "kingdom_legion",
+  "squadSize": 4,
+  "costCP": 4,
+  "musterSec": 0,
+  "member": {
+    "hp": 70,
+    "dps": 12.0,
+    "range": 6.5,
+    "moveSpeed": 2.4
+  },
+  "targeting": "densest_cluster",
+  "tags": [
+    "area_damage"
+  ],
+  "counters": {
+    "frontline": 1.3
+  },
+  "counteredBy": {
+    "ranged": 1.3,
+    "cavalry": 2.0
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_flame_casters",
+    "nameKey": "unit.flame_casters.name"
+  },
+  "areaRadius": 1.8
+}

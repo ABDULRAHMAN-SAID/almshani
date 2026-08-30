@@ -16,7 +16,7 @@ function randomDeck(seed: number): string[] {
   let rng = seed;
   const pool = UNIT_IDS.slice();
   const deck: string[] = [];
-  while (deck.length < 7) {
+  while (deck.length < 8) {
     const r = rngInt(rng, pool.length); rng = r.state;
     deck.push(pool.splice(r.value, 1)[0]);
   }

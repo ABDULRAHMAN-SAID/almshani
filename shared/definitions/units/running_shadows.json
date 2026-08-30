@@ -1,0 +1,35 @@
+{
+  "id": "running_shadows",
+  "role": "special",
+  "faction": "kingdom_legion",
+  "squadSize": 5,
+  "costCP": 4,
+  "musterSec": 0,
+  "member": {
+    "hp": 60,
+    "dps": 8.0,
+    "range": 1.1,
+    "moveSpeed": 4.2
+  },
+  "targeting": "priority_ranged_siege",
+  "tags": [
+    "assassin"
+  ],
+  "counters": {
+    "ranged": 1.6,
+    "support": 1.6
+  },
+  "counteredBy": {
+    "frontline": 1.4
+  },
+  "levels": {
+    "hpPct": 3,
+    "dpsPct": 3
+  },
+  "trait3": null,
+  "trait5": null,
+  "ui": {
+    "medallion": "medallion_running_shadows",
+    "nameKey": "unit.running_shadows.name"
+  }
+}
