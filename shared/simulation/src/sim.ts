@@ -251,7 +251,7 @@ export function step(st: SimState, ctx: SimContext, inputs: Command[]): SimEvent
   const a = ctx.arena;
 
   for (const cmd of inputs) applyCommand(st, ctx, cmd, events);
-  if (st.phase === 'ended') return events;
+  if ((st.phase as Phase) === 'ended') return events; // قد ينهيها انسحاب ضمن الأوامر
 
   // 1) تجدد نقاط القيادة (مكافأة السيطرة على الوسط)
   for (let p = 0 as PlayerIx; p <= 1; p = (p + 1) as PlayerIx) {
