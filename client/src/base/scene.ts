@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import { t } from '../i18n';
 import { box, cyl, cone, ball, merge, modelMat } from '../gfx';
-import { memberGeo } from '../battle/models';
+import { rigLib } from '../battle/rigs3d';
 
 interface Spot { id: string; x: number; z: number; }
 
@@ -36,8 +36,9 @@ export class BaseScene {
   private torches: THREE.PointLight[] = [];
   private embers!: THREE.Points;
   private emberVel: Float32Array = new Float32Array(0);
-  private guards: { mesh: THREE.Mesh; angle: number; radius: number; speed: number }[] = [];
-  private sparring: THREE.Mesh[] = [];
+  private guards: { obj: THREE.Object3D; mixer?: THREE.AnimationMixer; angle: number; radius: number; speed: number }[] = [];
+  private sparring: { obj: THREE.Object3D; mixer?: THREE.AnimationMixer }[] = [];
+  private lifeBuilt = false;
   private smoke!: THREE.Points;
   private smokeVel: Float32Array = new Float32Array(0);
   private coins = new Map<string, THREE.Mesh>();
@@ -289,20 +290,7 @@ export class BaseScene {
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     this.embers = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xe8a45a, size: 0.14, transparent: true, opacity: 0.85 }));
     this.scene.add(this.embers);
-    // حراس يطوفون حول القاعة (نماذج جنود المعركة نفسها)
-    for (let i = 0; i < 3; i++) {
-      const mesh = new THREE.Mesh(memberGeo(i === 2 ? 'steel_guard' : 'spear_bearers', true), modelMat());
-      this.scene.add(mesh);
-      this.guards.push({ mesh, angle: i * 2.1, radius: 6.5 + i * 1.3, speed: 0.14 + i * 0.03 });
-    }
-    // متبارزان قرب الثكنة (البند 4: مناطق تدريب فيها جنود يتبارزون)
-    for (const [ux, sx] of [['spear_bearers', -1], ['steel_guard', 1]] as [string, number][]) {
-      const m = new THREE.Mesh(memberGeo(ux, true), modelMat());
-      m.position.set(-6.5 + sx * 1.1, 0, 11.3);
-      m.rotation.y = sx > 0 ? Math.PI / 2 : -Math.PI / 2;
-      this.scene.add(m);
-      this.sparring.push(m);
-    }
+    // الحياة (حراس يمشون + متبارزان بحركات حقيقية) تُبنى عند جاهزية النماذج المهيكلة — في sync()
     // دخان ورشة الحصار
     const SN = 18;
     const spos = new Float32Array(SN * 3);
@@ -354,6 +342,41 @@ export class BaseScene {
     }
   }
 
+  // حياة القاعدة: حراس يمشون بدورية، ومتبارزان يتضاربان بحركات قتال حقيقية،
+  // وساحر عند المصهرة — نفس نماذج جنود المعركة المهيكلة.
+  private buildLife(): void {
+    for (let i = 0; i < 3; i++) {
+      const r = rigLib.makeMember(i === 2 ? 'steel_guard' : 'spear_bearers', true);
+      if (!r) continue;
+      r.obj.scale.setScalar(0.95);
+      this.scene.add(r.obj);
+      this.guards.push({ obj: r.obj, mixer: r.mixer, angle: i * 2.1, radius: 6.5 + i * 1.3, speed: 0.14 + i * 0.03 });
+    }
+    const duel: [string, number][] = [['spear_bearers', -1], ['steel_guard', 1]];
+    for (const [ux, sx] of duel) {
+      const r = rigLib.makeMember(ux, true);
+      if (!r) continue;
+      r.obj.scale.setScalar(0.95);
+      r.obj.position.set(-6.5 + sx * 1.2, 0, 11.3);
+      r.obj.rotation.y = sx > 0 ? -Math.PI / 2 : Math.PI / 2;
+      r.walk.stop();
+      r.attack.setLoop(THREE.LoopRepeat, Infinity);
+      r.attack.play();
+      r.attack.time = sx > 0 ? r.attack.getClip().duration * 0.5 : 0; // تناوب الضربات
+      this.scene.add(r.obj);
+      this.sparring.push({ obj: r.obj, mixer: r.mixer });
+    }
+    const mage = rigLib.makeMember('flame_casters', true);
+    if (mage) {
+      mage.obj.scale.setScalar(0.95);
+      mage.obj.position.set(9.5, 0, 6.5);
+      mage.obj.rotation.y = -Math.PI / 3;
+      mage.walk.stop(); mage.idle.play();
+      this.scene.add(mage.obj);
+      this.sparring.push({ obj: mage.obj, mixer: mage.mixer });
+    }
+  }
+
   sync(nowMs: number): void {
     if (this.disposed) return;
     const dt = Math.min(0.1, (nowMs - this.lastMs) / 1000) || 0.016;
@@ -381,12 +404,9 @@ export class BaseScene {
       spos.setX(i, spos.getX(i) + Math.sin(t01 + i) * 0.003);
     }
     spos.needsUpdate = true;
-    // المتبارزان يتضاربان
-    for (let i = 0; i < this.sparring.length; i++) {
-      const m = this.sparring[i];
-      m.rotation.x = -0.25 * Math.abs(Math.sin(t01 * 5 + i * Math.PI));
-      m.position.y = Math.abs(Math.sin(t01 * 5 + i * Math.PI)) * 0.06;
-    }
+    // جنود مهيكلة حقيقية: تُبنى مرة واحدة عند جاهزية النماذج ثم تُحرَّك بمازجاتها
+    if (!this.lifeBuilt && rigLib.ready) { this.buildLife(); this.lifeBuilt = true; }
+    for (const sp of this.sparring) sp.mixer?.update(dt);
     // مؤشر الاستلام يظهر عند تكدس ≥ ثلث السعة
     for (const [id, coin] of this.coins) {
       const bb = this.view?.buildings?.[id];
@@ -394,12 +414,15 @@ export class BaseScene {
       coin.visible = show;
       if (show) { coin.rotation.y = t01 * 2; coin.position.y = 4.6 + Math.sin(t01 * 3) * 0.25; }
     }
-    // الحراس يطوفون
+    // الحراس يطوفون مشياً حقيقياً حول القاعة
     for (const gd of this.guards) {
       gd.angle += gd.speed * dt;
       const x = Math.cos(gd.angle) * gd.radius, z = -5 + Math.sin(gd.angle) * (gd.radius * 0.7);
-      gd.mesh.position.set(x, Math.abs(Math.sin(t01 * 6 + gd.radius)) * 0.05, z);
-      gd.mesh.rotation.y = -gd.angle - Math.PI / 2;
+      gd.obj.position.set(x, 0, z);
+      // وجهة المسير على المدار الإهليلجي
+      const tx = -Math.sin(gd.angle) * gd.radius, tz = Math.cos(gd.angle) * gd.radius * 0.7;
+      gd.obj.rotation.y = Math.atan2(tx, tz);
+      gd.mixer?.update(dt);
     }
     // المباني: قفل/مستوى/ترقية + لافتات
     for (const [id, g] of this.groups) {

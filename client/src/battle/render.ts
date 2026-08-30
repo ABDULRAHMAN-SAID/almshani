@@ -5,6 +5,7 @@ import type { MatchClient } from './game';
 import { membersAlive, sectorOf, type Squad } from '../../../shared/simulation/src/index';
 import { memberGeo, siegeProp, COLD, WARM } from './models';
 import { modelMat, merge, box as gbox, cyl as gcyl, cone as gcone, ball as gball } from '../gfx';
+import { rigLib, UNIT_RIGS } from './rigs3d';
 
 const M = 0.001; // مم → متر
 
@@ -15,15 +16,27 @@ const COL = {
   mineRing: 0x6d8db4, foeRing: 0xb25b28
 };
 
+interface MemberAnim {
+  mixer: THREE.AnimationMixer;
+  walk: THREE.AnimationAction;
+  attack: THREE.AnimationAction;
+  idle: THREE.AnimationAction;
+  mode: 'walk' | 'idle' | 'attack';
+}
+
 interface SquadView {
   group: THREE.Group;
   members: THREE.Object3D[];
+  anims: (MemberAnim | null)[];   // مهيكلة حقيقية؛ null = مجسم إجرائي (خفاش/غولم)
   ring: THREE.Mesh;
   frost: THREE.Mesh;      // هالة الإبطاء (ساحرة الصقيع)
   unit: string;
   mine: boolean;
   lastHp: number;         // لكشف الشفاء بصرياً
   healAt: number;
+  lastGX: number;         // لاتجاه المسير وسرعته
+  lastGZ: number;
+  heading: number;
 }
 
 export class BattleRender {
@@ -58,7 +71,10 @@ export class BattleRender {
   private mats = new Map<number, THREE.MeshLambertMaterial>();
   flipped = false; // اللاعب 1 يرى الميدان من جهته
 
+  private lastAnimMs = 0;
+
   constructor(private canvas: HTMLCanvasElement, private mc: MatchClient) {
+    rigLib.load(); // فكّ نماذج الجنود المهيكلة (مرة واحدة للتطبيق كله)
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.scene.fog = new THREE.Fog(0x181a20, 95, 190);
@@ -399,13 +415,16 @@ export class BattleRender {
     const mine = sq.player === this.mc.you;
     const group = new THREE.Group();
     const members: THREE.Object3D[] = [];
+    const anims: (MemberAnim | null)[] = [];
     const geo = memberGeo(sq.unit, mine);
     const mat = modelMat();
     const big = sq.unit === 'hollow_knights' || sq.unit === 'stone_golem';
     const siege = u.role === 'siege';
     for (let i = 0; i < u.size; i++) {
-      const m = new THREE.Mesh(geo, mat);
-      m.scale.setScalar(1.35); // تكبير بصري: التفاصيل تُقرأ من ارتفاع كاميرا الميدان
+      // جندي مهيكل حقيقي إن توفر لهذه الوحدة — وإلا المجسم الإجرائي (خفاش/غولم)
+      const rigged = UNIT_RIGS[sq.unit] ? rigLib.makeMember(sq.unit, mine) : null;
+      const m: THREE.Object3D = rigged ? rigged.obj : new THREE.Mesh(geo, mat);
+      if (!rigged) m.scale.setScalar(1.35);
       const spread = big ? 1.05 : 0.78;
       const r = spread * Math.sqrt(i + 0.4), th = i * 2.39996;
       // طاقم الحصار يلتف حول الآلة بدل مركزها
@@ -414,6 +433,7 @@ export class BattleRender {
       m.rotation.y = Math.sin(i * 7.3) * 0.2;
       group.add(m);
       members.push(m);
+      anims.push(rigged ? { mixer: rigged.mixer, walk: rigged.walk, attack: rigged.attack, idle: rigged.idle, mode: 'walk' } : null);
     }
     if (siege) {
       const prop = siegeProp(sq.unit, mine ? COLD : WARM);
@@ -430,7 +450,11 @@ export class BattleRender {
     frost.rotation.x = -Math.PI / 2; frost.position.y = 0.28; frost.visible = false;
     group.add(frost);
     this.scene.add(group);
-    return { group, members, ring, frost, unit: sq.unit, mine, lastHp: sq.hpCenti, healAt: 0 };
+    return {
+      group, members, anims, ring, frost, unit: sq.unit, mine,
+      lastHp: sq.hpCenti, healAt: 0,
+      lastGX: sq.x * M, lastGZ: sq.z * M, heading: sq.player === 0 ? 0 : Math.PI
+    };
   }
 
   selectSquad(id: number | null): void {
@@ -497,6 +521,8 @@ export class BattleRender {
   sync(nowMs: number): void {
     const mc = this.mc;
     const alpha = mc.alpha(nowMs);
+    const animDt = this.lastAnimMs ? Math.min(0.066, (nowMs - this.lastAnimMs) / 1000) : 0.016;
+    this.lastAnimMs = nowMs;
     const live = new Set<number>();
     for (const sq of mc.st.squads) {
       live.add(sq.id);
@@ -510,11 +536,53 @@ export class BattleRender {
       const landing = sq.landingTicks > 0;
       const scale = landing ? 0.4 + 0.6 * (1 - sq.landingTicks / mc.ctx.arena.landingTicks) : 1;
       v.group.scale.setScalar(scale);
+      // اتجاه المسير: نحو الهدف أثناء القتال، ونحو حركة الفرقة أثناء الزحف
+      const gx = pose.x * M, gz = pose.z * M;
+      const movedD = Math.hypot(gx - v.lastGX, gz - v.lastGZ);
+      const speed = movedD / Math.max(animDt, 1e-3);
+      let targetHeading = v.heading;
+      if (sq.attackedThisTick && sq.targetId >= 0) {
+        const tp = mc.pose(sq.targetId, alpha);
+        if (tp) targetHeading = Math.atan2(tp.x * M - gx, tp.z * M - gz);
+      } else if (movedD > 0.004) {
+        targetHeading = Math.atan2(gx - v.lastGX, gz - v.lastGZ);
+      }
+      let dh = targetHeading - v.heading;
+      while (dh > Math.PI) dh -= Math.PI * 2;
+      while (dh < -Math.PI) dh += Math.PI * 2;
+      v.heading += dh * 0.18;
+      v.group.rotation.y = v.heading;
+      v.lastGX = gx; v.lastGZ = gz;
+
       const t = nowMs * 0.001;
+      const moving = speed > 0.35;
       for (let i = 0; i < v.members.length; i++) {
         const m = v.members[i];
         m.visible = i < alive;
-        if (m.visible && !landing) {
+        if (!m.visible) continue;
+        const an = v.anims[i];
+        if (an) {
+          // جندي مهيكل: مشي/سكون/ضربة من حركات حقيقية
+          if (sq.attackedThisTick && an.mode !== 'attack') {
+            an.mode = 'attack';
+            an.walk.fadeOut(0.08); an.idle.fadeOut(0.08);
+            an.attack.reset().fadeIn(0.06).play();
+          } else if (an.mode === 'attack' && !an.attack.isRunning()) {
+            an.mode = 'idle';
+            an.idle.reset().fadeIn(0.12).play();
+          }
+          if (an.mode !== 'attack') {
+            const want: 'walk' | 'idle' = moving && !landing ? 'walk' : 'idle';
+            if (an.mode !== want) {
+              an.mode = want;
+              if (want === 'walk') { an.idle.fadeOut(0.15); an.walk.reset().fadeIn(0.15).play(); }
+              else { an.walk.fadeOut(0.2); an.idle.reset().fadeIn(0.2).play(); }
+            }
+            an.walk.timeScale = Math.min(1.8, Math.max(0.7, speed / 2.6));
+          }
+          an.mixer.update(animDt);
+        } else if (!landing) {
+          // مجسم إجرائي (الخفافيش/الغولم/طاقم الحصار): الإيقاع القديم
           const flyBase = mc.ctx.units[sq.unit].flying ? 2.1 + Math.sin(t * 3 + i) * 0.25 : 0;
           if (sq.attackedThisTick) {
             m.position.y = flyBase + Math.abs(Math.sin(t * 14 + i)) * 0.12;
@@ -525,9 +593,6 @@ export class BattleRender {
           }
         }
       }
-      // اتجاه المسير العام
-      const face = sq.player === 0 ? 0 : Math.PI;
-      v.group.rotation.y = face;
       // هالة الصقيع على المبطَّئين
       v.frost.visible = sq.slowUntilTick > mc.st.tick;
       // وميض شفاء أخضر عند ارتفاع الصحة

@@ -34,6 +34,10 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@types/three": "^0.185.4"
+    "@gltf-transform/core": "^4.4.2",
+    "@gltf-transform/functions": "^4.4.2",
+    "@types/three": "^0.185.4",
+    "meshoptimizer": "^1.2.0",
+    "sharp": "^0.35.4"
   }
 }
