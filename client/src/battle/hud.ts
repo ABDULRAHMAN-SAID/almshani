@@ -122,9 +122,9 @@ export class BattleHud {
     for (const e of evs) {
       if (e.t === 'phase' && e.phase === 'overtime') this.toast(t('overtime'));
       if (e.t === 'forward' && e.player === this.mc.you) this.toast(t('forwardOpen'));
-      if (e.t === 'gate_down') this.toast(e.player === this.mc.you ? t('gate_down_you') : t('gate_down_foe'));
-      if (e.t === 'kill') this.render.spawnFx(e.x!, e.z!, e.player === this.mc.you ? 0xb25b28 : 0xd8c9a8, 2);
-      if (e.t === 'skill') this.render.spawnFx(e.x!, e.z!, 0xa08339, 4);
+      if (e.t === 'gate_down') { this.toast(e.player === this.mc.you ? t('gate_down_you') : t('gate_down_foe')); this.render.cheer(); }
+      if (e.t === 'kill') { this.render.spawnFx(e.x!, e.z!, e.player === this.mc.you ? 0xb25b28 : 0xd8c9a8, 2); this.render.cheer(); }
+      if (e.t === 'skill') { this.render.spawnFx(e.x!, e.z!, 0xa08339, 4); this.render.cheer(); }
       if (e.t === 'flag') this.render.spawnFx(e.x!, e.z!, 0x6d8db4, 2.5);
     }
   }

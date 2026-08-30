@@ -156,6 +156,10 @@ export class Lobby {
     if (s.match && s.seatIx !== null && s.match.st.phase !== 'ended') {
       s.match.setConnection(s.seatIx, null); // مهلة عودة 30 ثانية داخل الغرفة
     }
+    // امسح المراجع: حدث إغلاق متأخر للمقبس القديم بعد إعادة الاتصال كان
+    // يقطع اتصال الجلسة الجديدة لنفس المقعد (سباق يسبب انحراف تجزئات)
+    s.match = null;
+    s.seatIx = null;
   }
 
   private tryMatch(): void {

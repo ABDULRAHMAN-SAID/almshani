@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import type { MatchClient } from './game';
 import { membersAlive, sectorOf, type Squad } from '../../../shared/simulation/src/index';
 import { memberGeo, siegeProp, COLD, WARM } from './models';
-import { modelMat, merge, box as gbox, cyl as gcyl, cone as gcone } from '../gfx';
+import { modelMat, merge, box as gbox, cyl as gcyl, cone as gcone, ball as gball } from '../gfx';
 
 const M = 0.001; // مم → متر
 
@@ -52,6 +52,9 @@ export class BattleRender {
   private hqMeshes: THREE.Group[] = [];
   private gateDoors: (THREE.Mesh | null)[] = [null, null];
   private flagMarks: (THREE.Group | null)[] = [null, null];
+  // الجمهور: مجموعات بأطوار مختلفة كي يتموج المدرج لا يقفز كتلة واحدة
+  private crowdGroups: { mesh: THREE.Mesh; baseY: number; phase: number }[] = [];
+  private cheerUntil = 0;
   private mats = new Map<number, THREE.MeshLambertMaterial>();
   flipped = false; // اللاعب 1 يرى الميدان من جهته
 
@@ -78,8 +81,8 @@ export class BattleRender {
 
   private setupCamera(): void {
     const s = this.flipped ? 1 : -1;
-    this.camera.position.set(0, 67, s * 37);
-    this.camera.lookAt(0, 0, 0);
+    this.camera.position.set(0, 70, s * 46);
+    this.camera.lookAt(0, 0, s * 7); // ميل نحو جهة اللاعب: قلعته كاملة فوق شريط اليد
   }
 
   private setupLights(): void {
@@ -92,9 +95,10 @@ export class BattleRender {
   private buildArena(): void {
     const a = this.mc.ctx.arena;
     const W = a.halfWmm * M * 2, L = a.hqZmm * M * 2 + 10;
-    const g = new THREE.Mesh(new THREE.PlaneGeometry(W + 22, L + 8), this.mat(0x2a2622));
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(W + 36, L + 30), this.mat(0x2a2622));
     g.rotation.x = -Math.PI / 2; g.position.y = -0.4; // منخفضة كفاية فلا تتصارع عمقياً مع القطاعات
     this.scene.add(g);
+    this.buildStands();
 
     // القطاعات الثلاثة بتظليل خفيف متمايز + طبقة تلوين المسيطر
     const secW = [a.halfWmm - a.sectorEdgeMm, a.sectorEdgeMm * 2, a.halfWmm - a.sectorEdgeMm];
@@ -185,7 +189,8 @@ export class BattleRender {
         new THREE.MeshLambertMaterial({ color: c, side: THREE.DoubleSide }));
       flag.position.set(1.25, 7.25, 0);
       hq.add(flag);
-      hq.position.set(0, 0, (p === 0 ? -1 : 1) * a.hqZmm * M);
+      hq.position.set(0, 0, (p === 0 ? -1 : 1) * (a.hqZmm * M + 1.4)); // مزاحة خلف السور كي لا تخترقه بعد التكبير
+      hq.scale.setScalar(1.3); // قلعة مهيبة تُرى بوضوح من كاميرا الميدان
       this.scene.add(hq);
       this.hqMeshes.push(hq);
 
@@ -236,6 +241,93 @@ export class BattleRender {
       this.zoneFwd.push(fwd);
     }
   }
+
+  // ═══ الكولوسيوم: مدرجات محيطة بجمهور حي — الساحة حلبة استعراض لا ميدان مهجور ═══
+  private buildStands(): void {
+    const a = this.mc.ctx.arena;
+    const stone = 0x45413a, stoneD = 0x3a362f, wallBack = 0x322e28;
+    const skins = [0xd8c9a8, 0xc9b489, 0xb59a76, 0x8a6a4e];
+    const garb = [0xc9b489, 0xa4462f, 0x4d6f9c, 0x8a7a5c, 0xb08d4a, 0x8c8478, 0x9c5a3c, 0x5c718a, 0x6d4a35, 0x746a80];
+    let seed = 29;
+    const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+
+    const tiers = 3, tierD = 2.1, tierH = 1.15;
+    const sideX0 = a.halfWmm * M + 2.0;             // مسافة عن حافة الميدان
+    const sideLen = a.hqZmm * M * 2 + 6;
+    const endZ0 = a.hqZmm * M + 4.6;                // مدرج خلف كل قلعة — قلعتك محاطة بجمهورها
+    const endW = a.halfWmm * M * 2 + 1;
+
+    const steps: THREE.BufferGeometry[] = [];
+    const deco: THREE.BufferGeometry[] = [];
+    const flames: THREE.BufferGeometry[] = [];
+    const buckets: THREE.BufferGeometry[][] = [[], [], [], []];
+    const spectator = (x: number, y: number, z: number, faceY: number): void => {
+      const b = buckets[Math.floor(rnd() * 4)];
+      b.push(gbox(0.36, 0.52, 0.28, garb[Math.floor(rnd() * garb.length)], x, y + 0.26, z, faceY + (rnd() - 0.5) * 0.6));
+      b.push(gball(0.155, skins[Math.floor(rnd() * skins.length)], x, y + 0.64, z, 6, 5));
+    };
+
+    // المدرجات الجانبية على طول الساحة كلها
+    for (const side of [-1, 1]) {
+      for (let t = 0; t < tiers; t++) {
+        const x = side * (sideX0 + tierD * t + tierD / 2);
+        const h = tierH * (t + 1);
+        steps.push(gbox(tierD, h, sideLen, t % 2 ? stoneD : stone, x, h / 2, 0));
+        const rowX = side * (sideX0 + tierD * t + tierD * 0.5);
+        for (let z = -sideLen / 2 + 1.2; z < sideLen / 2 - 1; z += 1.25) {
+          if (rnd() < 0.82) spectator(rowX + (rnd() - 0.5) * 0.7, h, z, side > 0 ? -Math.PI / 2 : Math.PI / 2);
+        }
+      }
+      // جدار خلفي مع رايات المملكتين ومشاعل
+      const bx = side * (sideX0 + tierD * tiers + 0.5);
+      steps.push(gbox(1.0, tierH * tiers + 2.2, sideLen, wallBack, bx, (tierH * tiers + 2.2) / 2, 0));
+      for (let i = 0; i < 7; i++) {
+        const z = -sideLen / 2 + 4 + i * (sideLen - 8) / 6;
+        const py = tierH * tiers + 2.2;
+        deco.push(gcyl(0.07, 0.09, 2.6, 0x54432f, bx, py + 1.1, z, 5));
+        deco.push(gbox(0.08, 1.0, 1.5, i % 2 ? COL.hqMine : COL.hqFoe, bx + side * 0.06, py + 1.9, z + 0.75));
+        if (i % 2 === 0) {
+          deco.push(gcyl(0.05, 0.07, 1.1, 0x3a2e22, bx - side * 0.6, py - 1.4, z + 2, 5));
+          flames.push(gcone(0.22, 0.55, 0xe8a45a, bx - side * 0.6, py - 0.7, z + 2, 6));
+        }
+      }
+    }
+
+    // مدرجا النهايتين خلف القلعتين (منحنيان قليلاً نحو الميدان)
+    for (const ez of [-1, 1]) {
+      for (let t = 0; t < tiers; t++) {
+        const z = ez * (endZ0 + tierD * t + tierD / 2);
+        const h = tierH * (t + 1);
+        steps.push(gbox(endW + t * 1.6, h, tierD, t % 2 ? stoneD : stone, 0, h / 2, z));
+        for (let x = -(endW + t * 1.6) / 2 + 1; x < (endW + t * 1.6) / 2 - 0.8; x += 1.25) {
+          if (rnd() < 0.8) spectator(x, h, z + (rnd() - 0.5) * 0.7, ez > 0 ? Math.PI : 0);
+        }
+      }
+      const bz = ez * (endZ0 + tierD * tiers + 0.5);
+      steps.push(gbox(endW + tiers * 1.6, tierH * tiers + 2.0, 1.0, wallBack, 0, (tierH * tiers + 2.0) / 2, bz));
+    }
+
+    // أبراج الزوايا الأربع برايات — إطار الكولوسيوم
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+      const cx = sx * (sideX0 + tierD * tiers + 0.6), cz = sz * (endZ0 + tierD * tiers + 0.2);
+      steps.push(gcyl(1.15, 1.45, tierH * tiers + 4.6, stone, cx, (tierH * tiers + 4.6) / 2, cz, 8));
+      deco.push(gcone(1.5, 1.4, sz === (this.mc.you === 0 ? -1 : 1) ? COL.hqMine : COL.hqFoe, cx, tierH * tiers + 5.3, cz, 8));
+      deco.push(gcyl(0.06, 0.06, 2.2, 0x2a2118, cx, tierH * tiers + 6.8, cz, 5));
+    }
+
+    this.scene.add(new THREE.Mesh(merge(steps), modelMat()));
+    this.scene.add(new THREE.Mesh(merge(deco), modelMat()));
+    // ألسنة المشاعل بخامة غير مضاءة كي تتوهج في العتمة
+    this.scene.add(new THREE.Mesh(merge(flames), new THREE.MeshBasicMaterial({ vertexColors: true })));
+    for (const b of buckets) {
+      const mesh = new THREE.Mesh(merge(b), modelMat());
+      this.scene.add(mesh);
+      this.crowdGroups.push({ mesh, baseY: 0, phase: rnd() * Math.PI * 2 });
+    }
+  }
+
+  // هتاف: يرفع تموج الجمهور لحظة القتل/كسر البوابة/المهارة
+  cheer(): void { this.cheerUntil = performance.now() + 1400; }
 
   private mkGhost(): THREE.Mesh {
     const m = new THREE.Mesh(
@@ -530,6 +622,13 @@ export class BattleRender {
       if (ctl === -1) m.opacity = 0;
       else { m.opacity = 0.07; m.color.setHex(ctl === mc.you ? COL.mineRing : COL.foeRing); }
     }
+    // تموج الجمهور — ويشتد هتافاً بعد قتل أو كسر بوابة
+    const tc = nowMs * 0.001;
+    const cheering = nowMs < this.cheerUntil;
+    for (const cg of this.crowdGroups) {
+      cg.mesh.position.y = cg.baseY +
+        Math.abs(Math.sin(tc * (cheering ? 5.2 : 2.1) + cg.phase)) * (cheering ? 0.28 : 0.08);
+    }
     // مؤثرات
     for (let i = this.fx.length - 1; i >= 0; i--) {
       const f = this.fx[i];
@@ -545,12 +644,12 @@ export class BattleRender {
     const w = this.canvas.clientWidth || innerWidth, h = this.canvas.clientHeight || innerHeight;
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
-    // بورتريه: كاميرا عالية مائلة تُظهر المقرين معاً
+    // بورتريه: كاميرا عالية مائلة أبعد قليلاً — قلعتك كاملة في الإطار مع المدرجات
     const portrait = h > w;
     const s = this.flipped ? 1 : -1;
-    this.camera.position.set(0, portrait ? 67 : 50, s * (portrait ? 37 : 33));
-    this.camera.fov = portrait ? 62 : 53;
-    this.camera.lookAt(0, 0, 0);
+    this.camera.position.set(0, portrait ? 70 : 54, s * (portrait ? 46 : 40));
+    this.camera.fov = portrait ? 60 : 50;
+    this.camera.lookAt(0, 0, s * (portrait ? 7 : 3)); // قلعة اللاعب كاملة في الإطار
     this.camera.updateProjectionMatrix();
   }
 

@@ -75,6 +75,17 @@ export class MatchRoom {
       this.desyncs++;
       this.seats[player].send?.({ t: 'desync', tick });
       console.error(`[match ${this.id}] DESYNC p${player} tick=${tick} client=${hash} server=${server}`);
+      // تفريغ تشخيصي: السجل + التجزئات — يُعاد تشغيله بلا شبكة لعزل الطرف المنحرف
+      const dump = (globalThis as any).process?.env?.DESYNC_DUMP;
+      if (dump && this.desyncs === 1) {
+        import('node:fs').then(fs => fs.writeFileSync(
+          `${dump}/desync-${this.id}.json`,
+          JSON.stringify({ seed: this.seed, decks: this.decks, unitLevels: this.unitLevels,
+            seats: this.seats.map(s => ({ name: s.name, isBot: s.isBot })),
+            tick, clientHash: hash, serverHash: server,
+            hashes: [...this.hashes.entries()], log: this.log })
+        )).catch(() => {});
+      }
     }
   }
 
@@ -119,7 +130,8 @@ export class MatchRoom {
     // بث كل تكّتين (100ms) لخفض الرسائل — الترتيب محفوظ
     if (this.batch.length >= 2 || (this.st.phase as string) === 'ended') {
       const msg = { t: 'ticks', inputs: this.batch.splice(0) };
-      for (const s of this.seats) s.send?.(msg);
+      // إرسال كل مقعد معزول: استثناء مقبس واحد يجب ألا يُفقد الحزمة للمقعد الآخر
+      for (const s of this.seats) { try { s.send?.(msg); } catch { /* rejoin يعوّضه */ } }
     }
     if ((this.st.phase as string) === 'ended') this.finish();
   }

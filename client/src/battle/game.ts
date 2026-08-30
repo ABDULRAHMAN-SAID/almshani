@@ -63,8 +63,11 @@ export class MatchClient {
       if (!due && !backlog) break;
       const input = this.queue.shift()!;
       if (input.tick !== this.st.tick) {
-        // فجوة غير متوقعة — الخادم سيعيد الحالة عبر rejoinState عند الحاجة
+        // مكررة (بعد إعادة اتصال): تجاوزها. فجوة أمامية: لا تطبّقها على تكّة خاطئة
+        // أبداً — أعلنها وانتظر rejoinState بدل انحراف صامت.
         if (input.tick < this.st.tick) continue;
+        console.warn(`tick gap: expected ${this.st.tick} got ${input.tick}`);
+        continue;
       }
       this.snapshot(this.prev);
       const evs = step(this.st, this.ctx, input.commands);
