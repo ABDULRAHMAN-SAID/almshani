@@ -99,8 +99,11 @@ export function unitName(id: string): string {
 
 // حرفان مميزان لشارة الوحدة (Medallion) — نص لا إيموجي.
 // نأخذ الكلمة الأخيرة (الأكثر تمييزاً في الأسماء العربية) بلا «ال» التعريف.
+// المقارنة بنصٍّ لا بتعبير نمطي: المصغِّر يهرّب النصوص إلى ASCII لكنه يترك
+// التعابير النمطية بايتات خام، فتنكسر لو فُكّ ترميز الصفحة خطأً.
 export function unitMark(id: string): string {
   const words = unitName(id).trim().split(/\s+/);
-  const w = (words[words.length - 1] ?? '').replace(/^ال/, '');
+  let w = words[words.length - 1] ?? '';
+  if (w.startsWith('ال')) w = w.slice(2);
   return w.slice(0, 2) || unitName(id).slice(0, 2);
 }

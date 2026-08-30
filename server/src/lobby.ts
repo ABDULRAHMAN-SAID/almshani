@@ -7,7 +7,7 @@ import type { SimContext, PlayerIx, Command } from '../../shared/simulation/src/
 import { MatchRoom, type Seat } from './match';
 import {
   newBase, baseView, startUpgrade, trainUnit, claimMission, openFreeChest,
-  battleReward, unlockedUnits, collectBuilding, type BaseState
+  battleReward, unlockedUnits, collectBuilding, sanitizeBase, sanitizeDeck, type BaseState
 } from './empire';
 import { loadState, saveStateSoon, saveNow } from './store';
 
@@ -44,7 +44,12 @@ export class Lobby {
     this.botTimer = setInterval(() => this.fillWithBots(), 1000);
     const saved = loadState<{ accounts: Account[] }>();
     if (saved?.accounts) {
-      for (const a of saved.accounts) this.accounts.set(a.token, a);
+      for (const a of saved.accounts) {
+        // حسابات من إصدار أقدم (وحدات مُبدلة، حقول ناقصة) تُرحَّل عند التحميل
+        a.base = sanitizeBase(a.base, Date.now());
+        a.deck = sanitizeDeck(a.deck, a.base);
+        this.accounts.set(a.token, a);
+      }
       console.log(`store: حُمّل ${saved.accounts.length} حساباً`);
     }
   }

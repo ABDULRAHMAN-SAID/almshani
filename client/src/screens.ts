@@ -175,7 +175,7 @@ export function showUnits(profile: Profile, base: any, on: Actions): void {
   const el = screen(`
     <div class="tabwrap">
       <h2>${t('tab_units')}</h2>
-      <div class="sub" style="text-align:start;margin-bottom:8px">${t('deck_current')} ${deckEditing ? `— ${deckDraft.length}/7` : ''}</div>
+      <div class="sub" style="text-align:start;margin-bottom:8px">${t('deck_current')} ${deckEditing ? `— ${deckDraft.length}/8` : ''}</div>
       <div class="deckstrip">${(deckEditing ? deckDraft : profile.deck).map(id => `<div class="mini" title="${unitName(id)}">${unitMark(id)}</div>`).join('')}</div>
       <div class="row" style="margin-bottom:14px">
         <button class="btn ghost" id="b-deck">${deckEditing ? t('deck_save') : t('deck_edit')}</button>

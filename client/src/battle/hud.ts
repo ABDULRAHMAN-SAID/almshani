@@ -94,7 +94,7 @@ export class BattleHud {
       const u = this.mc.ctx.units[uid];
       const el = document.createElement('div');
       el.className = 'slot';
-      el.innerHTML = `<div class="med">${unitMark(uid)}</div><div class="cost">${u.cost}</div>`;
+      el.innerHTML = `<div class="med">${unitMark(uid)}</div><div class="cost">${u?.cost ?? '؟'}</div>`;
       el.title = unitName(uid);
       el.addEventListener('pointerdown', ev => { ev.preventDefault(); this.onSlotDrag?.(slot, ev); });
       this.slotsEl.appendChild(el);
@@ -105,7 +105,7 @@ export class BattleHud {
       const nextId = P.deck[P.order[4]];
       const nx = document.createElement('div');
       nx.className = 'slot next';
-      nx.innerHTML = `<div class="med">${unitMark(nextId)}</div><div class="cost">${this.mc.ctx.units[nextId].cost}</div>`;
+      nx.innerHTML = `<div class="med">${unitMark(nextId)}</div><div class="cost">${this.mc.ctx.units[nextId]?.cost ?? '؟'}</div>`;
       nx.title = unitName(nextId);
       this.slotsEl.appendChild(nx);
     }
@@ -153,7 +153,7 @@ export class BattleHud {
     const hand = handOf(P);
     hand.forEach((deckIx, slot) => {
       const u = mc.ctx.units[P.deck[deckIx]];
-      this.slotEls[slot]?.classList.toggle('poor', P.cp < u.cost);
+      if (u) this.slotEls[slot]?.classList.toggle('poor', P.cp < u.cost);
     });
     // المهارة
     const chargeLeft = a.skillChargeTicks - st.tick;

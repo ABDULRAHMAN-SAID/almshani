@@ -1,6 +1,6 @@
 // قلب الإمبراطورية على الخادم — الحقيقة الوحيدة للقاعدة: موارد بتحصيل كسول،
 // ترقيات مباني بمؤقتات، تدريب وحدات، مهام يومية. كل الأرقام من shared/definitions.
-import { BUILDINGS, BUILDINGS_META, ECONOMY, MISSIONS, UNIT_DEFS } from '../../shared/definitions/index';
+import { BUILDINGS, BUILDINGS_META, DEFAULT_DECK, ECONOMY, MISSIONS, UNIT_DEFS } from '../../shared/definitions/index';
 
 // مسرّع بيئة تطوير/اختبار: يقسم المؤقتات ويضاعف الإنتاج
 const SPEED = Math.max(1, parseFloat(process.env.BASE_SPEED ?? '1'));
@@ -29,6 +29,49 @@ export function newBase(now: number): BaseState {
     buildings: b, pending: {}, upgrading: null, unitLevels: {},
     lastAccrueMs: now, missions: {}, missionsDay: '', freeChestAt: 0
   };
+}
+
+// وحدات الموجات السابقة التي أُبدلت — نرحّل مستوياتها لمقابلاتها كي لا يخسر اللاعب تقدمه
+export const LEGACY_UNITS: Record<string, string> = {
+  spear_wall: 'spear_bearers', archers: 'vale_archers', shield_guard: 'steel_guard',
+  raid_cavalry: 'hollow_knights', flame_archers: 'flame_casters', catapult: 'siege_engineers',
+  field_medic: 'banner_guards', iron_ram: 'stone_golem', north_wolves: 'running_shadows',
+  light_slingers: 'flame_casters', frost_witch: 'flame_casters', axe_warriors: 'steel_guard'
+};
+
+// حساب محفوظ (متصفح أو ملف الخادم) قد يكون من إصدار أقدم: أكمل الحقول الناقصة
+// ورحّل الوحدات القديمة — أي شكل مدخل يخرج قاعدة صالحة للكود الحالي.
+export function sanitizeBase(raw: any, now: number): BaseState {
+  const fresh = newBase(now);
+  if (!raw || typeof raw !== 'object') return fresh;
+  const b: BaseState = { ...fresh, ...raw };
+  b.buildings = { ...fresh.buildings, ...(typeof raw.buildings === 'object' && raw.buildings ? raw.buildings : {}) };
+  b.pending = typeof raw.pending === 'object' && raw.pending ? raw.pending : {};
+  b.missions = typeof raw.missions === 'object' && raw.missions ? raw.missions : {};
+  const maxLvl = (ECONOMY as any).levels.maxLevel;
+  const lv: Record<string, number> = {};
+  for (const [id, l] of Object.entries(typeof raw.unitLevels === 'object' && raw.unitLevels ? raw.unitLevels : {})) {
+    const nid = UNIT_DEFS[id] ? id : LEGACY_UNITS[id];
+    if (nid && typeof l === 'number' && l > 1) lv[nid] = Math.max(lv[nid] ?? 1, Math.min(Math.floor(l), maxLvl));
+  }
+  b.unitLevels = lv;
+  if (b.upgrading && !BUILDINGS[b.upgrading.id]) b.upgrading = null;
+  return b;
+}
+
+// تشكيلة صالحة دائماً: رحّل القديم، احذف المجهول والمكرر، ثم أكمل إلى 8 من المتاح
+export function sanitizeDeck(raw: unknown, b: BaseState): string[] {
+  const unlocked = unlockedUnits(b);
+  const deck: string[] = [];
+  const push = (u: string) => {
+    if (UNIT_DEFS[u] && unlocked.includes(u) && !deck.includes(u) && deck.length < 8) deck.push(u);
+  };
+  if (Array.isArray(raw)) {
+    for (const x of raw) { const id = String(x); push(UNIT_DEFS[id] ? id : (LEGACY_UNITS[id] ?? '')); }
+  }
+  for (const u of DEFAULT_DECK) push(u);
+  for (const u of unlocked) push(u);
+  return deck;
 }
 
 const growth = (base: number, g: number, lvl: number) => Math.round(base * Math.pow(g, lvl));

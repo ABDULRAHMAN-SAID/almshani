@@ -5,7 +5,7 @@ import { UNIT_DEFS, ARENAS, COMMANDERS, DEFAULT_DECK } from '../../shared/defini
 import { buildUnits, buildArena } from '../../shared/simulation/src/index';
 import {
   newBase, baseView, startUpgrade, trainUnit, claimMission, openFreeChest,
-  battleReward, unlockedUnits, collectBuilding, type BaseState
+  battleReward, unlockedUnits, collectBuilding, sanitizeBase, sanitizeDeck, type BaseState
 } from '../../server/src/empire';
 import { MatchRoom, type Seat } from '../../server/src/match';
 import type { ClientMsg, ServerMsg } from '../../shared/protocol/src/messages';
@@ -40,7 +40,15 @@ export class LocalServer {
   private load(): SoloAccount | null {
     try {
       const raw = localStorage.getItem(STORE_KEY);
-      return raw ? (JSON.parse(raw) as SoloAccount) : null;
+      if (!raw) return null;
+      // حساب محفوظ من إصدار أقدم في متصفح اللاعب: رحّله بدل أن ينهار الكود الجديد عليه
+      const acc = JSON.parse(raw) as SoloAccount;
+      acc.name = typeof acc.name === 'string' && acc.name.trim() ? acc.name : 'القائد';
+      acc.wins = acc.wins | 0;
+      acc.losses = acc.losses | 0;
+      acc.base = sanitizeBase(acc.base, Date.now());
+      acc.deck = sanitizeDeck(acc.deck, acc.base);
+      return acc;
     } catch { return null; }
   }
 
