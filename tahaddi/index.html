@@ -520,6 +520,22 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .dcap{margin-top:14px;text-align:center;font-size:12.5px;font-weight:800;
  background:rgba(6,8,16,.5);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;min-height:36px}
 .dcap.dcIn{animation:fi .3s ease}
+/* ═══ بطاقات حيّة — فن البطاقة يتحرك دائماً ═══ */
+.chero{position:relative;flex-shrink:0;z-index:2;transform-style:preserve-3d;
+ animation:cardFloat 3.6s ease-in-out infinite}
+@keyframes cardFloat{0%,100%{transform:perspective(320px) rotateY(-6deg) translateY(0)}
+ 50%{transform:perspective(320px) rotateY(6deg) translateY(-2.5px)}}
+.cimgw{position:absolute;inset:0;border-radius:inherit;overflow:hidden}
+.cimgw img{width:100%;height:100%;object-fit:cover;display:block}
+.csheen{position:absolute;inset:0;border-radius:inherit;overflow:hidden;pointer-events:none}
+.csheen::after{content:'';position:absolute;top:-25%;bottom:-25%;left:-34%;width:28%;
+ background:linear-gradient(100deg,transparent,rgba(255,246,216,.34),transparent);
+ transform:skewX(-16deg);animation:cardSheen 3.4s ease-in-out infinite;animation-delay:inherit}
+@keyframes cardSheen{0%,55%{left:-34%}90%,100%{left:135%}}
+.cglow{position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;
+ animation:puls 2.8s ease-in-out infinite;animation-delay:inherit}
+.cspk{position:absolute;width:13px;height:13px;pointer-events:none;
+ animation:twk 1.9s linear infinite}
 .scr.nofi{animation:none}
 
 /* ═══ طبقة العمق والمتعة: خلفية حية + حركات ثلاثية الأبعاد + بريق ═══ */
@@ -15038,8 +15054,15 @@ function gcard(id,o){
   padding:${sm?'7px 4px 11px':'11px 6px 15px'}">
   <div style="position:absolute;top:0;left:0;right:0;height:52%;
    background:radial-gradient(ellipse at 50% 0%,${R.a}2E,transparent 70%)"></div>
-  ${CARD_IMG[id]?`<div style="width:${sm?'40px':'74px'};height:${sm?'40px':'74px'};flex-shrink:0;position:relative;z-index:2;border-radius:${sm?8:11}px;overflow:hidden;box-shadow:0 3px 9px rgba(0,0,0,.55)"><img src="${CARD_IMG[id]}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`
-  :`<div style="width:${sm?26:38}px;height:${sm?26:38}px;flex-shrink:0;position:relative;z-index:2;background-image:var(--icons);background-size:800% 500%;background-repeat:no-repeat;${iconPos(id)}"></div>`}
+  ${CARD_IMG[id]?`<div class="chero" style="width:${sm?'40px':'74px'};height:${sm?'40px':'74px'};border-radius:${sm?8:11}px;animation-delay:-${(id%9)*.41}s">
+   <div class="cimgw"><img src="${CARD_IMG[id]}"><div class="csheen" style="animation-delay:-${(id%7)*.5}s"></div></div>
+   <div class="cglow" style="box-shadow:inset 0 0 0 1px ${R.g}55,0 0 ${sm?9:15}px ${R.a}88"></div>
+   ${!sm&&(c.r==='epic'||c.r==='legendary')?`<svg class="cspk" viewBox="0 0 16 16" style="top:-4px;left:-3px;color:${R.g}"><path d="M8 0 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z" fill="currentColor"/></svg>
+   <svg class="cspk" viewBox="0 0 16 16" style="bottom:-3px;right:-3px;color:${R.g};animation-delay:.9s"><path d="M8 0 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z" fill="currentColor"/></svg>`:''}
+  </div>`
+  :`<div class="chero" style="width:${sm?26:38}px;height:${sm?26:38}px;animation-delay:-${(id%9)*.41}s">
+   <div style="position:absolute;inset:0;background-image:var(--icons);background-size:800% 500%;background-repeat:no-repeat;${iconPos(id)}"></div>
+  </div>`}
   <div style="position:relative;z-index:2;font-size:${sm?9:11.5}px;font-weight:900;
    margin-top:${sm?4:7}px;text-align:center;line-height:1.15;color:#EDF3F0">${c.n}</div>
   ${sm?'':`<div style="position:relative;z-index:2;font-size:8.5px;color:var(--tx2);
@@ -17616,7 +17639,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='3.2';
+const APP_VER='3.3';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
