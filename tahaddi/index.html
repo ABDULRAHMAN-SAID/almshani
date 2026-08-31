@@ -488,6 +488,29 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  animation:pop .28s cubic-bezier(.2,1.3,.4,1)}
 .qvt{font-size:17px;font-weight:900;margin-bottom:6px}
 .qvd{font-size:12.5px;color:var(--tx2);margin-bottom:16px}
+
+/* ═══ تذكرة الموسم ═══ */
+.szhead{display:grid;grid-template-columns:34px 1fr 1fr;gap:8px;margin:14px 0 8px;position:sticky;top:0;
+ z-index:5;background:linear-gradient(180deg,var(--bg) 78%,transparent);padding:6px 0}
+.szht{text-align:center;font-size:12px;font-weight:900;color:var(--tx2);background:var(--card);
+ border:1px solid var(--bd);border-radius:10px;padding:6px 0}
+.szht.p{color:var(--gold);border-color:rgba(232,178,58,.45);background:rgba(232,178,58,.07)}
+.szrow{display:grid;grid-template-columns:34px 1fr 1fr;gap:8px;margin-bottom:8px;align-items:stretch}
+.szrow.ms .szchip{border-width:1.5px;box-shadow:0 0 14px rgba(232,178,58,.12),0 4px 0 #0A0F1D}
+.szlv{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:900;color:var(--mut);
+ background:var(--surf);border:1px solid var(--bd);border-radius:10px}
+.szlv.on{color:#15100A;background:linear-gradient(145deg,#F0C25A,#C08C18);border-color:transparent}
+.szchip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--bd);
+ border-radius:12px;padding:8px 9px;min-height:46px;box-shadow:0 3px 0 #0A0F1D}
+.szchip .szi{flex-shrink:0}
+.szchip .szn2{flex:1;font-size:10.5px;font-weight:700;line-height:1.35}
+.szchip .szst{font-size:12px;color:var(--mut)}
+.szchip.ready{border-color:var(--gold);cursor:pointer;animation:glow 2.2s ease-in-out infinite}
+.szchip.ready .szst{color:var(--gold);font-weight:900}
+.szchip.ready:active{transform:translateY(3px);box-shadow:0 0 0 #0A0F1D}
+.szchip.done{opacity:.42}
+.szchip.lock{opacity:.62}
+.szchip.p.lock{background:rgba(232,178,58,.04)}
 </style>
 </head>
 <body>
@@ -17099,7 +17122,7 @@ function playScr(){
   <div style="display:flex;align-items:center;gap:7px">${ico('ticket',16)}
    <span style="font-size:11px;color:var(--tx2)">الموسم</span></div>
   <div style="font-weight:800;font-size:13px;margin-top:5px">أرشيف الزمن</div>
-  <div style="font-size:10px;color:var(--tx2);margin-top:2px">المستوى 24 · 560/1000</div></div>
+  <div style="font-size:10px;color:var(--tx2);margin-top:2px">المستوى ${szLv()}/100 · ${SZ().xp%100}/100</div></div>
  </div>
  </div>`);
 }
@@ -17165,34 +17188,104 @@ function dailyRewardsRow(){
  </div>`;
 }
 
-// ── الموسم ──
+// ── الموسم: تذكرة معركة كاملة — 100 مستوى بمسارين مجاني ومميز ──
+function SZ(){if(!S.szn)S.szn={xp:0,cf:[],cp:[],prem:false};return S.szn}
+const SZ_MAX=100,SZ_STEP=100,SZ_PASS_COST=950,SZ_END=new Date('2026-10-12T00:00:00Z');
+function szLv(){return Math.min(SZ_MAX,Math.floor(SZ().xp/SZ_STEP))}
+// مكافأة كل مستوى — حتمية وواضحة، والمميز أكرم دائماً
+function szReward(lv,prem){
+ if(prem){
+  if(lv===100)return{t:'wild',r:'legendary',v:2,i:'trophy',n:'جوكر أسطوري ×2',c:'#B8860F'};
+  if(lv===50)return{t:'emote',k:'tense',i:'sparkle',n:'تعبير حصري «توتر»',c:'#B76CF0'};
+  if(lv%25===0)return{t:'wild',r:'epic',v:1,i:'wild',n:'جوكر ملحمي',c:'#6B3FA0'};
+  if(lv%10===0)return{t:'wild',r:'rare',v:1,i:'wild',n:'جوكر نادر',c:'#1E5A8A'};
+  if(lv%5===0)return{t:'gems',v:30,i:'gem',n:'30 جوهرة',c:'#B76CF0'};
+  if(lv%2===0)return{t:'coins',v:250+lv*5,i:'coin',n:(250+lv*5)+' عملة',c:'#E8B23A'};
+  return{t:'shard',v:2,i:'shard',n:'شظيتا حكمة',c:'#5AC8F5'};
+ }
+ if(lv===100)return{t:'wild',r:'epic',v:1,i:'chest',n:'صندوق الختام: جوكر ملحمي',c:'#B8860F'};
+ if(lv%25===0)return{t:'gems',v:40,i:'chest',n:'صندوق: 40 جوهرة',c:'#B76CF0'};
+ if(lv%10===0)return{t:'gems',v:15,i:'gem',n:'15 جوهرة',c:'#B76CF0'};
+ if(lv%5===0)return{t:'wild',r:'common',v:1,i:'wild',n:'جوكر عادي',c:'#2E7D46'};
+ if(lv%2===1)return{t:'coins',v:120+lv*3,i:'coin',n:(120+lv*3)+' عملة',c:'#E8B23A'};
+ return{t:'shard',v:1,i:'shard',n:'شظية حكمة',c:'#5AC8F5'};
+}
+function szClaim(lane,lv){
+ const z=SZ();
+ if(lv>szLv()){toast('لم تصل لهذا المستوى بعد');return}
+ if(lane==='p'&&!z.prem){buyPassAsk();return}
+ const arr=lane==='p'?z.cp:z.cf;
+ if(arr.includes(lv))return;
+ arr.push(lv);
+ grantRewards([szReward(lv,lane==='p')]);
+ saveState();toast('استلمت المكافأة 🎉');if(window.FX)FX.correct(3);
+ seasonScr();
+}
+function szClaimAll(){
+ const z=SZ();let n=0;
+ for(let lv=1;lv<=szLv();lv++){
+  if(!z.cf.includes(lv)){z.cf.push(lv);grantRewards([szReward(lv,false)]);n++}
+  if(z.prem&&!z.cp.includes(lv)){z.cp.push(lv);grantRewards([szReward(lv,true)]);n++}
+ }
+ if(!n){toast('لا مكافآت جاهزة للاستلام');return}
+ saveState();toast('استلمت '+n+' مكافأة 🎉');if(window.FX)FX.win();
+ seasonScr();
+}
+function buyPassAsk(){
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox"><div style="font-size:30px">${ico('ticket',26)}</div>
+ <div class="qvt">التذكرة المميزة</div>
+ <div class="qvd">تفتح مسار المكافآت المميز كاملاً — جوكرات وجواهر مضاعفة وتعبير حصري، وتُستلم كل مستوياتك السابقة فوراً.</div>
+ <button class="btn gd" id="qvy">${ico('gem',14)} فتح بـ ${SZ_PASS_COST} جوهرة</button>
+ <button class="btn g" id="qvn" style="margin-top:9px">ليس الآن</button></div>`;
+ document.body.appendChild(ov);
+ ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+ ov.querySelector('#qvn').onclick=()=>ov.remove();
+ ov.querySelector('#qvy').onclick=()=>{ov.remove();
+  if(S.gems<SZ_PASS_COST){toast('تحتاج '+SZ_PASS_COST+' جوهرة — اجمعها من الصناديق والمستويات');return}
+  S.gems-=SZ_PASS_COST;SZ().prem=true;saveState();
+  toast('فُتحت التذكرة المميزة 👑');if(window.FX)FX.win();seasonScr()};
+}
+function szChip(lane,lv){
+ const z=SZ(),r=szReward(lv,lane==='p'),reached=lv<=szLv();
+ const claimed=(lane==='p'?z.cp:z.cf).includes(lv);
+ const lockedPrem=lane==='p'&&!z.prem;
+ const st=claimed?'done':(reached&&!lockedPrem?'ready':'lock');
+ return `<div class="szchip ${st} ${lane}" onclick="${claimed?'':(reached?`szClaim('${lane}',${lv})`:'')}">
+  <span class="szi" style="color:${r.c}">${ico(r.i,20)}</span>
+  <span class="szn2">${r.n}</span>
+  <span class="szst">${claimed?ico('check',13):(reached?(lockedPrem?ico('lock',13):'⬇'):ico('lock',12))}</span></div>`;
+}
 function seasonScr(){
- const day=18,total=42;
+ const z=SZ(),lv=szLv();
+ const prog=lv>=SZ_MAX?SZ_STEP:z.xp-lv*SZ_STEP;
+ const days=Math.max(0,Math.ceil((SZ_END-Date.now())/86400000));
+ let rows='';
+ for(let i=1;i<=SZ_MAX;i++){
+  const ms=i%25===0||i===100;
+  rows+=`<div class="szrow ${ms?'ms':''}" ${i===Math.min(SZ_MAX,lv+1)?'id="szcur"':''}>
+   <div class="szlv ${i<=lv?'on':''}">${i}</div>${szChip('f',i)}${szChip('p',i)}</div>`;
+ }
  go(`<div class="scr on">${tb('الموسم')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center">
- <div style="font-size:34px">${ico('ticket',16)}</div>
- <div class="mtl" style="font-size:19px;margin-top:6px">موسم الافتتاح</div>
- <div style="font-size:12px;color:var(--tx2);margin-top:4px">اليوم ${day} من ${total}</div>
- <div class="pbf" style="margin-top:11px"><div class="pbi"><i style="width:${day/total*100}%"></i></div></div>
+ <div style="font-size:30px">${ico('ticket',26)}</div>
+ <div class="mtl" style="font-size:19px;margin-top:4px">أرشيف الزمن — الموسم 4</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:4px">ينتهي بعد ${days} يوماً</div>
+ <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
+  <span class="qop2n" style="width:34px;height:34px;font-size:13px">${lv}</span>
+  <div style="flex:1"><div class="pbf"><div class="pbi"><i style="width:${prog}%"></i></div></div>
+   <div style="font-size:10px;color:var(--tx2);margin-top:3px">المستوى ${lv} من ${SZ_MAX} · ${prog}/${SZ_STEP} نقطة للمستوى التالي</div></div>
+ </div>
+ ${z.prem?`<div class="cch" style="display:inline-flex;margin-top:11px;color:var(--gold)">${ico('ticket',13)} التذكرة المميزة مفعّلة 👑</div>`
+  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة</button>`}
+ <button class="btn g" style="margin-top:9px" onclick="szClaimAll()">${ico('gift',15)} استلام كل الجاهز</button>
  </div></div></div>
- <div class="sl">مسار الموسم</div>
- <div class="note" style="text-align:right;margin-bottom:10px">مسار مجاني + مسار مميز</div>
- ${[[1,`${ico(`coin`,15)} 500 عملة`,1],[3,`${ico('cards',16)} نسخ بطاقة`,1],[5,`${ico(`gem`,15)} 10 جواهر`,1],
-    [8,`${ico(`cards`,16)} بطاقة نادرة`,0],[12,`${ico('palette',16)} إطار الموسم`,0],[16,`${ico(`cards`,16)} بطاقة ملحمية`,0]].map(([lv,rw,free])=>
- `<div class="li"><div class="lr">
-  <span class="qop2n">${lv}</span>
-  <div class="lb"><div class="lt">${rw}</div>
-  <div class="ls">${free?'مجاني':'مميز'}</div></div>
-  ${lv<=5?`<span style="color:var(--ok);font-size:17px">${ico('check',14)}</span>`:
-    `<span style="color:var(--mut);font-size:15px">${ico('lock',15)}</span>`}</div></div>`).join('')}
- <div class="sl">ألبوم الموسم</div>
- <div class="li"><div class="lr"><span style="font-size:22px">${ico('album',16)}</span>
- <div class="lb"><div class="lt">عجائب العالم</div>
- <div class="ls">14/60 بطاقة مقتنيات</div>
- <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:6px"><i style="width:23%"></i></div></div>
- </div></div></div>
- <div class="note">المقتنيات منفصلة عن بطاقات القتال</div></div>`);
+ <div class="szhead"><span class="szlv" style="visibility:hidden">0</span>
+  <span class="szht">${ico('user',13)} مجاني</span><span class="szht p">${ico('ticket',13)} مميز 👑</span></div>
+ <div class="szlist">${rows}</div>
+ <div class="note">تكسب نقاط الموسم من كل جولة تلعبها — والفوز يمنحك أكثر. كل ${SZ_STEP} نقطة = مستوى.</div></div>`);
+ setTimeout(()=>{const c=document.getElementById('szcur');if(c)c.scrollIntoView({block:'center',behavior:'instant'})},60);
 }
 
 // ── المزيد ──
@@ -17753,6 +17846,7 @@ function done(){
  }
  S.ach.stars_15=totStars();
  S.ach.all_cat=Object.keys(S.nets).length;
+ const szG=Math.round(xp*.8)+(st>0?30:10);SZ().xp=Math.min(SZ_MAX*SZ_STEP,SZ().xp+szG);
  S.xp+=xp;S.coins+=co;S.gems+=gm;S.matches++;saveState();
  if(ps){S.wins++;trk('first_win');trk('wins_10');if(!G.anyP)trk('no_help')}
  const vsWin=G.vs?G.pts>G.vs.score:null;
@@ -17770,6 +17864,7 @@ function done(){
  <div class="stc"><div class="i">${ico('up',14)}</div><div class="v">+${xp}</div><div class="l">خبرة</div></div>
  <div class="stc"><div class="i">${ico(`coin`,15)}</div><div class="v">+${co}${gm?` · ${ico('gem',15)}${gm}`:``}</div><div class="l">مكافآت</div></div></div>
  ${bd?`<div class="bwn">${ico('medal',16)} شارة جديدة: <span class="mtl">${bd}</span></div>`:''}
+ <div class="note" style="margin-top:10px">${ico('ticket',12)} +${szG} نقطة موسم · المستوى ${szLv()}/100</div>
  <div style="margin-top:22px"><button class="rbtn" onclick="${G.node?`mapScr('${G.node.net}')`:"tab('play')"}"><span>${G.node?'العودة للخريطة':'الرئيسية'}</span></button>
  <button class="btn g" style="margin-top:9px" onclick="tab('play')">الرئيسية</button></div></div></div>`);
  if((ps||vsWin)&&window.FX)FX.win();
