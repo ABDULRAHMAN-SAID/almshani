@@ -62,19 +62,34 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .cch{display:flex;align-items:center;gap:4px;background:var(--surf);border:1px solid var(--bd);
  border-radius:14px;padding:3px 8px;font-size:11px;font-weight:800}
 
-/* شريط سفلي */
-.nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;height:66px;
- background:rgba(15,21,36,.97);backdrop-filter:blur(12px);border-top:1px solid var(--bd);
- display:flex;align-items:center;justify-content:space-around;z-index:40;padding:0 4px}
-.nvi{flex:1;text-align:center;cursor:pointer;padding:6px 2px;color:var(--mut);transition:color .2s}
+/* شريط سفلي فخم — زجاج داكن وخيط ذهبي وميدالية معدنية */
+.nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;height:72px;
+ background:linear-gradient(180deg,rgba(21,28,48,.9),rgba(9,13,24,.98));backdrop-filter:blur(16px);
+ display:flex;align-items:center;justify-content:space-around;z-index:40;padding:0 6px;
+ border-top:1px solid rgba(232,178,58,.32);box-shadow:0 -10px 30px rgba(0,0,0,.5)}
+.nav::before{content:'';position:absolute;top:-1px;left:0;right:0;height:2px;pointer-events:none;
+ background:linear-gradient(90deg,transparent,rgba(232,178,58,.5) 18%,#FFE9A8 50%,rgba(232,178,58,.5) 82%,transparent)}
+.nav::after{content:'';position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(130% 100% at 50% 130%,rgba(123,79,224,.17),transparent 62%)}
+.nvi{flex:1;text-align:center;cursor:pointer;padding:8px 2px 10px;color:var(--mut);
+ transition:color .2s;position:relative;z-index:1}
 .nvi.on{color:var(--gold)}
-.nvi .i{font-size:19px;display:block}
-.nvi .l{font-size:9.5px;font-weight:700;margin-top:2px}
-.nvi.mid{flex:0 0 68px}
-.nvi.mid .cir{width:52px;height:52px;border-radius:50%;margin:-16px auto 0;
- background:linear-gradient(145deg,#8B5CF0,#5B2FB8);display:flex;align-items:center;justify-content:center;
- font-size:23px;border:3px solid var(--bg);box-shadow:0 4px 14px rgba(123,79,224,.5)}
-.nvi.mid .l{margin-top:3px;color:var(--tx)}
+.nvi.on::before{content:'';position:absolute;top:3px;left:50%;transform:translateX(-50%);
+ width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,#B8871E,#FFE9A8,#B8871E);
+ box-shadow:0 0 10px rgba(232,178,58,.8)}
+.nvi.on .i{filter:drop-shadow(0 0 8px rgba(232,178,58,.65))}
+.nvi .i{font-size:19px;display:block;transition:filter .2s}
+.nvi .l{font-size:9.5px;font-weight:800;margin-top:3px;letter-spacing:.2px}
+.nvi.mid{flex:0 0 78px}
+.nvi.mid .cir{width:58px;height:58px;border-radius:50%;margin:-24px auto 0;position:relative;
+ background:radial-gradient(circle at 32% 26%,#9B6CF5,#5B2FB8 74%);
+ display:flex;align-items:center;justify-content:center;font-size:23px;color:#fff;
+ border:3px solid #D9A93C;
+ box-shadow:0 7px 20px rgba(0,0,0,.55),0 0 22px rgba(232,178,58,.35),inset 0 3px 8px rgba(255,255,255,.28),inset 0 -4px 9px rgba(0,0,0,.35)}
+.nvi.mid .cir::after{content:'';position:absolute;inset:3px;border-radius:50%;pointer-events:none;
+ background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.4),transparent 42%)}
+.nvi.mid.on .cir{border-color:#FFE9A8;box-shadow:0 7px 20px rgba(0,0,0,.55),0 0 30px rgba(232,178,58,.6),inset 0 3px 8px rgba(255,255,255,.28)}
+.nvi.mid .l{margin-top:5px;color:var(--tx)}
 
 /* عام */
 .tbar{display:flex;align-items:center;padding:8px 0 14px}
@@ -13449,10 +13464,19 @@ function avatarSVG(cfg,size){
 }
 
 /** صورة الملف الشخصي: ميدالية تعبير مختارة أو الشخصية المرسومة */
+const FRAMES=[
+ {k:'s4',n:'إطار أرشيف الزمن',css:'linear-gradient(135deg,#5AC8F5,#7B4FE0 45%,#5AC8F5 90%)'},
+ {k:'royal',n:'إطار التاج الملكي',css:'linear-gradient(135deg,#FFE9A8,#B8871E 40%,#FFD75E 70%,#8A6210)'}
+];
 function avatarArt(size){
- return (S.avatarEmote&&EMO_ART[S.avatarEmote]&&(S.emotes||[]).includes(S.avatarEmote))
+ const inner=(S.avatarEmote&&EMO_ART[S.avatarEmote]&&(S.emotes||[]).includes(S.avatarEmote))
   ?face(S.avatarEmote,size):avatarSVG(S.av,size);
+ const fr=S.frame&&(S.frames||[]).includes(S.frame)&&FRAMES.find(f=>f.k===S.frame);
+ return fr?`<span style="display:inline-flex;border-radius:50%;padding:${Math.max(2,Math.round(size*.06))}px;
+  background:${fr.css};box-shadow:0 0 ${Math.round(size*.3)}px rgba(232,178,58,.4)">${inner}</span>`:inner;
 }
+function setFrame(k){S.frame=k;saveState();
+ toast(k?('لبست '+FRAMES.find(f=>f.k===k).n+' ✨'):'أُزيل الإطار');drawAv()}
 function setAvEmote(k){
  S.avatarEmote=k;saveState();
  toast(k?('صارت ميدالية «'+((EMOTES.find(e=>e.k===k)||{}).n||'')+'» صورة ملفك'):'عادت شخصيتك المرسومة صورة الملف');
@@ -13496,6 +13520,14 @@ function drawAv(){
  <div class="cr">
   <div onclick="setAvEmote(null)" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${!S.avatarEmote?'#E8B23A':'transparent'}">${avatarSVG(avEdit,44)}</div>
   ${(S.emotes||[]).map(k=>`<div onclick="setAvEmote('${k}')" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${S.avatarEmote===k?'#E8B23A':'transparent'}">${face(k,44)}</div>`).join('')}
+ </div></div>
+ <div style="margin:14px 0">
+ <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">الإطار — حصري من مسار الموسم المميز 👑</div>
+ <div class="cr">
+  <div class="fc ${!S.frame?'on':''}" onclick="setFrame(null)">بدون إطار</div>
+  ${FRAMES.map(f=>{const un=(S.frames||[]).includes(f.k);
+   return `<div class="fc ${S.frame===f.k?'on':''}" style="${un?'':'opacity:.42'}"
+    onclick="${un?`setFrame('${f.k}')`:`toast('يُفتح من مسار الموسم المميز 👑')`}">${un?'':ico('lock',12)+' '}${f.n}</div>`}).join('')}
  </div></div>
  ${rows.map(r=>`<div style="margin-bottom:14px">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">${r.n}</div>
@@ -14070,6 +14102,7 @@ function grantRewards(list){
   if(x.t==='wild'){S.wild=S.wild||{};S.wild[x.r]=(S.wild[x.r]||0)+x.v}
   if(x.t==='shard')S.shards=(S.shards||0)+x.v;
   if(x.t==='emote'&&!(S.emotes||[]).includes(x.k))S.emotes=(S.emotes||[]).concat(x.k);
+  if(x.t==='frame'){S.frames=S.frames||[];if(!S.frames.includes(x.k))S.frames.push(x.k)}
  });
 }
 
@@ -15000,7 +15033,7 @@ function mSubmit(val){
 
  if(ok){M.streak++;if(M.streak>M.bst)M.bst=M.streak}
  else M.streak=0;
- if(ok)M.correct=(M.correct||0)+1;
+ if(ok){M.correct=(M.correct||0)+1;if(S.club&&CW())S.club.my++}
  M.lastWinner=roundWinner;
  M.log.push({k,ok,pts,oppPts});
  M.lastOk=ok;M.lastPts=pts;M.lastOppPts=oppPts;
@@ -15035,7 +15068,7 @@ function mEnd(){
  const res=applyMatch(r,M.oppMmr,won);
  // مكافآت
  const coins=(won?120:45)+(M.chaseBonus?80:0),xp=Math.round((M.correct||0)*12+(won?60:20));
- S.coins+=coins;S.xp+=xp;S.matches++;if(won)S.wins++; saveState();
+ S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;DW().w++} saveState();
  // شظايا بطاقات
  const frag=won?3:1;
  const ids=Object.keys(S.cards.owned);
@@ -15197,7 +15230,7 @@ function back(){
 function resetNav(fn,arg){NAV=[{fn,arg}];run_(fn,arg)}
 function run_(fn,arg){({cardsScr,cardDetail,cardLevels,levelDetail,deckScr,rankedScr,
  profScr,achScr,misScr,storeScr,lbScr,seasonScr,avScr,setScr,setSection,
- shopScr,chestScr,oddsScr,rewardScr,wildScr,evoShopScr,emoteScr,colScr,playModesScr})[fn](arg)}
+ shopScr,chestScr,oddsScr,rewardScr,wildScr,evoShopScr,emoteScr,colScr,playModesScr,clubsScr,clubHome})[fn](arg)}
 /** شريط علوي موحّد: كل شاشة لها رجوع */
 const tbar=(t,sub)=>`<div class="tbar">
  <button class="bk" onclick="back()">${ico('back',15)}</button>
@@ -16069,7 +16102,7 @@ function doEvolve(id){
  S.evolved=(S.evolved||[]).concat(id);
  addColXP(ECON.collectionXP.evolution);
  toast(`${ico('energy',15)} تطوّرت `+cardById(id).n);
- evoShopScr();
+ refresh(evoShopScr);
 }
 
 // ═══════════ البند 21 — مجموعة التعبيرات: أربع رتب ═══════════
@@ -16156,7 +16189,7 @@ function buyEmote(k){
  ov.querySelector('#qvy').onclick=()=>{ov.remove();
   S.gems-=T.cost;S.emotes.push(k);
   if(S.emoteDeck.length<8)S.emoteDeck.push(k);
-  saveState();if(window.FX&&FX.win)FX.win();toast(`فُتح تعبير «${e.n}»`);emoteScr()};
+  saveState();if(window.FX&&FX.win)FX.win();toast(`فُتح تعبير «${e.n}»`);refresh(emoteScr)};
 }
 function toggleFav(k){const i=S.favEmotes.indexOf(k);
  i>=0?S.favEmotes.splice(i,1):S.favEmotes.push(k);emoteScr()}
@@ -17003,6 +17036,7 @@ function mDraw(){
  const st=M.st,k=st.k;
  const soft=arguments.length&&arguments[0]===1;
  const sy=soft?window.scrollY:0;
+ const oh=soft?document.body.scrollHeight:0;
  let body='';
  if(k==='quick')    body=drawQuick(st);
  if(k==='odd')      body=drawOdd(st);
@@ -17023,7 +17057,7 @@ function mDraw(){
   <span>${M.i>=M.rounds.length-1?'النتيجة النهائية':'الجولة التالية'}</span></button></div>`:''}
  ${M.pick?pickOverlay():''}
  </div>`);
- if(soft)window.scrollTo(0,sy);
+ if(soft)window.scrollTo(0,sy>0?Math.max(0,sy+document.body.scrollHeight-oh):0);
 }
 
 function mFeedback(){
@@ -17684,9 +17718,15 @@ const UNLOCKS=[
  {k:'casual',n:'تحدي الخصم',req:()=>totStars()>=6,d:'اجمع 6 نجوم'},
  {k:'ranked',n:'Ranked',req:()=>totStars()>=12,d:'اجمع 12 نجمة'},
  {k:'auction',n:'المزايدة 30/30',req:()=>S.ranked&&S.ranked.placed,d:'أكمل مباريات التحديد'},
- {k:'clubs',n:'الأندية',req:()=>false,d:'قريبًا'}
+ {k:'clubs',n:'الأندية',req:()=>totStars()>=6,d:'اجمع 6 نجوم'}
 ];
-const isUnlocked=k=>{const u=UNLOCKS.find(x=>x.k===k);return u?u.req():false};
+const isUnlocked=k=>{if(S.dev)return true;const u=UNLOCKS.find(x=>x.k===k);return u?u.req():false};
+let _devT=0,_devN=0;
+function devTap(){
+ const now=Date.now();if(now-_devT>1600)_devN=0;_devT=now;
+ if(++_devN>=5){_devN=0;S.dev=S.dev?0:1;saveState();
+  toast(S.dev?'وضع المطوّر 🔓 كل الأوضاع مفتوحة':'أُغلق وضع المطوّر');playScr()}
+}
 
 // ── صفحة «العب» ──
 function playScr(){
@@ -17709,7 +17749,7 @@ function playScr(){
   <div style="font-weight:800;font-size:13px;margin-top:5px">أرشيف الزمن</div>
   <div style="font-size:10px;color:var(--tx2);margin-top:2px">المستوى ${szLv()}/100 · ${SZ().xp%100}/100</div></div>
  </div>
- <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:14px">نسخة تجريبية ${APP_VER}</div>
+ <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:14px" onclick="devTap()">نسخة تجريبية ${APP_VER}${S.dev?' · وضع المطوّر 🔓':''}</div>
  </div>`);
 }
 
@@ -17752,30 +17792,47 @@ function seasonHero(){
  </div></div>`;
 }
 
-/** صف مكافآت اليوم — كبسولات سداسية لا صناديق خشبية */
+/* مكافآت اليوم — كل فوز اليوم يفتح خانة، والجائزة ظاهرة وتُستلم بضغطة */
+const DW_STAGES=[
+ {need:1,r:{t:'coins',v:300},i:'coin',n:'300 عملة'},
+ {need:2,r:{t:'gems',v:15},i:'gem',n:'15 جوهرة'},
+ {need:3,r:{t:'wild',r:'rare',v:1},i:'wild',n:'جوكر نادر'},
+ {need:4,r:{t:'gems',v:50},i:'gem',n:'50 جوهرة'}
+];
+function DW(){const d=dayKey();if(!S.dw||S.dw.day!==d)S.dw={day:d,w:0,cl:[]};return S.dw}
+function dwClaim(i){
+ const st=DW_STAGES[i],dw=DW();
+ if(dw.cl.includes(i))return;
+ if(dw.w<st.need){const m=st.need-dw.w;toast(`${ico('lock',13)} تنقصك ${m===1?'فوز واحد':m+' انتصارات'} اليوم لفتحها`);return}
+ dw.cl.push(i);grantRewards([st.r]);saveState();
+ toast(`${ico('gift',14)} استلمت ${st.n} 🎉`);if(window.FX)FX.win();
+ refresh(playScr);
+}
 function dailyRewardsRow(){
- const wins = S.dailyWins||0;
- const stages=[[1,'coin',60],[2,'gem',10],[3,'wild',1],[4,'chest','elite']];
- return `<div class="sl" style="margin:14px 0 8px">مكافآت اليوم</div>
+ const dw=DW();
+ return `<div class="sl" style="margin:14px 0 4px;display:flex;align-items:center;gap:7px">مكافآت اليوم
+  <span style="font-size:9.5px;color:var(--tx2);font-weight:700">افز مباريات لتفتحها — فزت اليوم <b style="color:var(--gold)">${dw.w}</b></span></div>
  <div style="display:flex;gap:8px">
- ${stages.map(([need,icon,val],i)=>{
-   const done = wins>=need, active = wins===need-1;
-   return `<div style="flex:1;text-align:center">
-    <div style="width:100%;aspect-ratio:1;position:relative;margin:0 auto">
+ ${DW_STAGES.map((st,i)=>{
+   const claimed=dw.cl.includes(i), ready=!claimed&&dw.w>=st.need;
+   const stroke=claimed?'#2ECC71':ready?'#E8B23A':'#28324E';
+   return `<div style="flex:1;text-align:center;cursor:pointer" onclick="dwClaim(${i})">
+    <div style="width:100%;aspect-ratio:1;position:relative;margin:0 auto;${ready?'animation:puls 1.6s ease-in-out infinite':''}">
     <svg viewBox="0 0 100 100" style="width:100%;height:100%">
      <polygon points="50,4 93,27 93,73 50,96 7,73 7,27"
-      fill="${done?'#2A3D6E':'#161D30'}" stroke="${done?'#5AC8F5':active?'#7B4FE0':'#28324E'}"
-      stroke-width="2.4"/></svg>
-    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-     color:${done?'#5AC8F5':'#68738E'}">${done?ico('check',18):ico('lock',16)}</div>
+      fill="${claimed?'#1B2C1F':ready?'#3A2E12':'#161D30'}" stroke="${stroke}" stroke-width="2.6"/></svg>
+    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+     color:${claimed?'#2ECC71':ready?'var(--gold)':'#68738E'}">
+     ${claimed?ico('check',20):`${ico(st.i,18)}<span style="font-size:8.5px;font-weight:900">${st.n}</span>`}</div>
     </div>
-    <div style="font-size:9.5px;color:var(--tx2);margin-top:4px">فوز ${need}</div>
+    <div style="font-size:9px;font-weight:800;margin-top:4px;color:${ready?'var(--gold)':claimed?'#2ECC71':'var(--tx2)'}">
+     ${claimed?'استُلمت':ready?'استلم الآن!':`فوز ${st.need}`}</div>
    </div>`}).join('')}
  </div>`;
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='3.6';
+const APP_VER='3.7';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -17801,7 +17858,7 @@ function evtClaim(k){
  if(!g||ev.claimed.includes(k))return;
  if(Math.min(g.need,g.of(ev))<g.need){toast('لم يكتمل التحدي بعد');return}
  ev.claimed.push(k);S.evtDone=(S.evtDone||0)+1;grantRewards([g.r]);saveState();
- toast('استلمت جائزة التحدي 🎉');if(window.FX)FX.correct(4);evtScr();
+ toast('استلمت جائزة التحدي 🎉');if(window.FX)FX.correct(4);refresh(evtScr);
 }
 function evtScr(){
  const ev=EV();
@@ -17837,19 +17894,24 @@ function szLv(){return Math.min(SZ_MAX,Math.floor(SZ().xp/SZ_STEP))}
 function szReward(lv,prem){
  if(prem){
   if(lv===100)return{t:'wild',r:'legendary',v:2,i:'trophy',n:'جوكر أسطوري ×2',c:'#B8860F'};
+  if(lv===90)return{t:'emote',k:'owl',i:'sparkle',n:'تعبير أسطوري «البومة الحكيمة»',c:'#B8860F'};
+  if(lv===80)return{t:'gems',v:200,i:'gem',n:'200 جوهرة',c:'#B76CF0'};
+  if(lv===70)return{t:'frame',k:'royal',i:'crown',n:'إطار «التاج الملكي»',c:'#E8B23A'};
   if(lv===50)return{t:'emote',k:'tense',i:'sparkle',n:'تعبير حصري «توتر»',c:'#B76CF0'};
+  if(lv===40)return{t:'gems',v:150,i:'gem',n:'150 جوهرة',c:'#B76CF0'};
+  if(lv===30)return{t:'frame',k:'s4',i:'ticket',n:'إطار الموسم «أرشيف الزمن»',c:'#5AC8F5'};
   if(lv%25===0)return{t:'wild',r:'epic',v:1,i:'wild',n:'جوكر ملحمي',c:'#6B3FA0'};
   if(lv%10===0)return{t:'wild',r:'rare',v:1,i:'wild',n:'جوكر نادر',c:'#1E5A8A'};
-  if(lv%5===0)return{t:'gems',v:30,i:'gem',n:'30 جوهرة',c:'#B76CF0'};
+  if(lv%5===0)return{t:'gems',v:60,i:'gem',n:'60 جوهرة',c:'#B76CF0'};
   if(lv%2===0)return{t:'coins',v:250+lv*5,i:'coin',n:(250+lv*5)+' عملة',c:'#E8B23A'};
-  return{t:'shard',v:2,i:'shard',n:'شظيتا حكمة',c:'#5AC8F5'};
+  return{t:'shard',v:2,i:'shard',n:'شظيتا تطوّر',c:'#5AC8F5'};
  }
  if(lv===100)return{t:'wild',r:'epic',v:1,i:'chest',n:'صندوق الختام: جوكر ملحمي',c:'#B8860F'};
  if(lv%25===0)return{t:'gems',v:40,i:'chest',n:'صندوق: 40 جوهرة',c:'#B76CF0'};
  if(lv%10===0)return{t:'gems',v:15,i:'gem',n:'15 جوهرة',c:'#B76CF0'};
  if(lv%5===0)return{t:'wild',r:'common',v:1,i:'wild',n:'جوكر عادي',c:'#2E7D46'};
  if(lv%2===1)return{t:'coins',v:120+lv*3,i:'coin',n:(120+lv*3)+' عملة',c:'#E8B23A'};
- return{t:'shard',v:1,i:'shard',n:'شظية حكمة',c:'#5AC8F5'};
+ return{t:'shard',v:1,i:'shard',n:'شظية تطوّر',c:'#5AC8F5'};
 }
 function szClaim(lane,lv){
  const z=SZ();
@@ -17860,7 +17922,7 @@ function szClaim(lane,lv){
  arr.push(lv);
  grantRewards([szReward(lv,lane==='p')]);
  saveState();toast('استلمت المكافأة 🎉');if(window.FX)FX.correct(3);
- seasonScr();
+ refresh(()=>seasonScr(1));
 }
 function szClaimAll(){
  const z=SZ();let n=0;
@@ -17870,7 +17932,7 @@ function szClaimAll(){
  }
  if(!n){toast('لا مكافآت جاهزة للاستلام');return}
  saveState();toast('استلمت '+n+' مكافأة 🎉');if(window.FX)FX.win();
- seasonScr();
+ refresh(()=>seasonScr(1));
 }
 function buyPassAsk(){
  const ov=document.createElement('div');ov.className='qvov';
@@ -17884,12 +17946,12 @@ function buyPassAsk(){
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
  ov.querySelector('#qvd').onclick=()=>{ov.remove();
-  paySheet('التذكرة المميزة — الموسم 4',9.99,()=>{SZ().prem=true},seasonScr);
+  paySheet('التذكرة المميزة — الموسم 4',9.99,()=>{SZ().prem=true},()=>seasonScr(1));
  };
  ov.querySelector('#qvy').onclick=()=>{ov.remove();
   if(S.gems<SZ_PASS_COST){toast('تحتاج '+SZ_PASS_COST+' جوهرة — اجمعها من الصناديق والمستويات');return}
   S.gems-=SZ_PASS_COST;SZ().prem=true;saveState();
-  toast('فُتحت التذكرة المميزة 👑');if(window.FX)FX.win();seasonScr()};
+  toast('فُتحت التذكرة المميزة 👑');if(window.FX)FX.win();refresh(()=>seasonScr(1))};
 }
 function szChip(lane,lv){
  const z=SZ(),r=szReward(lv,lane==='p'),reached=lv<=szLv();
@@ -17901,7 +17963,7 @@ function szChip(lane,lv){
   <span class="szn2">${r.n}</span>
   <span class="szst">${claimed?ico('check',13):(reached?(lockedPrem?ico('lock',13):'⬇'):ico('lock',12))}</span></div>`;
 }
-function seasonScr(){
+function seasonScr(keep){
  const z=SZ(),lv=szLv();
  const prog=lv>=SZ_MAX?SZ_STEP:z.xp-lv*SZ_STEP;
  const days=Math.max(0,Math.ceil((SZ_END-Date.now())/86400000));
@@ -17929,11 +17991,16 @@ function seasonScr(){
  <div class="wb" style="text-align:right;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
  بالأداء لا بالفوز فقط: نقاط كل جولة تلعبها تتحول نقاطَ موسم — كل إجابة صحيحة وسرعتُها وصعوبةُ سؤالها وسلاسلُك المتتالية.
  الفوز يضيف <b>+30</b> والخسارة تمنحك <b>+10</b> على الأقل. كل <b>100 نقطة = مستوى</b>، حتى المستوى 100.</div>
+ <div class="wb" style="text-align:right;margin-top:8px">${ico('ticket',13)} <b>ماذا يضيف المميز؟ 👑</b>
+ جواهر مضاعفة (60 بدل 15 كل 5 مستويات + دفعتا 150 و200)، إطاران حصريان لصورتك،
+ تعبيران حصريان («توتر» و«البومة الحكيمة»)، وجوكرات أندر حتى جوكرين أسطوريين في المستوى 100.<br>
+ ${ico('shard',12)} <b>الشظايا؟</b> شظايا التطوّر تُطوِّر بطاقاتك —
+ <span onclick="push('evoShopScr')" style="color:var(--info);font-weight:800;cursor:pointer;text-decoration:underline">افتح متجر الشظايا</span>.</div>
  <div class="szhead"><span class="szlv" style="visibility:hidden">0</span>
   <span class="szht">${ico('user',13)} مجاني</span><span class="szht p">${ico('ticket',13)} مميز 👑</span></div>
  <div class="szlist">${rows}</div>
  <div class="note">تكسب نقاط الموسم من كل جولة تلعبها — والفوز يمنحك أكثر. كل ${SZ_STEP} نقطة = مستوى.</div></div>`);
- setTimeout(()=>{const c=document.getElementById('szcur');if(c)c.scrollIntoView({block:'center',behavior:'instant'})},60);
+ if(!keep)setTimeout(()=>{const c=document.getElementById('szcur');if(c)c.scrollIntoView({block:'center',behavior:'instant'})},60);
 }
 
 // ── المزيد ──
@@ -17977,7 +18044,7 @@ function playModesScr(){
   ]},
   {t:'اجتماعي',items:[
    {k:'casual',i:'group',n:'تحدي الخصم',d:'منافس تدريبي',go:'vsScr()'},
-   {k:'clubs',i:'flag',n:'الأندية',d:'قريبًا',go:"toast('قريبًا')"},
+   {k:'clubs',i:'flag',n:'الأندية',d:'انضم لنادٍ ونافس',go:"push('clubsScr')"},
   ]}
  ];
  go(`<div class="scr on">${tbar('العب')}
@@ -17995,6 +18062,145 @@ function playModesScr(){
      <div style="font-weight:900;font-size:${m.big?14:12.5}px;margin-top:8px">${m.n}</div>
      <div style="font-size:10px;color:var(--tx2);margin-top:2px">${un?m.d:u?.d||'مقفل'}</div>
     </div>`}).join('')}</div>`).join('')}
+ </div>`);
+}
+
+/* ═══════════ الأندية v1 — محلية بصدق: الأعضاء آليون ومعلَنون كذلك ═══════════ */
+const CLUBS=[
+ {id:'falcons',n:'صقور الجزيرة',i:'flame',c:'#E8B23A',m:'العلو للصقور',base:1450},
+ {id:'scholars',n:'حرّاس المعرفة',i:'book',c:'#5AC8F5',m:'المعرفة قوة',base:1320},
+ {id:'storm',n:'عاصفة الشمال',i:'energy',c:'#7B4FE0',m:'لا أحد يوقف العاصفة',base:1180},
+ {id:'pearls',n:'لآلئ الخليج',i:'star',c:'#2ECC71',m:'نلمع في كل تحدٍّ',base:1050},
+ {id:'desert',n:'فرسان الصحراء',i:'swords',c:'#EF9F27',m:'الصبر مفتاح النصر',base:900},
+ {id:'moon',n:'سهرة القمر',i:'sparkle',c:'#FF6B9D',m:'نلعب للمتعة أولًا',base:760}
+];
+const CLUB_POOL=['سلطان','نورة','المهندس','ريان','أثير','حكيم','ليان','عمّار','جود','مشعل','دانة','طلال'];
+const CLUB_GOAL=800;
+function clubById(id){return CLUBS.find(c=>c.id===id)}
+function clubMembers(c){
+ const out=[];const seen={};
+ for(let i=0;seen._n!==10&&i<40;i++){
+  const nm=CLUB_POOL[(hashStr(c.id)+i*7)%CLUB_POOL.length];
+  if(seen[nm])continue;seen[nm]=1;seen._n=(seen._n||0)+1;
+  out.push({n:nm,cups:c.base+((hashStr(c.id+nm)%420)-160),
+   em:EMOTES[hashStr(nm+c.id)%EMOTES.length].k});
+  if(out.length>=10)break;
+ }
+ return out.sort((a,b)=>b.cups-a.cups);
+}
+function weekKey(){const d=new Date();return d.getFullYear()+'-'+Math.floor(((Date.now()/864e5)+4)/7)}
+function weekFrac(){return ((Date.now()/864e5+4)%7)/7}
+function CW(){
+ const c=S.club;if(!c)return null;
+ if(c.week!==weekKey()){c.week=weekKey();c.my=0;c.wkClaimed=0;c.chat=[]}
+ return c;
+}
+function clubBotPts(c,m){return Math.floor(weekFrac()*(45+hashStr(c.id+m.n)%50))}
+function clubsScr(){
+ if(S.club&&clubById(S.club.id))return clubHome();
+ go(`<div class="scr on">${tbar('الأندية')}
+ <div class="wb" style="text-align:right">${ico('info',13)} أندية <b>تجريبية بأعضاء آليين</b> — تعاون على هدف الأسبوع وتصدّر قائمة ناديك.
+ الأندية الحقيقية أونلاين قادمة.</div>
+ ${CLUBS.map(c=>{const mem=clubMembers(c);
+  const avg=Math.round(mem.reduce((a,m)=>a+m.cups,0)/mem.length);
+  return `<div class="li" style="cursor:pointer" onclick="joinClub('${c.id}')"><div class="lr">
+  <div style="width:46px;height:46px;flex-shrink:0;border-radius:13px;background:${c.c}22;
+   border:1.5px solid ${c.c};display:flex;align-items:center;justify-content:center;color:${c.c}">${ico(c.i,24)}</div>
+  <div class="lb"><div class="lt">${c.n}</div>
+   <div class="ls">«${c.m}» · ${mem.length+1} أعضاء</div></div>
+  <div style="text-align:center;flex-shrink:0">
+   <div style="font-size:11px;color:var(--gold);font-weight:900">${ico('trophy',11)} ${avg.toLocaleString('en-US')}</div>
+   <button class="btn gd" style="width:auto;padding:5px 14px;font-size:11px;margin-top:4px">انضمام</button></div>
+  </div></div>`}).join('')}
+ </div>`);
+}
+function joinClub(id){
+ S.club={id,week:weekKey(),my:0,wkClaimed:0,chat:[]};saveState();
+ toast('انضممت إلى «'+clubById(id).n+'» 🎉');if(window.FX)FX.win();
+ clubHome();
+}
+function leaveClub(){
+ confirmSheet('مغادرة النادي','ستفقد تقدمك في هدف الأسبوع الحالي. متأكد؟','مغادرة',()=>{
+  S.club=null;saveState();toast('غادرت النادي');clubsScr()});
+}
+const CLUB_LINES=['أحسنتم يا فريق 👏','من يلعب مباراة الآن؟','اقتربنا من هدف الأسبوع 💪',
+ 'لا تنسوا تحديات اليوم!','أفضل نادٍ ولا فخر ❤','ركّزوا على أسئلة التاريخ اليوم'];
+const CLUB_SAY=['السلام عليكم 👋','لنكمل هدف الأسبوع 💪','لعب رائع يا فريق 👏','سألعب مباراة الآن ⚡'];
+function clubSay(i){
+ const cw=CW();if(!cw)return;
+ cw.chat.push({n:S.name,tx:CLUB_SAY[i],me:1});
+ if(cw.chat.length>30)cw.chat=cw.chat.slice(-30);
+ saveState();clubChatDom();
+ setTimeout(()=>{
+  const cw2=CW();if(!cw2)return;
+  const c=clubById(cw2.id),mem=clubMembers(c);
+  const m=mem[Math.floor(Math.random()*mem.length)];
+  cw2.chat.push({n:m.n,tx:CLUB_LINES[Math.floor(Math.random()*CLUB_LINES.length)]});
+  if(cw2.chat.length>30)cw2.chat=cw2.chat.slice(-30);
+  saveState();clubChatDom();
+ },900+Math.random()*1200);
+}
+function clubChatHtml(cw){
+ return cw.chat.slice(-12).map(x=>`<div style="display:flex;gap:6px;margin-bottom:6px;${x.me?'flex-direction:row-reverse':''}">
+  <span style="font-size:9.5px;font-weight:900;color:${x.me?'var(--gold)':'var(--info)'};flex-shrink:0">${x.n}${x.me?'':' <span style=\'font-size:8px;background:var(--elev);color:var(--tx2);padding:0 4px;border-radius:5px\'>آلي</span>'}</span>
+  <span style="font-size:10.5px;color:var(--tx2)">${x.tx}</span></div>`).join('')||'<div class="note">لا رسائل بعد — ابدأ الدردشة</div>';
+}
+function clubChatDom(){const el=document.getElementById('clubChat');
+ const cw=CW();if(el&&cw){el.innerHTML=clubChatHtml(cw);el.scrollTop=el.scrollHeight}}
+function clubClaimWk(){
+ const cw=CW();if(!cw||cw.wkClaimed)return;
+ const c=clubById(cw.id),mem=clubMembers(c);
+ const tot=cw.my+mem.reduce((a,m)=>a+clubBotPts(c,m),0);
+ if(tot<CLUB_GOAL){toast('لم يكتمل هدف الأسبوع بعد');return}
+ cw.wkClaimed=1;grantRewards([{t:'gems',v:40}]);saveState();
+ toast(`${ico('gift',14)} صندوق النادي: 40 جوهرة 🎉`);if(window.FX)FX.win();
+ refresh(clubHome);
+}
+function clubHome(){
+ const cw=CW();if(!cw||!clubById(cw.id)){S.club=null;return clubsScr()}
+ const c=clubById(cw.id),mem=clubMembers(c);
+ if(!cw.chat.length){
+  cw.chat=[{n:mem[0].n,tx:'أهلًا بالعضو الجديد 👋'},{n:mem[2].n,tx:CLUB_LINES[2]}];
+ }
+ const rows=[...mem.map(m=>({n:m.n,cups:m.cups,em:m.em,pts:clubBotPts(c,m),bot:1})),
+  {n:S.name,cups:(S.ranked&&S.ranked.mmr)||1000,pts:cw.my,me:1}].sort((a,b)=>b.pts-a.pts);
+ const tot=rows.reduce((a,r)=>a+r.pts,0);
+ const pc=Math.min(100,Math.round(tot/CLUB_GOAL*100));
+ go(`<div class="scr on">${tbar('نادي '+c.n)}
+ <div class="orn"><div class="in">${ornCorners()}
+ <div style="display:flex;align-items:center;gap:12px">
+  <div style="width:56px;height:56px;flex-shrink:0;border-radius:15px;background:${c.c}22;
+   border:2px solid ${c.c};display:flex;align-items:center;justify-content:center;color:${c.c}">${ico(c.i,30)}</div>
+  <div style="flex:1"><div class="mtl" style="font-size:17px">${c.n}</div>
+   <div style="font-size:10.5px;color:var(--tx2);margin-top:3px">«${c.m}» · ${rows.length} أعضاء</div></div>
+  <button class="btn g" style="width:auto;padding:6px 11px;font-size:10.5px" onclick="leaveClub()">مغادرة</button>
+ </div></div></div>
+ <div class="li" style="margin-top:12px"><div style="padding:2px">
+  <div style="display:flex;align-items:center;gap:8px">
+   <span class="lt">${ico('target',15)} هدف الأسبوع: ${CLUB_GOAL} إجابة صحيحة جماعية</span>
+   <span style="margin-right:auto;font-size:11px;font-weight:900;color:var(--gold)">${tot.toLocaleString('en-US')}/${CLUB_GOAL}</span></div>
+  <div class="pbf" style="margin-top:8px"><div class="pbi"><i style="width:${pc}%"></i></div></div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:7px">
+   <span style="font-size:10px;color:var(--tx2)">مساهمتك: <b style="color:var(--info)">${cw.my}</b> إجابة</span>
+   ${tot>=CLUB_GOAL?(cw.wkClaimed?`<span style="margin-right:auto;font-size:10.5px;color:#2ECC71;font-weight:900">${ico('check',12)} استُلم صندوق الأسبوع</span>`
+    :`<button class="btn gd" style="width:auto;margin-right:auto;padding:5px 13px;font-size:11px" onclick="clubClaimWk()">${ico('gift',12)} استلام 40 جوهرة</button>`)
+   :`<span style="margin-right:auto;font-size:9.5px;color:var(--tx2)">أجب صحيحًا في أي وضع لتساهم</span>`}
+  </div></div></div>
+ <div class="sl" style="margin:14px 0 7px">دردشة النادي</div>
+ <div id="clubChat" style="background:var(--surf);border:1px solid var(--bd);border-radius:13px;
+  padding:10px 12px;max-height:150px;overflow-y:auto">${clubChatHtml(cw)}</div>
+ <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap">
+  ${CLUB_SAY.map((s,i)=>`<button class="btn g" style="width:auto;flex:1;min-width:40%;padding:7px 8px;font-size:10.5px"
+   onclick="clubSay(${i})">${s}</button>`).join('')}</div>
+ <div class="sl" style="margin:16px 0 7px">صدارة الأسبوع</div>
+ ${rows.map((r,i)=>`<div class="li" style="margin-bottom:7px;${r.me?'border-color:var(--gold)':''}"><div class="lr">
+  <span style="width:22px;text-align:center;font-weight:900;font-size:12px;color:${i<3?'var(--gold)':'var(--tx2)'}">${i+1}</span>
+  <div style="width:34px;height:34px;flex-shrink:0">${r.me?avatarArt(34):face(r.em,34)}</div>
+  <div class="lb"><div class="lt" style="font-size:12px">${r.n}${r.me?' <span style="font-size:8.5px;color:var(--gold)">أنت</span>':' <span style="font-size:8px;background:var(--elev);color:var(--tx2);padding:1px 5px;border-radius:5px">آلي</span>'}</div>
+  <div class="ls">${ico('trophy',10)} ${r.cups.toLocaleString('en-US')}</div></div>
+  <span style="font-weight:900;color:var(--info);font-size:12.5px">${r.pts}</span>
+  </div></div>`).join('')}
+ <div class="note">مساهمات الأعضاء الآليين تُحاكى محليًا — أونلاين حقيقي لاحقًا</div>
  </div>`);
 }
 
@@ -18131,7 +18337,11 @@ function toast(m){const t=$('tst');
  t.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;justify-content:center">'+m+'</span>';
  t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400)}
 function trk(k,a=1){S.mis[k]=(S.mis[k]||0)+a;S.ach[k]=(S.ach[k]||0)+a}
-const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();app.innerHTML=h;window.scrollTo(0,0)};
+let _keepY=null;
+const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();app.innerHTML=h;
+ if(_keepY!=null){window.scrollTo(0,_keepY);_keepY=null}else window.scrollTo(0,0)};
+/* إعادة رسم بلا قفزة — الشاشة تبقى مكانها عند الاستلام والشراء */
+function refresh(fn){_keepY=window.scrollY;fn()}
 const tb=(t,b)=>`<div class="tbar">${b?`<button class="bk" onclick="${b}">${ico('back',15)}</button>`:'<span class="sp"></span>'}<h2>${t}</h2><span class="sp"></span></div>`;
 const stars=(k,sz)=>{const s=S.stars[k]||0;let o='';
  for(let i=1;i<=3;i++)o+=`<span style="font-size:${sz||10}px;opacity:${i<=s?1:.22}">${ico('star',14)}</span>`;return o};
@@ -18465,7 +18675,7 @@ function ansr(a){
   const sb=G.st+1>=10?150:G.st+1>=5?100:G.st+1>=3?50:0;
   p=100+sp+db+sb;if(G.x2)p*=2}
  Object.assign(G,{ans:true,a,lo:ok,lp:p});G.pts+=p;G.hist[G.i]=ok;
- if(ok){G.ok++;G.st++;if(G.st>G.bst)G.bst=G.st;S.correct++;trk('correct_100')}
+ if(ok){G.ok++;G.st++;if(G.st>G.bst)G.bst=G.st;S.correct++;trk('correct_100');if(S.club&&CW())S.club.my++}
  else{G.mis++;G.st=0}
  trk('ans20');if(q.d>=3&&ok)trk('hard5');
  if(G.st>=5)S.ach.streak_5=Math.max(S.ach.streak_5||0,G.st);
@@ -18514,7 +18724,7 @@ function done(){
  S.ach.stars_15=totStars();
  S.ach.all_cat=Object.keys(S.nets).length;
  const szG=Math.round(xp*.8)+(st>0?30:10);SZ().xp=Math.min(SZ_MAX*SZ_STEP,SZ().xp+szG);
- {const _e=EV();_e.plays++;if(G.vs?G.pts>G.vs.score:ps)_e.wins++;
+ {const _e=EV();_e.plays++;if(G.vs?G.pts>G.vs.score:ps){_e.wins++;DW().w++}
   _e.correct+=G.ok;_e.bestStreak=Math.max(_e.bestStreak,G.bst);
   if(G.mis===0&&G.ok===G.qs.length)_e.perfect=1;if(G.anyP)_e.helper=1}
  S.xp+=xp;S.coins+=co;S.gems+=gm;S.matches++;saveState();
@@ -18596,6 +18806,18 @@ const EXCH=[
 const JOKERS=[
  {r:'common',g:40},{r:'rare',g:90},{r:'epic',g:220},{r:'legendary',g:500}
 ];
+/* تأكيد عام قبل أي صرف جواهر/عملات */
+function confirmSheet(t,d,okTxt,ok){
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox"><div style="font-size:26px">${ico('info',24)}</div>
+ <div class="qvt">${t}</div><div class="qvd">${d}</div>
+ <button class="btn gd" id="qvy">${okTxt||'تأكيد'}</button>
+ <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
+ document.body.appendChild(ov);
+ ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+ ov.querySelector('#qvn').onclick=()=>ov.remove();
+ ov.querySelector('#qvy').onclick=()=>{ov.remove();ok()};
+}
 function paySheet(name,usd,onOk,after){
  const ov=document.createElement('div');ov.className='qvov';
  ov.innerHTML=`<div class="qvbox">
@@ -18610,17 +18832,19 @@ function paySheet(name,usd,onOk,after){
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
  ov.querySelector('#qvy').onclick=()=>{ov.remove();onOk();saveState();
-  toast('تم الشراء (تجريبي) ✔');if(window.FX)FX.win();(after||shopScr)()};
+  toast('تم الشراء (تجريبي) ✔');if(window.FX)FX.win();refresh(after||shopScr)};
 }
 function buyIap(k){const p=IAP.find(x=>x.k===k);paySheet(p.n+' — '+p.gems+' جوهرة',p.usd,()=>{S.gems+=p.gems})}
 function buyBundle(k){const b=BUNDLES.find(x=>x.k===k);paySheet(b.n,b.usd,b.grant)}
 function buyExch(i){const e=EXCH[i];
  if(S.gems<e.g){toast('جواهر غير كافية — اشترِ باقة من الأعلى');return}
- S.gems-=e.g;S.coins+=e.c;saveState();toast('+'+e.c.toLocaleString('en-US')+' عملة');if(window.FX)FX.correct(2);storeScr()}
+ confirmSheet('تحويل جواهر إلى عملات',`ستدفع <b style="color:var(--gem)">${e.g} جوهرة</b> وتحصل على <b style="color:var(--gold)">${e.c.toLocaleString('en-US')} عملة</b>.`,'تأكيد التحويل',()=>{
+  S.gems-=e.g;S.coins+=e.c;saveState();toast('+'+e.c.toLocaleString('en-US')+' عملة');if(window.FX)FX.correct(2);refresh(storeScr)})}
 function buyJoker(i){const j=JOKERS[i];
  if(S.gems<j.g){toast('جواهر غير كافية');return}
- S.gems-=j.g;grantRewards([{t:'wild',r:j.r,v:1}]);saveState();
- toast('جوكر '+RARITY[j.r].n+' في جعبتك 🃏');if(window.FX)FX.correct(3);storeScr()}
+ confirmSheet('شراء جوكر '+RARITY[j.r].n,`ستدفع <b style="color:var(--gem)">${j.g} جوهرة</b> مقابل جوكر ${RARITY[j.r].n} واحد.`,'تأكيد الشراء',()=>{
+  S.gems-=j.g;grantRewards([{t:'wild',r:j.r,v:1}]);saveState();
+  toast('جوكر '+RARITY[j.r].n+' في جعبتك 🃏');if(window.FX)FX.correct(3);refresh(storeScr)})}
 function storeScr(){
  go(`<div class="scr on">${tb('المتجر')}
  <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. الأسعار الدولارية <b>تجريبية</b>: لا يُخصم مال حقيقي.</div>
@@ -18928,24 +19152,55 @@ splash();
  const fx=fc.getContext('2d');let P=[];
  function frs(){fc.width=innerWidth*DPR;fc.height=innerHeight*DPR;fc.style.width=innerWidth+'px';fc.style.height=innerHeight+'px';fx.setTransform(DPR,0,0,DPR,0,0)}
  frs();addEventListener('resize',frs);
- const COLS=['#E8B23A','#7B4FE0','#2ECC71','#378ADD','#B76CF0','#F2F4F8'];
- function burst(x,y,n,pow){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.35+Math.random()*.65)*pow;
-  P.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-pow*.45,rot:Math.random()*6,vr:(Math.random()-.5)*.3,
-  w:4+Math.random()*5,h:6+Math.random()*7,c:COLS[(Math.random()*COLS.length)|0],life:1,dl:.011+Math.random()*.008})}}
+ const COLS=['#FFE9A8','#E8B23A','#B76CF0','#5AC8F5','#2ECC71','#FF6B9D'];
+ function burst(x,y,n,pow){
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random()*.7)*pow;
+   P.push({t:'s',x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-pow*.3,
+    c:COLS[(Math.random()*COLS.length)|0],life:1,dl:.011+Math.random()*.009,w:1.6+Math.random()*1.8})}
+  for(let i=0,m=Math.min(10,n>>1);i<m;i++){const a=Math.random()*Math.PI*2,v=(.2+Math.random()*.5)*pow;
+   P.push({t:'g',x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-pow*.35,rot:Math.random()*6,vr:(Math.random()-.5)*.3,
+    w:3+Math.random()*3,c:COLS[(Math.random()*COLS.length)|0],life:1,dl:.01})}
+ }
+ function rocket(x){P.push({t:'r',x,y:innerHeight+8,vx:(Math.random()-.5)*1.2,vy:-(8.5+Math.random()*3),
+  c:'#FFE9A8',life:1,dl:0,fuse:innerHeight*(.26+Math.random()*.22)})}
  function floop(){requestAnimationFrame(floop);
   if(!P.length){fx.clearRect(0,0,innerWidth,innerHeight);return}
   fx.clearRect(0,0,innerWidth,innerHeight);
   P=P.filter(p=>p.life>0);
-  for(const p of P){p.life-=p.dl;p.vy+=.16;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
-   fx.save();fx.translate(p.x,p.y);fx.rotate(p.rot);fx.globalAlpha=Math.max(0,p.life);
-   fx.fillStyle=p.c;fx.fillRect(-p.w/2,-p.h/2,p.w,p.h*(.4+.6*Math.abs(Math.sin(p.rot*2))));fx.restore()}
-  fx.globalAlpha=1}
+  for(const p of P){
+   if(p.t==='r'){ // صاروخ صاعد بذيل متوهج
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.07;
+    fx.globalCompositeOperation='lighter';fx.globalAlpha=.95;
+    fx.strokeStyle=p.c;fx.lineWidth=2.2;fx.lineCap='round';
+    fx.beginPath();fx.moveTo(p.x-p.vx*3,p.y-p.vy*3);fx.lineTo(p.x,p.y);fx.stroke();
+    if(p.y<=p.fuse||p.vy>-1.2){p.life=0;burst(p.x,p.y,56,10.5)}
+    continue;
+   }
+   p.life-=p.dl;
+   if(p.t==='s'){ // شرارة متوهجة بذيل
+    const px=p.x,py=p.y;
+    p.vx*=.985;p.vy=p.vy*.985+.11;p.x+=p.vx;p.y+=p.vy;
+    fx.globalCompositeOperation='lighter';
+    fx.globalAlpha=Math.max(0,p.life);
+    fx.strokeStyle=p.c;fx.lineWidth=p.w;fx.lineCap='round';
+    fx.beginPath();fx.moveTo(px-p.vx*2.4,py-p.vy*2.4);fx.lineTo(p.x,p.y);fx.stroke();
+    if(p.life<.55&&Math.random()<.09){fx.fillStyle='#FFF7DD';
+     fx.beginPath();fx.arc(p.x,p.y,p.w*1.7,0,7);fx.fill()}
+   }else{ // قصاصة لامعة قليلة — لمسة احتفال لا مطر مربعات
+    p.vy+=.14;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;
+    fx.save();fx.globalCompositeOperation='source-over';fx.translate(p.x,p.y);fx.rotate(p.rot);
+    fx.globalAlpha=Math.max(0,p.life);fx.fillStyle=p.c;
+    fx.fillRect(-p.w/2,-p.w,p.w,p.w*2*(.4+.6*Math.abs(Math.sin(p.rot*2))));fx.restore();
+   }
+  }
+  fx.globalCompositeOperation='source-over';fx.globalAlpha=1}
  requestAnimationFrame(floop);
  window.FX={
   correct(st){const q=document.querySelector('.qtx,.qbox');
    const r=q?q.getBoundingClientRect():{left:innerWidth/2,top:160,width:0,height:0};
    burst(r.left+r.width/2,r.top+r.height/2,st>=5?46:st>=3?30:18,st>=5?11:8)},
-  win(){let k=0;const iv=setInterval(()=>{burst(60+Math.random()*(innerWidth-120),120+Math.random()*180,26,10);if(++k>=5)clearInterval(iv)},280)}
+  win(){rocket(innerWidth*.5);let k=0;const iv=setInterval(()=>{
+   rocket(40+Math.random()*(innerWidth-80));if(++k>=3)clearInterval(iv)},360)}
  };
 })();
 </script>
