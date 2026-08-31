@@ -511,6 +511,26 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .szchip.done{opacity:.42}
 .szchip.lock{opacity:.62}
 .szchip.p.lock{background:rgba(232,178,58,.04)}
+
+/* ═══ المتجر الدولاري التجريبي ═══ */
+.iapg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
+.iap{position:relative;background:linear-gradient(170deg,#1E1834,#120E22);border:1px solid #3B2F5C;
+ border-radius:14px;padding:14px 10px 12px;text-align:center;cursor:pointer;
+ box-shadow:0 4px 0 #0A0F1D;transition:transform .12s}
+.iap:active{transform:translateY(3px);box-shadow:0 1px 0 #0A0F1D}
+.iap:last-child:nth-child(odd){grid-column:1/-1}
+.iapb{position:absolute;top:-8px;inset-inline:14px;background:linear-gradient(145deg,#F0C25A,#C08C18);
+ color:#15100A;font-size:9px;font-weight:900;border-radius:8px;padding:2px 6px}
+.iapi{filter:drop-shadow(0 3px 8px rgba(183,108,240,.5))}
+.iapn{font-size:11.5px;font-weight:800;margin-top:6px}
+.iapg2{font-size:13px;font-weight:900;color:var(--gem);margin-top:3px}
+.usd{display:inline-block;margin-top:8px;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
+ font-size:13px;font-weight:900;border-radius:10px;padding:4px 14px;box-shadow:0 3px 0 #14522F}
+.usdbtn{width:auto;padding:8px 14px;font-size:12.5px;white-space:nowrap}
+.usdbig{font-size:30px;font-weight:900;color:#2ECC71;margin:6px 0 4px}
+.sandbox{display:inline-flex;align-items:center;gap:5px;background:rgba(55,138,221,.12);
+ border:1px solid rgba(55,138,221,.4);color:#8FC1F0;font-size:10.5px;font-weight:700;
+ border-radius:9px;padding:4px 10px;margin-bottom:14px}
 </style>
 </head>
 <body>
@@ -17237,10 +17257,14 @@ function buyPassAsk(){
  <div class="qvt">التذكرة المميزة</div>
  <div class="qvd">تفتح مسار المكافآت المميز كاملاً — جوكرات وجواهر مضاعفة وتعبير حصري، وتُستلم كل مستوياتك السابقة فوراً.</div>
  <button class="btn gd" id="qvy">${ico('gem',14)} فتح بـ ${SZ_PASS_COST} جوهرة</button>
+ <button class="btn" id="qvd" style="margin-top:9px;background:linear-gradient(145deg,#2ECC71,#1D8A4E)">شراء مباشر $9.99 (تجريبي)</button>
  <button class="btn g" id="qvn" style="margin-top:9px">ليس الآن</button></div>`;
  document.body.appendChild(ov);
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
+ ov.querySelector('#qvd').onclick=()=>{ov.remove();
+  paySheet('التذكرة المميزة — الموسم 4',9.99,()=>{SZ().prem=true},seasonScr);
+ };
  ov.querySelector('#qvy').onclick=()=>{ov.remove();
   if(S.gems<SZ_PASS_COST){toast('تحتاج '+SZ_PASS_COST+' جوهرة — اجمعها من الصناديق والمستويات');return}
   S.gems-=SZ_PASS_COST;SZ().prem=true;saveState();
@@ -17902,20 +17926,83 @@ function achScr(){
   '<div style="font-size:12px;color:var(--mut);text-align:center;padding:14px">لا شارات بعد — اهزم الحرّاس</div>'}</div>`);
 }
 
+// ── المتجر: أسعار دولارية بوضع شراء تجريبي — كل شيء قابل للشراء للتجربة ──
+// (لا يُخصم أي مال حقيقي: محاكاة كاملة لتجربة الاقتصاد قبل ربط متجر التطبيقات)
+const IAP=[
+ {k:'g1',usd:0.99, gems:80,   n:'حفنة جواهر',   bonus:''},
+ {k:'g2',usd:4.99, gems:500,  n:'كيس الجواهر',  bonus:'+8% مجاناً'},
+ {k:'g3',usd:9.99, gems:1200, n:'صندوق الجواهر',bonus:'+20% مجاناً'},
+ {k:'g4',usd:19.99,gems:2700, n:'خزنة الجواهر', bonus:'+35% مجاناً'},
+ {k:'g5',usd:49.99,gems:7500, n:'عرش الجواهر',  bonus:'الأفضل قيمة 👑'}
+];
+const BUNDLES=[
+ {k:'b1',usd:2.99,n:'حزمة البداية',d:'300 جوهرة + 3000 عملة + جوكر نادر',
+  grant:()=>{S.gems+=300;S.coins+=3000;grantRewards([{t:'wild',r:'rare',v:1}])}},
+ {k:'b2',usd:9.99,n:'حزمة التذكرة المميزة',d:'تفعيل تذكرة الموسم 👑 + 200 جوهرة',
+  grant:()=>{SZ().prem=true;S.gems+=200}}
+];
+const EXCH=[
+ {g:60,c:1500},{g:150,c:4200},{g:400,c:12000}
+];
+const JOKERS=[
+ {r:'common',g:40},{r:'rare',g:90},{r:'epic',g:220},{r:'legendary',g:500}
+];
+function paySheet(name,usd,onOk,after){
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox">
+ <div style="font-size:26px">${ico('shop',24)}</div>
+ <div class="qvt">${name}</div>
+ <div class="usdbig">$${usd.toFixed(2)}</div>
+ <div class="sandbox">${ico('info',12)} وضع تجريبي — لن يُخصم أي مال حقيقي</div>
+ <button class="btn gd" id="qvy">إتمام الشراء التجريبي</button>
+ <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
+ document.body.appendChild(ov);
+ ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+ ov.querySelector('#qvn').onclick=()=>ov.remove();
+ ov.querySelector('#qvy').onclick=()=>{ov.remove();onOk();saveState();
+  toast('تم الشراء (تجريبي) ✔');if(window.FX)FX.win();(after||storeScr)()};
+}
+function buyIap(k){const p=IAP.find(x=>x.k===k);paySheet(p.n+' — '+p.gems+' جوهرة',p.usd,()=>{S.gems+=p.gems})}
+function buyBundle(k){const b=BUNDLES.find(x=>x.k===k);paySheet(b.n,b.usd,b.grant)}
+function buyExch(i){const e=EXCH[i];
+ if(S.gems<e.g){toast('جواهر غير كافية — اشترِ باقة من الأعلى');return}
+ S.gems-=e.g;S.coins+=e.c;saveState();toast('+'+e.c.toLocaleString('en-US')+' عملة');if(window.FX)FX.correct(2);storeScr()}
+function buyJoker(i){const j=JOKERS[i];
+ if(S.gems<j.g){toast('جواهر غير كافية');return}
+ S.gems-=j.g;grantRewards([{t:'wild',r:j.r,v:1}]);saveState();
+ toast('جوكر '+RARITY[j.r].n+' في جعبتك 🃏');if(window.FX)FX.correct(3);storeScr()}
 function storeScr(){
  go(`<div class="scr on">${tb('المتجر')}
- <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — فقط مساعدات وتجميليات، حفاظًا على عدالة المنافسة.</div>
- <div style="display:flex;gap:9px;justify-content:center;margin-bottom:18px">
+ <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. الأسعار الدولارية <b>تجريبية</b>: لا يُخصم مال حقيقي.</div>
+ <div style="display:flex;gap:9px;justify-content:center;margin-bottom:16px">
  <span class="cch" style="font-size:14px;padding:9px 15px">${ico('coin',15)} ${S.coins.toLocaleString('en-US')}</span>
- <span class="cch" style="font-size:14px;padding:9px 15px;color:var(--gem)">${ico('gem',15)} ${S.gems}</span></div>
- <div class="sl">المساعدات</div>
- ${PWR.map(p=>`<div class="li"><div class="lr"><span style="font-size:21px">${ico(p.i,17)}</span>
- <div class="lb"><div class="lt">${p.l}</div></div>
- <button class="btn gd" style="width:auto;padding:7px 13px;font-size:12.5px" onclick="toast('الشراء يعمل في التطبيق')">${p.c}</button></div></div>`).join('')}
- <div class="sl">للمعاينة</div>
- <div class="li"><div class="lr"><span style="font-size:21px">${ico('gift',16)}</span>
- <div class="lb"><div class="lt">حزمة تجريبية</div><div class="ls">500 عملة + 5 جواهر</div></div>
- <button class="btn" style="width:auto;padding:7px 13px;font-size:12.5px" onclick="S.coins+=500;S.gems+=5;toast('أُضيفت');storeScr()">أضف</button></div></div></div>`);
+ <span class="cch" style="font-size:14px;padding:9px 15px;color:var(--gem)">${ico('gem',15)} ${S.gems.toLocaleString('en-US')}</span></div>
+
+ <div class="sl">${ico('gem',14)} باقات الجواهر</div>
+ <div class="iapg">
+ ${IAP.map(p=>`<div class="iap" onclick="buyIap('${p.k}')">
+  ${p.bonus?`<div class="iapb">${p.bonus}</div>`:''}
+  <div class="iapi">${ico('gem',26)}</div>
+  <div class="iapn">${p.n}</div>
+  <div class="iapg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)}</div>
+  <div class="usd">$${p.usd.toFixed(2)}</div></div>`).join('')}
+ </div>
+
+ <div class="sl">${ico('gift',15)} حزم خاصة</div>
+ ${BUNDLES.map(b=>`<div class="li"><div class="lr"><span style="font-size:22px">${ico(b.k==='b2'?'ticket':'gift',18)}</span>
+ <div class="lb"><div class="lt">${b.n}</div><div class="ls">${b.d}</div></div>
+ <button class="btn gd usdbtn" onclick="buyBundle('${b.k}')">$${b.usd.toFixed(2)}</button></div></div>`).join('')}
+
+ <div class="sl">${ico('coin',14)} صرف الجواهر عملاتٍ</div>
+ ${EXCH.map((e,i)=>`<div class="li"><div class="lr"><span style="font-size:21px">${ico('coin',17)}</span>
+ <div class="lb"><div class="lt">${e.c.toLocaleString('en-US')} عملة</div></div>
+ <button class="btn usdbtn" onclick="buyExch(${i})">${ico('gem',12)} ${e.g}</button></div></div>`).join('')}
+
+ <div class="sl">${ico('wild',15)} جوكرات الترقية</div>
+ ${JOKERS.map((j,i)=>`<div class="li"><div class="lr"><span style="font-size:21px;color:${RARITY[j.r].c}">${ico('wild',17)}</span>
+ <div class="lb"><div class="lt">جوكر ${RARITY[j.r].n}</div><div class="ls">يرقّي أي بطاقة من ندرة ${RARITY[j.r].n}</div></div>
+ <button class="btn usdbtn" onclick="buyJoker(${i})">${ico('gem',12)} ${j.g}</button></div></div>`).join('')}
+ </div>`);
 }
 
 function lbScr(){
