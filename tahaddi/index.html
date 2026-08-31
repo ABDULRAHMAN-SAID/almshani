@@ -15020,6 +15020,8 @@ const iconPos=id=>{const i=id-1;
  return `background-position:${(i%8)*(100/7)}% ${Math.floor(i/8)*(100/4)}%`};
 
 /** بطاقة كاملة بأسلوب اللعبة: إطار متدرّج · أيقونة · اسم · تكلفة · ندرة */
+// خامات بطاقات مرسومة من المالك (رقم البطاقة → data URI) — تُملأ من tools/build-cards.py
+const CARD_IMG={};
 function gcard(id,o){
  o=o||{};
  const c=cardById(id), R=RCOL[c.r], rar=RARITY[c.r];
@@ -15036,9 +15038,8 @@ function gcard(id,o){
   padding:${sm?'7px 4px 11px':'11px 6px 15px'}">
   <div style="position:absolute;top:0;left:0;right:0;height:52%;
    background:radial-gradient(ellipse at 50% 0%,${R.a}2E,transparent 70%)"></div>
-  <div style="width:${sm?26:38}px;height:${sm?26:38}px;flex-shrink:0;position:relative;z-index:2;
-   background-image:var(--icons);background-size:800% 500%;background-repeat:no-repeat;
-   ${iconPos(id)}"></div>
+  ${CARD_IMG[id]?`<div style="width:${sm?'40px':'74px'};height:${sm?'40px':'74px'};flex-shrink:0;position:relative;z-index:2;border-radius:${sm?8:11}px;overflow:hidden;box-shadow:0 3px 9px rgba(0,0,0,.55)"><img src="${CARD_IMG[id]}" style="width:100%;height:100%;object-fit:cover;display:block"></div>`
+  :`<div style="width:${sm?26:38}px;height:${sm?26:38}px;flex-shrink:0;position:relative;z-index:2;background-image:var(--icons);background-size:800% 500%;background-repeat:no-repeat;${iconPos(id)}"></div>`}
   <div style="position:relative;z-index:2;font-size:${sm?9:11.5}px;font-weight:900;
    margin-top:${sm?4:7}px;text-align:center;line-height:1.15;color:#EDF3F0">${c.n}</div>
   ${sm?'':`<div style="position:relative;z-index:2;font-size:8.5px;color:var(--tx2);
