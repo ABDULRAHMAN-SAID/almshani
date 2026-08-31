@@ -480,6 +480,26 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 @keyframes ebubIn{from{opacity:0;transform:translateX(-50%) scale(.35) translateY(16px)}
  to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
 .ebubfx{transform:translateX(-50%)}
+/* بروز لعب بطاقتك — طبقة DOM مستقلة فلا يُعاد رسم الشاشة */
+.cardfx{position:fixed;left:50%;top:30%;z-index:44;display:flex;flex-direction:column;align-items:center;gap:7px;
+ transform:translateX(-50%);pointer-events:none;animation:cfxIn .38s cubic-bezier(.2,1.4,.4,1);
+ background:radial-gradient(closest-side,rgba(6,8,16,.82),rgba(6,8,16,.55) 70%,rgba(6,8,16,0));
+ border-radius:26px;padding:16px 30px 13px;
+ filter:drop-shadow(0 14px 30px rgba(0,0,0,.6))}
+.cardfx .cfw{width:96px}
+.cardfx .cfp{font-size:14px;font-weight:900;color:#5E4408;background:linear-gradient(180deg,#FFE9A8,#E8C25A);
+ border:1.5px solid #B8871E;padding:5px 16px;border-radius:12px;white-space:nowrap;
+ box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.cardfx .cfs{font-size:10.5px;font-weight:800;color:#fff;background:rgba(6,8,16,.75);
+ border:1px solid rgba(232,178,58,.35);padding:3px 13px;border-radius:9px;max-width:250px;text-align:center}
+.cardfx.out{animation:cfxOut .4s ease forwards}
+@keyframes cfxIn{from{opacity:0;transform:translateX(-50%) scale(.3) translateY(34px)}
+ to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+@keyframes cfxOut{to{opacity:0;transform:translateX(-50%) scale(.85) translateY(-26px)}}
+/* رقائق الآثار الفعّالة تحت رأس المباراة */
+.fxchips{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px;justify-content:center}
+.fxchip{display:inline-flex;align-items:center;gap:4px;font-size:9.5px;font-weight:900;color:var(--gold);
+ background:#EF9F2714;border:1px solid #EF9F2755;border-radius:9px;padding:3px 9px;animation:rspop .35s ease}
 /* ═══ الشريط الزمني لوقت تفعيل البطاقة ═══ */
 .phtl{display:flex;gap:6px;align-items:center}
 .pht{flex:1;text-align:center;font-size:10.5px;font-weight:800;color:var(--mut);
@@ -16535,6 +16555,28 @@ function dots(n,c){
  return o;
 }
 // ── هيدر المباراة ──
+/* الآثار المسلّحة الظاهرة للاعب — تبقى مرئية بعد زوال التنبيه المؤقت */
+function fxChips(){
+ if(!M||!M.effects)return '';
+ const fx=M.effects,ch=[];
+ if(fx.anchorAt===M.i+1)ch.push(ico('lock',11)+' المرساة: الجولة القادمة مثبّتة');
+ if(fx.ambushAt===M.i)ch.push(ico('target',11)+' الكمين متأهب: إن لعب الخصم بطاقة +2 طاقة');
+ if(fx.ambushAt===M.i+1)ch.push(ico('target',11)+' كمين منصوب للجولة القادمة');
+ if(fx.bolt)ch.push(ico('energy',11)+' الصاعقة: صحيح قبل نصف الوقت = +1 طاقة');
+ if(fx.silentBet)ch.push(ico('dice',11)+' رهان صامت: جولة مثالية +2 · وإلا −1');
+ if(fx.insurance)ch.push(ico('shield',11)+' التأمين: النقص بواحد لا يُسقطك');
+ if(fx.chase)ch.push(ico('flame',11)+` المطاردة: تبقّى ${fx.chase.left} — فزت ${fx.chase.won}`);
+ if(fx.openBet)ch.push(ico('dice',11)+' الرهان المفتوح: فائز الجولة +2 طاقة');
+ if(fx.eliteNext)ch.push(ico('flame',11)+' تحدي النخبة: القادمة أصعب والفوز +2 طاقة');
+ if(fx.covenant)ch.push(ico('scroll',11)+' العهد: لا بطاقات للطرفين');
+ if(M.oppBlocked&&M.oppBlockedAt===M.i)ch.push(ico('lock',11)+` القفل: «${cardById(M.oppBlocked).n}» ممنوعة على الخصم`);
+ if(M.oppBlocked&&M.oppBlockedAt===M.i+1)ch.push(ico('lock',11)+` القفل: «${cardById(M.oppBlocked).n}» ممنوعة عليه القادمة`);
+ if(M.royalNext)ch.push(ico('hammer',11)+' مزاد ملكي قادم — الخصم يفتتح');
+ if(M.neutralNext)ch.push(ico('scale',11)+' ميدان محايد للجولة القادمة');
+ if(M.eliteRound)ch.push(ico('flame',11)+' جولة النخبة الآن: الفوز +2 طاقة');
+ if(!ch.length)return '';
+ return `<div class="fxchips">${ch.map(x=>`<span class="fxchip">${x}</span>`).join('')}</div>`;
+}
 function mHeader(){
  const k=M.rounds[M.i],mo=MODES[k];
  const secs=M.roundSecs||rankTime(S.ranked,k);
@@ -16573,9 +16615,14 @@ function mHeader(){
   <div style="font-size:9.5px;color:var(--gold);font-weight:900;margin-top:2px">${ico('trophy',10)} ${(M.oppMmr||1000).toLocaleString('en-US')}</div>
   <div style="display:flex;gap:3px;margin-top:3px">${dots(M.opp,'var(--no)')}</div></div>
  </div></div>
+ ${M.playedThisRound&&M.myLastPlayed?`<div style="display:flex;align-items:center;gap:9px;justify-content:center;margin:0 0 8px;animation:rspop .45s ease;background:linear-gradient(168deg,#14264A,#0E1526);border:1px solid var(--info);border-radius:12px;padding:6px 10px">
+  <div style="width:38px;flex-shrink:0">${gcard(M.myLastPlayed,{sm:1})}</div>
+  <div style="font-size:10.5px;color:var(--tx2);font-weight:800">أنت لعبت «<b class="mtl">${cardById(M.myLastPlayed).n}</b>»
+   <div style="font-size:9px;opacity:.85;font-weight:700;margin-top:2px">${cardById(M.myLastPlayed).s||''}</div></div></div>`:''}
  ${M.oppPlayedRound&&M.oppLastPlayed?`<div style="display:flex;align-items:center;gap:9px;justify-content:center;margin:0 0 8px;animation:rspop .45s ease;background:linear-gradient(168deg,#1C2540,#0E1526);border:1px solid ${M.rival?M.rival.c:'var(--no)'}66;border-radius:12px;padding:6px 10px">
   <div style="width:38px;flex-shrink:0">${gcard(M.oppLastPlayed,{sm:1})}</div>
   <div style="font-size:10.5px;color:var(--tx2);font-weight:800">${M.rival?M.rival.n:'الخصم'} لعب «<b class="mtl">${cardById(M.oppLastPlayed).n}</b>»</div></div>`:''}
+ ${fxChips()}
  <button class="efab" onclick="emoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>
  ${M.knownNext&&!M.ans?`<div class="hint" style="margin:0 0 8px;padding:6px 10px;font-size:11px">${ico('search',12)} الكشاف — الجولة القادمة: <b>${M.knownNext}</b></div>`:''}
  ${k!=='auction'?`<div class="trow"><div class="tcr" id="mtc" style="border-color:${c};color:${c}">${Math.ceil(M.ms/1000)}</div>
@@ -16588,7 +16635,7 @@ function mHand(){
  if(M.ans)return '';
  const mull=M.i===0&&!M.cycle.mulliganUsed&&!M.playedThisRound;
  if(M.effects.covenant)return `<div class="note">${ico('scroll',16)} العهد: لا بطاقات — المعرفة فقط</div>`;
- if(M.playedThisRound)return `<div class="note">لعبت بطاقتك في هذه الجولة</div>`;
+ if(M.playedThisRound)return `<div class="note">${M.myLastPlayed?`${ico('check',13)} لعبت «<b>${cardById(M.myLastPlayed).n}</b>» — ${cardById(M.myLastPlayed).s||'أثرها فعّال'}`:'لعبت بطاقتك في هذه الجولة'}</div>`;
  const k=M.rounds[M.i];
  return `<div class="sl" style="margin:12px 0 7px;display:flex;align-items:center;gap:8px">
  <span>يدك — ${ico('energy',15)} ${M.energy}</span>
@@ -16798,9 +16845,27 @@ function playCard(i){
  M.energy-=c.e;
  consumeCard(M.cycle,i);
  M.playedThisRound=true;
+ M.myLastPlayed=id;
  if(S.cards.owned[id])S.cards.owned[id].uses=(S.cards.owned[id].uses||0)+1;
+ cardFx(id);
  applyEffect(id);
  mDraw(1);
+}
+/* بروز مرئي كبير عند لعب بطاقتك — عنصر ثابت فوق الشاشة يختفي وحده */
+function cardFx(id){
+ const c=cardById(id);if(!c)return;
+ const old=document.querySelector('.cardfx');if(old)old.remove();
+ const d=document.createElement('div');d.className='cardfx';
+ d.innerHTML=`<div class="cfw">${gcard(id,{sm:1})}</div>
+ <div class="cfp">لعبتَ «${c.n}»</div>
+ ${c.s?`<div class="cfs">${c.s}</div>`:''}`;
+ document.body.appendChild(d);
+ // العدّ يبدأ من أول إطار مرسوم فعلاً — فلا يضيع عمر البروز في لحظة إعادة الرسم
+ requestAnimationFrame(()=>{
+  setTimeout(()=>{if(d.isConnected)d.classList.add('out')},2250);
+  setTimeout(()=>d.remove(),2700);
+ });
+ setTimeout(()=>d.remove(),6000);
 }
 
 /* ── نافذة الاختيار داخل المباراة ── */
@@ -17285,7 +17350,8 @@ function aWordAsk(){
  M.st.confirm='word';mDraw()}
 function aWordGo(){
  const st=M.st;st.myBid=st.pending;st.confirm=null;
- M.energy-=4;M.playedThisRound=true;
+ M.energy-=4;M.playedThisRound=true;M.myLastPlayed=29;
+ cardFx(29);
  const i=M.cycle.hand.indexOf(29);if(i>=0)consumeCard(M.cycle,i);
  S.cards.owned[29]&&(S.cards.owned[29].uses++);
  toast(`${ico('scale',16)} المزايدة أُغلقت على `+st.myBid);
@@ -17709,7 +17775,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='3.5';
+const APP_VER='3.6';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
