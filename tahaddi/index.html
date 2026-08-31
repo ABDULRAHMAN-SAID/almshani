@@ -480,6 +480,46 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 @keyframes ebubIn{from{opacity:0;transform:translateX(-50%) scale(.35) translateY(16px)}
  to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
 .ebubfx{transform:translateX(-50%)}
+/* ═══ الشريط الزمني لوقت تفعيل البطاقة ═══ */
+.phtl{display:flex;gap:6px;align-items:center}
+.pht{flex:1;text-align:center;font-size:10.5px;font-weight:800;color:var(--mut);
+ border:1.5px dashed var(--bd);border-radius:9px;padding:7px 2px}
+.pht.on{border-style:solid;font-weight:900}
+.phar{color:var(--mut);font-size:12px}
+/* ═══ مسرح المقطع المرئي للبطاقة ═══ */
+.dstage{position:relative}
+.drow{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.dnrg{font-size:11px;font-weight:900;color:var(--gem);background:var(--elev);border-radius:9px;
+ padding:3px 9px;display:inline-flex;align-items:center;gap:4px}
+.dnrg.dHit{animation:okp .5s ease;border:1px solid var(--gem)}
+.dnrg.dHit2{animation:okp .5s ease;border:1px solid #5DE39A}
+.dq{position:relative;background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--bd);
+ border-radius:12px;padding:12px 10px;text-align:center;min-height:78px;display:flex;
+ flex-direction:column;align-items:center;justify-content:center;gap:7px;transition:all .4s}
+.dq.dPulse{animation:okp .6s ease;border-color:var(--gold)}
+.dq.dWin{border-color:#2ECC71;box-shadow:0 0 14px rgba(46,204,113,.35)}
+.dqm{width:46px;height:46px;border-radius:11px;background:var(--elev);border:1.5px dashed var(--bd);
+ display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--gold)}
+.dqm.dFlip{animation:qflip .5s ease;border-style:solid;border-color:var(--gold)}
+.dops{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%}
+.dop{font-size:9.5px;font-weight:800;background:var(--elev);border:1px solid var(--bd);
+ border-radius:8px;padding:5px 4px;transition:all .5s}
+.dop.dGone{opacity:.22;text-decoration:line-through;border-color:var(--no);transform:scale(.94)}
+.dscore{position:absolute;top:6px;left:8px;font-size:13px;font-weight:900;color:#5DE39A}
+.dbid{position:absolute;top:6px;left:8px;font-size:12px;font-weight:900;color:var(--gold);
+ background:var(--elev);border-radius:8px;padding:2px 8px;align-items:center;gap:4px}
+.dPop{animation:rspop .4s ease}
+.dhand{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.dhand.dCycle .dslot{animation:emRock 1.2s ease-in-out}
+.dslot{width:64px;transition:all .45s cubic-bezier(.2,1.1,.4,1)}
+.dslot.feat{position:relative;z-index:2}
+.dslot.feat.dGlow{filter:drop-shadow(0 0 10px rgba(232,178,58,.85));transform:translateY(-6px) scale(1.06)}
+.dslot.feat.dFly{transform:translateY(-88px) scale(1.3);opacity:.97;
+ filter:drop-shadow(0 12px 22px rgba(232,178,58,.55))}
+.dslot.feat.dFade{opacity:.1;transform:translateY(-88px) scale(1.05)}
+.dcap{margin-top:14px;text-align:center;font-size:12.5px;font-weight:800;
+ background:rgba(6,8,16,.5);border:1px solid var(--bd);border-radius:10px;padding:8px 10px;min-height:36px}
+.dcap.dcIn{animation:fi .3s ease}
 .scr.nofi{animation:none}
 
 /* ═══ طبقة العمق والمتعة: خلفية حية + حركات ثلاثية الأبعاد + بريق ═══ */
@@ -15032,6 +15072,9 @@ function gcard(id,o){
   border-radius:50%;background:linear-gradient(150deg,#B76CF0,#6B3FA0);
   display:flex;align-items:center;justify-content:center;color:#fff;
   font-size:${sm?9:11}px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:3">${c.e}</div>
+ ${sm?'':`<div style="position:absolute;top:-5px;left:-4px;background:linear-gradient(150deg,#2A3550,#161D30);
+  border:1px solid ${R.g}88;color:${R.g};font-size:7.5px;font-weight:900;padding:2px 7px;
+  border-radius:8px;z-index:3">${({A:'قبل',B:'أثناء',C:'بعد'})[c.ph]}</div>`}
  ${lv?`<div style="position:absolute;bottom:${sm?-9:-11}px;left:50%;transform:translateX(-50%);
   width:${sm?26:32}px;height:${sm?26:32}px;z-index:4;
   clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
@@ -15148,12 +15191,18 @@ function cardDetail(id){
  <div class="orn" style="margin-top:12px"><div class="in">${ornCorners()}
  <div style="font-size:15px;font-weight:800;color:${R.g}">${c.s}</div>
  <div style="font-size:13px;line-height:1.8;margin-top:9px">${c.d}</div>
- <div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">
- <span class="cch" style="border-color:${R.a};color:${R.g}">${ico('energy',15)} ${c.e} طاقة</span>
- <span class="cch">${ico(TCAT_ICO[c.t],12)} ${TCAT[c.t].n}</span>
- <span class="cch">${({A:'قبل الجولة',B:'أثناء الجولة',C:'بعد الجولة'})[c.ph]}</span>
- ${c.need?`<span class="cch" style="color:var(--warn)">تحتاج ${c.need.map(k=>MODES[k]?.n||k).join(' أو ')}</span>`:''}
- </div></div></div>`:''}
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+ ${[[`${ico('energy',14)} الطاقة`,c.e+''],[`${ico(TCAT_ICO[c.t],12)} النوع`,TCAT[c.t].n],[`${ico('gem',12)} الندرة`,rar.n]]
+  .map(([l,v])=>`<div style="background:var(--elev);border:1px solid var(--bd);border-radius:10px;padding:8px 4px;text-align:center">
+  <div style="font-size:9.5px;color:var(--tx2);font-weight:800">${l}</div>
+  <div style="font-size:13px;font-weight:900;margin-top:3px;color:${R.g}">${v}</div></div>`).join('')}
+ </div>
+ <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:13px 0 6px">${ico('timer',12)} وقت التفعيل داخل الجولة</div>
+ <div class="phtl">
+ ${['A','B','C'].map(p=>`<div class="pht ${c.ph===p?'on':''}" style="${c.ph===p?`border-color:${R.g};color:${R.g};background:${R.b}44`:''}">${({A:'قبل الجولة',B:'أثناء الجولة',C:'بعد الجولة'})[p]}${c.ph===p?' ●':''}</div>`).join('<div class="phar">‹</div>')}
+ </div>
+ ${c.need?`<div class="cch" style="color:var(--warn);margin-top:11px;display:inline-flex">${ico('info',12)} تعمل فقط في جولات: ${c.need.map(k=>MODES[k]?.n||k).join(' أو ')}</div>`:''}
+ </div></div>`:''}
 
  ${cdTab==='learn'?`
  <div class="orn" style="margin-top:12px"><div class="in">${ornCorners()}
@@ -15171,13 +15220,7 @@ function cardDetail(id){
 
  ${cdTab==='watch'?`
  <div class="orn" style="margin-top:12px"><div class="in">${ornCorners()}
- <div id="demo" style="min-height:150px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;text-align:center">
-  <div style="font-size:38px">${ico('play',13)}</div>
-  <div style="font-size:13px;margin-top:9px">عرض قصير 5–8 ثوانٍ</div>
-  <button class="rbtn" style="margin-top:12px;width:auto;padding:0"
-   onclick="playDemo(${id})"><span style="padding:10px 22px">تشغيل</span></button>
-  <div class="note">بلا صوت · لا يعمل تلقائيًا</div></div>
+ <div id="demo" style="min-height:250px"></div>
  </div></div>`:''}
 
  ${cdTab==='try'?`
@@ -15193,6 +15236,7 @@ function cardDetail(id){
  ${st?`<div style="margin-top:13px"><button class="${inDeck?'btn g':'rbtn'}"
   onclick="toggleDeck(${id})">${inDeck?`<span>إزالة من التشكيلة</span>`:`<span>${ico('plus',14)} أضف للتشكيلة</span>`}</button></div>`:``}
  </div>`);
+ if(cdTab==='watch')setTimeout(()=>playDemo(id),60);
 }
 
 function upg(id){doUpgrade(id);const t=NAV[NAV.length-1];run_(t.fn,t.arg)}
@@ -15324,26 +15368,63 @@ function toggleDeck(id){
 }
 
 // ═══════════ العرض والتجربة ═══════════
+// مسرح مصغّر يمثّل الجولة: البطاقة تطير من يدك، الطاقة تُخصم، والأثر يحدث أمامك
+function pickOther(id,i){const p=CARDS.filter(x=>x.id!==id);return p[(id*3+i*7)%p.length].id}
+function demoStage(c){
+ const opts=['أوسلو','ستوكهولم','هلسنكي','كوبنهاغن'];
+ return `<div class="dstage" id="dStage">
+ <div class="drow"><div style="display:flex;align-items:center;gap:6px">${face('camel',24)}<b style="font-size:10.5px">ريان</b><span style="font-size:8px;background:var(--elev);color:var(--tx2);padding:1px 5px;border-radius:6px">آلي</span></div>
+  <div class="dnrg">${ico('energy',12)} <b id="dNrg">10</b>/10</div></div>
+ <div class="dq" id="dQ">
+  ${c.ph==='A'?`<div class="dqm" id="dQm">؟</div><div style="font-size:10px;color:var(--tx2)">الجولة القادمة — مجهولة</div>`
+  :`<div style="font-size:11.5px;font-weight:800">ما عاصمة النرويج؟</div>
+    <div class="dops" id="dOps">${opts.map((o,i)=>`<div class="dop" id="dOp${i}">${o}</div>`).join('')}</div>`}
+  <div class="dscore" id="dScore" style="display:none">+100</div>
+  <div class="dbid" id="dBid" style="display:none">${ico('hammer',13)} <b id="dBidN">10</b></div>
+ </div>
+ <div class="dhand" id="dHand">
+  <div class="dslot">${gcard(pickOther(c.id,0),{sm:1})}</div>
+  <div class="dslot feat" id="dFeat">${gcard(c.id,{sm:1})}</div>
+  <div class="dslot">${gcard(pickOther(c.id,1),{sm:1})}</div>
+ </div>
+ <div class="dcap" id="dCap">شاهد كيف تُستخدم «${c.n}»</div>
+ <div style="text-align:center;margin-top:9px"><button class="btn g" style="width:auto;padding:6px 16px;font-size:11px" onclick="playDemo(${c.id})">${ico('play',11)} إعادة من البداية</button></div>
+ </div>`;
+}
+let _demoQ=[];
+function _dStep(ms,fn){_demoQ.push(setTimeout(()=>{if($('dStage'))fn()},ms))}
 function playDemo(id){
- const c=cardById(id);
- const steps=DEMOS[id]||[`تختار ${c.n}`,'تُدفع تكلفة الطاقة',c.s,'يظهر الأثر في الجولة'];
- let i=0;
- const el=$('demo');
- const tick=()=>{
-  if(i>=steps.length){
-   el.innerHTML=`<div style="font-size:30px">${ico('check',14)}</div>
-   <div style="font-size:13px;margin-top:8px">انتهى العرض</div>
-   <button class="btn g" style="margin-top:11px;width:auto;padding:7px 18px;font-size:12px"
-    onclick="playDemo(${id})">إعادة</button>`;
-   return;
-  }
-  el.innerHTML=`<div style="font-size:11px;color:var(--gold)">${i+1} / ${steps.length}</div>
-  <div style="font-size:14px;font-weight:700;margin-top:10px;line-height:1.6;padding:0 8px">${steps[i]}</div>
-  <div class="pbf" style="margin-top:14px;width:70%"><div class="pbi" style="height:6px">
-   <i style="width:${(i+1)/steps.length*100}%"></i></div></div>`;
-  i++;setTimeout(tick,1500);
- };
- tick();
+ const c=cardById(id);const el=$('demo');if(!el||!c)return;
+ _demoQ.forEach(clearTimeout);_demoQ=[];
+ el.innerHTML=demoStage(c);
+ const caps=DEMOS[id]||null;
+ const cap=(t,i)=>{const e2=$('dCap');if(!e2)return;
+  e2.innerHTML=(caps&&caps[i]!==undefined)?caps[i]:t;
+  e2.classList.remove('dcIn');void e2.offsetWidth;e2.classList.add('dcIn')};
+ const phN={A:'قبل بدء الجولة',B:'أثناء الجولة',C:'بعد انتهاء الجولة'}[c.ph];
+ cap(`هذه بطاقة «${c.n}» — تكلفتها ${c.e} ${ico('energy',12)}`,0);
+ _dStep(250,()=>{const f=$('dFeat');if(f)f.classList.add('dGlow')});
+ _dStep(1500,()=>{cap(`تضغطها ${phN}`,1);const f=$('dFeat');if(f)f.classList.add('dFly')});
+ _dStep(2700,()=>{cap(`تُخصم الطاقة: 10 ← ${10-c.e}`,2);
+  const n=$('dNrg');if(n){n.textContent=10-c.e;n.parentElement.classList.add('dHit')}});
+ _dStep(3900,()=>{cap(c.s,3);const f=$('dFeat');if(f)f.classList.add('dFade');demoFx(c)});
+ _dStep(6300,()=>{cap(`هذا أثرها — ${c.s} ✓`,4);const q=$('dQ');if(q)q.classList.add('dWin')});
+ _dStep(8600,()=>playDemo(id)); // يعيد نفسه كمقطع فيديو
+}
+function demoFx(c){
+ const q=$('dQ');if(q)q.classList.add('dPulse');
+ if(c.ph==='A'&&$('dQm')){
+  $('dQm').classList.add('dFlip');
+  setTimeout(()=>{const m=$('dQm');if(m)m.innerHTML=`<span style="font-size:11px">${TCAT[c.t].i}<br>${TCAT[c.t].n}</span>`},420);
+ }
+ if(c.t==='deduce'){const a1=$('dOp1'),a3=$('dOp3');if(a1)a1.classList.add('dGone');if(a3)a3.classList.add('dGone')}
+ if(c.t==='risk'){const s=$('dScore');if(s){s.style.display='block';s.classList.add('dPop');
+  let v=100;const iv=setInterval(()=>{const e3=$('dScore');if(!e3||v>=200){clearInterval(iv);if(e3)e3.textContent='+200 ×2';return}v+=25;e3.textContent='+'+v},130)}}
+ if(c.t==='energy'){setTimeout(()=>{const n=$('dNrg');
+  if(n){n.textContent=Math.min(10,10-c.e+2);n.parentElement.classList.add('dHit2')}},700)}
+ if(c.t==='auction'){const b=$('dBid');if(b){b.style.display='inline-flex';b.classList.add('dPop');
+  let v=10;const iv=setInterval(()=>{const e4=$('dBidN');if(!e4||v>=14){clearInterval(iv);return}v+=2;e4.textContent=v},480)}}
+ if(c.t==='deck'){const h=$('dHand');if(h)h.classList.add('dCycle')}
 }
 const DEMOS={
  29:['المزايدة: الخصم عند 10','تضغط كلمة الفصل','تختار 14 وتؤكد',
@@ -17555,7 +17636,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='2.8';
+const APP_VER='2.9';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
