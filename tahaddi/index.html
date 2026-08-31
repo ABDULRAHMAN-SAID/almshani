@@ -531,6 +531,9 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .sandbox{display:inline-flex;align-items:center;gap:5px;background:rgba(55,138,221,.12);
  border:1px solid rgba(55,138,221,.4);color:#8FC1F0;font-size:10.5px;font-weight:700;
  border-radius:9px;padding:4px 10px;margin-bottom:14px}
+
+.usdtag{display:inline-block;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
+ font-size:11px;font-weight:900;border-radius:8px;padding:2px 8px;margin-inline-start:6px}
 </style>
 </head>
 <body>
@@ -17302,9 +17305,12 @@ function seasonScr(){
    <div style="font-size:10px;color:var(--tx2);margin-top:3px">المستوى ${lv} من ${SZ_MAX} · ${prog}/${SZ_STEP} نقطة للمستوى التالي</div></div>
  </div>
  ${z.prem?`<div class="cch" style="display:inline-flex;margin-top:11px;color:var(--gold)">${ico('ticket',13)} التذكرة المميزة مفعّلة 👑</div>`
-  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة</button>`}
+  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="usdtag">أو $9.99</span></button>`}
  <button class="btn g" style="margin-top:9px" onclick="szClaimAll()">${ico('gift',15)} استلام كل الجاهز</button>
  </div></div></div>
+ <div class="wb" style="text-align:right;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
+ بالأداء لا بالفوز فقط: نقاط كل جولة تلعبها تتحول نقاطَ موسم — كل إجابة صحيحة وسرعتُها وصعوبةُ سؤالها وسلاسلُك المتتالية.
+ الفوز يضيف <b>+30</b> والخسارة تمنحك <b>+10</b> على الأقل. كل <b>100 نقطة = مستوى</b>، حتى المستوى 100.</div>
  <div class="szhead"><span class="szlv" style="visibility:hidden">0</span>
   <span class="szht">${ico('user',13)} مجاني</span><span class="szht p">${ico('ticket',13)} مميز 👑</span></div>
  <div class="szlist">${rows}</div>
