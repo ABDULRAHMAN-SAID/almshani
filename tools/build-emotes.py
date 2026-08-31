@@ -1,63 +1,80 @@
 # يضمّن صور التعبيرات المرسومة من المالك داخل tahaddi/index.html
 #
-# الاستخدام:
-#   1) ارفع الصور إلى art/emotes/ — صورة مربعة لكل تعبير باسم مفتاحه:
-#      laugh.png sad.png wink.png clap.png think.png shock.png thumbs.png shake.png
-#      confident.png angry.png tense.png love.png sleep.png salute.png watch.png hourglass.png
-#      crown.png brain.png fire.png wizard.png pirate.png champion.png
-#      cat.png falcon.png camel.png lion.png monkey.png owl.png
-#      (png أو jpg أو webp — أي مجموعة جزئية تكفي؛ الناقص يبقى مرسوماً بالكود)
-#   2) python3 tools/build-emotes.py
+# الوضع الأساسي: لوحة واحدة art/emotes/sheet.png (أربعة صفوف: أسطورية 6،
+# ممتازة 6، عادية 8، نادرة 8) — الإحداثيات أدناه معايرة على دقة 1536×1024.
+# أي صورة مفردة باسم مفتاح التعبير (art/emotes/<key>.png) تتقدم على قصّة اللوحة.
 #
-# كل صورة تُقص مربعاً من مركزها وتُصغّر ثم تُضمّن Data URI داخل خريطة EMO_IMG،
-# فتظهر داخل الميدالية المعدنية نفسها (الحلقة واللمعة تبقيان من الرسم).
-import base64, io, os, re, sys
-from PIL import Image
+#   python3 tools/build-emotes.py
+#
+# كل ميدالية تُقص دائرياً بحافة ناعمة وتُضمّن Data URI في خريطة EMO_IMG،
+# والحلقة المرسومة في اللوحة تبقى هي إطار الميدالية داخل اللعبة.
+import base64, io, os, sys
+from PIL import Image, ImageDraw
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(ROOT, 'art', 'emotes')
 GAME = os.path.join(ROOT, 'tahaddi', 'index.html')
-SIZE = 112          # كافية لأكبر عرض (المعاينة 132px على شاشات عادية)
-QUALITY = 82
+OUT = 200          # دقة كل ميدالية المضمّنة
+QUALITY = 80
+GROW = 1.14        # توسيع نصف القطر المكتشف ليشمل الحلقة الذهبية كاملة
 
-KEYS = ['laugh','sad','wink','clap','think','shock','thumbs','shake',
-        'confident','angry','tense','love','sleep','salute','watch','hourglass',
-        'crown','brain','fire','wizard','pirate','champion',
-        'cat','falcon','camel','lion','monkey','owl']
+# (المفتاح، مركز س، مركز ص، نصف القطر) — من كشف حواف الحلقات على اللوحة
+SHEET_MAP = [
+    # الصف الأول — أسطورية
+    ('cat', 123, 131, 91), ('falcon', 335, 141, 91), ('camel', 555, 136, 92),
+    ('lion', 762, 134, 91), ('monkey', 974, 132, 91), ('wizard', 1188, 133, 91),
+    # الصف الثاني — ممتازة (العملاق الصخري، الثعلب، النمر، البومة، العبقري، الدب الملك)
+    ('champion', 110, 411, 91), ('pirate', 325, 405, 91), ('fire', 538, 405, 91),
+    ('owl', 768, 398, 91), ('brain', 971, 401, 91), ('crown', 1189, 401, 91),
+    # الصف الثالث — عادية
+    ('laugh', 98, 646, 66), ('sad', 264, 640, 65), ('wink', 430, 640, 65),
+    ('clap', 599, 637, 65), ('think', 773, 638, 65), ('shock', 940, 637, 65),
+    ('thumbs', 1100, 639, 65), ('shake', 1282, 637, 69),
+    # الصف الرابع — نادرة
+    ('confident', 98, 869, 65), ('angry', 265, 871, 66), ('tense', 437, 869, 65),
+    ('love', 604, 872, 67), ('sleep', 774, 870, 65), ('salute', 942, 869, 65),
+    ('watch', 1106, 872, 67), ('hourglass', 1278, 869, 66),
+]
 
-def webp_uri(im: Image.Image) -> str:
+def circle_webp(im: Image.Image) -> str:
+    """قص دائري بحافة ناعمة (قناع مكبّر 4× ثم مصغّر) → webp بشفافية."""
+    im = im.resize((OUT, OUT), Image.LANCZOS).convert('RGBA')
+    mask = Image.new('L', (OUT * 4, OUT * 4), 0)
+    ImageDraw.Draw(mask).ellipse((4, 4, OUT * 4 - 4, OUT * 4 - 4), fill=255)
+    im.putalpha(mask.resize((OUT, OUT), Image.LANCZOS))
     buf = io.BytesIO()
     im.save(buf, 'WEBP', quality=QUALITY, method=6)
     return 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode()
 
-def load_square(path: str) -> Image.Image:
-    im = Image.open(path).convert('RGB')
-    w, h = im.size
-    side = min(w, h)
-    im = im.crop(((w - side) // 2, (h - side) // 2, (w + side) // 2, (h + side) // 2))
-    return im.resize((SIZE, SIZE), Image.LANCZOS)
-
 def main() -> None:
-    if not os.path.isdir(SRC_DIR):
-        sys.exit(f'لا يوجد مجلد {SRC_DIR} — ارفع الصور أولاً')
-    entries, total = [], 0
-    for k in KEYS:
+    entries, total = {}, 0
+    sheet_path = os.path.join(SRC_DIR, 'sheet.png')
+    if os.path.exists(sheet_path):
+        sheet = Image.open(sheet_path).convert('RGBA')
+        for k, cx, cy, r in SHEET_MAP:
+            R = round(r * GROW)
+            entries[k] = circle_webp(sheet.crop((cx - R, cy - R, cx + R, cy + R)))
+    # الصور المفردة تتقدم على اللوحة
+    for k, *_ in SHEET_MAP:
         for ext in ('png', 'jpg', 'jpeg', 'webp'):
             p = os.path.join(SRC_DIR, f'{k}.{ext}')
             if os.path.exists(p):
-                uri = webp_uri(load_square(p))
-                entries.append(f"{k}:'{uri}'")
-                total += len(uri)
-                print(f'  {k}: {len(uri)//1024}KB')
+                im = Image.open(p).convert('RGBA')
+                w, h = im.size
+                side = min(w, h)
+                im = im.crop(((w - side) // 2, (h - side) // 2, (w + side) // 2, (h + side) // 2))
+                entries[k] = circle_webp(im)
                 break
     if not entries:
-        sys.exit('لم أجد أي صورة باسم مفتاح تعبير في art/emotes/')
+        sys.exit('لا لوحة ولا صور مفردة في art/emotes/')
+    total = sum(len(v) for v in entries.values())
     src = open(GAME, encoding='utf-8').read()
     a = src.index('const EMO_IMG={')
     b = src.index('};', a) + 2
-    src = src[:a] + 'const EMO_IMG={' + ',\n'.join(entries) + '};' + src[b:]
+    body = ',\n'.join(f"{k}:'{v}'" for k, v in entries.items())
+    src = src[:a] + 'const EMO_IMG={' + body + '};' + src[b:]
     open(GAME, 'w', encoding='utf-8').write(src)
-    print(f'ضُمّنت {len(entries)} صورة ({total//1024}KB) في اللعبة ✔')
+    print(f'ضُمّنت {len(entries)} ميدالية ({total // 1024}KB) في اللعبة ✔')
 
 if __name__ == '__main__':
     main()
