@@ -13678,8 +13678,8 @@ const CARDS=[
  d:'توضع سرًا. إن لعب خصمك بطاقة في الجولة التالية تحصل على +2 طاقة.',
  can:['في أي جولة عدا الأخيرة'],cant:['إن لم يلعب الخصم بطاقة'],pr:6},
 {id:10,n:'المواجهة المكشوفة',r:'common',e:1,ph:'A',t:'tactic',s:'مواجهة مباشرة',
- d:'في الجولة القادمة يرى كل لاعب البطاقات الأربع في يد الآخر.',
- can:['قبل بدء الجولة'],cant:['تكشف يدك أيضًا'],pr:5},
+ d:'يكشف لك كل بطاقات يد الخصم فورًا، وتبقى معلومة لك بقية المباراة.',
+ can:['في أي وقت قبل الإجابة'],cant:['لا تمنع الخصم من لعبها'],pr:5},
 {id:11,n:'العدّاد',r:'common',e:2,ph:'B',t:'deduce',need:['belongs','auction'],s:'كم إجابة صحيحة',
  d:'يخبرك بعدد الإجابات الصحيحة الموجودة، ولا يخبرك ما هي.',
  can:['في جولات متعددة الصحيح'],cant:['لا يحدد أيها'],pr:5},
@@ -16658,7 +16658,8 @@ function cardPlayable(id){
  switch(id){
   case 5:case 19:case 20:case 31:case 34:case 35:case 38:case 40:case 9:
    if(!nxt)return{ok:0,why:'لا جولة قادمة'};break;
-  case 6:if(M.i+2>M.rounds.length-1)return{ok:0,why:'يلزم جولتان قادمتان'};break;
+  case 6:if(M.i+2>M.rounds.length-1)return{ok:0,why:'يلزم جولتان قادمتان'};
+   if(M.effects.anchorAt===M.i+1)return{ok:0,why:'المرساة تثبّت الجولة القادمة'};break;
   case 2:if(cardsLeft(M.cycle)<1)return{ok:0,why:'لا بطاقات في الدورة'};break;
   case 27:if(cardsLeft(M.cycle)<3)return{ok:0,why:'يلزم ثلاث بطاقات في الدورة — بديلك واثنتان للنظر'};break;
   case 3:case 23:{const dk=S.cards.decks[S.cards.active];
@@ -16721,9 +16722,9 @@ function applyEffect(id){
   case 7:fx.bolt=1;toast(`${ico('energy',14)} الصاعقة: أجب صحيحًا قبل نصف الوقت لتستعيد 1 طاقة`);break;
   case 8:fx.silentBet=1;toast(`${ico('dice',14)} رهان صامت: جولة مثالية = +2 طاقة · وإلا −1`);break;
   case 9:fx.ambushAt=M.i+1;toast(`${ico('target',14)} كمين منصوب للجولة القادمة`);break;
-  case 10:{const names=M.oppHand.slice(0,4).map(x=>cardById(x).n).join(' · ');
+  case 10:{const names=M.oppHand.map(x=>cardById(x).n).join(' · ');
    M.oppKnown=[...new Set([...M.oppKnown,...M.oppHand])];
-   toast(`${ico('cards',14)} يد الخصم: ${names||'فارغة'}`);break}
+   toast(`${ico('cards',14)} يد الخصم كاملة: ${names||'فارغة'}`);break}
   case 11:if(k==='belongs'){st.reveal=st.items.filter(x=>x.ok).length;
     toast(`${ico('counter',14)} العدّاد: ${st.reveal} إجابة صحيحة`)}
    else{st.countHint=st.d.ok.length;
@@ -17708,7 +17709,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='3.4';
+const APP_VER='3.5';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
