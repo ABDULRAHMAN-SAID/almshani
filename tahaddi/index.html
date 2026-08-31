@@ -441,6 +441,9 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 @keyframes emTear{0%,100%{transform:translate(0,0) scale(.7);opacity:.45}50%{transform:translate(-3px,4px) scale(1.1);opacity:1}}
 @keyframes emPoint{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
 @keyframes emTilt{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+@keyframes emRoarP{0%,55%,100%{transform:scale(1)}65%{transform:scale(1.07)}75%{transform:scale(1.02)}85%{transform:scale(1.06)}}
+@keyframes emSheenX{0%,58%{transform:translateX(-16px)}92%,100%{transform:translateX(64px)}}
+@keyframes emRing2{0%{transform:scale(.55);opacity:.7}80%,100%{transform:scale(1.25);opacity:0}}
 .scr.nofi{animation:none}
 
 /* ═══ طبقة العمق والمتعة: خلفية حية + حركات ثلاثية الأبعاد + بريق ═══ */
@@ -12987,6 +12990,23 @@ hourglass:{b:['#7E5ED0','#2A1A5E'],full:1,a:'<linearGradient id="ghg" x1="0" y1=
 };
 // خامات مرسومة من المالك (مفتاح التعبير → data URI) — تُملأ من tools/build-emotes.py
 const EMO_IMG={};
+// حركة كل أسطوري فوق خامته + مؤثرات فوق الصورة (لا تعتمد على مكان الملامح)
+const EMO_ANIM={
+ cat:'emRock .9s ease-in-out infinite',
+ falcon:'emBob2 1.15s ease-in-out infinite',
+ camel:'emChew 1.1s linear infinite',
+ lion:'emRoarP 2.4s ease-in-out infinite',
+ monkey:'emTilt 2.6s ease-in-out infinite',
+ owl:'emTilt 3.2s ease-in-out infinite'
+};
+const EMO_FX={
+ cat:'<path class="an" style="animation:emTear .9s ease-in-out infinite" d="M8 19 q3 4 0 6.4 q-3 -2.4 0 -6.4" fill="#5AC8F5"/><path class="an" style="animation:emTear .9s ease-in-out infinite .45s" d="M40 19 q-3 4 0 6.4 q3 -2.4 0 -6.4" fill="#5AC8F5"/>',
+ falcon:'<g stroke="#fff" stroke-width="1.4" stroke-linecap="round" opacity=".75"><path class="an" style="animation:twk 1.15s linear infinite" d="M5.5 20 L11 20"/><path class="an" style="animation:twk 1.15s linear infinite .3s" d="M4.5 26 L10 26"/><path class="an" style="animation:twk 1.15s linear infinite .55s" d="M37 20 L42.5 20"/><path class="an" style="animation:twk 1.15s linear infinite .8s" d="M38 26 L43.5 26"/></g>',
+ camel:'<g fill="#F0DCA8"><circle class="an" style="animation:twk 1.6s linear infinite" cx="9" cy="38" r="1.6"/><circle class="an" style="animation:twk 1.6s linear infinite .5s" cx="39.5" cy="36.5" r="1.3"/><circle class="an" style="animation:twk 1.6s linear infinite 1s" cx="13" cy="42" r="1.1"/></g>',
+ lion:'<circle class="an" style="animation:emRing2 2.4s ease-out infinite .5s" cx="24" cy="24" r="17" fill="none" stroke="#FFE9A8" stroke-width="1.6"/>',
+ monkey:'<g class="an" style="animation:spin 3.2s linear infinite"><path d="M24 3.2 l1 2.1 2.1 1 -2.1 1 -1 2.1 -1 -2.1 -2.1 -1 2.1 -1 Z" fill="#FFFDF0"/></g>',
+ owl:'<g fill="#FFF6D8"><circle class="an" style="animation:twk 2.2s linear infinite" cx="8.5" cy="12" r="1.2"/><circle class="an" style="animation:twk 2.2s linear infinite .7s" cx="40" cy="10" r="1"/><circle class="an" style="animation:twk 2.2s linear infinite 1.4s" cx="41" cy="35" r="1.1"/></g>'
+};
 /** وجه تعبير — ميدالية معدنية بإحساس ثلاثي الأبعاد، والأسطوري يتحرك */
 function face(k,s){
  s=s||40;
@@ -13011,11 +13031,16 @@ function face(k,s){
   '<radialGradient id="ebg'+k+'" cx=".5" cy=".34" r=".95"><stop offset="0" stop-color="'+b1+'"/><stop offset="1" stop-color="'+b2+'"/></radialGradient>'+
   '<radialGradient id="evg'+k+'" cx=".5" cy=".42" r=".78"><stop offset=".55" stop-color="rgba(6,4,20,0)"/><stop offset="1" stop-color="rgba(6,4,20,.5)"/></radialGradient>'+
   (d.full?'':'<radialGradient id="esk'+k+'" cx=".36" cy=".28" r="1.05"><stop offset="0" stop-color="#FFE9C6"/><stop offset=".55" stop-color="#F0C492"/><stop offset="1" stop-color="#C68A50"/></radialGradient>')+
+  (t==='legendary'?'<linearGradient id="eshn'+k+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".5" stop-color="rgba(255,246,216,.4)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></linearGradient>':'')+
   '</defs>';
  const img=EMO_IMG[k];
+ const imTag='<image href="'+img+'" x="3" y="3" width="42" height="42" preserveAspectRatio="xMidYMid slice"/>';
  const inner=img
-  ?(t==='legendary'?'<g class="an" style="animation:emBob2 2.2s ease-in-out infinite">':'<g>')+
-   '<image href="'+img+'" x="3" y="3" width="42" height="42" preserveAspectRatio="xMidYMid slice"/></g>'
+  ?(t==='legendary'
+    ?'<g class="an" style="animation:'+(EMO_ANIM[k]||'emBob2 2s ease-in-out infinite')+'">'+imTag+'</g>'+
+     (EMO_FX[k]||'')+
+     '<g class="an" style="animation:emSheenX 3s ease-in-out infinite"><rect x="-10" y="-4" width="13" height="56" fill="url(#eshn'+k+')" transform="skewX(-16)"/></g>'
+    :'<g>'+imTag+'</g>')
   :'<circle cx="24" cy="24" r="20" fill="url(#ebg'+k+')"/>'+
    (d.full?'':'<circle cx="24" cy="24" r="17.6" fill="url(#esk'+k+')"/><path d="M9.5 29 Q24 39.5 38.5 29 Q35.5 41 24 41.4 Q12.5 41 9.5 29 Z" fill="#8A5A2E" opacity=".2"/><ellipse cx="16.5" cy="12.5" rx="6" ry="3.2" fill="#fff" opacity=".3" transform="rotate(-20 16.5 12.5)"/>')+
    d.a;
@@ -17391,7 +17416,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='2.3';
+const APP_VER='2.4';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
