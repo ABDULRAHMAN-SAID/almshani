@@ -124,33 +124,39 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .ncd .prg>i{display:block;height:100%}
 .strs{display:flex;gap:2px}
 
-/* خريطة العقد */
-#mw{position:relative;width:100%;height:590px;margin-top:4px}
+/* ═══ خريطة الشبكة — طريق رحلة ذهبي بمحطات ميدالية ═══ */
+.mphead{display:flex;align-items:center;gap:10px;background:linear-gradient(168deg,#1C2540,#0E1526);
+ border:1px solid var(--bd);border-radius:14px;padding:9px 12px;margin-bottom:10px}
+.mpico{width:42px;height:42px;flex-shrink:0;border-radius:12px;border:1.5px solid;
+ display:flex;align-items:center;justify-content:center}
+#mw{position:relative;width:100%;height:640px;margin-top:2px}
 #ms{position:absolute;inset:0;width:100%;height:100%}
-.nd{position:absolute;transform:translate(-50%,-50%);text-align:center;width:100px;cursor:pointer;z-index:2}
-/* ═══ خريطة الشبكة — دارة معرفية، لا مسار جبلي ═══ */
-.cktbg{background-image:
- linear-gradient(rgba(123,79,224,.05) 1px,transparent 1px),
- linear-gradient(90deg,rgba(123,79,224,.05) 1px,transparent 1px);
- background-size:22px 22px}
-.hxnode{width:58px;height:58px;position:relative;margin:0 auto}
-.hxnode svg{width:100%;height:100%;display:block}
-.hxnode .pulse{animation:hxpulse 2.2s ease-in-out infinite}
-@keyframes hxpulse{0%,100%{opacity:.45}50%{opacity:1}}
-.dataline{stroke-dasharray:1 3.2}
-.flowdot{animation:flowmove linear infinite}
-@keyframes flowmove{to{offset-distance:100%}}
-.nd .c{width:60px;height:60px;border-radius:50%;margin:0 auto;display:flex;align-items:center;
- justify-content:center;font-size:23px;border:2.5px solid;position:relative}
-.nd.bs .c{width:78px;height:78px;font-size:30px;border-width:3px}
-.nd.av .c{animation:glow 2.4s ease-in-out infinite}
-.nd .l{font-size:10.5px;font-weight:700;margin-top:5px;line-height:1.25;text-shadow:0 1px 6px rgba(0,0,0,.95)}
+.mapbg{border-radius:18px;overflow:hidden;border:1px solid #3B2F5C;
+ background:
+  radial-gradient(rgba(255,255,255,.055) 1px,transparent 1.4px),
+  linear-gradient(180deg,#151C33,#0B1020 55%,#080B14);
+ background-size:26px 26px,100% 100%;
+ box-shadow:inset 0 0 70px rgba(0,0,0,.6)}
+.mapsky{position:absolute;inset:0;pointer-events:none}
+.mapart{position:absolute;left:0;right:0;bottom:0;height:195px;opacity:.5;pointer-events:none;
+ -webkit-mask-image:linear-gradient(to top,#000 45%,transparent);
+ mask-image:linear-gradient(to top,#000 45%,transparent)}
+.mapart svg{position:absolute;inset:0;width:100%;height:100%}
+.roadflow{animation:roadflow 1.5s linear infinite}
+@keyframes roadflow{to{stroke-dashoffset:-26}}
+.nd{position:absolute;transform:translate(-50%,-50%);text-align:center;width:112px;cursor:pointer;z-index:2}
+.stmed{width:62px;height:62px;margin:0 auto;filter:drop-shadow(0 7px 11px rgba(0,0,0,.55))}
+.stmed.big{width:86px;height:86px}
+.stmed svg{width:100%;height:100%;display:block;overflow:visible}
+.ndstars{display:inline-flex;gap:1px;background:rgba(6,9,17,.88);border:1px solid #8A621088;
+ border-radius:8px;padding:1px 6px;margin-top:3px}
+.ndpl{display:inline-block;max-width:106px;font-size:10px;font-weight:800;line-height:1.2;color:var(--tx2);
+ background:rgba(6,9,17,.85);border:1px solid #28324E;border-radius:8px;padding:2px 8px;margin-top:3px}
+.ndgo{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:900;color:#5E4408;
+ background:linear-gradient(180deg,#FFE9A8,#E8C25A);border-radius:8px;padding:2px 9px;margin-top:3px;
+ box-shadow:0 3px 8px rgba(0,0,0,.45);animation:puls 1.8s ease-in-out infinite}
 .nd.lk{cursor:default}
-.nd.lk .c{background:var(--surf);border-color:var(--bd);color:var(--mut)}
-.nd.lk .l{color:var(--mut)}
-.nst{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);display:flex;gap:1px;
- background:var(--bg);padding:1px 4px;border-radius:8px;border:1px solid var(--bd)}
-.nst span{font-size:8px}
+.nd.lk .ndpl{color:var(--mut)}
 
 /* ورقة */
 .sbg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;display:none;
@@ -360,7 +366,17 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .ncd2i svg{position:absolute;inset:0;width:100%;height:100%}
 .ncd2b{position:relative;z-index:3;padding:10px 13px;width:100%;
  background:linear-gradient(to top,rgba(7,10,18,.95),rgba(7,10,18,.4) 62%,transparent)}
-.ncd2t{font-size:16px;font-weight:900}
+.ncd2t{font-size:16.5px;font-weight:900}
+.ncd2e{position:absolute;top:10px;inset-inline-end:12px;z-index:3;width:46px;height:46px;border-radius:50%;
+ border:2px solid;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 32% 26%,#222E52,#0B1020);
+ box-shadow:0 4px 12px rgba(0,0,0,.55),inset 0 2px 5px rgba(255,255,255,.14)}
+.ncd2pc{position:absolute;top:16px;inset-inline-start:12px;z-index:3;font-size:10px;font-weight:900;color:#5E4408;
+ background:linear-gradient(180deg,#FFE9A8,#E8C25A);border-radius:8px;padding:2px 8px;
+ box-shadow:0 3px 8px rgba(0,0,0,.4)}
+.ncd2done{position:absolute;top:16px;inset-inline-start:12px;z-index:3;font-size:10px;font-weight:900;color:#fff;
+ background:linear-gradient(180deg,#2ECC71,#1D8A4E);border-radius:8px;padding:2px 8px;display:inline-flex;gap:3px;align-items:center;
+ box-shadow:0 3px 8px rgba(0,0,0,.4)}
 .ncd2m{display:flex;align-items:center;gap:7px;margin-top:4px;font-size:10.5px;color:#C7CEE0}
 
 /* شارة معدنية سداسية — للإنجازات */
@@ -17914,7 +17930,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='3.8';
+const APP_VER='3.9';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18560,82 +18576,113 @@ function netsScr(){
  go(`<div class="scr on">${tb('اختر شبكتك')}
  ${NETS.map(t=>{const ns=nOf(t.id),dn=ns.filter(x=>S.stars[x.id]!==undefined).length;
  const tq=ns.reduce((a,x)=>a+qOf(x.id).length,0),ms=ns.length*3;
+ const pc=ns.length?Math.round(dn/ns.length*100):0;
  return `<div class="ncd2" onclick="mapScr('${t.id}')"><div class="ncd2i">${ART[t.id]||ART.general}
- <div class="ncd2b"><div class="ncd2t">${ico(t.i,15)} ${t.n}</div>
+ <div class="ncd2e" style="border-color:${t.c};color:${t.c}">${ico(t.i,22)}</div>
+ ${pc>=100?`<div class="ncd2done">${ico('check',11)} مكتملة</div>`:pc>0?`<div class="ncd2pc">${pc}%</div>`:''}
+ <div class="ncd2b"><div class="ncd2t mtl">${t.n}</div>
  <div class="ncd2m"><span class="mtl" style="font-size:11px">${ico('star',14)} ${netStars(t.id)}/${ms}</span>
- <span>·</span><span>${tq} سؤال</span><span>·</span><span>${dn}/${ns.length} عقدة</span></div>
+ <span>·</span><span>${tq.toLocaleString('en-US')} سؤال</span><span>·</span><span>${dn}/${ns.length} محطة</span></div>
  <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:7px">
- <i style="width:${ns.length?dn/ns.length*100:0}%"></i></div></div></div></div></div>`}).join('')}
+ <i style="width:${pc}%"></i></div></div></div></div></div>`}).join('')}
  <div class="note">كل شبكة لها خلفية متحركة خاصة — مرسومة بالكود لا صورًا</div></div>`);
 }
 
-/** بطاقة عنوان الشبكة — لافتة زاوية مشطوفة بدل شريط نصي عادي */
-function netBanner(t,id,ns){
- return `<div style="position:relative;height:42px;margin-bottom:12px">
- <svg viewBox="0 0 320 42" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
- <defs><linearGradient id="nb${id}" x1="0" y1="0" x2="1" y2="0">
-  <stop offset="0" stop-color="${t.c}"/><stop offset="1" stop-color="${t.c}99"/></linearGradient></defs>
- <path d="M0 0 L296 0 L320 21 L296 42 L0 42 Z" fill="#0F1524" stroke="${t.c}" stroke-width="1.3"/>
- <path d="M0 0 L6 0 L6 42 L0 42 Z" fill="url(#nb${id})"/>
- </svg>
- <div style="position:relative;height:42px;display:flex;align-items:center;padding-inline-start:16px;gap:9px">
- <span style="color:${t.c}">${ico(t.i,18)}</span>
- <span style="font-weight:900;font-size:14.5px;flex:1">${t.n}</span>
- <span style="font-size:11px;color:var(--tx2);padding-inline-end:26px">${ico('star',12)} ${netStars(id)}/${ns.length*3}</span>
- </div></div>`;
+/** درع الحارس — لعقد الزعماء */
+function bossShield(locked,done,c,uid){
+ const face=locked?`url(#stD${uid})`:done?`url(#stG${uid})`:`url(#stC${uid})`;
+ return `
+ <path d="M50 97 C30 87 20 73 20 51 L20 23 C33 17 44 14 50 13 C56 14 67 17 80 23 L80 51 C80 73 70 87 50 97 Z"
+  fill="#000" opacity=".4" transform="translate(0 3)"/>
+ <path d="M50 97 C30 87 20 73 20 51 L20 23 C33 17 44 14 50 13 C56 14 67 17 80 23 L80 51 C80 73 70 87 50 97 Z"
+  fill="${face}" stroke="url(#stR${uid})" stroke-width="4"/>
+ <path d="M50 89 C36 81 27 69 27 51 L27 28 C38 23 46 21 50 20.5 C54 21 62 23 73 28 L73 51 C73 69 64 81 50 89 Z"
+  fill="none" stroke="#000" stroke-width="1.2" opacity=".22"/>
+ ${locked?'':`<path d="M35 12 l6 5 9-9 9 9 6-5 -2.5 10 -25 0 z" fill="url(#stR${uid})" stroke="#0B1020" stroke-width="1" transform="translate(0 -6)"/>`}
+ <ellipse cx="39" cy="30" rx="10" ry="5" fill="#fff" opacity="${done?'.35':'.15'}" transform="rotate(-16 39 30)"/>`;
 }
-
-/** عقدة سداسية — نواة بيانات لا دائرة بسيطة */
-function hexNode(n,st,c){
- const locked = st==='lk';
- const done = st==='cl';
- const boss = !!n.bs;
- const R = boss?32:26;
- const pts=[0,60,120,180,240,300].map(a=>{
-   const r=a*Math.PI/180;
-   return `${(50+R/2*Math.cos(r)).toFixed(1)},${(50+R/2*Math.sin(r)).toFixed(1)}`;
- }).join(' ');
- const ic = locked?ico('lock',boss?20:15)
-   : boss?ico('shield',22)
-   : done?ico('check',15)
-   : ico('play',14);
- // العقدة المقفلة تبقى مرئية الحدود بوضوح — قفل معلّق بلا إطار يبدو كخطأ لا كتصميم
- return `<svg viewBox="0 0 100 100" class="${!locked&&!done?'pulse':''}">
- <polygon points="${pts}" fill="${locked?'#161D3099':c+'38'}"
-  stroke="${locked?'#3B4666':c}" stroke-width="${boss?3.2:2.4}"
-  stroke-linejoin="round"/>
- ${!locked?`<polygon points="${pts}" fill="none" stroke="${c}" stroke-width="1" opacity=".35"
-  transform="scale(1.18)" transform-origin="50 50"/>`:''}
- <foreignObject x="30" y="30" width="40" height="40">
- <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;
-  align-items:center;justify-content:center;color:${locked?'#8A93A8':c}">${ic}</div>
- </foreignObject></svg>`;
+/** محطة ميدالية — وجه معدني بحالة واضحة: ذهبية منجزة، ملوّنة متاحة، فولاذية مقفلة */
+function stationArt(n,st,c,ix){
+ const boss=!!n.bs,locked=st==='lk',done=st==='cl';
+ const R=boss?40:31,uid=n.id;
+ return `<svg viewBox="0 0 100 100">
+ <defs>
+  <linearGradient id="stR${uid}" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="${locked?'#55617E':'#FFE9A8'}"/>
+   <stop offset="1" stop-color="${locked?'#2A3450':'#8A6210'}"/></linearGradient>
+  <radialGradient id="stD${uid}" cx=".35" cy=".3" r="1">
+   <stop offset="0" stop-color="#2C3856"/><stop offset="1" stop-color="#131A2C"/></radialGradient>
+  <radialGradient id="stG${uid}" cx=".35" cy=".3" r="1">
+   <stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#C9921E"/></radialGradient>
+  <radialGradient id="stC${uid}" cx=".35" cy=".3" r="1">
+   <stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="${shade(c,-72)}"/></radialGradient>
+ </defs>
+ ${!locked&&!done?`<circle cx="50" cy="50" r="${R+8}" fill="none" stroke="${c}" stroke-width="2">
+   <animate attributeName="r" values="${R+4};${R+13};${R+4}" dur="2s" repeatCount="indefinite"/>
+   <animate attributeName="opacity" values=".65;.08;.65" dur="2s" repeatCount="indefinite"/></circle>`:''}
+ ${boss?bossShield(locked,done,c,uid):`
+  <circle cx="50" cy="53" r="${R}" fill="#000" opacity=".4"/>
+  <circle cx="50" cy="50" r="${R}" fill="${locked?`url(#stD${uid})`:done?`url(#stG${uid})`:`url(#stC${uid})`}"
+   stroke="url(#stR${uid})" stroke-width="4"/>
+  <circle cx="50" cy="50" r="${R-5.5}" fill="none" stroke="#000" stroke-width="1.1" opacity=".25"/>
+  <ellipse cx="41" cy="38" rx="12" ry="6" fill="#fff" opacity="${done?'.4':'.17'}" transform="rotate(-18 41 38)"/>`}
+ <foreignObject x="27" y="27" width="46" height="46">
+  <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+   color:${locked?'#6B7692':done?'#5E4408':'#fff'}">
+   ${locked?ico('lock',boss?22:17):done?ico('check',20):boss?ico('shield',26):ico('play',17)}</div>
+ </foreignObject>
+ ${boss?'':`<circle cx="${(50+R*.74).toFixed(1)}" cy="${(50-R*.74).toFixed(1)}" r="10.5"
+   fill="url(#stR${uid})" stroke="#0B1020" stroke-width="1.6"/>
+ <text x="${(50+R*.74).toFixed(1)}" y="${(50-R*.74+4).toFixed(1)}" text-anchor="middle"
+   font-size="11.5" font-weight="900" fill="${locked?'#9AA5C0':'#5E4408'}">${ix}</text>`}
+ </svg>`;
 }
 
 function mapScr(id){
  const t=NETS.find(x=>x.id===id),ns=nOf(id);
- let ln='',dl='';
- ns.forEach(n=>{if(!n.r)return;const p=ns.find(x=>x.id===n.r);if(!p)return;
-  const uk=nS(n)!=='lk';
-  const pid=`p${p.id}_${n.id}`;
-  ln+=`<path id="${pid}" d="M ${p.x*100} ${p.y*100} L ${n.x*100} ${n.y*100}"
-   fill="none" stroke="${uk?DC[n.d]:'#28324E'}" stroke-width="${uk?.55:.35}"
-   stroke-linecap="round" class="dataline" opacity="${uk?.85:.4}"/>`;
-  if(uk)dl+=`<circle r="1.1" fill="${DC[n.d]}"><animateMotion dur="${2.4+Math.random()*1.4}s"
-   repeatCount="indefinite" path="M ${p.x*100} ${p.y*100} L ${n.x*100} ${n.y*100}"/></circle>`;
- });
+ const done=ns.filter(x=>S.stars[x.id]!==undefined).length;
+ // الطريق: منحنيات ناعمة تمر عبر المحطات بالترتيب — مقسوم عند حدود المفتوح
+ const pts=ns.map(n=>[n.x*100,n.y*100]);
+ const seg=(a,b)=>`C ${a[0]} ${((a[1]+b[1])/2).toFixed(1)}, ${b[0]} ${((a[1]+b[1])/2).toFixed(1)}, ${b[0]} ${b[1]}`;
+ const road=(f,to)=>{let d=`M ${pts[f][0]} ${pts[f][1]}`;for(let i=f+1;i<=to;i++)d+=' '+seg(pts[i-1],pts[i]);return d};
+ let lastOpen=0;ns.forEach((n,i)=>{if(nS(n)!=='lk')lastOpen=i});
+ const openD=lastOpen>0?road(0,lastOpen):'';
+ const lockD=lastOpen<ns.length-1?road(lastOpen,ns.length-1):'';
  go(`<div class="scr on">${tb(t.n,"tab('nets')")}
- ${netBanner(t,id,ns)}
- <div class="hero" style="height:96px">${ART[id]||ART.general}
- <div class="hsub"><div class="a" style="font-size:15px">${t.d}</div></div></div>
- <div id="mw" class="cktbg" style="border-radius:16px;border:1px solid var(--bd)">
- <svg id="ms" viewBox="0 0 100 100" preserveAspectRatio="none">${ln}${dl}</svg>
- ${ns.map(n=>{const st=nS(n),c=DC[n.d];
-  return `<div class="nd ${n.bs?'bs':''} ${st}" style="left:${n.x*100}%;top:${n.y*100}%"
-   onclick="${st==='lk'?'':`sheet('${n.id}')`}">
-   <div class="hxnode">${hexNode(n,st,c)}</div>
-   ${st==='cl'?`<div style="margin-top:2px">${stars(n.id,8)}</div>`:''}
-   <div class="l" style="margin-top:2px">${n.n}</div></div>`}).join('')}</div></div>`);
+ <div class="mphead" style="border-color:${t.c}66">
+  <span class="mpico" style="background:${t.c}22;border-color:${t.c};color:${t.c}">${ico(t.i,20)}</span>
+  <div style="flex:1;min-width:0">
+   <div style="font-size:11px;color:var(--tx2)">${t.d}</div>
+   <div class="pbf" style="margin-top:5px"><div class="pbi" style="height:6px">
+    <i style="width:${ns.length?done/ns.length*100:0}%"></i></div></div>
+  </div>
+  <div style="text-align:center;flex-shrink:0">
+   <div class="mtl" style="font-size:13px">${ico('star',12)} ${netStars(id)}/${ns.length*3}</div>
+   <div style="font-size:9px;color:var(--tx2);margin-top:2px">${done}/${ns.length} محطة</div>
+  </div>
+ </div>
+ <div id="mw" class="mapbg">
+  <div class="mapsky" style="background:radial-gradient(95% 55% at 50% -8%,${t.c}33,transparent 62%)"></div>
+  <div class="mapart">${ART[id]||ART.general}</div>
+  <svg id="ms" viewBox="0 0 100 100" preserveAspectRatio="none">
+   <defs><linearGradient id="rd${id}" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0" stop-color="${t.c}"/><stop offset="1" stop-color="#E8B23A"/></linearGradient></defs>
+   ${lockD?`<path d="${lockD}" fill="none" stroke="#0A0F1D" stroke-width="17" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".85"/>
+   <path d="${lockD}" fill="none" stroke="#222C4A" stroke-width="12" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+   <path d="${lockD}" fill="none" stroke="#3B476E" stroke-width="2.4" stroke-dasharray="1 9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`:''}
+   ${openD?`<path d="${openD}" fill="none" stroke="#0A0F1D" stroke-width="19" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".9"/>
+   <path d="${openD}" fill="none" stroke="url(#rd${id})" stroke-width="13" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+   <path d="${openD}" fill="none" stroke="#FFF7DD" stroke-width="2.6" stroke-dasharray="3 10" stroke-linecap="round" vector-effect="non-scaling-stroke" class="roadflow" opacity=".8"/>`:''}
+  </svg>
+  ${ns.map((n,i)=>{const st=nS(n),c=DC[n.d];
+   return `<div class="nd ${n.bs?'bs':''} ${st}" style="left:${n.x*100}%;top:${n.y*100}%"
+    onclick="${st==='lk'?`toast('أنهِ المحطة السابقة أولًا')`:`sheet('${n.id}')`}">
+    <div class="stmed${n.bs?' big':''}">${stationArt(n,st,c,i+1)}</div>
+    ${st==='cl'?`<div class="ndstars">${stars(n.id,9)}</div>`:''}
+    <div class="ndpl" style="${st==='av'?`border-color:${c};color:#F2F4F8`:''}">${n.n}</div>
+    ${st==='av'?`<div><span class="ndgo">ابدأ ${ico('play',9)}</span></div>`:''}
+   </div>`}).join('')}
+ </div></div>`);
 }
 
 function sheet(id){
