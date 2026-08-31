@@ -469,10 +469,17 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .efab:active{transform:scale(.92)}
 .ebar.fx{position:fixed;left:10px;bottom:calc(134px + env(safe-area-inset-bottom));z-index:42;
  max-width:78vw;flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.55);margin:0}
-.ebubfx{position:fixed;z-index:43;display:flex;flex-direction:column;align-items:center;gap:3px;
- animation:pop .25s ease;pointer-events:none}
-.ebubfx.me{left:16px;bottom:calc(140px + env(safe-area-inset-bottom))}
-.ebubfx.op{right:16px;top:calc(140px + env(safe-area-inset-top))}
+.ebubfx{position:fixed;left:50%;z-index:43;display:flex;flex-direction:column;align-items:center;gap:5px;
+ animation:ebubIn .32s cubic-bezier(.2,1.3,.4,1);pointer-events:none;
+ filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
+.ebubfx.me{bottom:23%}
+.ebubfx.op{top:15%}
+.ebubfx .ebmsg{font-size:13.5px;padding:4px 16px;border-radius:11px}
+.ebubfx .ebnm{font-size:11px;font-weight:900;color:#fff;background:rgba(6,8,16,.68);
+ border:1px solid rgba(232,178,58,.4);border-radius:8px;padding:2px 10px;margin-bottom:2px}
+@keyframes ebubIn{from{opacity:0;transform:translateX(-50%) scale(.35) translateY(16px)}
+ to{opacity:1;transform:translateX(-50%) scale(1) translateY(0)}}
+.ebubfx{transform:translateX(-50%)}
 .scr.nofi{animation:none}
 
 /* ═══ طبقة العمق والمتعة: خلفية حية + حركات ثلاثية الأبعاد + بريق ═══ */
@@ -16397,7 +16404,6 @@ function mHeader(){
  <div style="flex:1;display:flex;align-items:center;gap:8px;position:relative;
   background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--info);
   border-radius:14px;padding:8px 10px">
-  ${M.myEmote&&Date.now()<M.myEmote.until?`<div class="ebub">${face(M.myEmote.k,38)}<div class="ebmsg">${(EMOTES.find(x=>x.k===M.myEmote.k)||{m:''}).m}</div></div>`:''}
   <div style="border-radius:50%;width:36px;height:36px;flex-shrink:0;overflow:hidden;
    background:linear-gradient(145deg,#FFE9A8,#A87518);padding:2px">${avatarArt(32)}</div>
   <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700">أنت</div>
@@ -16408,7 +16414,6 @@ function mHeader(){
  <div style="flex:1;display:flex;align-items:center;gap:8px;position:relative;
   background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid ${M.rival?M.rival.c:'var(--no)'};
   border-radius:14px;padding:8px 10px">
-  ${M.oppEmote&&!M.muted&&Date.now()<M.oppEmote.until?`<div class="ebub op">${face(M.oppEmote.k,38)}<div class="ebmsg">${(EMOTES.find(x=>x.k===M.oppEmote.k)||{m:''}).m}</div></div>`:''}
   <div style="width:36px;height:36px;flex-shrink:0">${M.rival?face(EMOTES[hashStr(M.rival.n)%EMOTES.length].k,36):robotArt(M.lastWinner==='opp'?'win':M.lastWinner==='me'?'lose':'idle')}</div>
   <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700">${M.rival?M.rival.n:'منافس تدريبي'}
    <span style="font-size:8.5px;background:var(--elev);color:var(--tx2);padding:1px 5px;border-radius:6px;font-weight:800">آلي</span></div>
@@ -16419,8 +16424,6 @@ function mHeader(){
   <div style="width:38px;flex-shrink:0">${gcard(M.oppLastPlayed,{sm:1})}</div>
   <div style="font-size:10.5px;color:var(--tx2);font-weight:800">${M.rival?M.rival.n:'الخصم'} لعب «<b class="mtl">${cardById(M.oppLastPlayed).n}</b>»</div></div>`:''}
  <button class="efab" onclick="emoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>
- ${M.emoteBar?`<div class="ebar fx">${myEmoteDeck().map(k2=>
-  `<div class="ebi" onclick="sendEmote('${k2}')">${face(k2,34)}</div>`).join('')}</div>`:''}
  ${M.knownNext&&!M.ans?`<div class="hint" style="margin:0 0 8px;padding:6px 10px;font-size:11px">${ico('search',12)} الكشاف — الجولة القادمة: <b>${M.knownNext}</b></div>`:''}
  ${k!=='auction'?`<div class="trow"><div class="tcr" id="mtc" style="border-color:${c};color:${c}">${Math.ceil(M.ms/1000)}</div>
  <div class="tbr"><i id="mtb" style="width:${rr*100}%;background:${c}"></i></div></div>`:''}
@@ -16743,21 +16746,26 @@ function myEmoteDeck(){
  if(!S.emoteDeck||!S.emoteDeck.filter(Boolean).length)S.emoteDeck=[...S.emotes].slice(0,8);
  return S.emoteDeck.filter(Boolean);
 }
-function emoteBar(){M.emoteBar=!M.emoteBar;mDraw(1)}
+// شريط وفقاعات عبر طبقة DOM مستقلة — الشاشة لا يُعاد رسمها فلا تهتز
+function emoteBarDom(send){
+ const ex=document.querySelector('.ebar.fx');
+ if(ex){ex.remove();return}
+ const d=document.createElement('div');d.className='ebar fx';
+ d.innerHTML=myEmoteDeck().map(k=>`<div class="ebi" onclick="${send}('${k}')">${face(k,38)}</div>`).join('');
+ document.body.appendChild(d);
+}
+function emoteBar(){emoteBarDom('sendEmote')}
 function sendEmote(k){
  const now=Date.now();
- if(M.emoteCd&&now<M.emoteCd){toast('مهلة قصيرة بين التعبيرات');return}
- M.emoteCd=now+EMOTE_CD;
- M.myEmote={k,until:now+2000};
- M.emoteBar=false;
- mDraw(1);
- setTimeout(()=>{if(M&&M.myEmote&&Date.now()>=M.myEmote.until){M.myEmote=null;mDraw()}},2100);
+ if(M&&M.emoteCd&&now<M.emoteCd){toast('مهلة قصيرة بين التعبيرات');return}
+ if(M)M.emoteCd=now+EMOTE_CD;
+ const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();
+ bubbleFx(k,'me');
 }
 function oppEmote(kind){
  if(!M||M.muted)return;
  const pool=kind==='win'?['laugh','confident','crown','fire','falcon','lion','wink']:kind==='lose'?['shock','tense','angry','sad']:['think','watch','camel','owl','hourglass'];
- M.oppEmote={k:pool[Math.floor(Math.random()*pool.length)],until:Date.now()+2000};
- setTimeout(()=>{if(M&&M.oppEmote&&Date.now()>=M.oppEmote.until){M.oppEmote=null;mDraw()}},2100);
+ bubbleFx(pool[Math.floor(Math.random()*pool.length)],'op',M.rival?M.rival.n:'الخصم');
 }
 
 // ── الرسم الرئيسي ──
@@ -17547,7 +17555,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='2.7';
+const APP_VER='2.8';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -17903,7 +17911,7 @@ function toast(m){const t=$('tst');
  t.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;justify-content:center">'+m+'</span>';
  t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400)}
 function trk(k,a=1){S.mis[k]=(S.mis[k]||0)+a;S.ach[k]=(S.ach[k]||0)+a}
-const go=h=>{app.innerHTML=h;window.scrollTo(0,0)};
+const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();app.innerHTML=h;window.scrollTo(0,0)};
 const tb=(t,b)=>`<div class="tbar">${b?`<button class="bk" onclick="${b}">${ico('back',15)}</button>`:'<span class="sp"></span>'}<h2>${t}</h2><span class="sp"></span></div>`;
 const stars=(k,sz)=>{const s=S.stars[k]||0;let o='';
  for(let i=1;i<=3;i++)o+=`<span style="font-size:${sz||10}px;opacity:${i<=s?1:.22}">${ico('star',14)}</span>`;return o};
@@ -18152,8 +18160,6 @@ function draw(){
  <span class="cch">${ico('coin',15)} ${S.coins}</span></div>
  ${G.vs?vsBar():''}
  <button class="efab" onclick="soloEmoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>
- ${G.emoteBar?`<div class="ebar fx">${myEmoteDeck().map(k9=>
-  `<div class="ebi" onclick="soloEmote('${k9}')">${face(k9,34)}</div>`).join('')}</div>`:''}
  <div class="trow"><div class="tcr" id="tcr" style="border-color:${tc};color:${tc}">${Math.ceil(G.ms/1000)}</div>
  <div class="tbr"><i id="tbi" style="width:${r*100}%;background:${tc}"></i></div></div>
  <div class="tgs"><span class="tg" style="color:${c};border-color:${c}66;background:${c}22">${DL[q.d]}</span>
@@ -18190,22 +18196,25 @@ function vsBar(){
  <div class="dots">${dots}</div>`;
 }
 let _soloCd=0;
-function soloEmoteBar(){G.emoteBar=!G.emoteBar;draw()}
+function soloEmoteBar(){emoteBarDom('soloEmote')}
 function soloEmote(k){
  if(Date.now()<_soloCd){toast('مهلة قصيرة بين التعبيرات');return}
  _soloCd=Date.now()+EMOTE_CD;
- G.emoteBar=false;draw();
+ const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();
  bubbleFx(k,'me');
- if(G.vs&&Math.random()<.75){
+ if(G&&G.vs&&Math.random()<.75){
   const pool=['laugh','watch','think','camel','confident','wink'];
-  setTimeout(()=>{if(typeof G!=='undefined'&&G)bubbleFx(pool[Math.floor(Math.random()*pool.length)],'op')},1100);
+  const nm=G.vs.name;
+  setTimeout(()=>{if(typeof G!=='undefined'&&G)bubbleFx(pool[Math.floor(Math.random()*pool.length)],'op',nm)},1100);
  }
 }
-function bubbleFx(k,side){
+function bubbleFx(k,side,label){
+ const old=document.querySelector('.ebubfx.'+side);if(old)old.remove();
  const d=document.createElement('div');d.className='ebubfx '+side;
- d.innerHTML=face(k,44)+'<div class="ebmsg">'+((EMOTES.find(x=>x.k===k)||{m:''}).m)+'</div>';
+ d.innerHTML=(label?'<div class="ebnm">'+label+'</div>':'')+face(k,84)+
+  '<div class="ebmsg">'+((EMOTES.find(x=>x.k===k)||{m:''}).m)+'</div>';
  document.body.appendChild(d);
- setTimeout(()=>d.remove(),2100);
+ setTimeout(()=>d.remove(),2400);
 }
 function fbk(){
  const q=G.qs[G.i],c=G.lo?'#2ECC71':'#E24B4A',a=q.fill?q.fill:q.o[q.c];
