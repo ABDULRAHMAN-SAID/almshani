@@ -13642,12 +13642,12 @@ const ECON={
  // البند 16 — حزم الجواهر · أسماء من عالم «تحدي» لا من غيره
  // التدرّج: شرارة ${ico(`back`,15)} قبس ${ico('back',15)} مشعل ${ico(`back`,15)} كنز ${ico(`back',15)} خزنة ${ico(`back',15)} قمة (القمة تربطها بشعار اللعبة)
  gemPacks:[
-  {id:'gems_80'   ,gems:80   ,n:'شرارة' ,art:'spark' ,tag:''       ,bonus:0},
-  {id:'gems_500'  ,gems:500  ,n:'قَبَس'  ,art:'ember' ,tag:''       ,bonus:0},
-  {id:'gems_1200' ,gems:1200 ,n:'مشعل'  ,art:'torch' ,tag:'+8%'    ,bonus:8},
-  {id:'gems_2500' ,gems:2500 ,n:'كنز'   ,art:'chest' ,tag:'+15%'   ,bonus:15},
-  {id:'gems_6500' ,gems:6500 ,n:'خزنة'  ,art:'vault' ,tag:'+22%'   ,bonus:22},
-  {id:'gems_14000',gems:14000,n:'قمّة'  ,art:'summit',tag:'الأفضل' ,bonus:30}
+  {id:'gems_80'   ,gems:80   ,usd:0.99,n:'شرارة' ,art:'spark' ,tag:''       ,bonus:0},
+  {id:'gems_500'  ,gems:500  ,usd:4.99,n:'قَبَس'  ,art:'ember' ,tag:''       ,bonus:0},
+  {id:'gems_1200' ,gems:1200 ,usd:9.99,n:'مشعل'  ,art:'torch' ,tag:'+8%'    ,bonus:8},
+  {id:'gems_2500' ,gems:2500 ,usd:19.99,n:'كنز'   ,art:'chest' ,tag:'+15%'   ,bonus:15},
+  {id:'gems_6500' ,gems:6500 ,usd:49.99,n:'خزنة'  ,art:'vault' ,tag:'+22%'   ,bonus:22},
+  {id:'gems_14000',gems:14000,usd:99.99,n:'قمّة'  ,art:'summit',tag:'الأفضل' ,bonus:30}
  ],
  // العملات تُشترى بالجواهر — البند 17
  coinPacks:[
@@ -15394,9 +15394,9 @@ function shopScr(){
  ${banner('الجواهر')}
  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
  ${ECON.gemPacks.map(p=>packTile({
-   art:GEM_ART[p.art](),n:p.n,amount:p.gems,cur:'gem',tag:p.tag,
-   price:'من المتجر',id:p.id})).join('')}</div>
- <div class="note">الأسعار بعملتك المحلية من Google Play وApp Store</div>
+   art:GEM_ART[p.art](),n:p.n+' — $'+p.usd.toFixed(2),amount:p.gems,cur:'gem',tag:p.tag,
+   price:'شراء بـ $'+p.usd.toFixed(2),id:p.id,buy:`buyGemPack('${p.id}')`})).join('')}</div>
+ <div class="note">شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من Google Play وApp Store</div>
 
  ${banner('العملات')}
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
@@ -15755,6 +15755,11 @@ function packTile(o){
    font-weight:900;padding:2px 9px;border-radius:9px;white-space:nowrap;
    box-shadow:0 2px 6px rgba(0,0,0,.5)">${o.tag}</div>`:''}
  </div>`;
+}
+function buyGemPack(id){
+ const p=ECON.gemPacks.find(x=>x.id===id);
+ if(!p)return;
+ paySheet(p.n+' — '+p.gems.toLocaleString('en-US')+' جوهرة',p.usd,()=>{S.gems+=p.gems},shopScr);
 }
 function buyCoins(id){
  const p=ECON.coinPacks.find(x=>x.id===id);
@@ -17214,7 +17219,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='1.9';
+const APP_VER='2.0';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -17390,7 +17395,7 @@ function moreScr(){
  ${r.placed?`<span class="cch" style="font-size:10px;color:${tierOf(r).c}">${rankLabel(r)}</span>`:''}
  </div></div></div></div></div>
  ${[[`${ico(`user`,16)}`,`ملفي الشخصي`,"push(`profScr`)"],[`${ico('medal',16)}`,`الإنجازات`,"push(`achScr`)"],[`${ico(`list`,16)}`,`المهام`,"push(`misScr`)"],
-    [`${ico('chart',16)}`,`لوحة الصدارة`,"push(`lbScr`)"],[`${ico('shop',16)}`,`المتجر`,"push(`storeScr`)"],
+    [`${ico('chart',16)}`,`لوحة الصدارة`,"push(`lbScr`)"],[`${ico('shop',16)}`,`المتجر`,"push(`shopScr`)"],
     [`${ico('book',16)}`,'مستوى المجموعة',"push('colScr')"],
     [`${ico('wild',16)}`,'بطاقات الجوكر',"push('wildScr')"],
     [`${ico('user',16)}`,'التعبيرات',"push('emoteScr')"],
@@ -18029,7 +18034,7 @@ function paySheet(name,usd,onOk,after){
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
  ov.querySelector('#qvy').onclick=()=>{ov.remove();onOk();saveState();
-  toast('تم الشراء (تجريبي) ✔');if(window.FX)FX.win();(after||storeScr)()};
+  toast('تم الشراء (تجريبي) ✔');if(window.FX)FX.win();(after||shopScr)()};
 }
 function buyIap(k){const p=IAP.find(x=>x.k===k);paySheet(p.n+' — '+p.gems+' جوهرة',p.usd,()=>{S.gems+=p.gems})}
 function buyBundle(k){const b=BUNDLES.find(x=>x.k===k);paySheet(b.n,b.usd,b.grant)}
