@@ -444,6 +444,35 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 @keyframes emRoarP{0%,55%,100%{transform:scale(1)}65%{transform:scale(1.07)}75%{transform:scale(1.02)}85%{transform:scale(1.06)}}
 @keyframes emSheenX{0%,58%{transform:translateX(-16px)}92%,100%{transform:translateX(64px)}}
 @keyframes emRing2{0%{transform:scale(.55);opacity:.7}80%,100%{transform:scale(1.25);opacity:0}}
+/* ═══ ساحات القتال — تتغير من رتبة لرتبة ═══ */
+#arena{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .6s}
+#arena.on{opacity:1}
+#arena .arSky{position:absolute;inset:0}
+#arena .arGlow{position:absolute;inset:0;animation:puls 3.4s ease-in-out infinite}
+#arena .arDeco{position:absolute;left:0;right:0;bottom:24%;width:100%;height:36%}
+#arena .arFloor{position:absolute;left:-25%;right:-25%;bottom:0;height:46%;
+ transform:perspective(430px) rotateX(58deg);transform-origin:bottom center;
+ animation:arScroll 9s linear infinite}
+@keyframes arScroll{from{background-position:0 0,0 0,0 0}to{background-position:0 0,0 0,0 46px}}
+#arena .arFloor::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,transparent 30%,rgba(6,8,16,.9) 96%)}
+#arena .arPil{position:absolute;bottom:16%;width:26px;height:36%}
+#arena .arPil.l{left:4px}
+#arena .arPil.r{right:4px}
+#arena .arNm{position:absolute;bottom:calc(8px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+ font-size:8.5px;font-weight:900;background:rgba(6,8,16,.6);border:1px solid;border-radius:8px;
+ padding:2px 10px;white-space:nowrap}
+/* ═══ زر التعبيرات أسفل اليسار — كلاش ستايل ═══ */
+.efab{position:fixed;left:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:42;
+ width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#2A3550,#161D30);
+ border:2px solid var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.55);cursor:pointer;
+ display:flex;align-items:center;justify-content:center;padding:0}
+.efab:active{transform:scale(.92)}
+.ebar.fx{position:fixed;left:10px;bottom:calc(134px + env(safe-area-inset-bottom));z-index:42;
+ max-width:78vw;flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.55);margin:0}
+.ebubfx{position:fixed;z-index:43;display:flex;flex-direction:column;align-items:center;gap:3px;
+ animation:pop .25s ease;pointer-events:none}
+.ebubfx.me{left:16px;bottom:calc(140px + env(safe-area-inset-bottom))}
+.ebubfx.op{right:16px;top:calc(140px + env(safe-area-inset-top))}
 .scr.nofi{animation:none}
 
 /* ═══ طبقة العمق والمتعة: خلفية حية + حركات ثلاثية الأبعاد + بريق ═══ */
@@ -13085,6 +13114,51 @@ function face(k,s){
   '</g>'+ring+'</svg>';
 }
 
+// ═══════════ ساحات القتال العشر — واحدة لكل رتبة ═══════════
+const ARENAS=[
+ {n:'ساحة الرمال',s1:'#4A3218',s2:'#140C04',g:'#CD7F32',f:'205,127,50',d:'pyr'},
+ {n:'ساحة الجليد',s1:'#274A66',s2:'#081222',g:'#BFE3FF',f:'127,184,216',d:'ice'},
+ {n:'الساحة الذهبية',s1:'#57400F',s2:'#181004',g:'#E8B23A',f:'232,178,58',d:'clsm'},
+ {n:'حدائق البلاتين',s1:'#0F4438',s2:'#06150F',g:'#5DCAA5',f:'93,202,165',d:'pyr'},
+ {n:'كهف الماس',s1:'#123B63',s2:'#04101E',g:'#5AC8F5',f:'90,200,245',d:'ice'},
+ {n:'عرين الماستر',s1:'#331A5E',s2:'#0D0522',g:'#B76CF0',f:'183,108,240',d:'clsm'},
+ {n:'قلعة الجراند',s1:'#26104E',s2:'#08041A',g:'#8B3FD9',f:'139,63,217',d:'clsm'},
+ {n:'ساحة الأبطال',s1:'#4E1414',s2:'#160404',g:'#E24B4A',f:'226,75,74',d:'pyr'},
+ {n:'سديم الميثيك',s1:'#4E1A38',s2:'#14040E',g:'#FF6B9D',f:'255,107,157',d:'ice'},
+ {n:'سماء الليجند',s1:'#4E3A08',s2:'#141002',g:'#FFD700',f:'255,215,0',d:'clsm'}
+];
+function arPillar(g){
+ return `<svg viewBox="0 0 24 120" width="100%" height="100%">
+ <rect x="8" y="18" width="8" height="96" rx="2" fill="#0A0E18" stroke="${g}44" stroke-width="1"/>
+ <rect x="5" y="108" width="14" height="8" rx="2" fill="#0A0E18" stroke="${g}44" stroke-width="1"/>
+ <circle cx="12" cy="12" r="5" fill="${g}" class="puls"/>
+ <circle cx="12" cy="12" r="8.5" fill="none" stroke="${g}" stroke-width="1" opacity=".4" class="puls"/></svg>`;
+}
+function arenaHTML(ix){
+ const A=ARENAS[ix]||ARENAS[0];
+ const deco=A.d==='pyr'
+  ?'<path d="M0 90 L14 62 L26 90 L38 50 L58 90 L70 68 L82 90 L100 90 Z" fill="#000" opacity=".5"/>'
+  :A.d==='ice'
+  ?'<path d="M0 90 L8 48 L14 90 L22 60 L30 90 L44 38 L54 90 L66 56 L74 90 L86 46 L94 90 L100 90 Z" fill="#000" opacity=".5"/>'
+  :'<path d="M0 90 L0 58 L8 58 L8 70 A6 6 0 0 1 20 70 L20 58 L32 58 L32 70 A6 6 0 0 1 44 70 L44 58 L56 58 L56 70 A6 6 0 0 1 68 70 L68 58 L80 58 L80 70 A6 6 0 0 1 92 70 L92 58 L100 58 L100 90 Z" fill="#000" opacity=".5"/>';
+ return `<div class="arSky" style="background:radial-gradient(120% 90% at 50% -8%,${A.s1},${A.s2} 68%)"></div>
+ <div class="arGlow" style="background:radial-gradient(58% 34% at 50% 44%,${A.g}44,transparent 70%)"></div>
+ <svg class="arDeco" viewBox="0 0 100 90" preserveAspectRatio="none">${deco}</svg>
+ <div class="arFloor" style="background:linear-gradient(transparent 0,rgba(${A.f},.06) 50%,rgba(${A.f},.2)),repeating-linear-gradient(90deg,rgba(${A.f},.24) 0 1.5px,transparent 1.5px 54px),repeating-linear-gradient(0deg,rgba(${A.f},.2) 0 1.5px,transparent 1.5px 46px)"></div>
+ <div class="arPil l">${arPillar(A.g)}</div>
+ <div class="arPil r">${arPillar(A.g)}</div>
+ <div class="arNm" style="color:${A.g};border-color:${A.g}55">${A.n} — رتبة ${TIERS[ix]?TIERS[ix].ar:''}</div>`;
+}
+let _arIx=-1;
+function setArena(ix){
+ ix=Math.max(0,Math.min(9,ix|0));
+ let el=document.getElementById('arena');
+ if(!el){el=document.createElement('div');el.id='arena';document.body.prepend(el)}
+ if(_arIx!==ix){el.innerHTML=arenaHTML(ix);_arIx=ix}
+ el.classList.add('on');
+}
+function hideArena(){const el=document.getElementById('arena');if(el)el.classList.remove('on')}
+
 // ═══════════ رسوم هوية خاصة — تحدي ═══════════
 // شخصية المنافس التدريبي: كيان معرفي هندسي — ليس روبوت أفلام، بل «حارس بيانات» بهوية بنفسجية-ذهبية
 function robotArt(mood){
@@ -14458,9 +14532,9 @@ function closeQuit(){M.quitAsk=false;M.menu=false;mDraw()}
 function startRanked(intro){
  if(!S.ranked)S.ranked=defaultRanked();
  const r=S.ranked;
- const oppMmr=r.mmr+Math.round((Math.random()-.5)*220);
  const deck=S.cards.decks[S.cards.active].cards;
  const rival=(intro&&intro.rv)||RIVALS[Math.floor(Math.random()*RIVALS.length)];
+ const oppMmr=r.mmr+((hashStr(rival.n)%260)-130); // كؤوس الخصم ثابتة لهويته
  $('nav').style.display='none';   // إخفاء الشريط أثناء المباراة
  M={rounds:(intro&&intro.seq)||buildRounds(r),i:0,me:0,opp:0,streak:0,menu:false,quitAsk:false,playedThisRound:false,
     oppMmr,oppSkill:.55+Math.min(.2,r.tier*.02),
@@ -14504,6 +14578,7 @@ function introBack(){
  introDraw();
 }
 function introDraw(){
+ setArena((S.ranked&&S.ranked.tier)||0);
  const r=S.ranked,t=tierOf(r),rv=_intro.rv;
  const basket=roundBasket(_intro.seq);
  go(`<div class="scr on">
@@ -16210,6 +16285,7 @@ function rankBadge(r,size){
 
 // ── شاشة الرانك ──
 function rankedScr(){
+ hideArena();
  if(!S.ranked)S.ranked=defaultRanked();
  const r=S.ranked,t=tierOf(r);
  if(!r.placed){
@@ -16322,23 +16398,28 @@ function mHeader(){
   background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--info);
   border-radius:14px;padding:8px 10px">
   ${M.myEmote&&Date.now()<M.myEmote.until?`<div class="ebub">${face(M.myEmote.k,38)}<div class="ebmsg">${(EMOTES.find(x=>x.k===M.myEmote.k)||{m:''}).m}</div></div>`:''}
-  <div style="border-radius:50%;width:34px;height:34px;flex-shrink:0;overflow:hidden;
-   background:linear-gradient(145deg,#FFE9A8,#A87518);padding:2px">${avatarArt(30)}</div>
+  <div style="border-radius:50%;width:36px;height:36px;flex-shrink:0;overflow:hidden;
+   background:linear-gradient(145deg,#FFE9A8,#A87518);padding:2px">${avatarArt(32)}</div>
   <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700">أنت</div>
+  <div style="font-size:9.5px;color:var(--gold);font-weight:900;margin-top:2px">${ico('trophy',10)} ${((S.ranked&&S.ranked.mmr)||1000).toLocaleString('en-US')}</div>
   <div style="display:flex;gap:3px;margin-top:3px">${dots(M.me,'var(--info)')}</div></div>
-  <button class="ebtn" onclick="emoteBar()">${face(myEmoteDeck()[0]||'laugh',20)}</button>
  </div>
  <div class="vsx" style="font-size:15px">${M.me}–${M.opp}</div>
  <div style="flex:1;display:flex;align-items:center;gap:8px;position:relative;
   background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid ${M.rival?M.rival.c:'var(--no)'};
   border-radius:14px;padding:8px 10px">
   ${M.oppEmote&&!M.muted&&Date.now()<M.oppEmote.until?`<div class="ebub op">${face(M.oppEmote.k,38)}<div class="ebmsg">${(EMOTES.find(x=>x.k===M.oppEmote.k)||{m:''}).m}</div></div>`:''}
-  <div style="width:34px;height:34px;flex-shrink:0">${robotArt(M.lastWinner==='opp'?'win':M.lastWinner==='me'?'lose':'idle')}</div>
+  <div style="width:36px;height:36px;flex-shrink:0">${M.rival?face(EMOTES[hashStr(M.rival.n)%EMOTES.length].k,36):robotArt(M.lastWinner==='opp'?'win':M.lastWinner==='me'?'lose':'idle')}</div>
   <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700">${M.rival?M.rival.n:'منافس تدريبي'}
    <span style="font-size:8.5px;background:var(--elev);color:var(--tx2);padding:1px 5px;border-radius:6px;font-weight:800">آلي</span></div>
+  <div style="font-size:9.5px;color:var(--gold);font-weight:900;margin-top:2px">${ico('trophy',10)} ${(M.oppMmr||1000).toLocaleString('en-US')}</div>
   <div style="display:flex;gap:3px;margin-top:3px">${dots(M.opp,'var(--no)')}</div></div>
  </div></div>
- ${M.emoteBar?`<div class="ebar">${myEmoteDeck().map(k2=>
+ ${M.oppPlayedRound&&M.oppLastPlayed?`<div style="display:flex;align-items:center;gap:9px;justify-content:center;margin:0 0 8px;animation:rspop .45s ease;background:linear-gradient(168deg,#1C2540,#0E1526);border:1px solid ${M.rival?M.rival.c:'var(--no)'}66;border-radius:12px;padding:6px 10px">
+  <div style="width:38px;flex-shrink:0">${gcard(M.oppLastPlayed,{sm:1})}</div>
+  <div style="font-size:10.5px;color:var(--tx2);font-weight:800">${M.rival?M.rival.n:'الخصم'} لعب «<b class="mtl">${cardById(M.oppLastPlayed).n}</b>»</div></div>`:''}
+ <button class="efab" onclick="emoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>
+ ${M.emoteBar?`<div class="ebar fx">${myEmoteDeck().map(k2=>
   `<div class="ebi" onclick="sendEmote('${k2}')">${face(k2,34)}</div>`).join('')}</div>`:''}
  ${M.knownNext&&!M.ans?`<div class="hint" style="margin:0 0 8px;padding:6px 10px;font-size:11px">${ico('search',12)} الكشاف — الجولة القادمة: <b>${M.knownNext}</b></div>`:''}
  ${k!=='auction'?`<div class="trow"><div class="tcr" id="mtc" style="border-color:${c};color:${c}">${Math.ceil(M.ms/1000)}</div>
@@ -16691,6 +16772,7 @@ function mDraw(){
   </div>`);
   return;
  }
+ setArena((S.ranked&&S.ranked.tier)||0);
  const st=M.st,k=st.k;
  const soft=arguments.length&&arguments[0]===1;
  const sy=soft?window.scrollY:0;
@@ -17465,7 +17547,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='2.6';
+const APP_VER='2.7';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -17855,7 +17937,7 @@ function nav(){
    :`<div class="nvi ${cur===k?'on':''}" style="position:relative" onclick="tab('${k}')">${dot}<span class="i">${ico(i,20)}</span><span class="l">${l}</span></div>`;
  }).join('');
 }
-function tab(k){cur=k;nav();NAV=[];
+function tab(k){cur=k;nav();NAV=[];hideArena();
  ({play:playScr,nets:netsScr,cards:()=>resetNav('cardsScr'),shop:()=>resetNav('shopScr'),more:moreScr})[k]()}
 
 // ═══════════ الشاشات ═══════════
@@ -18032,7 +18114,7 @@ function vsScr(){
 function run(qs,o){
  G={qs,i:0,pts:0,ok:0,mis:0,st:0,bst:0,node:o.node||null,mm:o.mm||null,vs:o.vs||null,
   ans:false,a:null,lp:0,lo:false,used:new Set(),hid:new Set(),hint:null,x2:false,
-  anyP:false,tm:null,ms:0,t0:0,hist:[]};
+  anyP:false,emoteBar:false,tm:null,ms:0,t0:0,hist:[]};
  nextQ();
 }
 const tl=q=>q.speed?6:20;
@@ -18051,6 +18133,7 @@ function tick(){
  if(b){b.style.width=r*100+'%';b.style.background=c}
 }
 function draw(){
+ setArena((S.ranked&&S.ranked.tier)||0);
  const q=G.qs[G.i],lim=tl(q),c=DC[q.d],r=Math.max(0,G.ms/(lim*1000));
  const tc=r>.5?'#2ECC71':r>.25?'#EF9F27':'#E24B4A';
  const nd=NODES.find(n=>n.id===q.n),nt=nd?NETS.find(t=>t.id===nd.net):null;
@@ -18068,6 +18151,9 @@ function draw(){
  <span class="qnum">السؤال ${G.i+1}/${G.qs.length}</span>
  <span class="cch">${ico('coin',15)} ${S.coins}</span></div>
  ${G.vs?vsBar():''}
+ <button class="efab" onclick="soloEmoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>
+ ${G.emoteBar?`<div class="ebar fx">${myEmoteDeck().map(k9=>
+  `<div class="ebi" onclick="soloEmote('${k9}')">${face(k9,34)}</div>`).join('')}</div>`:''}
  <div class="trow"><div class="tcr" id="tcr" style="border-color:${tc};color:${tc}">${Math.ceil(G.ms/1000)}</div>
  <div class="tbr"><i id="tbi" style="width:${r*100}%;background:${tc}"></i></div></div>
  <div class="tgs"><span class="tg" style="color:${c};border-color:${c}66;background:${c}22">${DL[q.d]}</span>
@@ -18088,14 +18174,38 @@ function draw(){
 function vsBar(){
  const dots=G.qs.map((_,i)=>{const h=G.hist[i];
   return `<span class="dot ${i===G.i?'now':h===undefined?'':h?'ok':'no'}"></span>`}).join('');
+ const myCups=((S.ranked&&S.ranked.mmr)||1000).toLocaleString('en-US');
+ const opCups=(900+(hashStr(G.vs.name)%700)).toLocaleString('en-US');
  return `<div class="vs"><div class="vsp" style="border-color:var(--info)">
- <div style="width:52px;height:52px;margin:0 auto 8px;border-radius:50%;overflow:hidden;border:2px solid var(--info)">${avatarArt(48)}</div>
- <div class="vsn">${S.name}</div><div class="vss" style="color:var(--info)">${G.pts}</div></div>
+ <div style="width:52px;height:52px;margin:0 auto 6px;border-radius:50%;overflow:hidden;border:2px solid var(--info)">${avatarArt(48)}</div>
+ <div class="vsn">${S.name}</div>
+ <div style="font-size:9px;color:var(--gold);font-weight:900">${ico('trophy',10)} ${myCups}</div>
+ <div class="vss" style="color:var(--info)">${G.pts}</div></div>
  <div class="vsx">VS</div>
  <div class="vsp" style="border-color:var(--no)">
- <div class="vsa" style="background:#E24B4A28;border-color:var(--no);color:var(--no)">م</div>
- <div class="vsn">${G.vs.name}</div><div class="vss" style="color:var(--no)">${G.vs.score}</div></div></div>
+ <div style="width:52px;height:52px;margin:0 auto 6px">${face(EMOTES[hashStr(G.vs.name)%EMOTES.length].k,52)}</div>
+ <div class="vsn">${G.vs.name}</div>
+ <div style="font-size:9px;color:var(--gold);font-weight:900">${ico('trophy',10)} ${opCups}</div>
+ <div class="vss" style="color:var(--no)">${G.vs.score}</div></div></div>
  <div class="dots">${dots}</div>`;
+}
+let _soloCd=0;
+function soloEmoteBar(){G.emoteBar=!G.emoteBar;draw()}
+function soloEmote(k){
+ if(Date.now()<_soloCd){toast('مهلة قصيرة بين التعبيرات');return}
+ _soloCd=Date.now()+EMOTE_CD;
+ G.emoteBar=false;draw();
+ bubbleFx(k,'me');
+ if(G.vs&&Math.random()<.75){
+  const pool=['laugh','watch','think','camel','confident','wink'];
+  setTimeout(()=>{if(typeof G!=='undefined'&&G)bubbleFx(pool[Math.floor(Math.random()*pool.length)],'op')},1100);
+ }
+}
+function bubbleFx(k,side){
+ const d=document.createElement('div');d.className='ebubfx '+side;
+ d.innerHTML=face(k,44)+'<div class="ebmsg">'+((EMOTES.find(x=>x.k===k)||{m:''}).m)+'</div>';
+ document.body.appendChild(d);
+ setTimeout(()=>d.remove(),2100);
 }
 function fbk(){
  const q=G.qs[G.i],c=G.lo?'#2ECC71':'#E24B4A',a=q.fill?q.fill:q.o[q.c];
@@ -18427,7 +18537,9 @@ function rivalProfile(name,base){
  const pool=EMOTES.map(e=>e.k);
  for(let i2=0;i2<9&&emoteKeys.length<7;i2++){const k2=pool[Math.floor(rr()*pool.length)];
   if(!emoteKeys.includes(k2))emoteKeys.push(k2)}
- return {me:0,name,avatar:face(emoteKeys[0]||'laugh',64),
+ const avK=EMOTES[hashStr(name)%EMOTES.length].k;
+ if(!emoteKeys.includes(avK))emoteKeys.unshift(avK);
+ return {me:0,name,avatar:face(avK,64),
   title:base.t||PROF_TITLES[tierIx],
   lvl:3+Math.floor(rr()*60),tierIx,div:1+Math.floor(rr()*3),rp:Math.floor(rr()*100),mmr,
   bestIx:Math.min(9,tierIx+(rr()<.4?1:0)),
