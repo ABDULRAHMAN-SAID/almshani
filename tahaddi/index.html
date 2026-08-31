@@ -14488,6 +14488,21 @@ function matchIntro(){
  },1000);
  introDraw();
 }
+function introProfile(){
+ clearInterval(_introTm);
+ profileView(rivalProfile(_intro.rv.n,{t:_intro.rv.t,mmrHint:(S.ranked&&S.ranked.mmr||1000)+((hashStr(_intro.rv.n)%260)-130)}),'introBack()');
+}
+function introBack(){
+ if(!_intro){tab('play');return}
+ clearInterval(_introTm);
+ _introTm=setInterval(()=>{
+  if(!_intro){clearInterval(_introTm);return}
+  _intro.left--;
+  const e=$('introT');if(e)e.textContent=_intro.left;
+  if(_intro.left<=0)introGo();
+ },1000);
+ introDraw();
+}
 function introDraw(){
  const r=S.ranked,t=tierOf(r),rv=_intro.rv;
  const basket=roundBasket(_intro.seq);
@@ -14507,6 +14522,7 @@ function introDraw(){
   <span style="font-size:9px;background:var(--elev);color:var(--tx2);padding:2px 7px;border-radius:7px;font-weight:800;vertical-align:middle">منافس آلي</span></div>
  <div style="font-size:11.5px;color:var(--gold);font-weight:700;margin-top:2px">${rv.t}</div>
  <div style="font-size:10.5px;color:var(--tx2);margin-top:3px">${t.ar} ${['III','II','I'][r.div]||''}</div>
+ <div onclick="introProfile()" style="font-size:10px;color:var(--info,#5AC8F5);font-weight:800;margin-top:5px;cursor:pointer">${ico('user',11)} عرض الملف الكامل ›</div>
  </div>
  <div class="vsx" style="font-size:19px">VS</div>
  <div style="width:52px;height:52px;flex-shrink:0;border-radius:50%;overflow:hidden;
@@ -17449,7 +17465,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='2.5';
+const APP_VER='2.6';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -17474,7 +17490,7 @@ function evtClaim(k){
  const g=EVT_GOALS.find(x=>x.k===k),ev=EV();
  if(!g||ev.claimed.includes(k))return;
  if(Math.min(g.need,g.of(ev))<g.need){toast('لم يكتمل التحدي بعد');return}
- ev.claimed.push(k);grantRewards([g.r]);saveState();
+ ev.claimed.push(k);S.evtDone=(S.evtDone||0)+1;grantRewards([g.r]);saveState();
  toast('استلمت جائزة التحدي 🎉');if(window.FX)FX.correct(4);evtScr();
 }
 function evtScr(){
@@ -18214,17 +18230,20 @@ function claim(k){const m=MIS.find(x=>x.k===k);S.claimed[k]=1;S.coins+=m.co;S.xp
  toast(`+${m.co} عملة · +${m.xp} خبرة`);misScr()}
 
 function achScr(){
- // توزيع المعادن: أول 3 ذهب، التاليان فضة، الباقي برونز
- const tone=i=>i<3?'gold':i<5?'silver':'bronze';
+ const p=myProfile();
+ const aw=achWall(p);
  go(`<div class="scr on">${tb('الإنجازات')}
- <div class="ga">${ACH.map((a,i)=>{const p=S.ach[a.k]||0,u=p>=a.n;
- return `<div class="mbdg ${u?'':'off'}"><div class="mbdgc">${metalBadge(a.i,tone(i),!u)}</div>
- <div class="mbdt">${a.t}</div>
- ${!u&&a.n>1?`<div style="font-size:9.5px;color:var(--tx2);margin-top:3px">${p}/${a.n}</div>`:''}</div>`}).join('')}</div>
+ <div class="orn"><div class="in">${ornCorners()}
+  <div style="display:flex;align-items:center;gap:11px">
+  <div style="width:46px;height:46px;flex-shrink:0">${metalBadge('medal',aw.earned>=30?'gold':aw.earned>=15?'silver':'bronze',aw.earned===0)}</div>
+  <div style="flex:1"><div class="mtl" style="font-size:15px">جدار الأوسمة</div>
+  <div style="font-size:11px;color:var(--tx2);margin-top:2px">حصدتَ ${aw.earned} من ${aw.total} — كل مسار: برونزي ثم فضي ثم ذهبي</div></div>
+  </div></div></div>
+ <div style="margin-top:12px">${aw.html}</div>
  <div class="sl">الشارات</div>
  ${S.badges.length?`<div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
- ${S.badges.map(b=>`<span class="cch" style="border-color:var(--gold)">${ico('medal',16)} <span class="mtl" style="font-size:11px">${b}</span></span>`).join('')}
+ ${S.badges.map(b2=>`<span class="cch" style="border-color:var(--gold)">${ico('medal',16)} <span class="mtl" style="font-size:11px">${b2}</span></span>`).join('')}
  </div></div></div>`:
   '<div style="font-size:12px;color:var(--mut);text-align:center;padding:14px">لا شارات بعد — اهزم الحرّاس</div>'}</div>`);
 }
@@ -18311,75 +18330,192 @@ function storeScr(){
 
 function lbScr(){
  const f=[{n:'سالم',x:14200},{n:'ريم',x:9800},{n:'خالد',x:7200},{n:S.name,x:S.xp,me:1},
-  {n:'نورة',x:2100},{n:'أحمد',x:900}].sort((a,b)=>b.x-a.x);
+  {n:'نورة',x:2100},{n:'أحمد',x:900}].sort((a2,b2)=>b2.x-a2.x);
  go(`<div class="scr on">${tb('لوحة الصدارة',"tab('play')")}
- <div class="wb">لاعبون وهميون للمعاينة. الترتيب الحقيقي يحتاج خادمًا.</div>
+ <div class="wb">لاعبون وهميون للمعاينة. الترتيب الحقيقي يحتاج خادمًا. اضغط أي لاعب لعرض ملفه الكامل.</div>
  ${f.map((u,i)=>{const r=rk(u.x),m=i===0?'#E8B23A':i===1?'#C0C0C0':i===2?'#CD7F32':null;
- return `<div class="rr" style="${u.me?'background:rgba(123,79,224,.14);border-color:var(--pur)':''}">
+ return `<div class="rr" style="cursor:pointer;${u.me?'background:rgba(123,79,224,.14);border-color:var(--pur)':''}"
+  onclick="${u.me?`push('profScr')`:`lbProf('${u.n}',${u.x})`}">
  <div class="rn" style="background:${m?m+'40':'var(--elev)'}">${m?`${ico('trophy',16)}`:i+1}</div>
  <div class="lb"><div class="lt">${u.n}${u.me?' (أنت)':''}</div><div class="ls">${r[0]}</div></div>
- <div style="font-weight:900;color:var(--gold)">${u.x.toLocaleString('en-US')}</div></div>`}).join('')}</div>`);
+ <div style="display:flex;align-items:center;gap:7px">
+  <span style="font-weight:900;color:var(--gold)">${u.x.toLocaleString('en-US')}</span>
+  <span style="color:var(--mut)">${ico('user',14)}</span></div></div>`}).join('')}</div>`);
 }
 
-function profScr(){
+// ═══════════ الملف الشخصي الاحترافي — لي وللخصوم ═══════════
+const PROF_TITLES=['مقاتل ناشئ','منافس صاعد','فارس الذهب','نخبة البلاتين','صائد الماس',
+ 'سيد الماستر','جراند ماستر','بطل الساحة','أسطورة ميثيك','الليجند الخالد'];
+
+// خمسة عشر مسار إنجاز، كل مسار بثلاثة أوسمة: برونزي ثم فضي ثم ذهبي = 45 وساماً
+const ACH_FAM=[
+ {n:'صائد الانتصارات',i:'trophy',v:p=>p.wins,t:[1,25,100]},
+ {n:'محارب الساحات',i:'swords',v:p=>p.matches,t:[10,50,200]},
+ {n:'موسوعة الإجابات',i:'check',v:p=>p.correct,t:[100,1000,5000]},
+ {n:'السلسلة الذهبية',i:'flame',v:p=>p.streak,t:[5,10,15]},
+ {n:'حاصد النجوم',i:'star',v:p=>p.stars,t:[15,45,90]},
+ {n:'مكتشف الشبكات',i:'map',v:p=>p.netsDone,t:[1,4,8]},
+ {n:'قاهر الحرّاس',i:'shield',v:p=>p.bossN,t:[1,3,6]},
+ {n:'جامع البطاقات',i:'cards',v:p=>p.own,t:[10,25,40]},
+ {n:'سيد الاكتمال',i:'book',v:p=>p.maxed,t:[1,5,15]},
+ {n:'مهندس التطوير',i:'sparkle',v:p=>p.evolved,t:[1,3,6]},
+ {n:'وجوه الساحة',i:'user',v:p=>p.emoteN,t:[8,16,28]},
+ {n:'عمدة المجموعة',i:'gem',v:p=>p.colLv,t:[10,25,50]},
+ {n:'قاطع التذكرة',i:'ticket',v:p=>p.passLv,t:[10,50,100]},
+ {n:'بطل التحديات',i:'timer',v:p=>p.evtDone,t:[5,20,60]},
+ {n:'متسلق الرتب',i:'medal',v:p=>p.bestIx+1,t:[2,5,7]}
+];
+function achWall(p){
+ let earned=0;
+ const html=ACH_FAM.map(f=>{
+  const v=f.v(p)||0;
+  const done=f.t.filter(x=>v>=x).length;earned+=done;
+  const nxt=f.t[Math.min(done,2)];
+  const tone=done>=3?'gold':done===2?'silver':'bronze';
+  const pct=Math.min(100,Math.round(v/nxt*100));
+  return `<div style="display:flex;align-items:center;gap:10px;background:linear-gradient(168deg,#1C2540,#0E1526);
+   border:1px solid ${done?'#E8B23A44':'var(--bd)'};border-radius:12px;padding:8px 10px;margin-bottom:8px">
+   <div style="width:44px;height:44px;flex-shrink:0">${metalBadge(f.i,tone,done===0)}</div>
+   <div style="flex:1;min-width:0">
+    <div style="display:flex;align-items:center;gap:7px">
+     <span style="font-size:12.5px;font-weight:900">${f.n}</span>
+     <span style="display:inline-flex;gap:3px">${[0,1,2].map(j=>`<span style="width:8px;height:8px;border-radius:3px;display:inline-block;background:${j<done?['#CD7F32','#C8D0DC','#E8B23A'][j]:'#2A3247'}"></span>`).join('')}</span></div>
+    <div class="pbf" style="margin-top:5px"><div class="pbi" style="height:6px"><i style="width:${done>=3?100:pct}%"></i></div></div>
+    <div style="font-size:9.5px;color:var(--tx2);margin-top:3px">${done>=3?`مكتمل — ${v.toLocaleString('en-US')}`:`${v.toLocaleString('en-US')} / ${nxt.toLocaleString('en-US')}`}</div>
+   </div></div>`;
+ }).join('');
+ return {html,earned,total:ACH_FAM.length*3};
+}
+function shieldRow(bestIx){
+ return `<div style="display:flex;gap:3px;justify-content:space-between;background:linear-gradient(168deg,#1C2540,#0E1526);
+  border:1px solid var(--bd);border-radius:12px;padding:9px 7px">
+ ${TIERS.map((t,i)=>`<div style="text-align:center;flex:1;min-width:0;${i<=bestIx?'':'filter:grayscale(1);opacity:.28'}">
+  ${tierEmblem(i,27)}<div style="font-size:7px;font-weight:800;color:${t.c};margin-top:1px;white-space:nowrap;overflow:hidden">${t.ar}</div></div>`).join('')}
+ </div>`;
+}
+/** ملفي أنا — من الحالة الحقيقية */
+function myProfile(){
  ensureEcon();
  const r=S.ranked||defaultRanked();
- const rk_=rk(S.xp);
  const own=Object.keys(S.cards.owned).length;
  const maxed=Object.values(S.cards.owned).filter(x=>x.lv>=10).length;
- const wr=S.matches?Math.round(S.wins/S.matches*100):0;
- const best=r.seasonBest?`${TIERS[r.seasonBest.tier].n}${r.seasonBest.div?' '+['','I','II','III'][r.seasonBest.div]:''}`:'—';
- const favE=Object.entries(S.cards.owned).sort((a,b)=>(b[1].uses||0)-(a[1].uses||0))[0];
- const fav=favE&&favE[1].uses?favE:null;
- go(`<div class="scr on">${tbar('ملفي')}
+ const bestIx=Math.max(r.tier||0,(r.seasonBest&&r.seasonBest.tier)||0);
+ return {me:1,name:S.name,avatar:avatarArt(64),
+  title:r.placed?PROF_TITLES[r.tier||0]:'مستكشف المعرفة',
+  lvl:lvl(S.xp),tierIx:r.tier||0,div:r.div||0,rp:r.rp||0,mmr:r.mmr||1000,bestIx,
+  wins:S.wins||0,matches:S.matches||0,wr:S.matches?Math.round(S.wins/S.matches*100):0,
+  streak:S.ach.streak_5||0,correct:S.correct||0,stars:totStars(),
+  own,maxed,evolved:(S.evolved||[]).length,colLv:colLevel(),
+  emoteN:S.emotes.length,emoteKeys:myEmoteDeck().slice(0,8),
+  passLv:szLv(),evtDone:S.evtDone||0,
+  bossN:S.ach.boss||0,netsDone:S.ach.net_done||0,
+  nets:NETS.map(t2=>{const ns=nOf(t2.id),ms=ns.length*3,got=netStars(t2.id);
+   return {n:t2.n,i:t2.i,c:t2.c,got,ms,pct:ms?Math.round(got/ms*100):0}})};
+}
+/** ملف خصم آلي — حتمي بالبذرة: نفس الاسم يعطي نفس السجل دائماً */
+function hashStr(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rivalProfile(name,base){
+ base=base||{};
+ let sd=hashStr(name);
+ const rr=()=>{sd=sd+0x6D2B79F5|0;let t2=Math.imul(sd^sd>>>15,1|sd);
+  t2=t2+Math.imul(t2^t2>>>7,61|t2)^t2;return((t2^t2>>>14)>>>0)/4294967296};
+ const mmr=base.mmrHint||900+Math.floor(rr()*1500);
+ const tierIx=Math.max(0,Math.min(9,Math.floor((mmr-800)/180)));
+ const matches=40+Math.floor(rr()*420);
+ const wr=42+Math.floor(rr()*26);
+ const emoteKeys=[];
+ const pool=EMOTES.map(e=>e.k);
+ for(let i2=0;i2<9&&emoteKeys.length<7;i2++){const k2=pool[Math.floor(rr()*pool.length)];
+  if(!emoteKeys.includes(k2))emoteKeys.push(k2)}
+ return {me:0,name,avatar:face(emoteKeys[0]||'laugh',64),
+  title:base.t||PROF_TITLES[tierIx],
+  lvl:3+Math.floor(rr()*60),tierIx,div:1+Math.floor(rr()*3),rp:Math.floor(rr()*100),mmr,
+  bestIx:Math.min(9,tierIx+(rr()<.4?1:0)),
+  wins:Math.round(matches*wr/100),matches,wr,streak:3+Math.floor(rr()*13),
+  correct:matches*6+Math.floor(rr()*900),stars:Math.floor(rr()*90),
+  own:8+Math.floor(rr()*32),maxed:Math.floor(rr()*11),evolved:Math.floor(rr()*7),
+  colLv:5+Math.floor(rr()*46),emoteN:Math.min(28,emoteKeys.length+Math.floor(rr()*16)),
+  emoteKeys,passLv:Math.floor(rr()*100),evtDone:Math.floor(rr()*70),
+  bossN:Math.floor(rr()*7),netsDone:Math.floor(rr()*9),
+  nets:NETS.map(t2=>{const ns=nOf(t2.id),ms=ns.length*3,pct=Math.floor(rr()*95);
+   return {n:t2.n,i:t2.i,c:t2.c,got:Math.round(pct*ms/100),ms,pct}})};
+}
+/** عرض موحّد لأي ملف — بطاقة لاعب كاملة */
+function profileView(p,backCall){
+ const t=TIERS[p.tierIx]||TIERS[0];
+ const aw=achWall(p);
+ go(`<div class="scr on">${p.me?tbar('ملفي'):tb('ملف اللاعب',backCall||"tab('play')")}
  <div class="orn"><div class="in">${ornCorners()}
- <div style="display:flex;align-items:center;gap:13px">
- <div style="border-radius:50%;padding:2.5px;flex-shrink:0;
-  background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer" onclick="push('avScr')">
-  ${avatarArt(64)}</div>
- <div style="flex:1;min-width:0">
-  <div class="mtl" style="font-size:18px">${S.name}</div>
-  <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
-   <span class="cch" style="font-size:10px">${rk_[0]} · ${lvl(S.xp)}</span>
-   ${r.placed?`<span class="cch" style="font-size:10px;color:${tierOf(r).c};border-color:${tierOf(r).c}66">${rankLabel(r)}</span>`:''}
-  </div>
-  <div class="pbf" style="margin-top:8px"><div class="pbi" style="height:7px">
-   <i style="width:${rat(S.xp)*100}%"></i></div></div>
-  <div style="font-size:10px;color:var(--mut);margin-top:3px">${ico('book',16)} مستوى المجموعة ${colLevel()}</div>
- </div></div></div></div>
+  <div style="display:flex;align-items:center;gap:13px">
+  <div style="border-radius:50%;padding:2.5px;flex-shrink:0;background:linear-gradient(145deg,#FFE9A8,#A87518);${p.me?'cursor:pointer':''}" ${p.me?`onclick="push('avScr')"`:''}>${p.avatar}</div>
+  <div style="flex:1;min-width:0">
+   <div class="mtl" style="font-size:18px">${p.name}${p.me?'':` <span style="font-size:9px;background:var(--elev);color:var(--tx2);padding:2px 7px;border-radius:7px;font-weight:800;vertical-align:middle">لاعب آلي</span>`}</div>
+   <div style="font-size:11.5px;color:var(--gold);font-weight:800;margin-top:3px">${p.title}</div>
+   <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+    <span class="cch" style="font-size:10px">المستوى ${p.lvl}</span>
+    <span class="cch" style="font-size:10px;color:#E8B23A">${ico('medal',12)} ${aw.earned}/${aw.total} وساماً</span>
+   </div>
+  </div></div>
+ </div></div>
 
- ${banner('إحصائياتي')}
+ ${banner('الرتبة التنافسية')}
+ <div style="display:flex;align-items:center;gap:13px;background:linear-gradient(168deg,#1C2540,#0E1526);
+  border:1.5px solid ${t.c}55;border-radius:14px;padding:12px">
+  <div style="flex-shrink:0">${tierEmblem(p.tierIx,62)}</div>
+  <div style="flex:1;min-width:0">
+   <div style="font-size:15px;font-weight:900;color:${t.c}">${t.ar}${t.div?' '+(['','I','II','III'][p.div]||''):''}</div>
+   <div style="font-size:10.5px;color:var(--tx2);margin-top:2px">MMR ${p.mmr.toLocaleString('en-US')}</div>
+   <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:7px">
+    <i style="width:${Math.min(100,Math.round(p.rp/RP_PER_DIV*100))}%;background:linear-gradient(90deg,${t.c}CC,${t.c})"></i></div></div>
+   <div style="font-size:9.5px;color:var(--mut);margin-top:3px">${p.rp}/${RP_PER_DIV} نقطة للترقية</div>
+  </div>
+  <div style="text-align:center;flex-shrink:0">
+   <div style="font-size:9px;color:var(--tx2);font-weight:800;margin-bottom:3px">أعلى رتبة</div>
+   ${tierEmblem(p.bestIx,40)}
+  </div>
+ </div>
+ <div class="sl">دروع الرتب</div>
+ ${shieldRow(p.bestIx)}
+
+ ${banner('الإحصائيات')}
  ${statGrid([
-  ['الانتصارات',S.wins,'#2ECC71'],
-  ['نسبة الفوز',wr+'%','#5DCAA5'],
-  ['النجوم',totStars(),'#E8B23A'],
-  ['إجابات صحيحة',S.correct,'#378ADD'],
-  ['البطاقات',own+'/40','#B76CF0'],
-  ['بطاقات مكتملة',maxed,'#B76CF0'],
-  ['أعلى رتبة',best,'#EF9F27'],
-  ['MMR',r.mmr||1000,'#A6AEC4']
+  ['الانتصارات',p.wins.toLocaleString('en-US'),'#2ECC71'],
+  ['المباريات',p.matches.toLocaleString('en-US'),'#5DCAA5'],
+  ['نسبة الفوز',p.wr+'%','#5AC8F5'],
+  ['أفضل سلسلة',p.streak,'#EF9F27'],
+  ['إجابات صحيحة',p.correct.toLocaleString('en-US'),'#378ADD'],
+  ['النجوم',p.stars,'#E8B23A'],
+  ['البطاقات',p.own+'/40','#B76CF0'],
+  ['بطاقات مكتملة',p.maxed,'#B76CF0'],
+  ['مستوى المجموعة',p.colLv,'#5DE39A'],
+  ['التعبيرات',p.emoteN+'/28','#FF6B9D']
  ])}
- ${fav?`<div style="margin-top:11px">
-  <div style="font-size:11px;font-weight:800;color:var(--gold);margin-bottom:5px">البطاقة المفضلة</div>
-  <div style="display:flex;align-items:center;gap:11px;
-   background:linear-gradient(168deg,#1C2540,#0E1526);border:1px solid var(--bd);
-   border-radius:11px;padding:9px 11px">
-   <div style="width:46px;flex-shrink:0">${gcard(+fav[0],{sm:1})}</div>
-   <div style="flex:1"><div style="font-size:14px;font-weight:900">${cardById(+fav[0]).n}</div>
-   <div style="font-size:11px;color:var(--tx2);margin-top:2px">استُخدمت ${fav[1].uses} مرة · المستوى ${fav[1].lv}</div></div>
-  </div></div>`:''}
+
+ ${banner('جدار الأوسمة')}
+ <div style="font-size:11px;color:var(--tx2);margin-bottom:9px">${ico('medal',13)} ${p.me?'حصدتَ':'حصد'} <b class="mtl">${aw.earned}</b> من ${aw.total} وساماً — كل مسار يرتقي برونزياً ففضياً فذهبياً</div>
+ ${aw.html}
+
+ ${banner('واجهة التعبيرات')}
+ <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center;background:linear-gradient(168deg,#1C2540,#0E1526);
+  border:1px solid var(--bd);border-radius:12px;padding:11px">
+  ${p.emoteKeys.map(k=>face(k,44)).join('')}
+ </div>
 
  ${banner('بصمة المعرفة')}
- ${NETS.map(t=>{const ns=nOf(t.id),ms=ns.length*3,got=netStars(t.id);
- const pct=ms?Math.round(got/ms*100):0;
- return `<div style="margin-bottom:11px"><div style="display:flex;font-size:12.5px;align-items:center">
- <span style="flex:1">${ico(t.i,15)} ${t.n}</span>
- <span style="font-size:11px;color:var(--tx2);margin-left:8px">${ico('star',14)} ${got}/${ms}</span>
- <span class="mtl" style="font-size:12.5px">${pct}%</span></div>
- <div class="pbf" style="margin-top:5px"><div class="pbi" style="height:7px">
- <i style="width:${pct}%;background:linear-gradient(90deg,${t.c}CC,${t.c})"></i></div></div></div>`}).join('')}
+ ${p.nets.map(x=>`<div style="margin-bottom:11px"><div style="display:flex;font-size:12.5px;align-items:center">
+  <span style="flex:1">${ico(x.i,15)} ${x.n}</span>
+  <span style="font-size:11px;color:var(--tx2);margin-left:8px">${ico('star',14)} ${x.got}/${x.ms}</span>
+  <span class="mtl" style="font-size:12.5px">${x.pct}%</span></div>
+  <div class="pbf" style="margin-top:5px"><div class="pbi" style="height:7px">
+  <i style="width:${x.pct}%;background:linear-gradient(90deg,${x.c}CC,${x.c})"></i></div></div></div>`).join('')}
+ ${p.me&&S.badges.length?`${banner('الشارات')}<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+  ${S.badges.map(b2=>`<span class="cch" style="border-color:var(--gold)">${ico('medal',16)} <span class="mtl" style="font-size:11px">${b2}</span></span>`).join('')}</div>`:''}
  </div>`);
 }
+function profScr(){profileView(myProfile())}
+function lbProf(name,x){profileView(rivalProfile(name,{mmrHint:800+Math.round(x/8)}),'lbScr()')}
+function rivalProf(name){const rv=RIVALS.find(v=>v.n===name);
+ profileView(rivalProfile(name,rv?{t:rv.t,mmrHint:(S.ranked&&S.ranked.mmr||1000)+((hashStr(name)%260)-130)}:{}),"tab('play')")}
 
 // ═══════════ حفظ التقدّم ═══════════
 // يعمل في التطبيق الفعلي عبر Firestore — وهنا محليًا للمعاينة
