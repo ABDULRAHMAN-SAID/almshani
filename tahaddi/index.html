@@ -525,7 +525,8 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .iapn{font-size:11.5px;font-weight:800;margin-top:6px}
 .iapg2{font-size:13px;font-weight:900;color:var(--gem);margin-top:3px}
 .usd{display:inline-block;margin-top:8px;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
- font-size:13px;font-weight:900;border-radius:10px;padding:4px 14px;box-shadow:0 3px 0 #14522F}
+ font-size:15px;font-weight:900;border-radius:11px;padding:5px 16px;box-shadow:0 3px 0 #14522F,0 5px 12px rgba(46,204,113,.3);
+ direction:ltr;letter-spacing:.3px}
 .usdbtn{width:auto;padding:8px 14px;font-size:12.5px;white-space:nowrap}
 .usdbig{font-size:30px;font-weight:900;color:#2ECC71;margin:6px 0 4px}
 .sandbox{display:inline-flex;align-items:center;gap:5px;background:rgba(55,138,221,.12);
@@ -17134,12 +17135,12 @@ function playScr(){
  ${seasonHero()}
  ${dailyRewardsRow()}
  <div style="display:flex;gap:9px;margin-top:12px">
- <div onclick="seasonScr()" style="flex:1;cursor:pointer;background:linear-gradient(168deg,#1C2540,#0E1526);
-  border:1px solid var(--bd);border-radius:13px;padding:11px">
+ <div onclick="evtScr()" style="flex:1;cursor:pointer;background:linear-gradient(168deg,#2A1C40,#150E26);
+  border:1px solid #4A2F5C;border-radius:13px;padding:11px">
   <div style="display:flex;align-items:center;gap:7px">${ico('flame',16)}
    <span style="font-size:11px;color:var(--tx2)">الحدث الحالي</span></div>
   <div style="font-weight:800;font-size:13px;margin-top:5px">ليلة المزايدة</div>
-  <div style="font-size:10px;color:var(--tx2);margin-top:2px">ينتهي بعد يوم 14 ساعة</div></div>
+  <div style="font-size:10px;color:var(--warn);margin-top:2px">${evtLeft()?'ينتهي بعد '+evtLeft():'انتهى'}</div></div>
  <div onclick="seasonScr()" style="flex:1;cursor:pointer;background:linear-gradient(168deg,#1C2540,#0E1526);
   border:1px solid var(--bd);border-radius:13px;padding:11px">
   <div style="display:flex;align-items:center;gap:7px">${ico('ticket',16)}
@@ -17147,6 +17148,7 @@ function playScr(){
   <div style="font-weight:800;font-size:13px;margin-top:5px">أرشيف الزمن</div>
   <div style="font-size:10px;color:var(--tx2);margin-top:2px">المستوى ${szLv()}/100 · ${SZ().xp%100}/100</div></div>
  </div>
+ <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:14px">نسخة تجريبية ${APP_VER}</div>
  </div>`);
 }
 
@@ -17211,6 +17213,54 @@ function dailyRewardsRow(){
  </div>`;
 }
 
+// ── حدث ليلة المزايدة: محدود الوقت، أهدافه ومكافآته مستقلة عن الموسم ──
+const APP_VER='1.7';
+const EVT_END=new Date('2026-09-06T21:00:00Z');
+function EV(){if(!S.evt)S.evt={plays:0,wins:0,claimed:[]};return S.evt}
+const EVT_GOALS=[
+ {k:'p3', n:'العب 3 جولات أثناء الحدث', need:3, of:()=>EV().plays, r:{t:'gems',v:30}, ri:'gem',  rn:'30 جوهرة'},
+ {k:'w3', n:'افز بـ3 جولات',            need:3, of:()=>EV().wins,  r:{t:'gems',v:60}, ri:'gem',  rn:'60 جوهرة'},
+ {k:'w7', n:'افز بـ7 جولات',            need:7, of:()=>EV().wins,  r:{t:'wild',r:'epic',v:1}, ri:'wild', rn:'جوكر ملحمي'},
+ {k:'p15',n:'العب 15 جولة',             need:15,of:()=>EV().plays, r:{t:'gems',v:120},ri:'chest',rn:'صندوق: 120 جوهرة'}
+];
+function evtLeft(){const ms=EVT_END-Date.now();if(ms<=0)return null;
+ const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000);
+ return d>0?`${d} يوم و ${h} ساعة`:`${h} ساعة`}
+function evtClaim(k){
+ const g=EVT_GOALS.find(x=>x.k===k),ev=EV();
+ if(!g||ev.claimed.includes(k))return;
+ if(g.of()<g.need){toast('لم يكتمل الهدف بعد');return}
+ ev.claimed.push(k);grantRewards([g.r]);saveState();
+ toast('استلمت مكافأة الحدث 🎉');if(window.FX)FX.correct(4);evtScr();
+}
+function evtScr(){
+ const left=evtLeft(),ev=EV();
+ go(`<div class="scr on">${tb('الحدث')}
+ <div class="orn"><div class="in">${ornCorners()}
+ <div style="text-align:center">
+ <div style="font-size:30px">${ico('flame',26)}</div>
+ <div class="mtl" style="font-size:20px;margin-top:4px">ليلة المزايدة</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">حدث محدود: اجمع الانتصارات وأنجز الأهداف<br>قبل انتهاء الوقت واقبض مكافآت لا تتكرر</div>
+ ${left?`<div class="cch" style="display:inline-flex;margin-top:10px;color:var(--warn)">${ico('timer',13)} ينتهي بعد ${left}</div>`
+  :`<div class="cch" style="display:inline-flex;margin-top:10px;color:var(--no)">انتهى الحدث</div>`}
+ <div style="display:flex;gap:8px;justify-content:center;margin-top:11px">
+  <span class="cch">${ico('play',12)} جولاتك: <b>${ev.plays}</b></span>
+  <span class="cch" style="color:var(--ok)">${ico('trophy',12)} انتصاراتك: <b>${ev.wins}</b></span></div>
+ ${left?`<button class="btn gd" style="margin-top:13px" onclick="vsScr()">${ico('swords',15)} العب جولة الحدث الآن</button>`:''}
+ </div></div></div>
+ <div class="sl">أهداف الحدث</div>
+ ${EVT_GOALS.map(g=>{const cur=Math.min(g.need,g.of()),done=cur>=g.need,claimed=ev.claimed.includes(g.k);
+ return `<div class="li"><div class="lr">
+  <span style="font-size:21px;color:${claimed?'var(--mut)':'var(--gold)'}">${ico(g.ri,18)}</span>
+  <div class="lb"><div class="lt" style="${claimed?'opacity:.5':''}">${g.n}</div>
+  <div class="ls">${g.rn}</div>
+  <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:6px"><i style="width:${cur/g.need*100}%"></i></div></div></div>
+  ${claimed?`<span style="color:var(--ok)">${ico('check',15)}</span>`
+   :done?`<button class="btn gd usdbtn" onclick="evtClaim('${g.k}')">استلام</button>`
+   :`<span style="font-size:11px;color:var(--mut);font-weight:800">${cur}/${g.need}</span>`}
+ </div></div>`}).join('')}
+ <div class="note">جولات التدريب ضد المنافس تُحتسب في الحدث — العب من الزر أعلاه</div></div>`);
+}
 // ── الموسم: تذكرة معركة كاملة — 100 مستوى بمسارين مجاني ومميز ──
 function SZ(){if(!S.szn)S.szn={xp:0,cf:[],cp:[],prem:false};return S.szn}
 const SZ_MAX=100,SZ_STEP=100,SZ_PASS_COST=950,SZ_END=new Date('2026-10-12T00:00:00Z');
@@ -17858,6 +17908,8 @@ function quit(){
 }
 
 function done(){
+ if(G.done)return; // صمام: نقرة مزدوجة على «التالي» كانت تضاعف الغنائم والعدّادات
+ G.done=true;
  clearInterval(G.tm);
  const acc=G.ok/G.qs.length,bf=G.mm!==null&&G.mis>G.mm;
  let st=0;
@@ -17877,6 +17929,7 @@ function done(){
  S.ach.stars_15=totStars();
  S.ach.all_cat=Object.keys(S.nets).length;
  const szG=Math.round(xp*.8)+(st>0?30:10);SZ().xp=Math.min(SZ_MAX*SZ_STEP,SZ().xp+szG);
+ if(evtLeft()){EV().plays++;if(G.vs?G.pts>G.vs.score:ps)EV().wins++}
  S.xp+=xp;S.coins+=co;S.gems+=gm;S.matches++;saveState();
  if(ps){S.wins++;trk('first_win');trk('wins_10');if(!G.anyP)trk('no_help')}
  const vsWin=G.vs?G.pts>G.vs.score:null;
