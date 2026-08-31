@@ -12985,6 +12985,8 @@ thumbs:{b:['#4E86D8','#16346E'],full:1,a:'<linearGradient id="gth" x1="0" y1="0"
 shake:{b:['#3E9E72','#0F4A30'],full:1,a:'<linearGradient id="gsh1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFDFB4"/><stop offset="1" stop-color="#DC9C60"/></linearGradient><linearGradient id="gsh2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C99560"/><stop offset="1" stop-color="#9A6636"/></linearGradient><path d="M4 24.5 L14 24.5 L14 33.5 L4 33.5 Z" fill="#2E5EA8"/><path d="M14 24.5 L14 33.5" stroke="#1C3E78" stroke-width="1.2"/><path d="M44 20 L34 20 L34 29 L44 29 Z" fill="#A83A3A"/><path d="M34 20 L34 29" stroke="#7A2424" stroke-width="1.2"/><path d="M13 25.5 Q17.5 23.5 21 26 L28.5 31.5 Q30.8 33.4 29 35.6 Q27.2 37.6 24.8 36 L17 30.5 Q13.5 28.5 13 25.5 Z" fill="url(#gsh1)"/><path d="M35 21 Q30.5 19.5 27 22 L20 27.5 Q17.8 29.4 19.6 31.6 Q21.4 33.4 23.8 32 L31.5 26.5 Q34.8 24.3 35 21 Z" fill="url(#gsh2)"/><path d="M21.5 28.5 L27 32.4 M23.2 27.2 L28.6 31 M25 25.9 L30.2 29.6" stroke="#8A5A30" stroke-width="1.1" stroke-linecap="round"/><path d="M24 15.5 L24 11.5 M17 17.5 L14.5 14.5 M31 17.5 L33.5 14.5" stroke="#FFE9A8" stroke-width="1.8" stroke-linecap="round"/><path d="M12 40 l.8 1.8 1.8 .8 -1.8 .8 -.8 1.8 -.8 -1.8 -1.8 -.8 1.8 -.8 Z" fill="#FFE9A8" opacity=".75"/>'},
 hourglass:{b:['#7E5ED0','#2A1A5E'],full:1,a:'<linearGradient id="ghg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#C08C18"/></linearGradient><rect x="13.5" y="7.5" width="21" height="3.6" rx="1.7" fill="url(#ghg)" stroke="#8A6510" stroke-width=".6"/><rect x="13.5" y="36.9" width="21" height="3.6" rx="1.7" fill="url(#ghg)" stroke="#8A6510" stroke-width=".6"/><rect x="14.8" y="11" width="1.8" height="26" fill="#C08C18"/><rect x="31.4" y="11" width="1.8" height="26" fill="#C08C18"/><path d="M18 11.2 L30 11.2 Q30 18.5 25.3 22.5 L25.3 25.5 Q30 29.5 30 36.8 L18 36.8 Q18 29.5 22.7 25.5 L22.7 22.5 Q18 18.5 18 11.2 Z" fill="#BFE3FF" opacity=".22" stroke="#fff" stroke-opacity=".45" stroke-width=".9"/><path d="M19.8 12.5 L28.2 12.5 Q27.7 17.5 24 20.3 Q20.3 17.5 19.8 12.5 Z" fill="#F0C25A"/><rect x="23.55" y="21" width=".9" height="13.5" fill="#F0C25A"/><path d="M19 36.8 L29 36.8 Q27.6 32 24 31 Q20.4 32 19 36.8 Z" fill="#F0C25A"/><path d="M19.2 13 Q19.6 17.5 22 20" stroke="#fff" stroke-width="1" opacity=".5" fill="none"/><path d="M37.5 12 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1 Z" fill="#FFE9A8" opacity=".9"/>'}
 };
+// خامات مرسومة من المالك (مفتاح التعبير → data URI) — تُملأ من tools/build-emotes.py
+const EMO_IMG={};
 /** وجه تعبير — ميدالية معدنية بإحساس ثلاثي الأبعاد، والأسطوري يتحرك */
 function face(k,s){
  s=s||40;
@@ -13010,11 +13012,16 @@ function face(k,s){
   '<radialGradient id="evg'+k+'" cx=".5" cy=".42" r=".78"><stop offset=".55" stop-color="rgba(6,4,20,0)"/><stop offset="1" stop-color="rgba(6,4,20,.5)"/></radialGradient>'+
   (d.full?'':'<radialGradient id="esk'+k+'" cx=".36" cy=".28" r="1.05"><stop offset="0" stop-color="#FFE9C6"/><stop offset=".55" stop-color="#F0C492"/><stop offset="1" stop-color="#C68A50"/></radialGradient>')+
   '</defs>';
+ const img=EMO_IMG[k];
+ const inner=img
+  ?(t==='legendary'?'<g class="an" style="animation:emBob2 2.2s ease-in-out infinite">':'<g>')+
+   '<image href="'+img+'" x="3" y="3" width="42" height="42" preserveAspectRatio="xMidYMid slice"/></g>'
+  :'<circle cx="24" cy="24" r="20" fill="url(#ebg'+k+')"/>'+
+   (d.full?'':'<circle cx="24" cy="24" r="17.6" fill="url(#esk'+k+')"/><path d="M9.5 29 Q24 39.5 38.5 29 Q35.5 41 24 41.4 Q12.5 41 9.5 29 Z" fill="#8A5A2E" opacity=".2"/><ellipse cx="16.5" cy="12.5" rx="6" ry="3.2" fill="#fff" opacity=".3" transform="rotate(-20 16.5 12.5)"/>')+
+   d.a;
  return '<svg viewBox="0 0 48 48" width="'+s+'" height="'+s+'" class="efc">'+defs+
   '<circle cx="24" cy="24" r="21.5" fill="'+MT[2]+'"/>'+
-  '<g clip-path="url(#ecl'+k+')"><circle cx="24" cy="24" r="20" fill="url(#ebg'+k+')"/>'+
-  (d.full?'':'<circle cx="24" cy="24" r="17.6" fill="url(#esk'+k+')"/><path d="M9.5 29 Q24 39.5 38.5 29 Q35.5 41 24 41.4 Q12.5 41 9.5 29 Z" fill="#8A5A2E" opacity=".2"/><ellipse cx="16.5" cy="12.5" rx="6" ry="3.2" fill="#fff" opacity=".3" transform="rotate(-20 16.5 12.5)"/>')+
-  d.a+
+  '<g clip-path="url(#ecl'+k+')">'+inner+
   '<circle cx="24" cy="24" r="20" fill="url(#evg'+k+')"/>'+
   '<ellipse cx="24" cy="10" rx="15.5" ry="5.8" fill="#fff" opacity=".12"/>'+
   '</g>'+ring+'</svg>';
@@ -13217,22 +13224,44 @@ function avatarSVG(cfg,size){
  if(ac==='headband')acc=`<rect x="20" y="36" width="60" height="7" rx="3" fill="#E24B4A"/>
   <path d="M78 39 L90 34 M78 41 L90 46" stroke="#E24B4A" stroke-width="3" stroke-linecap="round"/>`;
 
+ const hrB=hs==='bald'?'#3A2B1E':shade(hr,-16);
+ const brows=`<path d="M32.5 44.5 Q39 41 45.5 44.2" stroke="${hrB}" stroke-width="2.8" fill="none" stroke-linecap="round"/>
+  <path d="M54.5 44.2 Q61 41 67.5 44.5" stroke="${hrB}" stroke-width="2.8" fill="none" stroke-linecap="round"/>`;
+ const nose=`<path d="M50 54 Q52.6 59.5 50 62.5 Q48.3 61.4 48.8 59.4" fill="none" stroke="${dark}" stroke-width="1.6" stroke-linecap="round" opacity=".75"/>`;
+ const blush=`<ellipse cx="33" cy="60" rx="4.6" ry="2.9" fill="#E86A6A" opacity=".3"/>
+  <ellipse cx="67" cy="60" rx="4.6" ry="2.9" fill="#E86A6A" opacity=".3"/>`;
  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
  <defs><linearGradient id="avGold" x1="0" y1="0" x2="0" y2="1">
  <stop offset="0" stop-color="#FFF0C0"/><stop offset=".5" stop-color="#E8B23A"/>
  <stop offset="1" stop-color="#A87518"/></linearGradient>
+ <radialGradient id="avSk${c.skin}" cx=".38" cy=".3" r="1.05">
+ <stop offset="0" stop-color="${shade(sk,24)}"/><stop offset=".58" stop-color="${sk}"/>
+ <stop offset="1" stop-color="${shade(sk,-26)}"/></radialGradient>
  <clipPath id="avClip"><circle cx="50" cy="50" r="48"/></clipPath></defs>
  <g clip-path="url(#avClip)">
  <rect width="100" height="100" fill="${bg}"/>
  <circle cx="50" cy="50" r="46" fill="${shade(bg,-22)}" opacity=".45"/>
  ${hairBack}
  <path d="M28 88 Q28 74 50 74 Q72 74 72 88 L72 100 L28 100 Z" fill="${dark}"/>
- <ellipse cx="50" cy="52" rx="26" ry="29" fill="${sk}"/>
+ <ellipse cx="23.5" cy="54" rx="3.8" ry="5.6" fill="${sk}"/>
+ <ellipse cx="76.5" cy="54" rx="3.8" ry="5.6" fill="${sk}"/>
+ <ellipse cx="50" cy="52" rx="26" ry="29" fill="url(#avSk${c.skin})"/>
  <ellipse cx="50" cy="52" rx="26" ry="29" fill="none" stroke="${dark}" stroke-width=".8" opacity=".5"/>
- ${beard}${hairFront}${eyes}${mouth}${acc}
+ ${beard}${hairFront}${brows}${eyes}${nose}${blush}${mouth}${acc}
+ <ellipse cx="38" cy="30" rx="14" ry="6" fill="#fff" opacity=".14" transform="rotate(-16 38 30)"/>
  </g></svg>`;
 }
 
+/** صورة الملف الشخصي: ميدالية تعبير مختارة أو الشخصية المرسومة */
+function avatarArt(size){
+ return (S.avatarEmote&&EMO_ART[S.avatarEmote]&&(S.emotes||[]).includes(S.avatarEmote))
+  ?face(S.avatarEmote,size):avatarSVG(S.av,size);
+}
+function setAvEmote(k){
+ S.avatarEmote=k;saveState();
+ toast(k?('صارت ميدالية «'+((EMOTES.find(e=>e.k===k)||{}).n||'')+'» صورة ملفك'):'عادت شخصيتك المرسومة صورة الملف');
+ drawAv();
+}
 /** يفتّح أو يعتّم لونًا */
 function shade(hex,amt){
  const n=parseInt(hex.slice(1),16);
@@ -13263,8 +13292,14 @@ function drawAv(){
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:6px 0">
  <div style="display:inline-block;border-radius:50%;padding:3px;
-  background:linear-gradient(145deg,#FFE9A8,#A87518)">${avatarSVG(avEdit,104)}</div>
+  background:linear-gradient(145deg,#FFE9A8,#A87518)">${S.avatarEmote?face(S.avatarEmote,104):avatarSVG(avEdit,104)}</div>
  <div class="mtl" style="font-size:16px;margin-top:9px">${S.name}</div></div>
+ </div></div>
+ <div style="margin:14px 0">
+ <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">صورة الملف الشخصي — شخصيتك المرسومة أو ميدالية من تعبيراتك</div>
+ <div class="cr">
+  <div onclick="setAvEmote(null)" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${!S.avatarEmote?'#E8B23A':'transparent'}">${avatarSVG(avEdit,44)}</div>
+  ${(S.emotes||[]).map(k=>`<div onclick="setAvEmote('${k}')" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${S.avatarEmote===k?'#E8B23A':'transparent'}">${face(k,44)}</div>`).join('')}
  </div></div>
  ${rows.map(r=>`<div style="margin-bottom:14px">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">${r.n}</div>
@@ -14417,7 +14452,7 @@ function introDraw(){
  </div>
  <div class="vsx" style="font-size:19px">VS</div>
  <div style="width:52px;height:52px;flex-shrink:0;border-radius:50%;overflow:hidden;
-  background:linear-gradient(145deg,#FFE9A8,#A87518);padding:3px">${avatarSVG(S.av,46)}</div>
+  background:linear-gradient(145deg,#FFE9A8,#A87518);padding:3px">${avatarArt(46)}</div>
  </div>
  <div style="display:flex;gap:7px;justify-content:center;margin-top:12px">
  ${rv.bd.map(b=>`<div style="width:34px;height:34px">${metalBadge(b,'gold')}</div>`).join('')}
@@ -15220,7 +15255,7 @@ function setSection(k){
   <div class="orn"><div class="in">${ornCorners()}
   <div style="display:flex;align-items:center;gap:12px">
   <div style="border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518)">
-   ${avatarSVG(S.av,52)}</div>
+   ${avatarArt(52)}</div>
   <div style="flex:1"><div class="mtl" style="font-size:16px">${S.name}</div>
   <div style="font-size:11px;color:var(--tx2)">${rk(S.xp)[0]}</div></div></div>
   <button class="btn g" style="margin-top:11px" onclick="push('avScr')">تعديل الشخصية</button>
@@ -16214,7 +16249,7 @@ function mHeader(){
   border-radius:14px;padding:8px 10px">
   ${M.myEmote&&Date.now()<M.myEmote.until?`<div class="ebub">${face(M.myEmote.k,38)}<div class="ebmsg">${(EMOTES.find(x=>x.k===M.myEmote.k)||{m:''}).m}</div></div>`:''}
   <div style="border-radius:50%;width:34px;height:34px;flex-shrink:0;overflow:hidden;
-   background:linear-gradient(145deg,#FFE9A8,#A87518);padding:2px">${avatarSVG(S.av,30)}</div>
+   background:linear-gradient(145deg,#FFE9A8,#A87518);padding:2px">${avatarArt(30)}</div>
   <div style="flex:1;min-width:0"><div style="font-size:11px;font-weight:700">أنت</div>
   <div style="display:flex;gap:3px;margin-top:3px">${dots(M.me,'var(--info)')}</div></div>
   <button class="ebtn" onclick="emoteBar()">${face(myEmoteDeck()[0]||'laugh',20)}</button>
@@ -17298,7 +17333,7 @@ function playScr(){
 function simpleHead(){
  return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
  <div style="border-radius:50%;padding:2px;background:linear-gradient(145deg,#8B5CF0,#4A2C9B);cursor:pointer"
-  onclick="avScr()">${avatarSVG(S.av,40)}</div>
+  onclick="avScr()">${avatarArt(40)}</div>
  <div style="flex:1;min-width:0">
   <div style="font-weight:900;font-size:13.5px">${S.name}</div>
   <div style="font-size:10.5px;color:var(--tx2)">المستوى ${lvl(S.xp)}</div></div>
@@ -17356,7 +17391,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='2.2';
+const APP_VER='2.3';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -17525,7 +17560,7 @@ function moreScr(){
  <div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;align-items:center;gap:12px">
  <div style="border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer"
-  onclick="avScr()">${avatarSVG(S.av,54)}</div>
+  onclick="avScr()">${avatarArt(54)}</div>
  <div style="flex:1"><div class="mtl" style="font-size:16px">${S.name}</div>
  <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
  <span class="cch" style="font-size:10px">${rk(S.xp)[0]}</span>
@@ -17722,7 +17757,7 @@ function phead(){
  const r=rk(S.xp);
  return `<div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;align-items:center;gap:11px">
- <div style="flex-shrink:0;border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer" onclick="avScr()">${avatarSVG(S.av,42)}</div>
+ <div style="flex-shrink:0;border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer" onclick="avScr()">${avatarArt(42)}</div>
  <div class="pinf"><div class="pnm"><span class="mtl" style="font-size:14px">${S.name}</span><span class="plv">${lvl(S.xp)}</span></div>
  <div class="pbf" style="margin-top:6px"><div class="pbi"><i style="width:${rat(S.xp)*100}%"></i></div></div>
  <div class="pxp">${r[0]} · ${S.xp} خبرة</div></div>
@@ -17980,7 +18015,7 @@ function vsBar(){
  const dots=G.qs.map((_,i)=>{const h=G.hist[i];
   return `<span class="dot ${i===G.i?'now':h===undefined?'':h?'ok':'no'}"></span>`}).join('');
  return `<div class="vs"><div class="vsp" style="border-color:var(--info)">
- <div style="width:52px;height:52px;margin:0 auto 8px;border-radius:50%;overflow:hidden;border:2px solid var(--info)">${avatarSVG(S.av,48)}</div>
+ <div style="width:52px;height:52px;margin:0 auto 8px;border-radius:50%;overflow:hidden;border:2px solid var(--info)">${avatarArt(48)}</div>
  <div class="vsn">${S.name}</div><div class="vss" style="color:var(--info)">${G.pts}</div></div>
  <div class="vsx">VS</div>
  <div class="vsp" style="border-color:var(--no)">
@@ -18243,7 +18278,7 @@ function profScr(){
  <div style="display:flex;align-items:center;gap:13px">
  <div style="border-radius:50%;padding:2.5px;flex-shrink:0;
   background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer" onclick="push('avScr')">
-  ${avatarSVG(S.av,64)}</div>
+  ${avatarArt(64)}</div>
  <div style="flex:1;min-width:0">
   <div class="mtl" style="font-size:18px">${S.name}</div>
   <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
