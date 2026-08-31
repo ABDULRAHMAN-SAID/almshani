@@ -513,27 +513,27 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .szchip.p.lock{background:rgba(232,178,58,.04)}
 
 /* ═══ المتجر الدولاري التجريبي ═══ */
-.iapg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
-.iap{position:relative;background:linear-gradient(170deg,#1E1834,#120E22);border:1px solid #3B2F5C;
+.gpkg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
+.gpk{position:relative;background:linear-gradient(170deg,#1E1834,#120E22);border:1px solid #3B2F5C;
  border-radius:14px;padding:14px 10px 12px;text-align:center;cursor:pointer;
  box-shadow:0 4px 0 #0A0F1D;transition:transform .12s}
-.iap:active{transform:translateY(3px);box-shadow:0 1px 0 #0A0F1D}
-.iap:last-child:nth-child(odd){grid-column:1/-1}
-.iapb{position:absolute;top:-8px;inset-inline:14px;background:linear-gradient(145deg,#F0C25A,#C08C18);
+.gpk:active{transform:translateY(3px);box-shadow:0 1px 0 #0A0F1D}
+.gpk:last-child:nth-child(odd){grid-column:1/-1}
+.gpkb{position:absolute;top:-8px;inset-inline:14px;background:linear-gradient(145deg,#F0C25A,#C08C18);
  color:#15100A;font-size:9px;font-weight:900;border-radius:8px;padding:2px 6px}
-.iapi{filter:drop-shadow(0 3px 8px rgba(183,108,240,.5))}
-.iapn{font-size:11.5px;font-weight:800;margin-top:6px}
-.iapg2{font-size:13px;font-weight:900;color:var(--gem);margin-top:3px}
-.usd{display:inline-block;margin-top:8px;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
+.gpki{filter:drop-shadow(0 3px 8px rgba(183,108,240,.5))}
+.gpkn{font-size:11.5px;font-weight:800;margin-top:6px}
+.gpkg2{font-size:13px;font-weight:900;color:var(--gem);margin-top:3px}
+.prc{display:inline-block;margin-top:8px;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
  font-size:15px;font-weight:900;border-radius:11px;padding:5px 16px;box-shadow:0 3px 0 #14522F,0 5px 12px rgba(46,204,113,.3);
  direction:ltr;letter-spacing:.3px}
-.usdbtn{width:auto;padding:8px 14px;font-size:12.5px;white-space:nowrap}
-.usdbig{font-size:30px;font-weight:900;color:#2ECC71;margin:6px 0 4px}
+.prcbtn{width:auto;padding:8px 14px;font-size:12.5px;white-space:nowrap}
+.prcbig{font-size:30px;font-weight:900;color:#2ECC71;margin:6px 0 4px}
 .sandbox{display:inline-flex;align-items:center;gap:5px;background:rgba(55,138,221,.12);
  border:1px solid rgba(55,138,221,.4);color:#8FC1F0;font-size:10.5px;font-weight:700;
  border-radius:9px;padding:4px 10px;margin-bottom:14px}
 
-.usdtag{display:inline-block;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
+.prctag{display:inline-block;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
  font-size:11px;font-weight:900;border-radius:8px;padding:2px 8px;margin-inline-start:6px}
 </style>
 </head>
@@ -17137,10 +17137,10 @@ function playScr(){
  <div style="display:flex;gap:9px;margin-top:12px">
  <div onclick="evtScr()" style="flex:1;cursor:pointer;background:linear-gradient(168deg,#2A1C40,#150E26);
   border:1px solid #4A2F5C;border-radius:13px;padding:11px">
-  <div style="display:flex;align-items:center;gap:7px">${ico('flame',16)}
-   <span style="font-size:11px;color:var(--tx2)">الحدث الحالي</span></div>
-  <div style="font-weight:800;font-size:13px;margin-top:5px">ليلة المزايدة</div>
-  <div style="font-size:10px;color:var(--warn);margin-top:2px">${evtLeft()?'ينتهي بعد '+evtLeft():'انتهى'}</div></div>
+  <div style="display:flex;align-items:center;gap:7px">${ico('target',16)}
+   <span style="font-size:11px;color:var(--tx2)">تحديات اليوم</span></div>
+  <div style="font-weight:800;font-size:13px;margin-top:5px">أنجزت ${evtDone()}/${EVT_GOALS.length}</div>
+  <div style="font-size:10px;color:var(--warn);margin-top:2px">تتجدد بعد ${evtLeft()}</div></div>
  <div onclick="seasonScr()" style="flex:1;cursor:pointer;background:linear-gradient(168deg,#1C2540,#0E1526);
   border:1px solid var(--bd);border-radius:13px;padding:11px">
   <div style="display:flex;align-items:center;gap:7px">${ico('ticket',16)}
@@ -17213,53 +17213,60 @@ function dailyRewardsRow(){
  </div>`;
 }
 
-// ── حدث ليلة المزايدة: محدود الوقت، أهدافه ومكافآته مستقلة عن الموسم ──
-const APP_VER='1.7';
-const EVT_END=new Date('2026-09-06T21:00:00Z');
-function EV(){if(!S.evt)S.evt={plays:0,wins:0,claimed:[]};return S.evt}
+// ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
+const APP_VER='1.8';
+function dayKey(){return new Date().toISOString().slice(0,10)}
+function EV(){
+ const d=dayKey();
+ if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,claimed:[]};
+ return S.evt;
+}
 const EVT_GOALS=[
- {k:'p3', n:'العب 3 جولات أثناء الحدث', need:3, of:()=>EV().plays, r:{t:'gems',v:30}, ri:'gem',  rn:'30 جوهرة'},
- {k:'w3', n:'افز بـ3 جولات',            need:3, of:()=>EV().wins,  r:{t:'gems',v:60}, ri:'gem',  rn:'60 جوهرة'},
- {k:'w7', n:'افز بـ7 جولات',            need:7, of:()=>EV().wins,  r:{t:'wild',r:'epic',v:1}, ri:'wild', rn:'جوكر ملحمي'},
- {k:'p15',n:'العب 15 جولة',             need:15,of:()=>EV().plays, r:{t:'gems',v:120},ri:'chest',rn:'صندوق: 120 جوهرة'}
+ {k:'p3', n:'العب 3 جولات اليوم',            need:3, of:e=>e.plays,     r:{t:'gems',v:20},  ri:'gem',   rn:'20 جوهرة'},
+ {k:'w2', n:'افز بجولتين',                    need:2, of:e=>e.wins,      r:{t:'gems',v:30},  ri:'gem',   rn:'30 جوهرة'},
+ {k:'c20',n:'أجب 20 إجابة صحيحة',            need:20,of:e=>e.correct,   r:{t:'coins',v:2500},ri:'coin', rn:'2500 عملة'},
+ {k:'s5', n:'حقق سلسلة 5 إجابات في جولة',    need:1, of:e=>e.bestStreak>=5?1:0, r:{t:'gems',v:40}, ri:'flame', rn:'40 جوهرة'},
+ {k:'pf', n:'أنهِ جولة كاملة بلا أي خطأ',     need:1, of:e=>e.perfect,   r:{t:'wild',r:'rare',v:1}, ri:'wild', rn:'جوكر نادر'},
+ {k:'h1', n:'استخدم قدرة مساعدة في جولة',    need:1, of:e=>e.helper,    r:{t:'gems',v:15},  ri:'bulb',  rn:'15 جوهرة'}
 ];
-function evtLeft(){const ms=EVT_END-Date.now();if(ms<=0)return null;
- const d=Math.floor(ms/86400000),h=Math.floor(ms%86400000/3600000);
- return d>0?`${d} يوم و ${h} ساعة`:`${h} ساعة`}
+function evtLeft(){
+ const now=new Date(),mid=new Date(now);mid.setHours(24,0,0,0);
+ const h=Math.floor((mid-now)/3600000),m=Math.floor((mid-now)%3600000/60000);
+ return h>0?`${h} ساعة و ${m} دقيقة`:`${m} دقيقة`;
+}
+function evtDone(){const e=EV();return EVT_GOALS.filter(g=>e.claimed.includes(g.k)).length}
 function evtClaim(k){
  const g=EVT_GOALS.find(x=>x.k===k),ev=EV();
  if(!g||ev.claimed.includes(k))return;
- if(g.of()<g.need){toast('لم يكتمل الهدف بعد');return}
+ if(Math.min(g.need,g.of(ev))<g.need){toast('لم يكتمل التحدي بعد');return}
  ev.claimed.push(k);grantRewards([g.r]);saveState();
- toast('استلمت مكافأة الحدث 🎉');if(window.FX)FX.correct(4);evtScr();
+ toast('استلمت جائزة التحدي 🎉');if(window.FX)FX.correct(4);evtScr();
 }
 function evtScr(){
- const left=evtLeft(),ev=EV();
- go(`<div class="scr on">${tb('الحدث')}
+ const ev=EV();
+ go(`<div class="scr on">${tb('التحديات اليومية')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center">
- <div style="font-size:30px">${ico('flame',26)}</div>
- <div class="mtl" style="font-size:20px;margin-top:4px">ليلة المزايدة</div>
- <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">حدث محدود: اجمع الانتصارات وأنجز الأهداف<br>قبل انتهاء الوقت واقبض مكافآت لا تتكرر</div>
- ${left?`<div class="cch" style="display:inline-flex;margin-top:10px;color:var(--warn)">${ico('timer',13)} ينتهي بعد ${left}</div>`
-  :`<div class="cch" style="display:inline-flex;margin-top:10px;color:var(--no)">انتهى الحدث</div>`}
+ <div style="font-size:30px">${ico('target',26)}</div>
+ <div class="mtl" style="font-size:20px;margin-top:4px">تحديات اليوم</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">ستة تحديات جديدة كل يوم — أنجزها واقبض جوائزها<br>قبل أن تتجدد وتضيع عليك</div>
+ <div class="cch" style="display:inline-flex;margin-top:10px;color:var(--warn)">${ico('timer',13)} تتجدد بعد ${evtLeft()}</div>
  <div style="display:flex;gap:8px;justify-content:center;margin-top:11px">
-  <span class="cch">${ico('play',12)} جولاتك: <b>${ev.plays}</b></span>
-  <span class="cch" style="color:var(--ok)">${ico('trophy',12)} انتصاراتك: <b>${ev.wins}</b></span></div>
- ${left?`<button class="btn gd" style="margin-top:13px" onclick="vsScr()">${ico('swords',15)} العب جولة الحدث الآن</button>`:''}
+  <span class="cch" style="color:var(--ok)">${ico('check',12)} أنجزت اليوم: <b>${evtDone()}/${EVT_GOALS.length}</b></span></div>
+ <button class="btn gd" style="margin-top:13px" onclick="vsScr()">${ico('swords',15)} العب جولة الآن</button>
  </div></div></div>
- <div class="sl">أهداف الحدث</div>
- ${EVT_GOALS.map(g=>{const cur=Math.min(g.need,g.of()),done=cur>=g.need,claimed=ev.claimed.includes(g.k);
+ <div class="sl">تحديات اليوم</div>
+ ${EVT_GOALS.map(g=>{const cur=Math.min(g.need,g.of(ev)),done=cur>=g.need,claimed=ev.claimed.includes(g.k);
  return `<div class="li"><div class="lr">
   <span style="font-size:21px;color:${claimed?'var(--mut)':'var(--gold)'}">${ico(g.ri,18)}</span>
   <div class="lb"><div class="lt" style="${claimed?'opacity:.5':''}">${g.n}</div>
   <div class="ls">${g.rn}</div>
   <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:6px"><i style="width:${cur/g.need*100}%"></i></div></div></div>
   ${claimed?`<span style="color:var(--ok)">${ico('check',15)}</span>`
-   :done?`<button class="btn gd usdbtn" onclick="evtClaim('${g.k}')">استلام</button>`
+   :done?`<button class="btn gd prcbtn" onclick="evtClaim('${g.k}')">استلام</button>`
    :`<span style="font-size:11px;color:var(--mut);font-weight:800">${cur}/${g.need}</span>`}
  </div></div>`}).join('')}
- <div class="note">جولات التدريب ضد المنافس تُحتسب في الحدث — العب من الزر أعلاه</div></div>`);
+ <div class="note">تُحتسب كل الجولات: التدريب والمستويات والمنافسة</div></div>`);
 }
 // ── الموسم: تذكرة معركة كاملة — 100 مستوى بمسارين مجاني ومميز ──
 function SZ(){if(!S.szn)S.szn={xp:0,cf:[],cp:[],prem:false};return S.szn}
@@ -17355,7 +17362,7 @@ function seasonScr(){
    <div style="font-size:10px;color:var(--tx2);margin-top:3px">المستوى ${lv} من ${SZ_MAX} · ${prog}/${SZ_STEP} نقطة للمستوى التالي</div></div>
  </div>
  ${z.prem?`<div class="cch" style="display:inline-flex;margin-top:11px;color:var(--gold)">${ico('ticket',13)} التذكرة المميزة مفعّلة 👑</div>`
-  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="usdtag">أو $9.99</span></button>`}
+  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="prctag">أو $9.99</span></button>`}
  <button class="btn g" style="margin-top:9px" onclick="szClaimAll()">${ico('gift',15)} استلام كل الجاهز</button>
  </div></div></div>
  <div class="wb" style="text-align:right;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
@@ -17929,7 +17936,9 @@ function done(){
  S.ach.stars_15=totStars();
  S.ach.all_cat=Object.keys(S.nets).length;
  const szG=Math.round(xp*.8)+(st>0?30:10);SZ().xp=Math.min(SZ_MAX*SZ_STEP,SZ().xp+szG);
- if(evtLeft()){EV().plays++;if(G.vs?G.pts>G.vs.score:ps)EV().wins++}
+ {const _e=EV();_e.plays++;if(G.vs?G.pts>G.vs.score:ps)_e.wins++;
+  _e.correct+=G.ok;_e.bestStreak=Math.max(_e.bestStreak,G.bst);
+  if(G.mis===0&&G.ok===G.qs.length)_e.perfect=1;if(G.anyP)_e.helper=1}
  S.xp+=xp;S.coins+=co;S.gems+=gm;S.matches++;saveState();
  if(ps){S.wins++;trk('first_win');trk('wins_10');if(!G.anyP)trk('no_help')}
  const vsWin=G.vs?G.pts>G.vs.score:null;
@@ -18011,7 +18020,7 @@ function paySheet(name,usd,onOk,after){
  ov.innerHTML=`<div class="qvbox">
  <div style="font-size:26px">${ico('shop',24)}</div>
  <div class="qvt">${name}</div>
- <div class="usdbig">$${usd.toFixed(2)}</div>
+ <div class="prcbig">$${usd.toFixed(2)}</div>
  <div class="sandbox">${ico('info',12)} وضع تجريبي — لن يُخصم أي مال حقيقي</div>
  <button class="btn gd" id="qvy">إتمام الشراء التجريبي</button>
  <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
@@ -18038,29 +18047,29 @@ function storeScr(){
  <span class="cch" style="font-size:14px;padding:9px 15px;color:var(--gem)">${ico('gem',15)} ${S.gems.toLocaleString('en-US')}</span></div>
 
  <div class="sl">${ico('gem',14)} باقات الجواهر</div>
- <div class="iapg">
- ${IAP.map(p=>`<div class="iap" onclick="buyIap('${p.k}')">
-  ${p.bonus?`<div class="iapb">${p.bonus}</div>`:''}
-  <div class="iapi">${ico('gem',26)}</div>
-  <div class="iapn">${p.n}</div>
-  <div class="iapg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)}</div>
-  <div class="usd">$${p.usd.toFixed(2)}</div></div>`).join('')}
+ <div class="gpkg">
+ ${IAP.map(p=>`<div class="gpk" onclick="buyIap('${p.k}')">
+  ${p.bonus?`<div class="gpkb">${p.bonus}</div>`:''}
+  <div class="gpki">${ico('gem',26)}</div>
+  <div class="gpkn">${p.n} <span style="color:#5DE39A;font-weight:900;direction:ltr;display:inline-block">$${p.usd.toFixed(2)}</span></div>
+  <div class="gpkg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)}</div>
+  <div class="prc">$${p.usd.toFixed(2)}</div></div>`).join('')}
  </div>
 
  <div class="sl">${ico('gift',15)} حزم خاصة</div>
  ${BUNDLES.map(b=>`<div class="li"><div class="lr"><span style="font-size:22px">${ico(b.k==='b2'?'ticket':'gift',18)}</span>
  <div class="lb"><div class="lt">${b.n}</div><div class="ls">${b.d}</div></div>
- <button class="btn gd usdbtn" onclick="buyBundle('${b.k}')">$${b.usd.toFixed(2)}</button></div></div>`).join('')}
+ <button class="btn gd prcbtn" onclick="buyBundle('${b.k}')">$${b.usd.toFixed(2)}</button></div></div>`).join('')}
 
  <div class="sl">${ico('coin',14)} صرف الجواهر عملاتٍ</div>
  ${EXCH.map((e,i)=>`<div class="li"><div class="lr"><span style="font-size:21px">${ico('coin',17)}</span>
  <div class="lb"><div class="lt">${e.c.toLocaleString('en-US')} عملة</div></div>
- <button class="btn usdbtn" onclick="buyExch(${i})">${ico('gem',12)} ${e.g}</button></div></div>`).join('')}
+ <button class="btn prcbtn" onclick="buyExch(${i})">${ico('gem',12)} ${e.g}</button></div></div>`).join('')}
 
  <div class="sl">${ico('wild',15)} جوكرات الترقية</div>
  ${JOKERS.map((j,i)=>`<div class="li"><div class="lr"><span style="font-size:21px;color:${RARITY[j.r].c}">${ico('wild',17)}</span>
  <div class="lb"><div class="lt">جوكر ${RARITY[j.r].n}</div><div class="ls">يرقّي أي بطاقة من ندرة ${RARITY[j.r].n}</div></div>
- <button class="btn usdbtn" onclick="buyJoker(${i})">${ico('gem',12)} ${j.g}</button></div></div>`).join('')}
+ <button class="btn prcbtn" onclick="buyJoker(${i})">${ico('gem',12)} ${j.g}</button></div></div>`).join('')}
  </div>`);
 }
 
