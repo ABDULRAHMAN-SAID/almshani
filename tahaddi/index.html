@@ -78,7 +78,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
  width:26px;height:3px;border-radius:3px;background:linear-gradient(90deg,#B8871E,#FFE9A8,#B8871E);
  box-shadow:0 0 10px rgba(232,178,58,.8)}
 .nvi.on .i{filter:drop-shadow(0 0 8px rgba(232,178,58,.65))}
-.nvi .i{font-size:19px;display:block;transition:filter .2s}
+.nvi .i{font-size:19px;display:block;transition:filter .25s,opacity .25s}
+.nvi .i svg{width:25px;height:25px;display:block;margin:0 auto}
+.nvi:not(.on) .i{filter:grayscale(.72) brightness(.82);opacity:.72}
+.nvi.mid .cir svg{width:34px;height:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
 .nvi .l{font-size:9.5px;font-weight:800;margin-top:3px;letter-spacing:.2px}
 .nvi.mid{flex:0 0 78px}
 .nvi.mid .cir{width:58px;height:58px;border-radius:50%;margin:-24px auto 0;position:relative;
@@ -15068,7 +15071,7 @@ function mEnd(){
  const res=applyMatch(r,M.oppMmr,won);
  // مكافآت
  const coins=(won?120:45)+(M.chaseBonus?80:0),xp=Math.round((M.correct||0)*12+(won?60:20));
- S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;DW().w++} saveState();
+ S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;dropBattleChest()} saveState();
  // شظايا بطاقات
  const frag=won?3:1;
  const ids=Object.keys(S.cards.owned);
@@ -17734,7 +17737,7 @@ function playScr(){
  if(!S.cards)S.cards=defaultCards();
  go(`<div class="scr on">${simpleHead()}
  ${seasonHero()}
- ${dailyRewardsRow()}
+ ${battleChestRow()}
  <div style="display:flex;gap:9px;margin-top:12px">
  <div onclick="evtScr()" style="flex:1;cursor:pointer;background:linear-gradient(168deg,#2A1C40,#150E26);
   border:1px solid #4A2F5C;border-radius:13px;padding:11px">
@@ -17751,6 +17754,7 @@ function playScr(){
  </div>
  <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:14px" onclick="devTap()">نسخة تجريبية ${APP_VER}${S.dev?' · وضع المطوّر 🔓':''}</div>
  </div>`);
+ bcTick();
 }
 
 /** رأس مبسّط — أفاتار واسم ومستوى، وعملتان فقط، لا خمس موارد */
@@ -17792,47 +17796,125 @@ function seasonHero(){
  </div></div>`;
 }
 
-/* مكافآت اليوم — كل فوز اليوم يفتح خانة، والجائزة ظاهرة وتُستلم بضغطة */
-const DW_STAGES=[
- {need:1,r:{t:'coins',v:300},i:'coin',n:'300 عملة'},
- {need:2,r:{t:'gems',v:15},i:'gem',n:'15 جوهرة'},
- {need:3,r:{t:'wild',r:'rare',v:1},i:'wild',n:'جوكر نادر'},
- {need:4,r:{t:'gems',v:50},i:'gem',n:'50 جوهرة'}
-];
-function DW(){const d=dayKey();if(!S.dw||S.dw.day!==d)S.dw={day:d,w:0,cl:[]};return S.dw}
-function dwClaim(i){
- const st=DW_STAGES[i],dw=DW();
- if(dw.cl.includes(i))return;
- if(dw.w<st.need){const m=st.need-dw.w;toast(`${ico('lock',13)} تنقصك ${m===1?'فوز واحد':m+' انتصارات'} اليوم لفتحها`);return}
- dw.cl.push(i);grantRewards([st.r]);saveState();
- toast(`${ico('gift',14)} استلمت ${st.n} 🎉`);if(window.FX)FX.win();
+/* ═══ صناديق المعارك — نظام كلاش رويال: الفوز أونلاين يُسقط صندوقًا بحظ معلَن ═══ */
+const BC_ODDS=[['knowledge',55],['rival',30],['elite',11],['legend',4]];
+const BC_TIME={knowledge:300,rival:1800,elite:7200,legend:14400}; // ثوانٍ
+const BC_LABEL={knowledge:'عادي',rival:'نادر',elite:'ملحمي',legend:'أسطوري'};
+function BC(){if(!S.bc)S.bc=[null,null,null,null];return S.bc}
+function rollBattleChest(){
+ let r=Math.random()*100;
+ for(const[k,p]of BC_ODDS){if((r-=p)<0)return k}
+ return 'knowledge';
+}
+function dropBattleChest(){
+ const bc=BC(),i=bc.findIndex(x=>!x);
+ if(i<0){setTimeout(()=>toast(`${ico('chest',14)} خانات الصناديق ممتلئة — افتح صندوقًا لتستقبل غيره`),900);return}
+ const k=rollBattleChest();
+ bc[i]={k,st:'idle'};saveState();
+ const ch=ECON.chests[k];
+ setTimeout(()=>toast(`🎁 سقط ${ch.n}${k==='legend'?' — حظ أسطوري! 👑':k==='elite'?' — حظ ممتاز!':''}`),900);
+}
+function bcFmt(s){
+ if(s>=3600)return Math.floor(s/3600)+'س '+Math.ceil(s%3600/60)+'د';
+ if(s>=60)return Math.ceil(s/60)+' دقيقة';
+ return s+' ثانية';
+}
+const bcSkipCost=s=>Math.max(1,Math.ceil(s/600)); // جوهرة لكل 10 دقائق متبقية
+function bcTap(i){
+ const bc=BC(),c=bc[i];
+ if(!c){toast(`${ico('swords',13)} افز بمباراة أونلاين ليسقط صندوق هنا`);return}
+ const ch=ECON.chests[c.k];
+ if(c.st==='unlock'){
+  const left=Math.max(0,Math.ceil((c.doneAt-Date.now())/1000));
+  if(left<=0){bcOpen(i);return}
+  const cost=bcSkipCost(left);
+  confirmSheet('فتح فوري',`متبقٍّ <b>${bcFmt(left)}</b> على فتح ${ch.n}.<br>افتحه الآن مقابل <b style="color:var(--gem)">${cost} جوهرة</b>؟`,'فتح الآن',()=>{
+   if(S.gems<cost){toast('جواهر غير كافية');return}
+   S.gems-=cost;bcOpen(i)});
+  return;
+ }
+ if(S.dev){bcOpen(i);return}
+ if(bc.some(x=>x&&x.st==='unlock'&&Date.now()<x.doneAt)){toast(`${ico('timer',13)} صندوق آخر قيد الفتح — واحد في كل مرة`);return}
+ c.st='unlock';c.doneAt=Date.now()+BC_TIME[c.k]*1000;saveState();
+ toast(`${ico('timer',13)} بدأ فتح ${ch.n} — ${bcFmt(BC_TIME[c.k])}`);
  refresh(playScr);
 }
-function dailyRewardsRow(){
- const dw=DW();
- return `<div class="sl" style="margin:14px 0 4px;display:flex;align-items:center;gap:7px">مكافآت اليوم
-  <span style="font-size:9.5px;color:var(--tx2);font-weight:700">افز مباريات لتفتحها — فزت اليوم <b style="color:var(--gold)">${dw.w}</b></span></div>
- <div style="display:flex;gap:8px">
- ${DW_STAGES.map((st,i)=>{
-   const claimed=dw.cl.includes(i), ready=!claimed&&dw.w>=st.need;
-   const stroke=claimed?'#2ECC71':ready?'#E8B23A':'#28324E';
-   return `<div style="flex:1;text-align:center;cursor:pointer" onclick="dwClaim(${i})">
-    <div style="width:100%;aspect-ratio:1;position:relative;margin:0 auto;${ready?'animation:puls 1.6s ease-in-out infinite':''}">
-    <svg viewBox="0 0 100 100" style="width:100%;height:100%">
-     <polygon points="50,4 93,27 93,73 50,96 7,73 7,27"
-      fill="${claimed?'#1B2C1F':ready?'#3A2E12':'#161D30'}" stroke="${stroke}" stroke-width="2.6"/></svg>
-    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-     color:${claimed?'#2ECC71':ready?'var(--gold)':'#68738E'}">
-     ${claimed?ico('check',20):`${ico(st.i,18)}<span style="font-size:8.5px;font-weight:900">${st.n}</span>`}</div>
-    </div>
-    <div style="font-size:9px;font-weight:800;margin-top:4px;color:${ready?'var(--gold)':claimed?'#2ECC71':'var(--tx2)'}">
-     ${claimed?'استُلمت':ready?'استلم الآن!':`فوز ${st.need}`}</div>
-   </div>`}).join('')}
- </div>`;
+function bcOpen(i){
+ const bc=BC(),c=bc[i];if(!c)return;
+ const ch=ECON.chests[c.k];
+ bc[i]=null;
+ const list=openChest(c.k);
+ grantRewards(list);saveState();
+ if(window.FX)FX.win();
+ push('rewardScr',{title:ch.n,list});
+}
+/* رسم الصناديق الأربعة — خشبي، فولاذي، ملحمي، أسطوري */
+function chestArt(k){
+ const pal={
+  knowledge:{b1:'#8A5A2B',b2:'#5C3A18',lid:'#A06A34',band:'#C9A15E',lock:'#E8C25A',glow:''},
+  rival:{b1:'#3E5F8A',b2:'#22344E',lid:'#4A76AC',band:'#9FC3EA',lock:'#D7E7FA',glow:''},
+  elite:{b1:'#6B3FA0',b2:'#3A2260',lid:'#8251C4',band:'#C9A6F5',lock:'#E8D6FF',glow:'#B76CF0'},
+  legend:{b1:'#C99A2E',b2:'#8A6210',lid:'#E8C25A',band:'#FFE9A8',lock:'#FFF7DD',glow:'#FFD75E'}
+ }[k];
+ return `<svg viewBox="0 0 40 34" style="width:100%;height:auto;overflow:visible">
+ ${pal.glow?`<ellipse cx="20" cy="17" rx="17" ry="13" fill="${pal.glow}" opacity=".28">
+   <animate attributeName="opacity" values=".18;.4;.18" dur="2.2s" repeatCount="indefinite"/></ellipse>`:''}
+ ${k==='legend'?`<g opacity=".85"><path d="M20 1 l1.3 3.2 3.4.3-2.6 2.2.8 3.3-2.9-1.8-2.9 1.8.8-3.3-2.6-2.2 3.4-.3z" fill="#FFE9A8"/></g>`:''}
+ <rect x="5" y="14" width="30" height="16" rx="3" fill="${pal.b1}" stroke="${pal.b2}" stroke-width="1.4"/>
+ <path d="M5 17 a15 9 0 0 1 30 0 v-2 a3 3 0 0 0 -3 -3 h-24 a3 3 0 0 0 -3 3 z" fill="${pal.lid}" stroke="${pal.b2}" stroke-width="1.2"/>
+ <rect x="5" y="12.6" width="30" height="3.4" rx="1.6" fill="${pal.lid}" stroke="${pal.b2}" stroke-width="1.1"/>
+ <rect x="10.5" y="8.8" width="3.2" height="21" rx="1.4" fill="${pal.band}" opacity=".9"/>
+ <rect x="26.3" y="8.8" width="3.2" height="21" rx="1.4" fill="${pal.band}" opacity=".9"/>
+ <path d="M8 9.5 a14 8 0 0 1 24 0 l-2.2 1.6 a11.6 6.6 0 0 0 -19.6 0 z" fill="${pal.lid}" stroke="${pal.b2}" stroke-width="1.1"/>
+ <rect x="16.6" y="12.5" width="6.8" height="8.4" rx="2" fill="${pal.lock}" stroke="${pal.b2}" stroke-width="1.1"/>
+ <circle cx="20" cy="15.8" r="1.5" fill="${pal.b2}"/>
+ <rect x="19.3" y="16.4" width="1.4" height="2.6" rx=".7" fill="${pal.b2}"/>
+ <path d="M7.5 15.5 h25" stroke="#000" stroke-width=".7" opacity=".18"/>
+ <ellipse cx="14" cy="10" rx="4.5" ry="1.6" fill="#FFFFFF" opacity=".22" transform="rotate(-14 14 10)"/>
+ </svg>`;
+}
+function battleChestRow(){
+ const bc=BC();
+ return `<div class="sl" style="margin:14px 0 4px;display:flex;align-items:center;gap:7px">صناديق المعارك
+  <span style="font-size:9.5px;color:var(--tx2);font-weight:700">افز أونلاين ليسقط صندوق — حظك يحدد ندرته</span></div>
+ <div id="bcRow" style="display:flex;gap:8px">
+ ${bc.map((c,i)=>{
+  if(!c)return `<div onclick="bcTap(${i})" style="flex:1;aspect-ratio:.9;border:1.5px dashed #2C3854;border-radius:13px;
+   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;background:#10162688">
+   <span style="opacity:.35">${ico('chest',22)}</span>
+   <span style="font-size:8.5px;color:var(--mut);font-weight:800">خانة فارغة</span></div>`;
+  const ch=ECON.chests[c.k];
+  const ready=c.st==='unlock'&&Date.now()>=c.doneAt;
+  const unlocking=c.st==='unlock'&&!ready;
+  return `<div onclick="bcTap(${i})" style="flex:1;aspect-ratio:.9;border:1.5px solid ${ready?'var(--gold)':ch.c+'77'};border-radius:13px;
+   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:5px 4px 6px;
+   background:linear-gradient(168deg,${ch.c}22,#0E1526);${ready?'animation:puls 1.5s ease-in-out infinite':''}">
+   <div style="width:72%">${chestArt(c.k)}</div>
+   <span style="font-size:8.5px;font-weight:900;color:${ch.c}">${BC_LABEL[c.k]}</span>
+   <span id="bcT${i}" style="font-size:8.5px;font-weight:800;color:${ready?'var(--gold)':'var(--tx2)'}">${
+    ready?'افتح! 🎉':unlocking?bcFmt(Math.ceil((c.doneAt-Date.now())/1000)):S.dev?'افتح فورًا 🔓':'اضغط للفتح'}</span>
+  </div>`}).join('')}
+ </div>
+ <div style="font-size:9px;color:var(--mut);margin-top:5px;text-align:center">الحظ المعلن:
+  ${BC_ODDS.map(([k,p])=>`${BC_LABEL[k]} ${p}%`).join(' · ')}</div>`;
+}
+/* عدّاد حي لخانات الصناديق أثناء بقاء شاشة العب مفتوحة */
+function bcTick(){
+ clearInterval(window._bcIv);
+ window._bcIv=setInterval(()=>{
+  if(!document.getElementById('bcRow')){clearInterval(window._bcIv);return}
+  (S.bc||[]).forEach((c,i)=>{
+   const el=document.getElementById('bcT'+i);
+   if(c&&c.st==='unlock'&&el){
+    const left=Math.ceil((c.doneAt-Date.now())/1000);
+    if(left<=0){clearInterval(window._bcIv);refresh(playScr)}
+    else el.textContent=bcFmt(left);
+   }});
+ },1000);
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='3.7';
+const APP_VER='3.8';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18360,6 +18442,65 @@ function phead(){
 }
 
 // ═══════════ الشريط السفلي ═══════════
+/* أيقونات مرسومة بتدرجات معدنية — لكل أيقونة معرّفاتها الخاصة */
+const NAVICO={
+ nets:`<svg viewBox="0 0 32 32"><defs>
+  <linearGradient id="nvA_g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
+  <radialGradient id="nvA_p" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#9B6CF5"/><stop offset="1" stop-color="#4A2C9B"/></radialGradient></defs>
+  <path d="M16 4.5 L27 12.5 L22.8 25.5 L9.2 25.5 L5 12.5 Z" fill="none" stroke="url(#nvA_g)" stroke-width="1.7"/>
+  <g stroke="url(#nvA_g)" stroke-width="1" opacity=".5">
+   <line x1="16" y1="4.5" x2="16" y2="15.5"/><line x1="27" y1="12.5" x2="16" y2="15.5"/>
+   <line x1="22.8" y1="25.5" x2="16" y2="15.5"/><line x1="9.2" y1="25.5" x2="16" y2="15.5"/><line x1="5" y1="12.5" x2="16" y2="15.5"/></g>
+  <circle cx="16" cy="15.5" r="4" fill="url(#nvA_p)" stroke="#FFE9A8" stroke-width="1.2"/>
+  <circle cx="14.6" cy="14.2" r="1.2" fill="#fff" opacity=".55"/>
+  <circle cx="16" cy="4.5" r="2.1" fill="url(#nvA_g)"/><circle cx="27" cy="12.5" r="2.1" fill="url(#nvA_g)"/>
+  <circle cx="22.8" cy="25.5" r="2.1" fill="url(#nvA_g)"/><circle cx="9.2" cy="25.5" r="2.1" fill="url(#nvA_g)"/>
+  <circle cx="5" cy="12.5" r="2.1" fill="url(#nvA_g)"/></svg>`,
+ cards:`<svg viewBox="0 0 32 32"><defs>
+  <linearGradient id="nvB_g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
+  <linearGradient id="nvB_p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5CF0"/><stop offset="1" stop-color="#4A2C9B"/></linearGradient>
+  <linearGradient id="nvB_p2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#A87BF7"/><stop offset="1" stop-color="#5B2FB8"/></linearGradient></defs>
+  <g transform="rotate(-16 9 24)"><rect x="4.5" y="8.5" width="11" height="16" rx="2.2" fill="url(#nvB_p)" stroke="#D9A93C" stroke-width="1.1"/></g>
+  <g transform="rotate(16 23 24)"><rect x="16.5" y="8.5" width="11" height="16" rx="2.2" fill="url(#nvB_p)" stroke="#D9A93C" stroke-width="1.1"/></g>
+  <rect x="10.4" y="6.2" width="11.2" height="17.2" rx="2.2" fill="url(#nvB_p2)" stroke="url(#nvB_g)" stroke-width="1.4"/>
+  <path d="M16 10.2 l2.7 4.6 -2.7 4.6 -2.7 -4.6 z" fill="url(#nvB_g)"/>
+  <circle cx="14.2" cy="8.6" r="1" fill="#fff" opacity=".5"/></svg>`,
+ play:`<svg viewBox="0 0 32 32"><defs>
+  <linearGradient id="nvC_s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5F8FF"/><stop offset="1" stop-color="#8C97AD"/></linearGradient>
+  <linearGradient id="nvC_g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient></defs>
+  <g transform="rotate(45 16 16)">
+   <path d="M16 2.6 l2 3 v12.4 h-4 V5.6 z" fill="url(#nvC_s)" stroke="#B9C2D4" stroke-width=".5"/>
+   <rect x="10.6" y="18.2" width="10.8" height="2.7" rx="1.3" fill="url(#nvC_g)"/>
+   <rect x="14.5" y="20.9" width="3" height="5.2" rx="1.2" fill="#7A5217"/>
+   <circle cx="16" cy="27.6" r="1.9" fill="url(#nvC_g)"/></g>
+  <g transform="rotate(-45 16 16)">
+   <path d="M16 2.6 l2 3 v12.4 h-4 V5.6 z" fill="url(#nvC_s)" stroke="#B9C2D4" stroke-width=".5"/>
+   <rect x="10.6" y="18.2" width="10.8" height="2.7" rx="1.3" fill="url(#nvC_g)"/>
+   <rect x="14.5" y="20.9" width="3" height="5.2" rx="1.2" fill="#7A5217"/>
+   <circle cx="16" cy="27.6" r="1.9" fill="url(#nvC_g)"/></g>
+  <path d="M16 12.6 l.9 1.9 2 .3 -1.5 1.4 .4 2 -1.8 -1 -1.8 1 .4 -2 -1.5 -1.4 2 -.3 z" fill="#FFF7DD" opacity=".9"/></svg>`,
+ shop:`<svg viewBox="0 0 32 32"><defs>
+  <linearGradient id="nvD_c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7BE0F5"/><stop offset="1" stop-color="#2E6FB8"/></linearGradient>
+  <linearGradient id="nvD_g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#C9921E"/></linearGradient></defs>
+  <path d="M16 5 l6.5 5.2 -6.5 16 -6.5 -16 z" fill="url(#nvD_c)" stroke="#BFEFFA" stroke-width="1"/>
+  <path d="M16 5 l6.5 5.2 h-13 z" fill="#A5EAF8" opacity=".8"/>
+  <path d="M16 5 v21.2 M9.5 10.2 h13" stroke="#fff" stroke-width=".7" opacity=".6"/>
+  <ellipse cx="7.6" cy="24.2" rx="4.6" ry="2" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
+  <ellipse cx="7.6" cy="22.1" rx="4.6" ry="2" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
+  <ellipse cx="7.6" cy="20" rx="4.6" ry="2" fill="#FFE9A8" stroke="#8A6210" stroke-width=".8"/>
+  <ellipse cx="25.4" cy="23.2" rx="4" ry="1.8" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
+  <ellipse cx="25.4" cy="21.3" rx="4" ry="1.8" fill="#FFE9A8" stroke="#8A6210" stroke-width=".8"/>
+  <circle cx="13.6" cy="8.4" r="1" fill="#fff" opacity=".85"/></svg>`,
+ more:`<svg viewBox="0 0 32 32"><defs>
+  <linearGradient id="nvE_g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
+  <radialGradient id="nvE_s" cx=".35" cy=".3" r=".95"><stop offset="0" stop-color="#EDF1F9"/><stop offset="1" stop-color="#97A2B8"/></radialGradient></defs>
+  <path d="M6.5 25 a10 12 0 0 1 -2.6 -8.6 M25.5 25 a10 12 0 0 0 2.6 -8.6" stroke="url(#nvE_g)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  <path d="M4.6 13 l1.6 2.6 M27.4 13 l-1.6 2.6 M4.2 18.6 l2.2 1.4 M27.8 18.6 l-2.2 1.4" stroke="url(#nvE_g)" stroke-width="1.4" stroke-linecap="round"/>
+  <circle cx="16" cy="12.2" r="5.2" fill="url(#nvE_s)" stroke="url(#nvE_g)" stroke-width="1.3"/>
+  <path d="M7.8 26.5 a8.5 7 0 0 1 16.4 0 z" fill="url(#nvE_s)" stroke="url(#nvE_g)" stroke-width="1.3"/>
+  <circle cx="14.2" cy="10.8" r="1.3" fill="#fff" opacity=".65"/>
+  <path d="M16 3.4 l.8 1.7 1.8.2 -1.3 1.2 .3 1.8 -1.6 -.9 -1.6.9 .3 -1.8 -1.3 -1.2 1.8 -.2 z" fill="url(#nvE_g)"/></svg>`
+};
 function nav(){
  const items=[['nets','map','الشبكات'],['cards','cards','البطاقات'],['play','swords','العب'],['shop','shop','المتجر'],['more','user','المزيد']];
  // البند 31 — شارة فقط عند فائدة حقيقية: ترقية جاهزة أو هدية جاهزة
@@ -18371,8 +18512,8 @@ function nav(){
    font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;
    padding:0 4px">${b>9?'9+':b}</span>`:'';
   return k==='play'
-   ?`<div class="nvi mid ${cur===k?'on':''}" onclick="tab('${k}')"><div class="cir">${ico(i,24)}</div><div class="l">${l}</div></div>`
-   :`<div class="nvi ${cur===k?'on':''}" style="position:relative" onclick="tab('${k}')">${dot}<span class="i">${ico(i,20)}</span><span class="l">${l}</span></div>`;
+   ?`<div class="nvi mid ${cur===k?'on':''}" onclick="tab('${k}')"><div class="cir">${NAVICO.play}</div><div class="l">${l}</div></div>`
+   :`<div class="nvi ${cur===k?'on':''}" style="position:relative" onclick="tab('${k}')">${dot}<span class="i">${NAVICO[k]}</span><span class="l">${l}</span></div>`;
  }).join('');
 }
 function tab(k){cur=k;nav();NAV=[];hideArena();
@@ -18724,7 +18865,7 @@ function done(){
  S.ach.stars_15=totStars();
  S.ach.all_cat=Object.keys(S.nets).length;
  const szG=Math.round(xp*.8)+(st>0?30:10);SZ().xp=Math.min(SZ_MAX*SZ_STEP,SZ().xp+szG);
- {const _e=EV();_e.plays++;if(G.vs?G.pts>G.vs.score:ps){_e.wins++;DW().w++}
+ {const _e=EV();_e.plays++;if(G.vs?G.pts>G.vs.score:ps)_e.wins++;
   _e.correct+=G.ok;_e.bestStreak=Math.max(_e.bestStreak,G.bst);
   if(G.mis===0&&G.ok===G.qs.length)_e.perfect=1;if(G.anyP)_e.helper=1}
  S.xp+=xp;S.coins+=co;S.gems+=gm;S.matches++;saveState();
