@@ -17214,7 +17214,7 @@ function dailyRewardsRow(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='1.8';
+const APP_VER='1.9';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18020,6 +18020,7 @@ function paySheet(name,usd,onOk,after){
  ov.innerHTML=`<div class="qvbox">
  <div style="font-size:26px">${ico('shop',24)}</div>
  <div class="qvt">${name}</div>
+ <div class="qvd" style="margin-bottom:2px">السعر: <b style="color:#5DE39A">$${usd.toFixed(2)} دولار أمريكي</b></div>
  <div class="prcbig">$${usd.toFixed(2)}</div>
  <div class="sandbox">${ico('info',12)} وضع تجريبي — لن يُخصم أي مال حقيقي</div>
  <button class="btn gd" id="qvy">إتمام الشراء التجريبي</button>
@@ -18051,14 +18052,14 @@ function storeScr(){
  ${IAP.map(p=>`<div class="gpk" onclick="buyIap('${p.k}')">
   ${p.bonus?`<div class="gpkb">${p.bonus}</div>`:''}
   <div class="gpki">${ico('gem',26)}</div>
-  <div class="gpkn">${p.n} <span style="color:#5DE39A;font-weight:900;direction:ltr;display:inline-block">$${p.usd.toFixed(2)}</span></div>
-  <div class="gpkg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)}</div>
-  <div class="prc">$${p.usd.toFixed(2)}</div></div>`).join('')}
+  <div class="gpkn">${p.n}</div>
+  <div class="gpkg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)} <b style="color:#5DE39A">= $${p.usd.toFixed(2)} دولار</b></div>
+  <div class="prc">شراء بـ $${p.usd.toFixed(2)}</div></div>`).join('')}
  </div>
 
  <div class="sl">${ico('gift',15)} حزم خاصة</div>
  ${BUNDLES.map(b=>`<div class="li"><div class="lr"><span style="font-size:22px">${ico(b.k==='b2'?'ticket':'gift',18)}</span>
- <div class="lb"><div class="lt">${b.n}</div><div class="ls">${b.d}</div></div>
+ <div class="lb"><div class="lt">${b.n} — <b style="color:#5DE39A">$${b.usd.toFixed(2)} دولار</b></div><div class="ls">${b.d}</div></div>
  <button class="btn gd prcbtn" onclick="buyBundle('${b.k}')">$${b.usd.toFixed(2)}</button></div></div>`).join('')}
 
  <div class="sl">${ico('coin',14)} صرف الجواهر عملاتٍ</div>
