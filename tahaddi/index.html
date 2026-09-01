@@ -18000,7 +18000,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.3';
+const APP_VER='5.4';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18344,7 +18344,7 @@ function rmLeave(silent){
  RM.mm=0;clearInterval(_mmTm);
  // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
  try{cancelAnimationFrame(_ca.anim)}catch(e){}
- _ca.sim=null;_ca.drag=null;_ca.aim=null;_ca.slide=0;_ca.sx=null;_ca.anim=null;
+ _ca.sim=null;_ca.drag=null;_ca.aim=null;_ca.slide=0;_ca.sx=null;_ca.anim=null;_ca.grab=0;
  if(!silent)partyScr();
 }
 function rmSend(o){const c=RMcap;if(!c||!RM.code)return;
@@ -19488,7 +19488,20 @@ function caRender(rest){
   cx.fillStyle=md?'rgba(246,246,240,.30)':'rgba(255,214,138,.20)';cx.fillRect(0,W,W,2);
   cx.save();cx.setLineDash([W*.016,W*.013]);cx.lineWidth=W*.004;
   cx.strokeStyle=md?'rgba(246,246,240,.35)':'rgba(255,214,138,.18)';
-  cx.beginPath();cx.moveTo(0,H-W*.022);cx.lineTo(W,H-W*.022);cx.stroke();cx.restore();
+  cx.beginPath();cx.moveTo(0,H-W*.014);cx.lineTo(W,H-W*.014);cx.stroke();cx.restore();
+  // مسار السحب: اليد نفسها هي المقبض — تحريك مريح بالإبهام
+  if(RM.ca&&RM.ca.turn===RM.me&&!_ca.sim){
+   const ty=W+(H-W)*.60, x0=(CA_SR+26)*sc, x1=(CA_R-CA_SR-26)*sc;
+   cx.lineCap='round';
+   cx.strokeStyle='rgba(0,0,0,.55)';cx.lineWidth=11;
+   cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
+   cx.strokeStyle=md?'rgba(246,246,240,.34)':'rgba(255,214,138,.40)';cx.lineWidth=3.4;
+   cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
+   cx.fillStyle=md?'rgba(246,246,240,.8)':'rgba(255,233,168,.85)';
+   cx.font='bold '+Math.round(17*sc)+'px system-ui';
+   cx.textAlign='center';cx.textBaseline='middle';
+   cx.fillText('‹',x0-11,ty);cx.fillText('›',x1+11,ty);
+  }
  }
  let pcs=_ca.sim?_ca.sim.pcs:(rest||(RM.ca?RM.ca.pcs:[])).map(p=>({x:p.x,y:p.y,t:p.t,r:CA_PR}));
  // الضارب ظاهر دائمًا على قاعدتك — لا يظهر عند السحب فقط
@@ -19530,9 +19543,6 @@ function caRender(rest){
   const by=(CA_R-CA_SR-22)*sc;
   cx.setLineDash([5,7]);cx.strokeStyle='rgba(255,233,168,.55)';cx.lineWidth=2;
   cx.beginPath();cx.moveTo((CA_SR+42)*sc,by);cx.lineTo((CA_R-CA_SR-42)*sc,by);cx.stroke();cx.setLineDash([]);
-  cx.fillStyle='rgba(255,233,168,.85)';cx.font='bold '+Math.round(15*sc)+'px system-ui';
-  cx.textAlign='center';cx.textBaseline='middle';
-  cx.fillText('‹',(CA_SR+30)*sc,by);cx.fillText('›',(CA_R-CA_SR-30)*sc,by);
  }
  // خط تصويب الخصم — تراه وهو يفكّر ويسدّد
  if(_ca.aim&&!_ca.sim){
@@ -19575,25 +19585,31 @@ function caInit(){
  const pos=e=>{const r=cv.getBoundingClientRect();
   return [(e.clientX-r.left)*CA_R/r.width,(e.clientY-r.top)*CA_R/r.width]};
  const BASE=()=>CA_R-CA_SR-22;
+ const CACL=v=>Math.max(CA_SR+26,Math.min(CA_R-CA_SR-26,v));
  cv.onpointerdown=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
   const[x,y]=pos(e);
   const sy=BASE();
   if(_ca.sx==null)_ca.sx=CA_R/2;
-  // لمسة على شريط القاعدة = تحريك الضارب يمينًا ويسارًا · وفوقه = تصويب
-  if(y>sy-52){_ca.slide=1;_ca.sx=Math.max(CA_SR+26,Math.min(CA_R-CA_SR-26,x))}
-  else{_ca.slide=0;_ca.drag={sx:_ca.sx,sy,dx:0,dy:0}}
+  // اسحب اليد على المسند أو اقبض الضارب نفسه لتحريكه — بلا قفزات
+  if(y>CA_R){
+   _ca.slide=1;_ca.grab=Math.abs(x-_ca.sx)<38?x-_ca.sx:0;_ca.sx=CACL(x-_ca.grab);
+  }else if(Math.hypot(x-_ca.sx,y-sy)<=CA_SR*2.4){
+   _ca.slide=1;_ca.grab=x-_ca.sx;
+  }else{
+   // التصويب: اسحب من أي نقطة على اللوح — المسافة والاتجاه هما القوة
+   _ca.slide=0;_ca.drag={sx:_ca.sx,sy,px:x,py:y,dx:0,dy:0};
+  }
   try{cv.setPointerCapture(e.pointerId)}catch(x2){}
   caRender();
  };
  cv.onpointermove=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
   const[x,y]=pos(e);
-  if(_ca.slide){e.preventDefault();
-   _ca.sx=Math.max(CA_SR+26,Math.min(CA_R-CA_SR-26,x));caRender();return}
+  if(_ca.slide){e.preventDefault();_ca.sx=CACL(x-(_ca.grab||0));caRender();return}
   if(!_ca.drag)return;e.preventDefault();
-  _ca.drag.dx=Math.max(-95,Math.min(95,x-_ca.drag.sx));
-  _ca.drag.dy=Math.max(-95,Math.min(95,y-_ca.drag.sy));
+  _ca.drag.dx=Math.max(-95,Math.min(95,x-_ca.drag.px));
+  _ca.drag.dy=Math.max(-95,Math.min(95,y-_ca.drag.py));
   caRender();
  };
  cv.onpointerup=cv.onpointercancel=()=>{
@@ -19627,7 +19643,7 @@ function rmCarrom(R){
  <div style="display:flex;justify-content:center;margin-top:6px">
   <button onclick="caSkinTog()" style="background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">🎨 بدّل شكل اللوح</button>
  </div>
- <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب على القاعدة ثم اسحب للخلف وأفلت 🎯':'دور '+nm(C.turn)+' — يصوّب…'}</div>
+ <div class="caTurn ${mine?'me':''}">${mine?'دورك — اسحب اليد لتحريك الضارب · ثم اسحب على اللوح وأفلت 🎯':'دور '+nm(C.turn)+' — يصوّب…'}</div>
  ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}
  <div class="note">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 · إسقاط الضارب −1</div>`;
 }
