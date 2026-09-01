@@ -18,7 +18,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 #app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:76px}
 .scr{display:none;padding:14px 14px 20px;animation:fi .28s ease}
 .scr.on{display:block}
-@keyframes fi{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes fi{from{transform:translateY(8px)}to{transform:none}}
 
 /* حركات */
 @keyframes flt{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -667,16 +667,16 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  animation:aur 18s ease-in-out infinite alternate}
 @keyframes aur{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(2%,2%,0) scale(1.08)}}
 .scr{animation:fi3d .34s cubic-bezier(.22,1.1,.36,1);transform-origin:top center}
-@keyframes fi3d{from{opacity:0;transform:perspective(900px) translateY(14px) rotateX(4deg) scale(.985)}
- to{opacity:1;transform:none}}
+@keyframes fi3d{from{transform:perspective(900px) translateY(14px) rotateX(4deg) scale(.985)}
+ to{transform:none}}
 .qtx{animation:qflip .45s cubic-bezier(.2,1.2,.35,1);transform-origin:center bottom;
  box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 0 0 1px rgba(123,79,224,.14)}
-@keyframes qflip{from{opacity:0;transform:perspective(700px) rotateX(-56deg) translateY(-10px)}
+@keyframes qflip{from{transform:perspective(700px) rotateX(-56deg) translateY(-10px)}
  to{opacity:1;transform:none}}
 .op{animation:opin .4s cubic-bezier(.2,1.2,.4,1) backwards;box-shadow:0 3px 10px rgba(0,0,0,.22)}
 .ops .op:nth-child(1){animation-delay:.03s}.ops .op:nth-child(2){animation-delay:.09s}
 .ops .op:nth-child(3){animation-delay:.15s}.ops .op:nth-child(4){animation-delay:.21s}
-@keyframes opin{from{opacity:0;transform:perspective(700px) rotateX(-14deg) translateY(12px)}to{opacity:1;transform:none}}
+@keyframes opin{from{transform:perspective(700px) rotateX(-14deg) translateY(12px)}to{transform:none}}
 .op:active{transform:scale(.965) translateY(1px)}
 .op.ok{animation:okp .5s cubic-bezier(.2,1.4,.4,1);box-shadow:0 0 18px rgba(46,204,113,.35)}
 @keyframes okp{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
@@ -701,7 +701,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 #floor3d.on{opacity:1}
 #floor3d::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,transparent 40%,#080B14 96%)}
 .qbox{animation:qdrop .5s cubic-bezier(.2,1.25,.4,1);transform-origin:center bottom}
-@keyframes qdrop{from{opacity:0;transform:perspective(700px) rotateX(-40deg) translateY(-18px)}to{opacity:1;transform:none}}
+@keyframes qdrop{from{transform:perspective(700px) rotateX(-40deg) translateY(-18px)}to{transform:none}}
 .qbox::after{content:'';position:absolute;left:8%;right:8%;bottom:-14px;height:16px;border-radius:50%;
  background:radial-gradient(50% 100% at 50% 50%,rgba(123,79,224,.42),transparent 75%);filter:blur(3px)}
 .qop2{box-shadow:0 5px 0 #0A0F1D,0 9px 18px rgba(0,0,0,.4);animation:opin3 .42s cubic-bezier(.2,1.2,.4,1) backwards}
@@ -17891,7 +17891,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='4.8';
+const APP_VER='4.9';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -19080,7 +19080,8 @@ function ptExit(){
 function partyScr(){
  clearInterval(PT&&PT.tm);PT=null;rmLeave(1);
  go(`<div class="scr on">${NAV.length>1?tbar('ليلة العائلة'):tb('ليلة العائلة',"push('playModesScr')")}
- <div class="wb" style="text-align:right">${ico('group',13)} ألعاب جماعية للعائلة والأصدقاء — اختر طريقة اللعب ثم اللعبة.</div>
+ <div class="wb" style="text-align:right">${ico('group',13)} ألعاب جماعية للعائلة والأصدقاء — اختر طريقة اللعب ثم اللعبة.<br>
+ <b>أونو</b> و<b>كيرم</b> تحتاجان «غرفة بكود» لأن لكل لاعب يده ولوحه على هاتفه.</div>
  <div class="sl" style="margin:12px 0 8px">طريقة اللعب</div>
  <div style="display:flex;gap:9px">
   <div onclick="ptMode('pass')" class="ptWay ${ptWay==='pass'?'on':''}">
@@ -19091,21 +19092,30 @@ function partyScr(){
    <div class="d">كلٌّ من هاتفه</div></div>
  </div>
  <div class="sl" style="margin:16px 0 8px">اللعبة</div>
- ${[['🤫','برا السالفة','الكل يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة!','barra',1],
-    ['🕵️','مافيا','مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي','mafia',1],
-    ['🎨','مسابقة الرسم','كلمة واحدة والكل يرسم — صوتوا لأفضل لوحة','draw',0]].map(([e,n,d,g,net])=>{
- const on=ptWay==='pass'||net;
- return `<div class="li" style="cursor:pointer;${on?'':'opacity:.5'}" onclick="${on?`ptOpen('${g}')`:`toast('مسابقة الرسم بتمرير الجوال فقط — اللوحات أكبر من أن تُرسل')`}"><div class="lr">
+ ${PT_GAMES.map(([e,n,d,g,pass,net])=>{
+ const on=ptWay==='pass'?pass:net;
+ const why=ptWay==='pass'?'هذه اللعبة عبر غرفة بكود فقط — كل لاعب من هاتفه':'مسابقة الرسم متاحة في الطريقتين';
+ return `<div class="li" style="cursor:pointer;${on?'':'opacity:.45'}" onclick="${on?`ptOpen('${g}')`:`ptMode('${ptWay==='pass'?'code':'pass'}')`}"><div class="lr">
   <span style="font-size:30px;flex-shrink:0">${e}</span>
-  <div class="lb"><div class="lt">${n}${ptWay==='code'&&!net?' <span style="font-size:8.5px;color:var(--warn)">تمرير فقط</span>':''}</div>
-   <div class="ls">${d}</div></div>
-  <span style="color:var(--mut)">›</span></div></div>`}).join('')}
+  <div class="lb"><div class="lt">${n}${on?'':` <span style="font-size:8.5px;color:var(--warn)">${ptWay==='pass'?'بكود فقط':'بالتمرير فقط'}</span>`}</div>
+   <div class="ls">${on?d:why}</div></div>
+  <span style="color:${on?'var(--mut)':'var(--warn)'}">›</span></div></div>`}).join('')}
  </div>`);
 }
+const PT_GAMES=[
+ ['🤫','برا السالفة','الكل يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة!','barra',1,1],
+ ['🕵️','مافيا','مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي','mafia',1,1],
+ ['🎨','مسابقة الرسم','كلمة واحدة والكل يرسم — صوتوا لأفضل لوحة','draw',1,1],
+ ['🎴','أونو','108 بطاقات · تخطي وعكس و+2 و+4 — يدك في هاتفك وحدك','uno',0,1],
+ ['⚪','كيرم','لوح خشبي بفيزياء حقيقية — صوّب واضرب وأدخل قطعك','carrom',0,1]
+];
 let ptWay='pass';
 function ptMode(w){ptWay=w;refresh(partyScr)}
 function ptOpen(g){
- if(ptWay==='code')return roomScr(g);
+ const row=PT_GAMES.find(x=>x[3]===g);
+ // لعبة لا تعمل بالطريقة الحالية → انقل للطريقة التي تدعمها بدل الفشل
+ if(row&&ptWay==='pass'&&!row[4]){ptWay='code';return roomScr(g)}
+ if(ptWay==='code'){RM.game=g;return roomScr(g)}
  ({barra:barraSetup,mafia:mafiaSetup,draw:drawSetup})[g]();
 }
 const ptCount=(min,max)=>`<div class="sl" style="margin:14px 0 8px">عدد اللاعبين</div>
