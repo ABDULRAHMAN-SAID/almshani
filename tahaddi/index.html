@@ -13421,61 +13421,7 @@ function mmrDelta(myMmr,oppMmr,won){
  return Math.round(32*((won?1:0)-exp));
 }
 
-/** تطبيق نتيجة مباراة على الحالة التنافسية */
-function applyMatch(r,oppMmr,won){
- const res={rpGain:0,promoted:false,demoted:false,protected:false,
-  oldLabel:rankLabel(r),placement:false};
- r.mmr+=mmrDelta(r.mmr,oppMmr,won);
- won?r.wins++:r.losses++;
-
- // مباريات تحديد المستوى — القاعدة الثانية عشرة
- if(!r.placed){
-  r.placementDone++;if(won)r.placementWins++;
-  res.placement=true;
-  if(r.placementDone>=5){
-   r.placed=true;
-   const w=r.placementWins;
-   if(w>=5){r.tier=2;r.div=2}       // Gold II
-   else if(w===4){r.tier=2;r.div=3} // Gold III
-   else if(w===3){r.tier=1;r.div=1} // Silver I
-   else if(w===2){r.tier=1;r.div=3} // Silver III
-   else if(w===1){r.tier=0;r.div=1} // Bronze I
-   else {r.tier=0;r.div=3}          // Bronze III
-   r.rp=0;r.protect=1;
-   r.seasonBest={tier:r.tier,div:r.div};   // رتبة التحديد هي أول «أفضل رتبة»
-  }
-  return res;
- }
-
- const d=rpDelta(r.mmr,oppMmr,won);
- res.rpGain=d;
- r.rp+=d;
-
- // صعود
- while(r.rp>=RP_PER_DIV){
-  if(r.tier>=TIERS.length-1){r.rp=RP_PER_DIV;break}
-  r.rp-=RP_PER_DIV;
-  if(r.div>1){r.div--}
-  else{r.tier++;r.div=tierOf(r).div===0?0:3}
-  res.promoted=true;
-  r.protect=1;  // حماية الصعود — القاعدة الثالثة عشرة
- }
- // هبوط
- while(r.rp<0){
-  if(r.protect>0){r.protect--;r.rp=0;res.protected=true;break}
-  if(r.tier===0&&r.div===3){r.rp=0;break}
-  r.rp+=RP_PER_DIV;
-  if(r.div<3&&tierOf(r).div!==0){r.div++}
-  else{r.tier--;r.div=1}
-  res.demoted=true;
- }
- // أفضل رتبة في الموسم
- const cur=r.tier*10+(4-r.div);
- const best=r.seasonBest.tier*10+(4-r.seasonBest.div);
- if(cur>best)r.seasonBest={tier:r.tier,div:r.div};
- res.newLabel=rankLabel(r);
- return res;
-}
+/* applyMatch القديمة حُذفت: صار resolveMatch هو المحرّك الوحيد لكل الألعاب. */
 
 /* ═══════════════════════════════════════════════════════════════════
    نواة التصنيف — تصنيف مستقلّ لكل لعبة
@@ -13714,6 +13660,7 @@ function resolveMatch(o){
    p.seasonBest={tier:p.tier,div:p.div};
   }
   out.newName=rankName(p);
+  out.rpGain=out.rp;out.oldLabel=out.oldName;out.newLabel=out.newName;
   return out;
  }
 
@@ -13738,6 +13685,7 @@ function resolveMatch(o){
  const cur=p.tier*10+(4-p.div),best=p.seasonBest.tier*10+(4-p.seasonBest.div);
  if(cur>best)p.seasonBest={tier:p.tier,div:p.div};
  out.newName=rankName(p);
+ out.rpGain=out.rp;out.oldLabel=out.oldName;out.newLabel=out.newName;
  return out;
 }
 
@@ -14712,11 +14660,11 @@ function quitMatch(force){
  if(!force){M.menu=false;M.quitAsk=true;mDraw();return}
  clearInterval(M.tm);clearInterval(M.autoTm);
  if(M.st&&M.st.timer)clearInterval(M.st.timer);
- const r=S.ranked;
- const res=applyMatch(r,M.oppMmr,false);
+ const res=resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
+  result:{won:false},opponents:[{mmr:M.oppMmr}]});
  M=null;
  $('nav').style.display='flex';
- toast('انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} RP)`:''));
+ toast('انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} نقطة تصنيف)`:''));
  rankedScr();
 }
 function toggleMenu(){M.menu=!M.menu;mDraw(1)}
@@ -14729,7 +14677,8 @@ function startRanked(intro){
  const rival=(intro&&intro.rv)||RIVALS[Math.floor(Math.random()*RIVALS.length)];
  const oppMmr=r.mmr+((hashStr(rival.n)%260)-130); // كؤوس الخصم ثابتة لهويته
  $('nav').style.display='none';   // إخفاء الشريط أثناء المباراة
- M={rounds:(intro&&intro.seq)||buildRounds(r),i:0,me:0,opp:0,streak:0,menu:false,quitAsk:false,playedThisRound:false,
+ M={mid:'kn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999),
+  rounds:(intro&&intro.seq)||buildRounds(r),i:0,me:0,opp:0,streak:0,menu:false,quitAsk:false,playedThisRound:false,
     oppMmr,oppSkill:.55+Math.min(.2,r.tier*.02),
     rival,oppHand:oppDeckFor(rival),oppKnown:[],oppLastPlayed:null,oppBlocked:null,
     vault:null,pick:null,knownNext:null,netOverrideNext:null,neutralNext:0,royalNext:0,
@@ -15218,8 +15167,8 @@ function mEnd(){
  M.ended=true;
  clearInterval(M.tm);
  const won=M.me>M.opp;   // Best of 7
- const r=S.ranked;
- const res=applyMatch(r,M.oppMmr,won);
+ const res=resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
+  result:{won:won},opponents:[{mmr:M.oppMmr}]});
  // مكافآت
  const coins=(won?120:45)+(M.chaseBonus?80:0),xp=Math.round((M.correct||0)*12+(won?60:20));
  S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;dropBattleChest()} saveState();
@@ -18052,9 +18001,9 @@ function mResult(res,won,coins,xp,frag){
  `<div class="orn" style="margin-top:18px"><div class="in">${ornCorners()}
   <div style="display:flex;align-items:center;justify-content:center;gap:10px">
   <span style="font-size:15px;font-weight:900;color:${t.c}">${rankLabel(r)}</span>
-  <span class="mtl" style="font-size:17px">${res.rpGain>=0?'+':''}${res.rpGain} RP</span></div>
+  <span class="mtl" style="font-size:17px">${res.rpGain>=0?'+':''}${res.rpGain} نقطة</span></div>
   <div class="pbf" style="margin-top:10px"><div class="pbi"><i style="width:${Math.min(100,Math.max(0,r.rp))}%"></i></div></div>
-  <div style="font-size:11.5px;color:var(--tx2);margin-top:5px">${Math.max(0,r.rp)}/${RP_PER_DIV} RP</div>
+  <div style="font-size:11.5px;color:var(--tx2);margin-top:5px">${numPair(Math.max(0,r.rp),RP_PER_DIV)} نقطة تصنيف</div>
   ${res.promoted?`<div style="color:var(--ok);font-size:13px;font-weight:800;margin-top:8px">${ico('up',14)} ترقية!</div>`:''}
   ${res.demoted?`<div style="color:var(--no);font-size:13px;font-weight:800;margin-top:8px">${ico('down',14)} هبوط</div>`:''}
   ${res.protected?`<div style="color:var(--gold);font-size:12.5px;margin-top:8px">${ico('shield',16)} حماية الصعود أنقذتك</div>`:''}
@@ -18288,7 +18237,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.10';
+const APP_VER='5.11';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18630,6 +18579,7 @@ function rmLeave(silent){
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  RM.U=null;RM.C=null;RM.uno=null;RM.ca=null;RM.hand=[];
  if(RM.solo){RM.solo=0;RMcap=null;_ca.sim=null}
+ RM.mode=null;RM.mid=null;RM.rank=null;
  RM.mm=0;clearInterval(_mmTm);
  // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
  try{cancelAnimationFrame(_ca.anim)}catch(e){}
@@ -18651,20 +18601,77 @@ function rmBind(){
   },()=>{RM.msg='انقطع الاتصال بالغرفة';if(document.getElementById('rmScr'))roomDraw()})
  ];
 }
+/* ═══ ربط نهايات المباريات بنواة التصنيف ═══
+   نقطة واحدة تترجم نتيجة كل لعبة إلى نتيجة تصنيف، ثم تسلّمها
+   resolveMatch وهي التي تقرّر: هل يمنح هذا الوضع نقاطًا أصلًا؟ */
+
+/** وضع المباراة الجارية — الغرفة والكمبيوتر لا يمنحان نقاط تصنيف */
+function rmMode(){
+ if(RM.solo)return 'bot';
+ if(RM.mode)return RM.mode;
+ return RM.code?'room':'casual';
+}
+/** معرّف مباراة فريد — يمنع احتساب النتيجة مرّتين عند تكرار البثّ */
+function rmNewMid(){
+ return (RM.code||'s')+'-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999);
+}
+/** نتيجة اللعبة بشكل يفهمه نموذج حسابها */
+function rmResultFor(gid,d){
+ const me=RM.me,n=Math.max(2,(RM.players||[]).length);
+ if(gid==='carrom'){
+  const C=RM.ca;
+  if(C&&C.col&&C.col[me]&&C.col[d.by])return {won:C.col[me]===C.col[d.by]};  // فريقان متقابلان
+  return {won:d.by===me};
+ }
+ if(gid==='uno'){
+  const rk=d.rank||[];                       // نموذجها «ترتيب» لا «فوز/خسارة»
+  if(rk.length){const i=rk.findIndex(x=>x&&x.p===me);
+   return {place:i<0?rk.length:i+1,total:Math.max(2,rk.length)}}
+  return {place:d.by===me?1:2,total:n};
+ }
+ if(gid==='drawing'){
+  const i=(d.rank||[]).findIndex(x=>x&&x.p===me);
+  return {place:i<0?n:i+1,total:n};
+ }
+ if(gid==='mafia'){
+  const amMafia=RM.role==='مافيا';
+  return {teamWon:(d.win==='mafia')?amMafia:!amMafia,completed:true};
+ }
+ if(gid==='outsider'){
+  const amSpy=RM.role==='spy', caught=!!(d.acc&&d.sp&&d.acc===d.sp);
+  return {roundsWon:(amSpy?!caught:caught)?1:0,rounds:1};
+ }
+ return null;
+}
+/** تُنادى عند وصول نهاية المباراة — لكل مباراة مرّة واحدة */
+function rmSettle(d){
+ try{
+  const gid=gameIdOfRoom(RM.game);if(!gid)return null;
+  const res=rmResultFor(gid,d);if(!res)return null;
+  const opp=(RM.players||[]).filter(x=>x&&x.peer!==RM.me).map(()=>({mmr:1000}));
+  if(!RM.mid)RM.mid=rmNewMid();
+  const out=resolveMatch({gameId:gid,mode:rmMode(),matchId:RM.mid,
+   result:res,opponents:opp});
+  if(out&&out.applied){RM.rank=out;saveState()}
+  return out;
+ }catch(e){return null}
+}
+
 /* استقبال الرسائل — كل رسالة حالة كاملة لا فرقًا */
 function rmOn(d,m){
  const me=RM.me;
  if(d.t==='start'){RM.game=d.g;RM.phase=d.g==='draw'?'paint':d.g==='uno'?'uno':d.g==='carrom'?'carrom':'deal';
+  RM.mid=d.mid||rmNewMid();RM.rank=null;
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
  else if(d.t==='role'&&d.to===me){RM.role=d.r;RM.word=d.w||'';RM.cat=d.cat||RM.cat}
  else if(d.t==='ph'){RM.phase=d.p;RM.msg=d.m||'';if(d.p==='vote')RM.votes={};
   if(d.secs)rmTimer(d.secs)}
- else if(d.t==='end'){RM.phase='end';RM.res=d}
+ else if(d.t==='end'){RM.phase='end';RM.res=d;rmSettle(d)}
  else if(d.t==='night'){RM.phase='night';RM.step=d.step;RM.msg=d.m||'';RM.day=d.day||RM.day}
  else if(d.t==='morn'){RM.phase='morning';RM.alive=d.alive||RM.alive;RM.res={killed:d.killed};RM.day=d.day||RM.day}
  else if(d.t==='lynch'){RM.phase='lynch';RM.alive=d.alive||RM.alive;RM.res={who:d.who,role:d.role}}
- else if(d.t==='over'){RM.phase='over';RM.res=d}
+ else if(d.t==='over'){RM.phase='over';RM.res=d;rmSettle(d)}
  else if(d.t==='st'){ // مسارات رسم — لا صور: تبقى تحت حد الرسالة
   RM.art=RM.art||{};
   if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
@@ -18708,9 +18715,9 @@ function rmTimer(secs){
 }
 /* ── البحث عن لاعبين: الحضور نفسه يكوّن المجموعة بلا خادم ── */
 let _mmTm=null;
-async function mmScr(g){
+async function mmScr(g,mode){
  const c=await rmCap();
- RM.game=g;
+ RM.game=g;RM.mode=mode||'casual';
  if(!c){
   go(`<div class="scr on">${tb('بحث عن لاعبين','gameHub(\''+g+'\')')}
   <div class="orn"><div class="in">${ornCorners()}
@@ -18780,7 +18787,7 @@ function mmCancel(silent){
 }
 /* ── الشاشات ── */
 async function roomScr(game){
- RM.game=game||RM.game||'barra';
+ RM.game=game||RM.game||'barra';RM.mode='room';
  const c=await rmCap();
  if(!c){
   go(`<div class="scr on">${tb('غرفة بكود','partyScr()')}
@@ -18904,19 +18911,19 @@ function rmStart(){
  if(RM.game==='draw'){
   const ws=PARTY_WORDS[RM.cat||'أماكن'];
   RM.art={};
-  rmSend({t:'start',g:'draw',ps,cat:RM.cat,w:ws[Math.floor(Math.random()*ws.length)]});
+  rmSend({t:'start',g:'draw',ps,mid:rmNewMid(),cat:RM.cat,w:ws[Math.floor(Math.random()*ws.length)]});
   setTimeout(()=>rmSend({t:'ph',p:'paint',secs:75}),140);
   return;
  }
- if(RM.game==='uno'){rmSend({t:'start',g:'uno',ps});setTimeout(unoDeal,160);return}
- if(RM.game==='carrom'){rmSend({t:'start',g:'carrom',ps});setTimeout(caDeal,160);return}
+ if(RM.game==='uno'){rmSend({t:'start',g:'uno',ps,mid:rmNewMid()});setTimeout(unoDeal,160);return}
+ if(RM.game==='carrom'){rmSend({t:'start',g:'carrom',ps,mid:rmNewMid()});setTimeout(caDeal,160);return}
  // (الفرق تُشتق من الترتيب: الزوجي أبيض والفردي أسود)
  if(RM.game==='barra'){
   const ws=PARTY_WORDS[RM.cat||'أماكن'];
   const word=ws[Math.floor(Math.random()*ws.length)];
   const spy=ps[Math.floor(Math.random()*ps.length)].peer;
   RM.secret={word,spy};
-  rmSend({t:'start',g:'barra',ps,cat:RM.cat});
+  rmSend({t:'start',g:'barra',ps,mid:rmNewMid(),cat:RM.cat});
   ps.forEach(p=>rmSend({t:'role',to:p.peer,r:p.peer===spy?'spy':'in',w:p.peer===spy?'':word,cat:RM.cat}));
   setTimeout(()=>rmSend({t:'ph',p:'deal2',m:'انظر لدورك ثم اضغط جاهز'}),120);
  }else{
@@ -18928,7 +18935,7 @@ function rmStart(){
   roles.sort(()=>Math.random()-.5);
   RM.secret={roles:{}};
   ps.forEach((p,i)=>RM.secret.roles[p.peer]=roles[i]);
-  rmSend({t:'start',g:'mafia',ps});
+  rmSend({t:'start',g:'mafia',ps,mid:rmNewMid()});
   ps.forEach((p,i)=>rmSend({t:'role',to:p.peer,r:roles[i]}));
   setTimeout(()=>rmSend({t:'ph',p:'deal2',m:'انظر لدورك ثم اضغط جاهز'}),120);
  }
@@ -19313,7 +19320,8 @@ function unoAct(d){
  if(card[1]==='D')U.draw+=2;
  if(card[1]==='F')U.draw+=4;
  rmSend({t:'hand',to:cur,h:hand});
- if(!hand.length){rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🎉`,win:'uno',
+ if(!hand.length){rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🎉`,win:'uno',by:cur,
+   rank:RM.players.map(p=>({p:p.peer,c:(U.hands[p.peer]||[]).length})).sort((a,b)=>a.c-b.c),
    all:RM.players.map(p=>({n:p.name,r:U.hands[p.peer].length+' بطاقة'}))});return}
  U.turn=(U.turn+U.dir*(1+skip)+RM.players.length*2)%RM.players.length;
  unoPub(hand.length===1?{msg:`أونو! بقيت بطاقة واحدة لدى ${nm(cur)} 🔔`}:null);
@@ -19568,7 +19576,7 @@ function caAct(d){
  const left=t=>C.pcs.filter(p=>p.t===t).length;
  if(!left(mine)){
   if(C.q===cur){C.sc[cur]+=3;C.q=null}          // آخر قطعة تُغطّي الملكة
-  rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🏆`,win:'carrom',
+  rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🏆`,win:'carrom',by:cur,
    all:RM.players.map(p=>({n:p.name,r:C.sc[p.peer]+' نقطة'}))});
   return;
  }
