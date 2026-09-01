@@ -271,8 +271,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 /* عام */
 .tbar{display:flex;align-items:center;padding:8px 0 14px}
 .tbar h2{font-size:17px;font-weight:800;flex:1;text-align:center}
-.bk{background:none;border:none;color:var(--tx);font-size:23px;cursor:pointer;width:42px}
-.sp{width:42px}
+.bk{background:none;border:none;color:var(--tx);font-size:23px;cursor:pointer;width:44px;height:44px;min-width:44px;
+ display:inline-flex;align-items:center;justify-content:center;border-radius:12px;margin:-6px 0}
+.bk:active{background:rgba(255,255,255,.08)}
+.sp{width:44px}
 .btn{width:100%;background:linear-gradient(145deg,#8B5CF0,#5B2FB8);color:#fff;border:none;
  border-radius:14px;padding:15px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;
  transition:transform .1s;box-shadow:0 4px 14px rgba(123,79,224,.35)}
@@ -13300,7 +13302,7 @@ function drawAv(){
   {k:'beard',n:'اللحية',type:'opt',list:AV.beard},
   {k:'acc',n:'الإكسسوار',type:'acc',list:AV.acc}
  ];
- go(`<div class="scr on">${tb('شخصيتك',"profScr()")}
+ go(`<div class="scr on">${tb('شخصيتك')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:6px 0">
  <div style="display:inline-block;border-radius:50%;padding:3px;
@@ -14663,9 +14665,8 @@ function quitMatch(force){
  const res=resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
   result:{won:false},opponents:[{mmr:M.oppMmr}]});
  M=null;
- $('nav').style.display='flex';
  toast('انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} نقطة تصنيف)`:''));
- rankedScr();
+ Router.settle('rankedScr');
 }
 function toggleMenu(){M.menu=!M.menu;mDraw(1)}
 function closeQuit(){M.quitAsk=false;M.menu=false;mDraw()}
@@ -14676,7 +14677,7 @@ function startRanked(intro){
  const deck=S.cards.decks[S.cards.active].cards;
  const rival=(intro&&intro.rv)||RIVALS[Math.floor(Math.random()*RIVALS.length)];
  const oppMmr=r.mmr+((hashStr(rival.n)%260)-130); // كؤوس الخصم ثابتة لهويته
- $('nav').style.display='none';   // إخفاء الشريط أثناء المباراة
+ Router.enter('match',null,{replace:!!(Router.current()&&Router.current().fn==='intro')});
  M={mid:'kn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999),
   rounds:(intro&&intro.seq)||buildRounds(r),i:0,me:0,opp:0,streak:0,menu:false,quitAsk:false,playedThisRound:false,
     oppMmr,oppSkill:.55+Math.min(.2,r.tier*.02),
@@ -14694,7 +14695,7 @@ function matchIntro(){
  if(!S.ranked)S.ranked=defaultRanked();
  const rv=RIVALS[Math.floor(Math.random()*RIVALS.length)];
  _intro={rv,seq:buildRounds(S.ranked),deck:S.cards.active,left:10};
- $('nav').style.display='none';
+ Router.enter('intro');
  clearInterval(_introTm);
  _introTm=setInterval(()=>{
   if(!_intro){clearInterval(_introTm);return}
@@ -14706,7 +14707,7 @@ function matchIntro(){
 }
 function introProfile(){
  clearInterval(_introTm);
- profileView(rivalProfile(_intro.rv.n,{t:_intro.rv.t,mmrHint:(S.ranked&&S.ranked.mmr||1000)+((hashStr(_intro.rv.n)%260)-130)}),'introBack()');
+ push('profileView',rivalProfile(_intro.rv.n,{t:_intro.rv.t,mmrHint:(S.ranked&&S.ranked.mmr||1000)+((hashStr(_intro.rv.n)%260)-130)}));
 }
 function introBack(){
  if(!_intro){tab('play');return}
@@ -14771,7 +14772,7 @@ function introDraw(){
  </div>`);
 }
 function introDeck(i){_intro.deck=i;introDraw()}
-function introCancel(){clearInterval(_introTm);_intro=null;$('nav').style.display='flex';rankedScr()}
+function introCancel(){clearInterval(_introTm);_intro=null;Router.settle('rankedScr')}
 function introGo(){
  if(!_intro)return;
  clearInterval(_introTm);
@@ -15179,7 +15180,7 @@ function mEnd(){
   const id=ids[Math.floor(Math.random()*ids.length)];
   S.cards.owned[id].copies++;
  }
- $('nav').style.display='flex';   // يعود الشريط بعد المباراة
+ Router.enter('mResult',[res,won,coins,xp,frag],{replace:true});
  mResult(res,won,coins,xp,frag);
 }
 
@@ -15322,18 +15323,247 @@ function gcard(id,o){
  </div>`;
 }
 
-// ═══════════ مكدّس التنقل ═══════════
-// لا شاشة بلا مخرج — والرجوع يعيدك للسابقة فعلًا
-let NAV=[];
-function push(fn,arg){NAV.push({fn,arg});run_(fn,arg)}
-function back(){
- if(NAV.length>1){NAV.pop();const t=NAV[NAV.length-1];run_(t.fn,t.arg)}
- else{NAV=[];tab(cur)}
-}
-function resetNav(fn,arg){NAV=[{fn,arg}];run_(fn,arg)}
-function run_(fn,arg){({cardsScr,cardDetail,cardLevels,levelDetail,deckScr,rankedScr,
- profScr,achScr,misScr,storeScr,lbScr,seasonScr,avScr,setScr,setSection,
- shopScr,chestScr,oddsScr,rewardScr,wildScr,evoShopScr,emoteScr,colScr,playModesScr,partyScr,netsScr})[fn](arg)}
+// ═══════════ نواة التنقّل ═══════════
+// مكدّس واحد لكل الشاشات. الوحدة في src/navigation/router.js وتُحقن هنا بالبناء (tools/build.mjs).
+/* ⟦src:src/navigation/router.js⟧ */
+/**
+ * نواة التنقّل — مكدّس واحد لكل شاشات اللعبة.
+ *
+ * لا DOM هنا. كل ما يلمس الصفحة (الرسم، التمرير، الشريط السفلي، سجل المتصفح)
+ * يصل عبر hooks من اللعبة، فتُختبر النواة في Node بلا متصفح.
+ *
+ * الإطار على المكدّس: {fn, arg, y, ui, flow}
+ *   fn    اسم الشاشة في السجلّ            arg   وسيطها
+ *   y     موضع التمرير عند مغادرتها        ui    حالة الواجهة (تبويب/فلتر) تبقى معها
+ *   flow  تدفّق حيّ يرسم نفسه (مباراة/غرفة/جولة) — دخل بـ enter() لا push()
+ *
+ * السجلّ: register(fn, {render, bar, leave, dirty, guard, fallback})
+ *   render(arg)   ترسم الشاشة. إن غابت حُلّت بالاسم عبر hooks.resolve — لكن لا تُفتح
+ *                 شاشة غير مسجّلة أصلًا: السجلّ هو المصدر الوحيد للأسماء.
+ *   bar:false     شاشة كاملة بلا شريط سفلي (المالك الوحيد للشريط هو applyBar)
+ *   leave(done)   معنى «رجوع» داخل تدفّق حيّ: سؤال قبل الانسحاب لا سحب صامت.
+ *                 done() يكمل الرجوع فعلًا إن قرّر التدفّق ذلك.
+ *   dirty()       تغييرات غير محفوظة → hooks.confirmLeave قبل المغادرة
+ *   guard(arg)    شرط دخول الشاشة؛ إن أخفق فُتح fallback بدلها
+ *
+ * زرّ الرجوع في أندرويد: مدخل حارس واحد دائم في سجل المتصفح؛ popstate يعني «رجوع»
+ * ويمرّ بالقواعد نفسها (dirty ثم leave ثم سحب). في الجذر: تنبيه ثم خروج بضغطة ثانية.
+ */
+var Router=(function(){
+ 'use strict';
+ var REG={}, stack=[], H={}, last={fn:null,arg:'',t:0}, sent=0;
+ var DOUBLE_MS=450;                       // ضغطتان على الزرّ نفسه أقرب من هذا = واحدة
+
+ function frame(fn,arg,flow){return {fn:fn,arg:arg,y:0,ui:null,flow:!!flow}}
+ function top(){return stack.length?stack[stack.length-1]:null}
+ function def(fn){return REG[fn]||{}}
+ function key(a){try{return JSON.stringify(a===undefined?null:a)}catch(e){return String(a)}}
+ function now(){return H.now?H.now():Date.now()}
+ function indexOfTop(fn){for(var i=stack.length-1;i>=0;i--)if(stack[i].fn===fn)return i;return -1}
+
+ function init(hooks){
+  H=hooks||{};
+  if(H.history){
+   try{H.history.replaceState({r:0},'')}catch(e){}
+   try{H.history.scrollRestoration='manual'}catch(e){}   // التمرير شأننا لا شأن المتصفح
+  }
+  if(H.window&&H.window.addEventListener)H.window.addEventListener('popstate',onPop);
+ }
+ function register(fn,d){REG[fn]=Object.assign(REG[fn]||{},d||{});return REG[fn]}
+ function has(fn){return Object.prototype.hasOwnProperty.call(REG,fn)}
+ function names(){return Object.keys(REG)}
+
+ function resolve(fn){
+  if(!has(fn))return null;                // غير مسجّل = غير موجود، ولو كانت له دالة عامة
+  var d=REG[fn];
+  if(typeof d.render==='function')return d.render;
+  return H.resolve?H.resolve(fn):null;
+ }
+ /** يرسم شاشة بالاسم — بلا مسّ للمكدّس. الخطأ لا يترك شاشة بيضاء بل يبلّغ hooks.fail */
+ function render(fn,arg){
+  var r=resolve(fn);
+  try{
+   if(!r)throw new Error('شاشة غير مسجّلة: '+fn);
+   r(arg);
+  }catch(e){
+   if(H.fail)H.fail(fn,e);else throw e;
+  }
+  applyBar();
+ }
+ /** المالك الوحيد للشريط السفلي: يُشتقّ من سجلّ الشاشة العليا لا من كل شاشة على حدة */
+ function applyBar(){
+  var t=top(); if(!t)return;
+  if(H.bar)H.bar(def(t.fn).bar!==false,t.fn);
+ }
+ function saveY(){var t=top();if(t&&H.scrollY)t.y=H.scrollY()}
+ function restoreY(f){if(H.restore)H.restore(f.y||0)}
+
+ function guarded(fn,arg){
+  var d=def(fn);
+  if(d.guard&&!d.guard(arg))return d.fallback||null;
+  return fn;
+ }
+ function push(fn,arg){
+  var g=guarded(fn,arg);
+  if(g===null)return false;
+  if(g!==fn){fn=g;arg=undefined}
+  var t=now();
+  if(last.fn===fn&&last.arg===key(arg)&&t-last.t<DOUBLE_MS)return false;
+  last={fn:fn,arg:key(arg),t:t};
+  saveY(); stack.push(frame(fn,arg)); render(fn,arg); arm(); return true;
+ }
+ /** إطار تدفّق حيّ يرسم نفسه: يُسجَّل بلا رسم. الإطار نفسه مرّتين = مرّة */
+ function enter(fn,arg,o){
+  o=o||{}; var t=top();
+  last.fn=null;
+  if(t&&t.fn===fn){t.arg=arg;t.flow=true;applyBar();arm();return}
+  saveY();
+  if(o.replace&&stack.length)stack.pop();
+  stack.push(frame(fn,arg,true)); applyBar(); arm();
+ }
+ function replace(fn,arg){
+  last.fn=null;
+  if(stack.length)stack.pop();
+  stack.push(frame(fn,arg)); render(fn,arg); arm();
+ }
+ function reset(fn,arg){
+  last.fn=null;
+  stack.length=0; stack.push(frame(fn,arg)); render(fn,arg); disarm();
+ }
+ function clear(){last.fn=null;stack.length=0;disarm()}
+ /** سحب صامت بلا رسم — للتدفّق الذي سيرسم ما بعده بنفسه */
+ function pop(){stack.pop();applyBar();arm()}
+ function back(force){
+  var t=top();
+  last.fn=null;
+  if(t&&!force){
+   var d=def(t.fn);
+   if(d.dirty&&d.dirty()){
+    if(H.confirmLeave){H.confirmLeave(function(){back(true)});return false}
+   }
+   if(d.leave){d.leave(function(){back(true)});return false}
+  }
+  if(stack.length>1){
+   stack.pop(); var p=top(); restoreY(p); render(p.fn,p.arg); arm(); return true;
+  }
+  stack.length=0; disarm(); if(H.root)H.root(); return true;
+ }
+ /** إنهاء تدفّق: انزع إطاره وما فوقه وارسم ما تحته. false إن لم يكن على المكدّس */
+ function exit(fn){
+  var i=indexOfTop(fn); if(i<0)return false;
+  last.fn=null;
+  stack.length=i;
+  if(!stack.length){disarm();if(H.root)H.root();return true}
+  var p=top(); restoreY(p); render(p.fn,p.arg); arm(); return true;
+ }
+ /** الهبوط على شاشة بعينها بعد تدفّق: ارجع إليها إن كانت تحتك، وإلا حلّ محلّ التدفّق بها */
+ function settle(fn,arg){
+  last.fn=null;
+  var i=indexOfTop(fn);
+  if(i>=0){
+   stack.length=i+1; var f=top(); if(arg!==undefined)f.arg=arg;
+   restoreY(f); render(f.fn,f.arg); arm(); return;
+  }
+  var t=top(); if(t&&t.flow)stack.pop();
+  stack.push(frame(fn,arg)); render(fn,arg); arm();
+ }
+ /** حالة الواجهة للشاشة الحالية (تبويب/فلتر) — تبقى معها وتعود عند الرجوع */
+ function ui(patch){
+  var t=top(); if(!t)return {};
+  if(!t.ui)t.ui={}; if(patch)Object.assign(t.ui,patch); return t.ui;
+ }
+ function current(){return top()}
+ function depth(){return stack.length}
+
+ /* ── أندرويد ──
+  * مدخل حارس واحد يُوضع مرّة ولا يُنزع: كل ضغطة رجوع تستهلكه فنعيده فورًا.
+  * لا history.back() من عندنا أبدًا — التراجع غير المتزامن كان يعيد موضع التمرير
+  * المحفوظ في سجل المتصفح فيمحو ما استعدناه. في الجذر: ضغطة تنبّه، وثانية خلال
+  * EXIT_MS تخرج فعلًا (بالرجوع خطوتين: الحارس ثم صفحة اللعبة). */
+ var EXIT_MS=1500, rootPopAt=0;
+ function arm(){
+  if(!H.history||sent)return;
+  try{H.history.pushState({r:1},'');sent=1}catch(e){}
+ }
+ function disarm(){}
+ function onPop(){
+  sent=0;
+  var t=top(), live=stack.length>1||!!(t&&(t.flow||def(t.fn).leave));
+  if(live){
+   try{back()}catch(e){if(H.fail)H.fail(t?t.fn:'?',e)}
+   arm(); return;
+  }
+  var n=now();
+  if(rootPopAt&&n-rootPopAt<EXIT_MS){try{H.history.go(-1)}catch(e){}return}   // خروج حقيقي
+  rootPopAt=n; arm(); if(H.atRoot)H.atRoot();
+ }
+
+ return {init:init,register:register,has:has,names:names,def:def,
+  push:push,enter:enter,replace:replace,reset:reset,clear:clear,pop:pop,back:back,
+  exit:exit,settle:settle,render:render,ui:ui,current:current,depth:depth,
+  stack:stack,applyBar:applyBar,arm:arm,
+  _onPop:onPop,_state:function(){return {sent:sent}}};
+})();
+/* ⟦/src⟧ */
+Router.init({
+ // الأسماء تُحلّ من السجلّ فقط؛ الدالة العامة أو سجلّ النادي مجرّد طريقة للوصول إليها
+ resolve:fn=>{
+  if(typeof window[fn]==='function')return window[fn];
+  try{if(typeof scrFn==='function'){const f=scrFn(fn);if(f)return f}}catch(e){}
+  return null;
+ },
+ // لا شاشة بيضاء: أي انهيار في الرسم يعرض حالة خطأ فيها «إعادة المحاولة»
+ fail:(fn,e)=>{try{console.error('[nav]',fn,e)}catch(x){}try{clanScrFail(fn,e)}catch(x){}},
+ scrollY:()=>window.scrollY,
+ restore:y=>{_keepY=y},
+ bar:show=>{const el=$('nav');if(el)el.style.display=show?'flex':'none'},
+ root:()=>{if(!S.tutorial_completed)return;tab(cur||'play')},
+ confirmLeave:proceed=>confirmSheet('تغييرات لم تُحفظ','لديك تعديلات في هذه الشاشة لم تُحفظ بعد.','تجاهل والرجوع',proceed),
+ atRoot:()=>toast('اضغط رجوع مرّة أخرى للخروج'),
+ history:window.history,window:window
+});
+var NAV=Router.stack;                          // القرّاء القدامى يرون المكدّس نفسه
+function push(fn,arg){return Router.push(fn,arg)}
+function back(force){return Router.back(force)}
+function resetNav(fn,arg){return Router.reset(fn,arg)}
+function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا مسّ للمكدّس
+
+/* ═══ سجلّ الشاشات — كل شاشة في اللعبة لها اسم هنا، ولا تُفتح شاشة من خارجه ═══ */
+(function(){
+ const R=Router;
+ // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
+ ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
+  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk',
+  'shopScr','chestScr','oddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
+  'playScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
+  'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
+  'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
+  'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
+  'clEventsScr','clMoreScr'].forEach(n=>R.register(n,{}));
+ // شاشة كاملة بلا شريط سفلي
+ ['welcomeScr','askTut','skipAsk','clTransferScr','clSupportScr','clRequestSupportScr','clCreateScr']
+  .forEach(n=>R.register(n,{bar:false}));
+ // وسيط مركّب
+ R.register('mmScr',{render:a=>mmScr(a&&a.g,a&&a.mode),leave:()=>mmCancel()});
+ R.register('profileView',{render:p=>profileView(p)});
+ // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
+ R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
+ R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&GAME_DEFS.find(x=>x.rmKey===g)),fallback:'partyScr'});
+ // محرّرات: سؤال قبل المغادرة بتغييرات
+ R.register('renameAsk',{dirty:()=>{const el=$('nm');return !!el&&el.value.trim()!==(S.name||'')}});
+ R.register('clCreateScr',{dirty:formDirty});
+ ['clEditIdentityScr','clEditJoinScr','clEditPermsScr','clRanksScr'].forEach(n=>R.register(n,{bar:false,leave:()=>clEdBack()}));
+ // التدفّقات الحيّة: إطار يرسم نفسه، والرجوع فيه سؤال لا سحب صامت
+ R.register('match',   {bar:false,render:()=>mDraw(),     leave:()=>quitMatch()});
+ R.register('intro',   {bar:false,render:()=>introBack(), leave:()=>introCancel()});
+ R.register('mResult', {render:a=>mResult.apply(null,a||[])});
+ R.register('tutorial',{bar:false,render:()=>tDraw(),     leave:()=>push('skipAsk')});
+ R.register('room',    {bar:false,render:()=>roomDraw(),  leave:()=>rmBack()});
+ R.register('party',   {bar:false,render:()=>{},          leave:()=>ptExit()});   // لا يُدفع فوقه شيء
+ R.register('quiz',    {bar:false,render:()=>draw(),      leave:()=>quizExit()});
+})();
+/** أي حقل في الشاشة كُتب فيه شيء */
+function formDirty(){return [...document.querySelectorAll('#app .fin')].some(el=>(el.value||'').trim()&&el.value!==el.defaultValue)}
 /** شريط علوي موحّد: كل شاشة لها رجوع */
 const tbar=(t,sub)=>`<div class="tbar">
  <button class="bk" onclick="back()">${ico('back',15)}</button>
@@ -15344,7 +15574,7 @@ const tbar=(t,sub)=>`<div class="tbar">
 let cFilter={r:'all',e:'all',t:'all'};
 /* درس البطاقات — خمس خطوات قصيرة تشرح الدور كاملًا */
 let _lsn=0;
-function cardLessonScr(){_lsn=0;drawLesson()}
+function cardLessonScr(){_lsn=0;push('drawLesson')}
 function drawLesson(){
  const steps=[
   {i:'cards',t:'ما هي البطاقات؟',b:`أوراق تكتيكية تحملها معك في مباريات الرانك.<br>
@@ -15364,7 +15594,7 @@ function drawLesson(){
    art:()=>`<div style="font-size:44px">${ico('play',30)}</div>`}
  ];
  const s2=steps[_lsn];
- go(`<div class="scr on">${tb('درس البطاقات','cardsScr()')}
+ go(`<div class="scr on">${tb('درس البطاقات')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:10px 0">
   ${s2.art()}
@@ -15377,7 +15607,7 @@ function drawLesson(){
  <div style="display:flex;gap:9px">
   ${_lsn>0?`<button class="btn g" style="flex:1" onclick="_lsn--;drawLesson()">السابق</button>`:''}
   ${_lsn<steps.length-1?`<button class="rbtn" style="flex:1" onclick="_lsn++;drawLesson()"><span>التالي</span></button>`
-   :`<button class="rbtn" style="flex:1" onclick="cardsScr()"><span>${ico('check',14)} فهمت — إلى بطاقاتي</span></button>`}
+   :`<button class="rbtn" style="flex:1" onclick="back()"><span>${ico('check',14)} فهمت — إلى بطاقاتي</span></button>`}
  </div></div>`);
 }
 function cardsScr(){
@@ -15497,7 +15727,7 @@ function cardDetail(id){
  <div style="font-size:14px;font-weight:800;margin-top:8px">جرّب البطاقة</div>
  <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">
   جولة تدريبية 20–30 ثانية<br>بلا طاقة · بلا خسارة · بلا مكافآت</div>
- <button class="rbtn" style="margin-top:13px" onclick="tryCard(${id})"><span>ابدأ التجربة</span></button>
+ <button class="rbtn" style="margin-top:13px" onclick="push('tryCard',${id})"><span>ابدأ التجربة</span></button>
  </div></div></div>`:''}
 
  ${st?`<div style="margin-top:13px"><button class="${inDeck?'btn g':'rbtn'}"
@@ -15836,7 +16066,7 @@ function doDelete(){
   tutDone:0,ranked:null,cards:null,unlocked:{journey:1,quick:1},matches:0,wins:0,
   mis:{},claimed:{},ach:{},correct:0,nets:{},tab:'play',opt:S.opt};
  bindLegacyRanked();
- NAV=[];toast('حُذف الحساب');splash();
+ Router.clear();toast('حُذف الحساب');splash();
 }
 
 
@@ -16146,8 +16376,7 @@ function rewardScr(a){
 function renderReward(a){
  const L=a.list,left=L.length-revIdx;
  const cur=L[revIdx];
- go(`<div class="scr on">
- <div class="tbar"><span class="sp"></span><h2>${a.title}</h2><span class="sp"></span></div>
+ go(`<div class="scr on">${tbar(a.title)}
  ${revIdx<L.length?`
  <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:14px">
   ${left} ${left===1?'مكافأة متبقية':'مكافآت متبقية'}</div>
@@ -16483,7 +16712,6 @@ function shopHeader(){
 // لا صفحة جافة بعنوان «التدريب» · تدريب واحد اختياري · تعليم باللعب
 
 function welcomeScr(){
- $('nav').style.display='none';
  go(`<div class="scr on" style="display:flex;flex-direction:column;
   align-items:center;justify-content:center;min-height:88vh;text-align:center;padding:26px">
  <div class="flt2" style="width:200px;height:200px;background-image:var(--logo);
@@ -16492,7 +16720,7 @@ function welcomeScr(){
   <div style="font-size:19px;font-weight:800;margin-top:22px">أهلًا بك في تحدي</div>
  <div style="font-size:13.5px;color:var(--tx2);margin-top:7px">عالم من المعرفة والمنافسة ينتظرك.</div>
  <div style="width:100%;margin-top:auto;padding-top:40px">
- <button class="rbtn" onclick="askTut()"><span>ابدأ</span></button></div></div>`);
+ <button class="rbtn" onclick="push('askTut')"><span>ابدأ</span></button></div></div>`);
 }
 function askTut(){
  go(`<div class="scr on" style="display:flex;flex-direction:column;
@@ -16503,20 +16731,20 @@ function askTut(){
   جولة قصيرة ستعرّفك على أساسيات اللعب.</div>
  <div style="width:100%;margin-top:auto;padding-top:44px">
  <button class="rbtn" onclick="tutStart()"><span>ابدأ التدريب</span></button>
- <button class="btn g" style="margin-top:10px" onclick="skipAsk()">تخطي</button></div></div>`);
+ <button class="btn g" style="margin-top:10px" onclick="push('skipAsk')">تخطي</button></div></div>`);
 }
 function skipAsk(){
  go(`<div class="scr on" style="display:flex;flex-direction:column;
   justify-content:center;min-height:88vh;padding:26px">
  <div class="cfm"><div class="q" style="text-align:center;font-size:15px">تخطي التدريب؟</div>
  <div class="btns" style="margin-top:12px">
- <button class="rbtn" onclick="askTut()"><span>متابعة التدريب</span></button>
+ <button class="rbtn" onclick="back()"><span>متابعة التدريب</span></button>
  <button class="btn g" onclick="finishTut()">نعم، تخطي</button></div></div></div>`);
 }
 /** البند 26 — tutorial_completed مرتبط بالحساب */
 function finishTut(){
  S.tutorial_completed=true;S.tutDone=1;
- $('nav').style.display='flex';cur='play';nav();NAV=[];playScr();
+ cur='play';nav();Router.reset('playScr');
 }
 
 // ═══════════ البند 24 — محتوى التدريب ═══════════
@@ -16539,7 +16767,7 @@ const TSTEP=[
 let T2=null;
 function tutStart(){
  ensureEcon();
- $('nav').style.display='none';
+ Router.enter('tutorial');
  T2={i:0,ok:0,sel:null,picked:new Set(),ans:false,bid:2,used:false};
  tDraw();
 }
@@ -16597,7 +16825,7 @@ function tDraw(){
  <div class="qtop"><span class="qcat" style="border-color:var(--gold)">
   ${ico('cap',16)} <span class="mtl" style="font-size:11px">تدريب</span></span>
  <span class="qnum">${T2.i+1} من ${TSTEP.length-1}</span>
- <button class="btn g" style="width:auto;padding:5px 12px;font-size:12px" onclick="skipAsk()">تخطي</button></div>
+ <button class="btn g" style="width:auto;padding:5px 12px;font-size:12px" onclick="push('skipAsk')">تخطي</button></div>
  <div class="pbf" style="margin-bottom:14px"><div class="pbi" style="height:6px">
   <i style="width:${(T2.i+1)/(TSTEP.length-1)*100}%"></i></div></div>
  <div style="background:rgba(232,178,58,.12);border:1px solid rgba(232,178,58,.42);
@@ -16658,7 +16886,7 @@ function rankedScr(){
  if(!S.ranked)S.ranked=defaultRanked();
  const r=S.ranked,t=tierOf(r);
  if(!r.placed){
-  go(`<div class="scr on">${tb('التصنيف',"tab('play')")}
+  go(`<div class="scr on">${tb('التصنيف')}
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:8px 0">
   <div style="width:64px;height:64px;margin:0 auto">${tierEmblem(0,64)}</div>
@@ -16677,7 +16905,7 @@ function rankedScr(){
   <div class="note">البطاقات تعمل · لا مساعدات تكشف الإجابة · لا وقت إضافي</div></div>`);
   return;
  }
- go(`<div class="scr on">${tb('التصنيف',"tab('play')")}
+ go(`<div class="scr on">${tb('التصنيف')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:6px 0">
  <div style="width:58px;height:58px;margin:0 auto">${tierEmblem(r.tier,58)}</div>
@@ -16697,7 +16925,7 @@ function rankedScr(){
   <div style="font-size:9px;color:var(--tx2)">${l}</div></div>`).join('')}</div>
  </div></div>
  <div class="sl">تشكيلتك</div>
- <div class="li" style="cursor:pointer" onclick="deckScr()"><div class="lr">
+ <div class="li" style="cursor:pointer" onclick="push('deckScr')"><div class="lr">
  <span style="font-size:20px">${ico('cards',16)}</span>
  <div class="lb"><div class="lt">${S.cards.decks[S.cards.active].name}</div>
  <div class="ls">8 بطاقات · سقف المستوى في رتبتك: ${cardCap(r)}</div></div>
@@ -18013,7 +18241,7 @@ function mResult(res,won,coins,xp,frag){
  <div class="stc"><div class="i">${ico('up',14)}</div><div class="v">+${xp}</div><div class="l">خبرة</div></div>
  <div class="stc"><div class="i">${ico('cards',16)}</div><div class="v">+${frag}</div><div class="l">نسخ بطاقات</div></div>
  <div class="stc"><div class="i">${ico('flame',15)}</div><div class="v">${M.log.filter(l=>l.ok).length}/${M.log.length}</div><div class="l">جولات</div></div></div>
- <div style="margin-top:20px"><button class="rbtn" onclick="rankedScr()"><span>التصنيف</span></button>
+ <div style="margin-top:20px"><button class="rbtn" onclick="Router.settle('rankedScr')"><span>التصنيف</span></button>
  <button class="btn g" style="margin-top:9px" onclick="tab('play')">الرئيسية</button></div>
  </div></div>`);
 }
@@ -18157,7 +18385,7 @@ function plRankTxt(p){return p.placed?rankName(p):'غير مصنّف'}
 function plStrip(){
  const ev=EV(),done=evtDone();
  return `<div class="plBar">
-  <div class="av" onclick="avScr()">${avatarArt(38)}</div>
+  <div class="av" onclick="push('avScr')">${avatarArt(38)}</div>
   <div style="flex:1;min-width:0">
    <div class="nm">${esc(S.name)}</div>
    <div class="lv">المستوى ${lvl(S.xp)}</div></div>
@@ -18166,7 +18394,7 @@ function plStrip(){
  </div>
  <div class="plChips">
   <span class="plChip" onclick="push('seasonScr')">${ico('ticket',12)} الموسم <b>${szLv()}</b></span>
-  <span class="plChip" onclick="evtScr()">${ico('target',12)} مهام اليوم <b>${numPair(done,EVT_GOALS.length)}</b></span>
+  <span class="plChip" onclick="push('evtScr')">${ico('target',12)} مهام اليوم <b>${numPair(done,EVT_GOALS.length)}</b></span>
  </div>`;
 }
 
@@ -18192,7 +18420,7 @@ function plHero(){
    ${open
     ?`<button class="plBtn" onclick="preMatch()">${ico('swords',16)} لعب مصنّف</button>`
     :`<button class="plBtn" disabled>${ico('lock',15)} تفتح بجمع ${cl3Num(need)} نجمة</button>`}
-   <button class="plBtn gh" onclick="rankedScr()">التفاصيل</button></div>
+   <button class="plBtn gh" onclick="push('rankedScr')">التفاصيل</button></div>
  </div>`;
 }
 
@@ -18204,7 +18432,7 @@ function plGames(){
   <div class="plGrid">${rows.map(g=>{
    const p=rankOf(g.id),col=plTierCol(p);
    const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
-   return `<button class="plCard" onclick="gameHub('${g.rmKey}')">
+   return `<button class="plCard" onclick="push('gameHub','${g.rmKey}')">
     <span class="em${p.placed?'':' un'}">${p.placed?tierEmblem(p.tier,26):'؟'}</span>
     <span class="hd"><span class="art">${GAME_ART[g.rmKey]||''}</span></span>
     <div class="nm" style="margin-top:9px">${esc(g.ar)}</div>
@@ -18229,7 +18457,7 @@ function plMissions(){
  if(!open.length)return '';
  return `<div class="plSec">
   <div class="plSecT">${ico('target',14)} مهام اللعب
-   <span class="mo" onclick="evtScr()">الكل ${ico('back',10)}</span></div>
+   <span class="mo" onclick="push('evtScr')">الكل ${ico('back',10)}</span></div>
   <div class="plMis">${open.map(g=>{
    const cur=Math.min(g.need,g.of(ev));
    return `<div class="g"><span style="color:var(--gold);flex-shrink:0">${ico(g.ri,15)}</span>
@@ -18255,7 +18483,7 @@ function playScr(){
  </div>
  <div class="plSec">
   <div class="plSecT">${ico('chest',14)} صناديق المعارك
-   <span class="mo" onclick="oddsScr()">الاحتمالات ${ico('back',10)}</span></div>
+   <span class="mo" onclick="push('oddsScr')">الاحتمالات ${ico('back',10)}</span></div>
   ${battleChestRow(1)}
  </div>
  ${plMissions()}
@@ -18382,7 +18610,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.14';
+const APP_VER='5.15';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18555,13 +18783,12 @@ function seasonScr(keep){
 
 // ── المزيد ──
 function moreScr(){
- NAV=[];
  const r=S.ranked||defaultRanked();
  go(`<div class="scr on">${tb('المزيد')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;align-items:center;gap:12px">
  <div style="border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer"
-  onclick="avScr()">${avatarArt(54)}</div>
+  onclick="push('avScr')">${avatarArt(54)}</div>
  <div style="flex:1"><div class="mtl" style="font-size:16px">${S.name}</div>
  <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
  <span class="cch" style="font-size:10px">${rk(S.xp)[0]}</span>
@@ -18657,7 +18884,7 @@ const MODE_ART={
 function playModesScr(){
  const sections=[
   {t:'تنافس',items:[
-   {k:'ranked',n:'لعب مصنّف',d:'7 جولات · أنماط متغيرة',big:1,go:"rankedScr()"},
+   {k:'ranked',n:'لعب مصنّف',d:'7 جولات · أنماط متغيرة',big:1,go:"push('rankedScr')"},
   ]},
   {t:'سريع',items:[
    {k:'quick',n:'تحدي سريع',d:'6 أسئلة',go:'quickScr()'},
@@ -18731,7 +18958,20 @@ function rmLeave(silent){
  try{cancelAnimationFrame(_ca.loop)}catch(e){}
  _ca.sim=null;_ca.drag=null;_ca.aim=null;_ca.slide=0;_ca.sx=null;_ca.sxV=null;
  _ca.anim=null;_ca.loop=0;_ca.grab=0;
- if(!silent)partyScr();
+ if(!silent&&!Router.exit('room'))partyScr();
+}
+/** «رجوع» داخل غرفة: أثناء المباراة سؤال، وفي الردهة مغادرة */
+function rmBack(){
+ const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
+ if(!playing)return rmLeave();
+ confirmSheet('مغادرة الغرفة','المباراة جارية — إن غادرت الآن فلن تعود إليها.','مغادرة',()=>rmLeave());
+}
+/** «رجوع» داخل جولة أسئلة: سؤال ثم إنهاء بلا احتساب */
+function quizExit(){
+ confirmSheet('إنهاء الجولة','ستفقد تقدّم هذه الجولة ولن تُحتسب.','إنهاء',()=>{
+  if(G)clearInterval(G.tm);G=null;hideArena();
+  if(!Router.exit('quiz'))tab('play');
+ });
 }
 function rmSend(o){const c=RMcap;if(!c||!RM.code)return;
  try{c.emit(RM_TOPIC,Object.assign({c:RM.code},o))}catch(e){}}
@@ -18864,7 +19104,7 @@ async function mmScr(g,mode){
  const c=await rmCap();
  RM.game=g;RM.mode=mode||'casual';
  if(!c){
-  go(`<div class="scr on">${tb('بحث عن لاعبين','gameHub(\''+g+'\')')}
+  go(`<div class="scr on">${tb('بحث عن لاعبين')}
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:16px 0">
    <div style="font-size:44px">🌐</div>
@@ -18872,7 +19112,7 @@ async function mmScr(g,mode){
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
     اللعب مع لاعبين حقيقيين يحتاج فتح اللعبة من <b>رابط اللعبة المنشور</b>.<br>
     يمكنك اللعب مع الكمبيوتر الآن.</div>
-   ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="soloScr('${g}')"><span>🤖 العب مع الكمبيوتر</span></button>`:''}
+   ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="push('soloScr','${g}')"><span>🤖 العب مع الكمبيوتر</span></button>`:''}
   </div></div></div></div>`);
   return;
  }
@@ -18907,7 +19147,7 @@ function mmTick(){
 function mmDraw(){
  const S2=mmSearchers(),lim=RM_MIN[RM.game]||[2,8];
  const row=PT_GAMES.find(x=>x[3]===RM.game)||[];
- go(`<div class="scr on nofi" id="mmScr">${tb('بحث عن لاعبين','mmCancel()')}
+ go(`<div class="scr on nofi" id="mmScr">${tb('بحث عن لاعبين')}
  <div class="gHero sm">${GAME_ART[RM.game]||''}</div>
  <div class="orn" style="margin-top:12px"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:12px 0">
@@ -18919,8 +19159,8 @@ function mmDraw(){
  </div></div></div>
  ${(RM.mmT||0)>12?`<div class="wb" style="text-align:right;margin-top:12px">${ico('info',12)}
   لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب مع الكمبيوتر.</div>
-  ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);soloScr('${RM.game}')"><span>🤖 العب مع الكمبيوتر</span></button>`:''}
-  <button class="btn g" style="margin-top:9px" onclick="mmCancel(1);roomScr('${RM.game}')">${ico('next',13)} أنشئ غرفة بكود بدلًا من ذلك</button>`:''}
+  ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);Router.replace('soloScr','${RM.game}')"><span>🤖 العب مع الكمبيوتر</span></button>`:''}
+  <button class="btn g" style="margin-top:9px" onclick="mmCancel(1);Router.replace('roomScr','${RM.game}')">${ico('next',13)} أنشئ غرفة بكود بدلًا من ذلك</button>`:''}
  <button class="btn g" style="margin-top:14px;color:var(--no)" onclick="mmCancel()">${ico('door',13)} إلغاء البحث</button>
  </div>`);
 }
@@ -18928,14 +19168,14 @@ function mmCancel(silent){
  const c=RMcap;RM.mm=0;clearInterval(_mmTm);
  RM.unsub.forEach(u=>{try{u()}catch(e){}});RM.unsub=[];
  if(c){try{c.presence({lf:null})}catch(e){}}
- if(!silent)gameHub(RM.game);
+ if(!silent&&!Router.exit('mmScr'))gameHub(RM.game);
 }
 /* ── الشاشات ── */
 async function roomScr(game){
  RM.game=game||RM.game||'barra';RM.mode='room';
  const c=await rmCap();
  if(!c){
-  go(`<div class="scr on">${tb('غرفة بكود','partyScr()')}
+  go(`<div class="scr on">${tb('غرفة بكود')}
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:16px 0">
    <div style="font-size:44px">🔗</div>
@@ -18943,12 +19183,12 @@ async function roomScr(game){
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
     اللعب من عدة هواتف يعمل عند فتح اللعبة من <b>رابط اللعبة المنشور</b> ومشاركته مع من سيلعب معك.<br>
     في هذه النسخة المحلية استخدم <b>تمرير الجوال</b>.</div>
-   <button class="rbtn" style="margin-top:16px" onclick="ptWay='pass';partyScr()"><span>📱 العب بتمرير الجوال</span></button>
+   <button class="rbtn" style="margin-top:16px" onclick="ptWay='pass';Router.settle('partyScr')"><span>📱 العب بتمرير الجوال</span></button>
   </div></div></div></div>`);
   return;
  }
  if(!RM.name)RM.name=S.name||'لاعب';
- go(`<div class="scr on nofi" id="rmScr">${tb('غرفة بكود','rmLeave()')}
+ go(`<div class="scr on nofi" id="rmScr">${tb('غرفة بكود')}
  <div class="wb" style="text-align:right">${ico('info',13)} أنشئ غرفة وأعطِ الكود لمن معك — يفتحون <b>نفس رابط اللعبة</b> ويدخلون بالكود، ويرى كلٌّ دوره في هاتفه.</div>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:6px 0 5px">اسمك في الغرفة</div>
  <input class="fin" id="rmNm" maxlength="14" value="${RM.name}">
@@ -18978,6 +19218,9 @@ async function rmJoin(){
  setTimeout(()=>{if(RM.code&&rmRoster().length<2)toast('بانتظار بقية اللاعبين… تأكد من الكود')},2500);
 }
 function roomDraw(){
+ // الغرفة إطار حيّ واحد يحلّ محلّ شاشة الدخول التي جاءت منها (كود/بحث/كمبيوتر)
+ if(RM.code){const t0=Router.current();
+  if(!t0||t0.fn!=='room')Router.enter('room',null,{replace:!!(t0&&/^(roomScr|mmScr|soloScr)$/.test(t0.fn))})}
  const R=rmRoster();
  if(!RM.me){const me=rmMine();if(me)RM.me=me.peer}
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
@@ -19017,7 +19260,7 @@ function roomDraw(){
  else if(RM.game==='uno')body=rmUno(R);
  else if(RM.game==='carrom')body=rmCarrom(R);
  else body=rmMafia(R);
- go(`<div class="scr on nofi" id="rmScr">${tb('غرفة '+(RM.code||''),'rmLeave()')}${head}${body}
+ go(`<div class="scr on nofi" id="rmScr">${tb('غرفة '+(RM.code||''))}${head}${body}
  <button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button></div>`);
 }
 /* نهاية اللعبة — بطاقة فوز واضحة لكل ألعاب الغرفة */
@@ -19152,7 +19395,7 @@ function rmHostEnd(){
 const BOT_NAMES=['سلطان','نورة','ريان','حكيم','أثير'];
 function soloScr(g){
  const row=PT_GAMES.find(x=>x[3]===g)||[];
- go(`<div class="scr on">${tb('مع الكمبيوتر','gameHub(\''+g+'\')')}
+ go(`<div class="scr on">${tb('مع الكمبيوتر')}
  <div class="gHero sm">${GAME_ART[g]||''}</div>
  <div class="sl" style="margin:14px 0 9px">مستوى الخصم</div>
  ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard" onclick="soloStart('${g}','${k}')">
@@ -20445,10 +20688,10 @@ const PARTY_WORDS={
 };
 let PT=null;
 /* رأس ثابت لكل شاشات ليلة العائلة — رجوع دائم مع تأكيد أثناء اللعب */
-function ptHead(t,live){return tb(t,live?'ptExit()':'partyScr()')}
+function ptHead(t,live){return tb(t)}
 function ptExit(){
  confirmSheet('إنهاء اللعبة','ستتوقف الجولة الحالية ويعود الجميع لقائمة ليلة العائلة.','إنهاء',()=>{
-  clearInterval(PT&&PT.tm);if(PT)PT.tm=null;partyScr()});
+  clearInterval(PT&&PT.tm);if(PT)PT.tm=null;Router.settle('partyScr')});
 }
 const GAME_ART={
  carrom:`<svg viewBox="0 0 100 100"><defs>
@@ -20627,7 +20870,7 @@ function partyScr(){
  const last=defs.slice().sort((a,b)=>(rankOf(b.id).lastPlayedAt||0)-(rankOf(a.id).lastPlayedAt||0))[0];
  const cont=(last&&rankOf(last.id).lastPlayedAt)?last:null;
  const rest=cont?[cont].concat(defs.filter(g=>g.id!==cont.id)):defs;
- go(`<div class="scr on">${NAV.length>1?tbar('ليلة العائلة'):tb('ليلة العائلة',"tab('play')")}
+ go(`<div class="scr on">${tb('ليلة العائلة')}
  <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:4px">
   ألعاب جماعية للأصدقاء والعائلة — اختر اللعبة ثم اختر طريقة اللعب.</div>
  ${cont?`<div class="sl" style="margin:16px 0 9px">تابع لعبك</div>${gRow(cont,1)}
@@ -20675,12 +20918,12 @@ function gameHub(g){
 
  <div class="sl" style="margin:0 0 10px">اختر طريقة اللعب</div>
  ${ghWay('main','⚔️','لعب مصنّف','واجه لاعبًا قريبًا من مستواك وارفع رتبتك',
-   `mmScr('${g}','ranked')`,'#E8B23A')}
- ${ghWay('','🎮','لعب عادي','مباراة بلا تأثير على رتبتك',`mmScr('${g}','casual')`,'#4C9AF0')}
+   `push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
+ ${ghWay('','🎮','لعب عادي','مباراة بلا تأثير على رتبتك',`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
  ${ghWay('','🔗','غرفة بكود','أنشئ كودًا وأعطه لمن تعرفهم — لا تمنح نقاط تصنيف',
-   `roomScr('${g}')`,'#8B5CF0')}
+   `push('roomScr','${g}')`,'#8B5CF0')}
  ${def.bot?ghWay('','🤖','ضد الكمبيوتر','فورًا وبلا انتظار — لا تمنح نقاط تصنيف',
-   `soloScr('${g}')`,'#3FCF7F'):''}
+   `push('soloScr','${g}')`,'#3FCF7F'):''}
  ${def.pass?ghWay('','📱','تمرير الجوال','جهاز واحد يدور بينكم — لا تمنح نقاط تصنيف',
    `ptWay='pass';ptOpen('${g}')`,'#F0567F')
   :ghWay('','📱','تمرير الجوال','لا يصلح هنا — لكل لاعب يده ولوحه على هاتفه','','#2A3358',1)}
@@ -20750,10 +20993,10 @@ function gameRankScr(gameId){
 
 function ptOpen(g){
  const row=PT_GAMES.find(x=>x[3]===g);
- if(ptWay==='code'){RM.game=g;return gameHub(g)}
+ if(ptWay==='code'){RM.game=g;return push('gameHub',g)}
  // لعبة لا تعمل بالتمرير → مركزها يعرض بدائل الشبكة
- if(row&&!row[4])return gameHub(g);
- ({barra:barraSetup,mafia:mafiaSetup,draw:drawSetup})[g]();
+ if(row&&!row[4])return push('gameHub',g);
+ push(({barra:'barraSetup',mafia:'mafiaSetup',draw:'drawSetup'})[g]);
 }
 const ptCount=(min,max)=>`<div class="sl" style="margin:14px 0 8px">عدد اللاعبين</div>
  <div class="cr">${Array.from({length:max-min+1},(_,i)=>min+i).map(n=>
@@ -20765,12 +21008,13 @@ const ptCats=f=>`<div class="sl" style="margin:14px 0 8px">الفئة</div>
 /* ── برا السالفة ── */
 function barraSetup(keep){
  if(!keep||!PT||PT.g!=='barra')PT={g:'barra',n:5,cat:'أماكن'};
- go(`<div class="scr on">${tb('برا السالفة','partyScr()')}
+ go(`<div class="scr on">${tb('برا السالفة')}
  <div class="wb" style="text-align:right">الكل يرى الكلمة السرية إلا لاعبًا واحدًا. اسألوا بعضكم بالدور ثم صوّتوا: من برا السالفة؟</div>
  ${ptCount(3,8)}${ptCats('barraSetup')}
  <button class="rbtn" style="margin-top:18px" onclick="barraStart()"><span>ابدأ — مرروا الجوال</span></button></div>`);
 }
 function barraStart(){
+ Router.enter('party');
  const ws=PARTY_WORDS[PT.cat];
  PT.word=ws[Math.floor(Math.random()*ws.length)];
  PT.spy=Math.floor(Math.random()*PT.n);
@@ -20833,19 +21077,20 @@ function barraEnd(acc){
  ${right?'فازت المجموعة 👏':'اتهمتم اللاعب '+(acc+1)+' — فاز برا السالفة'}</div>
  </div></div></div>
  <button class="rbtn" style="margin-top:14px" onclick="barraStart()"><span>جولة جديدة — نفس اللاعبين</span></button>
- <button class="btn g" style="margin-top:9px" onclick="partyScr()">رجوع لليلة العائلة</button></div>`);
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
 }
 
 /* ── مافيا: التطبيق هو الراوي ── */
 function mafiaSetup(keep){
  if(!keep||!PT||PT.g!=='mafia')PT={g:'mafia',n:6};
- go(`<div class="scr on">${tb('مافيا','partyScr()')}
+ go(`<div class="scr on">${tb('مافيا')}
  <div class="wb" style="text-align:right">أدوار سرية: مافيا 🔪 وطبيب 💉 ومحقق 🔍 وشعب 👥.
  التطبيق يوزع الأدوار ويروي الليل والنهار — بلا حاجة لراوٍ بشري.</div>
  ${ptCount(5,12)}
  <button class="rbtn" style="margin-top:18px" onclick="mafiaStart()"><span>وزّع الأدوار</span></button></div>`);
 }
 function mafiaStart(){
+ Router.enter('party');
  const roles=[];
  const nMafia=PT.n>=8?2:1;
  for(let i=0;i<nMafia;i++)roles.push('مافيا');
@@ -20964,19 +21209,20 @@ function mafWinCheck(note){
  <div style="font-size:11.5px;color:var(--tx2);margin-top:10px">الأدوار كاملة:<br>${PT.roles.map((r,i)=>`اللاعب ${i+1}: ${r} ${MAF_ICON[r]}`).join('<br>')}</div>
  </div></div></div>
  <button class="rbtn" style="margin-top:14px" onclick="mafiaStart()"><span>جولة جديدة</span></button>
- <button class="btn g" style="margin-top:9px" onclick="partyScr()">رجوع لليلة العائلة</button></div>`);
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
  return true;
 }
 
 /* ── مسابقة الرسم ── */
 function drawSetup(keep){
  if(!keep||!PT||PT.g!=='draw')PT={g:'draw',n:3,cat:'حيوانات'};
- go(`<div class="scr on">${tb('مسابقة الرسم','partyScr()')}
+ go(`<div class="scr on">${tb('مسابقة الرسم')}
  <div class="wb" style="text-align:right">كلمة واحدة للجميع — كلٌّ يرسمها في 60 ثانية بالتناوب، ثم صوّتوا لأفضل لوحة. الترتيب النهائي بالميداليات!</div>
  ${ptCount(2,6)}${ptCats('drawSetup')}
  <button class="rbtn" style="margin-top:18px" onclick="drawStart()"><span>ابدأ المسابقة</span></button></div>`);
 }
 function drawStart(){
+ Router.enter('party');
  const ws=PARTY_WORDS[PT.cat];
  PT.word=ws[Math.floor(Math.random()*ws.length)];
  PT.idx=0;PT.imgs=[];PT.votes=Array(PT.n).fill(0);PT.vi=0;PT.color='#1B2030';
@@ -20997,7 +21243,7 @@ const PD_COLORS=['#1B2030','#E24B4A','#2ECC71','#378ADD','#E8B23A','#B76CF0','#F
 function drawBoard(){
  go(`<div class="scr on">
  <div style="display:flex;align-items:center;gap:8px;padding:6px 0 10px">
-  <button class="bk" style="width:34px" onclick="clearInterval(PT.tm);ptExit()">${ico('back',15)}</button>
+  <button class="bk" onclick="clearInterval(PT.tm);ptExit()">${ico('back',15)}</button>
   <span class="mtl" style="font-size:15px">ارسم: ${PT.word}</span>
   <span id="pdT" class="cch" style="margin-inline-start:auto;color:var(--warn)">60 ث</span></div>
  <canvas id="pdc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;
@@ -21062,7 +21308,7 @@ function drawEnd(){
   <div class="lb"><div class="lt">اللاعب ${r.i+1}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
   </div></div>`).join('')}
  <button class="rbtn" style="margin-top:10px" onclick="drawStart()"><span>كلمة جديدة — نفس اللاعبين</span></button>
- <button class="btn g" style="margin-top:9px" onclick="partyScr()">رجوع لليلة العائلة</button></div>`);
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
 }
 
 /* ═══════════ الأندية v1 — محلية بصدق: الأعضاء آليون ومعلَنون كذلك ═══════════ */
@@ -21846,15 +22092,8 @@ function navBar(){
   var q=!!(t0&&(t0.fn==='clubHome'||String(t0.fn).indexOf('cl')===0));
   document.body.classList.toggle('clQuiet',q);
  }catch(e){}
- var el=(typeof $==='function')?$('nav')
-        :(typeof document!=='undefined'?document.getElementById('nav'):null);
- if(!el)return;
- var st=clanState();
- // قبل انتهاء الترحيب الشريط مخفيّ عمدًا — لا نُظهره نيابةً عن اللعبة
- if(el.style.display==='none'&&!(st&&st.tutorial_completed))return;
- var open=null;
- try{if(typeof NAV!=='undefined'&&NAV&&NAV.length)open=NAV[NAV.length-1].fn}catch(e){}
- el.style.display=(typeof open==='string'&&NAV_NOBAR[open])?'none':'flex';
+ // مالك الشريط السفلي واحد: نواة التنقّل، من سجلّ الشاشة لا من كل شاشة على حدة
+ try{Router.applyBar()}catch(e){}
 }
 
 var _clanNavOn=0,_clanSent=0,_clanPop=0,_clanEat=0;
@@ -21870,35 +22109,7 @@ function clanNavSync(){
  * كان العدّاد يترك مداخل ميتة فتضيع ضغطات زر الرجوع بلا أثر.
  */
 function clanNavPatch(){
- if(_clanNavOn||typeof window==='undefined')return;
- if(typeof push!=='function'||typeof back!=='function')return;
- _clanNavOn=1;
- var oPush=window.push, oBack=window.back, oReset=window.resetNav;
- try{history.replaceState({cl:0},'')}catch(e){}
- window.push=function(fn,arg){
-  oPush(fn,arg);
-  clanNavSync();
-  navBar();
- };
- window.back=function(){
-  if(_clanSent&&!_clanPop){try{history.back();return}catch(e){}}
-  oBack();clanNavSync();navBar();
- };
- if(typeof oReset==='function'){
-  window.resetNav=function(fn,arg){
-   // تبديل التبويب يُفرغ المكدّس، فنُسقِط الحارس ونبتلع الـpopstate الناتج عنه
-   if(_clanSent){_clanSent=0;_clanEat++;try{history.back()}catch(e){_clanEat--}}
-   oReset(fn,arg);
-   navBar();
-  };
- }
- window.addEventListener('popstate',function(){
-  if(_clanEat>0){_clanEat--;return}
-  _clanSent=0;_clanPop=1;
-  try{oBack()}catch(e){}
-  _clanPop=0;
-  clanNavSync();navBar();
- });
+ /* زرّ الرجوع في أندرويد صار على مستوى التطبيق كلّه داخل Router — لا التفاف هنا */
 }
 
 /* ═══════════ ٨ · سجل الشاشات و run_ آمن ═══════════ */
@@ -24991,12 +25202,12 @@ function clHookBack(){
  if(bk)bk.setAttribute('onclick','clEdBack()');
 }
 function clEdBack(){
- if(!clDirty()){_clEd=null;return back()}
+ if(!clDirty()){_clEd=null;return back(true)}
  /* ثلاثة خيارات: حفظ · تجاهل · إلغاء (إغلاق الورقة بلا اختيار) */
  pickSheet('تغييرات لم تُحفظ','لديك تعديلات في هذه الشاشة لم تُحفظ. أغلق هذه الورقة للإلغاء والبقاء.',
   [['save','حفظ ثم الرجوع'],['drop','تجاهل التغييرات والرجوع']],'متابعة',k=>{
    if(k==='save'){clEdSave(1);return}
-   _clEd=null;back();
+   _clEd=null;back(true);
   });
 }
 function clEdSave(thenBack){
@@ -26936,7 +27147,7 @@ function clEvPlay() {
   'ستُفتح مباراة رانك عادية، ونتيجتها تُسجَّل في المضمار: فوز ٣ · تعادل ١ · خسارة ٠. ' +
   'مستوى بطاقاتك لا يضيف نقطة واحدة هنا.',
   'ابدأ المباراة', function () {
-   if (typeof rankedScr === 'function') rankedScr();
+   if (typeof rankedScr === 'function') push('rankedScr');
    else toast('مسار المباريات غير متاح الآن');
   });
 }
@@ -27437,7 +27648,10 @@ const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();app.i
  if(_keepY!=null){window.scrollTo(0,_keepY);_keepY=null}else window.scrollTo(0,0)};
 /* إعادة رسم بلا قفزة — الشاشة تبقى مكانها عند الاستلام والشراء */
 function refresh(fn){_keepY=window.scrollY;fn()}
-const tb=(t,b)=>`<div class="tbar">${b?`<button class="bk" onclick="${b}">${ico('back',15)}</button>`:'<span class="sp"></span>'}<h2>${t}</h2><span class="sp"></span></div>`;
+/** شريط علوي لأي شاشة: رجوع إن كان هناك ما يُرجع إليه، وإلا عنوان فقط — الوجهة قرار المكدّس لا الشاشة */
+const tb=(t,sub)=>{const c=Router.current();
+ return (Router.depth()>1||(c&&(c.flow||Router.def(c.fn).leave)))?tbar(t,sub)
+  :`<div class="tbar"><span class="sp"></span><h2>${t}</h2><span class="sp"></span></div>`};
 const stars=(k,sz)=>{const s=S.stars[k]||0;let o='';
  for(let i=1;i<=3;i++)o+=`<span style="font-size:${sz||10}px;opacity:${i<=s?1:.22}">${ico('star',14)}</span>`;return o};
 
@@ -27446,7 +27660,7 @@ function phead(){
  const r=rk(S.xp);
  return `<div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;align-items:center;gap:11px">
- <div style="flex-shrink:0;border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer" onclick="avScr()">${avatarArt(42)}</div>
+ <div style="flex-shrink:0;border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer" onclick="push('avScr')">${avatarArt(42)}</div>
  <div class="pinf"><div class="pnm"><span class="mtl" style="font-size:14px">${S.name}</span><span class="plv">${lvl(S.xp)}</span></div>
  <div class="pbf" style="margin-top:6px"><div class="pbi"><i style="width:${rat(S.xp)*100}%"></i></div></div>
  <div class="pxp">${r[0]} · ${S.xp} خبرة</div></div>
@@ -27538,20 +27752,20 @@ function nav(){
    :`<div class="nvi ${cur===k?'on':''}" style="position:relative" onclick="tab('${k}')">${dot}<span class="i">${NAVICO[k]}</span><span class="l">${l}</span></div>`;
  }).join('');
 }
-function tab(k){cur=k;nav();NAV=[];hideArena();
- ({play:playScr,nets:()=>resetNav('netsScr'),cards:()=>resetNav('cardsScr'),
+function tab(k){cur=k;nav();hideArena();
+ ({play:()=>resetNav('playScr'),nets:()=>resetNav('netsScr'),cards:()=>resetNav('cardsScr'),
    clubs:()=>resetNav(S.clan&&S.clan.c?'clubHome':'clSearchScr'),
-   shop:()=>resetNav('shopScr'),more:moreScr})[k]()}
+   shop:()=>resetNav('shopScr'),more:()=>resetNav('moreScr')})[k]()}
 
 // ═══════════ الشاشات ═══════════
 function splash(){
  loadState();
- if(S.tutorial_completed){$('nav').style.display='flex';cur='play';nav();NAV=[];playScr();return}
- welcomeScr();
+ if(S.tutorial_completed){cur='play';nav();Router.reset('playScr');return}
+ Router.reset('welcomeScr');
 }
-function start(){$('nav').style.display='flex';cur='play';nav();
+function start(){cur='play';nav();
  if(!S.tutDone){tutStart();return}
- home()}
+ Router.reset('home')}
 
 function home(){
  const done=NODES.filter(n=>S.stars[n.id]!==undefined).length;
@@ -27560,7 +27774,7 @@ function home(){
  <div class="bd2"><div class="t">${ico('map',16)} ادخل الشبكة</div>
  <div class="mt">افتح العقد واجمع النجوم · ${done}/${NODES.length} عقدة</div></div></div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
- <div class="li" style="text-align:center;cursor:pointer;margin:0" onclick="quickScr()">
+ <div class="li" style="text-align:center;cursor:pointer;margin:0" onclick="push('quickScr')">
  <div style="font-size:26px">${ico('energy',15)}</div><div class="lt" style="margin-top:6px">تحدٍ سريع</div>
  <div class="ls">6 أسئلة</div></div>
  <div class="li" style="text-align:center;cursor:pointer;margin:0" onclick="vsScr()">
@@ -27572,9 +27786,9 @@ function home(){
  <div class="stc"><div class="i">${ico('map',16)}</div><div class="v">${Object.keys(S.nets).length}</div><div class="l">الشبكات</div></div>
  <div class="stc"><div class="i">${ico('check',14)}</div><div class="v">${S.correct}</div><div class="l">إجابات صحيحة</div></div></div>
  <div class="sl">المزيد</div>
- <div class="li" style="cursor:pointer" onclick="lbScr()"><div class="lr"><span style="font-size:19px">${ico('chart',16)}</span>
+ <div class="li" style="cursor:pointer" onclick="push('lbScr')"><div class="lr"><span style="font-size:19px">${ico('chart',16)}</span>
  <div class="lb"><div class="lt">لوحة الصدارة</div></div><span style="color:var(--mut)">‹</span></div></div>
- <div class="li" style="cursor:pointer" onclick="profScr()"><div class="lr"><span style="font-size:19px">${ico('user',16)}</span>
+ <div class="li" style="cursor:pointer" onclick="push('profScr')"><div class="lr"><span style="font-size:19px">${ico('user',16)}</span>
  <div class="lb"><div class="lt">ملفي الشخصي</div></div><span style="color:var(--mut)">‹</span></div></div>
  <div class="li" style="cursor:pointer" onclick="splash()"><div class="lr"><span style="font-size:19px">${ico('reset',16)}</span>
  <div class="lb"><div class="lt">إعادة الضبط</div></div><span style="color:var(--mut)">‹</span></div></div></div>`);
@@ -27582,11 +27796,11 @@ function home(){
 
 function netsBack(){if(NAV.length>1)back();else resetNav('netsScr')}
 function netsScr(){
- go(`<div class="scr on">${NAV.length>1?tbar('اختر شبكتك'):tb('اختر شبكتك')}
+ go(`<div class="scr on">${tb('اختر شبكتك')}
  ${NETS.map(t=>{const ns=nOf(t.id),dn=ns.filter(x=>S.stars[x.id]!==undefined).length;
  const tq=ns.reduce((a,x)=>a+qOf(x.id).length,0),ms=ns.length*3;
  const pc=ns.length?Math.round(dn/ns.length*100):0;
- return `<div class="ncd2" onclick="mapScr('${t.id}')"><div class="ncd2i">${ART[t.id]||ART.general}
+ return `<div class="ncd2" onclick="push('mapScr','${t.id}')"><div class="ncd2i">${ART[t.id]||ART.general}
  <div class="ncd2e" style="border-color:${t.c};color:${t.c}">${ico(t.i,22)}</div>
  ${pc>=100?`<div class="ncd2done">${ico('check',11)} مكتملة</div>`:pc>0?`<div class="ncd2pc">${pc}%</div>`:''}
  <div class="ncd2b"><div class="ncd2t mtl">${t.n}</div>
@@ -27657,7 +27871,7 @@ function mapScr(id){
  let lastOpen=0;ns.forEach((n,i)=>{if(nS(n)!=='lk')lastOpen=i});
  const openD=lastOpen>0?road(0,lastOpen):'';
  const lockD=lastOpen<ns.length-1?road(lastOpen,ns.length-1):'';
- go(`<div class="scr on">${tb(t.n,"netsBack()")}
+ go(`<div class="scr on">${tb(t.n)}
  <div class="mphead" style="border-color:${t.c}66">
   <span class="mpico" style="background:${t.c}22;border-color:${t.c};color:${t.c}">${ico(t.i,20)}</span>
   <div style="flex:1;min-width:0">
@@ -27722,7 +27936,7 @@ function begin(id){
 
 let qC='all',qD=3;
 function quickScr(){
- go(`<div class="scr on">${tb('تحدٍ سريع',"tab('play')")}
+ go(`<div class="scr on">${tb('تحدٍ سريع')}
  <div style="font-size:13px;font-weight:800;margin-bottom:9px">الشبكة</div>
  <div class="cr" id="cr"><div class="fc on" data-c="all" onclick="pc(this)">الكل</div>
  ${NETS.map(t=>`<div class="fc" data-c="${t.id}" onclick="pc(this)">${ico(t.i,15)} ${t.n}</div>`).join('')}</div>
@@ -27757,6 +27971,7 @@ function run(qs,o){
  G={qs,i:0,pts:0,ok:0,mis:0,st:0,bst:0,node:o.node||null,mm:o.mm||null,vs:o.vs||null,
   ans:false,a:null,lp:0,lo:false,used:new Set(),hid:new Set(),x2:false,
   anyP:false,emoteBar:false,tm:null,ms:0,t0:0,hist:[]};
+ Router.enter('quiz');
  nextQ();
 }
 const tl=q=>q.speed?6:20;
@@ -27789,7 +28004,7 @@ function draw(){
   return `<div class="${cl}" onclick="${G.ans?'':`ansr('${i}')`}"><div class="qop2i">
    <span class="qop2n">${mark}</span><span class="qop2t">${o}</span></div></div>`}).join('')}</div>`}
  go(`<div class="scr on">
- <div class="qtop"><span class="qcat">${nt?ico(nt.i,14)+' ':''}${nt?nt.n:'سؤال'}</span>
+ <div class="qtop"><button class="bk" onclick="back()" title="إنهاء الجولة">${ico('back',15)}</button><span class="qcat">${nt?ico(nt.i,14)+' ':''}${nt?nt.n:'سؤال'}</span>
  <span class="qnum">السؤال ${G.i+1}/${G.qs.length}</span>
  <span class="cch">${ico('coin',15)} ${S.coins}</span></div>
  ${G.vs?vsBar():''}
@@ -27949,7 +28164,7 @@ function done(){
  <div class="stc"><div class="i">${ico(`coin`,15)}</div><div class="v">+${co}${gm?` · ${ico('gem',15)}${gm}`:``}</div><div class="l">مكافآت</div></div></div>
  ${bd?`<div class="bwn">${ico('medal',16)} شارة جديدة: <span class="mtl">${bd}</span></div>`:''}
  <div class="note" style="margin-top:10px">${ico('ticket',12)} +${szG} نقطة موسم · المستوى ${szLv()}/100</div>
- <div style="margin-top:22px"><button class="rbtn" onclick="${G.node?`mapScr('${G.node.net}')`:"tab('play')"}"><span>${G.node?'العودة للخريطة':'الرئيسية'}</span></button>
+ <div style="margin-top:22px"><button class="rbtn" onclick="${G.node?`Router.settle('mapScr','${G.node.net}')`:"tab('play')"}"><span>${G.node?'العودة للخريطة':'الرئيسية'}</span></button>
  <button class="btn g" style="margin-top:9px" onclick="tab('play')">الرئيسية</button></div></div></div>`);
  if((ps||vsWin)&&window.FX)FX.win();
 }
@@ -28099,7 +28314,7 @@ function storeScr(){
 function lbScr(){
  const f=[{n:'سالم',x:14200},{n:'ريم',x:9800},{n:'خالد',x:7200},{n:S.name,x:S.xp,me:1},
   {n:'نورة',x:2100},{n:'أحمد',x:900}].sort((a2,b2)=>b2.x-a2.x);
- go(`<div class="scr on">${tb('لوحة الصدارة',"tab('play')")}
+ go(`<div class="scr on">${tb('لوحة الصدارة')}
  <div class="wb">لاعبون وهميون للمعاينة. الترتيب الحقيقي يحتاج خادمًا. اضغط أي لاعب لعرض ملفه الكامل.</div>
  ${f.map((u,i)=>{const r=rk(u.x),m=i===0?'#E8B23A':i===1?'#C0C0C0':i===2?'#CD7F32':null;
  return `<div class="rr" style="cursor:pointer;${u.me?'background:rgba(123,79,224,.14);border-color:var(--pur)':''}"
@@ -28214,7 +28429,7 @@ function rivalProfile(name,base){
 function profileView(p,backCall){
  const t=TIERS[p.tierIx]||TIERS[0];
  const aw=achWall(p);
- go(`<div class="scr on">${p.me?tbar('ملفي'):tb('ملف اللاعب',backCall||"tab('play')")}
+ go(`<div class="scr on">${tb(p.me?'ملفي':'ملف اللاعب')}
  <div class="orn"><div class="in">${ornCorners()}
   <div style="display:flex;align-items:center;gap:13px">
   <div style="border-radius:50%;padding:2.5px;flex-shrink:0;background:linear-gradient(145deg,#FFE9A8,#A87518);${p.me?'cursor:pointer':''}" ${p.me?`onclick="push('avScr')"`:''}>${p.avatar}</div>
@@ -28285,7 +28500,7 @@ function profileView(p,backCall){
 function profScr(){profileView(myProfile())}
 function lbProf(name,x){profileView(rivalProfile(name,{mmrHint:800+Math.round(x/8)}),'lbScr()')}
 function rivalProf(name){const rv=RIVALS.find(v=>v.n===name);
- profileView(rivalProfile(name,rv?{t:rv.t,mmrHint:(S.ranked&&S.ranked.mmr||1000)+((hashStr(name)%260)-130)}:{}),"tab('play')")}
+ push('profileView',rivalProfile(name,rv?{t:rv.t,mmrHint:(S.ranked&&S.ranked.mmr||1000)+((hashStr(name)%260)-130)}:{}))}
 
 // ═══════════ حفظ التقدّم ═══════════
 // يعمل في التطبيق الفعلي عبر Firestore — وهنا محليًا للمعاينة
