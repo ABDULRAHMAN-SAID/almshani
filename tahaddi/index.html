@@ -62,6 +62,41 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .cch{display:flex;align-items:center;gap:4px;background:var(--surf);border:1px solid var(--bd);
  border-radius:14px;padding:3px 8px;font-size:11px;font-weight:800}
 
+/* كيرم */
+.caPl{flex:1;padding:9px 10px;border-radius:12px;background:linear-gradient(168deg,#1C2540,#0E1526);
+ border:1.5px solid var(--bd);transition:all .2s}
+.caPl.on{border-color:var(--gold);box-shadow:0 0 16px rgba(232,178,58,.28)}
+.caDot{width:13px;height:13px;border-radius:50%;display:inline-block;border:1.5px solid rgba(0,0,0,.4)}
+.caDot.w{background:radial-gradient(circle at 34% 30%,#FFF9EC,#D9C8A6)}
+.caDot.b{background:radial-gradient(circle at 34% 30%,#4A3E36,#1C1512)}
+.caTurn{text-align:center;font-size:11.5px;font-weight:900;color:var(--tx2);margin-top:10px}
+.caTurn.me{color:var(--gold)}
+/* أونو */
+.unoTable{background:radial-gradient(circle at 50% 40%,#1B4332,#0B1F18 72%);border:1px solid #2E7D46;
+ border-radius:18px;padding:14px 12px;box-shadow:inset 0 0 40px rgba(0,0,0,.55)}
+.unoPl{font-size:10px;font-weight:800;color:var(--tx2);background:rgba(6,9,17,.6);
+ border:1px solid var(--bd);border-radius:9px;padding:3px 9px}
+.unoPl.on{color:#5E4408;background:linear-gradient(180deg,#FFE9A8,#E8C25A);border-color:#B8871E}
+.unoC{position:relative;width:52px;height:76px;border-radius:9px;display:inline-flex;align-items:center;
+ justify-content:center;border:2.5px solid #F2F4F8;box-shadow:0 4px 10px rgba(0,0,0,.5);flex-shrink:0}
+.unoC.big{width:76px;height:110px;border-radius:12px;border-width:3.5px}
+.unoC .unoIn{background:#F7F9FF;color:#12203A;border-radius:50%/38%;width:66%;height:56%;
+ display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;
+ transform:rotate(-20deg);box-shadow:inset 0 2px 5px rgba(0,0,0,.16)}
+.unoC.big .unoIn{font-size:32px}
+.unoCorner{position:absolute;font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.unoCorner.tl{top:4px;left:5px}.unoCorner.br{bottom:4px;right:5px;transform:rotate(180deg)}
+.unoBack{width:52px;height:76px;border-radius:9px;border:2.5px solid #F2F4F8;display:flex;align-items:center;
+ justify-content:center;font-size:15px;font-weight:900;color:#FFE9A8;
+ background:repeating-linear-gradient(135deg,#1A1533,#1A1533 6px,#2C2350 6px,#2C2350 12px);
+ box-shadow:0 4px 10px rgba(0,0,0,.5)}
+.unoTurn{text-align:center;font-size:11.5px;font-weight:900;color:var(--tx2);margin-top:12px}
+.unoTurn.me{color:var(--gold)}
+.unoHand{display:flex;gap:7px;overflow-x:auto;padding:4px 2px 8px}
+.rmGame{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 6px;border-radius:13px;
+ cursor:pointer;font-size:11px;font-weight:800;color:var(--tx2);
+ background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--bd);transition:all .2s}
+.rmGame.on{color:var(--gold);border-color:var(--gold);box-shadow:0 0 16px rgba(232,178,58,.26)}
 /* ليلة العائلة: اختيار الطريقة + غرفة الكود */
 .ptWay{flex:1;text-align:center;padding:14px 8px;border-radius:15px;cursor:pointer;
  background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--bd);transition:all .2s}
@@ -17856,7 +17891,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='4.6';
+const APP_VER='4.8';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18174,6 +18209,7 @@ function playModesScr(){
 let RMcap=undefined, RM={code:null,host:0,game:null,name:'',phase:'idle',me:null,
   role:null,word:'',cat:'',players:[],alive:[],votes:{},msg:'',log:[],res:null,step:null,acts:{},day:1,unsub:[]};
 const RM_TOPIC='party';
+const RM_MIN={barra:[3,12],mafia:[4,12],draw:[2,8],uno:[2,6],carrom:[2,2]};
 const rmCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s};
 async function rmCap(){
  if(RMcap!==undefined)return RMcap;
@@ -18213,7 +18249,8 @@ function rmBind(){
 /* استقبال الرسائل — كل رسالة حالة كاملة لا فرقًا */
 function rmOn(d,m){
  const me=RM.me;
- if(d.t==='start'){RM.game=d.g;RM.phase='deal';RM.role=null;RM.word='';RM.cat=d.cat||'';
+ if(d.t==='start'){RM.game=d.g;RM.phase=d.g==='draw'?'paint':d.g==='uno'?'uno':d.g==='carrom'?'carrom':'deal';
+  RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
  else if(d.t==='role'&&d.to===me){RM.role=d.r;RM.word=d.w||'';RM.cat=d.cat||RM.cat}
  else if(d.t==='ph'){RM.phase=d.p;RM.msg=d.m||'';if(d.p==='vote')RM.votes={};
@@ -18223,8 +18260,22 @@ function rmOn(d,m){
  else if(d.t==='morn'){RM.phase='morning';RM.alive=d.alive||RM.alive;RM.res={killed:d.killed};RM.day=d.day||RM.day}
  else if(d.t==='lynch'){RM.phase='lynch';RM.alive=d.alive||RM.alive;RM.res={who:d.who,role:d.role}}
  else if(d.t==='over'){RM.phase='over';RM.res=d}
+ else if(d.t==='st'){ // مسارات رسم — لا صور: تبقى تحت حد الرسالة
+  RM.art=RM.art||{};
+  if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
+  if(RM.phase==='vote')setTimeout(rmPaintAll,30);}
+ else if(d.t==='hand'&&d.to===me){RM.hand=(d.h||[]).slice()}
+ else if(d.t==='uno'){RM.uno=d;RM.phase='uno'}
+ else if(d.t==='cast'){
+  const wasShot=!!d.shot;
+  RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,msg:d.msg||''};
+  RM.phase='carrom';
+  if(wasShot)setTimeout(()=>caPlay(d.shot),20);else setTimeout(caRender,40);}
  else if(d.t==='det'&&d.to===me){RM.detRes=`اللاعب ${((RM.players.find(x=>x.peer===d.target)||{}).name)||''}: ${d.isM?'مافيا! 🔪':'بريء 😇'}`}
- else if(d.t==='act'&&RM.host){RM.acts[d.role]=d.target;rmHostStep()}
+ else if(d.t==='act'&&RM.host){
+  if(RM.game==='uno')unoAct(d);
+  else if(RM.game==='carrom')caAct(d);
+  else{RM.acts[d.role]=d.target;rmHostStep()}}
  if(document.getElementById('rmScr'))roomDraw();
 }
 let _rmTm=null;
@@ -18232,8 +18283,11 @@ function rmTimer(secs){
  clearInterval(_rmTm);RM.secs=secs;
  _rmTm=setInterval(()=>{
   RM.secs--;const el=document.getElementById('rmT');
-  if(el)el.textContent=Math.floor(RM.secs/60)+':'+String(Math.max(0,RM.secs%60)).padStart(2,'0');
-  if(RM.secs<=0){clearInterval(_rmTm);if(RM.host&&RM.phase==='talk')rmHostVote()}
+  if(el)el.textContent=RM.phase==='paint'?Math.max(0,RM.secs)+' ث'
+   :Math.floor(RM.secs/60)+':'+String(Math.max(0,RM.secs%60)).padStart(2,'0');
+  if(RM.secs<=0){clearInterval(_rmTm);
+   if(RM.host&&RM.phase==='talk')rmHostVote();
+   else if(RM.host&&RM.phase==='paint')rmPaintDone()}
  },1000);
 }
 /* ── الشاشات ── */
@@ -18254,7 +18308,7 @@ async function roomScr(game){
   return;
  }
  if(!RM.name)RM.name=S.name||'لاعب';
- go(`<div class="scr on" id="rmScr">${tb('غرفة بكود','rmLeave()')}
+ go(`<div class="scr on nofi" id="rmScr">${tb('غرفة بكود','rmLeave()')}
  <div class="wb" style="text-align:right">${ico('info',13)} أنشئ غرفة وأعطِ الكود لمن معك — يفتحون <b>نفس رابط اللعبة</b> ويدخلون بالكود، ويرى كلٌّ دوره في هاتفه.</div>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:6px 0 5px">اسمك في الغرفة</div>
  <input class="fin" id="rmNm" maxlength="14" value="${RM.name}">
@@ -18302,17 +18356,22 @@ function roomDraw(){
    <div class="lb"><div class="lt" style="font-size:12.5px">${p.name}${p.me?' <span style="font-size:8.5px;color:var(--gold)">أنت</span>':''}</div></div>
    </div></div>`).join('')||'<div class="note">بانتظار انضمام اللاعبين…</div>'}
   ${RM.host?`<div class="sl" style="margin:14px 0 8px">اللعبة</div>
-   <div style="display:flex;gap:8px;margin-bottom:12px">
-    ${[['barra','🤫 برا السالفة',3],['mafia','🕵️ مافيا',4]].map(([g,n,mn])=>
-     `<button class="btn ${RM.game===g?'gd':'g'}" style="flex:1;font-size:11.5px;padding:9px 6px" onclick="RM.game='${g}';roomDraw()">${n}</button>`).join('')}</div>
-   ${RM.game==='barra'?ptCatsRoom():''}
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+    ${[['barra','🤫','برا السالفة'],['mafia','🕵️','مافيا'],['draw','🎨','مسابقة الرسم'],
+       ['uno','🎴','أونو'],['carrom','⚪','كيرم']].map(([g,e,n])=>
+     `<div class="rmGame ${RM.game===g?'on':''}" onclick="RM.game='${g}';roomDraw()">
+      <span style="font-size:22px">${e}</span><span>${n}</span></div>`).join('')}</div>
+   ${RM.game==='barra'||RM.game==='draw'?ptCatsRoom():''}
    <button class="rbtn" onclick="rmStart()"><span>${ico('play',14)} ابدأ اللعبة (${R.length} لاعبين)</span></button>
-   <div class="note">الحد الأدنى: برا السالفة 3 · مافيا 4</div>`
+   <div class="note">${RM_MIN[RM.game]?`الحد الأدنى ${RM_MIN[RM.game][0]} لاعبين`:''}${RM.game==='carrom'?' — كيرم للاعبَين بالضبط':''}</div>`
   :`<div class="note" style="margin-top:14px">بانتظار المضيف ليبدأ…</div>`}`;
  }
  else if(RM.game==='barra')body=rmBarra(R);
+ else if(RM.game==='draw')body=rmDraw(R);
+ else if(RM.game==='uno')body=rmUno(R);
+ else if(RM.game==='carrom')body=rmCarrom(R);
  else body=rmMafia(R);
- go(`<div class="scr on" id="rmScr">${tb('غرفة '+(RM.code||''),'rmLeave()')}${head}${body}
+ go(`<div class="scr on nofi" id="rmScr">${tb('غرفة '+(RM.code||''),'rmLeave()')}${head}${body}
  <button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button></div>`);
 }
 function ptCatsRoom(){
@@ -18324,9 +18383,19 @@ function ptCatsRoom(){
 /* ── المضيف يبدأ ويوزع الأدوار ── */
 function rmStart(){
  const R=rmRoster();
- const min=RM.game==='mafia'?4:3;
- if(R.length<min){toast(`تحتاج ${min} لاعبين على الأقل`);return}
+ const lim=RM_MIN[RM.game]||[2,12];
+ if(R.length<lim[0]){toast(`تحتاج ${lim[0]} لاعبين على الأقل`);return}
+ if(R.length>lim[1]){toast(`الحد الأقصى ${lim[1]} لاعبين لهذه اللعبة`);return}
  const ps=R.map(p=>({peer:p.peer,name:p.name}));
+ if(RM.game==='draw'){
+  const ws=PARTY_WORDS[RM.cat||'أماكن'];
+  RM.art={};
+  rmSend({t:'start',g:'draw',ps,cat:RM.cat,w:ws[Math.floor(Math.random()*ws.length)]});
+  setTimeout(()=>rmSend({t:'ph',p:'paint',secs:75}),140);
+  return;
+ }
+ if(RM.game==='uno'){rmSend({t:'start',g:'uno',ps});setTimeout(unoDeal,160);return}
+ if(RM.game==='carrom'){rmSend({t:'start',g:'carrom',ps});setTimeout(caDeal,160);return}
  if(RM.game==='barra'){
   const ws=PARTY_WORDS[RM.cat||'أماكن'];
   const word=ws[Math.floor(Math.random()*ws.length)];
@@ -18412,6 +18481,452 @@ function rmHostEnd(){
  const c=RMcap;if(c){try{c.presence({vt:null})}catch(e){}}
  rmSend({t:'end',sp:RM.secret.spy,w:RM.secret.word,acc:acc||''});
 }
+/* ── مسابقة الرسم عبر الغرفة: تُرسل المسارات لا الصور ── */
+let _pb={buf:[],stroke:null,tm:null};
+function rmDraw(R){
+ const nm=p=>((RM.players.find(x=>x.peer===p)||{}).name)||'لاعب';
+ if(RM.phase==='paint'){
+  setTimeout(rmPaintInit,40);
+  return `<div style="display:flex;align-items:center;gap:8px;margin:10px 0 8px">
+   <span class="mtl" style="font-size:16px">ارسم: ${RM.word}</span>
+   <span class="cch" id="rmT" style="margin-inline-start:auto;color:var(--warn)">${RM.secs||75}</span></div>
+  <canvas id="rmC" width="300" height="300" style="width:100%;aspect-ratio:1;border-radius:16px;
+   border:2px solid #3B2F5C;touch-action:none;background:#fff;cursor:crosshair"></canvas>
+  <div style="display:flex;gap:6px;margin-top:9px;align-items:center;justify-content:center" id="rmCols">
+  ${PD_COLORS.map((c,i)=>`<span onclick="RM.ci=${i};document.querySelectorAll('#rmCols span').forEach(x=>x.style.outline='none');this.style.outline='3px solid #FFE9A8'"
+   style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
+   border:2px solid ${c==='#FFFFFF'?'#8A93A8':'#0B1020'};${(RM.ci||0)===i?'outline:3px solid #FFE9A8':''}"></span>`).join('')}
+  </div>
+  <div class="note">الجميع يرسم في نفس الوقت — تُرسل خطوطك مباشرة</div>
+  ${RM.host?`<button class="rbtn" style="margin-top:10px" onclick="rmPaintDone()"><span>انتهى الوقت — إلى التصويت</span></button>`:''}`;
+ }
+ if(RM.phase==='vote'){
+  setTimeout(rmPaintAll,50);
+  const myVote=(R.find(p=>p.me)||{}).vote;
+  const tally={};R.forEach(p=>{if(p.vote)tally[p.vote]=(tally[p.vote]||0)+1});
+  return `<div class="sl" style="margin:12px 0 9px;text-align:center">صوّت لأفضل رسمة «${RM.word}» (غير رسمتك)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+  ${RM.players.map(p=>p.peer===RM.me?'':`<div onclick="rmVote('${p.peer}')"
+   style="cursor:pointer;border:2px solid ${myVote===p.peer?'var(--gold)':'#3B2F5C'};border-radius:14px;overflow:hidden;background:#fff">
+   <canvas class="rmArt" data-p="${p.peer}" width="300" height="300" style="width:100%;display:block"></canvas>
+   <div style="text-align:center;font-size:10.5px;font-weight:800;padding:5px;background:var(--surf)">
+    ${p.name}${tally[p.peer]?` — ${tally[p.peer]} صوت`:''}</div></div>`).join('')}
+  </div>
+  ${RM.host?`<button class="rbtn" style="margin-top:12px" onclick="rmDrawEnd()"><span>أغلق التصويت واعرض الترتيب</span></button>`:''}`;
+ }
+ if(RM.phase==='end'&&RM.res){
+  setTimeout(rmPaintAll,50);
+  return `<div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">الكلمة: <b class="mtl" style="font-size:15px">${RM.word}</b></div>
+  ${(RM.res.rank||[]).map((r,i)=>`<div class="li" style="margin-bottom:9px;${i===0?'border-color:var(--gold)':''}"><div class="lr">
+   <span style="font-size:24px;flex-shrink:0">${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.'}</span>
+   <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #3B2F5C;background:#fff">
+    <canvas class="rmArt" data-p="${r.p}" width="300" height="300" style="width:100%;height:100%"></canvas></div>
+   <div class="lb"><div class="lt">${nm(r.p)}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
+   </div></div>`).join('')}
+  ${RM.host?`<button class="rbtn" style="margin-top:10px" onclick="rmStart()"><span>كلمة جديدة</span></button>`:''}`;
+ }
+ return '<div class="note">…</div>';
+}
+function rmStrokeDraw(cx,s,scale){
+ const c=PD_COLORS[s[0]]||'#1B2030';
+ cx.strokeStyle=c;cx.lineWidth=(c==='#FFFFFF'?14:4)*(scale||1);cx.lineCap='round';cx.lineJoin='round';
+ cx.beginPath();
+ for(let i=1;i<s.length;i+=2){
+  const x=s[i]*(scale||1),y=s[i+1]*(scale||1);
+  if(i===1)cx.moveTo(x,y);else cx.lineTo(x,y);
+ }
+ if(s.length===3)cx.lineTo(s[1]*(scale||1)+.1,s[2]*(scale||1));
+ cx.stroke();
+}
+function rmPaintAll(){
+ document.querySelectorAll('canvas.rmArt').forEach(cv=>{
+  const cx=cv.getContext('2d');
+  cx.fillStyle='#fff';cx.fillRect(0,0,300,300);
+  ((RM.art||{})[cv.dataset.p]||[]).forEach(s=>rmStrokeDraw(cx,s,1));
+ });
+}
+function rmPaintInit(){
+ const cv=document.getElementById('rmC');if(!cv||cv._on)return;cv._on=1;
+ const cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,300,300);
+ ((RM.art||{})[RM.me]||[]).forEach(s=>rmStrokeDraw(cx,s,1));
+ let down=false,last=null;
+ const pos=e=>{const r=cv.getBoundingClientRect();
+  return [Math.max(0,Math.min(300,Math.round((e.clientX-r.left)*300/r.width))),
+          Math.max(0,Math.min(300,Math.round((e.clientY-r.top)*300/r.height)))]};
+ cv.onpointerdown=e=>{down=true;const p=pos(e);_pb.stroke=[RM.ci||0,p[0],p[1]];last=p;
+  try{cv.setPointerCapture(e.pointerId)}catch(x){}};
+ cv.onpointermove=e=>{
+  if(!down||!_pb.stroke)return;e.preventDefault();
+  const p=pos(e);
+  if(Math.abs(p[0]-last[0])+Math.abs(p[1]-last[1])<3)return;
+  cx.strokeStyle=PD_COLORS[RM.ci||0];cx.lineWidth=PD_COLORS[RM.ci||0]==='#FFFFFF'?14:4;
+  cx.lineCap='round';cx.beginPath();cx.moveTo(last[0],last[1]);cx.lineTo(p[0],p[1]);cx.stroke();
+  _pb.stroke.push(p[0],p[1]);last=p;
+  if(_pb.stroke.length>150){rmStrokeEnd();_pb.stroke=[RM.ci||0,p[0],p[1]]}
+ };
+ cv.onpointerup=cv.onpointercancel=()=>{if(down){down=false;rmStrokeEnd()}};
+}
+function rmStrokeEnd(){
+ if(!_pb.stroke||_pb.stroke.length<3)return _pb.stroke=null;
+ RM.art=RM.art||{};RM.art[RM.me]=(RM.art[RM.me]||[]).concat([_pb.stroke]);
+ _pb.buf.push(_pb.stroke);_pb.stroke=null;
+ clearTimeout(_pb.tm);_pb.tm=setTimeout(rmArtFlush,400);
+}
+function rmArtFlush(){
+ if(!_pb.buf.length||!RM.code)return;
+ // دفعات صغيرة تحترم حد الرسالة (4 كيلوبايت)
+ let batch=[],size=0;
+ while(_pb.buf.length){
+  const s=_pb.buf[0],sz=JSON.stringify(s).length;
+  if(size+sz>2600&&batch.length)break;
+  batch.push(_pb.buf.shift());size+=sz;
+ }
+ rmSend({t:'st',by:RM.me,s:batch});
+ if(_pb.buf.length)setTimeout(rmArtFlush,220);
+}
+function rmPaintDone(){clearInterval(_rmTm);rmArtFlush();setTimeout(()=>rmSend({t:'ph',p:'vote'}),350)}
+function rmDrawEnd(){
+ const R=rmRoster(),tally={};
+ R.forEach(p=>{if(p.vote)tally[p.vote]=(tally[p.vote]||0)+1});
+ const rank=RM.players.map(p=>({p:p.peer,v:tally[p.peer]||0})).sort((a,b)=>b.v-a.v);
+ const c=RMcap;if(c){try{c.presence({vt:null})}catch(e){}}
+ rmSend({t:'end',rank});
+}
+
+/* ── أونو عبر الغرفة: المضيف يحكم واليد تصل لكل لاعب وحده ── */
+const UNO_COL={r:['#E24B4A','#7E1F1F'],g:['#2ECC71','#12602F'],b:['#378ADD','#123C6E'],y:['#E8B23A','#8A6210'],w:['#2A3550','#0B1020']};
+const UNO_SYM={S:'⊘',R:'⇄',D:'+2',W:'★',F:'+4'};
+function unoDeck(){
+ const d=[];
+ 'rgby'.split('').forEach(c=>{
+  d.push(c+'0');
+  for(let v=1;v<=9;v++){d.push(c+v);d.push(c+v)}
+  ['S','R','D'].forEach(s=>{d.push(c+s);d.push(c+s)});
+ });
+ for(let i=0;i<4;i++){d.push('wW');d.push('wF')}
+ return d.sort(()=>Math.random()-.5);
+}
+function unoDeal(){
+ if(!RM.host)return;
+ const ps=RM.players;
+ const deck=unoDeck();
+ RM.U={deck,hands:{},dir:1,turn:0,col:'r',top:null,draw:0};
+ ps.forEach(p=>{RM.U.hands[p.peer]=deck.splice(0,7)});
+ let top=deck.shift();
+ while(top[0]==='w'){deck.push(top);top=deck.shift()}
+ RM.U.top=top;RM.U.col=top[0];
+ ps.forEach(p=>rmSend({t:'hand',to:p.peer,h:RM.U.hands[p.peer]}));
+ unoPub();
+}
+function unoPub(extra){
+ const U=RM.U;
+ rmSend(Object.assign({t:'uno',top:U.top,col:U.col,turn:RM.players[U.turn].peer,dir:U.dir,
+  cnt:RM.players.map(p=>({p:p.peer,n:U.hands[p.peer].length})),dk:U.deck.length,drawP:U.draw},extra||{}));
+}
+const unoOk=(card,top,col)=>card[0]==='w'||card[0]===col||card[1]===top[1];
+function unoAct(d){
+ if(!RM.host||!RM.U)return;
+ const U=RM.U,cur=RM.players[U.turn].peer;
+ if(d.by!==cur)return;
+ const hand=U.hands[cur];
+ if(d.a==='draw'){
+  const n=U.draw||1;
+  for(let i=0;i<n;i++){if(!U.deck.length)U.deck=unoDeck();hand.push(U.deck.shift())}
+  U.draw=0;
+  rmSend({t:'hand',to:cur,h:hand});
+  U.turn=(U.turn+U.dir+RM.players.length)%RM.players.length;
+  unoPub({msg:`${RM.players.find(p=>p.peer===cur).name} سحب ${n}`});
+  return;
+ }
+ const card=hand[d.i];
+ if(!card||!unoOk(card,U.top,U.col))return;
+ if(U.draw&&card[1]!=='D'&&card[1]!=='F')return;
+ hand.splice(d.i,1);
+ U.top=card;U.col=card[0]==='w'?(d.col||'r'):card[0];
+ let skip=0;
+ if(card[1]==='S')skip=1;
+ if(card[1]==='R'){if(RM.players.length===2)skip=1;else U.dir*=-1}
+ if(card[1]==='D')U.draw+=2;
+ if(card[1]==='F')U.draw+=4;
+ rmSend({t:'hand',to:cur,h:hand});
+ if(!hand.length){rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🎉`,win:'uno',
+   all:RM.players.map(p=>({n:p.name,r:U.hands[p.peer].length+' بطاقة'}))});return}
+ U.turn=(U.turn+U.dir*(1+skip)+RM.players.length*2)%RM.players.length;
+ unoPub();
+}
+function unoPlay(i){
+ const c=RM.hand[i],U=RM.uno;
+ if(!U||U.turn!==RM.me)return;
+ if(!unoOk(c,U.top,U.col)){toast('لا تصلح على البطاقة الحالية');return}
+ if(U.drawP&&c[1]!=='D'&&c[1]!=='F'){toast(`عليك ${U.drawP} سحب أو لعب +2/+4`);return}
+ if(c[0]==='w'){unoColAsk(i);return}
+ rmSend({t:'act',by:RM.me,a:'play',i});
+}
+function unoColAsk(i){
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox"><div class="qvt">اختر اللون</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px">
+ ${[['r','أحمر'],['g','أخضر'],['b','أزرق'],['y','أصفر']].map(([k,n])=>
+  `<button class="btn" data-c="${k}" style="background:linear-gradient(145deg,${UNO_COL[k][0]},${UNO_COL[k][1]})">${n}</button>`).join('')}</div>
+ <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
+ document.body.appendChild(ov);
+ ov.querySelector('#qvn').onclick=()=>ov.remove();
+ ov.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ov.remove();
+  rmSend({t:'act',by:RM.me,a:'play',i,col:b.dataset.c})});
+}
+function unoDrawCard(){
+ const U=RM.uno;if(!U||U.turn!==RM.me)return;
+ rmSend({t:'act',by:RM.me,a:'draw'});
+}
+function unoCard(c,big){
+ const col=UNO_COL[c[0]]||UNO_COL.w;
+ const face=UNO_SYM[c[1]]||c[1];
+ return `<div class="unoC${big?' big':''}" style="background:linear-gradient(150deg,${col[0]},${col[1]})">
+  <span class="unoIn">${face}</span>
+  <span class="unoCorner tl">${face}</span><span class="unoCorner br">${face}</span></div>`;
+}
+function rmUno(R){
+ const U=RM.uno;
+ if(!U)return '<div class="note">يوزّع المضيف البطاقات…</div>';
+ const mine=U.turn===RM.me;
+ const nm=p=>((RM.players.find(x=>x.peer===p)||{}).name)||'لاعب';
+ return `<div class="unoTable">
+  <div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:12px">
+   ${(U.cnt||[]).map(x=>`<span class="unoPl ${x.p===U.turn?'on':''}">
+    ${x.p===RM.me?'أنت':nm(x.p)} <b>${x.n}</b>${x.n===1?' 🔔':''}</span>`).join('')}</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:16px">
+   <div onclick="unoDrawCard()" style="cursor:${mine?'pointer':'default'};text-align:center">
+    <div class="unoBack">${U.dk}</div>
+    <div style="font-size:9.5px;color:var(--tx2);font-weight:800;margin-top:5px">${U.drawP?`اسحب ${U.drawP}`:'السحب'}</div></div>
+   <div style="text-align:center">
+    ${unoCard(U.top,1)}
+    <div style="font-size:9.5px;font-weight:900;margin-top:6px;color:${UNO_COL[U.col][0]}">اللون: ${({r:'أحمر',g:'أخضر',b:'أزرق',y:'أصفر'})[U.col]}</div></div>
+  </div>
+  <div class="unoTurn ${mine?'me':''}">${mine?'دورك — العب بطاقة أو اسحب':'دور '+nm(U.turn)}</div>
+ </div>
+ <div class="sl" style="margin:12px 0 7px">يدك — ${(RM.hand||[]).length} بطاقة</div>
+ <div class="unoHand">
+  ${(RM.hand||[]).map((c,i)=>`<div onclick="unoPlay(${i})"
+   style="cursor:pointer;${mine&&unoOk(c,U.top,U.col)?'':'opacity:.45'}">${unoCard(c)}</div>`).join('')}
+ </div>`;
+}
+
+/* ── كيرم عبر الغرفة — لوح فاخر بفيزياء حقيقية ──
+   المضيف يوزّع الوضع الابتدائي؛ من عليه الدور يصوّب، تُبثّ الضربة فيحاكيها الجميع،
+   ثم يبثّ الرامي المواضع النهائية فيتطابق اللوح عند الجميع. */
+const CA_R=400, CA_PR=13, CA_SR=16, CA_POCK=27, CA_FR=0.982, CA_STOP=0.09;
+function caDeal(){
+ if(!RM.host)return;
+ const P2=[],cx=CA_R/2,cy=CA_R/2;
+ P2.push({x:cx,y:cy,t:'q'});                        // الملكة في القلب
+ for(let ring=0;ring<2;ring++){
+  const n=ring?12:6,rad=ring?CA_PR*4.1:CA_PR*2.1;
+  for(let i=0;i<n;i++){
+   const a=(i/n)*Math.PI*2+(ring?0.26:0);
+   P2.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad,t:(i%2?'w':'b')});
+  }
+ }
+ const ps=RM.players;
+ RM.C={pcs:P2,turn:0,sc:{},col:{},shot:null};
+ ps.forEach((p,i)=>{RM.C.sc[p.peer]=0;RM.C.col[p.peer]=i===0?'w':'b'});
+ caPub('ابدأ — صوّب واضرب!');
+}
+function caPub(msg,shot){
+ const C=RM.C;
+ rmSend({t:'cast',pcs:C.pcs,turn:RM.players[C.turn].peer,sc:C.sc,col:C.col,msg:msg||'',shot:shot||null});
+}
+function caAct(d){
+ if(!RM.host||!RM.C)return;
+ const C=RM.C,cur=RM.players[C.turn].peer;
+ if(d.by!==cur||d.a!=='rest')return;
+ C.pcs=d.pcs;
+ let msg=d.msg||'';
+ if(d.pot&&d.pot.length){
+  d.pot.forEach(t=>{
+   if(t==='s')C.sc[cur]=Math.max(0,C.sc[cur]-1);          // الضارب في الجيب: خصم
+   else if(t==='q')C.sc[cur]+=3;                          // الملكة: ثلاث نقاط
+   else if(t===C.col[cur])C.sc[cur]+=1;
+   else{const other=RM.players.find(p=>p.peer!==cur);if(other)C.sc[other.peer]+=1}
+  });
+ }
+ const left=t=>C.pcs.filter(p=>p.t===t).length;
+ const mine=C.col[cur];
+ if(!left(mine)){
+  rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🏆`,win:'carrom',
+   all:RM.players.map(p=>({n:p.name,r:C.sc[p.peer]+' نقطة'}))});
+  return;
+ }
+ // يبقى الدور إن أدخل قطعة من لونه ولم يُسقط الضارب
+ const keep=d.pot&&d.pot.includes(mine)&&!d.pot.includes('s');
+ if(!keep)C.turn=(C.turn+1)%RM.players.length;
+ caPub(msg||(keep?'إصابة! الدور لك مجددًا':''));
+}
+let _ca={sim:null,drag:null,anim:null};
+function caPlay(shot){
+ // محاكاة الضربة عند الجميع من نفس الحالة — منظر واحد للكل
+ const C=RM.ca;if(!C)return;
+ const pcs=C.pcs.map(p=>({x:p.x,y:p.y,vx:0,vy:0,t:p.t,r:CA_PR}));
+ pcs.push({x:shot.x,y:shot.y,vx:shot.vx,vy:shot.vy,t:'s',r:CA_SR});
+ _ca.sim={pcs,pot:[],by:C.turn};
+ cancelAnimationFrame(_ca.anim);
+ caStep();
+}
+function caStep(){
+ const S2=_ca.sim;if(!S2)return;
+ for(let k=0;k<2;k++)caTick(S2);
+ caRender();
+ const moving=S2.pcs.some(p=>Math.abs(p.vx)+Math.abs(p.vy)>CA_STOP);
+ if(moving){_ca.anim=requestAnimationFrame(caStep);return}
+ // استقرّ اللوح: من ضرب يبثّ الوضع النهائي مرجعًا للجميع
+ _ca.sim=null;
+ const rest=S2.pcs.filter(p=>p.t!=='s').map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,t:p.t}));
+ if(RM.ca&&RM.ca.turn===RM.me){
+  rmSend({t:'act',by:RM.me,a:'rest',pcs:rest,pot:S2.pot,
+   msg:S2.pot.length?(S2.pot.includes('q')?'الملكة! +3':'إصابة'):'بلا إصابة'});
+ }
+ caRender(rest);
+}
+function caTick(S2){
+ const ps=S2.pcs;
+ for(const p of ps){
+  p.x+=p.vx;p.y+=p.vy;p.vx*=CA_FR;p.vy*=CA_FR;
+  if(Math.abs(p.vx)<0.02)p.vx=0;if(Math.abs(p.vy)<0.02)p.vy=0;
+  // الجدران
+  if(p.x<p.r){p.x=p.r;p.vx=-p.vx*0.72}
+  if(p.x>CA_R-p.r){p.x=CA_R-p.r;p.vx=-p.vx*0.72}
+  if(p.y<p.r){p.y=p.r;p.vy=-p.vy*0.72}
+  if(p.y>CA_R-p.r){p.y=CA_R-p.r;p.vy=-p.vy*0.72}
+ }
+ // اصطدامات مرنة بين الأقراص
+ for(let i=0;i<ps.length;i++)for(let j=i+1;j<ps.length;j++){
+  const a=ps[i],b=ps[j];
+  let dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),min=a.r+b.r;
+  if(d===0){dx=0.01;d=0.01}
+  if(d<min){
+   const nx=dx/d,ny=dy/d,ov=(min-d)/2;
+   a.x-=nx*ov;a.y-=ny*ov;b.x+=nx*ov;b.y+=ny*ov;
+   const rvx=b.vx-a.vx,rvy=b.vy-a.vy,sep=rvx*nx+rvy*ny;
+   if(sep<0){
+    const m=a.r===CA_SR?1.5:1, m2=b.r===CA_SR?1.5:1;
+    const imp=-(1.86)*sep/(1/m+1/m2);
+    a.vx-=imp*nx/m;a.vy-=imp*ny/m;b.vx+=imp*nx/m2;b.vy+=imp*ny/m2;
+   }
+  }
+ }
+ // الجيوب الأربعة
+ const P4=[[0,0],[CA_R,0],[0,CA_R],[CA_R,CA_R]];
+ for(let i=ps.length-1;i>=0;i--){
+  const p=ps[i];
+  for(const[px,py]of P4){
+   if(Math.hypot(p.x-px,p.y-py)<CA_POCK){S2.pot.push(p.t);ps.splice(i,1);break}
+  }
+ }
+}
+function caRender(rest){
+ const cv=document.getElementById('caC');if(!cv)return;
+ const cx=cv.getContext('2d'),W=cv.width;
+ const sc=W/CA_R;
+ cx.clearRect(0,0,W,W);
+ // خشب اللوح
+ const g=cx.createLinearGradient(0,0,W,W);
+ g.addColorStop(0,'#E8C88A');g.addColorStop(.5,'#D9AE63');g.addColorStop(1,'#C08F45');
+ cx.fillStyle=g;cx.fillRect(0,0,W,W);
+ cx.strokeStyle='#7A4E1E';cx.lineWidth=W*.03;cx.strokeRect(W*.015,W*.015,W*.97,W*.97);
+ // دائرة المركز وزخارف
+ cx.strokeStyle='#8A5E2A';cx.lineWidth=2;
+ cx.beginPath();cx.arc(W/2,W/2,W*.115,0,7);cx.stroke();
+ cx.beginPath();cx.arc(W/2,W/2,W*.035,0,7);cx.fillStyle='#B7793A';cx.fill();
+ cx.strokeStyle='#A8703A';cx.lineWidth=1.4;
+ [[.16,.16],[.84,.16],[.16,.84],[.84,.84]].forEach(([a,b])=>{
+  cx.beginPath();cx.arc(W*a,W*b,W*.035,0,7);cx.stroke();
+ });
+ // خطوط القاعدة
+ cx.strokeStyle='#8A5E2A';cx.lineWidth=W*.012;
+ [[.1,.12,.9,.12],[.1,.88,.9,.88],[.12,.1,.12,.9],[.88,.1,.88,.9]].forEach(([x1,y1,x2,y2])=>{
+  cx.beginPath();cx.moveTo(W*x1,W*y1);cx.lineTo(W*x2,W*y2);cx.stroke();
+ });
+ // الجيوب
+ [[0,0],[1,0],[0,1],[1,1]].forEach(([a,b])=>{
+  const px=a*W,py=b*W;
+  const pg=cx.createRadialGradient(px,py,2,px,py,CA_POCK*sc);
+  pg.addColorStop(0,'#05070C');pg.addColorStop(.8,'#0B1020');pg.addColorStop(1,'#3A2A14');
+  cx.beginPath();cx.arc(px,py,CA_POCK*sc,0,7);cx.fillStyle=pg;cx.fill();
+ });
+ const pcs=_ca.sim?_ca.sim.pcs:(rest||(RM.ca?RM.ca.pcs:[])).map(p=>({x:p.x,y:p.y,t:p.t,r:CA_PR}));
+ for(const p of pcs){
+  const r=(p.r||CA_PR)*sc,X=p.x*sc,Y=p.y*sc;
+  cx.beginPath();cx.arc(X+2,Y+3,r,0,7);cx.fillStyle='rgba(0,0,0,.32)';cx.fill();
+  const fill=p.t==='w'?['#FFF9EC','#D9C8A6']:p.t==='b'?['#4A3E36','#1C1512']
+   :p.t==='q'?['#FF6B6B','#8A1F26']:['#FFE9A8','#B8871E'];
+  const rg=cx.createRadialGradient(X-r*.35,Y-r*.4,r*.15,X,Y,r);
+  rg.addColorStop(0,fill[0]);rg.addColorStop(1,fill[1]);
+  cx.beginPath();cx.arc(X,Y,r,0,7);cx.fillStyle=rg;cx.fill();
+  cx.strokeStyle='rgba(0,0,0,.32)';cx.lineWidth=1.3;cx.stroke();
+  cx.beginPath();cx.arc(X,Y,r*.55,0,7);cx.strokeStyle='rgba(255,255,255,.22)';cx.lineWidth=1;cx.stroke();
+ }
+ // خط التصويب
+ if(_ca.drag){
+  const d=_ca.drag;
+  cx.setLineDash([7,6]);cx.strokeStyle='rgba(255,233,168,.9)';cx.lineWidth=2.4;
+  cx.beginPath();cx.moveTo(d.sx*sc,d.sy*sc);
+  cx.lineTo((d.sx-d.dx*2.4)*sc,(d.sy-d.dy*2.4)*sc);cx.stroke();cx.setLineDash([]);
+  const pw=Math.min(1,Math.hypot(d.dx,d.dy)/70);
+  cx.beginPath();cx.arc(d.sx*sc,d.sy*sc,CA_SR*sc,0,7);
+  cx.fillStyle=`rgba(255,233,168,${.25+pw*.5})`;cx.fill();
+  cx.strokeStyle='#FFE9A8';cx.lineWidth=2;cx.stroke();
+ }
+}
+function caInit(){
+ const cv=document.getElementById('caC');if(!cv||cv._on)return;cv._on=1;
+ caRender();
+ const pos=e=>{const r=cv.getBoundingClientRect();
+  return [(e.clientX-r.left)*CA_R/r.width,(e.clientY-r.top)*CA_R/r.height]};
+ cv.onpointerdown=e=>{
+  if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
+  const[x,y]=pos(e);
+  const sy=RM.ca.base||CA_R-CA_SR-16;
+  _ca.drag={sx:Math.max(CA_SR+30,Math.min(CA_R-CA_SR-30,x)),sy,dx:0,dy:0};
+  try{cv.setPointerCapture(e.pointerId)}catch(x2){}
+  caRender();
+ };
+ cv.onpointermove=e=>{
+  if(!_ca.drag)return;e.preventDefault();
+  const[x,y]=pos(e);
+  _ca.drag.dx=Math.max(-90,Math.min(90,x-_ca.drag.sx));
+  _ca.drag.dy=Math.max(-90,Math.min(90,y-_ca.drag.sy));
+  caRender();
+ };
+ cv.onpointerup=cv.onpointercancel=()=>{
+  const d=_ca.drag;if(!d)return;_ca.drag=null;
+  const pw=Math.hypot(d.dx,d.dy);
+  if(pw<10){caRender();return}
+  const k=0.19;
+  const shot={x:d.sx,y:d.sy,vx:-d.dx*k,vy:-d.dy*k};
+  rmSend({t:'cast',pcs:RM.ca.pcs,turn:RM.ca.turn,sc:RM.ca.sc,col:RM.ca.col,msg:'',shot});
+  caPlay(shot);
+ };
+}
+function rmCarrom(R){
+ const C=RM.ca;
+ if(!C)return '<div class="note">يجهّز المضيف اللوح…</div>';
+ const nm=p=>((RM.players.find(x=>x.peer===p)||{}).name)||'لاعب';
+ const mine=C.turn===RM.me;
+ const colName=c=>c==='w'?'البيضاء':'السوداء';
+ setTimeout(caInit,40);
+ return `<div style="display:flex;gap:8px;margin:8px 0 10px">
+  ${RM.players.map(p=>`<div class="caPl ${C.turn===p.peer?'on':''}">
+   <div style="display:flex;align-items:center;gap:6px">
+    <span class="caDot ${C.col[p.peer]==='w'?'w':'b'}"></span>
+    <span style="font-size:11px;font-weight:900">${p.peer===RM.me?'أنت':p.name}</span></div>
+   <div style="font-size:9.5px;color:var(--tx2);margin-top:3px">${colName(C.col[p.peer])} · <b style="color:var(--gold)">${C.sc[p.peer]||0}</b> نقطة</div>
+  </div>`).join('')}</div>
+ <canvas id="caC" width="360" height="360" style="width:100%;aspect-ratio:1;border-radius:14px;
+  touch-action:none;box-shadow:0 10px 26px rgba(0,0,0,.55);cursor:${mine?'crosshair':'default'}"></canvas>
+ <div class="caTurn ${mine?'me':''}">${mine?'دورك — اسحب للخلف من قاعدتك ثم أفلت 🎯':'دور '+nm(C.turn)+'…'}</div>
+ ${C.msg?`<div class="hint" style="text-align:center;margin-top:8px">${C.msg}</div>`:''}
+ <div class="note">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 · إسقاط الضارب −1</div>`;
+}
+
 /* ── مافيا عبر الغرفة ── */
 function rmMafia(R){
  const nm=p=>((RM.players.find(x=>x.peer===p)||{}).name)||'لاعب';
