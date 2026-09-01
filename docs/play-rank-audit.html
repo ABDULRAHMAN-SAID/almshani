@@ -1,0 +1,522 @@
+<title>ورقة قياس التصنيف</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EDF0EF; --card:#F7F9F8; --ink:#15222A; --ink-2:#3D5560; --ink-3:#6E848D;
+  --rule:#C6D0D1; --rule-2:#DDE4E4;
+  --queen:#B23127; --queen-soft:rgba(178,49,39,.10); --queen-line:rgba(178,49,39,.34);
+  --teak:#7C4A22; --good:#25755A; --warn:#9A6B12;
+  --grid:rgba(21,34,42,.055);
+  --fs:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1519; --card:#141E23; --ink:#E4EBEA; --ink-2:#A9BCC1; --ink-3:#76898F;
+    --rule:#2A3941; --rule-2:#1E2A31;
+    --queen:#E4685A; --queen-soft:rgba(228,104,90,.13); --queen-line:rgba(228,104,90,.40);
+    --teak:#C08B57; --good:#57BA92; --warn:#D2A244;
+    --grid:rgba(228,235,234,.05);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1519; --card:#141E23; --ink:#E4EBEA; --ink-2:#A9BCC1; --ink-3:#76898F;
+  --rule:#2A3941; --rule-2:#1E2A31;
+  --queen:#E4685A; --queen-soft:rgba(228,104,90,.13); --queen-line:rgba(228,104,90,.40);
+  --teak:#C08B57; --good:#57BA92; --warn:#D2A244;
+  --grid:rgba(228,235,234,.05);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans Arabic",system-ui,"Segoe UI",sans-serif;
+  font-size:var(--fs); line-height:1.75; font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.sheet{max-width:1000px;margin:0 auto;padding:0 20px 90px}
+
+/* ── رأس الورقة ── */
+.masthead{padding:52px 0 26px;border-bottom:2px solid var(--ink);margin-bottom:0}
+.stamp{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--queen);
+  border:1px solid var(--queen-line);border-radius:2px;padding:5px 10px;margin-bottom:22px;
+}
+.stamp b{font-weight:600}
+h1{
+  font-family:"Reem Kufi",system-ui,sans-serif;font-weight:600;
+  font-size:clamp(34px,6.2vw,58px);line-height:1.12;margin:0 0 14px;
+  letter-spacing:-.005em;text-wrap:balance;
+}
+.dek{font-size:19px;color:var(--ink-2);max-width:60ch;margin:0 0 30px;font-weight:300;line-height:1.65}
+.meta{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--rule-2)}
+.meta div{
+  flex:1 1 160px;padding:12px 0;border-bottom:0;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);
+}
+.meta div span{display:block;direction:ltr;text-align:right;color:var(--ink);font-size:14px;font-weight:500;margin-top:3px;font-variant-numeric:tabular-nums}
+
+/* ── مسطرة الأقسام ── */
+section{padding:56px 0;border-bottom:1px solid var(--rule-2)}
+section:last-of-type{border-bottom:0}
+.shead{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.snum{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  color:var(--queen);letter-spacing:.12em;padding-top:6px;flex:0 0 auto;
+}
+h2{
+  font-family:"Reem Kufi",system-ui,sans-serif;font-weight:500;
+  font-size:clamp(25px,4vw,34px);margin:0;line-height:1.25;letter-spacing:-.005em;
+}
+.slede{color:var(--ink-2);max-width:64ch;margin:0 0 34px;font-weight:300}
+h3{font-family:"Reem Kufi",system-ui,sans-serif;font-weight:500;font-size:20px;margin:38px 0 12px}
+p{max-width:66ch;margin:0 0 15px}
+strong{font-weight:600}
+.q{color:var(--queen);font-weight:600}
+
+/* ── بطاقات القياس ── */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1px;background:var(--rule-2);border:1px solid var(--rule-2);margin:0 0 34px}
+.gauge{background:var(--card);padding:18px 16px 16px}
+.gauge .v{
+  direction:ltr;font-family:"IBM Plex Mono",monospace;font-size:31px;font-weight:500;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;display:block;margin-bottom:2px;
+}
+.gauge .u{direction:ltr;display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.gauge .k{font-size:13px;color:var(--ink-2);margin-top:9px;line-height:1.45}
+.gauge.bad .v{color:var(--queen)}
+.gauge.ok .v{color:var(--good)}
+
+/* ── جداول ── */
+.tw{overflow-x:auto;margin:0 0 26px;border:1px solid var(--rule-2);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+th{
+  text-align:right;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;
+  padding:11px 14px;border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+td{padding:11px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;unicode-bidi:plaintext;text-align:right}
+td code,p code,li code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--queen-soft);padding:1px 5px;border-radius:2px;direction:ltr;display:inline-block}
+.id{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;white-space:nowrap}
+.sev{border-inline-start:3px solid var(--rule)}
+.sev.hi{border-inline-start-color:var(--queen)}
+.sev.md{border-inline-start-color:var(--warn)}
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;
+  padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap;
+}
+.pill.miss{color:var(--queen)} .pill.part{color:var(--warn)} .pill.have{color:var(--good)}
+
+/* ── شيفرة ── */
+pre{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7;direction:ltr;text-align:left;
+  background:var(--card);border:1px solid var(--rule-2);border-inline-start:3px solid var(--queen-line);
+  padding:16px 18px;overflow-x:auto;margin:0 0 24px;
+}
+pre.rtlmap{direction:rtl;text-align:right;border-inline-start-color:var(--rule);font-size:12.5px;line-height:1.85}
+pre b{color:var(--queen);font-weight:500}
+.cap{font-size:12.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;margin:-16px 0 26px}
+
+/* ── الرسم الهندسي ── */
+figure{margin:0 auto 30px;border:1px solid var(--rule-2);background:var(--card);max-width:660px}
+figure svg{display:block;width:100%;height:auto}
+.legend{display:grid;gap:9px;padding:16px 18px;border-top:1px solid var(--rule-2);font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.legend div{display:grid;grid-template-columns:26px 1fr;align-items:start;gap:8px}
+.sw{display:block;width:22px;height:14px;margin-top:3px}
+.sw.wall{border-top:4px solid var(--ink);margin-top:8px;height:0}
+.sw.thr{border-top:2px solid var(--queen);margin-top:9px;height:0}
+.sw.rim{border-top:1px dotted var(--ink-3);margin-top:10px;height:0}
+.sw.tex{border-top:1.5px dashed var(--teak);margin-top:9px;height:0}
+.sw.dot{width:10px;height:10px;border-radius:50%;margin:5px 6px 0 6px}
+.sw.dot.g{background:var(--good)} .sw.dot.r{background:var(--queen)}
+.sw.hat{background:var(--queen-soft);border:1px solid var(--queen-line);height:13px}
+figcaption{font-size:13px;color:var(--ink-2);padding:14px 18px;border-top:1px solid var(--rule-2);line-height:1.6}
+.dl{fill:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-size:11px}
+.dl.hot{fill:var(--queen)}
+.dn{fill:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600}
+
+/* ── قوائم ── */
+ul,ol{max-width:66ch;padding-inline-start:22px;margin:0 0 18px}
+li{margin-bottom:7px}
+.stages{list-style:none;padding:0;max-width:none;counter-reset:st}
+.stages>li{
+  counter-increment:st;position:relative;padding:20px 0 20px 0;border-top:1px solid var(--rule-2);margin:0;
+  display:grid;grid-template-columns:56px 1fr;gap:18px;
+}
+.stages>li::before{
+  content:counter(st,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;color:var(--queen);
+  line-height:1.2;
+}
+.stages h4{font-family:"Reem Kufi",sans-serif;font-size:19px;font-weight:500;margin:0 0 8px}
+.stages ul{margin:0;font-size:14.5px;color:var(--ink-2)}
+.acc{
+  margin-top:10px;font-size:13.5px;background:var(--queen-soft);border-inline-start:2px solid var(--queen-line);
+  padding:9px 13px;color:var(--ink);
+}
+.acc b{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--queen);display:block;margin-bottom:3px}
+
+.callout{border:1px solid var(--rule);background:var(--card);padding:20px 22px;margin:0 0 28px}
+.callout p:last-child{margin-bottom:0}
+.callout .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--queen);margin-bottom:8px}
+
+footer{padding:40px 0 0;border-top:2px solid var(--ink);font-size:13px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+@media (max-width:640px){
+  .sheet{padding:0 16px 60px}
+  section{padding:40px 0}
+  .shead{flex-wrap:wrap;gap:6px}
+  .stages>li{grid-template-columns:38px 1fr;gap:12px}
+  .stages>li::before{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style><style>
+.wire{font-family:"IBM Plex Mono",monospace;font-size:11.5px;line-height:1.55;direction:rtl;text-align:right;
+ background:var(--card);border:1px solid var(--rule-2);border-inline-start:3px solid var(--queen-line);
+ padding:16px 18px;overflow-x:auto;margin:0 0 22px;white-space:pre;color:var(--ink-2)}
+.wire b{color:var(--queen);font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px}
+@media (max-width:700px){.two{grid-template-columns:1fr}}
+.verdict{border:1.5px solid var(--queen-line);background:var(--queen-soft);padding:22px 24px;margin:0 0 28px}
+.verdict .big{font-family:"Reem Kufi",sans-serif;font-size:clamp(21px,3.4vw,28px);font-weight:600;color:var(--queen);margin:0 0 8px;line-height:1.3}
+.stage{display:grid;grid-template-columns:38px 1fr;gap:16px;padding:16px 0;border-top:1px solid var(--rule-2)}
+.stage .n{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:600;color:var(--queen)}
+.stage h4{font-family:"Reem Kufi",sans-serif;font-size:17px;font-weight:500;margin:0 0 5px}
+.stage p{font-size:14px;color:var(--ink-2);margin:0}
+</style>
+<div class="sheet">
+<header class="masthead">
+  <div class="stamp"><b>قراءة فقط</b> · لم يُعدَّل أي ملف إنتاج</div>
+  <h1>ورقة قياس التصنيف</h1>
+  <p class="dek">صفحة «اللعب» فارغة بنسبة ٤٣٪ ولا تحمل ولا لعبة واحدة، و«ليلة العائلة» تحشر خمسة عشر قرصًا في خمس بطاقات — وخلف الاثنتين سببٌ واحد: اللعبة كلّها تملك رتبةً واحدة، وخمس ألعاب من ستّ لا تملك تصنيفًا أصلًا.</p>
+  <div class="meta">
+    <div>النسخة المفحوصة<span>tahaddi v5.8.1</span></div>
+    <div>الشاشتان<span>playScr · partyScr</span></div>
+    <div>كائنات الرتبة<span>1</span></div>
+    <div>ألعاب لها تصنيف<span>1 / 6</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="shead"><span class="snum">A</span><h2>تشريح الصفحتين</h2></div>
+  <p class="slede">كل رقم أدناه مقيس من المتصفّح على هاتف 430×950، لا مقدَّر.</p>
+
+  <div class="gauges">
+    <div class="gauge bad"><span class="v">43<span class="u">%</span></span><div class="k">من شاشة «اللعب» فراغ — 409px من 950</div></div>
+    <div class="gauge bad"><span class="v">0</span><span class="u">لعبة</span><div class="k">بطاقات ألعاب في صفحة «اللعب»</div></div>
+    <div class="gauge bad"><span class="v">15</span><span class="u">قرصًا</span><div class="k">داخل بطاقات «ليلة العائلة» — 3 لكل بطاقة</div></div>
+    <div class="gauge bad"><span class="v">1<span class="u"> / 6</span></span><div class="k">ألعاب تمنح تصنيفًا</div></div>
+    <div class="gauge bad"><span class="v">8</span><span class="u">مواضع</span><div class="k">تعرض اسم الرتبة بالإنجليزية</div></div>
+  </div>
+
+  <h3>صفحة «اللعب» — <code>playScr()</code> · السطر 17831</h3>
+  <p>بنيتها أربعة عناصر فقط: رأس صغير، ثمّ بطاقة واحدة كبرى تخلط الموسم والرتبة وزرّ اللعب، ثمّ أربع خانات صناديق، ثمّ صفّان صغيران. المحتوى ينتهي عند <strong>541px</strong> من شاشة 950px، والباقي أشكالٌ عائمة تملأ مكان المحتوى المفقود.</p>
+  <ul>
+    <li><strong><code>Gold II</code> في قلب الصفحة</strong> — وليست كلمة <code>Ranked</code> وحدها: اسم الرتبة كامل يأتي إنجليزيًّا من <code>rankLabel()</code>.</li>
+    <li><strong>لا توجد ولا لعبة على الصفحة.</strong> الكيرم وأونو ومافيا والرسم وبرا السالفة لا يُوصل إليها إلا عبر «ليلة العائلة».</li>
+    <li>زرّ «العب» لا يبدأ مباراة — يدفع قائمة أوضاع وسيطة.</li>
+    <li>صناديق المعارك (ثانوية) تأخذ مساحة أكبر من أي لعبة.</li>
+  </ul>
+
+  <h3>صفحة «ليلة العائلة» — <code>partyScr()</code> · السطر 19814</h3>
+  <p>مبنيّة من جدول <code>PT_GAMES</code> — وهذه نقطة قوّة: الصفحة مولَّدة من بيانات أصلًا، فإعادة بنائها لا تعني إعادة كتابتها من الصفر.</p>
+  <ul>
+    <li><strong>كل بطاقة تحمل ثلاثة أقراص</strong> (تمرير · كود · بحث · كمبيوتر) — البطاقة تحاول تنفيذ كل إجراء بدل أن تختار اللعبة.</li>
+    <li><strong>لا رتبة ولا تقدّم لأي لعبة</strong> — ليس إغفالًا في التصميم، بل لأنّ التصنيف غير موجود لهذه الألعاب.</li>
+    <li>الترتيب ثابت في المصفوفة؛ لا «آخر لعبة» ولا مفضّلة.</li>
+    <li>المحتوى ينتهي عند 718px — ٢٤٪ فراغ.</li>
+  </ul>
+
+  <h3>مركز اللعبة — <code>gameHub(g)</code> · السطر 19910</h3>
+  <div class="callout">
+    <div class="lbl">العيب الجوهري</div>
+    <p>يعرض أربع طرق: مع الكمبيوتر · بحث عن لاعبين · غرفة بكود · تمرير الجوال. <strong>لا يوجد «لعب مصنّف» ولا «لعب عادي» إطلاقًا.</strong> كل مباراة كيرم أو أونو اليوم بلا تصنيف — لأنّ التصنيف غير موجود لها.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">B</span><h2>خريطة المسارات الحالية</h2></div>
+  <pre class="rtlmap">tab('play') ──نداء مباشر──▶ playScr        <b>جذر التبويب · لا يُسجَّل على NAV</b>
+  ├─ الرأس ──مباشر──▶ avScr
+  ├─ البطاقة الكبرى ──push──▶ playModesScr
+  ├─ صفّ التحديات ──مباشر──▶ evtScr         <b>بلا زرّ رجوع</b>
+  ├─ صفّ الموسم ──مباشر──▶ seasonScr        <b>بلا رجوع · وله أبٌ ثانٍ من moreScr</b>
+  └─ خانات الصناديق ──▶ bcTap(i)
+
+playModesScr
+  ├─ «Ranked» ──مباشر──▶ rankedScr          <b>نصّ إنجليزي</b>
+  ├─ «تحدي سريع» ──▶ quickScr
+  ├─ «رحلة الشبكة» ──push──▶ netsScr
+  ├─ «تحدي الخصم» ──▶ vsScr
+  └─ «ليلة العائلة» ──push──▶ partyScr
+
+partyScr ──مباشر──▶ gameHub(g)
+  ├─ soloScr(g)   مع الكمبيوتر
+  ├─ mmScr(g)     بحث عن لاعبين
+  ├─ roomScr(g)   غرفة بكود
+  └─ ptOpen(g)    تمرير الجوال</pre>
+
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>عطل التنقّل في هذين المسارين</th><th>الدليل</th></tr></thead>
+    <tbody>
+      <tr class="sev hi"><td class="id">1</td><td><code>rankedScr</code> ترجع بوجهة مكتوبة يدويًّا لا بـ<code>back()</code></td><td class="n">16452</td></tr>
+      <tr class="sev hi"><td class="id">2</td><td><code>gameHub</code> ترجع دائمًا إلى «العائلة» — فلو دخلتها من «اللعب» رجعت إلى شاشة لم تأتِ منها</td><td class="n">19913</td></tr>
+      <tr class="sev hi"><td class="id">3</td><td><code>evtScr</code> و<code>seasonScr</code> بلا زرّ رجوع أصلًا</td><td class="n">تقرير سابق N2</td></tr>
+      <tr class="sev md"><td class="id">4</td><td>المباريات وغرف الشبكة خارج مكدّس <code>NAV</code> تمامًا</td><td class="n">تقرير سابق N1</td></tr>
+      <tr class="sev md"><td class="id">5</td><td><code>partyScr</code> تختار شريطها وقت التشغيل حسب عمق المكدّس — ترقيع للتضارب</td><td class="n">19816</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">C</span><h2>تنفيذ التصنيف الحالي</h2></div>
+  <p class="slede">المحرّك الموجود سليم ويستحقّ البقاء — المشكلة أنّه يخدم لعبةً واحدة.</p>
+
+  <pre>TIERS = [ {k:'bronze', n:'Bronze', ar:'برونزي', div:3, <b>t:15, opt:[4,4]</b>}, … ]
+RP_PER_DIV = 100
+
+defaultRanked() = {placed, placementDone, placementWins,
+                   tier, div, rp, mmr, protect,
+                   seasonBest, globalRank, wins, losses}</pre>
+
+  <div class="tw"><table>
+    <thead><tr><th>الدالة</th><th>ماذا تفعل</th><th>الحكم</th></tr></thead>
+    <tbody>
+      <tr><td><code>rpDelta(my,opp,won)</code></td><td>‏±17..27 · −12..−25 حسب فرق الـMMR</td><td><span class="pill have">يطابق البند ٨</span></td></tr>
+      <tr><td><code>mmrDelta</code></td><td>Elo بمعامل 32</td><td><span class="pill have">سليم</span></td></tr>
+      <tr><td><code>applyMatch(r,oppMmr,won)</code></td><td><strong>تأخذ كائن الرتبة كوسيط ولا تقرأ الحالة داخلها</strong></td><td><span class="pill have">مفتاح الترحيل</span></td></tr>
+      <tr><td>مباريات التحديد</td><td>خمس مباريات ثمّ رتبة ابتدائية</td><td><span class="pill have">يطابق البند ٥١</span></td></tr>
+      <tr><td><code>protect</code></td><td>حماية واحدة بعد الترقية</td><td><span class="pill have">يطابق البند ٥٠</span></td></tr>
+      <tr><td><code>globalRank = 12842</code></td><td>رقم <strong>مخترع</strong> يُعرض للاعب عند الرتبة الأخيرة</td><td><span class="pill miss">يُحذف — البند ٧٥</span></td></tr>
+      <tr><td><code>t</code> · <code>opt</code> داخل جدول الرتب</td><td>زمن السؤال وعدد الخيارات — خاصيّة لعبة المعرفة لا خاصيّة رتبة</td><td><span class="pill part">تُنقل</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>وسياسة الأرقام مزدوجة اليوم: <code>rankLabel</code> تستعمل <code>I · II · III</code> و<code>rankLabelAr</code> تستعمل <code>١ · ٢ · ٣</code>. تُوحَّد على الأرقام الغربية كما اخترت.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">D</span><h2>أين الإنجليزية مكتوبة مباشرةً</h2></div>
+  <p class="slede">فُحصت الشاشات بالعرض الفعلي في متصفّح ثمّ استُخرج النصّ المرئي — لا بالبحث في الشيفرة، حتى لا يختلط اسم متغيّر بنصّ يراه اللاعب.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>الشاشة</th><th>النصّ الظاهر</th><th>المصدر</th></tr></thead>
+    <tbody>
+      <tr class="sev hi"><td>اللعب</td><td class="n">Gold II</td><td><code>rankLabel()</code> · 17885</td></tr>
+      <tr class="sev hi"><td>التصنيف</td><td class="n">Ranked · Gold II · RP · MMR</td><td>16452 · 16456</td></tr>
+      <tr class="sev hi"><td>أوضاع اللعب</td><td class="n">Ranked · VS</td><td>18288</td></tr>
+      <tr class="sev md"><td>المزيد</td><td class="n">Gold II</td><td><code>rankLabel()</code></td></tr>
+      <tr class="sev md"><td>المتجر</td><td class="n">Season Pass · RP</td><td>نصّ مباشر</td></tr>
+      <tr><td>المتجر</td><td class="n">Google Play · App Store</td><td>أسماء علامات — تبقى</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="two">
+    <div class="callout">
+      <div class="lbl">مواضع كلمة Ranked الأربعة</div>
+      <p><code>16452</code> عنوان شاشة التصنيف · <code>17789</code> نصّ زرّ · <code>17817</code> اسم وضع مقفل · <code>18288</code> بطاقة أوضاع اللعب.<br><br>الخمسة عشر الباقية من ١٩ تطابقًا هي <code>S.ranked</code> و<code>rankedScr</code> — أسماء متغيّرات تبقى بالإنجليزية.</p>
+    </div>
+    <div class="callout">
+      <div class="lbl">الأخطر من كلمة Ranked</div>
+      <p><code>rankLabel(r)</code> تُعيد <code>Bronze/Silver/Gold/…</code> وتُستدعى في <strong>ثمانية مواضع</strong>. تعريب الكلمة الواحدة لا يكفي — لا بدّ من قلب دالة التسمية نفسها.</p>
+    </div>
+  </div>
+
+  <p><strong>الخبر الطيّب:</strong> «ليلة العائلة» ومراكز الألعاب والنادي والبطاقات <span class="q">عربية بالكامل — صفر نصّ إنجليزي</span>. المشكلة محصورة في ثلاث شاشات وسطرين في المتجر.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">E</span><h2>رتبة واحدة أم لكل لعبة؟</h2></div>
+
+  <div class="verdict">
+    <div class="big">رتبة واحدة. للّعبة كلّها. قاطعًا.</div>
+    <p>كائن رتبة واحد في الحالة (<code>S.ranked</code>) بـ44 إشارة إليه، وموضعان فقط يمنحان التصنيف — <strong>كلاهما داخل لعبة المعرفة</strong>. الكيرم وأونو ومافيا والرسم وبرا السالفة <strong>لا تمنح ولا تخصم شيئًا</strong>: لا نقاط ولا MMR ولا سجلّ فوز وخسارة. المباراة تنتهي ولا تلمس الحالة التنافسية إطلاقًا. ولا يوجد في الحالة أي مفتاح باسم لعبة.</p>
+    <p style="margin-top:12px"><strong>فالبند ٢ ليس تعديلًا على نظام قائم — بل بناء نظام غير موجود.</strong> خمس ألعاب من ستّ ستحصل على تصنيفها لأول مرّة.</p>
+  </div>
+
+  <div class="callout">
+    <div class="lbl">تنبيه واجب قبل البدء</div>
+    <p>البنود ٥ و٧٦ و٧٧ تفترض <strong>خادمًا</strong>: MMR مخفيًّا عنده، ومنع الاستغلال من جهته، وتقدير زمن الانتظار من مقاييسه. <strong>اللعبة اليوم بلا خادم</strong>: الحالة كلّها في تخزين المتصفّح، والغرف نظير-إلى-نظير، وخصوم مباريات المعرفة محاكون على الجهاز.</p>
+    <p>سأبني النموذج والواجهة والقواعد كاملةً على الجهاز، بحيث ينتقل الحساب إلى الخادم لاحقًا بتغيير مصدر البيانات وحده. ولن أكتب في الواجهة أنّ الخادم يتحقّق ما دام لا يفعل — كما التزمنا في النادي.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">F</span><h2>خطة الترحيل</h2></div>
+
+  <h3>النموذج</h3>
+  <pre>GAMES = ['knowledge','carrom','uno','mafia','drawing','outsider']
+
+GameRankProfile = {
+  gameId, seasonId,
+  visibleTier, division, rankPoints,        <b>// ما يراه اللاعب</b>
+  hiddenMMR,                                <b>// لا يُعرض</b>
+  peakTier, peakDivision,
+  wins, losses, gamesPlayed, winStreak,
+  placementMatchesRemaining,
+  masteryXp, masteryLevel,                  <b>// منفصل عن الرتبة</b>
+  lastPlayedAt
+}
+S.gameRanks = { knowledge:{…}, carrom:{…}, uno:{…}, mafia:{…}, drawing:{…}, outsider:{…} }</pre>
+
+  <h3>الترحيل بلا فقدان</h3>
+  <p>رتبة اللاعب الحالية كانت رتبة المعرفة فعليًّا، فتنتقل كما هي إلى <code>knowledge</code>، وباقي الألعاب تبدأ <strong>«غير مصنّف»</strong> لا برونزي. وتبقى نسخة من الحالة القديمة حتى نتأكّد.</p>
+
+  <h3>نموذج حساب لكل لعبة</h3>
+  <div class="tw"><table>
+    <thead><tr><th>اللعبة</th><th>النموذج</th><th>الأساس</th></tr></thead>
+    <tbody>
+      <tr><td>المعرفة</td><td class="n">winLoss</td><td>فوز/خسارة + MMR الخصم · الإجابات الصحيحة فاصل تعادل فقط</td></tr>
+      <tr><td>كيرم</td><td class="n">winLoss</td><td>فوز/خسارة + MMR · الدقّة والأخطاء والملكة إحصاءات ملفّ لا نقاط</td></tr>
+      <tr><td>أونو</td><td class="n">placement</td><td>‏1v1 فوز/خسارة · أربعة لاعبين ترتيب معدَّل بالـMMR</td></tr>
+      <tr><td>مافيا</td><td class="n">teamResult</td><td>نتيجة الفريق + إكمال المباراة + معدّل الانسحاب · بلا أي تقييم للكلام</td></tr>
+      <tr><td>برا السالفة</td><td class="n">roundsAggregate</td><td>تُجمع الجولات ثمّ نتيجة واحدة للمباراة</td></tr>
+      <tr><td>الرسم</td><td class="n">placement</td><td>الترتيب + التخمينات الناجحة + نجاح الآخرين في تخمين رسمك</td></tr>
+    </tbody>
+  </table></div>
+  <p>كلّها تمرّ عبر واجهة واحدة: <code>resolveMatch({gameId, mode, result, opponents}) → {rpDelta, mmrDelta, events}</code>.</p>
+
+  <div class="callout">
+    <div class="lbl">القاعدة الثابتة — نقطة واحدة في المشروع كلّه</div>
+    <pre style="margin:0;border:0;background:transparent;padding:0">function grantsRP(mode){ return mode === 'ranked' }</pre>
+    <p style="margin-top:10px">الغرفة بكود · التحدّي الودّي · الكمبيوتر · العادي · تمرير الجوال ⟵ <strong>لا نقاط تصنيف إطلاقًا</strong>، وتُمنَح خبرة إتقان بسيطة بدلها. وتُختم كل مباراة بمعرّف فريد يُسجَّل فلا تُحتسب نتيجة مرّتين.</p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">G</span><h2>شكل الصفحات الجديدة</h2></div>
+  <p class="slede">مخطّط نصّي بالمقاسات — حشوة 16–20px، تباعد الأقسام 20px، وحشوة سفلية بارتفاع الشريط زائدًا المنطقة الآمنة.</p>
+
+  <h3>«اللعب»</h3>
+  <div class="wire">┌────────────────────────────────────────┐
+│                اللعب                   │  جذر تبويب · بلا رجوع
+├────────────────────────────────────────┤
+│ [أفاتار] لاعب · المستوى 27             │  شريط حالة نحيف ≈56px
+│ الموسم 14 · مكافآت اليوم 4/4  [عملتان] │
+├────────────────────────────────────────┤
+│ ╔════════════════════════════════════╗ │
+│ ║ عالم المعرفة          [شارة ذهبي]  ║ │  <b>البطاقة الأكبر — القلب</b>
+│ ║ ذهبي II                            ║ │
+│ ║ نقاط التصنيف        64 / 100       ║ │
+│ ║ ▓▓▓▓▓▓▓▓▓░░░░  🔥 فوزان متتاليان   ║ │
+│ ║ [   لعب مصنّف   ]  [  التفاصيل  ]  ║ │
+│ ╚════════════════════════════════════╝ │
+├────────────────────────────────────────┤
+│ ألعابك                                 │
+│ ┌──────────────┐ ┌──────────────┐      │  شبكة ٢×٣
+│ │ كيرم         │ │ أونو         │      │
+│ │ ذهبي III     │ │ فضي I        │      │
+│ │ ▓▓▓▓▓░░ 72   │ │ ▓▓░░░░░ 33   │      │
+│ └──────────────┘ └──────────────┘      │
+│ ┌──────────────┐ ┌──────────────┐      │
+│ │ برا السالفة  │ │ مافيا        │      │
+│ │ برونزي II 41 │ │ <b>غير مصنّف</b>    │      │
+│ └──────────────┘ └──────────────┘      │
+│ ┌──────────────┐                       │
+│ │ مسابقة الرسم │                       │
+│ │ برونزي I  65 │                       │
+│ └──────────────┘                       │
+├────────────────────────────────────────┤
+│ ⚡ مباراة سريعة                      › │  بطاقة أفقية
+│    ادخل مباراة غير مصنّفة مباشرة        │
+├────────────────────────────────────────┤
+│ 🎉 ليلة العائلة                        │
+│    ألعاب جماعية للأصدقاء والعائلة       │
+│    ⚪ 🎴 🕵️ 🎨 🤫   [ استكشف الألعاب ] │
+├────────────────────────────────────────┤
+│ مهام اللعب              <b>تُخفى إن خلت</b>   │
+│ 🎯 اربح مباراة مصنّفة            1/1   │
+│ 🎯 أدخل الملكة في الكيرم         0/1   │
+├────────────────────────────────────────┤
+│ [حدث جارٍ]      <b>يظهر فقط عند وجود حدث</b>  │
+└────────────────────────────────────────┘</div>
+
+  <h3>«ليلة العائلة»</h3>
+  <div class="wire">┌────────────────────────────────────────┐
+│  ‹           ليلة العائلة              │
+├────────────────────────────────────────┤
+│ ألعاب جماعية للأصدقاء والعائلة.        │  سطر واحد فقط
+├────────────────────────────────────────┤
+│ تابع لعبك                <b>يُخفى للجديد</b>  │
+│ [كيرم] كيرم · ذهبي III  [العب مجددًا]  │
+├────────────────────────────────────────┤
+│ اختر اللعبة                            │
+│ ┌────────────────────────────────────┐ │
+│ │ [أيقونة 60px] برا السالفة        ‹ │ │  ارتفاع ≈112px
+│ │               الكل يعرف الكلمة إلا  │ │  <b>بلا أي أقراص</b>
+│ │               واحدًا — اكشفوه       │ │
+│ │               فضي III ▓▓▓░░ 18/100 │ │
+│ └────────────────────────────────────┘ │
+│ … مافيا · مسابقة الرسم · أونو · كيرم   │
+└────────────────────────────────────────┘</div>
+
+  <h3>مركز اللعبة — مثال الكيرم</h3>
+  <div class="wire">┌────────────────────────────────────────┐
+│  ‹              كيرم                   │
+├────────────────────────────────────────┤
+│ [أيقونة] كيرم                          │
+│ ذهبي III · نقاط التصنيف 72 / 100       │
+│ ▓▓▓▓▓▓▓░░░                             │
+│ أفضل رتبة: ماسي II · الموسم: 18 يومًا  │
+│                   [ عرض التصنيف › ]    │
+├────────────────────────────────────────┤
+│ ╔════════════════════════════════════╗ │
+│ ║ ⚔ لعب مصنّف                      › ║ │  <b>الأبرز</b>
+│ ║ واجه لاعبًا قريبًا من مستواك        ║ │
+│ ╚════════════════════════════════════╝ │
+│ 🎮 لعب عادي — بلا تأثير على رتبتك    › │
+│ 🔗 غرفة بكود — <b>لا تمنح نقاط تصنيف</b>  › │
+│ 🤖 ضد الكمبيوتر                      › │
+│ 🎯 التدريب                           › │
+└────────────────────────────────────────┘</div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">H</span><h2>ما سيتغيّر</h2></div>
+  <p class="slede">المشروع ملفّ واحد، فالقائمة أقسامٌ داخله لا ملفّات منفصلة — عدا ما يُستحدث.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>القسم</th><th>السطور</th><th>التغيير</th></tr></thead>
+    <tbody>
+      <tr><td><code>TIERS</code></td><td class="n">13356–13367</td><td>يصير <code>RANK_TIERS</code> عربيًّا كامل الرتب؛ يُنقل <code>t</code>/<code>opt</code> إلى إعداد المعرفة</td></tr>
+      <tr><td><code>applyMatch</code> وأخواتها</td><td class="n">13372–13482</td><td>تعمل على <code>GameRankProfile</code>؛ يُحذف الترتيب العالمي الملفّق</td></tr>
+      <tr><td><code>rankLabel</code> / <code>rankLabelAr</code></td><td class="n">13379–13388</td><td>تُدمجان في <code>rankName()</code> عربية بأرقام غربية</td></tr>
+      <tr class="sev hi"><td><strong>جديد</strong> — نواة التصنيف</td><td class="n">—</td><td><code>GAME_DEFS</code> · <code>S.gameRanks</code> · <code>resolveMatch</code> · <code>grantsRP</code> · <code>migrateRanks</code></td></tr>
+      <tr><td><code>playScr</code> · <code>seasonHero</code></td><td class="n">17831–17893</td><td>إعادة بناء كاملة</td></tr>
+      <tr><td><code>playModesScr</code></td><td class="n">18285+</td><td>تعريب، ثمّ دمج دوره في «اللعب»</td></tr>
+      <tr><td><code>rankedScr</code></td><td class="n">16428+</td><td>تصير <code>gameRankScr(gameId)</code></td></tr>
+      <tr><td><code>PT_GAMES</code> · <code>partyScr</code></td><td class="n">19814–19903</td><td>تُستبدل بـ<code>GAME_DEFS</code>؛ حذف الأقراص الخمسة عشر</td></tr>
+      <tr><td><code>gameHub</code></td><td class="n">19910–19932</td><td>يضاف «لعب مصنّف» و«لعب عادي» و«تدريب»</td></tr>
+      <tr><td>نهايات المباريات</td><td class="n">14438 · 14944 · 18719 · 18945</td><td>تمرّ كلّها عبر <code>resolveMatch</code> بمعرّف مباراة فريد</td></tr>
+      <tr><td>شاشة النتيجة · الملف الشخصي · المتجر</td><td class="n">—</td><td>تغيّر الرتبة لكل لعبة · قسم «تصنيفات الألعاب» · تعريب سطرين</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>ملفّات جديدة</h3>
+  <pre>src/i18n/ar.json        <b>جدول النصوص</b>
+docs/RANK_SYSTEM.md     <b>عقد التصنيف: النماذج والقواعد لكل لعبة</b>
+tools/check-i18n.js     <b>فحص آلي: لا نصّ إنجليزي مرئي خارج أسماء العلامات</b></pre>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">↦</span><h2>المراحل</h2></div>
+  <p class="slede">ستّ مراحل مرتّبة بالاعتماد، كلّ واحدة قابلة للإصدار وحدها. لا تُحذف ميزة عاملة قبل أن يعمل بديلها.</p>
+  <div class="stage"><div class="n">01</div><div><h4>اللغة</h4><p>تعريب الرتب والشاشات الثلاث وسطرَي المتجر · جدول النصوص · فحص آلي. <strong>صفر تغيير في المنطق</strong> — أسرع مرحلة وأوضح أثر.</p></div></div>
+  <div class="stage"><div class="n">02</div><div><h4>نواة التصنيف</h4><p><code>GAME_DEFS</code> · <code>S.gameRanks</code> · الترحيل · <code>resolveMatch</code> · <code>grantsRP</code>. بلا تغيير مرئي في الواجهة.</p></div></div>
+  <div class="stage"><div class="n">03</div><div><h4>ربط الألعاب</h4><p>نهايات الكيرم وأونو ومافيا والرسم وبرا السالفة بمحرّك النتيجة — هنا تحصل الخمسة على تصنيفها أول مرّة.</p></div></div>
+  <div class="stage"><div class="n">04</div><div><h4>صفحة اللعب</h4><p>إعادة البناء كاملةً حسب المخطّط.</p></div></div>
+  <div class="stage"><div class="n">05</div><div><h4>ليلة العائلة ومركز اللعبة</h4><p>البطاقات الأعلى بالرتبة والتقدّم · حذف الأقراص · «لعب مصنّف» و«عادي» في كل مركز.</p></div></div>
+  <div class="stage"><div class="n">06</div><div><h4>شاشات التصنيف</h4><p>مسار الرتب · لوحات الصدارة بتبويبات · الترقية والهبوط · قسم الملف الشخصي · شاشة النتيجة.</p></div></div>
+</section>
+
+<footer>
+  التقرير النصّي في المستودع: <span style="color:var(--ink-2)">docs/PLAY-RANK-AUDIT.md</span> · تقرير التنقّل السابق: <span style="color:var(--ink-2)">docs/AUDIT-AND-REFACTOR-PLAN.md</span>
+</footer>
+</div>
+<script>
+document.documentElement.setAttribute('dir','rtl');
+document.documentElement.setAttribute('lang','ar');
+</script>
