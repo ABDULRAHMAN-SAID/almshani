@@ -18239,7 +18239,7 @@ function plMissions(){
 }
 
 function playScr(){
- rankAll();playCss();
+ rankAll();playCss();hubRegister();
  if(!S.cards)S.cards=defaultCards();
  const fam=['barra','mafia','draw','uno','carrom'];
  go(`<div class="scr on"><div class="plWrap">
@@ -18382,7 +18382,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.12';
+const APP_VER='5.13';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20242,22 +20242,6 @@ function ptExit(){
  confirmSheet('إنهاء اللعبة','ستتوقف الجولة الحالية ويعود الجميع لقائمة ليلة العائلة.','إنهاء',()=>{
   clearInterval(PT&&PT.tm);if(PT)PT.tm=null;partyScr()});
 }
-function partyScr(){
- clearInterval(PT&&PT.tm);PT=null;rmLeave(1);
- go(`<div class="scr on">${NAV.length>1?tbar('ليلة العائلة'):tb('ليلة العائلة',"push('playModesScr')")}
- <div class="wb" style="text-align:right">${ico('group',13)} ألعاب جماعية للعائلة والأصدقاء — ادخل اللعبة ثم اختر: مع الكمبيوتر، بحث عن لاعبين، غرفة بكود، أو تمرير الجوال.</div>
- <div class="sl" style="margin:14px 0 9px">اختر اللعبة</div>
- ${PT_GAMES.map(([e,n,d,g,pass,net])=>
-  `<div class="gTile" onclick="gameHub('${g}')">
-  <div class="gArt">${GAME_ART[g]||`<div style="font-size:34px">${e}</div>`}</div>
-  <div style="flex:1;min-width:0">
-   <div class="gNm">${n}</div>
-   <div class="gDs">${d}</div>
-   <div class="gWays">${[pass?'📱 تمرير':'',net?'🔗 كود':'',net?'🌐 بحث':'',SOLO_OK[g]?'🤖 كمبيوتر':''].filter(Boolean).map(w=>`<span>${w}</span>`).join('')}</div></div>
-  <span style="color:var(--gold);font-size:18px">›</span></div>`).join('')}
- </div>`);
-}
-/* أشكال الألعاب — مرسومة بالكود بعمق وظلال */
 const GAME_ART={
  carrom:`<svg viewBox="0 0 100 100"><defs>
   <linearGradient id="gaW" x1="0" y1="0" x2="1" y2="1">
@@ -20338,29 +20322,224 @@ const SOLO_OK={uno:1,carrom:1};
 const DIFFS=[['easy','سهل','🙂','يلعب بعشوائية ويخطئ كثيرًا'],
  ['mid','متوسط','😐','يلعب بمنطق سليم ويخطئ أحيانًا'],
  ['hard','صعب','😈','يحسب أفضل نقلة ولا يسامح']];
-function gameHub(g){
- const row=PT_GAMES.find(x=>x[3]===g)||[];
- RM.game=g;
- go(`<div class="scr on">${tb(row[1]||'اللعبة','partyScr()')}
- <div class="gHero">${GAME_ART[g]||''}</div>
- <div style="text-align:center;font-size:12px;color:var(--tx2);margin:10px 0 4px">${row[2]||''}</div>
- <div class="sl" style="margin:16px 0 9px">اختر طريقة اللعب</div>
- ${SOLO_OK[g]?`<div class="wayCard" onclick="soloScr('${g}')">
-  <span class="wIco">🤖</span><div style="flex:1"><div class="wT">مع الكمبيوتر</div>
-  <div class="wD">فورًا وبلا انتظار — سهل · متوسط · صعب</div></div><span class="wGo">›</span></div>`:''}
- <div class="wayCard" onclick="mmScr('${g}')">
-  <span class="wIco">🌐</span><div style="flex:1"><div class="wT">بحث عن لاعبين</div>
-  <div class="wD">نبحث لك عن لاعبين متصلين الآن عبر الشبكة</div></div><span class="wGo">›</span></div>
- <div class="wayCard" onclick="roomScr('${g}')">
-  <span class="wIco">🔗</span><div style="flex:1"><div class="wT">غرفة بكود</div>
-  <div class="wD">أنشئ كودًا وأعطه لمن تعرفهم</div></div><span class="wGo">›</span></div>
- ${row[4]?`<div class="wayCard" onclick="ptWay='pass';ptOpen('${g}')">
-  <span class="wIco">📱</span><div style="flex:1"><div class="wT">تمرير الجوال</div>
-  <div class="wD">جهاز واحد يدور بينكم</div></div><span class="wGo">›</span></div>`
- :`<div class="wayCard off"><span class="wIco">📱</span><div style="flex:1"><div class="wT">تمرير الجوال</div>
-  <div class="wD">لا يصلح هنا — لكل لاعب يده ولوحه على هاتفه</div></div></div>`}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ليلة العائلة ومركز اللعبة
+   ───────────────────────────────────────────────────────────────────
+   القائمة تختار اللعبة وحدها، والمركز يختار طريقة اللعب.
+   بطاقة اللعبة لا تحمل أزرار الطرق حتى لا تزدحم.
+   ═══════════════════════════════════════════════════════════════════ */
+var _hubCss=0;
+function hubCss(){
+ if(_hubCss||typeof document==='undefined')return;
+ _hubCss=1;
+ var css=[
+ /* بطاقة لعبة في القائمة */
+ '.gRow{display:flex;align-items:center;gap:13px;width:100%;padding:13px;border-radius:18px;',
+ ' margin-bottom:10px;cursor:pointer;text-align:start;font-family:inherit;color:#EDF1FA;',
+ ' background:linear-gradient(160deg,#17203E,#0A1022);border:1px solid #2A3358}',
+ '.gRow:active{transform:scale(.985)}',
+ '.gRow .art{width:60px;height:60px;flex-shrink:0;border-radius:14px;overflow:hidden;',
+ ' background:#0A1022;border:1px solid #2A3358}',
+ '.gRow .art svg{width:100%;height:100%;display:block}',
+ '.gRow .bd{flex:1;min-width:0;display:block}',
+ '.gRow .nm{display:block;font-size:15px;font-weight:900;line-height:1.2}',
+ '.gRow .ds{display:block;font-size:10.5px;color:#8F9BBC;margin-top:4px;line-height:1.5;',
+ ' overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+ '.gRow .rk{display:flex;align-items:center;gap:8px;margin-top:8px}',
+ '.gRow .rk .t{font-size:11px;font-weight:900}',
+ '.gRow .rk .p{margin-inline-start:auto;font-size:9.5px;color:#8B96B6}',
+ '.gRow .bar{display:block;height:5px;border-radius:3px;margin-top:5px;background:#0A0F22;',
+ ' border:1px solid #2C3560;overflow:hidden}',
+ '.gRow .bar i{display:block;height:100%;border-radius:3px}',
+ '.gRow .go{color:#E8B23A;flex-shrink:0}',
+ '.gRow.cont{border-color:rgba(232,178,58,.55);background:linear-gradient(160deg,#241C3E,#0C1122)}',
+
+ /* رأس مركز اللعبة */
+ '.ghHero{position:relative;overflow:hidden;border-radius:20px;padding:15px;margin-bottom:16px;',
+ ' background:linear-gradient(155deg,#212A55,#101733 60%,#080C1C);border:1px solid #33406B}',
+ '.ghHero .row{display:flex;align-items:center;gap:13px}',
+ '.ghHero .art{width:62px;height:62px;flex-shrink:0;border-radius:15px;overflow:hidden;',
+ ' background:#0A1022;border:1px solid #2A3358}',
+ '.ghHero .art svg{width:100%;height:100%;display:block}',
+ '.ghHero .nm{font-size:18px;font-weight:900}',
+ '.ghHero .rk{font-size:14px;font-weight:900;margin-top:4px}',
+ '.ghHero .meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}',
+ '.ghMeta{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;',
+ ' background:rgba(255,255,255,.045);border:1px solid #313C63;font-size:10px;font-weight:800;color:#B7C1DC}',
+ '.ghMeta b{color:#EDF1FA}',
+ '.ghHero .lnk{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 13px;',
+ ' min-height:38px;border-radius:11px;font-size:11px;font-weight:900;color:#C3A8FA;cursor:pointer;',
+ ' background:rgba(139,92,240,.13);border:1.5px solid rgba(139,92,240,.55);font-family:inherit}',
+
+ /* أزرار طرق اللعب */
+ '.ghWay{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:17px;',
+ ' margin-bottom:10px;cursor:pointer;text-align:start;font-family:inherit;color:#EDF1FA;',
+ ' background:linear-gradient(160deg,#17203E,#0A1022);border:1.5px solid var(--ac,#2A3358)}',
+ '.ghWay:active{transform:scale(.985)}',
+ '.ghWay.main{padding:17px 14px;background:linear-gradient(158deg,#2A2154,#120C26);',
+ ' box-shadow:0 12px 30px -18px var(--ac)}',
+ '.ghWay>span:nth-child(2){display:block}',
+ '.ghWay .ic{width:44px;height:44px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;',
+ ' justify-content:center;font-size:21px;background:var(--acs,rgba(255,255,255,.05));',
+ ' border:1px solid var(--ac,#2A3358)}',
+ '.ghWay.main .ic{width:50px;height:50px;font-size:24px}',
+ '.ghWay .t{display:block;font-size:14px;font-weight:900}',
+ '.ghWay.main .t{font-size:16.5px}',
+ '.ghWay .s{display:block;font-size:10.5px;color:#8F9BBC;margin-top:4px;line-height:1.5}',
+ '.ghWay .go{margin-inline-start:auto;color:var(--ac,#8B5CF0);flex-shrink:0}',
+ '.ghWay.off{opacity:.45;cursor:default}',
+ '.ghNote{font-size:9.5px;color:#7E89A8;line-height:1.7;margin-top:4px;text-align:center}'
+ ].join('\n');
+ var st=document.createElement('style');st.id='hubStyle';st.textContent=css;document.head.appendChild(st);
+}
+
+/** بطاقة لعبة في القائمة — تختار اللعبة فقط، وطرق اللعب في مركزها */
+function gRow(def,cont){
+ const p=rankOf(def.id),col=plTierCol(p);
+ const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
+ return `<button class="gRow${cont?' cont':''}" onclick="push('gameHub','${def.rmKey}')">
+  <span class="art">${GAME_ART[def.rmKey]||''}</span>
+  <span class="bd">
+   <span class="nm">${esc(def.ar)}</span>
+   <span class="ds">${esc(def.desc)}</span>
+   <span class="rk">
+    <span class="t" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</span>
+    <span class="p">${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV)+' نقطة':'بلا رتبة بعد'}</span></span>
+   <span class="bar"><i style="width:${pct}%;background:${p.placed?col:'#3A4470'}"></i></span>
+  </span>
+  <span class="go">${ico('back',17)}</span></button>`;
+}
+
+function partyScr(){
+ clearInterval(PT&&PT.tm);PT=null;rmLeave(1);
+ rankAll();hubCss();hubRegister();
+ const defs=GAME_DEFS.filter(g=>g.id!=='knowledge');
+ // آخر لعبة لعبتها تتصدّر القائمة — ولا تظهر للاعب الجديد
+ const last=defs.slice().sort((a,b)=>(rankOf(b.id).lastPlayedAt||0)-(rankOf(a.id).lastPlayedAt||0))[0];
+ const cont=(last&&rankOf(last.id).lastPlayedAt)?last:null;
+ const rest=cont?[cont].concat(defs.filter(g=>g.id!==cont.id)):defs;
+ go(`<div class="scr on">${NAV.length>1?tbar('ليلة العائلة'):tb('ليلة العائلة',"tab('play')")}
+ <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:4px">
+  ألعاب جماعية للأصدقاء والعائلة — اختر اللعبة ثم اختر طريقة اللعب.</div>
+ ${cont?`<div class="sl" style="margin:16px 0 9px">تابع لعبك</div>${gRow(cont,1)}
+  <div class="sl" style="margin:18px 0 9px">كل الألعاب</div>
+  ${defs.filter(g=>g.id!==cont.id).map(g=>gRow(g)).join('')}`
+  :`<div class="sl" style="margin:16px 0 9px">اختر اللعبة</div>
+  ${defs.map(g=>gRow(g)).join('')}`}
  </div>`);
 }
+
+function ghWay(cls,icon,t,s,call,acc,off){
+ return `<button class="ghWay ${cls}${off?' off':''}" style="--ac:${acc};--acs:${clRGBA(acc,.15)}"
+  ${off?'disabled':`onclick="${call}"`}>
+  <span class="ic">${icon}</span>
+  <span style="flex:1;min-width:0"><span class="t">${esc(t)}</span><span class="s">${esc(s)}</span></span>
+  ${off?'':`<span class="go">${ico('back',15)}</span>`}</button>`;
+}
+
+/** مركز اللعبة — رتبتك فيها ثم طرق لعبها */
+function gameHub(g){
+ hubCss();rankAll();hubRegister();
+ const def=GAME_DEFS.find(x=>x.rmKey===g);
+ if(!def)return partyScr();
+ RM.game=g;
+ const p=rankOf(def.id),col=plTierCol(p);
+ const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
+ const peak=p.placed?rankName({tier:p.seasonBest.tier,div:p.seasonBest.div}):null;
+ go(`<div class="scr on">${tbar(def.ar)}
+ <div class="ghHero">
+  <div class="row">
+   <div class="art">${GAME_ART[g]||''}</div>
+   <div style="flex:1;min-width:0">
+    <div class="nm">${esc(def.ar)}</div>
+    <div class="rk" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</div>
+    <div class="plBarTrk" style="margin-top:8px"><i style="width:${pct}%;background:${p.placed?col:'#3A4470'}"></i></div>
+   </div></div>
+  <div class="meta">
+   <span class="ghMeta">${ico('chart',11)} نقاط التصنيف <b>${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV):numPair(p.placementDone,5)+' تحديد'}</b></span>
+   ${peak?`<span class="ghMeta">${ico('trophy',11)} أفضل رتبة <b>${peak}</b></span>`:''}
+   <span class="ghMeta">${ico('swords',11)} مبارياتك <b>${cl3Num(p.gamesPlayed)}</b></span>
+   <span class="ghMeta">${ico('star',11)} الإتقان <b>${cl3Num(masteryLevel(p.masteryXp))}</b></span>
+  </div>
+  <button class="lnk" onclick="push('gameRankScr','${def.id}')">${ico('medal',13)} عرض التصنيف ${ico('back',11)}</button>
+ </div>
+
+ <div class="sl" style="margin:0 0 10px">اختر طريقة اللعب</div>
+ ${ghWay('main','⚔️','لعب مصنّف','واجه لاعبًا قريبًا من مستواك وارفع رتبتك',
+   `mmScr('${g}','ranked')`,'#E8B23A')}
+ ${ghWay('','🎮','لعب عادي','مباراة بلا تأثير على رتبتك',`mmScr('${g}','casual')`,'#4C9AF0')}
+ ${ghWay('','🔗','غرفة بكود','أنشئ كودًا وأعطه لمن تعرفهم — لا تمنح نقاط تصنيف',
+   `roomScr('${g}')`,'#8B5CF0')}
+ ${def.bot?ghWay('','🤖','ضد الكمبيوتر','فورًا وبلا انتظار — لا تمنح نقاط تصنيف',
+   `soloScr('${g}')`,'#3FCF7F'):''}
+ ${def.pass?ghWay('','📱','تمرير الجوال','جهاز واحد يدور بينكم — لا تمنح نقاط تصنيف',
+   `ptWay='pass';ptOpen('${g}')`,'#F0567F')
+  :ghWay('','📱','تمرير الجوال','لا يصلح هنا — لكل لاعب يده ولوحه على هاتفه','','#2A3358',1)}
+ <div class="ghNote">نقاط التصنيف من «اللعب المصنّف» وحده — لئلّا تُجمع الرتب من غرف الأصدقاء.</div>
+ </div>`);
+}
+
+/** يسجّل شاشات اللعب في سجلّ الشاشات فيعمل زرّ الرجوع ومكدّس التنقّل */
+function hubRegister(){
+ try{
+  if(typeof SCR==='object'&&SCR){
+   SCR.gameHub=gameHub;SCR.gameRankScr=gameRankScr;SCR.partyScr=partyScr;SCR.playScr=playScr;
+  }
+ }catch(e){}
+}
+
+/** تصنيف لعبة بعينها — لا رتبة عالمية مجهولة */
+function gameRankScr(gameId){
+ hubCss();rankAll();
+ const def=GAME_DEFS.find(x=>x.id===gameId);
+ if(!def)return partyScr();
+ const p=rankOf(def.id),col=plTierCol(p);
+ const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
+ const winRate=(p.wins+p.losses)?Math.round(p.wins/(p.wins+p.losses)*100)+'%':'—';
+ go(`<div class="scr on">${tbar('تصنيف '+def.ar)}
+ <div class="orn"><div class="in">${ornCorners()}
+  <div style="text-align:center;padding:6px 0">
+   <div style="width:66px;height:66px;margin:0 auto">${tierEmblem(p.tier,66)}</div>
+   <div style="font-size:23px;font-weight:900;color:${p.placed?col:'#8B96B6'};margin-top:8px">${plRankTxt(p)}</div>
+   <div style="font-size:15px;font-weight:900;margin-top:8px">${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV):numPair(p.placementDone,5)}</div>
+   <div style="font-size:10px;color:var(--tx2);margin-top:2px">${p.placed?'نقاط التصنيف':'مباريات تحديد المستوى'}</div>
+   <div class="plBarTrk" style="margin-top:11px"><i style="width:${pct}%;background:${p.placed?col:'#3A4470'}"></i></div>
+   ${p.protect>0?`<div style="font-size:11px;color:var(--ok);margin-top:8px">${ico('shield',14)} لديك مباراة حماية</div>`:''}
+  </div>
+  <div style="display:flex;gap:7px;margin-top:12px">
+   ${[[ico('trophy',15),cl3Num(p.wins),'انتصارات'],[ico('broken',15),cl3Num(p.losses),'خسائر'],
+      [ico('chart',15),winRate,'نسبة الفوز'],[ico('flame',15),cl3Num(p.bestStreak),'أطول سلسلة']]
+     .map(([i,v,l])=>`<div style="flex:1;text-align:center;background:rgba(232,178,58,.08);
+      border:1px solid rgba(232,178,58,.24);border-radius:10px;padding:7px 3px">
+      <div style="font-size:12px">${i}</div><div class="mtl" style="font-size:13px">${v}</div>
+      <div style="font-size:9px;color:var(--tx2)">${l}</div></div>`).join('')}
+  </div>
+ </div></div>
+
+ <div class="sl">مسار الرتب</div>
+ <div class="cr" style="padding-bottom:6px">${TIERS.map((t,i)=>{
+   const here=p.placed&&i===p.tier;
+   return `<div style="flex-shrink:0;width:74px;text-align:center;padding:9px 4px;border-radius:13px;
+    border:1.5px solid ${here?t.c:'#2A3358'};background:${here?clRGBA(t.c,.14):'#0C1226'}">
+    <div style="width:34px;height:34px;margin:0 auto;opacity:${here?1:.55}">${tierEmblem(i,34)}</div>
+    <div style="font-size:9.5px;font-weight:900;margin-top:5px;color:${here?t.c:'#8B96B6'}">${t.ar}</div>
+    ${here?`<div style="font-size:8px;color:${t.c};margin-top:2px">أنت هنا</div>`:''}</div>`}).join('')}</div>
+
+ <div class="sl">الإتقان</div>
+ <div class="li"><div class="lr">
+  <span style="color:var(--gold);flex-shrink:0">${ico('medal',18)}</span>
+  <div class="lb"><div class="lt">مستوى الإتقان ${cl3Num(masteryLevel(p.masteryXp))}</div>
+   <div class="ls">يزيد بكل مباراة تلعبها — ولو لم تكن مصنّفة. الرتبة تقيس مهارتك، والإتقان يقيس رحلتك.</div></div>
+ </div></div>
+
+ <div class="note" style="text-align:right;margin-top:14px">${ico('info',12)}
+  لا توجد لوحة صدارة بعد: تصنيفك محفوظ على جهازك وحده، ولا خادم يقارن اللاعبين.
+  نقاط التصنيف تُمنَح من «اللعب المصنّف» فقط.</div>
+ <button class="btn g" style="margin-top:12px" onclick="push('gameHub','${def.rmKey}')">${ico('swords',14)} طرق لعب ${esc(def.ar)}</button>
+ </div>`);
+}
+
 function ptOpen(g){
  const row=PT_GAMES.find(x=>x[3]===g);
  if(ptWay==='code'){RM.game=g;return gameHub(g)}
