@@ -13,7 +13,12 @@
     "start": "node server/dist/index.js",
     "test:sim": "esbuild shared/simulation/test/sim.test.ts --bundle --platform=node --outfile=.build/sim.test.js --log-level=warning && node .build/sim.test.js",
     "sim": "esbuild tools/sim-runner/run.ts --bundle --platform=node --outfile=.build/sim-runner.js --log-level=warning && node .build/sim-runner.js",
-    "build:artifact": "esbuild client/src/main.ts --bundle --minify --format=iife --define:process.env.BASE_SPEED='\"1\"' --outfile=client/dist/bundle.solo.js --log-level=warning"
+    "build:artifact": "esbuild client/src/main.ts --bundle --minify --format=iife --define:process.env.BASE_SPEED='\"1\"' --outfile=client/dist/bundle.solo.js --log-level=warning",
+    "build:tahaddi": "esbuild server/src/tahaddi/index.ts --bundle --platform=node --format=esm --external:ws --outfile=server/dist/tahaddi.js --log-level=warning",
+    "start:tahaddi": "node server/dist/tahaddi.js",
+    "test:tahaddi": "node tools/test-rank-core.cjs && node tools/test-router.cjs && node tools/test-carrom-physics.cjs && npm run build:tahaddi && node tools/test-tahaddi-server.cjs",
+    "game:build": "node tools/build.mjs",
+    "game:check": "node tools/build.mjs --check"
   },
   "repository": {
     "type": "git",

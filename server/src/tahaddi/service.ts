@@ -1,0 +1,294 @@
+// خدمة تحدّي: الحسابات، الحفظ السحابي، النتائج المتحقَّق منها، لوحات الصدارة، وتتابع الغرف.
+// القاعدة الذهبية: أي قيمة تصل من العميل ادّعاء يُفحص — الهوية من الجلسة، والرتبة من هنا لا من الهاتف.
+import { randomBytes } from 'node:crypto';
+import RankCore from '../../../src/progression/rank.js';
+import type { RankProfile } from '../../../src/progression/rank.js';
+import { FileStore } from './tstore';
+import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, LeaderRow, GameId } from './protocol';
+
+export interface Account {
+  token: string; id: string; name: string; createdAt: number; lastSeen: number;
+  save: CloudSave | null;
+  ranks: Record<string, RankProfile>;
+}
+export interface Session {
+  peer: string; account: Account; presence: Record<string, unknown>;
+  send: (m: ServerMsg) => void;
+}
+interface Pending {
+  gameId: GameId; mode: string; participants: string[]; createdAt: number;
+  reports: Map<string, ResultReport>;
+}
+interface Persisted { v: 1; accounts: Account[] }
+
+const MAX_SAVE_BYTES = 256 * 1024;
+const MAX_PRESENCE_BYTES = 4 * 1024;
+const MAX_EMIT_BYTES = 8 * 1024;
+const RESULT_WAIT_MS = parseInt(process.env.TAHADDI_RESULT_WAIT_MS ?? '90000', 10);
+const SWEEP_MS = parseInt(process.env.TAHADDI_SWEEP_MS ?? '5000', 10);
+const TOPIC_RE = /^[a-z][a-z0-9_.-]{0,47}$/;
+
+export function sanitizeName(n: unknown): string | null {
+  if (typeof n !== 'string') return null;
+  const s = n.replace(/<[^>]*>/g, '').replace(/[\u0000-\u001f\u007f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 14);
+  return s.length >= 2 ? s : null;
+}
+const bytes = (v: unknown) => Buffer.byteLength(JSON.stringify(v ?? null), 'utf8');
+
+export class TahaddiService {
+  private accounts = new Map<string, Account>();      // token → account
+  private byId = new Map<string, Account>();          // id → account
+  private sessions = new Map<string, Session>();      // peer → session
+  private pending = new Map<string, Pending>();       // matchId → reports
+  private store: FileStore<Persisted>;
+  private sweeper: ReturnType<typeof setInterval>;
+
+  constructor(store?: FileStore<Persisted>) {
+    this.store = store ?? new FileStore<Persisted>();
+    const saved = this.store.load();
+    if (saved?.accounts) {
+      for (const a of saved.accounts) {
+        const acc: Account = {
+          token: String(a.token), id: String(a.id), name: sanitizeName(a.name) ?? 'لاعب',
+          createdAt: +a.createdAt || Date.now(), lastSeen: +a.lastSeen || 0,
+          save: a.save && typeof a.save === 'object' && a.save.blob && typeof a.save.blob === 'object' ? { t: +a.save.t || 0, blob: a.save.blob } : null,
+          ranks: {}
+        };
+        for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
+        this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
+      }
+      console.log(`tahaddi/store: حُمّل ${this.accounts.size} حسابًا`);
+    }
+    this.sweeper = setInterval(() => this.sweepPending(), SWEEP_MS);
+    (this.sweeper as any).unref?.();
+  }
+
+  private persist(): void { this.store.saveSoon(() => ({ v: 1, accounts: [...this.accounts.values()] })); }
+  flush(): void { this.store.saveNow({ v: 1, accounts: [...this.accounts.values()] }); }
+  close(): void { clearInterval(this.sweeper); this.flush(); }
+
+  /* ── الحساب ── */
+  hello(send: (m: ServerMsg) => void, token?: string, name?: string, rid?: string): Session {
+    let account = typeof token === 'string' ? this.accounts.get(token) : undefined;
+    if (!account) {
+      account = {
+        token: randomBytes(16).toString('hex'),
+        id: 'p' + randomBytes(6).toString('hex'),
+        name: sanitizeName(name) ?? `لاعب-${this.byId.size + 1}`,
+        createdAt: Date.now(), lastSeen: Date.now(), save: null, ranks: {}
+      };
+      for (const g of RankCore.GAMES) account.ranks[g] = RankCore.newRankProfile(g);
+      this.accounts.set(account.token, account); this.byId.set(account.id, account);
+    }
+    // الاسم ملك الحساب: جهاز جديد بالرمز نفسه يأخذ اسم الحساب ولا يفرض اسمه المحلي (setName هو الطريق الوحيد للتغيير)
+    account.lastSeen = Date.now();
+    const peer = 'k' + randomBytes(8).toString('hex');
+    const session: Session = { peer, account, presence: {}, send };
+    this.sessions.set(peer, session);
+    send({ t: 'welcome', rid, token: account.token, id: account.id, name: account.name, peer,
+      ranks: account.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!account.save });
+    this.broadcastPeers();
+    this.persist();
+    return session;
+  }
+  drop(s: Session): void {
+    if (!this.sessions.delete(s.peer)) return;
+    this.broadcastPeers();
+  }
+  setName(s: Session, name: unknown, rid?: string): void {
+    const n = sanitizeName(name);
+    if (!n) return s.send({ t: 'error', rid, code: 'bad_name' });
+    s.account.name = n; this.persist();
+    s.send({ t: 'nameSet', rid, name: n });
+  }
+
+  /* ── الحفظ السحابي: الخادم يحفظ ما يرسله الهاتف كما هو، لكنّ الرتب لا تُؤخذ منه أبدًا ── */
+  saveCloud(s: Session, save: unknown, rid?: string): void {
+    const sv = save as CloudSave;
+    if (!sv || typeof sv !== 'object' || !sv.blob || typeof sv.blob !== 'object' || Array.isArray(sv.blob))
+      return s.send({ t: 'error', rid, code: 'bad_save' });
+    if (bytes(sv.blob) > MAX_SAVE_BYTES) return s.send({ t: 'error', rid, code: 'save_too_big' });
+    const blob = { ...sv.blob } as Record<string, unknown>;
+    delete blob.gameRanks; delete blob.ranked; delete blob.account;   // ملك الخادم — لا يُخزَّن ادّعاء عنها
+    const t2 = Date.now();
+    s.account.save = { t: typeof sv.t === 'number' ? sv.t : t2, blob };
+    this.persist();
+    s.send({ t: 'cloudSaved', rid, t2 });
+  }
+  loadCloud(s: Session, rid?: string): void {
+    s.send({ t: 'cloud', rid, save: s.account.save, ranks: s.account.ranks });
+  }
+  profile(s: Session, id: unknown, rid?: string): void {
+    const a = typeof id === 'string' && id ? this.byId.get(id) : s.account;
+    if (!a) return s.send({ t: 'error', rid, code: 'no_such_player' });
+    s.send({ t: 'profileView', rid, id: a.id, name: a.name, ranks: a.ranks });
+  }
+
+  /* ── النتائج: المصنّف يحتاج تقارير كل المشاركين ويتّفق فيها الفائز ── */
+  submitResult(s: Session, report: unknown, rid?: string): void {
+    const r = report as ResultReport;
+    const def = r && RankCore.gameDef(String(r.gameId));
+    if (!def) return s.send({ t: 'error', rid, code: 'bad_game' });
+    const matchId = typeof r.matchId === 'string' ? r.matchId.slice(0, 64) : '';
+    if (!matchId) return s.send({ t: 'error', rid, code: 'bad_match' });
+    const mode = RankCore.MODES_ALL.includes(String(r.mode)) ? String(r.mode) : 'casual';
+    const result = (r.result && typeof r.result === 'object') ? r.result : {};
+    const me = s.account;
+    const prof = me.ranks[def.id];
+
+    if (!RankCore.grantsRP(mode)) {
+      // إتقان فقط — الهاتف موثوق هنا لأنه لا نقاط ولا رتبة على المحكّ
+      const out = RankCore.resolve(prof, { gameId: def.id, mode, matchId, result, opponents: [] });
+      this.persist();
+      return s.send({ t: 'result', rid, status: out.applied ? 'applied' : 'ignored', reason: out.reason, profile: prof, delta: out as any });
+    }
+
+    // مصنّف: من شارك؟ حسابات حقيقية، أنا بينها، ولا أقلّ من اثنين
+    const parts = Array.isArray(r.participants) ? [...new Set(r.participants.map(String))].slice(0, 12).sort() : [];
+    if (!parts.includes(me.id) || parts.length < 2 || parts.some(id => !this.byId.has(id)))
+      return s.send({ t: 'error', rid, code: 'bad_participants' });
+    if (prof.seen && prof.seen.includes(matchId))
+      return s.send({ t: 'result', rid, status: 'ignored', reason: 'نتيجة مكرّرة', profile: prof, delta: null });
+
+    let pend = this.pending.get(matchId);
+    if (!pend) { pend = { gameId: def.id as GameId, mode, participants: parts, createdAt: Date.now(), reports: new Map() }; this.pending.set(matchId, pend); }
+    else if (pend.participants.join() !== parts.join())
+      return s.send({ t: 'error', rid, code: 'participants_mismatch' });
+    if (pend.reports.has(me.id))
+      return s.send({ t: 'result', rid, status: 'pending', reason: 'تقريرك مسجّل — بانتظار الباقين', profile: prof, delta: null });
+    pend.reports.set(me.id, { matchId, gameId: def.id as GameId, mode: mode as any, result, participants: parts });
+
+    if (pend.reports.size < pend.participants.length)
+      return s.send({ t: 'result', rid, status: 'pending', reason: 'بانتظار تقارير بقيّة اللاعبين', profile: prof, delta: null });
+
+    const ok = this.consistent(def.scoreModel, pend);
+    this.pending.delete(matchId);
+    const outcome = this.settle(pend, matchId, ok);
+    const mine = outcome.get(me.id);
+    s.send({ t: 'result', rid, status: ok ? 'applied' : 'disputed', reason: ok ? '' : 'تقارير اللاعبين متناقضة — لا نقاط',
+      profile: me.ranks[def.id], delta: mine ?? null });
+    for (const [id, delta] of outcome) {
+      if (id === me.id) continue;
+      const acc = this.byId.get(id)!;
+      this.toAccount(id, { t: 'resultFinal', matchId, status: ok ? 'applied' : 'disputed', profile: acc.ranks[def.id], delta });
+    }
+  }
+  /** الفائز واحد لا اثنان، والترتيب بلا تكرار — ما لا يتّسق لا يُحتسب */
+  private consistent(model: string, pend: Pending): boolean {
+    const reps = [...pend.reports.values()];
+    if (model === 'winLoss') {
+      const winners = reps.filter(r => !!(r.result as any).won).length;
+      return winners >= 1 && winners < reps.length;
+    }
+    if (model === 'placement') {
+      const n = reps.length;
+      const places = reps.map(r => (r.result as any).place | 0);
+      if (new Set(places).size !== n) return false;
+      return places.every(p => p >= 1 && p <= n) && reps.every(r => ((r.result as any).total | 0) === n);
+    }
+    if (model === 'teamResult') {
+      // فريقان: لا يفوز الجميع ولا يخسر الجميع
+      const won = reps.filter(r => !!(r.result as any).teamWon).length;
+      return won >= 1 && won < reps.length;
+    }
+    if (model === 'roundsAggregate') {
+      const rounds = new Set(reps.map(r => (r.result as any).rounds | 0));
+      return rounds.size === 1 && [...rounds][0] >= 1;
+    }
+    return false;
+  }
+  private settle(pend: Pending, matchId: string, ok: boolean): Map<string, Record<string, unknown> | null> {
+    const out = new Map<string, Record<string, unknown> | null>();
+    for (const id of pend.participants) {
+      const acc = this.byId.get(id)!; const prof = acc.ranks[pend.gameId];
+      if (!ok) {   // تُختم النتيجة كمرئيّة حتى لا يعاد تقديمها بعد التنقيح
+        if (!prof.seen) prof.seen = [];
+        if (!prof.seen.includes(matchId)) { prof.seen.push(matchId); if (prof.seen.length > 24) prof.seen.splice(0, prof.seen.length - 24); }
+        out.set(id, null); continue;
+      }
+      const rep = pend.reports.get(id)!;
+      // MMR الخصوم من هنا لا من الهاتف
+      const opponents = pend.participants.filter(x => x !== id).map(x => ({ mmr: this.byId.get(x)!.ranks[pend.gameId].mmr }));
+      const delta = RankCore.resolve(prof, { gameId: pend.gameId, mode: pend.mode, matchId, result: rep.result, opponents });
+      out.set(id, delta as any);
+    }
+    this.persist();
+    return out;
+  }
+  private sweepPending(): void {
+    const now = Date.now();
+    for (const [matchId, pend] of this.pending) {
+      if (now - pend.createdAt < RESULT_WAIT_MS) continue;
+      this.pending.delete(matchId);
+      // انتهت المهلة بلا تقارير الجميع: لا نقاط لأحد، وتُختم حتى لا تعود
+      for (const id of pend.participants) {
+        const acc = this.byId.get(id); if (!acc) continue;
+        const prof = acc.ranks[pend.gameId];
+        if (!prof.seen) prof.seen = [];
+        if (!prof.seen.includes(matchId)) prof.seen.push(matchId);
+        if (pend.reports.has(id)) this.toAccount(id, { t: 'resultFinal', matchId, status: 'incomplete', profile: prof, delta: null });
+      }
+      this.persist();
+    }
+  }
+  pendingCount(): number { return this.pending.size; }
+
+  /* ── لوحة الصدارة: من الخادم، مرتّبة بالرتبة ثم الدرجة ثم النقاط ── */
+  leaderboard(s: Session, gameId: unknown, limit: unknown, rid?: string): void {
+    const g = RankCore.gameDef(String(gameId));
+    if (!g) return s.send({ t: 'error', rid, code: 'bad_game' });
+    const n = Math.max(1, Math.min(100, (limit as number) | 0 || 50));
+    const rows = [...this.byId.values()]
+      .map(a => ({ a, p: a.ranks[g.id], sc: RankCore.score(a.ranks[g.id]) }))
+      .filter(x => x.p.gamesPlayed > 0)
+      .sort((x, y) => y.sc - x.sc || y.p.mmr - x.p.mmr || x.a.createdAt - y.a.createdAt);
+    const row = (x: { a: Account; p: RankProfile }): LeaderRow => ({ id: x.a.id, name: x.a.name, tier: x.p.tier, div: x.p.div, rp: x.p.rp, wins: x.p.wins, losses: x.p.losses, placed: x.p.placed });
+    const meIx = rows.findIndex(x => x.a === s.account);
+    s.send({ t: 'leaderboard', rid, gameId: g.id as GameId, rows: rows.slice(0, n).map(row), total: rows.length,
+      me: meIx >= 0 ? { rank: meIx + 1, row: row(rows[meIx]) } : null });
+  }
+
+  /* ── الغرف: تتابع حضور وبثّ — نفس دلالة غرفة الأرتيفاكت (الكلّ يسمع الكلّ، والمرسل يسمع نفسه) ── */
+  presence(s: Session, patch: unknown): void {
+    if (!patch || typeof patch !== 'object' || Array.isArray(patch)) return;
+    const next = { ...s.presence };
+    for (const [k, v] of Object.entries(patch as Record<string, unknown>)) {
+      if (v === null || v === undefined) delete next[k]; else next[k] = v;
+    }
+    if (bytes(next) > MAX_PRESENCE_BYTES) return s.send({ t: 'error', code: 'presence_too_big' });
+    s.presence = next;
+    this.broadcastPeers();
+  }
+  emit(s: Session, topic: unknown, data: unknown): void {
+    if (typeof topic !== 'string' || !TOPIC_RE.test(topic)) return s.send({ t: 'error', code: 'bad_topic' });
+    if (bytes(data) > MAX_EMIT_BYTES) return s.send({ t: 'error', code: 'msg_too_big' });
+    const m: ServerMsg = { t: 'msg', topic, data, from: { peer: s.peer, by: s.account.id } };
+    for (const x of this.sessions.values()) x.send(m);
+  }
+  peers(): PeerView[] {
+    return [...this.sessions.values()].map(x => ({ peer: x.peer, by: x.account.id, kind: 'viewer' as const, presence: x.presence }));
+  }
+  private broadcastPeers(): void {
+    const m: ServerMsg = { t: 'peers', list: this.peers() };
+    for (const x of this.sessions.values()) x.send(m);
+  }
+  private toAccount(id: string, m: ServerMsg): void {
+    for (const x of this.sessions.values()) if (x.account.id === id) x.send(m);
+  }
+
+  /* ── توجيه الرسائل ── */
+  handle(s: Session, msg: ClientMsg): void {
+    switch (msg.t) {
+      case 'setName': return this.setName(s, msg.name, msg.rid);
+      case 'saveCloud': return this.saveCloud(s, msg.save, msg.rid);
+      case 'loadCloud': return this.loadCloud(s, msg.rid);
+      case 'submitResult': return this.submitResult(s, msg.report, msg.rid);
+      case 'leaderboard': return this.leaderboard(s, msg.gameId, msg.limit, msg.rid);
+      case 'profile': return this.profile(s, msg.id, msg.rid);
+      case 'presence': return this.presence(s, msg.patch);
+      case 'emit': return this.emit(s, msg.topic, msg.data);
+      default: return s.send({ t: 'error', rid: (msg as any).rid, code: 'unknown' });
+    }
+  }
+  stats() { return { accounts: this.byId.size, online: this.sessions.size, pending: this.pending.size }; }
+}
