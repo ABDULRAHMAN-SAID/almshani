@@ -111,6 +111,18 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .caDot.b{background:radial-gradient(circle at 34% 30%,#4A3E36,#1C1512)}
 .caTurn{text-align:center;font-size:11.5px;font-weight:900;color:var(--tx2);margin-top:10px}
 .caTurn.me{color:var(--gold)}
+/* اليد الطائرة والمقاعد */
+.unoFly{position:fixed;z-index:60;pointer-events:none;transition:transform .55s cubic-bezier(.3,.9,.4,1),opacity .55s ease}
+.unoFly .unoC{box-shadow:0 10px 24px rgba(0,0,0,.6)}
+.unoFlyHand{position:absolute;width:36px;left:-16px;top:26px;opacity:.95;
+ filter:drop-shadow(0 3px 6px rgba(0,0,0,.5));transform:rotate(-24deg)}
+.seatHand{position:absolute;width:30px;left:-20px;top:2px;opacity:.9;transform:rotate(-18deg);
+ filter:drop-shadow(0 3px 6px rgba(0,0,0,.5));animation:handTap 1.6s ease-in-out infinite}
+@keyframes handTap{0%,100%{transform:rotate(-18deg) translateY(0)}50%{transform:rotate(-10deg) translateY(-5px)}}
+.gWays{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.gWays span{font-size:8.5px;font-weight:800;color:var(--tx2);background:rgba(6,9,17,.5);
+ border:1px solid var(--bd);border-radius:7px;padding:2px 7px}
+.wayCard.off{opacity:.45;cursor:default}
 /* نهاية اللعبة */
 .rmOver{position:relative;text-align:center;padding:26px 16px;border-radius:20px;overflow:hidden;
  background:linear-gradient(168deg,#241A3E,#0B1020);border:1.5px solid var(--gold);
@@ -155,9 +167,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .unoSlot.ok::after{content:'';position:absolute;inset:-3px;border-radius:11px;border:2px solid var(--gold);
  box-shadow:0 0 12px rgba(232,178,58,.5);pointer-events:none}
 .unoSlot:not(.ok){opacity:.42}
+.rmTopMini{display:flex;align-items:center;gap:10px;justify-content:center;font-size:10px;font-weight:800;
+ color:var(--tx2);background:rgba(6,9,17,.5);border:1px solid var(--bd);border-radius:10px;padding:5px 10px;margin-bottom:6px}
 /* كيرم */
-.caWrap{position:relative;width:100%;margin:0 -4px;border-radius:16px;overflow:hidden;
+.caWrap{position:relative;width:100%;border-radius:16px;overflow:hidden;
  box-shadow:0 12px 30px rgba(0,0,0,.6)}
+.caWrap.big{width:calc(100% + 24px);margin:0 -12px;border-radius:20px}
 .caWrap canvas{width:100%;display:block;aspect-ratio:1;touch-action:none}
 .caMsg{text-align:center;font-size:11.5px;font-weight:900;color:var(--gold);margin-top:9px;
  background:#E8B23A14;border:1px solid #E8B23A55;border-radius:11px;padding:7px 10px;animation:rspop .4s ease}
@@ -17985,7 +18000,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.1';
+const APP_VER='5.2';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18303,7 +18318,7 @@ function playModesScr(){
 let RMcap=undefined, RM={code:null,host:0,game:null,name:'',phase:'idle',me:null,
   role:null,word:'',cat:'',players:[],alive:[],votes:{},msg:'',log:[],res:null,step:null,acts:{},day:1,unsub:[]};
 const RM_TOPIC='party';
-const RM_MIN={barra:[3,12],mafia:[4,12],draw:[2,8],uno:[2,6],carrom:[2,2]};
+const RM_MIN={barra:[3,12],mafia:[4,12],draw:[2,8],uno:[2,4],carrom:[2,4]};
 const rmCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s};
 async function rmCap(){
  if(RMcap!==undefined)return RMcap;
@@ -18361,13 +18376,21 @@ function rmOn(d,m){
   if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
   if(RM.phase==='vote')setTimeout(rmPaintAll,30);}
  else if(d.t==='hand'&&d.to===me){RM.hand=(d.h||[]).slice()}
- else if(d.t==='uno'){RM.uno=d;RM.phase='uno';
+ else if(d.t==='uno'){
+  const prev=RM.uno;
+  RM.uno=d;RM.phase='uno';
+  if(prev&&d.by&&d.top!==prev.top)setTimeout(()=>unoFly(d.by,d.top),40);
   if(RM.solo&&isBot(d.turn))setTimeout(unoBot,RM.diff==='hard'?1100:1600);}
+ else if(d.t==='aim'){
+  _ca.aim={x:d.x,y:d.y,ang:d.ang};
+  if(RM.ca)RM.ca.msg='الخصم يصوّب…';
+  setTimeout(caRender,20);
+  if(document.getElementById('rmScr'))roomDraw();}
  else if(d.t==='cast'){
   const wasShot=!!d.shot;
   RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,msg:d.msg||''};
   RM.phase='carrom';
-  if(wasShot)setTimeout(()=>caPlay(d.shot),20);
+  if(wasShot){_ca.aim=null;setTimeout(()=>caPlay(d.shot),20)}
   else{setTimeout(caRender,40);
    if(RM.solo&&isBot(d.turn))setTimeout(caBot,2200)}}
  else if(d.t==='det'&&d.to===me){RM.detRes=`اللاعب ${((RM.players.find(x=>x.peer===d.target)||{}).name)||''}: ${d.isM?'مافيا! 🔪':'بريء 😇'}`}
@@ -18511,7 +18534,12 @@ async function rmJoin(){
 function roomDraw(){
  const R=rmRoster();
  if(!RM.me){const me=rmMine();if(me)RM.me=me.peer}
- const head=`<div class="rmTop">
+ const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
+ const head=playing
+  ?`<div class="rmTopMini"><span>${ico('group',11)} ${R.length}</span>
+    <span style="color:var(--gold)">${RM.solo?'مع الكمبيوتر':'كود '+RM.code}</span>
+    ${RM.solo?`<span>${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''}</span>`:''}</div>`
+  :`<div class="rmTop">
   <div><div style="font-size:9.5px;color:var(--tx2);font-weight:800">كود الغرفة</div>
    <div class="mtl" style="font-size:26px;letter-spacing:7px">${RM.code}</div></div>
   <div style="margin-right:auto;text-align:center">
@@ -18588,6 +18616,7 @@ function rmStart(){
  }
  if(RM.game==='uno'){rmSend({t:'start',g:'uno',ps});setTimeout(unoDeal,160);return}
  if(RM.game==='carrom'){rmSend({t:'start',g:'carrom',ps});setTimeout(caDeal,160);return}
+ // (الفرق تُشتق من الترتيب: الزوجي أبيض والفردي أسود)
  if(RM.game==='barra'){
   const ws=PARTY_WORDS[RM.cat||'أماكن'];
   const word=ws[Math.floor(Math.random()*ws.length)];
@@ -18683,8 +18712,10 @@ function soloScr(g){
  ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard" onclick="soloStart('${g}','${k}')">
   <span class="wIco">${e}</span><div style="flex:1"><div class="wT">${n}</div><div class="wD">${d}</div></div>
   <span class="wGo">›</span></div>`).join('')}
- ${g==='uno'?`<div class="sl" style="margin:16px 0 9px">عدد الخصوم</div>
- <div class="cr">${[1,2,3].map(n=>`<div class="fc ${(RM.bots||1)===n?'on':''}" onclick="RM.bots=${n};soloScr('${g}')">${n}</div>`).join('')}</div>`:''}
+ ${g==='uno'?`<div class="sl" style="margin:16px 0 9px">عدد اللاعبين (أنت + الكمبيوتر)</div>
+ <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
+ ${g==='carrom'?`<div class="sl" style="margin:16px 0 9px">عدد اللاعبين</div>
+ <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div></div>`);
 }
 function soloTransport(n){
@@ -18699,7 +18730,7 @@ function soloTransport(n){
 }
 function soloStart(g,diff){
  RM.solo=1;RM.diff=diff||'mid';
- const n=g==='carrom'?1:(RM.bots||1);
+ const n=g==='carrom'?((RM.caN||2)-1):(RM.bots||1);
  soloTransport(n);
  RM.code='SOLO';RM.host=1;RM.me='me';RM.game=g;RM.phase='lobby';RM.name=S.name||'أنت';
  rmStart();
@@ -18775,7 +18806,13 @@ function caBot(){
  ang+=(Math.random()-.5)*noise*2;
  const pw=RM.diff==='easy'?(9+Math.random()*7):(13+Math.random()*4);
  const shot={x:sx,y:sy,vx:Math.cos(ang)*pw,vy:Math.sin(ang)*pw};
- rmSend({t:'cast',pcs:RM.ca.pcs,turn:cur,sc:RM.ca.sc,col:RM.ca.col,msg:'',shot});
+ // يتحرك أولًا ويصوّب أمام الجميع، ثم يضرب — لا ضربة مفاجئة
+ rmSend({t:'aim',by:cur,x:sx,y:sy,ang});
+ const snap={pcs:RM.ca.pcs,sc:RM.ca.sc,col:RM.ca.col};
+ setTimeout(()=>{
+  if(!RM.ca||!RM.code)return;   // غادر اللاعب أثناء التصويب — لا ضربة
+  rmSend({t:'cast',pcs:snap.pcs,turn:cur,sc:snap.sc,col:snap.col,msg:'',shot});
+ },1500);
 }
 
 /* ── مسابقة الرسم عبر الغرفة: تُرسل المسارات لا الصور ── */
@@ -18917,7 +18954,7 @@ function unoDeal(){
 }
 function unoPub(extra){
  const U=RM.U;
- rmSend(Object.assign({t:'uno',top:U.top,col:U.col,turn:RM.players[U.turn].peer,dir:U.dir,
+ rmSend(Object.assign({t:'uno',top:U.top,col:U.col,turn:RM.players[U.turn].peer,dir:U.dir,by:U.lastBy||null,
   cnt:RM.players.map(p=>({p:p.peer,n:U.hands[p.peer].length})),dk:U.deck.length,drawP:U.draw},extra||{}));
 }
 const unoOk=(card,top,col)=>card[0]==='w'||card[0]===col||card[1]===top[1];
@@ -18929,7 +18966,7 @@ function unoAct(d){
  if(d.a==='draw'){
   const n=U.draw||1;
   for(let i=0;i<n;i++){if(!U.deck.length)U.deck=unoDeck();hand.push(U.deck.shift())}
-  U.draw=0;
+  U.draw=0;U.lastBy=null;
   rmSend({t:'hand',to:cur,h:hand});
   U.turn=(U.turn+U.dir+RM.players.length)%RM.players.length;
   unoPub({msg:`${RM.players.find(p=>p.peer===cur).name} سحب ${n}`});
@@ -18939,6 +18976,7 @@ function unoAct(d){
  if(!card||!unoOk(card,U.top,U.col))return;
  if(U.draw&&card[1]!=='D'&&card[1]!=='F')return;
  hand.splice(d.i,1);
+ U.lastBy=cur;
  U.top=card;U.col=card[0]==='w'?(d.col||'r'):card[0];
  let skip=0;
  if(card[1]==='S')skip=1;
@@ -18957,6 +18995,7 @@ function unoPlay(i){
  if(!unoOk(c,U.top,U.col)){toast('لا تصلح على البطاقة الحالية');return}
  if(U.drawP&&c[1]!=='D'&&c[1]!=='F'){toast(`عليك ${U.drawP} سحب أو لعب +2/+4`);return}
  if(c[0]==='w'){unoColAsk(i);return}
+ unoFly(RM.me,c);
  rmSend({t:'act',by:RM.me,a:'play',i});
 }
 function unoColAsk(i){
@@ -18969,12 +19008,24 @@ function unoColAsk(i){
  document.body.appendChild(ov);
  ov.querySelector('#qvn').onclick=()=>ov.remove();
  ov.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{ov.remove();
+  unoFly(RM.me,(RM.hand||[])[i]);
   rmSend({t:'act',by:RM.me,a:'play',i,col:b.dataset.c})});
 }
 function unoDrawCard(){
  const U=RM.uno;if(!U||U.turn!==RM.me)return;
  rmSend({t:'act',by:RM.me,a:'draw'});
 }
+/* يد مرسومة تتحرك — تُظهر مَن يلعب وماذا يفعل */
+const HAND_SVG=`<svg viewBox="0 0 64 78"><defs>
+ <linearGradient id="hnS" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0" stop-color="#F6D3AE"/><stop offset="1" stop-color="#C99263"/></linearGradient></defs>
+ <g stroke="#8A5E3C" stroke-width="1.6" stroke-linejoin="round">
+  <rect x="22" y="6" width="11" height="34" rx="5.5" fill="url(#hnS)"/>
+  <rect x="33" y="10" width="11" height="30" rx="5.5" fill="url(#hnS)"/>
+  <rect x="43" y="16" width="10" height="24" rx="5" fill="url(#hnS)"/>
+  <rect x="12" y="14" width="11" height="27" rx="5.5" fill="url(#hnS)"/>
+  <path d="M10 34 q-7 6 -3 13 l6 9 q4 6 12 6 h14 q13 0 13 -13 v-14 q0 -5 -6 -5 h-30 q-4 0 -6 4 z" fill="url(#hnS)"/>
+ </g></svg>`;
 const UNO_HELP={S:['تخطٍّ','اللاعب التالي يفقد دوره'],R:['عكس','ينعكس اتجاه اللعب — وفي لعبة الثنائي تلعب مرة أخرى'],
  D:['سحب اثنتين','التالي يسحب بطاقتين ويفقد دوره'],W:['جوكر','تختار أنت اللون التالي — تُلعب في أي وقت'],
  F:['جوكر +4','تختار اللون والتالي يسحب أربع بطاقات']};
@@ -18999,6 +19050,23 @@ function unoHint(i){
  el.classList.add('on');
  clearTimeout(el._h);el._h=setTimeout(()=>el.classList.remove('on'),4200);
 }
+/* البطاقة تطير من مقعد اللاعب إلى كومة الرمي — ومعها يد */
+function unoFly(fromPeer,card){
+ const seat=document.querySelector(`.unoSeat[data-p="${fromPeer}"]`)||document.querySelector('.unoHand');
+ const pile=document.querySelector('.unoTopWrap');
+ if(!seat||!pile)return;
+ const a=seat.getBoundingClientRect(),b=pile.getBoundingClientRect();
+ const old=document.querySelector('.unoFly');if(old)old.remove();
+ const d=document.createElement('div');d.className='unoFly';
+ d.innerHTML=`<span class="unoFlyHand">${HAND_SVG}</span>${unoCard(card)}`;
+ d.style.left=(a.left+a.width/2-26)+'px';d.style.top=(a.top+a.height/2-38)+'px';
+ document.body.appendChild(d);
+ requestAnimationFrame(()=>{
+  d.style.transform=`translate(${b.left+b.width/2-(a.left+a.width/2)}px,${b.top+b.height/2-(a.top+a.height/2)}px) rotate(${fromPeer===RM.me?0:200}deg) scale(1.12)`;
+  d.style.opacity='.15';
+ });
+ setTimeout(()=>d.remove(),620);
+}
 function unoSeats(U){
  // مقاعد حول الطاولة: أنا أسفل، والبقية موزّعون
  const others=(U.cnt||[]).filter(x=>x.p!==RM.me);
@@ -19006,7 +19074,8 @@ function unoSeats(U){
  const spots=others.length===1?['top']:others.length===2?['left','right']:['left','top','right'];
  return others.map((x,i)=>{
   const turn=x.p===U.turn;
-  return `<div class="unoSeat ${spots[i]||'top'} ${turn?'on':''}">
+  return `<div class="unoSeat ${spots[i]||'top'} ${turn?'on':''}" data-p="${x.p}">
+   ${turn?`<span class="seatHand">${HAND_SVG}</span>`:''}
    <div class="unoFan">${Array.from({length:Math.min(7,x.n)},(_,k)=>
     `<span style="transform:rotate(${(k-(Math.min(7,x.n)-1)/2)*9}deg) translateY(${Math.abs(k-(Math.min(7,x.n)-1)/2)*1.6}px)">${unoBack()}</span>`).join('')}</div>
    <div class="unoSeatNm">${nm(x.p)} <b>${x.n}</b>${x.n===1?' 🔔':''}</div>
@@ -19062,7 +19131,8 @@ function caDeal(){
  }
  const ps=RM.players;
  RM.C={pcs:P2,turn:0,sc:{},col:{},shot:null};
- ps.forEach((p,i)=>{RM.C.sc[p.peer]=0;RM.C.col[p.peer]=i===0?'w':'b'});
+ // لاعبان: أبيض ضد أسود · أربعة: فريقان متقابلان
+ ps.forEach((p,i)=>{RM.C.sc[p.peer]=0;RM.C.col[p.peer]=(i%2===0)?'w':'b'});
  caPub('ابدأ — صوّب واضرب!');
 }
 function caPub(msg,shot){
@@ -19201,9 +19271,10 @@ function caRender(rest){
  let pcs=_ca.sim?_ca.sim.pcs:(rest||(RM.ca?RM.ca.pcs:[])).map(p=>({x:p.x,y:p.y,t:p.t,r:CA_PR}));
  // الضارب ظاهر دائمًا على قاعدتك — لا يظهر عند السحب فقط
  if(!_ca.sim&&RM.ca){
-  const base=CA_R-CA_SR-20;
-  const sx=_ca.drag?_ca.drag.sx:(_ca.sx||CA_R/2);
-  pcs=pcs.concat([{x:sx,y:base,t:'s',r:CA_SR}]);
+  const base=CA_R-CA_SR-22;
+  const sx=_ca.drag?_ca.drag.sx:(_ca.aim?_ca.aim.x:(_ca.sx||CA_R/2));
+  const sy=_ca.aim?_ca.aim.y:base;
+  pcs=pcs.concat([{x:sx,y:sy,t:'s',r:CA_SR}]);
  }
  for(const p of pcs){
   const r=(p.r||CA_PR)*sc,X=p.x*sc,Y=p.y*sc;
@@ -19216,11 +19287,38 @@ function caRender(rest){
   cx.strokeStyle='rgba(0,0,0,.32)';cx.lineWidth=1.3;cx.stroke();
   cx.beginPath();cx.arc(X,Y,r*.55,0,7);cx.strokeStyle='rgba(255,255,255,.22)';cx.lineWidth=1;cx.stroke();
  }
- // شريط القاعدة الذي ينزلق عليه الضارب
+ // شريط القاعدة الذي ينزلق عليه الضارب + مقبضان يمين ويسار
  if(!_ca.sim&&RM.ca&&RM.ca.turn===RM.me){
-  const by=(CA_R-CA_SR-20)*sc;
-  cx.setLineDash([5,7]);cx.strokeStyle='rgba(255,233,168,.5)';cx.lineWidth=2;
-  cx.beginPath();cx.moveTo((CA_SR+30)*sc,by);cx.lineTo((CA_R-CA_SR-30)*sc,by);cx.stroke();cx.setLineDash([]);
+  const by=(CA_R-CA_SR-22)*sc;
+  cx.setLineDash([5,7]);cx.strokeStyle='rgba(255,233,168,.55)';cx.lineWidth=2;
+  cx.beginPath();cx.moveTo((CA_SR+26)*sc,by);cx.lineTo((CA_R-CA_SR-26)*sc,by);cx.stroke();cx.setLineDash([]);
+  cx.fillStyle='rgba(255,233,168,.85)';cx.font='bold '+Math.round(15*sc)+'px system-ui';
+  cx.textAlign='center';cx.textBaseline='middle';
+  cx.fillText('‹',(CA_SR+16)*sc,by);cx.fillText('›',(CA_R-CA_SR-16)*sc,by);
+ }
+ // اليد المرسومة: تمسك الضارب وتتبعه — وتظهر للخصم أيضًا
+ const handAt=(hx,hy,ang,scale)=>{
+  if(!_ca.hand)return;
+  cx.save();cx.translate(hx*sc,hy*sc);cx.rotate(ang||0);
+  const w=44*sc*(scale||1),h=54*sc*(scale||1);
+  cx.drawImage(_ca.hand,-w/2,4*sc,w,h);
+  cx.restore();
+ };
+ if(!_ca.sim&&RM.ca){
+  const base=CA_R-CA_SR-22;
+  const hx=_ca.drag?_ca.drag.sx:(_ca.sx||CA_R/2);
+  if(RM.ca.turn===RM.me)handAt(hx,base+CA_SR*0.7,0,1);
+  else if(_ca.aim)handAt(_ca.aim.x,_ca.aim.y-CA_SR*1.6,Math.PI,1);   // يد الخصم من جهته
+ }
+ // خط تصويب الخصم — تراه وهو يفكّر ويسدّد
+ if(_ca.aim&&!_ca.sim){
+  const a=_ca.aim;
+  cx.setLineDash([6,7]);cx.strokeStyle='rgba(226,75,74,.85)';cx.lineWidth=2.4;
+  cx.beginPath();cx.moveTo(a.x*sc,a.y*sc);
+  cx.lineTo((a.x+Math.cos(a.ang)*70)*sc,(a.y+Math.sin(a.ang)*70)*sc);cx.stroke();cx.setLineDash([]);
+  cx.beginPath();cx.arc(a.x*sc,a.y*sc,CA_SR*sc,0,7);
+  cx.fillStyle='rgba(226,75,74,.3)';cx.fill();
+  cx.strokeStyle='#E24B4A';cx.lineWidth=2;cx.stroke();
  }
  // خط التصويب
  if(_ca.drag){
@@ -19234,30 +19332,42 @@ function caRender(rest){
   cx.strokeStyle='#FFE9A8';cx.lineWidth=2;cx.stroke();
  }
 }
+function caHandImg(){
+ if(_ca.hand||_ca.handLoad)return;_ca.handLoad=1;
+ const img=new Image();
+ img.onload=()=>{_ca.hand=img;caRender()};
+ img.src='data:image/svg+xml;utf8,'+encodeURIComponent(HAND_SVG);
+}
 function caInit(){
  const cv=document.getElementById('caC');if(!cv||cv._on)return;cv._on=1;
+ caHandImg();
  caRender();
  const pos=e=>{const r=cv.getBoundingClientRect();
   return [(e.clientX-r.left)*CA_R/r.width,(e.clientY-r.top)*CA_R/r.height]};
+ const BASE=()=>CA_R-CA_SR-22;
  cv.onpointerdown=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
   const[x,y]=pos(e);
-  const sy=CA_R-CA_SR-20;
-  const sx=Math.max(CA_SR+30,Math.min(CA_R-CA_SR-30,x));
-  // لمسة قرب القاعدة تحرّك الضارب؛ وأي لمسة تبدأ التصويب من موضعه
-  if(y>sy-46)_ca.sx=sx;
-  _ca.drag={sx:_ca.sx||CA_R/2,sy,dx:0,dy:0};
+  const sy=BASE();
+  if(_ca.sx==null)_ca.sx=CA_R/2;
+  // لمسة على شريط القاعدة = تحريك الضارب يمينًا ويسارًا · وفوقه = تصويب
+  if(y>sy-52){_ca.slide=1;_ca.sx=Math.max(CA_SR+26,Math.min(CA_R-CA_SR-26,x))}
+  else{_ca.slide=0;_ca.drag={sx:_ca.sx,sy,dx:0,dy:0}}
   try{cv.setPointerCapture(e.pointerId)}catch(x2){}
   caRender();
  };
  cv.onpointermove=e=>{
-  if(!_ca.drag)return;e.preventDefault();
+  if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
   const[x,y]=pos(e);
-  _ca.drag.dx=Math.max(-90,Math.min(90,x-_ca.drag.sx));
-  _ca.drag.dy=Math.max(-90,Math.min(90,y-_ca.drag.sy));
+  if(_ca.slide){e.preventDefault();
+   _ca.sx=Math.max(CA_SR+26,Math.min(CA_R-CA_SR-26,x));caRender();return}
+  if(!_ca.drag)return;e.preventDefault();
+  _ca.drag.dx=Math.max(-95,Math.min(95,x-_ca.drag.sx));
+  _ca.drag.dy=Math.max(-95,Math.min(95,y-_ca.drag.sy));
   caRender();
  };
  cv.onpointerup=cv.onpointercancel=()=>{
+  if(_ca.slide){_ca.slide=0;caRender();return}
   const d=_ca.drag;if(!d)return;_ca.drag=null;
   const pw=Math.hypot(d.dx,d.dy);
   if(pw<10){caRender();return}
@@ -19275,15 +19385,15 @@ function rmCarrom(R){
  const colName=c=>c==='w'?'البيضاء':'السوداء';
  setTimeout(caInit,40);
  const left=c=>C.pcs.filter(p=>p.t===c).length;
- return `<div style="display:flex;gap:7px;margin:6px 0 8px">
-  ${RM.players.map(p=>`<div class="caPl ${C.turn===p.peer?'on':''}">
+ return `<div style="display:flex;gap:6px;margin:4px 0 7px;flex-wrap:wrap">
+  ${RM.players.map(p=>`<div class="caPl ${C.turn===p.peer?'on':''}" style="${RM.players.length>2?'min-width:46%':''}">
    <div style="display:flex;align-items:center;gap:6px">
     <span class="caDot ${C.col[p.peer]==='w'?'w':'b'}"></span>
     <span style="font-size:11px;font-weight:900">${p.peer===RM.me?'أنت':p.name}</span>
     <b style="margin-inline-start:auto;color:var(--gold);font-size:13px">${C.sc[p.peer]||0}</b></div>
    <div style="font-size:9px;color:var(--tx2);margin-top:2px">${colName(C.col[p.peer])} · بقي ${left(C.col[p.peer])}</div>
   </div>`).join('')}</div>
- <div class="caWrap"><canvas id="caC" width="440" height="440"></canvas></div>
+ <div class="caWrap big"><canvas id="caC" width="520" height="520"></canvas></div>
  <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب على القاعدة ثم اسحب للخلف وأفلت 🎯':'دور '+nm(C.turn)+' — يصوّب…'}</div>
  ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}
  <div class="note">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 · إسقاط الضارب −1</div>`;
@@ -19371,7 +19481,7 @@ function rmAct(target){
  RM.acts[mine]=target;roomDraw();
 }
 function rmNight(){
- RM.acts={};RM.detRes=null;
+ RM.acts={};RM.detRes=null;_ca.aim=null;
  RM.day=RM.phase==='lynch'?RM.day+1:RM.day;
  rmSend({t:'night',step:'mafia',day:RM.day});
  RM.hostStep='mafia';
@@ -19442,27 +19552,16 @@ function ptExit(){
 function partyScr(){
  clearInterval(PT&&PT.tm);PT=null;rmLeave(1);
  go(`<div class="scr on">${NAV.length>1?tbar('ليلة العائلة'):tb('ليلة العائلة',"push('playModesScr')")}
- <div class="wb" style="text-align:right">${ico('group',13)} ألعاب جماعية للعائلة والأصدقاء — اختر طريقة اللعب ثم اللعبة.<br>
- <b>أونو</b> و<b>كيرم</b> تحتاجان «غرفة بكود» لأن لكل لاعب يده ولوحه على هاتفه.</div>
- <div class="sl" style="margin:12px 0 8px">طريقة اللعب</div>
- <div style="display:flex;gap:9px">
-  <div onclick="ptMode('pass')" class="ptWay ${ptWay==='pass'?'on':''}">
-   <div style="font-size:30px">📱</div><div class="t">تمرير الجوال</div>
-   <div class="d">جهاز واحد يدور بينكم</div></div>
-  <div onclick="ptMode('code')" class="ptWay ${ptWay==='code'?'on':''}">
-   <div style="font-size:30px">🔗</div><div class="t">غرفة بكود</div>
-   <div class="d">كلٌّ من هاتفه</div></div>
- </div>
- <div class="sl" style="margin:16px 0 8px">اللعبة</div>
- ${PT_GAMES.map(([e,n,d,g,pass,net])=>{
- const on=ptWay==='pass'?pass:net;
- const why=ptWay==='pass'?'هذه اللعبة عبر غرفة بكود فقط — كل لاعب من هاتفه':'مسابقة الرسم متاحة في الطريقتين';
- return `<div class="gTile ${on?'':'off'}" onclick="${on?`ptOpen('${g}')`:`ptMode('${ptWay==='pass'?'code':'pass'}')`}">
+ <div class="wb" style="text-align:right">${ico('group',13)} ألعاب جماعية للعائلة والأصدقاء — ادخل اللعبة ثم اختر: مع الكمبيوتر، بحث عن لاعبين، غرفة بكود، أو تمرير الجوال.</div>
+ <div class="sl" style="margin:14px 0 9px">اختر اللعبة</div>
+ ${PT_GAMES.map(([e,n,d,g,pass,net])=>
+  `<div class="gTile" onclick="gameHub('${g}')">
   <div class="gArt">${GAME_ART[g]||`<div style="font-size:34px">${e}</div>`}</div>
   <div style="flex:1;min-width:0">
-   <div class="gNm">${n}${on?'':` <span style="font-size:8.5px;color:var(--warn)">${ptWay==='pass'?'بكود فقط':'بالتمرير فقط'}</span>`}</div>
-   <div class="gDs">${on?d:why}</div></div>
-  <span style="color:${on?'var(--gold)':'var(--warn)'};font-size:18px">›</span></div>`}).join('')}
+   <div class="gNm">${n}</div>
+   <div class="gDs">${d}</div>
+   <div class="gWays">${[pass?'📱 تمرير':'',net?'🔗 كود':'',net?'🌐 بحث':'',SOLO_OK[g]?'🤖 كمبيوتر':''].filter(Boolean).map(w=>`<span>${w}</span>`).join('')}</div></div>
+  <span style="color:var(--gold);font-size:18px">›</span></div>`).join('')}
  </div>`);
 }
 /* أشكال الألعاب — مرسومة بالكود بعمق وظلال */
@@ -19562,9 +19661,11 @@ function gameHub(g){
  <div class="wayCard" onclick="roomScr('${g}')">
   <span class="wIco">🔗</span><div style="flex:1"><div class="wT">غرفة بكود</div>
   <div class="wD">أنشئ كودًا وأعطه لمن تعرفهم</div></div><span class="wGo">›</span></div>
- ${(PT_GAMES.find(x=>x[3]===g)||[])[4]?`<div class="wayCard" onclick="ptWay='pass';ptOpen('${g}')">
+ ${row[4]?`<div class="wayCard" onclick="ptWay='pass';ptOpen('${g}')">
   <span class="wIco">📱</span><div style="flex:1"><div class="wT">تمرير الجوال</div>
-  <div class="wD">جهاز واحد يدور بينكم</div></div><span class="wGo">›</span></div>`:''}
+  <div class="wD">جهاز واحد يدور بينكم</div></div><span class="wGo">›</span></div>`
+ :`<div class="wayCard off"><span class="wIco">📱</span><div style="flex:1"><div class="wT">تمرير الجوال</div>
+  <div class="wD">لا يصلح هنا — لكل لاعب يده ولوحه على هاتفه</div></div></div>`}
  </div>`);
 }
 function ptOpen(g){
