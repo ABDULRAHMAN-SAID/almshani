@@ -18010,7 +18010,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.8';
+const APP_VER='5.8.1';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -22582,6 +22582,104 @@ function clTabGo(k){
  if(M[k])push(M[k]);
 }
 
+/* ═══════════ شعارات الأندية وخلفياتها ═══════════
+   كل نادٍ يختار حيوانه عند الإنشاء: يظهر ظلًّا ذهبيًّا داخل الدرع،
+   ومشهدًا كاملًا خلف بطاقة الهوية.
+   الأشكال متجهية مؤقّتة — تُستبدل بالفن المرسوم حالما تصل الصور. */
+var CL_ANIM={
+ falcon:{ar:'صقر',vb:'0 0 200 110',
+  d:'M96 44 C82 32 56 18 14 10 C40 24 62 38 80 50 C86 55 92 52 96 46 Z'+
+    'M104 44 C118 32 144 18 186 10 C160 24 138 38 120 50 C114 55 108 52 104 46 Z'+
+    'M100 26 L106 38 L108 50 L104 44 L96 44 L92 50 L94 38 Z'+
+    'M96 52 C96 62 97 70 100 78 C103 70 104 62 104 52 Z'+
+    'M100 74 L92 96 L100 90 L108 96 Z',air:1},
+ lion:{ar:'أسد',vb:'0 0 200 110',
+  d:'M62 44 C56 34 62 22 74 22 C80 14 94 12 100 20 C112 18 120 26 118 38'+
+    'C124 42 126 50 122 56 L148 58 C164 58 172 66 172 78 L176 96 L168 96 L162 80'+
+    'L150 84 L146 100 L138 100 L142 82 L104 82 L98 100 L90 100 L94 80'+
+    'C82 76 74 66 72 56 L60 60 L54 76 L48 74 L54 54 Z'+
+    'M172 70 L190 58 L186 74 L192 88 L180 82 Z'},
+ wolf:{ar:'ذئب',vb:'0 0 200 110',
+  d:'M30 54 L14 48 L18 42 L34 46 L42 28 L49 44 L57 26 L61 46'+
+    'C77 46 101 50 121 56 C137 60 149 66 157 74'+
+    'L169 68 L188 42 L186 66 L197 80 L177 78 L163 86'+
+    'L159 102 L151 102 L153 84 L119 82 L113 102 L105 102 L109 80'+
+    'L75 76 L67 100 L59 100 L65 74 C47 70 34 64 30 54 Z'},
+ tiger:{ar:'نمر',vb:'0 0 200 110',
+  d:'M36 52 L22 44 L26 38 L40 44 L48 38 L50 46 L58 42 L58 52'+
+    'C74 50 96 52 116 56 C132 58 146 62 156 70 L166 66 L188 40 L184 62 L196 76'+
+    'L178 74 L164 82 L160 100 L152 100 L154 82 L118 80 L112 100 L104 100 L108 78'+
+    'L72 74 L64 98 L56 98 L62 72 C48 68 38 62 36 52 Z'},
+ horse:{ar:'حصان',vb:'0 0 200 110',
+  d:'M70 40 L58 24 L64 22 L74 34 L80 26 L82 36 L90 32 L88 42'+
+    'C102 46 110 56 112 70 L128 60 C142 52 154 54 160 64 L172 60 L170 74'+
+    'L176 100 L168 100 L162 78 L148 84 L146 102 L138 102 L142 80'+
+    'L112 84 L106 102 L98 102 L104 82 C92 76 84 64 84 52'+
+    'L70 58 L60 74 L54 70 L64 50 Z'},
+ camel:{ar:'جمل',vb:'0 0 200 110',
+  d:'M50 46 L40 30 L48 28 L56 42 L64 38 L64 48'+
+    'C74 50 80 56 84 64 C88 52 98 44 112 44 C128 44 138 54 140 68'+
+    'L146 66 C158 62 168 68 168 80 L172 102 L164 102 L158 82 L146 86'+
+    'L144 102 L136 102 L140 84 L106 84 L100 102 L92 102 L98 82'+
+    'C86 78 78 68 76 58 C72 62 66 62 62 58 L56 62 L50 78 L44 76 L52 56 Z'}
+};
+var CLAN_EMB=['falcon','lion','wolf','tiger','horse','camel'];
+/** يعيد مفتاح الحيوان أو null للأندية القديمة التي حفظت أيقونة عادية */
+function clAnim(k){return (k&&CL_ANIM[k])?k:null}
+function clAnimName(k){return CL_ANIM[k]?CL_ANIM[k].ar:''}
+/** ظلّ الحيوان وحده — للدرع وقوائم الاختيار */
+function clAnimSvg(k,s,fill){
+ var a=CL_ANIM[clAnim(k)||'falcon'];
+ return '<svg viewBox="'+a.vb+'" width="'+s+'" height="'+Math.round(s*0.62)+
+  '" preserveAspectRatio="xMidYMid meet" style="display:block" aria-hidden="true">'+
+  '<path d="'+a.d+'" fill="'+(fill||'#FFDE8C')+'"/></svg>';
+}
+var _clScN=0;
+/** مشهد الحيوان خلف بطاقة الهوية: سماء وقمر وكثبان وظلّ الحيوان على الأفق */
+function clAnimScene(k,col,gold){
+ var a=CL_ANIM[clAnim(k)||'falcon'], id='sc'+(++_clScN), c=col||'#8B5CF0';
+ var bc=gold?'#F5C542':'#0A0718', bo=gold?'1':'.92';
+ var stars='';
+ var SX=[18,40,66,92,120,150,178,206,232,262],SY=[14,30,10,38,18,8,34,16,26,12];
+ for(var i=0;i<SX.length;i++)
+  stars+='<circle cx="'+SX[i]+'" cy="'+SY[i]+'" r="'+(i%3?0.9:1.4)+'" fill="#FFF6D8" opacity="'+(i%3?0.35:0.6)+'"/>';
+ // الطائر يحلّق في السماء، وبقيّة الحيوانات تقف على الكثيب
+ var beast=a.air
+  ? '<g transform="translate(30,10) scale(0.42)"><path d="'+a.d+'" fill="'+bc+'" opacity="'+bo+'"/></g>'
+  : '<g transform="translate(16,44) scale(0.40)"><path d="'+a.d+'" fill="'+bc+'" opacity="'+bo+'"/></g>';
+ return '<svg viewBox="0 0 300 120" preserveAspectRatio="xMinYMid slice" aria-hidden="true">'+
+  '<defs>'+
+   '<linearGradient id="'+id+'s" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="'+c+'" stop-opacity=".55"/>'+
+    '<stop offset=".55" stop-color="#150E32" stop-opacity=".85"/>'+
+    '<stop offset="1" stop-color="#3A2360" stop-opacity=".9"/></linearGradient>'+
+   '<radialGradient id="'+id+'m"><stop offset="0" stop-color="#FFF0BE" stop-opacity=".9"/>'+
+    '<stop offset="1" stop-color="#FFF0BE" stop-opacity="0"/></radialGradient>'+
+   '<linearGradient id="'+id+'f" x1="0" y1="0" x2="1" y2="0">'+
+    '<stop offset="0" stop-color="#0B1024" stop-opacity="0"/>'+
+    '<stop offset=".52" stop-color="#0B1024" stop-opacity=".55"/>'+
+    '<stop offset="1" stop-color="#0B1024" stop-opacity=".97"/></linearGradient>'+
+  '</defs>'+
+  '<rect width="300" height="120" fill="url(#'+id+'s)"/>'+stars+
+  '<circle cx="60" cy="26" r="26" fill="url(#'+id+'m)"/>'+
+  '<circle cx="60" cy="26" r="9" fill="#FFF0BE" opacity=".95"/>'+
+  '<path d="M0 120 L0 74 C34 60 62 80 96 70 C132 60 164 78 200 68 L300 74 L300 120 Z" fill="#241634" opacity=".9"/>'+
+  beast+
+  '<path d="M0 120 L0 92 C40 80 78 98 118 90 C154 82 182 96 220 88 L300 92 L300 120 Z" fill="#120C22"/>'+
+  '<rect width="300" height="120" fill="url(#'+id+'f)"/>'+
+  '</svg>';
+}
+
+/** شبكة اختيار حيوان النادي — كل بلاطة تعرض المشهد نفسه الذي سيظهر خلف البطاقة */
+function clAnimPick(cur,call,col){
+ return '<div class="clAnimG">'+clEmbList().map(function(k){
+  var a=CL_ANIM[k]; if(!a)return '';
+  return '<div class="clAnimT'+(cur===k?' on':'')+'" onclick="'+call+"('"+k+"')"+'">'+
+   '<div class="sc">'+clAnimScene(k,col||'#8B5CF0',1)+'</div>'+
+   '<div class="nm">'+a.ar+'</div>'+
+   (cur===k?'<div class="ck">✓</div>':'')+'</div>';
+ }).join('')+'</div>';
+}
 /* ═══════════ ١) الرئيسية — لوحة النادي الذهبية ═══════════ */
 
 /** لون النادي إلى rgba — لتلوين الهالات والحدود من لون واحد */
@@ -22612,10 +22710,11 @@ function clanCss2(){
  '.clHdrP h2{margin:0;font-size:19px;font-weight:900;letter-spacing:.4px;color:#F4F6FC}',
  '.clHdrP .dm{display:block;width:9px;height:9px;margin-top:6px;border-radius:2px;transform:rotate(45deg);',
  ' background:linear-gradient(135deg,#FFEDB4,#C9921E)}',
- '.clHdrP::before{content:"";position:absolute;inset-inline-end:11px;top:15px;bottom:15px;width:3px;',
- ' border-radius:2px;background:linear-gradient(180deg,#FFEDB4,#A9721A)}',
- '.clHdrP::after{content:"";position:absolute;inset-inline-start:11px;top:15px;bottom:15px;width:3px;',
- ' border-radius:2px;background:linear-gradient(180deg,#FFEDB4,#A9721A)}',
+ '.clHdrT{position:absolute;inset-inline-end:-9px;top:7px;bottom:7px;width:24px;',
+ ' background:linear-gradient(150deg,#1B2549,#0C1329);border:1.5px solid #39456F;border-radius:9px;',
+ ' clip-path:polygon(100% 0,100% 100%,0 100%,58% 50%,0 0)}',
+ '.clHdrT::after{content:"";position:absolute;inset-inline-end:0;top:0;bottom:0;width:5px;',
+ ' background:linear-gradient(180deg,#FFEDB4,#A9721A);border-radius:3px}',
 
  /* بطاقة الهوية */
  '.clHero2{position:relative;overflow:hidden;border-radius:20px;padding:14px;margin-bottom:12px;',
@@ -22623,7 +22722,7 @@ function clanCss2(){
  ' border:1.5px solid rgba(245,197,66,.5);box-shadow:0 14px 34px -18px rgba(245,197,66,.55)}',
  '.clHero2 .art{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:19px}',
  '.clHero2 .art .gl{position:absolute;inset:0;background:radial-gradient(130% 92% at 84% -14%,var(--cla),transparent 62%)}',
- '.clHero2 .art svg{position:absolute;bottom:0;inset-inline-start:0;width:100%;height:62%;opacity:.85}',
+ '.clHero2 .art svg{position:absolute;inset:0;width:100%;height:100%}',
  '.clHero2 .in{position:relative;z-index:1;display:flex;gap:12px;align-items:flex-start}',
  '.clHero2 .nm{display:flex;align-items:center;gap:7px;font-size:19px;font-weight:900;line-height:1.25;',
  ' color:#F7F9FF;word-break:break-word}',
@@ -22714,7 +22813,24 @@ function clanCss2(){
  '.clOn{display:flex;gap:9px;overflow-x:auto;padding:2px 0 4px}',
  '.clOn .p{width:62px;flex-shrink:0;text-align:center;cursor:pointer}',
  '.clOn .p .nm{font-size:9.5px;font-weight:800;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
- '.clOn .p .bt{font-size:7.5px;color:#7E89A8}'
+ '.clOn .p .bt{font-size:7.5px;color:#7E89A8}',
+ '.clThumb{position:relative;overflow:hidden;width:82px;height:66px;flex-shrink:0;border-radius:13px;',
+ ' border:1px solid #333F68;background:#0A1024}',
+ '.clThumb svg{position:absolute;inset:0;width:100%;height:100%}',
+ '.clAnimG{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}',
+ '.clAnimT{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;',
+ ' background:#0A1024;border:1.5px solid #2C3660}',
+ '.clAnimT.on{border-color:#F5C542;box-shadow:0 0 18px -6px rgba(245,197,66,.9)}',
+ '.clAnimT:active{transform:scale(.97)}',
+ '.clAnimT .sc{position:relative;height:62px;overflow:hidden}',
+ '.clAnimT .sc svg{position:absolute;inset:0;width:100%;height:100%}',
+ '.clAnimT .sl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}',
+ '.clAnimT .sl svg{position:static;width:auto;height:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.7))}',
+ '.clAnimT .nm{font-size:10.5px;font-weight:900;text-align:center;padding:7px 2px;color:#DCE3F5}',
+ '.clAnimT.on .nm{color:#F5C542}',
+ '.clAnimT .ck{position:absolute;top:5px;inset-inline-start:6px;width:19px;height:19px;border-radius:50%;',
+ ' background:#F5C542;color:#231600;font-size:12px;font-weight:900;display:flex;align-items:center;',
+ ' justify-content:center}'
  ].join('\n');
  var st=document.createElement('style');
  st.id='clanStyleV2';st.textContent=css;document.head.appendChild(st);
@@ -22742,7 +22858,9 @@ function clCrest(col,icoN,sz){
   '<path d="M50 34 L83 44 V70 C83 91 68 103 50 112 C32 103 17 91 17 70 V44 Z" fill="url(#'+id+'f)"/>'+
   '<path d="M50 34 L83 44 V70 C83 91 68 103 50 112 C32 103 17 91 17 70 V44 Z" fill="none" '+
    'stroke="rgba(255,255,255,.22)" stroke-width="1.2"/>'+
-  '<g transform="translate(29,52)">'+ico(icoN||'shield',42,'#FFDE8C')+'</g>'+
+  (clAnim(icoN)
+    ?'<g transform="translate(14,51) scale(0.36)"><path d="'+CL_ANIM[icoN].d+'" fill="#FFDE8C"/></g>'
+    :'<g transform="translate(29,52)">'+ico(icoN||'shield',42,'#FFDE8C')+'</g>')+
   '</svg>';
 }
 
@@ -22756,17 +22874,17 @@ function clHeroArt(){
 
 function clStatTile(icoN,val,label,acc,dot){
  return '<div class="clSt2" style="--ac:'+acc+'">'+
-  '<div class="ic">'+ico(icoN,17)+'</div>'+
+  '<div class="ic">'+(icoN.length<=3?'<span style="font-size:18px;line-height:1">'+icoN+'</span>':ico(icoN,17))+'</div>'+
   '<div class="v">'+val+'</div>'+
   '<div class="l">'+(dot?'<i class="dt"></i>':'')+esc(label)+'</div></div>';
 }
 function clSecHead(t,icoN,acc,btn){
  return '<div class="clSecH"><span class="clSecT" style="--ac:'+(acc||'#8B5CF0')+'">'+
-  '<span>'+ico(icoN,14)+'</span>'+esc(t)+'</span>'+(btn||'')+'</div>';
+  '<span style="font-size:15px;line-height:1">'+icoN+'</span>'+esc(t)+'</span>'+(btn||'')+'</div>';
 }
 function clActBtn(icoN,t,sub,call,acc){
  return '<button class="clAct" style="--ac:'+acc+';--acs:'+clRGBA(acc,.16)+'" onclick="'+call+'">'+
-  '<span class="ic">'+ico(icoN,21)+'</span>'+
+  '<span class="ic" style="font-size:22px;line-height:1">'+icoN+'</span>'+
   '<span class="tx"><span class="t">'+esc(t)+'</span><span class="s">'+esc(sub)+'</span></span>'+
   '<span class="ch">'+ico('back',15)+'</span></button>';
 }
@@ -22777,7 +22895,7 @@ function clubHome(){
  const head=`<div class="clHdr">
   <button class="clHdrB" onclick="${gear?"push('clSettingsScr')":'back()'}"
    aria-label="${gear?'إعدادات النادي':'رجوع'}">${ico(gear?'gear':'back',18)}</button>
-  <div class="clHdrP"><h2>النادي</h2><i class="dm"></i></div></div>`;
+  <div class="clHdrP"><i class="clHdrT"></i><h2>النادي</h2><i class="dm"></i></div></div>`;
  clScreen('clubHome',null,head,()=>{
   const c=cl3C(),col=c.col||'#8B5CF0';
   const n=clCount(),cap=clCap();
@@ -22794,7 +22912,7 @@ function clubHome(){
 
   // ① بطاقة الهوية
   let h=`<div class="clHero2" style="--cla:${clRGBA(col,.5)}">
-   <div class="art"><div class="gl"></div>${clHeroArt()}</div>
+   <div class="art">${clAnimScene(c.i,col)}</div>
    <div class="in">
     ${clCrest(col,c.i||'shield',74)}
     <div style="flex:1;min-width:0">
@@ -22805,30 +22923,28 @@ function clubHome(){
       <button class="clPil tg" onclick="clCopyTag()" aria-label="نسخ رمز النادي">${esc(c.tag||'—')} ${ico('export',12)}</button>
      </div>
      <div class="rw">
-      <span class="clPil${n>=cap?' full':''}">${ico('group',12)} ${cl3Num(n)}/${cl3Num(cap)} عضوًا</span>
-      <span class="clPil">${ico('door',12)} ${esc(clJoinTxt(c.jt))}</span>
-      <span class="clPil">${ico('globe',12)} اللغة ${esc(c.lang||'العربية')}</span>
+      <span class="clPil${n>=cap?' full':''}">👥 ${cl3Num(n)}/${cl3Num(cap)} عضوًا</span>
+      <span class="clPil">⏳ ${esc(clJoinTxt(c.jt))}</span>
+      <span class="clPil">🌐 اللغة ${esc(c.lang||'العربية')}</span>
       <span class="clPil">${ico('info',12)} محلي على جهازك</span>
      </div></div></div></div>`;
 
   // ② بلاطات الأرقام
   h+=`<div class="clSts">
-   ${clStatTile('chart',cl3Num(c.pts),'نقاط النادي','#4C9AF0')}
-   ${clStatTile('trophy',c.rank?('#'+cl3Num(c.rank)):'—','رتبة النادي','#E8B23A')}
-   ${clStatTile('heart',cl3Num(donWk),'دعم الأسبوع','#F0567F')}
-   ${clStatTile('medal',evN?(Math.round(evW/evN*100)+'%'):'—','فوز الفعاليات','#E8B23A')}
-   ${clStatTile('group',cl3Num(onList.length),'المتصلون','#3FCF7F',1)}</div>
+   ${clStatTile('📊',cl3Num(c.pts),'نقاط النادي','#4C9AF0')}
+   ${clStatTile('🏆',c.rank?('#'+cl3Num(c.rank)):'—','رتبة النادي','#E8B23A')}
+   ${clStatTile('❤️',cl3Num(donWk),'دعم الأسبوع','#F0567F')}
+   ${clStatTile('🏅',evN?(Math.round(evW/evN*100)+'%'):'—','فوز الفعاليات','#E8B23A')}
+   ${clStatTile('👥',cl3Num(onList.length),'المتصلون','#3FCF7F',1)}</div>
    <div class="clDisc"><span>${ico('info',13)}</span><div>الخانات التي تظهر «—» لم تُسجَّل بعد على هذا الجهاز: لا خادم يرتّب الأندية عالميًا ولا سجلّ فعاليات سابق.</div></div>`;
 
   // ③ عن النادي
   h+=`<div class="clSecW">
-   ${clSecHead('عن النادي','group',col,canEditId
+   ${clSecHead('عن النادي','👥',col,canEditId
      ?`<button class="clSecB" onclick="push('clEditIdentityScr')">${ico('scroll',13)} تعديل</button>`:'')}
    <div class="clPan tap" onclick="push('clInfoScr')">
     <div style="display:flex;gap:12px;align-items:flex-start">
-     <div style="position:relative;overflow:hidden;width:78px;height:64px;flex-shrink:0;border-radius:13px;
-      background:linear-gradient(160deg,${clRGBA(col,.55)},#0A1024);border:1px solid ${clRGBA(col,.5)};
-      display:flex;align-items:center;justify-content:center;color:#FFDE8C">${ico('flag',26)}</div>
+     <div class="clThumb" style="border-color:${clRGBA(col,.5)}">${clAnimScene(c.i,col,1)}</div>
      <div style="flex:1;min-width:0">
       <div style="font-size:11.5px;color:#A3ADCA;line-height:1.85;display:-webkit-box;-webkit-line-clamp:3;
        -webkit-box-orient:vertical;overflow:hidden">${esc(c.desc||'لم يُكتب وصف للنادي بعد.')}</div>
@@ -22836,26 +22952,26 @@ function clubHome(){
      </div></div></div></div>`;
 
   // ④ الإعلان المثبّت
-  h+=`<div class="clSecW">${clSecHead('الإعلان المثبّت','flag','#8B5CF0')}`;
+  h+=`<div class="clSecW">${clSecHead('الإعلان المثبّت','📌','#8B5CF0')}`;
   h+=pin
    ?`<div class="clPan" style="border-color:${clRGBA('#8B5CF0',.5)};background:linear-gradient(165deg,rgba(139,92,240,.14),#090E1F)">
      <div style="font-size:12px;line-height:1.85">${esc(pin.tx)}</div>
      <div style="font-size:9.5px;color:#8B96B6;margin-top:8px">${pin.byN?clNameTap(pin.by,pin.byN):'الإدارة'}${pin.at?' · '+esc(clSafeAgo(pin.at)):''}</div></div></div>`
-   :`<div class="clPan dash"><div class="clEmpty"><span class="bg">${ico('sound',24)}</span>
+   :`<div class="clPan dash"><div class="clEmpty"><span class="bg" style="font-size:26px">📣</span>
       لا إعلان مثبّت الآن${cl3Can('announce')?' — تستطيع نشر واحد من الدردشة':''}.</div></div></div>`;
 
   // ⑤ أربعة إجراءات
   h+=`<div class="clActs">
-   ${clActBtn('gift','طلب دعم','اطلب المساعدة',"push('clRequestSupportScr')",'#8B5CF0')}
-   ${clActBtn('swords','تحدٍّ ودي','واجهة التحديات','clFriendly()','#E8B23A')}
-   ${clActBtn('heart','الداعمون','من دعم النادي',"push('clDonorsScr')",'#F0567F')}
-   ${clActBtn('trophy','المنافسات','شارك واربح',"push('clEventsScr')",'#F08A2E')}</div>`;
+   ${clActBtn('🎁','طلب دعم','اطلب المساعدة',"push('clRequestSupportScr')",'#8B5CF0')}
+   ${clActBtn('⚔️','تحدٍّ ودي','واجهة التحديات','clFriendly()','#E8B23A')}
+   ${clActBtn('❤️','الداعمون','من دعم النادي',"push('clDonorsScr')",'#F0567F')}
+   ${clActBtn('🏆','المنافسات','شارك واربح',"push('clEventsScr')",'#F08A2E')}</div>`;
 
   // ⑥ تقدّم الأسبوع
-  h+=`<div class="clSecW">${clSecHead('تقدّم النادي هذا الأسبوع','chart','#4C9AF0')}
+  h+=`<div class="clSecW">${clSecHead('تقدّم النادي هذا الأسبوع','📊','#4C9AF0')}
    <div class="clPan">
     <div class="clGoalR" style="--gc:${done?'#E8B23A':'#4C9AF0'}">
-     <span class="t"><span style="color:#F0567F;display:flex">${ico('target',15)}</span> هدف الأسبوع</span>
+     <span class="t"><span style="font-size:15px;line-height:1">🎯</span> هدف الأسبوع</span>
      <span class="v">${cl3Num(tot)}/${cl3Num(goal)}</span></div>
     <div class="clBar"><i style="width:${pc}%;background:${done
       ?'linear-gradient(90deg,#C9921E,#FFE9A8)':'linear-gradient(90deg,#5B2FB8,#A97BFF)'}"></i></div>
@@ -22872,7 +22988,7 @@ function clubHome(){
 
   // ⑦ الدردشة
   h+=`<div class="clSecW">
-   ${clSecHead('الدردشة','sound','#8B5CF0',`<button class="clSecB" onclick="push('clChatScr')">${ico('sound',13)} فتح الدردشة</button>`)}
+   ${clSecHead('الدردشة','💬','#8B5CF0',`<button class="clSecB" onclick="push('clChatScr')">💬 فتح الدردشة</button>`)}
    <div class="clPan">`;
   if(chat.length){
    h+=chat.map((x,i)=>{
@@ -22885,13 +23001,13 @@ function clubHome(){
       <span class="ms">${esc(x.tx||'')}</span></span>
      <span class="av">${clAvatar(m,44)}${on?'<i class="on"></i>':''}</span></div>`}).join('');
   }else{
-   h+=`<div class="clEmpty"><span class="bg">${ico('sound',24)}</span>لا رسائل بعد — افتح الدردشة وابدأ الكلام.</div>`;
+   h+=`<div class="clEmpty"><span class="bg" style="font-size:26px">💬</span>لا رسائل بعد — افتح الدردشة وابدأ الكلام.</div>`;
   }
   h+=`</div></div>`;
 
   // ⑧ الأعضاء المتصلون
   h+=`<div class="clSecW">
-   ${clSecHead('الأعضاء المتصلون','group','#3FCF7F',`<button class="clSecB" onclick="push('clMembersScr')">كل الأعضاء</button>`)}
+   ${clSecHead('الأعضاء المتصلون','👥','#3FCF7F',`<button class="clSecB" onclick="push('clMembersScr')">كل الأعضاء</button>`)}
    <div class="clPan">`;
   if(onList.length){
    h+=`<div class="clOn">${onList.slice(0,12).map(m=>{
@@ -22903,7 +23019,7 @@ function clubHome(){
      ${m.bot?'<div class="bt">آلي</div>':''}</div>`}).join('')}</div>
     <div style="font-size:9px;color:#7E89A8;line-height:1.7;margin-top:9px">${ico('info',11)} حضور الأعضاء المعلَّمين بـ«آلي» محاكى على جهازك — لا يوجد اتصال بلاعبين آخرين.</div>`;
   }else{
-   h+=`<div class="clEmpty"><span class="bg">${ico('group',24)}</span>لا أحد متصل الآن — آخر ظهور يظهر في صفحة الأعضاء.</div>`;
+   h+=`<div class="clEmpty"><span class="bg" style="font-size:26px">👥</span>لا أحد متصل الآن — آخر ظهور يظهر في صفحة الأعضاء.</div>`;
   }
   h+=`</div></div>`;
 
@@ -23570,6 +23686,8 @@ function clColList(){try{if(typeof CLAN_COL!=='undefined'&&CLAN_COL&&CLAN_COL.le
  return ['#8B5CF0','#5AC8F5','#2ECC71','#EF9F27','#FF6B9D','#E24B4A','#5DCAA5','#B76CF0']}
 function clSafeCol(c){return /^#[0-9A-Fa-f]{6}$/.test(String(c||''))?String(c):'#8B5CF0'}
 function clSafeIco(i){return clEmbList().indexOf(i)>=0?i:clEmbList()[0]}
+function clNewAnim(k){clNewPick('i',clSafeIco(k))}
+function clEdAnim(k){clEdPick('i',clSafeIco(k))}
 function clMyLv(){try{return lvl(S.xp)}catch(e){return 1}}
 function clMyTier(){return (S.ranked&&S.ranked.tier!=null)?S.ranked.tier:0}
 
@@ -24095,14 +24213,14 @@ function clEditIdentityScr(){
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 5px">وصف النادي</div>
  <textarea class="fin" rows="3" maxlength="80" style="resize:none" oninput="clEdSet('desc',this.value)">${esc(v.desc)}</textarea>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 5px">الشعار</div>
- <div class="cr">${clEmbList().map(i=>`<div class="fc ${v.i===i?'on':''}" onclick="clEdPick('i','${clSafeIco(i)}')">${ico(i,17)}</div>`).join('')}</div>
+ ${clAnimPick(v.i,'clEdAnim',clSafeCol(v.col))}
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 5px">اللون</div>
  <div class="cr">${clColList().map(k=>`<div onclick="clEdPick('col','${clSafeCol(k)}')" style="width:34px;height:34px;border-radius:9px;
   flex-shrink:0;cursor:pointer;background:${clSafeCol(k)};border:2.5px solid ${v.col===k?'#fff':'transparent'}"></div>`).join('')}</div>
  <div class="sl">معاينة</div>
  <div class="li"><div class="lr">
   <div style="width:48px;height:48px;flex-shrink:0;border-radius:13px;background:${clSafeCol(v.col)}22;
-   border:1.5px solid ${clSafeCol(v.col)};display:flex;align-items:center;justify-content:center;color:${clSafeCol(v.col)}">${ico(v.i,25)}</div>
+   border:1.5px solid ${clSafeCol(v.col)};display:flex;align-items:center;justify-content:center">${clAnimSvg(v.i,34,clSafeCol(v.col))}</div>
   <div class="lb"><div class="lt">${esc(v.n||'بلا اسم')}</div>
    <div class="ls">${esc(v.desc||'بلا وصف')}</div></div></div></div>
  <button class="btn" style="margin-top:14px" onclick="clEdSave(0)">${ico('save',14)} حفظ الهوية</button>
@@ -24312,7 +24430,8 @@ function clCreateScr(){
  <textarea class="fin" rows="3" maxlength="80" style="resize:none" placeholder="بمَ يتميّز ناديك؟"
   oninput="clNewSet('desc',this.value)">${esc(v.desc)}</textarea>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 5px">الشعار</div>
- <div class="cr">${EM.map(i=>`<div class="fc ${v.i===i?'on':''}" onclick="clNewPick('i','${clSafeIco(i)}')">${ico(i,17)}</div>`).join('')}</div>
+ ${clAnimPick(v.i,'clNewAnim',clSafeCol(v.col))}
+ <div style="font-size:9.5px;color:var(--mut);margin-top:6px;line-height:1.7">الحيوان يظهر شعارًا في درع ناديك وخلفيةً لبطاقته.</div>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 5px">اللون</div>
  <div class="cr">${CO.map(k=>`<div onclick="clNewPick('col','${clSafeCol(k)}')" style="width:34px;height:34px;border-radius:9px;
   flex-shrink:0;cursor:pointer;background:${clSafeCol(k)};border:2.5px solid ${v.col===k?'#fff':'transparent'}"></div>`).join('')}</div>
@@ -24335,7 +24454,7 @@ function clCreateScr(){
  <div class="sl">معاينة</div>
  <div class="li"><div class="lr">
   <div style="width:48px;height:48px;flex-shrink:0;border-radius:13px;background:${clSafeCol(v.col)}22;
-   border:1.5px solid ${clSafeCol(v.col)};display:flex;align-items:center;justify-content:center;color:${clSafeCol(v.col)}">${ico(v.i,25)}</div>
+   border:1.5px solid ${clSafeCol(v.col)};display:flex;align-items:center;justify-content:center">${clAnimSvg(v.i,34,clSafeCol(v.col))}</div>
   <div class="lb"><div class="lt" id="clNwN">${esc(v.n||'اسم ناديك')}</div>
    <div class="ls" id="clNwD">${esc(v.desc||'وصف قصير يظهر في نتائج البحث')}</div></div></div></div>
  <button class="btn" style="margin-top:14px" onclick="clCreateGo()">${ico('crown',14)} أنشئ النادي</button>
