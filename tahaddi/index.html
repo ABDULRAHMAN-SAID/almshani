@@ -14034,7 +14034,7 @@ const canUpgrade=(id)=>{
 };
 const readyCount=()=>Object.keys(S.cards?.owned||{}).filter(id=>canUpgrade(+id)).length;
 
-/** البند 1 — النسخ الزائدة لا تختفي */
+/** البند 1 — النسخ الزائدة لا تختفي · كل ترقية تمر بتأكيد */
 function doUpgrade(id){
  const c=cardById(id),st=S.cards.owned[id];
  if(st.lv>=10){toast('المستوى الأقصى');return}
@@ -14044,12 +14044,15 @@ function doUpgrade(id){
  if(fromWild>0){
   const w=S.wild[c.r]||0;
   if(w<fromWild){toast(`تحتاج ${need-st.copies} نسخة أو جوكر`);return}
-  S.wild[c.r]-=fromWild;
  }
- st.copies-=use;            // الزائد يبقى
- S.coins-=cost; st.lv++; saveState();
- addColXP(ECON.collectionXP.upgrade);
- toast(`${ico('up',14)} ${c.n} ${ico('back',15)} المستوى ${st.lv}`);
+ confirmSheet('ترقية «'+c.n+'»',`ستدفع <b style="color:var(--gold)">${cost.toLocaleString('en-US')} عملة</b> و<b>${need} نسخة${fromWild>0?` (منها ${fromWild} جوكر)`:''}</b> لرفعها للمستوى ${st.lv+1}.`,'تأكيد الترقية',()=>{
+  if(fromWild>0)S.wild[c.r]-=fromWild;
+  st.copies-=use;            // الزائد يبقى
+  S.coins-=cost; st.lv++; saveState();
+  addColXP(ECON.collectionXP.upgrade);
+  buyFx(ico('up',15),`${c.n} — المستوى ${st.lv}`);
+  const t=NAV[NAV.length-1];if(t)refresh(()=>run_(t.fn,t.arg));
+ });
 }
 
 /** البند 8 — مستوى المجموعة */
@@ -15397,7 +15400,7 @@ function cardDetail(id){
  if(cdTab==='watch')setTimeout(()=>playDemo(id),60);
 }
 
-function upg(id){doUpgrade(id);const t=NAV[NAV.length-1];run_(t.fn,t.arg)}
+function upg(id){doUpgrade(id)}
 const RAR_NEED={common:[2,4,10,20,50,100,200,400,800,1500],
  rare:[2,4,10,20,50,100,200,400,800,1500],
  epic:[2,4,8,16,32,64,128,256,512,1000],
@@ -15948,11 +15951,15 @@ function buyDeal(i){
  if(S.dealsBought.includes(key)){toast('اشتريتها اليوم');return}
  const have=d.cur==='gems'?S.gems:S.coins;
  if(have<d.cost){toast(d.cur==='gems'?'جواهر غير كافية':'عملات غير كافية');return}
- if(d.cur==='gems')S.gems-=d.cost;else S.coins-=d.cost;
- S.dealsBought.push(key);
- if(d.t==='card')grantRewards([{t:'card',id:d.c.id,v:d.n}]);
- else grantRewards([{t:'emote',k:d.e.k}]);
- toast('تم الشراء');shopScr(); saveState();
+ const nm=d.t==='card'?`${d.c.n} ×${d.n}`:`تعبير «${d.e.n}»`;
+ confirmSheet('شراء الصفقة',`ستدفع <b style="color:${d.cur==='gems'?'var(--gem)':'var(--gold)'}">${d.cost.toLocaleString('en-US')} ${d.cur==='gems'?'جوهرة':'عملة'}</b> مقابل <b>${nm}</b>.`,'تأكيد الشراء',()=>{
+  if(d.cur==='gems')S.gems-=d.cost;else S.coins-=d.cost;
+  S.dealsBought.push(key);
+  if(d.t==='card')grantRewards([{t:'card',id:d.c.id,v:d.n}]);
+  else grantRewards([{t:'emote',k:d.e.k}]);
+  saveState();buyFx(ico('gift',15),'اشتريت '+nm);if(window.FX)FX.correct(3);
+  refresh(shopScr);
+ });
 }
 
 // ═══════════ البند 10+11 — الصندوق ونسبه ═══════════
@@ -16009,8 +16016,11 @@ function oddsScr(key){
 function buyChest(key){
  const c=ECON.chests[key];
  if(S.gems<c.price){toast('جواهر غير كافية');return}
- S.gems-=c.price;S.chestInv[key]=(S.chestInv[key]||0)+1;
- toast('أُضيف للمخزون');chestScr(key);
+ confirmSheet('شراء '+c.n,`ستدفع <b style="color:var(--gem)">${c.price.toLocaleString('en-US')} جوهرة</b> ويُضاف الصندوق لمخزونك.`,'تأكيد الشراء',()=>{
+  S.gems-=c.price;S.chestInv[key]=(S.chestInv[key]||0)+1;saveState();
+  buyFx(ico(CHEST_ICO[key]||c.i,15),'اشتريت '+c.n,'في مخزونك الآن '+S.chestInv[key]);
+  refresh(()=>chestScr(key));
+ });
 }
 function doOpen(key){
  const c=ECON.chests[key];
@@ -16131,11 +16141,13 @@ function evoShopScr(){
 }
 function doEvolve(id){
  if(S.shards<ECON.evoShards){toast('شظايا غير كافية');return}
- S.shards-=ECON.evoShards;
- S.evolved=(S.evolved||[]).concat(id);
- addColXP(ECON.collectionXP.evolution);
- toast(`${ico('energy',15)} تطوّرت `+cardById(id).n);
- refresh(evoShopScr);
+ confirmSheet('تطوير البطاقة',`ستدفع <b style="color:var(--info)">${ECON.evoShards} شظايا تطوّر</b> لتطوير «${cardById(id).n}» نهائيًا.`,'تأكيد التطوير',()=>{
+  S.shards-=ECON.evoShards;
+  S.evolved=(S.evolved||[]).concat(id);
+  addColXP(ECON.collectionXP.evolution);
+  saveState();buyFx(ico('energy',15),'تطوّرت '+cardById(id).n);if(window.FX)FX.win();
+  refresh(evoShopScr);
+ });
 }
 
 // ═══════════ البند 21 — مجموعة التعبيرات: أربع رتب ═══════════
@@ -16222,7 +16234,7 @@ function buyEmote(k){
  ov.querySelector('#qvy').onclick=()=>{ov.remove();
   S.gems-=T.cost;S.emotes.push(k);
   if(S.emoteDeck.length<8)S.emoteDeck.push(k);
-  saveState();if(window.FX&&FX.win)FX.win();toast(`فُتح تعبير «${e.n}»`);refresh(emoteScr)};
+  saveState();if(window.FX&&FX.win)FX.win();buyFx(face(k,64),`فُتح تعبير «${e.n}»`);refresh(emoteScr)};
 }
 function toggleFav(k){const i=S.favEmotes.indexOf(k);
  i>=0?S.favEmotes.splice(i,1):S.favEmotes.push(k);emoteScr()}
@@ -16331,8 +16343,12 @@ function buyGemPack(id){
 function buyCoins(id){
  const p=ECON.coinPacks.find(x=>x.id===id);
  if(S.gems<p.gems){toast('جواهر غير كافية');return}
- S.gems-=p.gems;S.coins+=p.coins;
- toast(`+${p.coins.toLocaleString('en-US')} عملة`);shopScr();
+ confirmSheet('شراء ذهب',`ستدفع <b style="color:var(--gem)">${p.gems.toLocaleString('en-US')} جوهرة</b> وتحصل على <b style="color:var(--gold)">${p.coins.toLocaleString('en-US')} عملة ذهبية</b>.`,'تأكيد الشراء',()=>{
+  S.gems-=p.gems;S.coins+=p.coins;saveState();
+  buyFx(ico('coin',15),`+${p.coins.toLocaleString('en-US')} عملة ذهبية`,`رصيدك الآن ${S.coins.toLocaleString('en-US')} عملة`);
+  if(window.FX)FX.correct(3);
+  refresh(shopScr);
+ });
 }
 
 
@@ -17750,11 +17766,11 @@ function pickMulligan(i){
 const UNLOCKS=[
  {k:'journey',n:'رحلة الشبكة',req:()=>true},
  {k:'quick',n:'التحدي السريع',req:()=>true},
- {k:'cards',n:'البطاقات',req:()=>totStars()>=3,d:'اجمع 3 نجوم'},
- {k:'casual',n:'تحدي الخصم',req:()=>totStars()>=6,d:'اجمع 6 نجوم'},
- {k:'ranked',n:'Ranked',req:()=>totStars()>=12,d:'اجمع 12 نجمة'},
+ {k:'cards',n:'البطاقات',req:()=>totStars()>=3,d:'اجمع 3 نجوم',sr:3},
+ {k:'casual',n:'تحدي الخصم',req:()=>totStars()>=6,d:'اجمع 6 نجوم',sr:6},
+ {k:'ranked',n:'Ranked',req:()=>totStars()>=12,d:'اجمع 12 نجمة',sr:12},
  {k:'auction',n:'المزايدة 30/30',req:()=>S.ranked&&S.ranked.placed,d:'أكمل مباريات التحديد'},
- {k:'clubs',n:'الأندية',req:()=>totStars()>=6,d:'اجمع 6 نجوم'}
+ {k:'clubs',n:'الأندية',req:()=>totStars()>=6,d:'اجمع 6 نجوم',sr:6}
 ];
 const isUnlocked=k=>{if(S.dev)return true;const u=UNLOCKS.find(x=>x.k===k);return u?u.req():false};
 let _devT=0,_devN=0;
@@ -17947,7 +17963,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='4.0';
+const APP_VER='4.1';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18148,34 +18164,99 @@ function moreScr(){
 
 
 /** شاشة اختيار وضع اللعب — أقسام مصنّفة لا 12 بطاقة مبعثرة */
+/* شعارات الأوضاع — ميداليات مرسومة بتدرجات معدنية، لكل وضع هويته */
+const MODE_ART={
+ ranked:`<svg viewBox="0 0 56 56"><defs>
+  <linearGradient id="maRg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
+  <radialGradient id="maRp" cx=".35" cy=".28" r="1"><stop offset="0" stop-color="#9B6CF5"/><stop offset="1" stop-color="#3A2260"/></radialGradient></defs>
+  <path d="M9 20 a22 26 0 0 0 4 22 M47 20 a22 26 0 0 1 -4 22" stroke="url(#maRg)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M28 50 C17 45 12 37 12 25 L12 13 C19 10 24.5 8.6 28 8 C31.5 8.6 37 10 44 13 L44 25 C44 37 39 45 28 50 Z"
+   fill="url(#maRp)" stroke="url(#maRg)" stroke-width="2.6"/>
+  <path d="M18 6.5 l4 3.6 6-6 6 6 4-3.6 -1.6 7 -16.8 0 z" fill="url(#maRg)" stroke="#0B1020" stroke-width=".8"/>
+  <path d="M28 17 l3 6.1 6.7.7 -5 4.6 1.4 6.6 -6.1-3.5 -6.1 3.5 1.4-6.6 -5-4.6 6.7-.7 z" fill="url(#maRg)"/>
+  <ellipse cx="21" cy="16" rx="5" ry="2.6" fill="#fff" opacity=".22" transform="rotate(-18 21 16)"/></svg>`,
+ quick:`<svg viewBox="0 0 56 56"><defs>
+  <linearGradient id="maQg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
+  <radialGradient id="maQf" cx=".35" cy=".28" r="1"><stop offset="0" stop-color="#2B3760"/><stop offset="1" stop-color="#131A2E"/></radialGradient></defs>
+  <path d="M8 16 h9 M5 24 h8 M8 32 h7" stroke="#EF9F27" stroke-width="2.4" stroke-linecap="round" opacity=".7"/>
+  <rect x="30" y="4" width="8" height="4.6" rx="1.6" fill="url(#maQg)"/>
+  <circle cx="34" cy="31" r="19" fill="url(#maQf)" stroke="url(#maQg)" stroke-width="3.4"/>
+  <g stroke="url(#maQg)" stroke-width="1.6" opacity=".7">
+   <line x1="34" y1="14.6" x2="34" y2="18"/><line x1="34" y1="44" x2="34" y2="47.4"/>
+   <line x1="17.6" y1="31" x2="21" y2="31"/><line x1="47" y1="31" x2="50.4" y2="31"/></g>
+  <path d="M36.5 19 l-8.5 13 h6 l-3.5 11 10.5-14 h-6.4 z" fill="#FFD75E" stroke="#B8871E" stroke-width="1"/>
+  <ellipse cx="27" cy="21" rx="6" ry="3" fill="#fff" opacity=".18" transform="rotate(-22 27 21)"/></svg>`,
+ journey:`<svg viewBox="0 0 56 56"><defs>
+  <linearGradient id="maJg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
+  <radialGradient id="maJp" cx=".35" cy=".3" r=".95"><stop offset="0" stop-color="#5AC8F5"/><stop offset="1" stop-color="#1E5A8A"/></radialGradient></defs>
+  <path d="M28 6 L48 20 L41 45 L15 45 L8 20 Z" fill="none" stroke="url(#maJg)" stroke-width="2.4"/>
+  <g stroke="url(#maJg)" stroke-width="1.4" opacity=".5">
+   <line x1="28" y1="6" x2="28" y2="27"/><line x1="48" y1="20" x2="28" y2="27"/>
+   <line x1="41" y1="45" x2="28" y2="27"/><line x1="15" y1="45" x2="28" y2="27"/><line x1="8" y1="20" x2="28" y2="27"/></g>
+  <circle cx="28" cy="27" r="6.4" fill="url(#maJp)" stroke="#FFE9A8" stroke-width="1.8"/>
+  <circle cx="25.8" cy="24.8" r="2" fill="#fff" opacity=".5"/>
+  ${[[28,6],[48,20],[41,45],[15,45],[8,20]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.4" fill="url(#maJg)" stroke="#0B1020" stroke-width=".8"/>`).join('')}</svg>`,
+ casual:`<svg viewBox="0 0 56 56"><defs>
+  <linearGradient id="maCg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
+  <radialGradient id="maCr" cx=".35" cy=".3" r="1"><stop offset="0" stop-color="#F26D6D"/><stop offset="1" stop-color="#7E1F1F"/></radialGradient>
+  <radialGradient id="maCb" cx=".65" cy=".3" r="1"><stop offset="0" stop-color="#6FA9F5"/><stop offset="1" stop-color="#1E3F7E"/></radialGradient></defs>
+  <path d="M18 8 C11 10 7 12 5 14 L5 26 C5 37 10 43 18 47 C21.5 45 24 42.6 25.7 40 L25.7 12 C23.4 10.4 20.9 9 18 8 Z"
+   fill="url(#maCr)" stroke="url(#maCg)" stroke-width="2" transform="rotate(-7 16 28)"/>
+  <path d="M38 8 C45 10 49 12 51 14 L51 26 C51 37 46 43 38 47 C34.5 45 32 42.6 30.3 40 L30.3 12 C32.6 10.4 35.1 9 38 8 Z"
+   fill="url(#maCb)" stroke="url(#maCg)" stroke-width="2" transform="rotate(7 40 28)"/>
+  <path d="M28 20 l8.5 5 v10 l-8.5 5 -8.5-5 v-10 z" fill="#141B2E" stroke="url(#maCg)" stroke-width="2.2"/>
+  <text x="28" y="33.6" text-anchor="middle" font-size="10.5" font-weight="900" fill="#FFE9A8">VS</text>
+  <ellipse cx="13" cy="14" rx="4" ry="2" fill="#fff" opacity=".25" transform="rotate(-20 13 14)"/></svg>`,
+ clubs:`<svg viewBox="0 0 56 56"><defs>
+  <linearGradient id="maLg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
+  <radialGradient id="maLp" cx=".35" cy=".25" r="1.1"><stop offset="0" stop-color="#8B5CF0"/><stop offset="1" stop-color="#311B52"/></radialGradient></defs>
+  <path d="M6 21 a24 28 0 0 0 5 21 M50 21 a24 28 0 0 1 -5 21" stroke="url(#maLg)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M4.5 15 l2.4 3.4 M51.5 15 l-2.4 3.4 M3 26 l3 1.8 M53 26 l-3 1.8" stroke="url(#maLg)" stroke-width="1.7" stroke-linecap="round"/>
+  <path d="M28 51 C16.5 46 11.5 38 11.5 25 L11.5 11.5 C18 9 23.8 7.6 28 7 C32.2 7.6 38 9 44.5 11.5 L44.5 25 C44.5 38 39.5 46 28 51 Z"
+   fill="url(#maLp)" stroke="url(#maLg)" stroke-width="2.8"/>
+  <path d="M13.5 27 L28 20 L42.5 27 L42.5 33 L28 26 L13.5 33 Z" fill="url(#maLg)" opacity=".95"/>
+  <path d="M28 10.5 l1.7 3.4 3.8.4 -2.8 2.6 .8 3.7 -3.5-2 -3.5 2 .8-3.7 -2.8-2.6 3.8-.4 z" fill="url(#maLg)"/>
+  <path d="M19 38 l1.2 2.4 2.7.3 -2 1.9 .5 2.6 -2.4-1.4 -2.4 1.4 .5-2.6 -2-1.9 2.7-.3 z" fill="url(#maLg)"/>
+  <path d="M37 38 l1.2 2.4 2.7.3 -2 1.9 .5 2.6 -2.4-1.4 -2.4 1.4 .5-2.6 -2-1.9 2.7-.3 z" fill="url(#maLg)"/>
+  <ellipse cx="20" cy="15" rx="5.5" ry="2.6" fill="#fff" opacity=".2" transform="rotate(-16 20 15)"/></svg>`
+};
 function playModesScr(){
  const sections=[
   {t:'تنافس',items:[
-   {k:'ranked',i:'shield',n:'Ranked',d:'7 جولات · أنماط متغيرة',big:1,go:"rankedScr()"},
+   {k:'ranked',n:'Ranked',d:'7 جولات · أنماط متغيرة',big:1,go:"rankedScr()"},
   ]},
   {t:'سريع',items:[
-   {k:'quick',i:'energy',n:'تحدي سريع',d:'6 أسئلة',go:'quickScr()'},
-   {k:'journey',i:'web',n:'رحلة الشبكة',d:'افتح العقد',go:"tab('nets')"},
+   {k:'quick',n:'تحدي سريع',d:'6 أسئلة',go:'quickScr()'},
+   {k:'journey',n:'رحلة الشبكة',d:'افتح العقد',go:"tab('nets')"},
   ]},
   {t:'اجتماعي',items:[
-   {k:'casual',i:'group',n:'تحدي الخصم',d:'منافس تدريبي',go:'vsScr()'},
-   {k:'clubs',i:'flag',n:'الأندية',d:'انضم لنادٍ ونافس',go:"push('clubsScr')"},
+   {k:'casual',n:'تحدي الخصم',d:'منافس تدريبي',go:'vsScr()'},
+   {k:'clubs',n:'الأندية',d:'انضم لنادٍ ونافس',go:"push('clubsScr')"},
   ]}
  ];
+ const lockTxt=u=>{
+  if(!u)return 'مقفل';
+  if(u.sr){const left=Math.max(0,u.sr-totStars());
+   return `${u.d} — عندك ${totStars()} وتبقّى ${left}`}
+  return u.d||'مقفل';
+ };
  go(`<div class="scr on">${tbar('العب')}
  ${sections.map(sec=>`
   <div class="sl" style="margin:14px 0 8px">${sec.t}</div>
   <div style="display:grid;grid-template-columns:${sec.items.some(x=>x.big)?'1fr':'1fr 1fr'};gap:9px">
   ${sec.items.map(m=>{
     const un=isUnlocked(m.k), u=UNLOCKS.find(x=>x.k===m.k);
-    return `<div onclick="${un?m.go:`toast('${u?.d||"مقفل"}')`}"
-     style="cursor:pointer;background:linear-gradient(168deg,#1C2540,#0E1526);
+    return `<div onclick="${un?m.go:`toast('${lockTxt(u)}')`}"
+     style="cursor:pointer;position:relative;background:linear-gradient(168deg,#1C2540,#0E1526);
      border:1px solid ${un?'#3B2F5C':'#28324E'};border-radius:14px;padding:${m.big?'16px':'13px'};
-     opacity:${un?1:.5};text-align:center">
-     <div style="width:${m.big?40:32}px;height:${m.big?40:32}px;margin:0 auto;color:${un?'var(--pur)':'var(--mut)'}">
-      ${ico(un?m.i:'lock',m.big?32:24)}</div>
-     <div style="font-weight:900;font-size:${m.big?14:12.5}px;margin-top:8px">${m.n}</div>
-     <div style="font-size:10px;color:var(--tx2);margin-top:2px">${un?m.d:u?.d||'مقفل'}</div>
+     text-align:center">
+     <div class="modeart" style="width:${m.big?58:48}px;height:${m.big?58:48}px;margin:0 auto;
+      ${un?'':'filter:grayscale(.75) brightness(.6)'}">${MODE_ART[m.k]}</div>
+     ${un?'':`<span style="position:absolute;top:9px;inset-inline-end:10px;color:var(--mut)">${ico('lock',15)}</span>`}
+     <div style="font-weight:900;font-size:${m.big?14:12.5}px;margin-top:8px;${un?'':'color:var(--tx2)'}">${m.n}</div>
+     <div style="font-size:10px;color:${un?'var(--tx2)':'var(--warn)'};margin-top:2px">${un?m.d:lockTxt(u)}</div>
+     ${!un&&u&&u.sr?`<div class="pbf" style="margin-top:7px"><div class="pbi" style="height:5px">
+      <i style="width:${Math.min(100,totStars()/u.sr*100)}%"></i></div></div>`:''}
     </div>`}).join('')}</div>`).join('')}
  </div>`);
 }
@@ -19018,6 +19099,19 @@ const EXCH=[
 const JOKERS=[
  {r:'common',g:40},{r:'rare',g:90},{r:'epic',g:220},{r:'legendary',g:500}
 ];
+/* بروز نجاح الشراء — يوضح ماذا اشتريت وكم صار رصيدك */
+function buyFx(inner,big,sub){
+ const old=document.querySelector('.buyfx');if(old)old.remove();
+ const d=document.createElement('div');d.className='cardfx buyfx';
+ d.innerHTML=`<div style="font-size:42px;line-height:1">${inner}</div>
+ <div class="cfp">${big}</div>${sub?`<div class="cfs">${sub}</div>`:''}`;
+ document.body.appendChild(d);
+ requestAnimationFrame(()=>{
+  setTimeout(()=>{if(d.isConnected)d.classList.add('out')},1900);
+  setTimeout(()=>d.remove(),2350);
+ });
+ setTimeout(()=>d.remove(),6000);
+}
 /* تأكيد عام قبل أي صرف جواهر/عملات */
 function confirmSheet(t,d,okTxt,ok){
  const ov=document.createElement('div');ov.className='qvov';
@@ -19044,19 +19138,19 @@ function paySheet(name,usd,onOk,after){
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
  ov.querySelector('#qvy').onclick=()=>{ov.remove();onOk();saveState();
-  toast('تم الشراء (تجريبي) ✔');if(window.FX)FX.win();refresh(after||shopScr)};
+  buyFx(ico('shop',15),'تم الشراء ✔',name);if(window.FX)FX.win();refresh(after||shopScr)};
 }
 function buyIap(k){const p=IAP.find(x=>x.k===k);paySheet(p.n+' — '+p.gems+' جوهرة',p.usd,()=>{S.gems+=p.gems})}
 function buyBundle(k){const b=BUNDLES.find(x=>x.k===k);paySheet(b.n,b.usd,b.grant)}
 function buyExch(i){const e=EXCH[i];
  if(S.gems<e.g){toast('جواهر غير كافية — اشترِ باقة من الأعلى');return}
  confirmSheet('تحويل جواهر إلى عملات',`ستدفع <b style="color:var(--gem)">${e.g} جوهرة</b> وتحصل على <b style="color:var(--gold)">${e.c.toLocaleString('en-US')} عملة</b>.`,'تأكيد التحويل',()=>{
-  S.gems-=e.g;S.coins+=e.c;saveState();toast('+'+e.c.toLocaleString('en-US')+' عملة');if(window.FX)FX.correct(2);refresh(storeScr)})}
+  S.gems-=e.g;S.coins+=e.c;saveState();buyFx(ico('coin',15),'+'+e.c.toLocaleString('en-US')+' عملة ذهبية',`رصيدك الآن ${S.coins.toLocaleString('en-US')}`);if(window.FX)FX.correct(2);refresh(storeScr)})}
 function buyJoker(i){const j=JOKERS[i];
  if(S.gems<j.g){toast('جواهر غير كافية');return}
  confirmSheet('شراء جوكر '+RARITY[j.r].n,`ستدفع <b style="color:var(--gem)">${j.g} جوهرة</b> مقابل جوكر ${RARITY[j.r].n} واحد.`,'تأكيد الشراء',()=>{
   S.gems-=j.g;grantRewards([{t:'wild',r:j.r,v:1}]);saveState();
-  toast('جوكر '+RARITY[j.r].n+' في جعبتك 🃏');if(window.FX)FX.correct(3);refresh(storeScr)})}
+  buyFx(ico('wild',16),'جوكر '+RARITY[j.r].n+' في جعبتك');if(window.FX)FX.correct(3);refresh(storeScr)})}
 function storeScr(){
  go(`<div class="scr on">${tb('المتجر')}
  <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. الأسعار الدولارية <b>تجريبية</b>: لا يُخصم مال حقيقي.</div>
