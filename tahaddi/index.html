@@ -62,6 +62,46 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .cch{display:flex;align-items:center;gap:4px;background:var(--surf);border:1px solid var(--bd);
  border-radius:14px;padding:3px 8px;font-size:11px;font-weight:800}
 
+/* بلاطات الألعاب ثلاثية الأبعاد */
+.gTile{display:flex;align-items:center;gap:12px;padding:12px 13px;margin-bottom:11px;border-radius:17px;
+ cursor:pointer;position:relative;overflow:hidden;
+ background:linear-gradient(168deg,#243055,#0E1526 65%);border:1px solid #3B2F5C;
+ box-shadow:0 8px 20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07);
+ transition:transform .18s,box-shadow .18s}
+.gTile::after{content:'';position:absolute;top:0;bottom:0;width:38%;left:-40%;pointer-events:none;
+ background:linear-gradient(100deg,transparent,rgba(255,255,255,.09),transparent);
+ animation:sweep 5.5s linear infinite}
+.gTile:active{transform:scale(.985)}
+.gTile.off{opacity:.5;box-shadow:none}
+.gArt{width:62px;height:62px;flex-shrink:0;border-radius:14px;overflow:hidden;position:relative;
+ display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 34% 26%,#2B3760,#0B1020);
+ border:1.5px solid #4A3E86;box-shadow:0 5px 13px rgba(0,0,0,.5),inset 0 2px 6px rgba(255,255,255,.12)}
+.gArt svg{width:100%;height:100%;display:block}
+.gNm{font-weight:900;font-size:13.5px}
+.gDs{font-size:10px;color:var(--tx2);margin-top:3px;line-height:1.5}
+.gHero{width:150px;height:150px;margin:8px auto 0;border-radius:26px;overflow:hidden;
+ display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 34% 26%,#2B3760,#0B1020);
+ border:2px solid #4A3E86;
+ box-shadow:0 16px 40px rgba(0,0,0,.6),inset 0 3px 10px rgba(255,255,255,.14);
+ transform:perspective(700px) rotateX(7deg)}
+.gHero.sm{width:104px;height:104px;border-radius:20px}
+.gHero svg{width:100%;height:100%}
+.wayCard{display:flex;align-items:center;gap:12px;padding:13px;margin-bottom:10px;border-radius:15px;cursor:pointer;
+ background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--bd);
+ box-shadow:0 6px 16px rgba(0,0,0,.4);transition:border-color .2s,transform .15s}
+.wayCard:active{transform:scale(.985)}
+.wIco{font-size:27px;flex-shrink:0;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.wT{font-weight:900;font-size:13px}
+.wD{font-size:10px;color:var(--tx2);margin-top:3px}
+.wGo{color:var(--gold);font-size:18px}
+.mmRad{position:relative;width:96px;height:96px;margin:0 auto}
+.mmRad span{position:absolute;inset:0;border-radius:50%;border:2px solid var(--gold);opacity:0;
+ animation:mmPing 2.4s ease-out infinite}
+.mmRad span:nth-child(2){animation-delay:.8s}
+.mmRad span:nth-child(3){animation-delay:1.6s}
+@keyframes mmPing{0%{transform:scale(.25);opacity:.9}100%{transform:scale(1);opacity:0}}
 /* كيرم */
 .caPl{flex:1;padding:9px 10px;border-radius:12px;background:linear-gradient(168deg,#1C2540,#0E1526);
  border:1.5px solid var(--bd);transition:all .2s}
@@ -14546,7 +14586,10 @@ function buildRound(k){
   bellArm();
  }
  if(k==='chain'){ // تناوب إجابات صحيحة من مجموعة كبيرة حتى يخطئ أحد
-  const d=pickMode('auction');
+  let d=pickMode('auction');
+  // المجموعة يجب أن تتسع للتناوب: 9 صحيحة و5 دخيلة على الأقل
+  for(let g=0;g<8&&(!d||d.ok.length<9||d.no.length<5);g++)d=pickMode('auction');
+  if(!d||d.ok.length<9||d.no.length<5)d=AUCTION.find(x=>x.ok.length>=9&&x.no.length>=5)||d;
   const okI=[...d.ok].sort(()=>Math.random()-.5).slice(0,9).map(v=>({v,ok:1,by:0}));
   const noI=[...d.no].sort(()=>Math.random()-.5).slice(0,5).map(v=>({v,ok:0,by:0}));
   M.st={k,d,grid:[...okI,...noI].sort(()=>Math.random()-.5),
@@ -17891,7 +17934,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='4.9';
+const APP_VER='5.0';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18231,6 +18274,8 @@ function rmLeave(silent){
  RM.unsub.forEach(u=>{try{u()}catch(e){}});RM.unsub=[];
  if(c&&RM.code){try{c.presence({pc:null,nm:null,hs:null,vt:null,st:null})}catch(e){}}
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
+ if(RM.solo){RM.solo=0;RMcap=null;_ca.sim=null}
+ RM.mm=0;clearInterval(_mmTm);
  if(!silent)partyScr();
 }
 function rmSend(o){const c=RMcap;if(!c||!RM.code)return;
@@ -18265,12 +18310,15 @@ function rmOn(d,m){
   if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
   if(RM.phase==='vote')setTimeout(rmPaintAll,30);}
  else if(d.t==='hand'&&d.to===me){RM.hand=(d.h||[]).slice()}
- else if(d.t==='uno'){RM.uno=d;RM.phase='uno'}
+ else if(d.t==='uno'){RM.uno=d;RM.phase='uno';
+  if(RM.solo&&isBot(d.turn))setTimeout(unoBot,RM.diff==='hard'?550:900);}
  else if(d.t==='cast'){
   const wasShot=!!d.shot;
   RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,msg:d.msg||''};
   RM.phase='carrom';
-  if(wasShot)setTimeout(()=>caPlay(d.shot),20);else setTimeout(caRender,40);}
+  if(wasShot)setTimeout(()=>caPlay(d.shot),20);
+  else{setTimeout(caRender,40);
+   if(RM.solo&&isBot(d.turn))setTimeout(caBot,900)}}
  else if(d.t==='det'&&d.to===me){RM.detRes=`اللاعب ${((RM.players.find(x=>x.peer===d.target)||{}).name)||''}: ${d.isM?'مافيا! 🔪':'بريء 😇'}`}
  else if(d.t==='act'&&RM.host){
   if(RM.game==='uno')unoAct(d);
@@ -18289,6 +18337,78 @@ function rmTimer(secs){
    if(RM.host&&RM.phase==='talk')rmHostVote();
    else if(RM.host&&RM.phase==='paint')rmPaintDone()}
  },1000);
+}
+/* ── البحث عن لاعبين: الحضور نفسه يكوّن المجموعة بلا خادم ── */
+let _mmTm=null;
+async function mmScr(g){
+ const c=await rmCap();
+ RM.game=g;
+ if(!c){
+  go(`<div class="scr on">${tb('بحث عن لاعبين','gameHub(\''+g+'\')')}
+  <div class="orn"><div class="in">${ornCorners()}
+  <div style="text-align:center;padding:16px 0">
+   <div style="font-size:44px">🌐</div>
+   <div class="mtl" style="font-size:17px;margin-top:10px">البحث غير متاح هنا</div>
+   <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
+    اللعب مع لاعبين حقيقيين يحتاج فتح اللعبة من <b>رابط اللعبة المنشور</b>.<br>
+    يمكنك اللعب مع الكمبيوتر الآن.</div>
+   ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="soloScr('${g}')"><span>🤖 العب مع الكمبيوتر</span></button>`:''}
+  </div></div></div></div>`);
+  return;
+ }
+ RM.name=RM.name||S.name||'لاعب';RM.mm=1;RM.mmT=0;
+ try{await c.presence({pc:null,lf:g,nm:RM.name,hs:null,vt:null})}catch(e){}
+ RM.unsub.forEach(u=>{try{u()}catch(e){}});
+ RM.unsub=[c.onPeers(()=>mmTick())];
+ clearInterval(_mmTm);
+ _mmTm=setInterval(()=>{RM.mmT++;mmTick();if(document.getElementById('mmScr'))mmDraw()},1000);
+ mmTick();mmDraw();
+}
+function mmSearchers(){
+ const c=RMcap;if(!c)return [];
+ return (c.peers()||[]).filter(p=>p.kind==='viewer'&&p.presence&&p.presence.lf===RM.game)
+  .sort((a,b)=>a.peer.localeCompare(b.peer));
+}
+function mmTick(){
+ const c=RMcap;if(!c||!RM.mm)return;
+ const S2=mmSearchers(),lim=RM_MIN[RM.game]||[2,8];
+ if(S2.length<lim[0])return;
+ const grp=S2.slice(0,lim[1]);
+ if(!grp.some(p=>p.isMe&&p.sameTab))return;            // لست ضمن المجموعة الأولى — انتظر
+ // كل الأجهزة تحسب الكود نفسه من أول لاعب: لا حاجة لخادم
+ const code=(grp[0].peer.replace(/[^A-Za-z0-9]/g,'').slice(0,4).toUpperCase()+'XXXX').slice(0,4);
+ RM.mm=0;clearInterval(_mmTm);
+ RM.code=code;RM.host=!!(grp[0].isMe&&grp[0].sameTab);RM.phase='lobby';
+ try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby'})}catch(e){}
+ rmBind();
+ toast('وُجد لاعبون! 🎉');if(window.FX)FX.correct(3);
+ setTimeout(roomDraw,120);
+}
+function mmDraw(){
+ const S2=mmSearchers(),lim=RM_MIN[RM.game]||[2,8];
+ const row=PT_GAMES.find(x=>x[3]===RM.game)||[];
+ go(`<div class="scr on nofi" id="mmScr">${tb('بحث عن لاعبين','mmCancel()')}
+ <div class="gHero sm">${GAME_ART[RM.game]||''}</div>
+ <div class="orn" style="margin-top:12px"><div class="in">${ornCorners()}
+ <div style="text-align:center;padding:12px 0">
+  <div class="mmRad"><span></span><span></span><span></span></div>
+  <div class="mtl" style="font-size:16px;margin-top:12px">نبحث عن لاعبين لـ${row[1]||''}…</div>
+  <div style="font-size:12px;color:var(--tx2);margin-top:7px">
+   في البحث الآن: <b style="color:var(--gold)">${S2.length}</b> · نحتاج <b>${lim[0]}</b><br>
+   مضى ${RM.mmT||0} ثانية</div>
+ </div></div></div>
+ ${(RM.mmT||0)>12?`<div class="wb" style="text-align:right;margin-top:12px">${ico('info',12)}
+  لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب مع الكمبيوتر.</div>
+  ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);soloScr('${RM.game}')"><span>🤖 العب مع الكمبيوتر</span></button>`:''}
+  <button class="btn g" style="margin-top:9px" onclick="mmCancel(1);roomScr('${RM.game}')">${ico('next',13)} أنشئ غرفة بكود بدلًا من ذلك</button>`:''}
+ <button class="btn g" style="margin-top:14px;color:var(--no)" onclick="mmCancel()">${ico('door',13)} إلغاء البحث</button>
+ </div>`);
+}
+function mmCancel(silent){
+ const c=RMcap;RM.mm=0;clearInterval(_mmTm);
+ RM.unsub.forEach(u=>{try{u()}catch(e){}});RM.unsub=[];
+ if(c){try{c.presence({lf:null})}catch(e){}}
+ if(!silent)gameHub(RM.game);
 }
 /* ── الشاشات ── */
 async function roomScr(game){
@@ -18481,6 +18601,111 @@ function rmHostEnd(){
  const c=RMcap;if(c){try{c.presence({vt:null})}catch(e){}}
  rmSend({t:'end',sp:RM.secret.spy,w:RM.secret.word,acc:acc||''});
 }
+/* ══ اللعب مع الكمبيوتر: نفس محرك الغرفة بناقل محلي وخصوم آليين ══ */
+const BOT_NAMES=['سلطان','نورة','ريان','حكيم','أثير'];
+function soloScr(g){
+ const row=PT_GAMES.find(x=>x[3]===g)||[];
+ go(`<div class="scr on">${tb('مع الكمبيوتر','gameHub(\''+g+'\')')}
+ <div class="gHero sm">${GAME_ART[g]||''}</div>
+ <div class="sl" style="margin:14px 0 9px">مستوى الخصم</div>
+ ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard" onclick="soloStart('${g}','${k}')">
+  <span class="wIco">${e}</span><div style="flex:1"><div class="wT">${n}</div><div class="wD">${d}</div></div>
+  <span class="wGo">›</span></div>`).join('')}
+ ${g==='uno'?`<div class="sl" style="margin:16px 0 9px">عدد الخصوم</div>
+ <div class="cr">${[1,2,3].map(n=>`<div class="fc ${(RM.bots||1)===n?'on':''}" onclick="RM.bots=${n};soloScr('${g}')">${n}</div>`).join('')}</div>`:''}
+ <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div></div>`);
+}
+function soloTransport(n){
+ const me={peer:'me',isMe:true,sameTab:true,kind:'viewer',presence:{pc:'SOLO',nm:S.name||'أنت',hs:1}};
+ const bots=Array.from({length:n},(_,i)=>({peer:'bot'+i,isMe:false,sameTab:false,kind:'viewer',
+  presence:{pc:'SOLO',nm:BOT_NAMES[i%BOT_NAMES.length]}}));
+ const all=[me].concat(bots);
+ RMcap={peers:()=>all,
+  emit:(t,d)=>{rmOn(d,{});return Promise.resolve()},
+  presence:p=>{Object.keys(p).forEach(k=>{p[k]==null?delete me.presence[k]:me.presence[k]=p[k]});return Promise.resolve()},
+  on:()=>()=>{},onPeers:()=>()=>{},connected:()=>true};
+}
+function soloStart(g,diff){
+ RM.solo=1;RM.diff=diff||'mid';
+ const n=g==='carrom'?1:(RM.bots||1);
+ soloTransport(n);
+ RM.code='SOLO';RM.host=1;RM.me='me';RM.game=g;RM.phase='lobby';RM.name=S.name||'أنت';
+ rmStart();
+ setTimeout(roomDraw,120);
+}
+const isBot=p=>String(p||'').indexOf('bot')===0;
+/* أونو: عقل الخصم حسب الصعوبة */
+function unoBot(){
+ if(!RM.solo||!RM.U)return;
+ const U=RM.U,cur=RM.players[U.turn].peer;
+ if(!isBot(cur))return;
+ const hand=U.hands[cur];
+ const ok=hand.map((c,i)=>({c,i})).filter(x=>unoOk(x.c,U.top,U.col));
+ const stack=U.draw?ok.filter(x=>x.c[1]==='D'||x.c[1]==='F'):ok;
+ const pool=U.draw?stack:ok;
+ if(!pool.length){unoAct({by:cur,a:'draw'});return}
+ let pick;
+ if(RM.diff==='easy')pick=pool[Math.floor(Math.random()*pool.length)];
+ else{
+  const colCount={};hand.forEach(c=>{if(c[0]!=='w')colCount[c[0]]=(colCount[c[0]]||0)+1});
+  const best=Object.entries(colCount).sort((a,b)=>b[1]-a[1])[0];
+  const score=x=>{
+   const c=x.c;let s=0;
+   if(c[0]==='w')s-=6;                                  // احتفظ بالجوكر
+   if(c[1]==='D'||c[1]==='F')s+=5;
+   if(c[1]==='S'||c[1]==='R')s+=3;
+   if(c[0]===U.col)s+=2;
+   if(RM.diff==='hard'){
+    const opp=RM.players.find(p=>p.peer!==cur&&U.hands[p.peer]);
+    const low=opp&&U.hands[opp.peer].length<=2;
+    if(low&&(c[1]==='D'||c[1]==='F'||c[1]==='S'))s+=9;   // اضرب من اقترب من الفوز
+    if(!isNaN(+c[1]))s+=(+c[1])*0.25;                    // تخلّص من الأرقام العالية
+   }
+   return s;
+  };
+  pool.sort((a,b)=>score(b)-score(a));
+  pick=RM.diff==='hard'?pool[0]:(Math.random()<.75?pool[0]:pool[Math.floor(Math.random()*pool.length)]);
+  if(pick.c[0]==='w'){
+   const bestCol=best?best[0]:'r';
+   unoAct({by:cur,a:'play',i:pick.i,col:bestCol});return;
+  }
+ }
+ if(pick.c[0]==='w'){
+  const cols=['r','g','b','y'];
+  unoAct({by:cur,a:'play',i:pick.i,col:cols[Math.floor(Math.random()*4)]});return;
+ }
+ unoAct({by:cur,a:'play',i:pick.i});
+}
+/* كيرم: تصويب الخصم حسب الصعوبة */
+function caBot(){
+ if(!RM.solo||!RM.ca)return;
+ const cur=RM.ca.turn;if(!isBot(cur))return;
+ const mine=RM.ca.col[cur];
+ const pcs=RM.ca.pcs;
+ const targets=pcs.filter(p=>p.t===mine||p.t==='q');
+ const base=40;                                        // قاعدة الخصم أعلى اللوح
+ const pockets=[[0,0],[CA_R,0],[0,CA_R],[CA_R,CA_R]];
+ let best=null;
+ targets.forEach(t=>{
+  pockets.forEach(([px,py])=>{
+   const ang=Math.atan2(py-t.y,px-t.x);
+   const hit={x:t.x-Math.cos(ang)*(CA_PR+CA_SR),y:t.y-Math.sin(ang)*(CA_PR+CA_SR)};
+   if(hit.y<base+10)return;                            // خلف الضارب: غير ممكن
+   const d=Math.hypot(hit.x-CA_R/2,hit.y-base);
+   const q=(t.t==='q'?-40:0)+d+Math.hypot(px-t.x,py-t.y)*0.8;
+   if(!best||q<best.q)best={q,hit,t};
+  });
+ });
+ const noise=RM.diff==='hard'?0.02:RM.diff==='mid'?0.07:0.20;
+ const sx=Math.max(CA_SR+30,Math.min(CA_R-CA_SR-30,best?best.hit.x:CA_R/2));
+ const sy=base;
+ let ang=best?Math.atan2(best.hit.y-sy,best.hit.x-sx):Math.PI/2;
+ ang+=(Math.random()-.5)*noise*2;
+ const pw=RM.diff==='easy'?(9+Math.random()*7):(13+Math.random()*4);
+ const shot={x:sx,y:sy,vx:Math.cos(ang)*pw,vy:Math.sin(ang)*pw};
+ rmSend({t:'cast',pcs:RM.ca.pcs,turn:cur,sc:RM.ca.sc,col:RM.ca.col,msg:'',shot});
+}
+
 /* ── مسابقة الرسم عبر الغرفة: تُرسل المسارات لا الصور ── */
 let _pb={buf:[],stroke:null,tm:null};
 function rmDraw(R){
@@ -18780,8 +19005,9 @@ function caStep(){
  // استقرّ اللوح: من ضرب يبثّ الوضع النهائي مرجعًا للجميع
  _ca.sim=null;
  const rest=S2.pcs.filter(p=>p.t!=='s').map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,t:p.t}));
- if(RM.ca&&RM.ca.turn===RM.me){
-  rmSend({t:'act',by:RM.me,a:'rest',pcs:rest,pot:S2.pot,
+ const shooter=RM.ca?RM.ca.turn:null;
+ if(shooter===RM.me||(RM.solo&&RM.host)){
+  rmSend({t:'act',by:shooter,a:'rest',pcs:rest,pot:S2.pot,
    msg:S2.pot.length?(S2.pot.includes('q')?'الملكة! +3':'إصابة'):'بلا إصابة'});
  }
  caRender(rest);
@@ -19095,13 +19321,82 @@ function partyScr(){
  ${PT_GAMES.map(([e,n,d,g,pass,net])=>{
  const on=ptWay==='pass'?pass:net;
  const why=ptWay==='pass'?'هذه اللعبة عبر غرفة بكود فقط — كل لاعب من هاتفه':'مسابقة الرسم متاحة في الطريقتين';
- return `<div class="li" style="cursor:pointer;${on?'':'opacity:.45'}" onclick="${on?`ptOpen('${g}')`:`ptMode('${ptWay==='pass'?'code':'pass'}')`}"><div class="lr">
-  <span style="font-size:30px;flex-shrink:0">${e}</span>
-  <div class="lb"><div class="lt">${n}${on?'':` <span style="font-size:8.5px;color:var(--warn)">${ptWay==='pass'?'بكود فقط':'بالتمرير فقط'}</span>`}</div>
-   <div class="ls">${on?d:why}</div></div>
-  <span style="color:${on?'var(--mut)':'var(--warn)'}">›</span></div></div>`}).join('')}
+ return `<div class="gTile ${on?'':'off'}" onclick="${on?`ptOpen('${g}')`:`ptMode('${ptWay==='pass'?'code':'pass'}')`}">
+  <div class="gArt">${GAME_ART[g]||`<div style="font-size:34px">${e}</div>`}</div>
+  <div style="flex:1;min-width:0">
+   <div class="gNm">${n}${on?'':` <span style="font-size:8.5px;color:var(--warn)">${ptWay==='pass'?'بكود فقط':'بالتمرير فقط'}</span>`}</div>
+   <div class="gDs">${on?d:why}</div></div>
+  <span style="color:${on?'var(--gold)':'var(--warn)'};font-size:18px">›</span></div>`}).join('')}
  </div>`);
 }
+/* أشكال الألعاب — مرسومة بالكود بعمق وظلال */
+const GAME_ART={
+ carrom:`<svg viewBox="0 0 100 100"><defs>
+  <linearGradient id="gaW" x1="0" y1="0" x2="1" y2="1">
+   <stop offset="0" stop-color="#F0D6A2"/><stop offset=".5" stop-color="#D9AE63"/><stop offset="1" stop-color="#A9762F"/></linearGradient>
+  <linearGradient id="gaF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8A5A2B"/><stop offset="1" stop-color="#4E3014"/></linearGradient>
+  <radialGradient id="gaP" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#05070C"/><stop offset="1" stop-color="#2A1B0B"/></radialGradient>
+  <radialGradient id="gaWh" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFFDF6"/><stop offset="1" stop-color="#CBB894"/></radialGradient>
+  <radialGradient id="gaBk" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#5A4C42"/><stop offset="1" stop-color="#181210"/></radialGradient>
+  <radialGradient id="gaQ" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FF8080"/><stop offset="1" stop-color="#8A1F26"/></radialGradient></defs>
+  <rect x="4" y="6" width="92" height="92" rx="7" fill="url(#gaF)"/>
+  <rect x="2" y="2" width="92" height="92" rx="7" fill="url(#gaW)" stroke="#7A4E1E" stroke-width="3"/>
+  <circle cx="48" cy="48" r="17" fill="none" stroke="#A8703A" stroke-width="1.4"/>
+  <circle cx="48" cy="48" r="5.5" fill="#B7793A" opacity=".55"/>
+  ${[[12,12],[84,12],[12,84],[84,84]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="8" fill="url(#gaP)"/>`).join('')}
+  <g stroke="#8A5E2A" stroke-width="1.6" opacity=".75">
+   <path d="M20 22 H76 M20 74 H76 M22 20 V76 M74 20 V76"/></g>
+  <circle cx="48" cy="48" r="5" fill="url(#gaQ)" stroke="rgba(0,0,0,.3)"/>
+  ${[[38,40],[58,40],[38,57],[58,57],[48,34],[48,62]].map(([x,y],i)=>
+   `<circle cx="${x}" cy="${y}" r="5" fill="url(#${i%2?'gaBk':'gaWh'})" stroke="rgba(0,0,0,.3)"/>`).join('')}
+  <circle cx="48" cy="82" r="6.4" fill="url(#gaQ)" opacity="0"/>
+  <circle cx="48" cy="82" r="6.4" fill="#FFE9A8" stroke="#8A6210" stroke-width="1.4"/>
+ </svg>`,
+ uno:`<svg viewBox="0 0 100 100"><defs>
+  <linearGradient id="guR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0605E"/><stop offset="1" stop-color="#8A1F1F"/></linearGradient>
+  <linearGradient id="guG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#48DC8A"/><stop offset="1" stop-color="#12602F"/></linearGradient>
+  <linearGradient id="guB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5BA4F0"/><stop offset="1" stop-color="#123C6E"/></linearGradient>
+  <linearGradient id="guY" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD75E"/><stop offset="1" stop-color="#8A6210"/></linearGradient></defs>
+  <g transform="rotate(-22 30 62)"><rect x="10" y="30" width="34" height="50" rx="6" fill="url(#guB)" stroke="#F2F4F8" stroke-width="3"/>
+   <ellipse cx="27" cy="55" rx="11" ry="16" fill="#F7F9FF" transform="rotate(20 27 55)"/>
+   <text x="27" y="62" text-anchor="middle" font-size="20" font-weight="900" fill="#123C6E">7</text></g>
+  <g transform="rotate(-4 50 58)"><rect x="33" y="22" width="34" height="50" rx="6" fill="url(#guG)" stroke="#F2F4F8" stroke-width="3"/>
+   <ellipse cx="50" cy="47" rx="11" ry="16" fill="#F7F9FF" transform="rotate(20 50 47)"/>
+   <text x="50" y="54" text-anchor="middle" font-size="20" font-weight="900" fill="#12602F">4</text></g>
+  <g transform="rotate(16 72 60)"><rect x="56" y="28" width="34" height="50" rx="6" fill="url(#guR)" stroke="#F2F4F8" stroke-width="3"/>
+   <ellipse cx="73" cy="53" rx="11" ry="16" fill="#F7F9FF" transform="rotate(20 73 53)"/>
+   <text x="73" y="60" text-anchor="middle" font-size="17" font-weight="900" fill="#8A1F1F">+2</text></g>
+  <circle cx="18" cy="16" r="3" fill="url(#guY)"/><circle cx="86" cy="20" r="2.4" fill="url(#guY)"/>
+ </svg>`,
+ barra:`<svg viewBox="0 0 100 100"><defs>
+  <radialGradient id="gbB" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#B07A16"/></radialGradient></defs>
+  <circle cx="34" cy="52" r="24" fill="url(#gbB)" stroke="#8A6210" stroke-width="2.5"/>
+  <circle cx="26" cy="46" r="3.2" fill="#2A1B08"/><circle cx="42" cy="46" r="3.2" fill="#2A1B08"/>
+  <path d="M25 62 Q34 57 43 62" stroke="#2A1B08" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M46 58 L64 50" stroke="#2A1B08" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="72" cy="34" r="16" fill="#1C2540" stroke="#7B4FE0" stroke-width="2.5"/>
+  <text x="72" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#B76CF0">؟</text>
+ </svg>`,
+ mafia:`<svg viewBox="0 0 100 100"><defs>
+  <linearGradient id="gmH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B4666"/><stop offset="1" stop-color="#141A2C"/></linearGradient></defs>
+  <ellipse cx="50" cy="76" rx="30" ry="16" fill="#1C2540"/>
+  <circle cx="50" cy="48" r="21" fill="#2A3550" stroke="#4A5878" stroke-width="2"/>
+  <path d="M18 40 h64 l-6-9 H24 z" fill="url(#gmH)"/>
+  <ellipse cx="50" cy="40" rx="32" ry="5" fill="#0F1524"/>
+  <rect x="30" y="45" width="40" height="9" rx="4" fill="#0B1020"/>
+  <circle cx="39" cy="49.5" r="2.6" fill="#E24B4A"/><circle cx="61" cy="49.5" r="2.6" fill="#E24B4A"/>
+  <path d="M40 64 Q50 60 60 64" stroke="#0B1020" stroke-width="3" fill="none" stroke-linecap="round"/>
+ </svg>`,
+ draw:`<svg viewBox="0 0 100 100"><defs>
+  <linearGradient id="gdP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8C88A"/><stop offset="1" stop-color="#A9762F"/></linearGradient></defs>
+  <path d="M50 16 C26 16 12 34 12 52 c0 14 12 22 24 20 8-1.4 12 3 10 10 -1.6 6 3 12 10 12 20 0 32-20 32-40 C88 32 72 16 50 16 Z"
+   fill="url(#gdP)" stroke="#7A4E1E" stroke-width="2.5"/>
+  <circle cx="34" cy="38" r="6" fill="#E24B4A"/><circle cx="54" cy="30" r="6" fill="#378ADD"/>
+  <circle cx="70" cy="44" r="6" fill="#2ECC71"/><circle cx="66" cy="64" r="6" fill="#B76CF0"/>
+  <path d="M22 84 L38 68 l8 8 -16 16 z" fill="#C9A6F5" stroke="#5B2FB8" stroke-width="2"/>
+  <path d="M18 88 l4-6 6 4 z" fill="#FFE9A8"/>
+ </svg>`
+};
 const PT_GAMES=[
  ['🤫','برا السالفة','الكل يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة!','barra',1,1],
  ['🕵️','مافيا','مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي','mafia',1,1],
@@ -19111,11 +19406,36 @@ const PT_GAMES=[
 ];
 let ptWay='pass';
 function ptMode(w){ptWay=w;refresh(partyScr)}
+const SOLO_OK={uno:1,carrom:1};
+const DIFFS=[['easy','سهل','🙂','يلعب بعشوائية ويخطئ كثيرًا'],
+ ['mid','متوسط','😐','يلعب بمنطق سليم ويخطئ أحيانًا'],
+ ['hard','صعب','😈','يحسب أفضل نقلة ولا يسامح']];
+function gameHub(g){
+ const row=PT_GAMES.find(x=>x[3]===g)||[];
+ RM.game=g;
+ go(`<div class="scr on">${tb(row[1]||'اللعبة','partyScr()')}
+ <div class="gHero">${GAME_ART[g]||''}</div>
+ <div style="text-align:center;font-size:12px;color:var(--tx2);margin:10px 0 4px">${row[2]||''}</div>
+ <div class="sl" style="margin:16px 0 9px">اختر طريقة اللعب</div>
+ ${SOLO_OK[g]?`<div class="wayCard" onclick="soloScr('${g}')">
+  <span class="wIco">🤖</span><div style="flex:1"><div class="wT">مع الكمبيوتر</div>
+  <div class="wD">فورًا وبلا انتظار — سهل · متوسط · صعب</div></div><span class="wGo">›</span></div>`:''}
+ <div class="wayCard" onclick="mmScr('${g}')">
+  <span class="wIco">🌐</span><div style="flex:1"><div class="wT">بحث عن لاعبين</div>
+  <div class="wD">نبحث لك عن لاعبين متصلين الآن عبر الشبكة</div></div><span class="wGo">›</span></div>
+ <div class="wayCard" onclick="roomScr('${g}')">
+  <span class="wIco">🔗</span><div style="flex:1"><div class="wT">غرفة بكود</div>
+  <div class="wD">أنشئ كودًا وأعطه لمن تعرفهم</div></div><span class="wGo">›</span></div>
+ ${(PT_GAMES.find(x=>x[3]===g)||[])[4]?`<div class="wayCard" onclick="ptWay='pass';ptOpen('${g}')">
+  <span class="wIco">📱</span><div style="flex:1"><div class="wT">تمرير الجوال</div>
+  <div class="wD">جهاز واحد يدور بينكم</div></div><span class="wGo">›</span></div>`:''}
+ </div>`);
+}
 function ptOpen(g){
  const row=PT_GAMES.find(x=>x[3]===g);
- // لعبة لا تعمل بالطريقة الحالية → انقل للطريقة التي تدعمها بدل الفشل
- if(row&&ptWay==='pass'&&!row[4]){ptWay='code';return roomScr(g)}
- if(ptWay==='code'){RM.game=g;return roomScr(g)}
+ if(ptWay==='code'){RM.game=g;return gameHub(g)}
+ // لعبة لا تعمل بالتمرير → مركزها يعرض بدائل الشبكة
+ if(row&&!row[4])return gameHub(g);
  ({barra:barraSetup,mafia:mafiaSetup,draw:drawSetup})[g]();
 }
 const ptCount=(min,max)=>`<div class="sl" style="margin:14px 0 8px">عدد اللاعبين</div>
