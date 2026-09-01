@@ -170,10 +170,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .rmTopMini{display:flex;align-items:center;gap:10px;justify-content:center;font-size:10px;font-weight:800;
  color:var(--tx2);background:rgba(6,9,17,.5);border:1px solid var(--bd);border-radius:10px;padding:5px 10px;margin-bottom:6px}
 /* كيرم */
-.caWrap{position:relative;width:100%;border-radius:16px;overflow:hidden;
+.caWrap{position:relative;width:100%;border-radius:9px;overflow:hidden;
  box-shadow:0 12px 30px rgba(0,0,0,.6)}
-.caWrap.big{width:calc(100% + 24px);margin:0 -12px;border-radius:20px}
-.caWrap canvas{width:100%;display:block;aspect-ratio:1;touch-action:none}
+.caWrap.big{width:calc(100% + 24px);margin:0 -12px;border-radius:7px}
+.caWrap canvas{width:100%;display:block;aspect-ratio:520/572;touch-action:none}
 .caMsg{text-align:center;font-size:11.5px;font-weight:900;color:var(--gold);margin-top:9px;
  background:#E8B23A14;border:1px solid #E8B23A55;border-radius:11px;padding:7px 10px;animation:rspop .4s ease}
 .unoTable{position:relative;min-height:290px;display:flex;align-items:center;justify-content:center;
@@ -18000,7 +18000,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.2';
+const APP_VER='5.3';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18342,6 +18342,9 @@ function rmLeave(silent){
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  if(RM.solo){RM.solo=0;RMcap=null;_ca.sim=null}
  RM.mm=0;clearInterval(_mmTm);
+ // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
+ try{cancelAnimationFrame(_ca.anim)}catch(e){}
+ _ca.sim=null;_ca.drag=null;_ca.aim=null;_ca.slide=0;_ca.sx=null;_ca.anim=null;
  if(!silent)partyScr();
 }
 function rmSend(o){const c=RMcap;if(!c||!RM.code)return;
@@ -19238,36 +19241,255 @@ function caPotMsg(pot,who){
   return n+(t===mine?' (+1 لك)':' (نقطة للخصم)');
  }).join(' · ');
 }
+// ===== لوح الكيرم المرسوم: نسختان — كلاسيكي خشبي وحديث لأربعة لاعبين =====
+function caRR(x,X,Y,w,h,r){
+ r=Math.min(r,w/2,h/2);
+ x.beginPath();
+ x.moveTo(X+r,Y);x.lineTo(X+w-r,Y);x.quadraticCurveTo(X+w,Y,X+w,Y+r);
+ x.lineTo(X+w,Y+h-r);x.quadraticCurveTo(X+w,Y+h,X+w-r,Y+h);
+ x.lineTo(X+r,Y+h);x.quadraticCurveTo(X,Y+h,X,Y+h-r);
+ x.lineTo(X,Y+r);x.quadraticCurveTo(X,Y,X+r,Y);
+ x.closePath();
+}
+// خشب القيقب مع عروق مرسومة
+function caGrain(x,W,c0,c1,c2){
+ const g=x.createLinearGradient(0,0,W*.35,W);
+ g.addColorStop(0,c0);g.addColorStop(.5,c1);g.addColorStop(1,c2);
+ x.fillStyle=g;x.fillRect(0,0,W,W);
+ x.save();
+ x.globalAlpha=.085;x.strokeStyle='#7A4E1B';x.lineWidth=1.1;
+ for(let i=0;i<52;i++){
+  const y0=(i+.5)*W/52;x.beginPath();
+  for(let px=-6;px<=W+6;px+=9){
+   const yy=y0+Math.sin(px*.0215+i*1.63)*2.1+Math.sin(px*.0058+i*.7)*3.6;
+   px<0?x.moveTo(px,yy):x.lineTo(px,yy);
+  }
+  x.stroke();
+ }
+ x.globalAlpha=.055;x.strokeStyle='#4B2C0B';x.lineWidth=2.4;
+ for(let i=0;i<9;i++){
+  const y0=(i+.5)*W/9;x.beginPath();
+  for(let px=-6;px<=W+6;px+=12){
+   const yy=y0+Math.sin(px*.011+i*2.2)*5.5;
+   px<0?x.moveTo(px,yy):x.lineTo(px,yy);
+  }
+  x.stroke();
+ }
+ x.restore();
+ const v=x.createRadialGradient(W/2,W/2,W*.30,W/2,W/2,W*.78);
+ v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(72,42,10,.30)');
+ x.fillStyle=v;x.fillRect(0,0,W,W);
+}
+// ① اللوح الكلاسيكي: إطار جوزي، أركان نحاسية، وردة البوصلة في المنتصف
+function caSkin2(x,W){
+ const F=f=>f*W, BK='#221A10', RD='#C1252B', CR='#F6E9C8';
+ caGrain(x,W,'#F5E3B8','#EACE95','#D8AE6E');
+ const OUT=.940,INN=.872,A=.145,B=.855,MID=(OUT+INN)/2;
+ const seg=(x1,y1,x2,y2,w,col)=>{x.strokeStyle=col;x.lineWidth=w;x.lineCap='round';
+  x.beginPath();x.moveTo(F(x1),F(y1));x.lineTo(F(x2),F(y2));x.stroke()};
+ // القِطاعات المنحنية عند الأركان — محصورة داخل مربع خطوط القاعدة
+ x.save();
+ x.beginPath();x.rect(F(1-OUT),F(1-OUT),F(OUT*2-1),F(OUT*2-1));x.clip();
+ x.strokeStyle='rgba(34,26,16,.68)';x.lineWidth=W*.005;
+ [[0,0],[1,0],[1,1],[0,1]].forEach(([a,b])=>{
+  x.beginPath();x.arc(a*W,b*W,F(.305),0,7);x.stroke();
+ });
+ // الأسهم القُطرية من كل ركن نحو المركز
+ [[0,0,1,1],[1,0,-1,1],[1,1,-1,-1],[0,1,1,-1]].forEach(([a,b,ux,uy])=>{
+  const n=Math.SQRT1_2,dx=ux*n,dy=uy*n;
+  const x0=a*W+dx*F(.185), y0=b*W+dy*F(.185);
+  const x1=a*W+dx*F(.335), y1=b*W+dy*F(.335);
+  x.strokeStyle=BK;x.lineWidth=W*.0075;x.lineCap='round';
+  x.beginPath();x.moveTo(x0,y0);x.lineTo(x1,y1);x.stroke();
+  const hw=F(.028),hl=F(.05);
+  x.beginPath();
+  x.moveTo(x1+dx*hl,y1+dy*hl);
+  x.lineTo(x1-dy*hw,y1+dx*hw);
+  x.lineTo(x1+dy*hw,y1-dx*hw);
+  x.closePath();x.fillStyle=BK;x.fill();
+ });
+ x.restore();
+ // خطوط القاعدة السوداء المزدوجة على الجهات الأربع
+ [OUT,INN].forEach(p=>{
+  const q=1-p,w=W*.0115;
+  seg(A,p,B,p,w,BK);seg(A,q,B,q,w,BK);
+  seg(p,A,p,B,w,BK);seg(q,A,q,B,w,BK);
+ });
+ // الدوائر الحمراء عند طرفَي كل خط قاعدة
+ const dot=(cxp,cyp)=>{
+  x.beginPath();x.arc(F(cxp),F(cyp),F(.032),0,7);x.fillStyle=CR;x.fill();
+  x.strokeStyle='rgba(34,26,16,.55)';x.lineWidth=1.4;x.stroke();
+  const rg=x.createRadialGradient(F(cxp)-F(.007),F(cyp)-F(.008),F(.004),F(cxp),F(cyp),F(.021));
+  rg.addColorStop(0,'#F0666A');rg.addColorStop(1,RD);
+  x.beginPath();x.arc(F(cxp),F(cyp),F(.021),0,7);x.fillStyle=rg;x.fill();
+ };
+ [A,B].forEach(t=>{dot(t,MID);dot(t,1-MID);dot(MID,t);dot(1-MID,t)});
+ // خطوط الصليب الرفيعة من المركز إلى خطوط القاعدة
+ x.strokeStyle='rgba(34,26,16,.55)';x.lineWidth=W*.003;
+ [[1,0],[-1,0],[0,1],[0,-1]].forEach(([ux,uy])=>{
+  x.beginPath();
+  x.moveTo(W/2+ux*F(.128),W/2+uy*F(.128));
+  x.lineTo(W/2+ux*F(.372),W/2+uy*F(.372));x.stroke();
+ });
+ // وردة البوصلة: نجمة ثمانية داخل دائرتين
+ const cxm=W/2,cym=W/2,rs=F(.112),ri=F(.040);
+ for(let k=0;k<8;k++){
+  const a0=k*Math.PI/4;
+  x.beginPath();
+  x.moveTo(cxm+Math.cos(a0)*rs,cym+Math.sin(a0)*rs);
+  x.lineTo(cxm+Math.cos(a0+Math.PI/8)*ri,cym+Math.sin(a0+Math.PI/8)*ri);
+  x.lineTo(cxm+Math.cos(a0-Math.PI/8)*ri,cym+Math.sin(a0-Math.PI/8)*ri);
+  x.closePath();
+  x.fillStyle=(k%2===0)?'#8E1A20':'#1B1510';x.fill();
+  x.strokeStyle='rgba(34,26,16,.5)';x.lineWidth=1;x.stroke();
+ }
+ x.strokeStyle=BK;x.lineWidth=W*.0055;
+ x.beginPath();x.arc(cxm,cym,F(.128),0,7);x.stroke();
+ x.lineWidth=W*.0032;
+ x.beginPath();x.arc(cxm,cym,F(.117),0,7);x.stroke();
+ // نقاط حمراء على المحاور الأربعة
+ [[1,0],[-1,0],[0,1],[0,-1]].forEach(([ux,uy])=>{
+  const px=cxm+ux*F(.128),py=cym+uy*F(.128);
+  x.beginPath();x.arc(px,py,F(.021),0,7);x.fillStyle=CR;x.fill();
+  x.beginPath();x.arc(px,py,F(.014),0,7);x.fillStyle=RD;x.fill();
+ });
+ // القلب الأحمر
+ x.beginPath();x.arc(cxm,cym,F(.032),0,7);x.fillStyle=CR;x.fill();
+ const hg=x.createRadialGradient(cxm-F(.01),cym-F(.012),F(.004),cxm,cym,F(.024));
+ hg.addColorStop(0,'#F0666A');hg.addColorStop(1,'#9E1B22');
+ x.beginPath();x.arc(cxm,cym,F(.024),0,7);x.fillStyle=hg;x.fill();
+ // الإطار الخشبي الداكن
+ const fw=W*.030;
+ const fg=x.createLinearGradient(0,0,W,W);
+ fg.addColorStop(0,'#7C4818');fg.addColorStop(.35,'#59300F');
+ fg.addColorStop(.7,'#8C5722');fg.addColorStop(1,'#492708');
+ x.strokeStyle=fg;x.lineWidth=fw;x.strokeRect(fw/2,fw/2,W-fw,W-fw);
+ x.strokeStyle='rgba(28,14,3,.6)';x.lineWidth=2;x.strokeRect(fw,fw,W-fw*2,W-fw*2);
+ x.strokeStyle='rgba(255,222,164,.20)';x.lineWidth=1.2;x.strokeRect(1,1,W-2,W-2);
+ // الأركان النحاسية + الجيوب السوداء
+ caPockets(x,W,[['#C9A03C'],['#C9A03C'],['#C9A03C'],['#C9A03C']],1);
+}
+// ② اللوح الحديث لأربعة لاعبين: حافة جلدية مخيطة وأربع مناطق ملوّنة
+function caSkin4(x,W){
+ const F=f=>f*W;
+ const COL=['#1F9D4E','#2160C8','#D42B2B','#E8B71D'];   // أسفل · يسار · أعلى · يمين
+ caGrain(x,W,'#F8EBCB','#F1DCAE','#E2C388');
+ const OUT=.940,INN=.872,A=.145,B=.855;
+ // مناطق اللاعبين الأربع
+ for(let k=0;k<4;k++){
+  x.save();
+  x.translate(W/2,W/2);x.rotate(k*Math.PI/2);x.translate(-W/2,-W/2);
+  const c=COL[k];
+  caRR(x,F(A),F(INN),F(B-A),F(OUT-INN),F(.012));x.fillStyle=c;x.fill();
+  x.fillStyle='rgba(255,255,255,.28)';
+  caRR(x,F(A),F(INN),F(B-A),F(.016),F(.008));x.fill();
+  x.fillStyle='rgba(0,0,0,.20)';
+  caRR(x,F(A),F(OUT-.014),F(B-A),F(.014),F(.007));x.fill();
+  x.globalAlpha=.34;x.fillStyle=c;
+  caRR(x,F(A+.045),F(INN-.038),F(B-A-.09),F(.021),F(.010));x.fill();
+  x.globalAlpha=1;
+  x.strokeStyle='rgba(30,20,10,.35)';x.lineWidth=1.4;
+  caRR(x,F(A),F(INN),F(B-A),F(OUT-INN),F(.012));x.stroke();
+  x.restore();
+ }
+ // شرائط الأركان الملوّنة — نصفان بلوني المنطقتين المجاورتين
+ const CN=[[0,0,COL[2],COL[1]],[1,0,COL[2],COL[3]],[1,1,COL[0],COL[3]],[0,1,COL[0],COL[1]]];
+ CN.forEach(([a,b,c1,c2])=>{
+  const P=(t)=>[a?W-F(t):F(t), b?W-F(t):F(t)];
+  const [x1,y1]=P(.300),[x2,y2]=P(.150);
+  x.lineWidth=W*.019;x.lineCap='round';
+  x.strokeStyle=c1;x.beginPath();x.moveTo(x1,y2);x.lineTo((x1+x2)/2,(y1+y2)/2);x.stroke();
+  x.strokeStyle=c2;x.beginPath();x.moveTo((x1+x2)/2,(y1+y2)/2);x.lineTo(x2,y1);x.stroke();
+ });
+ // شعار المنتصف: دائرتان بداخلهما مستطيلان
+ x.strokeStyle='#2C2118';x.lineWidth=W*.0055;
+ x.beginPath();x.arc(W/2,W/2,F(.132),0,7);x.stroke();
+ x.lineWidth=W*.0032;
+ x.beginPath();x.arc(W/2,W/2,F(.119),0,7);x.stroke();
+ caRR(x,W/2-F(.084),W/2-F(.064),F(.168),F(.052),F(.025));
+ x.fillStyle='#15110D';x.fill();
+ caRR(x,W/2-F(.084),W/2+F(.012),F(.168),F(.052),F(.025));
+ x.fillStyle='#F3E7CA';x.fill();
+ x.strokeStyle='rgba(40,28,16,.55)';x.lineWidth=1.4;x.stroke();
+ // الحافة الجلدية السوداء مع الغُرز البيضاء
+ const fw=W*.034;
+ const lg=x.createLinearGradient(0,0,W,W);
+ lg.addColorStop(0,'#33333A');lg.addColorStop(.42,'#131317');lg.addColorStop(1,'#2A2A31');
+ x.strokeStyle=lg;x.lineWidth=fw;x.strokeRect(fw/2,fw/2,W-fw,W-fw);
+ x.save();x.setLineDash([W*.016,W*.013]);x.lineWidth=W*.005;
+ x.strokeStyle='rgba(246,246,240,.8)';
+ x.strokeRect(fw*.52,fw*.52,W-fw*1.04,W-fw*1.04);
+ x.restore();
+ x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=1.6;x.strokeRect(fw,fw,W-fw*2,W-fw*2);
+ caPockets(x,W,[[COL[2]],[COL[3]],[COL[0]],[COL[1]]],0);
+}
+// الأركان والجيوب — نحاسية للكلاسيكي وملوّنة للحديث
+function caPockets(x,W,cols,brass){
+ const PR=CA_POCK*(W/CA_R);
+ [[0,0],[1,0],[1,1],[0,1]].forEach(([a,b],i)=>{
+  const px=a*W,py=b*W,c=cols[i][0];
+  const cap=PR*(brass?1.82:1.42);
+  x.save();
+  if(brass){
+   const gx=px+(a?-1:1)*cap, gy=py+(b?-1:1)*cap;
+   const bg=x.createLinearGradient(px,py,gx,gy);
+   bg.addColorStop(0,'#7A5714');bg.addColorStop(.32,'#F4E1A2');
+   bg.addColorStop(.62,'#C9A03C');bg.addColorStop(1,'#6E4D10');
+   x.beginPath();x.arc(px,py,cap,0,7);x.fillStyle=bg;x.fill();
+   x.strokeStyle='rgba(66,42,6,.55)';x.lineWidth=1.8;x.stroke();
+   const sd=cap*.76;
+   [[.26,.94],[.94,.26],[.70,.70]].forEach(([u,v])=>{
+    const sx=px+(a?-1:1)*sd*u, sy=py+(b?-1:1)*sd*v;
+    x.beginPath();x.arc(sx,sy,W*.0072,0,7);x.fillStyle='rgba(92,64,14,.8)';x.fill();
+    x.beginPath();x.arc(sx-1,sy-1,W*.0038,0,7);x.fillStyle='rgba(255,242,196,.65)';x.fill();
+   });
+  }else{
+   x.beginPath();x.arc(px,py,cap,0,7);x.fillStyle=c;x.fill();
+   x.beginPath();x.arc(px,py,cap,0,7);
+   x.strokeStyle='rgba(255,255,255,.35)';x.lineWidth=2;x.stroke();
+  }
+  const pg=x.createRadialGradient(px,py,PR*.12,px,py,PR);
+  pg.addColorStop(0,'#000');pg.addColorStop(.74,'#07080C');pg.addColorStop(1,brass?'#2A1D10':'#101014');
+  x.beginPath();x.arc(px,py,PR,0,7);x.fillStyle=pg;x.fill();
+  x.strokeStyle=brass?'rgba(255,232,170,.55)':'rgba(255,255,255,.45)';
+  x.lineWidth=2.2;x.stroke();
+  x.restore();
+ });
+}
+function caSkinTog(){
+ _ca.skin=(_ca.skin==='m')?'c':'m';
+ try{localStorage.setItem('caSkin',_ca.skin)}catch(e){}
+ _ca.bg=null;caRender();
+}
+function caBoardImg(W,four){
+ const key=W+'|'+(four?4:2);
+ if(_ca.bg&&_ca.bgKey===key)return _ca.bg;
+ const c=document.createElement('canvas');c.width=c.height=W;
+ const x=c.getContext('2d');
+ four?caSkin4(x,W):caSkin2(x,W);
+ _ca.bg=c;_ca.bgKey=key;
+ return c;
+}
 function caRender(rest){
  const cv=document.getElementById('caC');if(!cv)return;
- const cx=cv.getContext('2d'),W=cv.width;
+ const cx=cv.getContext('2d'),W=cv.width,H=cv.height;
  const sc=W/CA_R;
- cx.clearRect(0,0,W,W);
- // خشب اللوح
- const g=cx.createLinearGradient(0,0,W,W);
- g.addColorStop(0,'#E8C88A');g.addColorStop(.5,'#D9AE63');g.addColorStop(1,'#C08F45');
- cx.fillStyle=g;cx.fillRect(0,0,W,W);
- cx.strokeStyle='#7A4E1E';cx.lineWidth=W*.03;cx.strokeRect(W*.015,W*.015,W*.97,W*.97);
- // دائرة المركز وزخارف
- cx.strokeStyle='#8A5E2A';cx.lineWidth=2;
- cx.beginPath();cx.arc(W/2,W/2,W*.115,0,7);cx.stroke();
- cx.beginPath();cx.arc(W/2,W/2,W*.035,0,7);cx.fillStyle='#B7793A';cx.fill();
- cx.strokeStyle='#A8703A';cx.lineWidth=1.4;
- [[.16,.16],[.84,.16],[.16,.84],[.84,.84]].forEach(([a,b])=>{
-  cx.beginPath();cx.arc(W*a,W*b,W*.035,0,7);cx.stroke();
- });
- // خطوط القاعدة
- cx.strokeStyle='#8A5E2A';cx.lineWidth=W*.012;
- [[.1,.12,.9,.12],[.1,.88,.9,.88],[.12,.1,.12,.9],[.88,.1,.88,.9]].forEach(([x1,y1,x2,y2])=>{
-  cx.beginPath();cx.moveTo(W*x1,W*y1);cx.lineTo(W*x2,W*y2);cx.stroke();
- });
- // الجيوب
- [[0,0],[1,0],[0,1],[1,1]].forEach(([a,b])=>{
-  const px=a*W,py=b*W;
-  const pg=cx.createRadialGradient(px,py,2,px,py,CA_POCK*sc);
-  pg.addColorStop(0,'#05070C');pg.addColorStop(.8,'#0B1020');pg.addColorStop(1,'#3A2A14');
-  cx.beginPath();cx.arc(px,py,CA_POCK*sc,0,7);cx.fillStyle=pg;cx.fill();
- });
+ cx.clearRect(0,0,W,H);
+ // اللوح المرسوم (مُخزَّن مرة واحدة) — كلاسيكي للاعبَين وحديث لأربعة
+ if(!_ca.skin)_ca.skin=(RM.players&&RM.players.length>=4)?'m':'c';
+ cx.drawImage(caBoardImg(W,_ca.skin==='m'),0,0);
+ // مسند خشبي أسفل اللوح تظهر عليه يدك وهي تمسك الضارب
+ if(H>W){
+  const md=_ca.skin==='m';
+  const ag=cx.createLinearGradient(0,W,0,H);
+  if(md){ag.addColorStop(0,'#2B2B31');ag.addColorStop(.4,'#141418');ag.addColorStop(1,'#08080A')}
+  else{ag.addColorStop(0,'#4A2E13');ag.addColorStop(.4,'#25190C');ag.addColorStop(1,'#0C0906')}
+  cx.fillStyle=ag;cx.fillRect(0,W,W,H-W);
+  cx.fillStyle=md?'rgba(246,246,240,.30)':'rgba(255,214,138,.20)';cx.fillRect(0,W,W,2);
+  cx.save();cx.setLineDash([W*.016,W*.013]);cx.lineWidth=W*.004;
+  cx.strokeStyle=md?'rgba(246,246,240,.35)':'rgba(255,214,138,.18)';
+  cx.beginPath();cx.moveTo(0,H-W*.022);cx.lineTo(W,H-W*.022);cx.stroke();cx.restore();
+ }
  let pcs=_ca.sim?_ca.sim.pcs:(rest||(RM.ca?RM.ca.pcs:[])).map(p=>({x:p.x,y:p.y,t:p.t,r:CA_PR}));
  // الضارب ظاهر دائمًا على قاعدتك — لا يظهر عند السحب فقط
  if(!_ca.sim&&RM.ca){
@@ -19275,6 +19497,22 @@ function caRender(rest){
   const sx=_ca.drag?_ca.drag.sx:(_ca.aim?_ca.aim.x:(_ca.sx||CA_R/2));
   const sy=_ca.aim?_ca.aim.y:base;
   pcs=pcs.concat([{x:sx,y:sy,t:'s',r:CA_SR}]);
+ }
+ // اليد المرسومة: تمسك الضارب من خلفه فيبقى القرص فوق الأصابع
+ const handAt=(hx,hy,ang,scale)=>{
+  if(!_ca.hand)return;
+  cx.save();cx.translate(hx*sc,hy*sc);cx.rotate(ang||0);
+  const w=64*sc*(scale||1),h=80*sc*(scale||1);
+  cx.globalAlpha=.96;
+  cx.shadowColor='rgba(0,0,0,.4)';cx.shadowBlur=8*sc;cx.shadowOffsetY=3*sc;
+  cx.drawImage(_ca.hand,-w/2,-h*0.09,w,h);
+  cx.restore();
+ };
+ if(!_ca.sim&&RM.ca){
+  const base=CA_R-CA_SR-22;
+  const hx=_ca.drag?_ca.drag.sx:(_ca.sx||CA_R/2);
+  if(RM.ca.turn===RM.me)handAt(hx,base+CA_SR*.85,0,1);
+  else if(_ca.aim)handAt(_ca.aim.x,_ca.aim.y-CA_SR*.85,Math.PI,1);   // يد الخصم من جهته
  }
  for(const p of pcs){
   const r=(p.r||CA_PR)*sc,X=p.x*sc,Y=p.y*sc;
@@ -19291,24 +19529,10 @@ function caRender(rest){
  if(!_ca.sim&&RM.ca&&RM.ca.turn===RM.me){
   const by=(CA_R-CA_SR-22)*sc;
   cx.setLineDash([5,7]);cx.strokeStyle='rgba(255,233,168,.55)';cx.lineWidth=2;
-  cx.beginPath();cx.moveTo((CA_SR+26)*sc,by);cx.lineTo((CA_R-CA_SR-26)*sc,by);cx.stroke();cx.setLineDash([]);
+  cx.beginPath();cx.moveTo((CA_SR+42)*sc,by);cx.lineTo((CA_R-CA_SR-42)*sc,by);cx.stroke();cx.setLineDash([]);
   cx.fillStyle='rgba(255,233,168,.85)';cx.font='bold '+Math.round(15*sc)+'px system-ui';
   cx.textAlign='center';cx.textBaseline='middle';
-  cx.fillText('‹',(CA_SR+16)*sc,by);cx.fillText('›',(CA_R-CA_SR-16)*sc,by);
- }
- // اليد المرسومة: تمسك الضارب وتتبعه — وتظهر للخصم أيضًا
- const handAt=(hx,hy,ang,scale)=>{
-  if(!_ca.hand)return;
-  cx.save();cx.translate(hx*sc,hy*sc);cx.rotate(ang||0);
-  const w=44*sc*(scale||1),h=54*sc*(scale||1);
-  cx.drawImage(_ca.hand,-w/2,4*sc,w,h);
-  cx.restore();
- };
- if(!_ca.sim&&RM.ca){
-  const base=CA_R-CA_SR-22;
-  const hx=_ca.drag?_ca.drag.sx:(_ca.sx||CA_R/2);
-  if(RM.ca.turn===RM.me)handAt(hx,base+CA_SR*0.7,0,1);
-  else if(_ca.aim)handAt(_ca.aim.x,_ca.aim.y-CA_SR*1.6,Math.PI,1);   // يد الخصم من جهته
+  cx.fillText('‹',(CA_SR+30)*sc,by);cx.fillText('›',(CA_R-CA_SR-30)*sc,by);
  }
  // خط تصويب الخصم — تراه وهو يفكّر ويسدّد
  if(_ca.aim&&!_ca.sim){
@@ -19332,18 +19556,24 @@ function caRender(rest){
   cx.strokeStyle='#FFE9A8';cx.lineWidth=2;cx.stroke();
  }
 }
+function caSkinLoad(){
+ try{const v=localStorage.getItem('caSkin');if(v==='m'||v==='c')_ca.skin=v}catch(e){}
+}
 function caHandImg(){
  if(_ca.hand||_ca.handLoad)return;_ca.handLoad=1;
  const img=new Image();
  img.onload=()=>{_ca.hand=img;caRender()};
- img.src='data:image/svg+xml;utf8,'+encodeURIComponent(HAND_SVG);
+ // صورة مستقلة تحتاج xmlns وأبعادًا صريحة وإلا رفضها المتصفح ولم تظهر اليد
+ img.onerror=()=>{_ca.handLoad=0};
+ img.src='data:image/svg+xml;utf8,'+encodeURIComponent(
+  HAND_SVG.replace('<svg ','<svg xmlns="http://www.w3.org/2000/svg" width="64" height="78" '));
 }
 function caInit(){
  const cv=document.getElementById('caC');if(!cv||cv._on)return;cv._on=1;
- caHandImg();
+ caSkinLoad();caHandImg();
  caRender();
  const pos=e=>{const r=cv.getBoundingClientRect();
-  return [(e.clientX-r.left)*CA_R/r.width,(e.clientY-r.top)*CA_R/r.height]};
+  return [(e.clientX-r.left)*CA_R/r.width,(e.clientY-r.top)*CA_R/r.width]};
  const BASE=()=>CA_R-CA_SR-22;
  cv.onpointerdown=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
@@ -19393,7 +19623,10 @@ function rmCarrom(R){
     <b style="margin-inline-start:auto;color:var(--gold);font-size:13px">${C.sc[p.peer]||0}</b></div>
    <div style="font-size:9px;color:var(--tx2);margin-top:2px">${colName(C.col[p.peer])} · بقي ${left(C.col[p.peer])}</div>
   </div>`).join('')}</div>
- <div class="caWrap big"><canvas id="caC" width="520" height="520"></canvas></div>
+ <div class="caWrap big"><canvas id="caC" width="520" height="572"></canvas></div>
+ <div style="display:flex;justify-content:center;margin-top:6px">
+  <button onclick="caSkinTog()" style="background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">🎨 بدّل شكل اللوح</button>
+ </div>
  <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب على القاعدة ثم اسحب للخلف وأفلت 🎯':'دور '+nm(C.turn)+' — يصوّب…'}</div>
  ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}
  <div class="note">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 · إسقاط الضارب −1</div>`;
