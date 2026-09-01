@@ -13477,6 +13477,288 @@ function applyMatch(r,oppMmr,won){
  return res;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   نواة التصنيف — تصنيف مستقلّ لكل لعبة
+   ───────────────────────────────────────────────────────────────────
+   المبدأ: مهارة الكيرم ليست مهارة المعرفة. لكل لعبة ملفّ تصنيف خاصّ
+   بها، ولكلٍّ نموذج حساب يناسب طبيعتها، والموسم واحد يجمعها كلّها.
+
+   هذه الطبقة بيانات ومنطق فقط — لا ترسم شيئًا ولا تغيّر أي شاشة.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/** موسم واحد عالمي، ورتبة مستقلّة لكل لعبة داخله */
+const SEASON_ID=4;
+
+/** معرّفات الألعاب إنجليزية — لا يُستخدم الاسم العربي مفتاحًا للتخزين */
+const GAMES=['knowledge','carrom','uno','mafia','drawing','outsider'];
+
+/**
+ * تعريف كل لعبة — إضافة لعبة جديدة لاحقًا لا تتطلّب تعديل شاشة اللعب.
+ * scoreModel يحدّد كيف تتحوّل نتيجة المباراة إلى نقاط تصنيف.
+ * status: live · soon · maintenance
+ */
+const GAME_DEFS=[
+ {id:'knowledge',ar:'عالم المعرفة',icon:'bulb',rmKey:null,
+  desc:'سبع جولات بأنماط متغيّرة — أسرع وأدقّ يفوز.',
+  scoreModel:'winLoss',   ranked:1,casual:1,room:0,bot:0,pass:0,minP:2,maxP:2,status:'live'},
+ {id:'carrom',   ar:'كيرم',        icon:'ball',rmKey:'carrom',
+  desc:'صوّب وأسقط قطعك قبل خصمك.',
+  scoreModel:'winLoss',   ranked:1,casual:1,room:1,bot:1,pass:0,minP:2,maxP:4,status:'live'},
+ {id:'uno',      ar:'أونو',        icon:'cards',rmKey:'uno',
+  desc:'تخلّص من بطاقاتك قبل الجميع.',
+  scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:0,minP:2,maxP:4,status:'live'},
+ {id:'mafia',    ar:'مافيا',       icon:'user',rmKey:'mafia',
+  desc:'مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي.',
+  scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:0,pass:1,minP:5,maxP:12,status:'live'},
+ {id:'drawing',  ar:'مسابقة الرسم',icon:'palette',rmKey:'draw',
+  desc:'كلمة واحدة والكلّ يرسم — صوّتوا لأفضل لوحة.',
+  scoreModel:'placement', ranked:1,casual:1,room:1,bot:0,pass:1,minP:3,maxP:10,status:'live'},
+ {id:'outsider', ar:'برا السالفة', icon:'bulb',rmKey:'barra',
+  desc:'الكلّ يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة.',
+  scoreModel:'roundsAggregate',ranked:1,casual:1,room:1,bot:0,pass:1,minP:3,maxP:8,status:'live'}
+];
+const gameDef=id=>GAME_DEFS.find(g=>g.id===id)||null;
+/** مفتاح الغرفة (carrom · uno · mafia · draw · barra) إلى معرّف اللعبة */
+const gameIdOfRoom=k=>{const g=GAME_DEFS.find(x=>x.rmKey===k);return g?g.id:null};
+const gameName=id=>{const g=gameDef(id);return g?g.ar:''};
+
+/**
+ * ملفّ تصنيف لعبة واحدة.
+ * أسماء الحقول الداخلية باقية كما كانت (tier · div · rp · mmr …) لأنّ
+ * مواضع النداء القائمة تعتمد عليها؛ وأسماء المواصفة تُقرأ عبر rankView.
+ */
+function newRankProfile(gameId){
+ return {gameId:gameId,seasonId:SEASON_ID,
+  placed:false,placementDone:0,placementWins:0,
+  tier:0,div:3,rp:0,mmr:1000,protect:0,
+  seasonBest:{tier:0,div:3},
+  wins:0,losses:0,gamesPlayed:0,winStreak:0,bestStreak:0,
+  masteryXp:0,lastPlayedAt:0,seen:[]};
+}
+
+/** الشكل الذي تصفه المواصفة — للواجهة والتوثيق، لا للتخزين */
+function rankView(p){
+ return {gameId:p.gameId,seasonId:p.seasonId,
+  visibleTier:p.tier,division:p.div,rankPoints:p.rp,hiddenMMR:p.mmr,
+  peakTier:p.seasonBest.tier,peakDivision:p.seasonBest.div,
+  wins:p.wins,losses:p.losses,gamesPlayed:p.gamesPlayed,winStreak:p.winStreak,
+  placementMatchesRemaining:Math.max(0,5-p.placementDone),
+  masteryLevel:masteryLevel(p.masteryXp),unranked:!p.placed};
+}
+
+/** الإتقان يعكس الوقت والإنجاز، والرتبة تعكس المهارة — لا يُخلطان */
+function masteryLevel(xp){return Math.max(1,Math.floor(Math.sqrt((xp||0)/40))+1)}
+
+/** كل ملفّات التصنيف — تُنشأ عند أول نداء */
+function rankAll(){
+ if(!S.gameRanks)S.gameRanks={};
+ for(const id of GAMES)if(!S.gameRanks[id])S.gameRanks[id]=newRankProfile(id);
+ return S.gameRanks;
+}
+/** ملفّ تصنيف لعبة بعينها */
+function rankOf(gameId){
+ const all=rankAll();
+ return all[gameId]||(all[gameId]=newRankProfile(gameId));
+}
+
+/**
+ * الترحيل من الحالة القديمة: رتبة اليوم كانت رتبة المعرفة فعليًّا،
+ * فتنتقل كما هي، وباقي الألعاب تبدأ «غير مصنّف» لا برونزي.
+ */
+function migrateRanks(legacy){
+ const all=rankAll();
+ if(legacy&&typeof legacy==='object'&&!legacy.gameId){
+  const k=all.knowledge;
+  ['placed','placementDone','placementWins','tier','div','rp','mmr','protect','wins','losses']
+   .forEach(f=>{if(typeof legacy[f]==='number'||typeof legacy[f]==='boolean')k[f]=legacy[f]});
+  if(legacy.seasonBest&&typeof legacy.seasonBest.tier==='number')k.seasonBest={tier:legacy.seasonBest.tier,div:legacy.seasonBest.div};
+  k.gamesPlayed=(k.wins|0)+(k.losses|0);
+ }
+ return all;
+}
+
+/* ── S.ranked يبقى اسمًا صالحًا يشير إلى ملفّ المعرفة ──
+   ٤٤ موضع نداء قائمًا يستعملها، فتُعرَّف كخاصيّة وصول غير مُعدّدة:
+   لا تُحفظ مرّتين في التخزين، وتقرأ وتكتب في المصدر الجديد مباشرة. */
+function bindLegacyRanked(){
+ try{
+  const d=Object.getOwnPropertyDescriptor(S,'ranked');
+  if(d&&d.get)return;                     // مربوطة أصلًا
+  const legacy=d?S.ranked:null;
+  if(d)delete S.ranked;
+  Object.defineProperty(S,'ranked',{
+   configurable:true,enumerable:false,
+   get(){return rankOf('knowledge')},
+   set(v){migrateRanks(v)}
+  });
+  if(legacy)migrateRanks(legacy);
+ }catch(e){}
+}
+
+/* ═══ الأوضاع: من يمنح نقاط تصنيف ومن لا يمنح ═══
+   قاعدة ثابتة لا استثناء لها: الغرف الخاصة والكمبيوتر والعادي
+   والتمرير لا تمنح نقاط تصنيف إطلاقًا، حتى لا يصنع أحد حسابين
+   ويجمع رتبة. تمنح إتقانًا فقط. */
+const MODES_ALL=['ranked','casual','room','bot','pass','training'];
+function grantsRP(mode){return mode==='ranked'}
+/** خبرة الإتقان لكل وضع — الوضع المصنّف أعلاها والتدريب أدناها */
+const MASTERY_XP={ranked:12,casual:7,room:5,pass:5,bot:3,training:2};
+
+/* ═══ نماذج الحساب — لكل لعبة ما يناسبها ═══ */
+
+/** فوز/خسارة: المعرفة والكيرم. الإحصاءات الدقيقة للملفّ لا للنقاط. */
+function scoreWinLoss(res){
+ return {won:!!res.won,strength:res.won?1:0};
+}
+/** ترتيب: أونو والرسم. الأول يكسب كثيرًا والأخير يخسر أكثر. */
+function scorePlacement(res){
+ const n=Math.max(2,res.total|0),p=Math.min(n,Math.max(1,res.place|0));
+ const norm=(n-p)/(n-1);                 // ١ للأول · ٠ للأخير
+ return {won:p===1,strength:norm};
+}
+/** نتيجة فريق: مافيا. النتيجة أساس، والانسحاب يخصم، والإكمال يُحسب. */
+function scoreTeam(res){
+ let s=res.teamWon?1:0;
+ if(res.left)s-=0.5;                     // الانسحاب يضرّ ولو فاز فريقك
+ else if(res.completed)s+=0.05;
+ return {won:!!res.teamWon&&!res.left,strength:Math.max(0,Math.min(1,s))};
+}
+/** تجميع جولات: برا السالفة. نتيجة واحدة للمباراة لا نقطة لكل جولة. */
+function scoreRounds(res){
+ const n=Math.max(1,res.rounds|0),w=Math.max(0,Math.min(n,res.roundsWon|0));
+ const r=w/n;
+ return {won:r>0.5,strength:r};
+}
+const SCORE_MODELS={winLoss:scoreWinLoss,placement:scorePlacement,
+ teamResult:scoreTeam,roundsAggregate:scoreRounds};
+
+/** نقاط التصنيف من قوّة النتيجة وفرق المهارة — مدى واحد لكل الألعاب */
+function rpFromStrength(strength,myMmr,oppMmr){
+ const base=Math.round(-20+strength*44);          // ‎+24 للأول · ‎−20 للأخير
+ const diff=(oppMmr-myMmr)/150;                   // خصمٌ أقوى يزيد الكسب ويقلّل الخسارة
+ const adj=Math.round(Math.max(-1,Math.min(1,diff))*(base>=0?4:-4));
+ return Math.max(-28,Math.min(30,base+adj));
+}
+
+/**
+ * النقطة الوحيدة في المشروع التي تمنح أو تخصم نقاط تصنيف.
+ *
+ *   resolveMatch({gameId, mode, matchId, result, opponents})
+ *
+ * result يتبع scoreModel اللعبة:
+ *   winLoss         {won}
+ *   placement       {place, total}
+ *   teamResult      {teamWon, completed, left}
+ *   roundsAggregate {roundsWon, rounds}
+ *
+ * تعيد ما حدث فعلًا: {applied, rp, mmr, promoted, demoted, protected,
+ *                     placement, mastery, oldName, newName, reason}
+ */
+function resolveMatch(o){
+ o=o||{};
+ const def=gameDef(o.gameId);
+ const out={applied:false,rp:0,mmr:0,promoted:false,demoted:false,
+  protected:false,placement:false,mastery:0,oldName:'',newName:'',reason:''};
+ if(!def){out.reason='لعبة غير معروفة';return out}
+ if(def.status!=='live'){out.reason='اللعبة غير متاحة الآن';return out}
+ const mode=MODES_ALL.indexOf(o.mode)>=0?o.mode:'casual';
+ const p=rankOf(def.id);
+
+ // النتيجة الواحدة لا تُحتسب مرّتين مهما تكرّر بثّها
+ const mid=o.matchId?String(o.matchId):null;
+ if(mid){
+  if(!p.seen)p.seen=[];
+  if(p.seen.indexOf(mid)>=0){out.reason='نتيجة مكرّرة';return out}
+  p.seen.push(mid);
+  if(p.seen.length>24)p.seen.splice(0,p.seen.length-24);
+ }
+
+ const model=SCORE_MODELS[def.scoreModel]||scoreWinLoss;
+ const sc=model(o.result||{});
+ p.gamesPlayed++;
+ p.lastPlayedAt=Date.now();
+ p.masteryXp+=(MASTERY_XP[mode]||3);
+ out.mastery=MASTERY_XP[mode]||3;
+ out.applied=true;
+
+ if(!grantsRP(mode)){
+  out.reason='وضع لا يمنح نقاط تصنيف';
+  return out;                       // الإتقان فقط — لا رتبة ولا سجلّ تنافسي
+ }
+
+ const opps=(o.opponents||[]).map(x=>(x&&typeof x.mmr==='number')?x.mmr:1000);
+ const oppMmr=opps.length?Math.round(opps.reduce((a,b)=>a+b,0)/opps.length):1000;
+
+ out.oldName=rankName(p);
+ sc.won?p.wins++:p.losses++;
+ p.winStreak=sc.won?p.winStreak+1:0;
+ if(p.winStreak>p.bestStreak)p.bestStreak=p.winStreak;
+
+ const dm=mmrDelta(p.mmr,oppMmr,sc.won?1:0);
+ p.mmr+=dm;out.mmr=dm;
+
+ // مباريات تحديد المستوى — لا نقاط قبل أن تُعرف رتبتك
+ if(!p.placed){
+  p.placementDone++;if(sc.won)p.placementWins++;
+  out.placement=true;
+  if(p.placementDone>=5){
+   p.placed=true;
+   const w=p.placementWins;
+   if(w>=5){p.tier=2;p.div=2}
+   else if(w===4){p.tier=2;p.div=3}
+   else if(w===3){p.tier=1;p.div=1}
+   else if(w===2){p.tier=1;p.div=3}
+   else if(w===1){p.tier=0;p.div=1}
+   else {p.tier=0;p.div=3}
+   p.rp=0;p.protect=1;
+   p.seasonBest={tier:p.tier,div:p.div};
+  }
+  out.newName=rankName(p);
+  return out;
+ }
+
+ const d=rpFromStrength(sc.strength,p.mmr,oppMmr);
+ out.rp=d;p.rp+=d;
+
+ while(p.rp>=RP_PER_DIV){
+  if(p.tier>=TIERS.length-1){p.rp=RP_PER_DIV;break}
+  p.rp-=RP_PER_DIV;
+  if(p.div>1)p.div--;
+  else{p.tier++;p.div=tierOf(p).div===0?0:3}
+  out.promoted=true;p.protect=1;
+ }
+ while(p.rp<0){
+  if(p.protect>0){p.protect--;p.rp=0;out.protected=true;break}
+  if(p.tier===0&&p.div===3){p.rp=0;break}
+  p.rp+=RP_PER_DIV;
+  if(p.div<3&&tierOf(p).div!==0)p.div++;
+  else{p.tier--;p.div=1}
+  out.demoted=true;
+ }
+ const cur=p.tier*10+(4-p.div),best=p.seasonBest.tier*10+(4-p.seasonBest.div);
+ if(cur>best)p.seasonBest={tier:p.tier,div:p.div};
+ out.newName=rankName(p);
+ return out;
+}
+
+/** إعادة ضبط ليّنة عند بداية موسم: نزول درجتين لا هبوط إلى برونزي */
+function seasonSoftReset(newSeasonId){
+ const all=rankAll();
+ for(const id of GAMES){
+  const p=all[id];
+  if(!p.placed)continue;
+  for(let i=0;i<2;i++){
+   if(p.div<3&&tierOf(p).div!==0)p.div++;
+   else if(p.tier>0){p.tier--;p.div=1}
+  }
+  p.rp=0;p.protect=1;p.winStreak=0;
+  p.seasonBest={tier:p.tier,div:p.div};
+  p.seasonId=newSeasonId;
+  p.seen=[];
+ }
+ return all;
+}
+
 
 // ═══════════ نظام البطاقات — النسخة النهائية ═══════════
 // طُبّقت التصحيحات الاثنا عشر من مستند المراجعة
@@ -15604,6 +15886,7 @@ function doDelete(){
  S={name:'المستكشف',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,
   tutDone:0,ranked:null,cards:null,unlocked:{journey:1,quick:1},matches:0,wins:0,
   mis:{},claimed:{},ach:{},correct:0,nets:{},tab:'play',opt:S.opt};
+ bindLegacyRanked();
  NAV=[];toast('حُذف الحساب');splash();
 }
 
@@ -18005,7 +18288,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.9';
+const APP_VER='5.10';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -26562,6 +26845,7 @@ let S={name:'المستكشف',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{
  colXP:0,wild:null,shards:0,emotes:null,emoteDeck:null,favEmotes:null,
  chestInv:null,evolved:[],dealsBought:[],lastGift:null,
  matches:0,wins:0,mis:{},claimed:{},ach:{},correct:0,nets:{},tab:'play'};
+bindLegacyRanked();   // S.ranked صارت اسمًا لملفّ تصنيف المعرفة
 let G=null,cur='play';
 
 // ═══════════ مولّدات التصميم المطوّر ═══════════
@@ -27484,10 +27768,12 @@ function loadState(){
   if(!raw)return false;
   const d=JSON.parse(raw);
   if(!d||d.v!==1||!d.s)return false;
+  // رتبة النسخ القديمة كانت رتبة المعرفة فعليًّا — تُسحب قبل الدمج ثمّ تُرحَّل
+  const legacyRank=d.s.ranked;delete d.s.ranked;
   Object.assign(S,d.s);
+  bindLegacyRanked();migrateRanks(legacyRank);
   // إصلاح أي حقل ناقص من نسخة أقدم
   if(!S.cards)S.cards=defaultCards();
-  if(!S.ranked)S.ranked=defaultRanked();
   if(!S.stars)S.stars={};
   ensureEcon();
   return true;
