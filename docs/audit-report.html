@@ -1,0 +1,569 @@
+<title>ورقة قياس تحدّي</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --paper:#EDF0EF; --card:#F7F9F8; --ink:#15222A; --ink-2:#3D5560; --ink-3:#6E848D;
+  --rule:#C6D0D1; --rule-2:#DDE4E4;
+  --queen:#B23127; --queen-soft:rgba(178,49,39,.10); --queen-line:rgba(178,49,39,.34);
+  --teak:#7C4A22; --good:#25755A; --warn:#9A6B12;
+  --grid:rgba(21,34,42,.055);
+  --fs:16px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1519; --card:#141E23; --ink:#E4EBEA; --ink-2:#A9BCC1; --ink-3:#76898F;
+    --rule:#2A3941; --rule-2:#1E2A31;
+    --queen:#E4685A; --queen-soft:rgba(228,104,90,.13); --queen-line:rgba(228,104,90,.40);
+    --teak:#C08B57; --good:#57BA92; --warn:#D2A244;
+    --grid:rgba(228,235,234,.05);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1519; --card:#141E23; --ink:#E4EBEA; --ink-2:#A9BCC1; --ink-3:#76898F;
+  --rule:#2A3941; --rule-2:#1E2A31;
+  --queen:#E4685A; --queen-soft:rgba(228,104,90,.13); --queen-line:rgba(228,104,90,.40);
+  --teak:#C08B57; --good:#57BA92; --warn:#D2A244;
+  --grid:rgba(228,235,234,.05);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans Arabic",system-ui,"Segoe UI",sans-serif;
+  font-size:var(--fs); line-height:1.75; font-weight:400;
+  -webkit-font-smoothing:antialiased;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.sheet{max-width:1000px;margin:0 auto;padding:0 20px 90px}
+
+/* ── رأس الورقة ── */
+.masthead{padding:52px 0 26px;border-bottom:2px solid var(--ink);margin-bottom:0}
+.stamp{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--queen);
+  border:1px solid var(--queen-line);border-radius:2px;padding:5px 10px;margin-bottom:22px;
+}
+.stamp b{font-weight:600}
+h1{
+  font-family:"Reem Kufi",system-ui,sans-serif;font-weight:600;
+  font-size:clamp(34px,6.2vw,58px);line-height:1.12;margin:0 0 14px;
+  letter-spacing:-.005em;text-wrap:balance;
+}
+.dek{font-size:19px;color:var(--ink-2);max-width:60ch;margin:0 0 30px;font-weight:300;line-height:1.65}
+.meta{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--rule-2)}
+.meta div{
+  flex:1 1 160px;padding:12px 0;border-bottom:0;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3);
+}
+.meta div span{display:block;direction:ltr;text-align:right;color:var(--ink);font-size:14px;font-weight:500;margin-top:3px;font-variant-numeric:tabular-nums}
+
+/* ── مسطرة الأقسام ── */
+section{padding:56px 0;border-bottom:1px solid var(--rule-2)}
+section:last-of-type{border-bottom:0}
+.shead{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.snum{
+  font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600;
+  color:var(--queen);letter-spacing:.12em;padding-top:6px;flex:0 0 auto;
+}
+h2{
+  font-family:"Reem Kufi",system-ui,sans-serif;font-weight:500;
+  font-size:clamp(25px,4vw,34px);margin:0;line-height:1.25;letter-spacing:-.005em;
+}
+.slede{color:var(--ink-2);max-width:64ch;margin:0 0 34px;font-weight:300}
+h3{font-family:"Reem Kufi",system-ui,sans-serif;font-weight:500;font-size:20px;margin:38px 0 12px}
+p{max-width:66ch;margin:0 0 15px}
+strong{font-weight:600}
+.q{color:var(--queen);font-weight:600}
+
+/* ── بطاقات القياس ── */
+.gauges{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:1px;background:var(--rule-2);border:1px solid var(--rule-2);margin:0 0 34px}
+.gauge{background:var(--card);padding:18px 16px 16px}
+.gauge .v{
+  direction:ltr;font-family:"IBM Plex Mono",monospace;font-size:31px;font-weight:500;line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;display:block;margin-bottom:2px;
+}
+.gauge .u{direction:ltr;display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--ink-3)}
+.gauge .k{font-size:13px;color:var(--ink-2);margin-top:9px;line-height:1.45}
+.gauge.bad .v{color:var(--queen)}
+.gauge.ok .v{color:var(--good)}
+
+/* ── جداول ── */
+.tw{overflow-x:auto;margin:0 0 26px;border:1px solid var(--rule-2);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:520px}
+th{
+  text-align:right;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-3);font-weight:500;
+  padding:11px 14px;border-bottom:1px solid var(--rule);white-space:nowrap;
+}
+td{padding:11px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;unicode-bidi:plaintext;text-align:right}
+td code,p code,li code{font-family:"IBM Plex Mono",monospace;font-size:.88em;background:var(--queen-soft);padding:1px 5px;border-radius:2px;direction:ltr;display:inline-block}
+.id{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:13px;white-space:nowrap}
+.sev{border-inline-start:3px solid var(--rule)}
+.sev.hi{border-inline-start-color:var(--queen)}
+.sev.md{border-inline-start-color:var(--warn)}
+.pill{
+  display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.08em;
+  padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap;
+}
+.pill.miss{color:var(--queen)} .pill.part{color:var(--warn)} .pill.have{color:var(--good)}
+
+/* ── شيفرة ── */
+pre{
+  font-family:"IBM Plex Mono",monospace;font-size:13px;line-height:1.7;direction:ltr;text-align:left;
+  background:var(--card);border:1px solid var(--rule-2);border-inline-start:3px solid var(--queen-line);
+  padding:16px 18px;overflow-x:auto;margin:0 0 24px;
+}
+pre.rtlmap{direction:rtl;text-align:right;border-inline-start-color:var(--rule);font-size:12.5px;line-height:1.85}
+pre b{color:var(--queen);font-weight:500}
+.cap{font-size:12.5px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace;margin:-16px 0 26px}
+
+/* ── الرسم الهندسي ── */
+figure{margin:0 auto 30px;border:1px solid var(--rule-2);background:var(--card);max-width:660px}
+figure svg{display:block;width:100%;height:auto}
+.legend{display:grid;gap:9px;padding:16px 18px;border-top:1px solid var(--rule-2);font-size:13.5px;color:var(--ink-2);line-height:1.5}
+.legend div{display:grid;grid-template-columns:26px 1fr;align-items:start;gap:8px}
+.sw{display:block;width:22px;height:14px;margin-top:3px}
+.sw.wall{border-top:4px solid var(--ink);margin-top:8px;height:0}
+.sw.thr{border-top:2px solid var(--queen);margin-top:9px;height:0}
+.sw.rim{border-top:1px dotted var(--ink-3);margin-top:10px;height:0}
+.sw.tex{border-top:1.5px dashed var(--teak);margin-top:9px;height:0}
+.sw.dot{width:10px;height:10px;border-radius:50%;margin:5px 6px 0 6px}
+.sw.dot.g{background:var(--good)} .sw.dot.r{background:var(--queen)}
+.sw.hat{background:var(--queen-soft);border:1px solid var(--queen-line);height:13px}
+figcaption{font-size:13px;color:var(--ink-2);padding:14px 18px;border-top:1px solid var(--rule-2);line-height:1.6}
+.dl{fill:var(--ink-3);font-family:"IBM Plex Mono",monospace;font-size:11px}
+.dl.hot{fill:var(--queen)}
+.dn{fill:var(--ink);font-family:"IBM Plex Mono",monospace;font-size:12px;font-weight:600}
+
+/* ── قوائم ── */
+ul,ol{max-width:66ch;padding-inline-start:22px;margin:0 0 18px}
+li{margin-bottom:7px}
+.stages{list-style:none;padding:0;max-width:none;counter-reset:st}
+.stages>li{
+  counter-increment:st;position:relative;padding:20px 0 20px 0;border-top:1px solid var(--rule-2);margin:0;
+  display:grid;grid-template-columns:56px 1fr;gap:18px;
+}
+.stages>li::before{
+  content:counter(st,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace;font-size:22px;font-weight:600;color:var(--queen);
+  line-height:1.2;
+}
+.stages h4{font-family:"Reem Kufi",sans-serif;font-size:19px;font-weight:500;margin:0 0 8px}
+.stages ul{margin:0;font-size:14.5px;color:var(--ink-2)}
+.acc{
+  margin-top:10px;font-size:13.5px;background:var(--queen-soft);border-inline-start:2px solid var(--queen-line);
+  padding:9px 13px;color:var(--ink);
+}
+.acc b{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--queen);display:block;margin-bottom:3px}
+
+.callout{border:1px solid var(--rule);background:var(--card);padding:20px 22px;margin:0 0 28px}
+.callout p:last-child{margin-bottom:0}
+.callout .lbl{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:var(--queen);margin-bottom:8px}
+
+footer{padding:40px 0 0;border-top:2px solid var(--ink);font-size:13px;color:var(--ink-3);font-family:"IBM Plex Mono",monospace}
+@media (max-width:640px){
+  .sheet{padding:0 16px 60px}
+  section{padding:40px 0}
+  .shead{flex-wrap:wrap;gap:6px}
+  .stages>li{grid-template-columns:38px 1fr;gap:12px}
+  .stages>li::before{font-size:18px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="sheet">
+
+<header class="masthead">
+  <div class="stamp"><b>قراءة فقط</b> · لم يُعدَّل أي ملف إنتاج</div>
+  <h1>ورقة قياس تحدّي</h1>
+  <p class="dek">تشخيص بالأرقام لثلاثة أنظمة تنقّل متوازية، وثمانين شاشة نصفها خارج المكدّس، وجيبِ كيرم غير موجود فيزيائيًّا — ثم خطة إعادة بناء على ستّ مراحل.</p>
+  <div class="meta">
+    <div>النسخة المفحوصة<span>tahaddi v5.7</span></div>
+    <div>الالتزام<span>c36abaa</span></div>
+    <div>النسخة المحفوظة<span>legacy/v5.7</span></div>
+    <div>حجم الملف<span>5.11 MB</span></div>
+    <div>الأسطر<span>27,278</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="shead"><span class="snum">01</span><h2>الخلاصة</h2></div>
+  <p class="slede">خمسة أرقام تختصر التقرير. كلٌّ منها مقيس من الملفّ نفسه، لا مقدَّر.</p>
+
+  <div class="gauges">
+    <div class="gauge bad"><span class="v">3</span><span class="u">أنظمة</span><div class="k">أنظمة تنقّل متوازية لا يعرف أحدها الآخر</div></div>
+    <div class="gauge bad"><span class="v">32<span class="u"> / 80</span></span><div class="k">شاشة فقط يستطيع زرّ الرجوع الوصول إليها</div></div>
+    <div class="gauge bad"><span class="v">27</span><span class="u">شاشة</span><div class="k">بلا أي زرّ رجوع، منها كلّ شاشات ليلة العائلة</div></div>
+    <div class="gauge bad"><span class="v">0</span><span class="u">/ 3,042</span><div class="k">محاولة أسقطت الضارب في الجيب — مستحيل رياضيًّا</div></div>
+    <div class="gauge bad"><span class="v">0.08</span><span class="u">قطعة/ضربة</span><div class="k">معدّل السقوط الحقيقي على لوح كامل</div></div>
+  </div>
+
+  <p>المشروع كلّه ملفّ واحد: كتلة <code>&lt;script&gt;</code> واحدة فيها 3.59 مليون حرف، و<code>&lt;style&gt;</code> واحدة فيها 547 ألفًا، و808 دوال على المستوى الأعلى منها 80 دالة ترسم شاشة كاملة. لا حدود بين الوحدات، ولا سطح اختبار مستقلّ، وخطأ صياغة واحد في أي كتلة يُسقط اللعبة كلّها إلى شاشة بيضاء.</p>
+
+  <p>التنقّل ليس نظامًا بل ثلاثة: مكدّس <code>NAV</code>، ونداءات مباشرة تتخطّاه، وشريط علوي تُكتب فيه وجهة الرجوع يدويًّا. أمّا جيب الكيرم فليس عطل رسم ولا عطل توقيت: <strong>اللوح ليس فيه ثقوب أصلًا</strong> — الجدران الأربعة خطوط مصمتة تعبر فمَ الجيب، والسقوط يقع بالمصادفة حين يصادف قصُّ الجدار أن يركن مركز القطعة داخل نافذة عرضها <span class="q">1.62 وحدة</span>.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">02</span><h2>تشريح المشروع</h2></div>
+  <p class="slede">المقاييس الخام أوّلًا، ثمّ أنظمة التنقّل الثلاثة كما هي في الشيفرة.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>القياس</th><th>القيمة</th><th>القياس</th><th>القيمة</th></tr></thead>
+    <tbody>
+      <tr><td>كتل <code>&lt;script&gt;</code></td><td class="n">1 <span style="color:var(--ink-3)">(3,593,414 حرفًا)</span></td><td>دوال المستوى الأعلى</td><td class="n">808</td></tr>
+      <tr><td>كتل <code>&lt;style&gt;</code></td><td class="n">1 <span style="color:var(--ink-3)">(547,154 حرفًا)</span></td><td>ثوابت المستوى الأعلى</td><td class="n">252</td></tr>
+      <tr><td>دوال ترسم شاشة</td><td class="n">80</td><td>نداءات <code>go(</code></td><td class="n">87</td></tr>
+      <tr><td>نداءات <code>back()</code></td><td class="n">36</td><td>نداءات <code>refresh(</code></td><td class="n">54</td></tr>
+      <tr><td>تعديل <code>innerHTML</code> مباشرةً</td><td class="n">33</td><td>تعديل <code>classList</code> مباشرةً</td><td class="n">35</td></tr>
+      <tr><td>تعديل <code>style.display</code> مباشرةً</td><td class="n">14</td><td><code>setTimeout</code></td><td class="n">69</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>النظام الأوّل — مكدّس <code>NAV</code></h3>
+  <pre>let NAV=[];
+function push(fn,arg){NAV.push({fn,arg});run_(fn,arg)}
+function back(){
+ if(NAV.length&gt;1){NAV.pop();const t=NAV[NAV.length-1];run_(t.fn,t.arg)}
+ else{NAV=[];tab(cur)}
+}
+function run_(fn,arg){({cardsScr,cardDetail,cardLevels,levelDetail,deckScr,rankedScr, … })[fn](arg)}</pre>
+  <p class="cap">tahaddi/index.html:14207</p>
+  <p><code>run_</code> يعرف <strong>26 اسم شاشة</strong> في خريطته الحرفية، وأضافت موجة النادي سجلًّا ثانيًا <code>SCR</code> فوقه بـ24 شاشة عبر التفافٍ وقت التشغيل. المجموع القابل للحلّ 32 اسمًا من أصل 80 شاشة. <strong>كل مباراة، وكل لعبة عائلية، وغرف الشبكة، والكيرم، والأونو — خارج المكدّس تمامًا.</strong></p>
+
+  <h3>النظام الثاني — النداء المباشر</h3>
+  <p>25 انتقالًا بين الشاشات ينادي دالة الهدف مباشرةً من <code>onclick</code>، فلا يُسجَّل شيء. النتيجة أنّ شاشة <code>seasonScr</code> لها أبوان مختلفان — واحد يسجّل نفسه وآخر لا — فأيّ منطق رجوع ثابت فيها خاطئ في نصف الحالات.</p>
+
+  <h3>النظام الثالث — وجهة رجوع مكتوبة يدويًّا</h3>
+  <p>الدالة <code>tb(t,b)</code> تأخذ سلوك الرجوع كنصّ. من 24 استخدامًا لها: <strong>17 تكتب الوجهة يدويًّا</strong> على خمس وجهات فقط، و<strong>7 بلا وجهة أصلًا ⇒ بلا زرّ رجوع</strong>. وفي الشيفرة اعترافٌ صريح بالتضارب — شاشتان تختاران شريطهما وقت التشغيل حسب عمق المكدّس:</p>
+  <pre>${NAV.length&gt;1 ? tbar('اختر شبكتك')  : tb('اختر شبكتك')}
+${NAV.length&gt;1 ? tbar('ليلة العائلة') : tb('ليلة العائلة',"push('playModesScr')")}</pre>
+  <p class="cap">ترقيعٌ لعَرَض، لا حلّ لسبب</p>
+
+  <h3>ما هو غائب تمامًا</h3>
+  <div class="tw"><table>
+    <thead><tr><th>المطلوب</th><th>الحالة</th><th>الدليل</th></tr></thead>
+    <tbody>
+      <tr><td>استعادة موضع التمرير عند الرجوع</td><td><span class="pill miss">غائب</span></td><td><code>_keepY</code> له 3 مواضع فقط، ولا <code>push</code> ولا <code>back</code> يكتبه</td></tr>
+      <tr><td>استعادة الفلاتر والتبويب النشط</td><td><span class="pill miss">غائب</span></td><td>لا حفظ لحالة شاشة عند مغادرتها</td></tr>
+      <tr><td>حالة تحميل / هيكل عظمي</td><td><span class="pill miss">غائبة</span></td><td>صفر تطابق لـ<code>skeleton</code></td></tr>
+      <tr><td>حالة انقطاع شبكة</td><td><span class="pill miss">غائبة</span></td><td>صفر تطابق لـ<code>navigator.onLine</code></td></tr>
+      <tr><td>حالة فراغ وحالة خطأ</td><td><span class="pill part">جزئية</span></td><td>داخل النادي فقط (<code>clNoClub</code> / <code>clErrBox</code>)</td></tr>
+      <tr><td>تحذير من مغادرة بتغييرات غير محفوظة</td><td><span class="pill miss">غائب</span></td><td>صفر <code>beforeunload</code> · <code>confirm(</code> واحدة في الملفّ كلّه</td></tr>
+      <tr><td>زرّ رجوع ≥ 44×44 بكسل</td><td><span class="pill miss">غير مطابق</span></td><td><code>.bk{width:42px}</code> بلا ارتفاع صريح</td></tr>
+      <tr><td>زرّ رجوع أندرويد</td><td><span class="pill part">جزئي</span></td><td><code>history.pushState</code> مرّة واحدة، من وحدة النادي فقط</td></tr>
+      <tr><td>مالك واحد للشريط السفلي</td><td><span class="pill miss">غائب</span></td><td>12 تعديلًا مباشرًا لـ<code>$('nav').style.display</code></td></tr>
+      <tr><td>حماية من الضغط المزدوج · حرّاس مسارات</td><td><span class="pill miss">غائبة</span></td><td>لا سجلّ حماية ولا فحص شروط قبل الدخول</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">03</span><h2>خريطة المسارات الحالية</h2></div>
+  <p class="slede">54 حافّة مرصودة: 29 عبر المكدّس و25 نداءً مباشرًا يتخطّاه.</p>
+
+  <h3>الجذور — والعيب في السطر نفسه</h3>
+  <pre>function tab(k){cur=k;nav();NAV=[];hideArena();
+ ({play:playScr,                                  <b>// نداء مباشر — لا يُسجَّل جذرًا</b>
+   nets:()=&gt;resetNav('netsScr'),
+   cards:()=&gt;resetNav('cardsScr'),
+   clubs:()=&gt;resetNav(S.clan&amp;&amp;S.clan.c?'clubHome':'clSearchScr'),
+   shop:()=&gt;resetNav('shopScr'),
+   more:moreScr})[k]()}                           <b>// نداء مباشر — لا يُسجَّل جذرًا</b></pre>
+  <p>تبويبان من ستّة لا يسجّلان جذرهما، والأربعة الباقية تسجّله. فتختلف دلالة العمق بين التبويبات: في «المتجر» يعني <code>NAV.length===1</code> أنّك في الجذر، وفي «العب» يعني أنّك بعده بخطوة. <strong>النتيجة المرئية: الرجوع من أوّل شاشة داخل «العب» يعيد بناء التبويب كلّه فيضيع التمرير وكلّ حالة عابرة</strong>، بينما نظيره في «المتجر» يعيد رسم الجذر فقط.</p>
+
+  <h3>الخريطة</h3>
+  <pre class="rtlmap">[العب]      playScr ──مباشر──▶ evtScr            <b>بلا رجوع</b>
+            playScr ──مباشر──▶ seasonScr         <b>بلا رجوع · وله أب ثانٍ</b>
+
+[البطاقات]  cardsScr ──push──▶ cardDetail ──push──▶ cardLevels ──push──▶ levelDetail
+            cardsScr ──push──▶ deckScr ──push──▶ cardDetail
+
+[المزيد]    moreScr ──push──▶ colScr · emoteScr · seasonScr · setScr · wildScr
+            setScr ──push──▶ setSection ──push──▶ avScr
+            seasonScr ──push──▶ evoShopScr
+
+[المتجر]    shopScr ──push──▶ chestScr ──push──▶ oddsScr
+
+[الشبكات]   home ──مباشر──▶ lbScr · quickScr  ·  home ──push──▶ netsScr
+            netsScr ──مباشر──▶ mapScr  ·  rankedScr ──مباشر──▶ deckScr
+            lbScr ──push──▶ profScr  ·  profileView ──push──▶ avScr
+
+[العائلة]   partyScr ──مباشر──▶ gameHub ──مباشر──▶ soloScr
+            partyScr ──push──▶ playModesScr ──push──▶ netsScr · partyScr
+            barraTalk ▶ barraVote ▶ barraEnd ▶ partyScr        <b>كلّها مباشرة · بلا رجوع</b>
+            mafiaMorning ▶ mafPick · mafCheck ▶ mafiaMorning · mafWinCheck ▶ partyScr
+
+[النادي]    24 شاشة، كلّها push + سجلّ SCR       <b>القسم الوحيد المتّسق</b>
+
+[التعليم]   welcomeScr ▶ askTut ⇄ skipAsk · tDraw ▶ skipAsk</pre>
+
+  <div class="callout">
+    <div class="lbl">ما لا يظهر على الخريطة أصلًا</div>
+    <p>المباريات (<code>mRound</code>, <code>mResult</code>, <code>mDraw</code>)، وشاشة البحث عن خصم، وغرف الشبكة (<code>rmCarrom</code>, <code>rmUno</code>, <code>rmLobby</code>)، وكلّ شاشات المافيا وبرّا والرسم — لا تمثيل لها في <code>NAV</code>. الدخول بنداء مباشر والخروج بنداء آخر. <strong>لا توجد نقطة واحدة في اللعبة تعرف: هل اللاعب الآن داخل مباراة أم لا؟</strong></p>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">04</span><h2>أخطاء التنقّل</h2></div>
+  <p class="slede">ستّة عشر خطأً مرتّبة بالأثر. الشريط الأحمر: يمنع اللاعب من المتابعة. البرتقالي: يفسد التجربة دون أن يحبسه.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>#</th><th>الخطأ</th><th>ما يراه اللاعب</th><th>السبب والدليل</th></tr></thead>
+    <tbody>
+      <tr class="sev hi"><td class="id">N1</td><td>نصف الشاشات خارج المكدّس</td><td>زرّ رجوع أندرويد يخرج من اللعبة كلّها بدل الرجوع خطوة</td><td>80 شاشة مقابل 32 اسمًا قابلًا للحلّ — <code>:14207</code></td></tr>
+      <tr class="sev hi"><td class="id">N2</td><td>شاشات فرعية بلا زرّ رجوع</td><td>حَبْس داخل المتجر والموسم والمهام والإنجازات والتحديات</td><td><code>tb(title)</code> بوسيط واحد يرسم فراغًا مكان الزرّ — 7 مواضع</td></tr>
+      <tr class="sev hi"><td class="id">N3</td><td>البحث عن خصم بلا إلغاء</td><td>لا مخرج أثناء «جارٍ التجهيز» إلّا انتظار النتيجة</td><td>نفس سبب N2 — <code>${tb('جارٍ التجهيز')}</code></td></tr>
+      <tr class="sev hi"><td class="id">N4</td><td>وجهة رجوع مكتوبة يدويًّا</td><td>الرجوع يقفز إلى شاشة لم تأتِ منها</td><td>17 استخدامًا على 5 وجهات — <code>partyScr()</code> وحدها ×5</td></tr>
+      <tr class="sev hi"><td class="id">N5</td><td>الشاشة نفسها بأبوين</td><td><code>seasonScr</code> من «العب» ترجع إلى «المزيد»</td><td>مدخل عبر <code>push</code> وآخر بنداء مباشر</td></tr>
+      <tr class="sev hi"><td class="id">N16</td><td>لا آلة حالة للمباراة</td><td>لا شيء يمنع الخروج من مباراة جارية إلى تبويب آخر</td><td>المباريات خارج <code>NAV</code> تمامًا</td></tr>
+      <tr class="sev md"><td class="id">N6</td><td>لا استعادة تمرير</td><td>الرجوع من تفاصيل بطاقة يعيدك إلى أعلى القائمة</td><td><code>push</code>/<code>back</code> لا يكتبان <code>_keepY</code> — <code>:25394</code></td></tr>
+      <tr class="sev md"><td class="id">N7</td><td>لا استعادة فلاتر</td><td>التصفية والفرز يضيعان عند الرجوع</td><td>لا تُحفظ حالة شاشة عند المغادرة</td></tr>
+      <tr class="sev md"><td class="id">N8</td><td>عمق مختلف بين التبويبات</td><td>الرجوع من أوّل شاشة في «العب» يعيد بناء التبويب كلّه</td><td><code>play</code>/<code>more</code> لا يسجّلان جذرهما — <code>:26393</code></td></tr>
+      <tr class="sev md"><td class="id">N9</td><td>لا مالك للشريط السفلي</td><td>الشريط يظهر داخل مباراة أو يختفي خارجها</td><td>12 تعديلًا مباشرًا موزّعة على الملفّ</td></tr>
+      <tr class="sev md"><td class="id">N10</td><td>زرّ أندرويد داخل النادي فقط</td><td>سلوك مزدوج داخل التطبيق الواحد</td><td><code>clanNavPatch</code> يلفّ الدوال وقت التشغيل ولا يُفعَّل خارجه</td></tr>
+      <tr class="sev md"><td class="id">N11</td><td>لا حارس لتغييرات غير محفوظة</td><td>الخروج من محرّر هوية النادي يفقد التعديل بلا سؤال</td><td>صفر <code>beforeunload</code></td></tr>
+      <tr class="sev md"><td class="id">N12</td><td>زرّ الرجوع أصغر من الحدّ</td><td>خطأ لمس متكرّر على الهاتف</td><td><code>.bk{width:42px}</code> والمطلوب ≥ 44×44 — <code>:274</code></td></tr>
+      <tr class="sev md"><td class="id">N13</td><td>لا حماية من الضغط المزدوج</td><td>ضغطتان سريعتان تدفعان الشاشة مرّتين</td><td>لا سجلّ حماية</td></tr>
+      <tr class="sev md"><td class="id">N14</td><td>لا حرّاس مسارات</td><td>الوصول إلى شاشة تعتمد على حالة غير موجودة</td><td>لا فحص شروط قبل الدخول</td></tr>
+      <tr class="sev md"><td class="id">N15</td><td>لا حالة انقطاع شبكة</td><td>شاشة فارغة بلا تفسير عند انقطاع الاتصال</td><td>صفر <code>navigator.onLine</code></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">05</span><h2>عطل جيب الكيرم</h2></div>
+  <p class="slede">شُغِّلت دالة <code>caTick</code> الحقيقية — منسوخة حرفيًّا من ملفّ اللعبة بلا تعديل — في بيئة Node بلا رسم. الأرقام التالية أرقام اللعبة نفسها، لا أرقام نموذج مبسّط.</p>
+
+  <div class="callout">
+    <div class="lbl">السبب الجذري</div>
+    <p><strong>اللوح ليس فيه ثقوب.</strong> الجدران الأربعة خطوط مصمتة تمتدّ على طول الحافة كاملةً بلا أي فجوة عند الجيوب، والجيب ليس منطقة على السطح بل اختبار مسافة من نقطة الزاوية يُنفَّذ <em>بعد</em> أن يكون الجدار قد قصّ الموضع.</p>
+  </div>
+
+  <pre>// الجدران — تسري على طول الحافة كاملةً، بما فيها فمُ الجيب
+if(p.x&lt;p.r){p.x=p.r;p.vx=-p.vx*0.72}
+if(p.y&lt;p.r){p.y=p.r;p.vy=-p.vy*0.72}
+…
+// ثم الجيب — اختبار مسافة على الموضع المقصوص أصلًا
+if(Math.hypot(p.x-px,p.y-py)&lt;CA_POCK){ …تسقط… }</pre>
+  <p class="cap">tahaddi/index.html:19332</p>
+
+  <p>النتيجة الرياضية المباشرة: بعد القصّ، مركز أي قطعة محبوسٌ داخل المربّع <code>[r , 400−r]</code> في المحورين. إذن أقرب مسافة يبلغها مركزها من مركز الجيب هي <code>√2·r</code> دائمًا — مهما كانت الضربة.</p>
+
+  <figure>
+    <svg viewBox="0 0 430 300" role="img" style="direction:ltr" aria-label="رسم بمقياس لزاوية اللوح يبيّن أن حدّ قصّ الجدار يقع خارج عتبة الالتقاط بالنسبة للضارب">
+      <defs>
+        <pattern id="hatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="6" stroke="var(--queen)" stroke-width="2.4" opacity=".6"/>
+        </pattern>
+      </defs>
+      <circle cx="110" cy="95" r="100" fill="url(#hatch)"/>
+      <circle cx="110" cy="95" r="91.9" fill="var(--card)"/>
+      <circle cx="110" cy="95" r="122" fill="none" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="2 4"/>
+      <circle cx="110" cy="95" r="92.5" fill="none" stroke="var(--teak)" stroke-width="1.3" stroke-dasharray="6 4"/>
+      <circle cx="110" cy="95" r="100" fill="none" stroke="var(--queen)" stroke-width="2"/>
+
+      <line x1="175" y1="95" x2="175" y2="292" stroke="var(--good)" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="110" y1="160" x2="418" y2="160" stroke="var(--good)" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="192.5" y1="95" x2="192.5" y2="292" stroke="var(--queen)" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="110" y1="177.5" x2="418" y2="177.5" stroke="var(--queen)" stroke-width="1" stroke-dasharray="4 4"/>
+      <line x1="110" y1="95" x2="192.5" y2="177.5" stroke="var(--queen)" stroke-width="1.2"/>
+
+      <line x1="30" y1="95" x2="418" y2="95" stroke="var(--ink)" stroke-width="5"/>
+      <line x1="110" y1="30" x2="110" y2="292" stroke="var(--ink)" stroke-width="5"/>
+
+      <circle cx="175" cy="160" r="5" fill="var(--good)"/>
+      <circle cx="192.5" cy="177.5" r="5" fill="var(--queen)"/>
+      <circle cx="110" cy="95" r="3.5" fill="var(--ink)"/>
+
+      <line x1="202.5" y1="95" x2="202.5" y2="84" stroke="var(--teak)" stroke-width=".8"/>
+      <text class="dl" x="198" y="80" text-anchor="end" fill="var(--teak)">18.5</text>
+      <line x1="210" y1="95" x2="210" y2="58" stroke="var(--queen)" stroke-width=".8"/>
+      <text class="dn" x="210" y="52" text-anchor="middle" fill="var(--queen)">20</text>
+      <line x1="232" y1="95" x2="232" y2="32" stroke="var(--ink-3)" stroke-width=".8"/>
+      <text class="dl" x="232" y="26" text-anchor="middle">24.4</text>
+
+      <line x1="176.5" y1="169.9" x2="184.9" y2="161.5" stroke="var(--queen)" stroke-width="1.4"/>
+      <line x1="188.3" y1="181.7" x2="196.7" y2="173.3" stroke="var(--queen)" stroke-width="1.4"/>
+      <line x1="186.6" y1="171.6" x2="248" y2="214" stroke="var(--queen)" stroke-width=".8"/>
+      <text class="dn" x="252" y="218" fill="var(--queen)">+3.33</text>
+
+      <line x1="181" y1="166" x2="256" y2="140" stroke="var(--good)" stroke-width=".8"/>
+      <text class="dn" x="260" y="144" fill="var(--good)">18.38</text>
+      <line x1="198.5" y1="183.5" x2="256" y2="262" stroke="var(--queen)" stroke-width=".8"/>
+      <text class="dn" x="260" y="266" fill="var(--queen)">23.33</text>
+      <line x1="110" y1="191" x2="62" y2="232" stroke="var(--queen)" stroke-width=".8"/>
+      <text class="dn" x="58" y="236" text-anchor="end" fill="var(--queen)">1.62</text>
+      <text class="dl" x="418" y="290" text-anchor="end">1 board unit = 5 px</text>
+    </svg>
+    <div class="legend">
+      <div><i class="sw wall"></i><span>الجداران — يعبران فمَ الجيب بلا انقطاع، فلا فجوة في السطح</span></div>
+      <div><i class="sw thr"></i><span>عتبة الالتقاط = 20 وحدة من مركز الجيب</span></div>
+      <div><i class="sw rim"></i><span>الحلقة المرسومة = 24.4 — وهي ما يراه اللاعب</span></div>
+      <div><i class="sw tex"></i><span>الحفرة المطبوعة في صورة اللوح = 18.5</span></div>
+      <div><i class="sw hat"></i><span>المساحة المخطّطة = كامل نافذة السقوط المتاحة على اللوح</span></div>
+      <div><i class="sw dot g"></i><span>أقرب موضع لمركز قطعة نصف قطرها 13 ⟶ 18.38 · داخل العتبة بفارق <span class="q">1.62 وحدة</span></span></div>
+      <div><i class="sw dot r"></i><span>أقرب موضع لمركز الضارب نصف قطره 16.5 ⟶ 23.33 · <span class="q">يتجاوز العتبة بـ 3.33 — لا يسقط أبدًا</span></span></div>
+    </div>
+    <figcaption>زاوية اللوح بالمقياس. حدّ القصّ الذي يفرضه الجدار — النقطتان — هو أقرب ما يبلغه مركز القطعة من مركز الجيب مهما كانت الضربة. النقطة الحمراء تقع خارج دائرة الالتقاط، ولا تصويب ولا قوّة تُدخلها.</figcaption>
+  </figure>
+
+  <div class="tw"><table>
+    <thead><tr><th>التجربة</th><th>النتيجة</th></tr></thead>
+    <tbody>
+      <tr><td>الضارب مصوَّب على قلب الجيب تمامًا · 88 قيمة سرعة من 1 إلى 9.74 (أقصى قوّة ممكنة)</td><td class="n"><span class="q">0 / 88 دخلت</span><br><span style="color:var(--ink-3)">أقرب مسافة بلغها: 26.31 · المطلوب &lt; 20</span></td></tr>
+      <tr><td>الضارب من 3,042 وضعًا وزاوية داخل رُبع الجيب مباشرةً</td><td class="n"><span class="q">0 / 3,042 دخلت</span></td></tr>
+      <tr><td>لوح كامل (19 قطعة + ضارب) · 87 ضربة افتتاحية</td><td class="n"><span class="q">7 قطع في المجموع</span><br><span style="color:var(--ink-3)">0.08 قطعة لكل ضربة — واحدة كلّ 12 ضربة</span></td></tr>
+      <tr><td>قطعة تنزلق بمحاذاة الحافة ولا تقصد الجيب أصلًا</td><td class="n"><span class="q">ابتلعها الجيب</span><br><span style="color:var(--ink-3)">في السرعات 3 و5 و8 كلّها</span></td></tr>
+      <tr><td>مخروط قبول قطعة وحيدة · سرعة 3</td><td class="n">±0.5°</td></tr>
+      <tr><td>مخروط القبول نفسه · سرعة 5 و7</td><td class="n">±30°</td></tr>
+      <tr><td>مخروط القبول نفسه · سرعة 9</td><td class="n">±18.75°</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>قراءة الأرقام</h3>
+  <p><strong>الضارب لا يسقط أبدًا</strong>، وهذا ليس نقصًا تجميليًّا: قانون الكيرم يعدّ سقوطه خطأً بخصم نقطة، والشيفرة نفسها تحمل رسالة الخطأ <code>'الضارب (−1)'</code> داخل <code>caPotMsg</code> — وهي <strong>شيفرة ميتة لا تُنفَّذ في أي حالة</strong>. قاعدةٌ طُبِّقت في الإصدار 5.6 وغير قابلة للتحقّق أصلًا.</p>
+  <p><strong>السقوط يحدث بالمصادفة لا بالتصويب.</strong> ما يُسقط القطعة ليس دخولها الفم، بل أن يصادف قصُّ الجدارين أن يركن مركزها داخل نافذة عرضها 1.62 وحدة. ولذلك: قطعة تمشي على الحافة ولا تقصد الجيب تُبتلع، وقطعة مصوَّبة تصويبًا مثاليًّا بسرعة هادئة ترتدّ إلّا في نطاق ±0.5°، وضربة قويّة بخطأ تصويب 30° تدخل.</p>
+  <p><strong>السلوك غير مطّرد مع القوّة.</strong> مخروط القبول يقفز من ±0.5° عند سرعة 3 إلى ±30° عند 5 ثمّ ينكمش إلى ±18.75° عند 9. لا يستطيع لاعب أن يبني نموذجًا ذهنيًّا على هذا.</p>
+
+  <h3>ما ليس سببًا — نُفي بالقياس حتى لا يُصلَح الشيء الخطأ</h3>
+  <ul>
+    <li><strong>ليس tunnelling.</strong> أقصى سحب <code>√(95²+95²)=134.35</code> بكسل × <code>k=0.0725</code> = <strong>9.74 وحدة لكلّ إطار</strong>، وقطر منطقة الالتقاط 40 وحدة. لا قفز فوق الجيب في خطوة واحدة.</li>
+    <li><strong>ليست حركة السقوط.</strong> أُضيفت في 5.6 وتعمل كما ينبغي؛ المشكلة قبلها: القطعة لا تدخل أصلًا.</li>
+    <li><strong>ليست قطعًا مستقرّة فوق الفم.</strong> فُحصت 480 ضربة لقطعة و108 للضارب: صفر حالة استقرّت داخل الحلقة المرسومة دون أن تُحتسب. الحالة السائدة أنّ القطعة ترتدّ عن <em>جدار غير مرئي يعبر فم الجيب</em>.</li>
+  </ul>
+
+  <h3>أربعة أقطار لجيب واحد</h3>
+  <div class="tw"><table>
+    <thead><tr><th>ما هو</th><th>نصف القطر بوحدات اللوح</th></tr></thead>
+    <tbody>
+      <tr><td>الحفرة المطبوعة في الصورة — اللوح الكلاسيكي</td><td class="n">18.5</td></tr>
+      <tr><td>الحفرة المطبوعة في الصورة — لوح الأربعة</td><td class="n">13.9</td></tr>
+      <tr><td>البئر الاصطناعي <code>caWell</code> المرسوم فوقها</td><td class="n">20.0</td></tr>
+      <tr><td>الحلقة الخارجية <code>caRims</code></td><td class="n">24.4</td></tr>
+      <tr><td><strong>العتبة الفيزيائية الفعّالة</strong></td><td class="n"><span class="q">1.62</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>اللاعب يرى فمًا نصف قطره 24.4 ويلعب على نافذة عرضها 1.62. وفي لوح الأربعة يزيد الخلل: البئر المرسوم أكبر بنحو 44٪ من الحفرة المطبوعة تحته، فتظهر بقعة داكنة لا تطابق الخشب.</p>
+
+  <div class="callout">
+    <div class="lbl">البنية الصحيحة — بلا أي إخفاء</div>
+    <ol>
+      <li><strong>مستوى ثنائي الأبعاد واحد</strong> مرجعًا وحيدًا للمواضع، منفصلًا تمامًا عن الرسم.</li>
+      <li><strong>الجدران تصير أربع قطع مقطوعة عند الجيوب.</strong> عند الفم لا يوجد جدار — الفراغ هناك حقيقي.</li>
+      <li><strong>الجيب مِجَسّ دائري</strong>، والاختبار: هل يعبر مسارُ مركز القطعة خلال هذا الإطار قرصَ المجسّ؟ (قطعة مستقيمة ضدّ دائرة، لا نقطة نهائية)، مع شرط تداخل حقيقي.</li>
+      <li><strong>حافة الجيب جسم مادّي</strong>: قوسان قصيران عند طرفَي الفم يرتدّ عنهما ما لم يدخل — وهذا ما يعطي إحساس «لعقت الحافة وخرجت».</li>
+      <li><strong>حركة السقوط منفصلة عن الفيزياء</strong>: بمجرّد تجاوز المجسّ تخرج القطعة من مستوى المحاكاة فلا تؤثّر في اصطدام ولا تعود.</li>
+      <li><strong>خطوات فرعية للزمن</strong> لا تتجاوز الواحدة منها نصفَ أصغر نصف قطر، فيبقى النظام صحيحًا لو زادت القوّة مستقبلًا.</li>
+      <li><strong>مقاس واحد للحقيقة</strong>: نصف قطر الجيب يُشتقّ من الصورة المقاسة، ويُرسم البئر والحلقة بالمقاس نفسه.</li>
+      <li><strong>محرّك القوانين منفصل عن الفيزياء</strong>: الفيزياء تُخرج «ما الذي سقط ومتى»، والقوانين تقرّر النقاط والخطأ والدور بلا علم بالإحداثيات.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">06</span><h2>خطة إعادة البناء</h2></div>
+  <p class="slede">ستّ مراحل مرتّبة بالاعتماد: كلّ مرحلة تعتمد على ما قبلها وقابلة للإصدار وحدها. لا تُحذف ميزة عاملة قبل أن يعمل بديلها في المرحلة نفسها.</p>
+
+  <ol class="stages">
+    <li><div>
+      <h4>نواة التنقّل</h4>
+      <ul>
+        <li>موجّه واحد بسجلّ شاشات صريح: <code>{id, render, guard, keepScroll, showsBottomNav, isMatch}</code>.</li>
+        <li>تسجيل الشاشات الثمانين كلّها — بما فيها المباريات والغرف وليلة العائلة.</li>
+        <li>شريط علوي واحد إجباري: رجوع أعلى اليمين، مساحة لمس ≥ 44×44، ينادي <code>router.back()</code> فقط. حذف <code>tb(t,b)</code> بعد تحويل المواضع الـ17.</li>
+        <li>حفظ واستعادة التمرير والفلاتر والتبويب النشط عند كلّ رجوع.</li>
+        <li>مالك واحد للشريط السفلي؛ زرّ أندرويد على مستوى التطبيق كلّه؛ حماية الضغط المزدوج؛ حارس التغييرات غير المحفوظة.</li>
+      </ul>
+      <div class="acc"><b>اختبار القبول</b>من أي شاشة، ضغط الرجوع 20 مرّة متتالية ينتهي بالجذر بلا استثناء ولا شاشة بيضاء.</div>
+    </div></li>
+
+    <li><div>
+      <h4>تدفّق «العب» و«ليلة العائلة»</h4>
+      <ul>
+        <li>لا دخول مباشر إلى مباراة: كلّ لعبة لها شاشة دخول تختار الوضع — كود · بحث · كمبيوتر · تمرير الهاتف.</li>
+        <li>إعادة بناء «العب» على تدرّج Ranked واضح، و«ليلة العائلة» بلون مميّز لكلّ لعبة.</li>
+        <li>شاشات المافيا وبرّا والرسم تدخل السجلّ ويصير لها رجوع وخروج صريح.</li>
+      </ul>
+      <div class="acc"><b>اختبار القبول</b>لا مسار في اللعبة يصل إلى مباراة بلا مرور بشاشة اختيار الوضع.</div>
+    </div></li>
+
+    <li><div>
+      <h4>آلة حالة المباراة والغرفة</h4>
+      <ul>
+        <li><code>MATCH</code> و<code>ROOM</code> كآلتَي حالة صريحتين.</li>
+        <li>داخل المباراة: لا شريط سفلي، وزرّ الرجوع يفتح «قائمة المباراة» (متابعة · قوانين · انسحاب) لا يخرج مباشرة.</li>
+        <li>الانسحاب، ومهلة إعادة الاتصال، وإلغاء البحث بلا سباق حالة.</li>
+      </ul>
+      <div class="acc"><b>اختبار القبول</b>الخروج من مباراة جارية مستحيل بلا تأكيد؛ وإلغاء البحث لا يترك اللاعب في حالة معلّقة.</div>
+    </div></li>
+
+    <li><div>
+      <h4>فيزياء الكيرم</h4>
+      <ul>
+        <li>تنفيذ البنية الثمانية أعلاه كوحدة خالصة بلا DOM ولا رسم، قابلة للاختبار في Node.</li>
+        <li>فصل محرّك القوانين عن الفيزياء؛ وضعان: كلاسيكي وسريع.</li>
+      </ul>
+      <div class="acc"><b>اختبار القبول العددي</b>الضارب يسقط عند تصويبه على الجيب · معدّل السقوط على لوح كامل يتجاوز 0.5 قطعة لكل ضربة مصوَّبة · مخروط القبول يتناقص باطّراد كلّما زادت المسافة · قطعة تمشي على الحافة ولا تقصد الجيب لا تُبتلع.</div>
+    </div></li>
+
+    <li><div>
+      <h4>واجهة الكيرم</h4>
+      <ul>
+        <li>الرسم يستهلك مخرجات الفيزياء فقط.</li>
+        <li>مقاس واحد للجيب يُشتقّ من الصورة المقاسة، فيتطابق البئر والحلقة والمجسّ.</li>
+        <li>حركة السقوط طبقةً مستقلّة فوق مستوى اللعب.</li>
+      </ul>
+    </div></li>
+
+    <li><div>
+      <h4>المتجر والتقدّم</h4>
+      <ul>
+        <li>تنقّل المتجر + شاشة تفاصيل المنتج + تأكيد شراء + منع تكرار العملية.</li>
+        <li>فصل كامل بين مسارات التقدّم الثلاثة: طريق الكؤوس · Ranked · الموسم.</li>
+        <li>شاشة نتيجة موحّدة، وحالات التحميل والفراغ والخطأ والانقطاع على مستوى التطبيق كلّه.</li>
+      </ul>
+    </div></li>
+  </ol>
+
+  <h3>تقسيم المصدر</h3>
+  <pre>src/
+  core/     router.js  stack.js  guards.js  bus.js  storage.js
+  ui/       topbar.js  bottomnav.js  modal.js  sheet.js  states.js  motion.js
+  screens/  play/  family/  clan/  store/  profile/  season/  settings/
+  match/    machine.js  matchmaking.js  result.js  forfeit.js  reconnect.js
+  games/
+    carrom/ physics.js  rules.js  render.js  input.js  board.js
+    uno/    rules.js  render.js
+  data/     cards.js  economy.js  progression.js
+  build.mjs                <b># يدمج الكلّ في tahaddi/index.html</b></pre>
+  <p>الملفّ المنشور يبقى ملفًّا واحدًا كما هو اليوم — شرطُ النشر كصفحة واحدة قائم — لكنّ مصدره يصير وحدات مستقلّة تُختبر وحدةً وحدة.</p>
+</section>
+
+<section>
+  <div class="shead"><span class="snum">07</span><h2>حواجز الأمان</h2></div>
+  <div class="tw"><table>
+    <thead><tr><th>الحاجز</th><th>الحالة</th></tr></thead>
+    <tbody>
+      <tr><td>نسخة محفوظة من الإصدار العامل</td><td><span class="pill have">قائم</span> فرع <code>legacy/v5.7</code> مدفوع إلى GitHub عند <code>c36abaa</code></td></tr>
+      <tr><td>قاعدة «لا حذف قبل بديل»</td><td><span class="pill have">مثبَّتة</span> ومُلزِمة لكلّ مرحلة</td></tr>
+      <tr><td>اختبارات تسبق نقل الشيفرة</td><td><span class="pill have">قائم</span> كلّ مرحلة تبدأ باختباراتها</td></tr>
+      <tr><td>فحص صياغة ولقطات شاشة قبل كلّ نشر</td><td><span class="pill have">قائم</span> منذ الإصدارات السابقة</td></tr>
+    </tbody>
+  </table></div>
+  <p style="color:var(--ink-3);font-size:14px">ملاحظة إجرائية: الوسم <code>legacy-v5.7</code> رُفض دفعه (خطأ 403 من وسيط الشبكة على دفع الوسوم). الفرع <code>legacy/v5.7</code> هو النسخة المحفوظة المعتمدة، وهو مدفوع ومتاح.</p>
+</section>
+
+<footer>
+  الأرقام كلّها قابلة لإعادة الإنتاج · <span style="color:var(--ink-2)">tools/carrom-diagnosis/</span> · التقرير النصّي: <span style="color:var(--ink-2)">docs/AUDIT-AND-REFACTOR-PLAN.md</span>
+</footer>
+
+</div>
+<script>
+document.documentElement.setAttribute('dir','rtl');
+document.documentElement.setAttribute('lang','ar');
+</script>
