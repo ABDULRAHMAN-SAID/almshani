@@ -13359,11 +13359,11 @@ const TIERS=[
  {k:'gold',n:'Gold',ar:'ذهبي',c:'#E8B23A',div:3,t:13,opt:[5,5]},
  {k:'platinum',n:'Platinum',ar:'بلاتيني',c:'#5DCAA5',div:3,t:12,opt:[5,5]},
  {k:'diamond',n:'Diamond',ar:'ماسي',c:'#5AC8F5',div:3,t:11,opt:[5,6]},
- {k:'master',n:'Master',ar:'ماستر',c:'#B76CF0',div:3,t:11,opt:[6,6]},
- {k:'grandmaster',n:'Grandmaster',ar:'جراند ماستر',c:'#8B3FD9',div:3,t:10,opt:[6,6]},
- {k:'champion',n:'Champion',ar:'تشامبيون',c:'#E24B4A',div:3,t:9,opt:[6,6]},
- {k:'mythic',n:'Mythic',ar:'ميثيك',c:'#FF6B9D',div:3,t:9,opt:[6,6]},
- {k:'legend',n:'Legend',ar:'ليجند',c:'#FFD700',div:0,t:8,opt:[6,6]}
+ {k:'master',n:'Master',ar:'محترف',c:'#B76CF0',div:3,t:11,opt:[6,6]},
+ {k:'grandmaster',n:'Grandmaster',ar:'نخبة',c:'#8B3FD9',div:3,t:10,opt:[6,6]},
+ {k:'champion',n:'Champion',ar:'بطل',c:'#E24B4A',div:3,t:9,opt:[6,6]},
+ {k:'mythic',n:'Mythic',ar:'أسطوري',c:'#FF6B9D',div:3,t:9,opt:[6,6]},
+ {k:'legend',n:'Legend',ar:'قمة الأساطير',c:'#FFD700',div:0,t:8,opt:[6,6]}
 ];
 
 const RP_PER_DIV=100;
@@ -13376,16 +13376,14 @@ function defaultRanked(){
 }
 
 const tierOf=r=>TIERS[Math.min(r.tier,TIERS.length-1)];
-function rankLabel(r){
+/** زوج «الحالي / الهدف»: يُعزل اتجاهه فلا تنقلب الأرقام داخل نصّ عربي (البند ٦٥) */
+const numPair=(a,b)=>`<span dir="ltr" style="display:inline-block;font-variant-numeric:tabular-nums">${a} / ${b}</span>`;
+/** اسم الرتبة كما يراه اللاعب: عربي بأرقام رومانية — سياسة واحدة في المشروع كلّه */
+function rankName(r){
  const t=tierOf(r);
- if(t.div===0) return t.n+(r.globalRank?` #${r.globalRank.toLocaleString('en-US')}`:'');
- return `${t.n} ${['','I','II','III'][r.div]}`;
+ return t.div===0 ? t.ar : `${t.ar} ${['','I','II','III'][r.div]}`;
 }
-function rankLabelAr(r){
- const t=tierOf(r);
- if(t.div===0) return t.ar;
- return `${t.ar} ${['','١','٢','٣'][r.div]}`;
-}
+const rankLabel=rankName, rankLabelAr=rankName;   // توافق خلفي مع مواضع النداء القائمة
 
 /** الوقت وعدد الخيارات يتغيران بالرتبة — القاعدة السادسة */
 /** كل نوع جولة له أرضية زمنية لا تُخترق مهما ارتفعت الرتبة */
@@ -13475,8 +13473,6 @@ function applyMatch(r,oppMmr,won){
  const cur=r.tier*10+(4-r.div);
  const best=r.seasonBest.tier*10+(4-r.seasonBest.div);
  if(cur>best)r.seasonBest={tier:r.tier,div:r.div};
- // ترتيب عالمي وهمي في Legend
- if(r.tier===9&&!r.globalRank)r.globalRank=12842;
  res.newLabel=rankLabel(r);
  return res;
 }
@@ -13915,16 +13911,16 @@ const EMOTES=[
  // نادرة
  {k:'confident',n:'ثقة',m:'واثق تماماً',r:'rare',src:'المتجر'},
  {k:'angry',n:'غضب',m:'غاضب!',r:'rare',src:'الإنجازات'},
- {k:'tense',n:'توتر',m:'لحظة حرجة',r:'rare',src:'Season Pass'},
+ {k:'tense',n:'توتر',m:'لحظة حرجة',r:'rare',src:'تذكرة الموسم'},
  {k:'love',n:'إعجاب',m:'أعجبني!',r:'rare',src:'المتجر'},
  {k:'sleep',n:'نعسان',m:'مملّ…',r:'rare',src:'الصفقات اليومية'},
  {k:'salute',n:'تحية',m:'احترامي',r:'rare',src:'المتجر'},
- {k:'watch',n:'مراقبة',m:'أراقبك',r:'rare',src:'Mastery'},
+ {k:'watch',n:'مراقبة',m:'أراقبك',r:'rare',src:'الإتقان'},
  {k:'hourglass',n:'الوقت يمضي',m:'الوقت يمضي!',r:'rare',src:'المتجر'},
  // ممتازة — شخصيات
  {k:'crown',n:'الدب الملك',m:'الملك هنا',r:'epic',src:'البطولات'},
  {k:'brain',n:'العبقري',m:'عبقرية!',r:'epic',src:'الأحداث'},
- {k:'fire',n:'النمر الأبيض',m:'زمجرة!',r:'epic',src:'Collection Level'},
+ {k:'fire',n:'النمر الأبيض',m:'زمجرة!',r:'epic',src:'مستوى المجموعة'},
  {k:'wizard',n:'الساحر',m:'خدعة سحرية',r:'epic',src:'المتجر'},
  {k:'pirate',n:'الثعلب الماكر',m:'خدعتك!',r:'epic',src:'الصناديق'},
  {k:'champion',n:'العملاق الصخري',m:'صلب كالصخر',r:'epic',src:'الإنجازات'},
@@ -13934,7 +13930,7 @@ const EMOTES=[
  {k:'camel',n:'الجمل المستهزئ',m:'ولا يهمك',r:'legendary',src:'المتجر'},
  {k:'lion',n:'ملك الغابة',m:'زئير!',r:'legendary',src:'الصناديق الأسطورية'},
  {k:'monkey',n:'القرد المشاغب',m:'ما شفت شي',r:'legendary',src:'الأحداث'},
- {k:'owl',n:'البومة الحكيمة',m:'حكمة اليوم',r:'legendary',src:'Season Pass'}
+ {k:'owl',n:'البومة الحكيمة',m:'حكمة اليوم',r:'legendary',src:'تذكرة الموسم'}
 ];
 const EMOTE_CD=2500;  // البند 19
 
@@ -14514,7 +14510,7 @@ function introDraw(){
  <div style="font-size:10.5px;color:var(--tx2);margin-top:3px">${t.ar} ${['III','II','I'][r.div]||''}</div>
  <div onclick="introProfile()" style="font-size:10px;color:var(--info,#5AC8F5);font-weight:800;margin-top:5px;cursor:pointer">${ico('user',11)} عرض الملف الكامل ›</div>
  </div>
- <div class="vsx" style="font-size:19px">VS</div>
+ <div class="vsx" style="font-size:19px">ضد</div>
  <div style="width:52px;height:52px;flex-shrink:0;border-radius:50%;overflow:hidden;
   background:linear-gradient(145deg,#FFE9A8,#A87518);padding:3px">${avatarArt(46)}</div>
  </div>
@@ -15209,7 +15205,7 @@ function cardDetail(id){
   <div class="mtl" style="font-size:22px">${eff}${capped?` <span style="font-size:11px;color:var(--warn)">مقيّد من ${lv}</span>`:''}</div>
   <div class="pbf" style="margin-top:7px"><div class="pbi" style="height:8px">
    <i style="width:${Math.min(100,st.copies/need*100)}%"></i></div></div>
-  <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">${st.copies} / ${need} نسخة</div>
+  <div style="font-size:10.5px;color:var(--tx2);margin-top:4px">${numPair(st.copies,need)} نسخة</div>
   ${masteryOf(st.uses)?`<div style="font-size:10.5px;color:var(--gold);margin-top:5px">
    ${ico('star',14)} إتقان ${MASTERY[masteryOf(st.uses)-1].n}</div>`:''}
   ${canUpgrade(id)?`<button class="rbtn" style="margin-top:9px" onclick="upg(${id})">
@@ -15313,7 +15309,7 @@ function cardLevels(id){
  <div class="pbf" style="margin-top:9px"><div class="pbi">
   <i style="width:${Math.min(100,st.copies/upgNeed(c.r,st.lv)*100)}%"></i></div></div>
  <div style="font-size:11.5px;color:var(--tx2);margin-top:5px">
-  ${st.copies} / ${upgNeed(c.r,st.lv)} نسخة${(S.wild?.[c.r]||0)?` · ${ico('wild',16)} ${S.wild[c.r]} جوكر`:''}</div>
+  ${numPair(st.copies,upgNeed(c.r,st.lv))} نسخة${(S.wild?.[c.r]||0)?` · ${ico('wild',16)} ${S.wild[c.r]} جوكر`:''}</div>
  <div style="font-size:12px;margin-top:10px">تكلفة الترقية:
   <span class="mtl">${upgCoin(c.r,st.lv).toLocaleString('en-US')} عملة</span></div>
  <button class="${canUpgrade(id)?'rbtn':'btn g'}" style="margin-top:11px"
@@ -15811,12 +15807,12 @@ function shopScr(){
 
  ${banner("المزيد")}
  ${[[`${ico('wild',16)}`,`بطاقات الجوكر`,`wildScr`],[`${ico('energy',15)}`,`شظايا التطور`,`evoShopScr`],
-    [`${ico('user',16)}`,`التعبيرات`,`emoteScr`],[`${ico('ticket',16)}`,`Season Pass`,`seasonScr`]].map(([i,n,f])=>
+    [`${ico('user',16)}`,`التعبيرات`,`emoteScr`],[`${ico('ticket',16)}`,`تذكرة الموسم`,`seasonScr`]].map(([i,n,f])=>
  `<div class="li" style="cursor:pointer" onclick="push('${f}')"><div class="lr">
   <span style="font-size:20px">${i}</span><div class="lb"><div class="lt">${n}</div></div>
   <span style="color:var(--mut)">›</span></div></div>`).join('')}
 
- <div class="note">${ico('gem',15)} لا تشتري RP ولا فوزًا ولا إجابة ولا وقتًا إضافيًا</div>
+ <div class="note">${ico('gem',15)} لا تشتري نقاط تصنيف ولا فوزًا ولا إجابة ولا وقتًا إضافيًا</div>
  </div>`);
 }
 function takeGift(){
@@ -15988,14 +15984,14 @@ function wildScr(){
   <div class="ls">يعوّض نسخة من بطاقة ${RARITY[r].n}</div></div>
   <div class="mtl" style="font-size:20px">${n}</div></div></div>`}).join('')}
  <div class="sl">المصادر</div>
- <div class="note" style="text-align:right">الصناديق · Season Pass · البطولات · الأحداث · المتجر · مكافآت مستوى المجموعة</div>
+ <div class="note" style="text-align:right">الصناديق · تذكرة الموسم · البطولات · الأحداث · المتجر · مكافآت مستوى المجموعة</div>
  </div>`);
 }
 
 // ═══════════ البند 7 — التطور ═══════════
 function evoShopScr(){
  ensureEcon();
- go(`<div class="scr on">${tbar('التطور Evolution')}
+ go(`<div class="scr on">${tbar('التطوّر')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center"><div style="font-size:38px">${ico('energy',15)}</div>
  <div class="mtl" style="font-size:24px;margin-top:6px">${S.shards}</div>
@@ -16016,7 +16012,7 @@ function evoShopScr(){
     lv10&&S.shards>=ECON.evoShards?`<button class="btn gd" style="width:auto;padding:6px 12px;font-size:11.5px"
      onclick="doEvolve(${id})">تطوير</button>`:`<span style="color:var(--mut)">${ico('lock',15)}</span>`}
    </div></div>`}).join('')}
- <div class="note">التطور يغيّر أسلوب اللعب أو يقدّم Sidegrade — لا زيادة قوة ضخمة</div></div>`);
+ <div class="note">التطوّر يغيّر أسلوب اللعب أو يقدّم ترقية جانبية — لا زيادة قوة ضخمة</div></div>`);
 }
 function doEvolve(id){
  if(S.shards<ECON.evoShards){toast('شظايا غير كافية');return}
@@ -16430,7 +16426,7 @@ function rankedScr(){
  if(!S.ranked)S.ranked=defaultRanked();
  const r=S.ranked,t=tierOf(r);
  if(!r.placed){
-  go(`<div class="scr on">${tb('Ranked',"tab('play')")}
+  go(`<div class="scr on">${tb('التصنيف',"tab('play')")}
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:8px 0">
   <div style="width:64px;height:64px;margin:0 auto">${tierEmblem(0,64)}</div>
@@ -16449,21 +16445,20 @@ function rankedScr(){
   <div class="note">البطاقات تعمل · لا مساعدات تكشف الإجابة · لا وقت إضافي</div></div>`);
   return;
  }
- go(`<div class="scr on">${tb('Ranked',"tab('play')")}
+ go(`<div class="scr on">${tb('التصنيف',"tab('play')")}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:6px 0">
  <div style="width:58px;height:58px;margin:0 auto">${tierEmblem(r.tier,58)}</div>
- <div style="font-size:24px;font-weight:900;color:${t.c};margin-top:6px">${rankLabel(r)}</div>
- <div style="font-size:12px;color:var(--tx2)">${rankLabelAr(r)}</div>
+ <div style="font-size:24px;font-weight:900;color:${t.c};margin-top:6px">${rankName(r)}</div>
  <div class="pbf" style="margin-top:12px"><div class="pbi">
  <i style="width:${Math.min(100,r.rp)}%"></i></div></div>
- <div style="font-size:12px;color:var(--tx2);margin-top:5px">${Math.max(0,r.rp)}/${RP_PER_DIV} RP</div>
+ <div style="font-size:15px;font-weight:900;margin-top:6px">${numPair(Math.max(0,r.rp),RP_PER_DIV)}</div>
+ <div style="font-size:10px;color:var(--tx2);margin-top:2px">نقاط التصنيف</div>
  ${r.protect>0?`<div style="font-size:11px;color:var(--ok);margin-top:6px">${ico('shield',16)} لديك مباراة حماية</div>`:''}
  </div>
  <div style="display:flex;gap:7px;margin-top:12px">
  ${[[`${ico('trophy',16)}`,r.wins,`انتصارات`],[`${ico('broken',16)}`,r.losses,`خسائر`],
-    [`${ico('chart',16)}`,r.wins+r.losses?Math.round(r.wins/(r.wins+r.losses)*100)+'%':'—','نسبة'],
-    [`${ico('energy',15)}`,r.mmr,'MMR']].map(([i,v,l])=>
+    [`${ico('chart',16)}`,r.wins+r.losses?Math.round(r.wins/(r.wins+r.losses)*100)+'%':'—','نسبة الفوز']].map(([i,v,l])=>
  `<div style="flex:1;text-align:center;background:rgba(232,178,58,.08);
   border:1px solid rgba(232,178,58,.24);border-radius:10px;padding:7px 3px">
   <div style="font-size:12px">${i}</div><div class="mtl" style="font-size:13px">${v}</div>
@@ -16989,7 +16984,7 @@ function mDraw(){
   go(`<div class="scr on">${mHeader()}
   <div class="cfm" style="margin-top:20px;border-color:var(--no)">
   <div class="q">هل أنت متأكد من الانسحاب؟<br>
-  <span style="color:var(--tx2);font-size:12px">سيتم احتساب المباراة خسارة وقد تفقد نقاط RP</span></div>
+  <span style="color:var(--tx2);font-size:12px">سيتم احتساب المباراة خسارة وقد تفقد نقاط تصنيف</span></div>
   <div class="btns"><button class="rbtn" onclick="closeQuit()"><span>العودة للمباراة</span></button>
   <button class="btn g" style="color:var(--no)" onclick="quitMatch(1)">تأكيد الانسحاب</button></div></div>
   </div>`);
@@ -17786,7 +17781,7 @@ function mResult(res,won,coins,xp,frag){
  <div class="stc"><div class="i">${ico('up',14)}</div><div class="v">+${xp}</div><div class="l">خبرة</div></div>
  <div class="stc"><div class="i">${ico('cards',16)}</div><div class="v">+${frag}</div><div class="l">نسخ بطاقات</div></div>
  <div class="stc"><div class="i">${ico('flame',15)}</div><div class="v">${M.log.filter(l=>l.ok).length}/${M.log.length}</div><div class="l">جولات</div></div></div>
- <div style="margin-top:20px"><button class="rbtn" onclick="rankedScr()"><span>Ranked</span></button>
+ <div style="margin-top:20px"><button class="rbtn" onclick="rankedScr()"><span>التصنيف</span></button>
  <button class="btn g" style="margin-top:9px" onclick="tab('play')">الرئيسية</button></div>
  </div></div>`);
 }
@@ -17814,7 +17809,7 @@ const UNLOCKS=[
  {k:'quick',n:'التحدي السريع',req:()=>true},
  {k:'cards',n:'البطاقات',req:()=>totStars()>=3,d:'اجمع 3 نجوم',sr:3},
  {k:'casual',n:'تحدي الخصم',req:()=>totStars()>=6,d:'اجمع 6 نجوم',sr:6},
- {k:'ranked',n:'Ranked',req:()=>totStars()>=12,d:'اجمع 12 نجمة',sr:12},
+ {k:'ranked',n:'اللعب المصنّف',req:()=>totStars()>=12,d:'اجمع 12 نجمة',sr:12},
  {k:'auction',n:'المزايدة الكبرى',req:()=>S.ranked&&S.ranked.placed,d:'أكمل مباريات التحديد'},
  {k:'clubs',n:'الأندية',req:()=>totStars()>=6,d:'اجمع 6 نجوم',sr:6},
  {k:'party',n:'ليلة العائلة',req:()=>true}
@@ -18010,7 +18005,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.8.1';
+const APP_VER='5.9';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -18252,7 +18247,7 @@ const MODE_ART={
   <path d="M38 8 C45 10 49 12 51 14 L51 26 C51 37 46 43 38 47 C34.5 45 32 42.6 30.3 40 L30.3 12 C32.6 10.4 35.1 9 38 8 Z"
    fill="url(#maCb)" stroke="url(#maCg)" stroke-width="2" transform="rotate(7 40 28)"/>
   <path d="M28 20 l8.5 5 v10 l-8.5 5 -8.5-5 v-10 z" fill="#141B2E" stroke="url(#maCg)" stroke-width="2.2"/>
-  <text x="28" y="33.6" text-anchor="middle" font-size="10.5" font-weight="900" fill="#FFE9A8">VS</text>
+  <text x="28" y="33.6" text-anchor="middle" font-size="10.5" font-weight="900" fill="#FFE9A8">ضد</text>
   <ellipse cx="13" cy="14" rx="4" ry="2" fill="#fff" opacity=".25" transform="rotate(-20 13 14)"/></svg>`,
  party:`<svg viewBox="0 0 56 56"><defs>
   <linearGradient id="maPg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
@@ -18285,7 +18280,7 @@ const MODE_ART={
 function playModesScr(){
  const sections=[
   {t:'تنافس',items:[
-   {k:'ranked',n:'Ranked',d:'7 جولات · أنماط متغيرة',big:1,go:"rankedScr()"},
+   {k:'ranked',n:'لعب مصنّف',d:'7 جولات · أنماط متغيرة',big:1,go:"rankedScr()"},
   ]},
   {t:'سريع',items:[
    {k:'quick',n:'تحدي سريع',d:'6 أسئلة',go:'quickScr()'},
@@ -25014,7 +25009,7 @@ function clChatScr(){
   <div class="ls">يرفع الكتم مشرفٌ أو من هو أعلى منه.</div></div>`:''}
  <div class="note">اضغط مطوّلًا على أي رسالة، أو زر ⋯ على البطاقات: رد · نسخ · كتم · إبلاغ.<br>
  القواعد تُطبَّق في طبقة النادي لا في الشاشة: ٣ ثوانٍ بين رسالة وأخرى، وقصّ النص وفلترة الألفاظ
- والروابط والتكرار في clanText.</div>
+ والروابط والتكرار قبل أن تُنشر الرسالة.</div>
  </div>`);
   clChatBind();
   cl5Nav();
@@ -27001,7 +26996,7 @@ function vsBar(){
  <div class="vsn">${S.name}</div>
  <div style="font-size:9px;color:var(--gold);font-weight:900">${ico('trophy',10)} ${myCups}</div>
  <div class="vss" style="color:var(--info)">${G.pts}</div></div>
- <div class="vsx">VS</div>
+ <div class="vsx">ضد</div>
  <div class="vsp" style="border-color:var(--no)">
  <div style="width:52px;height:52px;margin:0 auto 6px">${face(EMOTES[hashStr(G.vs.name)%EMOTES.length].k,52)}</div>
  <div class="vsn">${G.vs.name}</div>
@@ -27330,7 +27325,7 @@ function achWall(p){
      <span style="font-size:12.5px;font-weight:900">${f.n}</span>
      <span style="display:inline-flex;gap:3px">${[0,1,2].map(j=>`<span style="width:8px;height:8px;border-radius:3px;display:inline-block;background:${j<done?['#CD7F32','#C8D0DC','#E8B23A'][j]:'#2A3247'}"></span>`).join('')}</span></div>
     <div class="pbf" style="margin-top:5px"><div class="pbi" style="height:6px"><i style="width:${done>=3?100:pct}%"></i></div></div>
-    <div style="font-size:9.5px;color:var(--tx2);margin-top:3px">${done>=3?`مكتمل — ${v.toLocaleString('en-US')}`:`${v.toLocaleString('en-US')} / ${nxt.toLocaleString('en-US')}`}</div>
+    <div style="font-size:9.5px;color:var(--tx2);margin-top:3px">${done>=3?`مكتمل — ${v.toLocaleString('en-US')}`:numPair(v.toLocaleString('en-US'),nxt.toLocaleString('en-US'))}</div>
    </div></div>`;
  }).join('');
  return {html,earned,total:ACH_FAM.length*3};
