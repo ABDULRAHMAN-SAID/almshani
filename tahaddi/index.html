@@ -19189,7 +19189,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.22';
+const APP_VER='5.23';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20331,6 +20331,14 @@ function unoApplyState(d){
  RM.uno=d;RM.phase='uno';
  if(prev&&d.by&&d.top!==prev.top)setTimeout(()=>unoFly(d.by,d.top),40);
  if(RM.solo&&isBot(d.turn))setTimeout(unoBot,RM.diff==='hard'?1100:1600);
+ if(RM.solo&&d.call&&!d.call.said){
+  const pSay=RM.diff==='hard'?1:RM.diff==='mid'?.8:.55, pCatch=RM.diff==='hard'?1:RM.diff==='mid'?.7:.3;
+  const key=d.call.p+':'+(d.cnt||[]).map(c=>c.n).join(',');
+  if(RM._unoCallKey===key)return;RM._unoCallKey=key;
+  if(isBot(d.call.p)){if(Math.random()<pSay)setTimeout(()=>{if(RM.U&&RM.U.call&&RM.U.call.p===d.call.p&&!RM.U.call.said)unoCallAct({by:d.call.p,a:'uno'})},600+Math.random()*900)}
+  else{const bot=(RM.players||[]).map(p=>p.peer).find(isBot);
+   if(bot&&Math.random()<pCatch)setTimeout(()=>{if(RM.U&&RM.U.call&&RM.U.call.p===d.call.p&&!RM.U.call.said)unoCallAct({by:bot,a:'catch'})},2600+Math.random()*1200)}
+ }
 }
 function rmUnoIntro(){
  const I=RM.unoIntro;
@@ -20349,15 +20357,17 @@ function unoPub(extra){
  const U=RM.U;
  rmSend(Object.assign({t:'uno',top:U.top,col:U.col,turn:RM.players[U.turn].peer,dir:U.dir,by:U.lastBy||null,
   cnt:RM.players.map(p=>({p:p.peer,n:U.hands[p.peer].length})),dk:U.deck.length,
-  drawP:U.draw,drew:U.drew||null},extra||{}));
+  drawP:U.draw,drew:U.drew||null,call:U.call?{p:U.call.p,said:U.call.said}:null},extra||{}));
 }
 const unoOk=(card,top,col)=>card[0]==='w'||card[0]===col||card[1]===top[1];
 // جوكر +4 لا يُلعب إلا إذا لم يكن بيدك لون الطاولة — قانون رسمي
 const unoW4Ok=(card,hand,col)=>card!=='wF'||!hand.some(c=>c[0]===col);
 function unoAct(d){
  if(!RM.host||!RM.U)return;
+ if(d.a==='uno'||d.a==='catch')return unoCallAct(d);
  const U=RM.U,cur=RM.players[U.turn].peer;
  if(d.by!==cur)return;
+ if(U.call&&U.call.p!==cur)U.call=null;   // لعب التالي: انتهت فرصة الإمساك
  const hand=U.hands[cur];
  const nm=p=>(RM.players.find(x=>x.peer===p)||{}).name||'لاعب';
  const nxt=k=>(U.turn+U.dir*(1+(k||0))+RM.players.length*2)%RM.players.length;
@@ -20410,7 +20420,28 @@ function unoAct(d){
    rank:RM.players.map(p=>({p:p.peer,c:(U.hands[p.peer]||[]).length})).sort((a,b)=>a.c-b.c),
    all:RM.players.map(p=>({n:p.name,r:U.hands[p.peer].length+' بطاقة'}))});return}
  U.turn=(U.turn+U.dir*(1+skip)+RM.players.length*2)%RM.players.length;
- unoPub(hand.length===1?{msg:`أونو! بقيت بطاقة واحدة لدى ${nm(cur)} 🔔`}:null);
+ // بطاقة واحدة: على اللاعب أن يقول «أونو!» قبل أن يلعب التالي — وإلا أمسك به أحدهم فسحب بطاقتين
+ U.call=hand.length===1?{p:cur,said:false,at:Date.now()}:null;
+ unoPub(hand.length===1?{msg:`بقيت بطاقة واحدة لدى ${nm(cur)} — عليه أن يقول أونو!`}:null);
+}
+/** نداء أونو والإمساك — خارج الدور: أي لاعب في أي وقت ما دام النداء معلّقًا */
+function unoCallAct(d){
+ if(!RM.host||!RM.U)return;
+ const U=RM.U,call=U.call;
+ const nm=p=>(RM.players.find(x=>x.peer===p)||{}).name||'لاعب';
+ if(d.a==='uno'){
+  if(!call||call.p!==d.by||call.said)return;
+  call.said=true;unoPub({msg:`${nm(d.by)}: أونو! 🔔`});
+  return;
+ }
+ if(d.a==='catch'){
+  if(!call||call.said||call.p===d.by)return;
+  const hand=U.hands[call.p];
+  for(let i=0;i<2;i++){if(!U.deck.length){U.deck=(U.disc||[]).splice(0).sort(()=>Math.random()-.5);if(!U.deck.length)U.deck=unoDeck()}hand.push(U.deck.shift())}
+  rmSend({t:'hand',to:call.p,h:hand});
+  U.call=null;
+  unoPub({msg:`${nm(d.by)} أمسك بـ${nm(call.p)}: لم يقل أونو — سحب بطاقتين`});
+ }
 }
 function unoPlay(i){
  const c=RM.hand[i],U=RM.uno;
@@ -20423,6 +20454,8 @@ function unoPlay(i){
  unoFly(RM.me,c);unoCounted();
  rmSend({t:'act',by:RM.me,a:'play',i});
 }
+function unoSay(){if(RM.uno&&RM.uno.call&&RM.uno.call.p===RM.me)rmSend({t:'act',by:RM.me,a:'uno'})}
+function unoCatch(){if(RM.uno&&RM.uno.call&&RM.uno.call.p!==RM.me&&!RM.uno.call.said)rmSend({t:'act',by:RM.me,a:'catch'})}
 function unoCounted(){try{const e=EV();e.unoCards=(e.unoCards||0)+1;trk('uno_card')}catch(x){}}
 function unoColAsk(i){
  const ov=document.createElement('div');ov.className='qvov';
@@ -20572,6 +20605,9 @@ function rmUno(R){
  return `${rmUnoTable(U,mine)}
  <div class="unoTurn ${mine?'me':''}">${mine?(U.drew===RM.me?'سحبتَ بطاقة — العبها أو مرِّر':'دورك — المس بطاقة لشرحها ثم انقرها للعبها'):'دور '+nm(U.turn)+'…'}</div>
  ${mine&&U.drew===RM.me?`<button class="btn g" style="margin:6px 0" onclick="unoPass()">مرِّر الدور ↩</button>`:''}
+ ${U.call&&!U.call.said?(U.call.p===RM.me
+   ?`<button class="btn gd" style="margin:6px 0;min-height:44px;animation:puls 1.1s ease-in-out infinite" onclick="unoSay()">أونو! 🔔 — قلها قبل أن يلعب التالي</button>`
+   :`<button class="btn g" style="margin:6px 0;min-height:44px;border-color:var(--no);color:var(--no)" onclick="unoCatch()">${nm(U.call.p)} لم يقل أونو — أمسك به! (يسحب بطاقتين)</button>`):''}
  <div id="unoTip" class="unoTip">المس أي بطاقة ليظهر شرحها هنا</div>
  <div class="sl" style="margin:10px 0 5px">يدك — ${hand.length} بطاقة</div>
  <div class="unoHandWrap">
@@ -20870,6 +20906,8 @@ function caPutBack(C,t){
  return 0;
 }
 /* قوانين الكيرم الرسمية:
+   · لا ضرب للخلف: الضارب يُدفع إلى الأمام أو جانبًا، والقطع خلف خطّ القاعدة تُضرب بالارتداد (caInit)
+   · لا تُدخل قطعتك الأخيرة والملكة على اللوح — تعود إلى المركز وينتقل الدور (الاتحاد الدولي يعدّها خسارة اللوح)
    · تُكمل دورك إن أدخلت قطعة من لونك بلا خطأ
    · الملكة لا تُحتسب حتى تُغطّى بقطعة من لونك — وإلا عادت إلى المركز
    · الضارب في الجيب خطأ: نقطة ناقصة وتعود إحدى قطعك إلى اللوح وينتقل الدور
@@ -20902,6 +20940,15 @@ function caAct(d){
   else{C.q=null;caPutBack(C,'q');notes.push('لم تُغطَّ الملكة — عادت إلى المركز')}
  }
  const left=t=>C.pcs.filter(p=>p.t===t).length;
+ // القانون: لا تُدخل قطعتك الأخيرة والملكة ما زالت على اللوح — تعود القطعة إلى المركز وينتقل الدور
+ const queenIn=!C.pcs.some(p=>p.t==='q')||gotQ||C.q===cur;
+ if(!left(mine)&&!queenIn&&caPutBack(C,mine)){
+  C.got[cur]=Math.max(0,(C.got[cur]||0)-1);C.sc[cur]=Math.max(0,C.sc[cur]-1);
+  notes.push('قطعتك الأخيرة قبل الملكة — عادت إلى المركز');
+  C.turn=(C.turn+1)%RM.players.length;
+  caPub([d.msg||''].concat(notes).filter(Boolean).join(' · '));
+  return;
+ }
  if(!left(mine)){
   if(C.q===cur){C.sc[cur]+=3;C.q=null}          // آخر قطعة تُغطّي الملكة
   rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! 🏆`,win:'carrom',by:cur,
@@ -21191,7 +21238,7 @@ function caRender(rest){
   cx.strokeStyle='#E24B4A';cx.lineWidth=2;cx.stroke();
  }
  if(_ca.drag){
-  const d=_ca.drag, raw=Math.hypot(d.dx,d.dy), pw=caPower(raw), can=!!d.cancel;
+  const d=_ca.drag, raw=Math.hypot(d.dx,d.dy), pw=caPower(raw), can=!!d.cancel, back=!can&&!!d.back&&raw>=10;
   // منطقة الإلغاء: الشريط العلوي فوق الساحة — تظهر أثناء التصويب فقط
   const zh=Math.min(M*.72,36*sc), zw=Math.min(W*.7,190*sc), zx=W/2-zw/2, zy=M/2-zh/2;
   cx.fillStyle=can?'rgba(226,75,74,.94)':'rgba(6,9,17,.66)';caRR(cx,zx,zy,zw,zh,zh/2);cx.fill();
@@ -21199,7 +21246,7 @@ function caRender(rest){
   cx.fillStyle='#fff';cx.font='900 '+Math.round(13.5*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';
   cx.fillText(can?'أفلت هنا لإلغاء الضربة':'✕ اسحب إلى هنا للإلغاء',W/2,M/2);
   cx.setLineDash([8,6]);cx.lineWidth=2.6;
-  cx.strokeStyle=can?'rgba(190,190,200,.45)':'rgba(255,233,168,.92)';
+  cx.strokeStyle=can?'rgba(190,190,200,.45)':back?'rgba(226,75,74,.85)':'rgba(255,233,168,.92)';
   cx.beginPath();cx.moveTo(PX(d.sx),PY(d.sy));
   cx.lineTo(PX(d.sx-d.dx*2.4),PY(d.sy-d.dy*2.4));cx.stroke();cx.setLineDash([]);
   cx.beginPath();
@@ -21209,11 +21256,11 @@ function caRender(rest){
   cx.fillStyle=can?'rgba(160,160,170,.35)':'rgba(255,233,168,'+(.25+pw*.5)+')';cx.fill();
   cx.strokeStyle=can?'#9AA0AE':'#FFE9A8';cx.lineWidth=2;cx.stroke();
   // نسبة القوّة فوق الضارب
-  const lab=can?'إلغاء':Math.round(pw*100)+'%';
+  const lab=can?'إلغاء':back?'ممنوع للخلف':Math.round(pw*100)+'%';
   cx.font='900 '+Math.round(13*sc)+'px system-ui';cx.textAlign='center';cx.textBaseline='middle';
   const tw=cx.measureText(lab).width+14*sc, tx=PX(d.sx), ty=PY(d.sy)-CA_SR*sc*2.6;
   cx.fillStyle='rgba(6,9,17,.7)';caRR(cx,tx-tw/2,ty-9*sc,tw,18*sc,9*sc);cx.fill();
-  cx.fillStyle=can?'#FFB4B3':pw>.8?'#FF9A7A':'#FFE9A8';cx.fillText(lab,tx,ty);
+  cx.fillStyle=can||back?'#FFB4B3':pw>.8?'#FF9A7A':'#FFE9A8';cx.fillText(lab,tx,ty);
  }
 }
 /** القوّة من طول السحب: تربيعية فوق حدّ أدنى — لمسة خفيفة تدفع، وسحب كامل يضرب بكل القوّة */
@@ -21280,6 +21327,7 @@ function caInit(){
   _ca.drag.dx=Math.max(-95,Math.min(95,x-_ca.drag.px));
   _ca.drag.dy=Math.max(-95,Math.min(95,y-_ca.drag.py));
   _ca.drag.cancel=y<-6;   // الإصبع فوق الساحة (في الإطار العلوي) = إلغاء عند الإفلات
+  _ca.drag.back=-_ca.drag.dy>0;   // السحب إلى الأعلى = ضربة للخلف — ممنوعة قانونًا
   caRender();
  };
  cv.onpointercancel=()=>{_ca.slide=0;_ca.drag=null;caRender()};   // قطع النظام للّمس = لا ضربة
@@ -21289,6 +21337,7 @@ function caInit(){
   const d=_ca.drag;if(!d)return;_ca.drag=null;
   const pw=Math.hypot(d.dx,d.dy);
   if(d.cancel||pw<10){caRender();if(d.cancel)toast('أُلغيت الضربة');return}
+  if(-d.dy>0){caRender();toast('لا يجوز الضرب للخلف — القطع خلف خطّ القاعدة تُضرب بالارتداد من الجدار');return}   // قانون رسمي
   /* القوّة نسبة السحب من 95 وحدة بمنحنى تربيعي: بداية هادئة ودفعة كبيرة في آخر السحب.
      أقصى سرعة CA_VMAX — عبور اللوح في نحو نصف ثانية. */
   const v=CA_VMAX*caPower(pw);
