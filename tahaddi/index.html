@@ -325,9 +325,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 /* عام */
 .tbar{display:flex;align-items:center;padding:8px 0 14px}
 .tbar h2{font-size:17px;font-weight:800;flex:1;text-align:center}
-.bk{background:none;border:none;color:var(--tx);font-size:23px;cursor:pointer;width:44px;height:44px;min-width:44px;
- display:inline-flex;align-items:center;justify-content:center;border-radius:12px;margin:-6px 0}
-.bk:active{background:rgba(255,255,255,.08)}
+.bk{background:linear-gradient(160deg,#1E2750,#0C1229);border:1.5px solid rgba(232,178,58,.75);color:#F5D98A;font-size:23px;cursor:pointer;
+ width:44px;height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;margin:-6px 0;
+ box-shadow:0 4px 12px rgba(0,0,0,.45),0 0 14px rgba(232,178,58,.2),inset 0 1px 0 rgba(255,255,255,.12)}
+.bk:active{background:rgba(232,178,58,.2)}
+.bk svg{filter:drop-shadow(0 0 4px rgba(232,178,58,.55))}
 .sp{width:44px}
 /* دروع الرتب: خلية من ملصق مخبوز، والكبيرة تطفو ويمرّ عليها لمعان */
 /* أيقونات من رسوم المالك: قناع من لوحة رموز البطاقات بتدرّج ذهبي وظلّ — لا أشكال خطّية */
@@ -582,6 +584,33 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  font-weight:900;filter:drop-shadow(0 2px 3px rgba(0,0,0,.6))}
 
 /* بطاقة مؤطرة بذهب محفور — تستبدل .phead */
+/* بطاقة دور بوجهين: ظهر مزخرف يُقلب بلمسة إلى وجه الدور */
+.rcWrap{perspective:1100px;display:flex;justify-content:center;margin:4px 0 14px}
+.rc{position:relative;width:min(236px,74vw);aspect-ratio:2/3;transform-style:preserve-3d;transform:rotateY(180deg);
+ transition:transform .75s cubic-bezier(.2,.8,.2,1);cursor:pointer}
+.rc.up{transform:rotateY(0);cursor:default}
+.rcF{position:absolute;inset:0;border-radius:22px;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 16px 36px;
+ border:2px solid var(--rc,#E8B23A);background:linear-gradient(165deg,#1A2237,#0B1020);
+ box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 26px var(--rcs,rgba(232,178,58,.25)),inset 0 0 0 1px rgba(255,255,255,.05)}
+.rcF::before{content:'';position:absolute;inset:7px;border:1px solid var(--rcs,rgba(232,178,58,.3));border-radius:16px;pointer-events:none}
+.rcBack{transform:rotateY(180deg);--rc:#C89124;--rcs:rgba(232,178,58,.3);background:linear-gradient(165deg,#2A1F52,#0D1424 70%)}
+.rcPat{position:absolute;inset:0;pointer-events:none;
+ background:repeating-linear-gradient(45deg,transparent 0 13px,rgba(255,255,255,.035) 13px 14px),
+  repeating-linear-gradient(-45deg,transparent 0 13px,rgba(255,255,255,.035) 13px 14px),
+  radial-gradient(circle at 50% 36%,var(--rcs,rgba(232,178,58,.25)),transparent 62%)}
+.rcEm{position:relative;width:98px;height:98px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.14),rgba(0,0,0,.4));border:2px solid var(--rc);
+ box-shadow:0 0 24px var(--rcs),inset 0 2px 8px rgba(255,255,255,.12),inset 0 -6px 12px rgba(0,0,0,.4)}
+.rcEm svg{filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
+.rcTag{position:absolute;top:13px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:900;color:var(--rc);white-space:nowrap;
+ padding:3px 10px;border:1px solid var(--rcs);border-radius:8px;background:rgba(8,12,28,.75)}
+.rcT{position:relative;font-size:24px;font-weight:900;margin-top:14px;color:var(--rc);line-height:1.2;text-shadow:0 2px 8px rgba(0,0,0,.6)}
+.rcD{position:relative;font-size:11.5px;color:#B7C1DC;margin-top:8px;line-height:1.65}
+.rcFt{position:absolute;bottom:13px;left:12px;right:12px;font-size:10px;font-weight:700;color:#8F9BBC}
+.rcNm{position:relative;font-size:26px;font-weight:900;margin-top:12px}
+.rcSub{position:relative;font-size:12px;font-weight:800;color:#C3A8FA;margin-top:2px}
+.rcHint{position:absolute;bottom:14px;left:12px;right:12px;font-size:10.5px;color:#E2E7F4;font-weight:800}
 .orn{position:relative;border-radius:18px;padding:2px;margin-bottom:12px;
  background:linear-gradient(145deg,#FFE9A8,#C89124 28%,#7A5410 52%,#C89124 76%,#FFE9A8);
  box-shadow:0 6px 18px rgba(0,0,0,.5),0 0 0 1px rgba(255,233,168,.12)}
@@ -15485,7 +15514,7 @@ function introDraw(){
  const r=S.ranked,t=tierOf(r),rv=_intro.rv;
  const basket=roundBasket(_intro.seq);
  go(`<div class="scr on">
- <div class="tbar"><button class="bk" onclick="introCancel()">‹</button>
+ <div class="tbar"><button class="bk" onclick="introCancel()">${bkChev()}</button>
  <h2>معلومات الخصم</h2>
  <div class="sp" style="display:flex;align-items:center;justify-content:center">
  <span class="tcr" id="introT" style="width:34px;height:34px;font-size:13px;border-color:var(--gold);color:var(--gold)">${_intro.left}</span></div></div>
@@ -16325,8 +16354,10 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
 /** أي حقل في الشاشة كُتب فيه شيء */
 function formDirty(){return [...document.querySelectorAll('#app .fin')].some(el=>(el.value||'').trim()&&el.value!==el.defaultValue)}
 /** شريط علوي موحّد: كل شاشة لها رجوع */
+/** سهم الرجوع — يشير إلى اليمين لأن الواجهة عربية، ويأخذ لون الزرّ */
+function bkChev(){return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9.2 5.2 L16 12 L9.2 18.8" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 const tbar=(t,sub)=>`<div class="tbar">
- <button class="bk" onclick="back()">${ico('back',15)}</button>
+ <button class="bk" onclick="back()">${bkChev()}</button>
  <h2>${t}${sub?`<div style="font-size:10.5px;color:var(--tx2);font-weight:600;margin-top:1px">${sub}</div>`:''}</h2>
  <span class="sp"></span></div>`;
 
@@ -19374,7 +19405,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.27';
+const APP_VER='5.28';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20130,16 +20161,9 @@ function rmStart(){
 function rmBarra(R){
  const nm=p=>((RM.players.find(x=>x.peer===p)||{}).name)||'لاعب';
  if(RM.phase==='deal'||RM.phase==='deal2'){
-  return `<div class="orn"><div class="in">${ornCorners()}
-  <div style="text-align:center;padding:16px 0">
-  ${!RM.role?`<div style="font-size:40px">${ico('timer',36)}</div><div class="mtl" style="font-size:16px;margin-top:9px">يوزّع المضيف الأدوار…</div>`
-   :RM.role==='spy'?`<div style="font-size:46px">${ico('mute',42)}</div>
-    <div class="mtl" style="font-size:20px;margin-top:10px">أنت برا السالفة!</div>
-    <div style="font-size:12px;color:var(--tx2);margin-top:8px">لا تعرف الكلمة — موّه ولا تنكشف.<br>الفئة: <b>${RM.cat}</b></div>`
-   :`<div style="font-size:40px">${ico('lock',36)}</div>
-    <div style="font-size:12px;color:var(--tx2);margin-top:9px">الكلمة السرية:</div>
-    <div class="mtl" style="font-size:24px;margin-top:6px">${RM.word}</div>`}
-  </div></div></div>
+  return `${!RM.role?`<div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:16px 0">
+   <div style="font-size:40px">${ico('timer',36)}</div><div class="mtl" style="font-size:16px;margin-top:9px">يوزّع المضيف الأدوار…</div></div></div></div>`
+   :mafRoleCard(RM.role,{shown:true,foot:'دورك في هذه الجولة — لا تُرِه أحدًا'})}
   ${RM.host&&RM.role?`<button class="rbtn" style="margin-top:14px" onclick="rmHostTalk()"><span>الجميع رأى دوره — ابدأ النقاش</span></button>`:''}`;
  }
  if(RM.phase==='talk'){
@@ -22078,23 +22102,15 @@ function barraStart(){
 }
 function barraDeal(){
  if(PT.idx>=PT.n){barraTalk();return}
+ const n=PT.idx+1,spy=PT.idx===PT.spy;
+ const card=spy?{game:'برا السالفة',title:'أنت برا السالفة!',desc:'لا تعرف الكلمة — جاوب بذكاء ولا تنكشف.',icon:ico('door',58,'red'),ac:'#E24B4A'}
+  :{game:'برا السالفة',tag:'الكلمة السرية',title:PT.word,desc:'لا تخبر أحدًا — واسأل بذكاء لتكشف الغريب.',icon:ico('lock',58),ac:'#E8B23A'};
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
- <div class="orn"><div class="in">${ornCorners()}
- <div style="text-align:center;padding:16px 0">
- ${PT.shown?`
-  ${PT.idx===PT.spy?`<div style="font-size:44px">${ico('mute',40)}</div>
-   <div class="mtl" style="font-size:19px;margin-top:10px">أنت برا السالفة!</div>
-   <div style="font-size:12px;color:var(--tx2);margin-top:8px">لا تعرف الكلمة — جاوب بذكاء ولا تنكشف.<br>الفئة: <b>${PT.cat}</b></div>`
-  :`<div style="font-size:44px">${ico('lock',40)}</div>
-   <div style="font-size:12px;color:var(--tx2);margin-top:10px">الكلمة السرية:</div>
-   <div class="mtl" style="font-size:24px;margin-top:6px">${PT.word}</div>
-   <div style="font-size:11px;color:var(--tx2);margin-top:8px">لا تخبر أحدًا!</div>`}
-  <button class="rbtn" style="margin-top:18px" onclick="PT.idx++;PT.shown=false;barraDeal()"><span>أخفيت — مرر للتالي</span></button>`
- :`<div style="font-size:44px">${ico('play',40)}</div>
-  <div class="mtl" style="font-size:18px;margin-top:10px">اللاعب ${PT.idx+1}</div>
-  <div style="font-size:12px;color:var(--tx2);margin-top:8px">تأكد أن غيرك لا يرى الشاشة</div>
-  <button class="rbtn" style="margin-top:18px" onclick="PT.shown=true;barraDeal()"><span>أنا اللاعب ${PT.idx+1} — اكشف</span></button>`}
- </div></div></div></div>`);
+ ${roleCard(Object.assign(card,{shown:PT.shown,foot:'الفئة: '+PT.cat,hint:'اللاعب '+n+' — اضغط للكشف',reveal:'ptReveal()'}))}
+ <button class="rbtn" id="rcRev" style="margin-top:4px${PT.shown?';display:none':''}" onclick="ptReveal()"><span>أنا اللاعب ${n} — اكشف</span></button>
+ <button class="rbtn" id="rcNext" style="margin-top:4px${PT.shown?'':';display:none'}" onclick="PT.idx++;PT.shown=false;barraDeal()"><span>أخفيت — مرر للتالي</span></button>
+ <div style="font-size:10.5px;color:var(--tx2);text-align:center;margin-top:10px;line-height:1.7">تأكد أن غيرك لا يرى الشاشة قبل الكشف.</div>
+ </div>`);
 }
 function barraTalk(){
  clearInterval(PT.tm);PT.secs=120;
@@ -22158,22 +22174,51 @@ function mafiaStart(){
  mafiaDeal();
 }
 const MAF_ICON={'مافيا':ico('swords',40),'طبيب':ico('heart',40),'محقق':ico('search',40),'شعب':ico('group',40)};
+/** مواصفات بطاقة كل دور: شعار ملوّن، لون الإطار، وصف الدور */
+const MAF_ROLE={
+ 'مافيا':{ic:'swords',tint:'red',  ac:'#E24B4A',d:'تصطاد ليلًا — وتنكر نهارًا'},
+ 'طبيب': {ic:'heart', tint:null,   ac:'#2ECC71',d:'تنقذ لاعبًا واحدًا كل ليلة'},
+ 'محقق': {ic:'search',tint:'blue', ac:'#4C9AF0',d:'تكشف حقيقة لاعب واحد كل ليلة'},
+ 'شعب':  {ic:'group', tint:null,   ac:'#E8B23A',d:'انتبه وناقش وصوّت بحكمة'}
+};
+/** بطاقة دور/كلمة بوجهين: ظهر مزخرف يُقلب بلمسة إلى وجه الدور — للمافيا وبرا السالفة والغرف */
+function roleCard(o){
+ const ac=o.ac||'#E8B23A';
+ return `<div class="rcWrap"><div class="rc${o.shown?' up':''}" id="rcCard" style="--rc:${ac};--rcs:${clRGBA(ac,.28)}"${(o.shown||!o.reveal)?'':` onclick="${o.reveal}"`}>
+  <div class="rcF rcBack"><div class="rcPat"></div>${ornCorners()}
+   <div class="rcEm">${ico('shield',54)}</div>
+   <div class="rcNm mtl">تحدّي</div>
+   <div class="rcSub">${esc(o.game||'')}</div>
+   <div class="rcHint">${esc(o.hint||'اضغط للكشف')}</div></div>
+  <div class="rcF rcFront"><div class="rcPat"></div>${ornCorners()}
+   <div class="rcTag">${esc(o.tag||o.game||'')}</div>
+   <div class="rcEm">${o.icon||''}</div>
+   <div class="rcT">${esc(o.title||'')}</div>
+   ${o.desc?`<div class="rcD">${esc(o.desc)}</div>`:''}
+   ${o.foot?`<div class="rcFt">${esc(o.foot)}</div>`:''}</div>
+ </div></div>`;
+}
+/** بطاقة دور مافيا جاهزة */
+function mafRoleCard(role,o){
+ const sp=MAF_ROLE[role]||MAF_ROLE['شعب'];
+ return roleCard(Object.assign({game:'مافيا',title:role,desc:sp.d,icon:ico(sp.ic,58,sp.tint),ac:sp.ac},o||{}));
+}
+/** يقلب البطاقة في مكانها ويبدّل الزرّين — بلا إعادة رسم الشاشة كي تظهر حركة القلب */
+function ptReveal(){
+ PT.shown=true;
+ const c=document.getElementById('rcCard');if(c){c.classList.add('up');c.removeAttribute('onclick')}
+ const a=document.getElementById('rcRev'),b=document.getElementById('rcNext');
+ if(a)a.style.display='none';if(b)b.style.display='';
+}
 function mafiaDeal(){
  if(PT.idx>=PT.n){mafiaNight('mafia');return}
+ const n=PT.idx+1;
  go(`<div class="scr on">${ptHead('مافيا',1)}
- <div class="orn"><div class="in">${ornCorners()}
- <div style="text-align:center;padding:16px 0">
- ${PT.shown?`<div style="font-size:44px">${MAF_ICON[PT.roles[PT.idx]]}</div>
-  <div class="mtl" style="font-size:20px;margin-top:9px">${PT.roles[PT.idx]}</div>
-  <div style="font-size:11.5px;color:var(--tx2);margin-top:7px">${
-   PT.roles[PT.idx]==='مافيا'?'تصطاد ليلًا — أنكر نهارًا':
-   PT.roles[PT.idx]==='طبيب'?'تنقذ لاعبًا كل ليلة':
-   PT.roles[PT.idx]==='محقق'?'تكشف حقيقة لاعب كل ليلة':'انتبه وناقش وصوّت بحكمة'}</div>
-  <button class="rbtn" style="margin-top:16px" onclick="PT.idx++;PT.shown=false;mafiaDeal()"><span>أخفيت — مرر للتالي</span></button>`
- :`<div style="font-size:44px">${ico('play',40)}</div>
-  <div class="mtl" style="font-size:18px;margin-top:10px">اللاعب ${PT.idx+1}</div>
-  <button class="rbtn" style="margin-top:16px" onclick="PT.shown=true;mafiaDeal()"><span>اكشف دوري</span></button>`}
- </div></div></div></div>`);
+ ${mafRoleCard(PT.roles[PT.idx],{shown:PT.shown,foot:'اللاعب '+n+' — لا تُرِ دورك أحدًا',hint:'اللاعب '+n+' — اضغط لكشف دورك',reveal:'ptReveal()'})}
+ <button class="rbtn" id="rcRev" style="margin-top:4px${PT.shown?';display:none':''}" onclick="ptReveal()"><span>اكشف دوري</span></button>
+ <button class="rbtn" id="rcNext" style="margin-top:4px${PT.shown?'':';display:none'}" onclick="PT.idx++;PT.shown=false;mafiaDeal()"><span>أخفيت — مرر للتالي</span></button>
+ <div style="font-size:10.5px;color:var(--tx2);text-align:center;margin-top:10px;line-height:1.7">تأكد أن غيرك لا يرى الشاشة قبل الكشف.</div>
+ </div>`);
 }
 function mafGate(title,emoji,desc,next){
  go(`<div class="scr on">${ptHead('مافيا — الليلة '+PT.day,1)}
@@ -22300,7 +22345,7 @@ const PD_COLORS=['#1B2030','#E24B4A','#2ECC71','#378ADD','#E8B23A','#B76CF0','#F
 function drawBoard(){
  go(`<div class="scr on">
  <div style="display:flex;align-items:center;gap:8px;padding:6px 0 10px">
-  <button class="bk" onclick="clearInterval(PT.tm);ptExit()">${ico('back',15)}</button>
+  <button class="bk" onclick="clearInterval(PT.tm);ptExit()">${bkChev()}</button>
   <span class="mtl" style="font-size:15px">ارسم: ${PT.word}</span>
   <span id="pdT" class="cch" style="margin-inline-start:auto;color:var(--warn)">60 ث</span></div>
  <canvas id="pdc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;
@@ -29065,7 +29110,7 @@ function draw(){
   return `<div class="${cl}" onclick="${G.ans?'':`ansr('${i}')`}"><div class="qop2i">
    <span class="qop2n">${mark}</span><span class="qop2t">${o}</span></div></div>`}).join('')}</div>`}
  go(`<div class="scr on">
- <div class="qtop"><button class="bk" onclick="back()" title="إنهاء الجولة">${ico('back',15)}</button><span class="qcat">${nt?ico(nt.i,14)+' ':''}${nt?nt.n:'سؤال'}</span>
+ <div class="qtop"><button class="bk" onclick="back()" title="إنهاء الجولة">${bkChev()}</button><span class="qcat">${nt?ico(nt.i,14)+' ':''}${nt?nt.n:'سؤال'}</span>
  <span class="qnum">السؤال ${G.i+1}/${G.qs.length}</span>
  <span class="cch">${ico('coin',15)} ${S.coins}</span></div>
  ${G.vs?vsBar():''}
