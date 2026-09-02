@@ -20820,11 +20820,34 @@ const CA_TEX={c:'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQD
    ثم تُرسم أفواه الجيوب برمجيًا بمقاس CA_POCK نفسه فيتطابق المنظر مع الفيزياء. */
 const CA_MGF={c:0.135,m:0.195};      // هامش الإطار نسبةً إلى ساحة اللعب في كل صورة
 function caMG(){const g=CA_MGF[_ca.skin==='m'?'m':'c'];return Math.round(CA_VW*g/(1+2*g))}
+/* صورتا اللوح المرجعيتان على خلفية بيضاء حول الإطار المستدير — كانت تظهر حدودًا بيضاء
+   حول اللوح. نُفرغ الهامش الأبيض المتّصل بالحواف (ملء فيضي من الزوايا) فيبقى الإطار
+   الخشبي وحده على خلفية الشاشة، ولا يُمسّ أي أبيض داخل اللوح. */
+function caTexClean(im){
+ const w=im.naturalWidth||im.width,h=im.naturalHeight||im.height;
+ const c=document.createElement('canvas');c.width=w;c.height=h;
+ const x=c.getContext('2d');x.drawImage(im,0,0);
+ let d;try{d=x.getImageData(0,0,w,h)}catch(e){return im}
+ const px=d.data,seen=new Uint8Array(w*h),st=[];
+ const light=i=>px[i*4]>222&&px[i*4+1]>222&&px[i*4+2]>222;
+ const push=(X,Y)=>{if(X<0||Y<0||X>=w||Y>=h)return;const i=Y*w+X;if(seen[i])return;seen[i]=1;if(light(i))st.push(i)};
+ for(let X=0;X<w;X++){push(X,0);push(X,h-1)}
+ for(let Y=0;Y<h;Y++){push(0,Y);push(w-1,Y)}
+ let n=0;
+ while(st.length){const i=st.pop();px[i*4+3]=0;n++;const X=i%w,Y=(i-X)/w;push(X+1,Y);push(X-1,Y);push(X,Y+1);push(X,Y-1)}
+ // حافة ناعمة: البكسلات الفاتحة الملاصقة للشفّاف تُخفَّف بدل أن تبقى هالة بيضاء
+ for(let Y=1;Y<h-1;Y++)for(let X=1;X<w-1;X++){const i=Y*w+X;if(px[i*4+3]===0)continue;
+  const l=px[i*4]*.299+px[i*4+1]*.587+px[i*4+2]*.114;if(l<200)continue;
+  if(px[(i-1)*4+3]===0||px[(i+1)*4+3]===0||px[(i-w)*4+3]===0||px[(i+w)*4+3]===0)px[i*4+3]=Math.round(255*(1-(l-200)/55))}
+ x.putImageData(d,0,0);
+ c.naturalWidth=w;c.naturalHeight=h;   // كالصورة الأصلية لمن يسأل عن أبعادها
+ c._cleared=n;return c;
+}
 function caTexLoad(){
  if(_ca.texGo)return;_ca.texGo=1;_ca.tex={};
  ['c','m'].forEach(k=>{
   const im=new Image();
-  im.onload=()=>{_ca.tex[k]=im;_ca.bg=null;caRender()};
+  im.onload=()=>{_ca.tex[k]=caTexClean(im);_ca.bg=null;caRender()};
   im.src=CA_TEX[k];
  });
 }
@@ -20852,6 +20875,7 @@ function caBoardImg(W,H,four){
  const c=document.createElement('canvas');c.width=W;c.height=H;
  const x=c.getContext('2d');
  const tex=_ca.tex&&_ca.tex[k];
+ x.fillStyle='#080B14';x.fillRect(0,0,W,W);   // خلفية الشاشة خلف زوايا الإطار المستديرة — لا أبيض
  if(tex)x.drawImage(tex,0,0,W,W);
  else{x.fillStyle=four?'#141418':'#5C2A14';x.fillRect(0,0,W,W);
   x.fillStyle='#EFD9A4';x.fillRect(M,M,P,P)}
