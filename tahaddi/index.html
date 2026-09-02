@@ -13761,6 +13761,9 @@ var NET=(function(){
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
+ /* ── الشراء: الإيصال إلى الخادم، والخادم يسأل المتجر ويمنح ── */
+ function purchase(claim){return request({t:'purchase',claim:claim},25000)}
+ function purchases(){return request({t:'purchases'})}
 
  /* ── الغرفة على الخادم — الواجهة نفسها التي تعطيها قدرة room في الأرتيفاكت ── */
  function peersView(){
@@ -13786,6 +13789,7 @@ var NET=(function(){
 
  return {boot:boot,connect:connect,disconnect:disconnect,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u}};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=NET;
@@ -13882,6 +13886,126 @@ var SFX=(function(){
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
+/* ⟦/src⟧ */
+/* ⟦src:src/economy/catalog.js⟧ */
+/**
+ * كتالوج المنتجات المدفوعة — قائمة واحدة يقرأها الهاتف (العرض) والخادم (المنح).
+ * المعرّفات هي نفسها معرّفات المنتجات في App Store Connect وGoogle Play Console.
+ * الأسعار هنا للعرض فقط؛ السعر الفعلي يعرضه المتجر بعملة اللاعب، والمال لا يمرّ بهذا الكود أبدًا.
+ * ما يُمنح عند الشراء يقرّره الخادم من هذا الملف لا من الهاتف.
+ */
+var CATALOG=(function(){
+ 'use strict';
+ var PRODUCTS=[
+  {id:'gems_80',     kind:'gems',   usd:0.99,  gems:80,    n:'شرارة', art:'spark',  bonus:0},
+  {id:'gems_500',    kind:'gems',   usd:4.99,  gems:500,   n:'قَبَس',  art:'ember',  bonus:0},
+  {id:'gems_1200',   kind:'gems',   usd:9.99,  gems:1200,  n:'مشعل',  art:'torch',  bonus:8},
+  {id:'gems_2500',   kind:'gems',   usd:19.99, gems:2500,  n:'كنز',   art:'chest',  bonus:15},
+  {id:'gems_6500',   kind:'gems',   usd:49.99, gems:6500,  n:'خزنة',  art:'vault',  bonus:22},
+  {id:'gems_14000',  kind:'gems',   usd:99.99, gems:14000, n:'قمّة',  art:'summit', bonus:30},
+  {id:'bundle_start',kind:'bundle', usd:2.99,  gems:300, coins:3000, wild:'rare', n:'حزمة البداية', d:'300 جوهرة + 3000 عملة + جوكر نادر'},
+  {id:'season_pass', kind:'pass',   usd:9.99,  gems:200, pass:true, consumable:false, n:'التذكرة المميزة', d:'تفعيل تذكرة الموسم + 200 جوهرة'}
+ ];
+ var byId={};
+ for(var i=0;i<PRODUCTS.length;i++)byId[PRODUCTS[i].id]=PRODUCTS[i];
+ function get(id){return (typeof id==='string'&&Object.prototype.hasOwnProperty.call(byId,id))?byId[id]:null}
+ function ofKind(k){return PRODUCTS.filter(function(p){return p.kind===k})}
+ /** ما يُمنح فعلًا — أرقام صريحة لا مراجع، ليُحفظ مع الإيصال كما مُنح */
+ function grantOf(p){
+  if(typeof p==='string')p=get(p);
+  if(!p)return null;
+  return {gems:p.gems|0,coins:p.coins|0,wild:p.wild||null,pass:!!p.pass};
+ }
+ return {PRODUCTS:PRODUCTS,get:get,ofKind:ofKind,grantOf:grantOf,ids:PRODUCTS.map(function(p){return p.id})};
+})();
+if(typeof module!=='undefined'&&module.exports)module.exports=CATALOG;
+/* ⟦/src⟧ */
+/* ⟦src:src/economy/billing.js⟧ */
+/**
+ * الشراء داخل التطبيق — الهاتف يطلب الشراء عبر المتجر، والمتجر يعطي إيصالًا، والخادم وحده يتحقّق ويمنح.
+ *
+ * الجسر الأصلي: تطبيق المتجر (Capacitor) يضع كائنًا على window.TahaddiBilling بهذا العقد:
+ *   platform: 'ios' | 'android'
+ *   buy(productId)  → Promise<{platform, productId, receipt, transactionId}>   (receipt: إيصال App Store أو purchaseToken من Google Play)
+ *   finish(r)       اختياري — يُستدعى بعد أن يمنح الخادم (استهلاك المنتج عند Google)
+ *   restore()       اختياري — Promise<[{platform, productId, receipt, transactionId}]>
+ * بلا هذا الجسر (نسخة الويب) لا يوجد شراء بالمال، وتقول الواجهة ذلك بصراحة.
+ * لا DOM هنا إلا window. لا يرمي إلا وعودًا مرفوضة بـ e.code.
+ */
+var Billing=(function(){
+ 'use strict';
+ var W=(typeof window!=='undefined')?window:null;
+ var net=null, catalog=null;
+ function init(o){if(o&&o.net)net=o.net;if(o&&o.catalog)catalog=o.catalog}
+ function provider(){
+  try{var b=W&&W.TahaddiBilling;if(b&&typeof b.buy==='function')return b}catch(e){}
+  return null;
+ }
+ function serverOk(){
+  try{var s=net&&net.state();return !!(s&&s.mode==='server'&&s.connected)}catch(e){return false}
+ }
+ /** 'store' جاهز للشراء · 'no_store' لا جسر متجر (ويب) · 'no_server' لا خادم يتحقّق */
+ function status(){
+  if(!provider())return 'no_store';
+  if(!serverOk())return 'no_server';
+  return 'store';
+ }
+ function err(code,msg){var e=new Error(msg||code);e.code=code;return e}
+ function claimOf(b,productId,r){
+  return {platform:String(r.platform||b.platform||'unknown'),productId:productId,
+   receipt:String(r.receipt),transactionId:r.transactionId!=null?String(r.transactionId):undefined};
+ }
+ function verifyWithServer(claim){
+  return net.purchase(claim).then(function(m){
+   if(m&&m.t==='purchased')return m;
+   throw err((m&&m.code)||'verify_failed');
+  },function(e){throw err((e&&e.code)||'offline')});
+ }
+ /** يشتري منتجًا: المتجر → إيصال → الخادم يتحقّق ويمنح. يعيد {productId, grant, txId, duplicate} */
+ function buy(productId){
+  var p=catalog&&catalog.get(productId);
+  if(!p)return Promise.reject(err('unknown_product'));
+  var b=provider();
+  if(!b)return Promise.reject(err('no_provider'));
+  if(!serverOk())return Promise.reject(err('offline'));
+  return Promise.resolve().then(function(){return b.buy(productId)}).then(function(r){
+   if(!r||!r.receipt)throw err('cancelled');
+   return verifyWithServer(claimOf(b,productId,r)).then(function(m){
+    try{if(typeof b.finish==='function')b.finish(r)}catch(e){}
+    return m;
+   });
+  },function(e){throw (e&&e.code)?e:err('cancelled',e&&e.message)});
+ }
+ /** يستعيد مشتريات المتجر (غير المستهلكة) ويمرّرها على الخادم — يعيد ما مُنح أو كان ممنوحًا */
+ function restore(){
+  var b=provider();
+  if(!b||typeof b.restore!=='function')return Promise.resolve([]);
+  if(!serverOk())return Promise.reject(err('offline'));
+  return Promise.resolve().then(function(){return b.restore()}).then(function(list){
+   list=Array.isArray(list)?list:[];
+   var out=[];
+   return list.reduce(function(chain,r){
+    return chain.then(function(){
+     if(!r||!r.receipt||!r.productId)return;
+     return verifyWithServer(claimOf(b,r.productId,r)).then(function(m){out.push(m)},function(){});
+    });
+   },Promise.resolve()).then(function(){return out});
+  });
+ }
+ var AR={
+  cancelled:'ألغيت عملية الشراء — لم يُخصم شيء',
+  no_provider:'الشراء بالمال متاح من داخل تطبيق تحدّي على App Store وGoogle Play فقط',
+  offline:'لا اتصال بخادم تحدّي — لن يُخصم شيء',
+  unknown_product:'منتج غير معروف',
+  already_used:'هذا الإيصال استُخدم في حساب آخر من قبل',
+  verify_failed:'لم يتحقّق المتجر من الشراء — لم يُمنح شيء',
+  iap_unavailable:'الشراء غير مفعّل على هذا الخادم بعد',
+  bad_claim:'طلب شراء غير صالح'
+ };
+ function explain(e){var c=e&&e.code;return AR[c]||('تعذّر الشراء ('+(c||'؟')+')')}
+ return {init:init,provider:provider,status:status,buy:buy,restore:restore,explain:explain,_AR:AR};
+})();
+if(typeof module!=='undefined'&&module.exports)module.exports=Billing;
 /* ⟦/src⟧ */
 const TIERS=RankCore.TIERS;
 const RP_PER_DIV=RankCore.RP_PER_DIV;
@@ -14412,14 +14536,7 @@ const ECON={
  // البند 16 — حزم الجواهر (الأسعار من المتاجر لا من الكود)
  // البند 16 — حزم الجواهر · أسماء من عالم «تحدي» لا من غيره
  // التدرّج: شرارة ${ico(`back`,15)} قبس ${ico('back',15)} مشعل ${ico(`back`,15)} كنز ${ico(`back',15)} خزنة ${ico(`back',15)} قمة (القمة تربطها بشعار اللعبة)
- gemPacks:[
-  {id:'gems_80'   ,gems:80   ,usd:0.99,n:'شرارة' ,art:'spark' ,tag:''       ,bonus:0},
-  {id:'gems_500'  ,gems:500  ,usd:4.99,n:'قَبَس'  ,art:'ember' ,tag:''       ,bonus:0},
-  {id:'gems_1200' ,gems:1200 ,usd:9.99,n:'مشعل'  ,art:'torch' ,tag:'+8%'    ,bonus:8},
-  {id:'gems_2500' ,gems:2500 ,usd:19.99,n:'كنز'   ,art:'chest' ,tag:'+15%'   ,bonus:15},
-  {id:'gems_6500' ,gems:6500 ,usd:49.99,n:'خزنة'  ,art:'vault' ,tag:'+22%'   ,bonus:22},
-  {id:'gems_14000',gems:14000,usd:99.99,n:'قمّة'  ,art:'summit',tag:'الأفضل' ,bonus:30}
- ],
+ gemPacks:CATALOG.ofKind('gems').map((p,i,a)=>({id:p.id,gems:p.gems,usd:p.usd,n:p.n,art:p.art,tag:i===a.length-1?'الأفضل':(p.bonus?'+'+p.bonus+'%':''),bonus:p.bonus})),
  // العملات تُشترى بالجواهر — البند 17
  coinPacks:[
   {id:'c1',coins:2000  ,gems:60 ,n:'كيس'  ,art:'spark'},
@@ -16383,6 +16500,7 @@ const SETS=[
 const DEF_OPT={haptic:1,confirm:1,fast:0,sfx:1,music:0,nMatch:1,nSeason:1,nFriend:1,
  seeProfile:'all',challenge:'friends'};
 function ensureOpt(){if(!S.opt)S.opt={...DEF_OPT}}
+if(window.Billing&&window.NET&&window.CATALOG)Billing.init({net:NET,catalog:CATALOG});
 /* الصوت والاهتزاز يقرآن الإعدادات نفسها التي تعرضها الشاشة */
 if(window.SFX){
  SFX.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.sfx},haptic:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.haptic}});
@@ -17098,11 +17216,7 @@ function packTile(o){
    box-shadow:0 2px 6px rgba(0,0,0,.5)">${o.tag}</div>`:''}
  </div>`;
 }
-function buyGemPack(id){
- const p=ECON.gemPacks.find(x=>x.id===id);
- if(!p)return;
- paySheet(p.n+' — '+p.gems.toLocaleString('en-US')+' جوهرة',p.usd,()=>{S.gems+=p.gems},shopScr);
-}
+function buyGemPack(id){if(CATALOG.get(id))paySheet(id,shopScr)}
 function buyCoins(id){
  const p=ECON.coinPacks.find(x=>x.id===id);
  if(S.gems<p.gems){toast('جواهر غير كافية');return}
@@ -19038,7 +19152,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.19';
+const APP_VER='5.20';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -19146,14 +19260,12 @@ function buyPassAsk(){
  <div class="qvt">التذكرة المميزة</div>
  <div class="qvd">تفتح مسار المكافآت المميز كاملاً — جوكرات وجواهر مضاعفة وتعبير حصري، وتُستلم كل مستوياتك السابقة فوراً.</div>
  <button class="btn gd" id="qvy">${ico('gem',14)} فتح بـ ${SZ_PASS_COST} جوهرة</button>
- <button class="btn" id="qvd" style="margin-top:9px;background:linear-gradient(145deg,#2ECC71,#1D8A4E)">شراء مباشر $9.99 (تجريبي)</button>
+ <button class="btn" id="qvd" style="margin-top:9px;background:linear-gradient(145deg,#2ECC71,#1D8A4E)">شراء بـ $9.99 عبر المتجر</button>
  <button class="btn g" id="qvn" style="margin-top:9px">ليس الآن</button></div>`;
  document.body.appendChild(ov);
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
- ov.querySelector('#qvd').onclick=()=>{ov.remove();
-  paySheet('التذكرة المميزة — الموسم 4',9.99,()=>{SZ().prem=true},()=>seasonScr(1));
- };
+ ov.querySelector('#qvd').onclick=()=>{ov.remove();paySheet('season_pass',()=>seasonScr(1))};
  ov.querySelector('#qvy').onclick=()=>{ov.remove();
   if(S.gems<SZ_PASS_COST){toast('تحتاج '+SZ_PASS_COST+' جوهرة — اجمعها من الصناديق والمستويات');return}
   S.gems-=SZ_PASS_COST;SZ().prem=true;saveState();
@@ -28676,21 +28788,21 @@ function achScr(){
   '<div style="font-size:12px;color:var(--mut);text-align:center;padding:14px">لا شارات بعد — اهزم الحرّاس</div>'}</div>`);
 }
 
-// ── المتجر: أسعار دولارية بوضع شراء تجريبي — كل شيء قابل للشراء للتجربة ──
-// (لا يُخصم أي مال حقيقي: محاكاة كاملة لتجربة الاقتصاد قبل ربط متجر التطبيقات)
-const IAP=[
- {k:'g1',usd:0.99, gems:80,   n:'حفنة جواهر',   bonus:''},
- {k:'g2',usd:4.99, gems:500,  n:'كيس الجواهر',  bonus:'+8% مجاناً'},
- {k:'g3',usd:9.99, gems:1200, n:'صندوق الجواهر',bonus:'+20% مجاناً'},
- {k:'g4',usd:19.99,gems:2700, n:'خزنة الجواهر', bonus:'+35% مجاناً'},
- {k:'g5',usd:49.99,gems:7500, n:'عرش الجواهر',  bonus:'الأفضل قيمة 👑'}
-];
-const BUNDLES=[
- {k:'b1',usd:2.99,n:'حزمة البداية',d:'300 جوهرة + 3000 عملة + جوكر نادر',
-  grant:()=>{S.gems+=300;S.coins+=3000;grantRewards([{t:'wild',r:'rare',v:1}])}},
- {k:'b2',usd:9.99,n:'حزمة التذكرة المميزة',d:'تفعيل تذكرة الموسم 👑 + 200 جوهرة',
-  grant:()=>{SZ().prem=true;S.gems+=200}}
-];
+// ── المتجر: المنتجات المدفوعة من الكتالوج المشترك (src/economy/catalog.js) — الخادم يمنح، لا الهاتف ──
+const IAP=CATALOG.ofKind('gems').map((p,i,a)=>({k:'g'+(i+1),pid:p.id,usd:p.usd,gems:p.gems,n:p.n,
+ bonus:i===a.length-1?'الأفضل قيمة 👑':(p.bonus?'+'+p.bonus+'% مجاناً':'')}));
+const BUNDLES=[{k:'b1',pid:'bundle_start'},{k:'b2',pid:'season_pass'}].map(b=>{const p=CATALOG.get(b.pid);return {...b,usd:p.usd,n:p.n,d:p.d}});
+/** تطبيق منحة شراء كما أعادها الخادم (أو الكتالوج في وضع المطوّر).
+    txId يمنع تطبيق الإيصال نفسه مرّتين على هذا الجهاز؛ وعلى جهاز جديد تُستعاد المنحة مرّة. */
+function applyGrant(g,txId){
+ if(!g)return false;
+ if(txId){S.iapTx=S.iapTx||[];if(S.iapTx.includes(txId))return false;S.iapTx.push(txId);if(S.iapTx.length>200)S.iapTx.shift()}
+ if(g.gems)S.gems+=g.gems;
+ if(g.coins)S.coins+=g.coins;
+ if(g.wild)grantRewards([{t:'wild',r:g.wild,v:1}]);
+ if(g.pass)SZ().prem=true;
+ saveState();return true;
+}
 const EXCH=[
  {g:60,c:1500},{g:150,c:4200},{g:400,c:12000}
 ];
@@ -28723,24 +28835,40 @@ function confirmSheet(t,d,okTxt,ok){
  ov.querySelector('#qvn').onclick=()=>ov.remove();
  ov.querySelector('#qvy').onclick=()=>{ov.remove();ok()};
 }
-function paySheet(name,usd,onOk,after){
+/* ورقة الشراء: المتجر يعطي إيصالًا، والخادم يتحقّق ويمنح. بلا متجر أو بلا خادم تقول ذلك بصراحة.
+   زرّ التجربة يظهر في وضع المطوّر فقط ولا يخصم شيئًا. */
+function paySheet(pid,after){
+ const p=CATALOG.get(pid);if(!p)return;
+ const name=p.n+(p.kind==='gems'?' — '+p.gems.toLocaleString('en-US')+' جوهرة':'');
+ const st=(window.Billing?Billing.status():'no_store');
+ const why=st==='no_server'?'الشراء يحتاج اتصالًا بخادم تحدّي — هذه نسخة محلية':'الشراء بالمال متاح من داخل تطبيق تحدّي على App Store وGoogle Play';
  const ov=document.createElement('div');ov.className='qvov';
  ov.innerHTML=`<div class="qvbox">
  <div style="font-size:26px">${ico('shop',24)}</div>
  <div class="qvt">${name}</div>
- <div class="qvd" style="margin-bottom:2px">السعر: <b style="color:#5DE39A">$${usd.toFixed(2)} دولار أمريكي</b></div>
- <div class="prcbig">$${usd.toFixed(2)}</div>
- <div class="sandbox">${ico('info',12)} وضع تجريبي — لن يُخصم أي مال حقيقي</div>
- <button class="btn gd" id="qvy">إتمام الشراء التجريبي</button>
+ ${p.d?`<div class="qvd">${p.d}</div>`:''}
+ <div class="prcbig">$${p.usd.toFixed(2)}</div>
+ ${st==='store'?`<div class="qvd" style="margin-bottom:6px">يظهر السعر النهائي بعملتك في نافذة المتجر</div>
+  <button class="btn gd" id="qvy">${ico('shop',14)} شراء عبر المتجر</button>`
+  :`<div class="sandbox">${ico('info',12)} ${why}</div>`}
+ ${S.dev?`<button class="btn g" id="qvt" style="margin-top:9px">تجربة الشراء — وضع المطوّر، بلا مال</button>`:''}
  <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
  document.body.appendChild(ov);
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
- ov.querySelector('#qvy').onclick=()=>{ov.remove();onOk();saveState();
-  buyFx(ico('shop',15),'تم الشراء ✔',name);if(window.FX)FX.win();refresh(after||shopScr)};
+ const done=(grant,txId,label)=>{ov.remove();
+  if(applyGrant(grant,txId)){buyFx(ico('shop',15),label,name);if(window.FX)FX.win()}
+  else toast('هذا الشراء مطبَّق على جهازك من قبل');
+  refresh(after||storeScr)};
+ const y=ov.querySelector('#qvy');
+ if(y)y.onclick=async()=>{y.disabled=true;y.textContent='جارٍ الشراء…';
+  try{const r=await Billing.buy(pid);done(r.grant,r.txId,r.duplicate?'مشتريات مستعادة ✔':'تم الشراء ✔')}
+  catch(e){ov.remove();toast(Billing.explain(e))}};
+ const t=ov.querySelector('#qvt');
+ if(t)t.onclick=()=>done(CATALOG.grantOf(p),null,'شراء تجريبي ✔ — وضع المطوّر');
 }
-function buyIap(k){const p=IAP.find(x=>x.k===k);paySheet(p.n+' — '+p.gems+' جوهرة',p.usd,()=>{S.gems+=p.gems})}
-function buyBundle(k){const b=BUNDLES.find(x=>x.k===k);paySheet(b.n,b.usd,b.grant)}
+function buyIap(k){const p=IAP.find(x=>x.k===k);if(p)paySheet(p.pid,storeScr)}
+function buyBundle(k){const b=BUNDLES.find(x=>x.k===k);if(b)paySheet(b.pid,storeScr)}
 function buyExch(i){const e=EXCH[i];
  if(S.gems<e.g){toast('جواهر غير كافية — اشترِ باقة من الأعلى');return}
  confirmSheet('تحويل جواهر إلى عملات',`ستدفع <b style="color:var(--gem)">${e.g} جوهرة</b> وتحصل على <b style="color:var(--gold)">${e.c.toLocaleString('en-US')} عملة</b>.`,'تأكيد التحويل',()=>{
@@ -28752,7 +28880,7 @@ function buyJoker(i){const j=JOKERS[i];
   buyFx(ico('wild',16),'جوكر '+RARITY[j.r].n+' في جعبتك');if(window.FX)FX.correct(3);refresh(storeScr)})}
 function storeScr(){
  go(`<div class="scr on">${tb('المتجر')}
- <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. الأسعار الدولارية <b>تجريبية</b>: لا يُخصم مال حقيقي.</div>
+ <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. ${(window.Billing?Billing.status():'no_store')==='store'?'الشراء عبر متجر التطبيقات والخادم يتحقّق من كل إيصال.':'الشراء بالمال متاح داخل تطبيق تحدّي على المتاجر؛ هنا تُعرض الأسعار فقط.'}</div>
  <div style="display:flex;gap:9px;justify-content:center;margin-bottom:16px">
  <span class="cch" style="font-size:14px;padding:9px 15px">${ico('coin',15)} ${S.coins.toLocaleString('en-US')}</span>
  <span class="cch" style="font-size:14px;padding:9px 15px;color:var(--gem)">${ico('gem',15)} ${S.gems.toLocaleString('en-US')}</span></div>

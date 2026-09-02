@@ -132,6 +132,9 @@ var NET=(function(){
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
+ /* ── الشراء: الإيصال إلى الخادم، والخادم يسأل المتجر ويمنح ── */
+ function purchase(claim){return request({t:'purchase',claim:claim},25000)}
+ function purchases(){return request({t:'purchases'})}
 
  /* ── الغرفة على الخادم — الواجهة نفسها التي تعطيها قدرة room في الأرتيفاكت ── */
  function peersView(){
@@ -157,6 +160,7 @@ var NET=(function(){
 
  return {boot:boot,connect:connect,disconnect:disconnect,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u}};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=NET;

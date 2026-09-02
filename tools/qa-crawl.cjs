@@ -122,7 +122,7 @@ const CAPTURES=[
  ['draw-vote',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();PT.imgs=[qaImg('#E24B4A'),qaImg('#2ECC71'),qaImg('#378ADD')];PT.idx=PT.n;drawVote()")],
  ['draw-end',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();PT.imgs=[qaImg('#E24B4A'),qaImg('#2ECC71'),qaImg('#378ADD')];PT.votes=[2,1,0];drawEnd()")],
  // ── أوراق وحوارات ──
- ['paySheet',R("tab('shop');paySheet('التذكرة المميزة',9.99,()=>{},()=>{})")],
+ ['paySheet',R("tab('shop');paySheet('season_pass')")],
  ['confirmSheet',R("tab('more');confirmSheet('حذف الحساب','سيُمحى كل شيء.','احذف',()=>{})")],
  ['toast',R("tab('play');toast('حُفظ الاسم')")],
 ];

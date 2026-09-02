@@ -448,4 +448,6 @@ src/
 | 4.4 أهداف لمس | أسماء الأعضاء (`.tapName`) والداعمين، روابط العب والموسم وقبل المباراة، «تخطي»، «تبديل مجاني»، «تغيير»، شرائح التصفية ≥36 بكسل |
 | المرحلة C: الربط بالإنترنت | العميل يقرأ عنوان الخادم من `<meta name="tahaddi-server">`/`?server=`؛ الخادم: `HOST`، `TAHADDI_ORIGINS`، CORS على `/health`؛ `server/Dockerfile`، `fly.toml`، `render.yaml`، `.github/workflows/pages.yml`، `tools/build-www.cjs`، `capacitor.config.json`، `twa-manifest.json`، `docs/DEPLOY.md` |
 
+| الشراء (v5.20) | كتالوج واحد `src/economy/catalog.js` للهاتف والخادم؛ الخادم يتحقّق من الإيصال عند Apple/Google (`server/src/tahaddi/iap.ts`) ويمنح من الكتالوج ويستهلك الإيصال مرّة واحدة؛ الهاتف يشتري عبر جسر `window.TahaddiBilling` من تطبيق المتجر (`src/economy/billing.js`)؛ نسخة الويب تعرض الأسعار وتقول إن الشراء داخل تطبيق المتجر؛ زرّ التجربة في وضع المطوّر فقط. لا بيانات بنكية في أي مكان (`docs/PAYMENTS.md`) |
+
 ما بقي مفتوحًا من التقرير: 4.3 قياس الكيرم على جهاز حقيقي (بيد المالك)، 4.5 النصّ الصغير، 4.7 طول شاشة الموسم، 4.10 توازن المحتوى، 4.13 الإتاحة، وتقسيم الملف الواحد (4.1). الاستضافة نفسها قرار المالك: `fly deploy` أو Render بحسابه.

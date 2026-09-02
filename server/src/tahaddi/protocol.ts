@@ -27,6 +27,12 @@ export interface ResultReport {
   participants: string[];
 }
 
+/** ادّعاء شراء: إيصال من المتجر — الخادم يسأل المتجر ويمنح من الكتالوج، ولا يصدّق الأرقام القادمة من الهاتف */
+export type Platform = 'ios' | 'android' | 'test';
+export interface PurchaseClaim { platform: Platform; productId: string; receipt: string; transactionId?: string }
+export interface PurchaseGrant { gems: number; coins: number; wild: string | null; pass: boolean }
+export interface PurchaseRec { txId: string; platform: Platform; productId: string; accountId: string; at: number; grant: PurchaseGrant }
+
 export type ClientMsg =
   | { t: 'hello'; rid?: string; token?: string; name?: string }
   | { t: 'setName'; rid?: string; name: string }
@@ -35,6 +41,8 @@ export type ClientMsg =
   | { t: 'submitResult'; rid?: string; report: ResultReport }
   | { t: 'leaderboard'; rid?: string; gameId: GameId; limit?: number }
   | { t: 'profile'; rid?: string; id?: string }
+  | { t: 'purchase'; rid?: string; claim: PurchaseClaim }
+  | { t: 'purchases'; rid?: string }
   // ── الغرف: تتابع حضور وبثّ لحظات — نفس واجهة غرفة الأرتيفاكت ──
   | { t: 'presence'; patch: Record<string, unknown> }
   | { t: 'emit'; topic: string; data?: unknown };
@@ -57,6 +65,8 @@ export type ServerMsg =
   | { t: 'resultFinal'; matchId: string; status: 'applied' | 'disputed' | 'incomplete'; profile: RankProfile | null; delta: Record<string, unknown> | null }
   | { t: 'leaderboard'; rid?: string; gameId: GameId; rows: LeaderRow[]; me: { rank: number; row: LeaderRow } | null; total: number }
   | { t: 'profileView'; rid?: string; id: string; name: string; ranks: Record<string, RankProfile> }
+  | { t: 'purchased'; rid?: string; productId: string; txId: string; grant: PurchaseGrant; duplicate: boolean }
+  | { t: 'purchaseList'; rid?: string; list: PurchaseRec[] }
   | { t: 'peers'; list: PeerView[] }
   | { t: 'msg'; topic: string; data?: unknown; from: { peer: string; by: string } }
   | { t: 'error'; rid?: string; code: string; message?: string };

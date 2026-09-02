@@ -17,7 +17,7 @@ const sec=t=>console.log('\n── '+t+' ──');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 (async()=>{
- const server=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA},stdio:['ignore','pipe','pipe']});
+ const server=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA,TAHADDI_IAP_TEST_SECRET:'t3st-online'},stdio:['ignore','pipe','pipe']});
  const logs=[];server.stdout.on('data',d=>logs.push(String(d)));server.stderr.on('data',d=>logs.push('ERR '+String(d)));
  await sleep(800);
  const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader']});
@@ -99,6 +99,28 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   check('صفّان حقيقيان بأسماء الحسابين وإفصاح عن نطاق الترتيب',/عبدالرحمن/.test(lb)&&/لاعبو هذا الخادم · 2/.test(lb)&&/غير مصنّف/.test(lb),lb.slice(0,200));
   const more=await A.evaluate(()=>{tab('more');return document.getElementById('netLine').innerText});
   check('«المزيد» تقول الحقيقة: متصل بخادم تحدّي وحسابك',/متصل بخادم تحدّي/.test(more)&&more.includes(sa.id),more);
+
+  sec('الشراء');
+  const {createHmac}=require('crypto');
+  const receipt=(pid,tx)=>createHmac('sha256','t3st-online').update(pid+'.'+tx).digest('hex');
+  const web=await A.evaluate(()=>{const st=Billing.status();tab('shop');paySheet('gems_80');const ov=document.querySelector('.qvov');
+   const r={st,hasBuy:!!ov.querySelector('#qvy'),txt:ov.innerText};ov.remove();return r});
+  check('نسخة الويب بلا جسر متجر: لا زرّ شراء، والورقة تقول إن الشراء داخل تطبيق المتجر',web.st==='no_store'&&!web.hasBuy&&/App Store/.test(web.txt),JSON.stringify(web).slice(0,200));
+  const bought=await A.evaluate(async r=>{
+   window.TahaddiBilling={platform:'test',finished:[],buy:async pid=>({platform:'test',productId:pid,receipt:r.rc,transactionId:r.tx}),finish(x){this.finished.push(x)}};
+   const st=Billing.status();const g0=S.gems;
+   const m=await Billing.buy('gems_500');
+   return {st,g0,t:m.t,gems:m.grant.gems,dup:m.duplicate,finished:window.TahaddiBilling.finished.length};
+  },{rc:receipt('gems_500','tx-online-1'),tx:'tx-online-1'});
+  check('مع جسر المتجر: الحالة store، والخادم يتحقّق ويمنح 500 جوهرة، والجسر يُبلَّغ بالإنهاء',bought.st==='store'&&bought.t==='purchased'&&bought.gems===500&&bought.dup===false&&bought.finished===1,JSON.stringify(bought));
+  const viaSheet=await A.evaluate(async()=>{const g0=S.gems;paySheet('gems_500');document.querySelector('#qvy').click();
+   await new Promise(r=>setTimeout(r,900));return {g0,g1:S.gems,tx:(S.iapTx||[]).slice()}});
+  check('الورقة تطبّق المنحة مرّة واحدة لكل إيصال: الإيصال المكرّر لا يضيف جواهر على الجهاز',viaSheet.g1===viaSheet.g0+500&&viaSheet.tx.length===1,JSON.stringify(viaSheet));
+  const stolen=await B.evaluate(async r=>{
+   window.TahaddiBilling={platform:'test',buy:async pid=>({platform:'test',productId:pid,receipt:r.rc,transactionId:r.tx})};
+   try{await Billing.buy('gems_500');return 'granted'}catch(e){return e.code+'|'+Billing.explain(e)}
+  },{rc:receipt('gems_500','tx-online-1'),tx:'tx-online-1'});
+  check('الإيصال نفسه من حساب آخر يُرفض برسالة عربية واضحة',/^already_used\|/.test(stolen)&&/حساب آخر/.test(stolen),stolen);
 
   check('صفر أخطاء JS في المتصفحين',A._errs.length===0&&B._errs.length===0,(A._errs.concat(B._errs)).slice(0,3).join(' | '));
   const health=await A.evaluate(async p=>{const r=await fetch(`http://localhost:${p}/health`);return r.json()},PORT);

@@ -67,6 +67,10 @@ PORT=8090 npm run start:tahaddi  # http://localhost:8090
 
 `server/src/tahaddi/protocol.ts` — رسائل العميل: `hello · setName · saveCloud · loadCloud · submitResult · leaderboard · profile · presence · emit`. ردود الخادم مقابلة، وكل طلب يحمل `rid` يعود في ردّه.
 
+## ٦ب. الشراء داخل التطبيق (v5.20)
+
+`purchase {claim:{platform, productId, receipt, transactionId?}}` → الخادم يسأل المتجر (`iap.ts`) ويمنح من `src/economy/catalog.js` ويحفظ الإيصال المستهلك؛ `purchases` تعيد مشتريات الحساب. التفاصيل والحسابات المطلوبة من المالك في `docs/PAYMENTS.md`.
+
 ## ٧. الاختبارات
 
 | الاختبار | ماذا يثبت |

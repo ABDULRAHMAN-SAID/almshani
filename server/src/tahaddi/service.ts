@@ -4,7 +4,9 @@ import { randomBytes } from 'node:crypto';
 import RankCore from '../../../src/progression/rank.js';
 import type { RankProfile } from '../../../src/progression/rank.js';
 import { FileStore } from './tstore';
-import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, LeaderRow, GameId } from './protocol';
+import CATALOG from '../../../src/economy/catalog.js';
+import { verify as verifyReceipt, iapStatus } from './iap';
+import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, LeaderRow, GameId, PurchaseClaim, PurchaseRec } from './protocol';
 
 export interface Account {
   token: string; id: string; name: string; createdAt: number; lastSeen: number;
@@ -19,7 +21,9 @@ interface Pending {
   gameId: GameId; mode: string; participants: string[]; createdAt: number;
   reports: Map<string, ResultReport>;
 }
-interface Persisted { v: 1; accounts: Account[] }
+interface Persisted { v: 1; accounts: Account[]; purchases?: PurchaseRec[] }
+const PLATFORMS = new Set(['ios', 'android', 'test']);
+const MAX_RECEIPT_BYTES = 64 * 1024;
 
 const MAX_SAVE_BYTES = 256 * 1024;
 const MAX_PRESENCE_BYTES = 4 * 1024;
@@ -40,6 +44,7 @@ export class TahaddiService {
   private byId = new Map<string, Account>();          // id → account
   private sessions = new Map<string, Session>();      // peer → session
   private pending = new Map<string, Pending>();       // matchId → reports
+  private purchases = new Map<string, PurchaseRec>();  // txId → شراء ممنوح (منع إعادة الاستخدام)
   private store: FileStore<Persisted>;
   private sweeper: ReturnType<typeof setInterval>;
 
@@ -57,14 +62,16 @@ export class TahaddiService {
         for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
         this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
       }
-      console.log(`tahaddi/store: حُمّل ${this.accounts.size} حسابًا`);
+      for (const r of saved.purchases ?? []) if (r && typeof r.txId === 'string') this.purchases.set(r.txId, r);
+      console.log(`tahaddi/store: حُمّل ${this.accounts.size} حسابًا و${this.purchases.size} شراءً`);
     }
     this.sweeper = setInterval(() => this.sweepPending(), SWEEP_MS);
     (this.sweeper as any).unref?.();
   }
 
-  private persist(): void { this.store.saveSoon(() => ({ v: 1, accounts: [...this.accounts.values()] })); }
-  flush(): void { this.store.saveNow({ v: 1, accounts: [...this.accounts.values()] }); }
+  private snapshot(): Persisted { return { v: 1, accounts: [...this.accounts.values()], purchases: [...this.purchases.values()] }; }
+  private persist(): void { this.store.saveSoon(() => this.snapshot()); }
+  flush(): void { this.store.saveNow(this.snapshot()); }
   close(): void { clearInterval(this.sweeper); this.flush(); }
 
   /* ── الحساب ── */
@@ -285,10 +292,37 @@ export class TahaddiService {
       case 'submitResult': return this.submitResult(s, msg.report, msg.rid);
       case 'leaderboard': return this.leaderboard(s, msg.gameId, msg.limit, msg.rid);
       case 'profile': return this.profile(s, msg.id, msg.rid);
+      case 'purchase': { void this.purchase(s, msg.claim, msg.rid); return; }
+      case 'purchases': return this.purchaseList(s, msg.rid);
       case 'presence': return this.presence(s, msg.patch);
       case 'emit': return this.emit(s, msg.topic, msg.data);
       default: return s.send({ t: 'error', rid: (msg as any).rid, code: 'unknown' });
     }
   }
-  stats() { return { accounts: this.byId.size, online: this.sessions.size, pending: this.pending.size }; }
+  stats() { return { accounts: this.byId.size, online: this.sessions.size, pending: this.pending.size, purchases: this.purchases.size, iap: iapStatus() }; }
+
+  /* ── الشراء: الإيصال يُتحقّق منه عند المتجر، والمنحة من الكتالوج، والإيصال يُستهلك مرّة واحدة ── */
+  async purchase(s: Session, claim: unknown, rid?: string): Promise<void> {
+    const c = claim as PurchaseClaim;
+    if (!c || typeof c !== 'object' || !PLATFORMS.has(c.platform) || typeof c.productId !== 'string' || typeof c.receipt !== 'string'
+        || !c.receipt || c.receipt.length > MAX_RECEIPT_BYTES || (c.transactionId != null && typeof c.transactionId !== 'string'))
+      return s.send({ t: 'error', rid, code: 'bad_claim' });
+    const product = CATALOG.get(c.productId);
+    if (!product) return s.send({ t: 'error', rid, code: 'unknown_product' });
+    const v = await verifyReceipt(c.platform, c.productId, c.receipt, c.transactionId);
+    if (!v.ok) return s.send({ t: 'error', rid, code: v.code, message: v.detail });
+    const prev = this.purchases.get(v.txId);
+    if (prev) {
+      if (prev.accountId !== s.account.id) return s.send({ t: 'error', rid, code: 'already_used' });
+      return s.send({ t: 'purchased', rid, productId: prev.productId, txId: prev.txId, grant: prev.grant, duplicate: true });
+    }
+    const grant = CATALOG.grantOf(product)!;
+    const rec: PurchaseRec = { txId: v.txId, platform: c.platform, productId: c.productId, accountId: s.account.id, at: Date.now(), grant };
+    this.purchases.set(v.txId, rec); this.persist();
+    s.send({ t: 'purchased', rid, productId: rec.productId, txId: rec.txId, grant, duplicate: false });
+  }
+  purchaseList(s: Session, rid?: string): void {
+    const list = [...this.purchases.values()].filter(r => r.accountId === s.account.id);
+    s.send({ t: 'purchaseList', rid, list });
+  }
 }

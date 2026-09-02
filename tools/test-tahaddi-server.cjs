@@ -16,7 +16,7 @@ const sec=t=>console.log('\n── '+t+' ──');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 function startServer(){
- const p=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA,TAHADDI_RESULT_WAIT_MS:'1200',TAHADDI_SWEEP_MS:'300'},stdio:['ignore','pipe','pipe']});
+ const p=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA,TAHADDI_RESULT_WAIT_MS:'1200',TAHADDI_SWEEP_MS:'300',TAHADDI_IAP_TEST_SECRET:'t3st-secret'},stdio:['ignore','pipe','pipe']});
  p.logs=[];p.stdout.on('data',d=>p.logs.push(String(d)));p.stderr.on('data',d=>p.logs.push('ERR '+String(d)));
  return p;
 }
@@ -119,6 +119,42 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
   const bad=client();const wbad=await hello(bad,'not-a-real-token');
   check('رمز مجهول = حساب جديد لا سرقة حساب',wbad.id!==wa.id);
   await A3.close();await bad.close();
+
+  sec('الشراء — الخادم يتحقّق ويمنح ويمنع إعادة الاستخدام');
+  {   // كتلة مستقلّة كي لا تتعارض الأسماء مع أقسام الاختبار الأخرى
+  const {createHmac}=require('crypto');
+  const receipt=(pid,tx)=>createHmac('sha256','t3st-secret').update(pid+'.'+tx).digest('hex');
+  const P=client();const wp=await hello(P,wa.token);
+  const Q=client();await hello(Q,undefined,'خصم');
+  const ok1=await P.req({t:'purchase',claim:{platform:'test',productId:'gems_80',receipt:receipt('gems_80','tx1'),transactionId:'tx1'}});
+  check('إيصال صالح → منحة من الكتالوج (80 جوهرة) بمعرّف عملية',ok1.t==='purchased'&&ok1.grant.gems===80&&ok1.grant.coins===0&&ok1.txId==='test:tx1'&&ok1.duplicate===false,JSON.stringify(ok1));
+  const pdup=await P.req({t:'purchase',claim:{platform:'test',productId:'gems_80',receipt:receipt('gems_80','tx1'),transactionId:'tx1'}});
+  check('الإيصال نفسه من الحساب نفسه → duplicate:true بلا منح جديد',pdup.t==='purchased'&&pdup.duplicate===true&&pdup.txId==='test:tx1');
+  const stolen=await Q.req({t:'purchase',claim:{platform:'test',productId:'gems_80',receipt:receipt('gems_80','tx1'),transactionId:'tx1'}});
+  check('الإيصال نفسه من حساب آخر → already_used',stolen.t==='error'&&stolen.code==='already_used',JSON.stringify(stolen));
+  const pforged=await P.req({t:'purchase',claim:{platform:'test',productId:'gems_14000',receipt:'0'.repeat(64),transactionId:'tx9'}});
+  check('إيصال مزوّر → verify_failed ولا شيء يُمنح',pforged.t==='error'&&pforged.code==='verify_failed');
+  const cheat=await P.req({t:'purchase',claim:{platform:'test',productId:'gems_14000',receipt:receipt('gems_80','tx2'),transactionId:'tx2'}});
+  check('إيصال منتج رخيص على منتج غالٍ → مرفوض (المنتج جزء من التوقيع)',cheat.t==='error'&&cheat.code==='verify_failed');
+  const unk=await P.req({t:'purchase',claim:{platform:'test',productId:'gems_999',receipt:receipt('gems_999','tx3'),transactionId:'tx3'}});
+  check('منتج خارج الكتالوج → unknown_product',unk.t==='error'&&unk.code==='unknown_product');
+  const ios=await P.req({t:'purchase',claim:{platform:'ios',productId:'gems_80',receipt:'abc',transactionId:'t'}});
+  check('App Store بلا سرّ مضبوط → iap_unavailable لا منح على الثقة',ios.t==='error'&&ios.code==='iap_unavailable',JSON.stringify(ios));
+  const badc=await P.req({t:'purchase',claim:{platform:'steam',productId:'gems_80',receipt:'x'}});
+  check('منصّة مجهولة → bad_claim',badc.t==='error'&&badc.code==='bad_claim');
+  const ppass=await P.req({t:'purchase',claim:{platform:'test',productId:'season_pass',receipt:receipt('season_pass','tx4'),transactionId:'tx4'}});
+  check('التذكرة: منحة مركّبة (تذكرة + 200 جوهرة)',ppass.t==='purchased'&&ppass.grant.pass===true&&ppass.grant.gems===200);
+  const plist=await P.req({t:'purchases'});
+  check('قائمة مشتريات الحساب: اثنان، ولا يرى الخصم شيئًا',plist.t==='purchaseList'&&plist.list.length===2&&(await Q.req({t:'purchases'})).list.length===0,JSON.stringify(plist).slice(0,200));
+  const hs=await new Promise(r=>require('http').get(`http://localhost:${PORT}/health`,res=>{let d='';res.on('data',c=>d+=c);res.on('end',()=>r(JSON.parse(d)))}));
+  check('/health يفصح عمّا هو مفعّل: test فقط، ولا ios ولا android، وعدد المشتريات',hs.iap&&hs.iap.test===true&&hs.iap.ios===false&&hs.iap.android===false&&hs.purchases===2,JSON.stringify(hs));
+  await P.close();await Q.close();
+  server.kill('SIGTERM');await sleep(400);server=startServer();await sleep(700);
+  const P2=client();await hello(P2,wa.token);
+  const dup2=await P2.req({t:'purchase',claim:{platform:'test',productId:'gems_80',receipt:receipt('gems_80','tx1'),transactionId:'tx1'}});
+  check('الإيصالات المستهلكة باقية بعد إعادة التشغيل — لا تُصرف مرّتين',dup2.t==='purchased'&&dup2.duplicate===true);
+  await P2.close();
+  }
  }catch(e){fail++;console.log('  ✗ استثناء: '+(e&&e.stack||e))}
  server.kill('SIGTERM');
  try{fs.unlinkSync(DATA)}catch(e){}
