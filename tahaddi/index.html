@@ -303,19 +303,24 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .nvi.on .i{filter:drop-shadow(0 0 8px rgba(232,178,58,.65))}
 .nvi .i{font-size:19px;display:block;transition:filter .25s,opacity .25s}
 .nvi .i svg{width:25px;height:25px;display:block;margin:0 auto}
-.nvi:not(.on) .i{filter:grayscale(.72) brightness(.82);opacity:.72}
-.nvi.mid .cir svg{width:34px;height:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.45))}
-.nvi .l{font-size:9.5px;font-weight:800;margin-top:3px;letter-spacing:.2px}
-.nvi.mid{flex:0 0 78px}
-.nvi.mid .cir{width:58px;height:58px;border-radius:50%;margin:-24px auto 0;position:relative;
- background:radial-gradient(circle at 32% 26%,#9B6CF5,#5B2FB8 74%);
+.nvi:not(.on) .i{filter:grayscale(.3) brightness(.92);opacity:.92}
+.nvi.mid .cir svg{width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.nvi .l{font-size:10px;font-weight:900;margin-top:3px;letter-spacing:.2px;color:#E2E7F4}
+.nvi.on .l{color:var(--gold)}
+.nvi.mid{flex:0 0 80px}
+.nvi.mid .cir{width:62px;height:62px;border-radius:50%;margin:-27px auto 0;position:relative;
+ background:radial-gradient(circle at 35% 28%,#2E3A6E,#141B3C 58%,#0A0F22);
  display:flex;align-items:center;justify-content:center;font-size:23px;color:#fff;
- border:3px solid #D9A93C;
- box-shadow:0 7px 20px rgba(0,0,0,.55),0 0 22px rgba(232,178,58,.35),inset 0 3px 8px rgba(255,255,255,.28),inset 0 -4px 9px rgba(0,0,0,.35)}
+ border:3px solid #E2B245;
+ box-shadow:0 0 0 3px #0B1020,0 0 0 4.5px rgba(232,178,58,.45),0 8px 22px rgba(0,0,0,.6),0 0 24px rgba(232,178,58,.4),
+  inset 0 2px 6px rgba(255,255,255,.18),inset 0 -5px 10px rgba(0,0,0,.45)}
+.nvi.mid .cir::before{content:'';position:absolute;inset:-7px;border-radius:50%;pointer-events:none;animation:glow 2.6s ease-in-out infinite}
 .nvi.mid .cir::after{content:'';position:absolute;inset:3px;border-radius:50%;pointer-events:none;
- background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.4),transparent 42%)}
-.nvi.mid.on .cir{border-color:#FFE9A8;box-shadow:0 7px 20px rgba(0,0,0,.55),0 0 30px rgba(232,178,58,.6),inset 0 3px 8px rgba(255,255,255,.28)}
-.nvi.mid .l{margin-top:5px;color:var(--tx)}
+ background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.3),transparent 45%)}
+.nvi.mid.on .cir{border-color:#FFE9A8;
+ box-shadow:0 0 0 3px #0B1020,0 0 0 4.5px rgba(232,178,58,.75),0 8px 22px rgba(0,0,0,.6),0 0 32px rgba(232,178,58,.6),
+  inset 0 2px 6px rgba(255,255,255,.18),inset 0 -5px 10px rgba(0,0,0,.45)}
+.nvi.mid .l{margin-top:6px;color:var(--tx)}
 
 /* عام */
 .tbar{display:flex;align-items:center;padding:8px 0 14px}
@@ -869,7 +874,6 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 @keyframes okp{0%{transform:scale(1)}40%{transform:scale(1.05)}100%{transform:scale(1)}}
 .ncd{transition:transform .18s;box-shadow:0 8px 22px rgba(0,0,0,.3)}
 .ncd:active{transform:perspective(700px) rotateX(4deg) scale(.985)}
-.nvi.mid .cir{animation:glow 2.6s ease-in-out infinite}
 .btn{position:relative;overflow:hidden}
 .btn:not(:disabled)::after{content:'';position:absolute;top:0;bottom:0;width:46px;left:-70px;
  background:linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent);
@@ -13052,13 +13056,20 @@ if(typeof module!=='undefined'&&module.exports)module.exports=ICO2;
 /* ⟦/src⟧ */
 /* تعاريف تدرّجات الأيقونات تُحقن مرّة في الصفحة */
 if(window.ICO2&&!document.getElementById('tg-gold'))document.body.insertAdjacentHTML('afterbegin',ICO2.defs);
+/** يعيد تلوين الأجزاء الذهبية في أيقونة مرسومة إلى مفتاح لون من تدرّجات المجموعة نفسها */
+const ICO_TINT={silver:'#4C5566',bronze:'#5A2E10',purple:'#3B1F6B',red:'#6B1414',green:'#0E4D28',blue:'#123A73',orange:'#7A3A08',teal:'#0F4A48',steel:'#252C38',navy:'#0B1533'};
+function icoTint(p,k){
+ const d=ICO_TINT[k];if(!d)return p;
+ return p.split('tr-gold').join('tr-'+k).split('tg-gold').join('tg-'+k)
+  .split('#8A5A10').join(d).split('#6B4508').join(d).split('#5A3706').join(d);
+}
 function ico(n,s,c){
  s=s||16;
  const a=window.UI_ICONS&&UI_ICONS[n];          // لوحة أيقونات المالك المرسومة إن وُجدت
  if(a!=null)return '<span class="uico" data-i="'+n+'" style="width:'+s+'px;height:'+s+'px;--ux:'+((a%8)*(100/7))+'%;--uy:'+(Math.floor(a/8)*(100/4))+'%"></span>';
  let p=window.ICO2&&ICO2.get(n);
  if(p){
-  if(n==='medal'&&c){const k=/C0C7D6|silver/i.test(c)?'silver':/B87333|bronze/i.test(c)?'bronze':null;if(k)p=p.split('tr-gold').join('tr-'+k).split('tg-gold').join('tg-'+k).split('#8A5A10').join(k==='silver'?'#4C5566':'#5A2E10')}
+  if(c){const k=(n==='medal'&&/C0C7D6|silver/i.test(c))?'silver':(n==='medal'&&/B87333|bronze/i.test(c))?'bronze':(ICO_TINT[c]?c:null);if(k)p=icoTint(p,k)}
   return '<svg class="ico" data-i="'+n+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" style="display:inline-block;vertical-align:-.14em;flex-shrink:0">'+p+'</svg>';
  }
  p=ICO[n];
@@ -19363,7 +19374,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.26';
+const APP_VER='5.27';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -21784,6 +21795,19 @@ const DIFFS=[['easy','سهل',ico('bulb',20),'يلعب بعشوائية ويخط
    بطاقة اللعبة لا تحمل أزرار الطرق حتى لا تزدحم.
    ═══════════════════════════════════════════════════════════════════ */
 var _hubCss=0;
+/** بيانات عرض مركز اللعبة: نوع اللعبة ومدّتها التقريبية بكل طريقة */
+const GAME_META={
+ carrom:{type:'لعبة لوح',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة'},
+ uno:   {type:'لعبة بطاقات',  time:'10 - 20 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة'},
+ mafia: {type:'لعبة أدوار',   time:'20 - 40 دقيقة',quick:'15 - 25 دقيقة'},
+ draw:  {type:'لعبة رسم',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق'},
+ barra: {type:'لعبة تخمين',   time:'10 - 20 دقيقة',quick:'5 - 10 دقائق'}
+};
+function ghRange(a,b,unit){return a+' - '+b+' '+unit}
+/** حبّة معلومات — أي مدى رقمي فيها يُعزل ليُقرأ تصاعديًا داخل النصّ العربي */
+function ghPill(icon,t){return '<span class="ghPill">'+icon+'<span>'+String(t).replace(/(\d+) - (\d+)/g,'<bdi dir="ltr">$1 - $2</bdi>')+'</span></span>'}
+function ghChev(){return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+
 function hubCss(){
  if(_hubCss||typeof document==='undefined')return;
  _hubCss=1;
@@ -21809,39 +21833,66 @@ function hubCss(){
  '.gRow .go{color:#E8B23A;flex-shrink:0}',
  '.gRow.cont{border-color:rgba(232,178,58,.55);background:linear-gradient(160deg,#241C3E,#0C1122)}',
 
- /* رأس مركز اللعبة */
- '.ghHero{position:relative;overflow:hidden;border-radius:20px;padding:15px;margin-bottom:16px;',
- ' background:linear-gradient(155deg,#212A55,#101733 60%,#080C1C);border:1px solid #33406B}',
- '.ghHero .row{display:flex;align-items:center;gap:13px}',
- '.ghHero .art{width:62px;height:62px;flex-shrink:0;border-radius:15px;overflow:hidden;',
- ' background:#0A1022;border:1px solid #2A3358}',
+ /* رأس مركز اللعبة — إطار متدرّج بنفسجي/ذهبي، أيقونة اللعبة، نوعها، وحبّتا معلومات */
+ '.ghHero{position:relative;overflow:hidden;border-radius:22px;padding:16px 15px 14px;margin-bottom:18px;',
+ ' border:1px solid transparent;',
+ ' background:linear-gradient(160deg,#1A2247,#0E1430 55%,#0A0F22) padding-box,',
+ '  linear-gradient(135deg,#9B6CF5,#3A2F7A 45%,#3A4C86 70%,#E8B23A) border-box;',
+ ' box-shadow:0 14px 34px -18px rgba(123,79,224,.7),inset 0 1px 0 rgba(255,255,255,.06)}',
+ '.ghHero::before{content:"";position:absolute;top:-45%;right:-15%;width:65%;height:120%;pointer-events:none;',
+ ' background:radial-gradient(closest-side,rgba(139,92,240,.22),transparent)}',
+ '.ghHero .row{display:flex;align-items:center;gap:14px;position:relative}',
+ '.ghHero .art{width:74px;height:74px;flex-shrink:0;border-radius:18px;overflow:hidden;',
+ ' background:#0A1022;border:1px solid #3A4674;',
+ ' box-shadow:0 8px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}',
  '.ghHero .art svg{width:100%;height:100%;display:block}',
- '.ghHero .nm{font-size:18px;font-weight:900}',
- '.ghHero .rk{font-size:14px;font-weight:900;margin-top:4px}',
- '.ghHero .meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}',
- '.ghMeta{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;',
- ' background:rgba(255,255,255,.045);border:1px solid #313C63;font-size:10px;font-weight:800;color:#B7C1DC}',
- '.ghMeta b{color:#EDF1FA}',
- '.ghHero .lnk{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 13px;',
- ' min-height:38px;border-radius:11px;font-size:11px;font-weight:900;color:#C3A8FA;cursor:pointer;',
- ' background:rgba(139,92,240,.13);border:1.5px solid rgba(139,92,240,.55);font-family:inherit}',
+ '.ghHero .bd{flex:1;min-width:0}',
+ '.ghHero .nm{font-size:23px;font-weight:900;line-height:1.15;color:#F7F8FC}',
+ '.ghHero .ty{font-size:12px;font-weight:800;color:#B79BFF;margin-top:3px}',
+ '.ghHero .ghPk{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:#9AA5C6;margin-top:8px}',
+ '.ghHero .ghPk i{width:6px;height:6px;flex-shrink:0;transform:rotate(45deg);background:linear-gradient(135deg,#FFE9A8,#B8871E);',
+ ' box-shadow:0 0 6px rgba(232,178,58,.7)}',
+ '.ghHero .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;position:relative}',
+ '.ghHero .pills .ghPill{font-size:11px;padding:7px 12px;border-radius:12px;background:rgba(8,12,28,.72);border:1px solid #33406B;color:#DDE3F2}',
+ '.ghRank{display:flex;align-items:center;gap:8px;width:100%;margin-top:12px;padding:9px 11px;border-radius:13px;position:relative;',
+ ' background:rgba(255,255,255,.035);border:1px solid #2E3A63;font-family:inherit;color:#EDF1FA;cursor:pointer;text-align:start}',
+ '.ghRank:active{background:rgba(255,255,255,.07)}',
+ '.ghRank .rt{font-size:12.5px;font-weight:900}',
+ '.ghRank .rp{font-size:10px;color:#8F9BBC}',
+ '.ghRank .go{margin-inline-start:auto;color:#E8B23A;display:flex;flex-shrink:0}',
 
- /* أزرار طرق اللعب */
- '.ghWay{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:17px;',
- ' margin-bottom:10px;cursor:pointer;text-align:start;font-family:inherit;color:#EDF1FA;',
- ' background:linear-gradient(160deg,#17203E,#0A1022);border:1.5px solid var(--ac,#2A3358)}',
+ /* عنوان القسم بخطّين ومعيّنين ذهبيين */
+ '.ghSec{display:flex;align-items:center;gap:9px;margin:2px 0 13px;color:#E8B23A;font-size:14px;font-weight:900}',
+ '.ghSec i{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,178,58,.55))}',
+ '.ghSec i:last-child{background:linear-gradient(90deg,rgba(232,178,58,.55),transparent)}',
+ '.ghSec b{width:7px;height:7px;flex-shrink:0;transform:rotate(45deg);background:linear-gradient(135deg,#FFE9A8,#B8871E);',
+ ' box-shadow:0 0 7px rgba(232,178,58,.7)}',
+ '.ghSec span{text-shadow:0 0 12px rgba(232,178,58,.35);white-space:nowrap}',
+
+ /* بطاقات طرق اللعب — لون مميّز لكل طريقة، أيقونة في مربّع، وحبّات معلومات */
+ '.ghWay{display:flex;align-items:center;gap:12px;width:100%;padding:13px 12px 13px 10px;border-radius:19px;',
+ ' margin-bottom:11px;cursor:pointer;text-align:start;font-family:inherit;color:#EDF1FA;position:relative;overflow:hidden;',
+ ' background:linear-gradient(160deg,var(--acs,rgba(255,255,255,.06)),rgba(10,16,34,.92) 58%,#080C1C);',
+ ' border:1.5px solid var(--acg,#2A3358);',
+ ' box-shadow:0 10px 26px -16px var(--ac,#000),inset 0 1px 0 rgba(255,255,255,.06)}',
+ '.ghWay::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;',
+ ' background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%)}',
  '.ghWay:active{transform:scale(.985)}',
- '.ghWay.main{padding:17px 14px;background:linear-gradient(158deg,#2A2154,#120C26);',
- ' box-shadow:0 12px 30px -18px var(--ac)}',
- '.ghWay>span:nth-child(2){display:block}',
- '.ghWay .ic{width:44px;height:44px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;',
- ' justify-content:center;font-size:21px;background:var(--acs,rgba(255,255,255,.05));',
- ' border:1px solid var(--ac,#2A3358)}',
- '.ghWay.main .ic{width:50px;height:50px;font-size:24px}',
- '.ghWay .t{display:block;font-size:14px;font-weight:900}',
- '.ghWay.main .t{font-size:16.5px}',
- '.ghWay .s{display:block;font-size:10.5px;color:#8F9BBC;margin-top:4px;line-height:1.5}',
- '.ghWay .go{margin-inline-start:auto;color:var(--ac,#8B5CF0);flex-shrink:0}',
+ '.ghWay.main{border-color:var(--ac);box-shadow:0 12px 30px -14px var(--ac),inset 0 0 0 1px rgba(232,178,58,.18)}',
+ '.ghWay .ic{width:50px;height:50px;flex-shrink:0;border-radius:15px;display:flex;align-items:center;justify-content:center;',
+ ' background:linear-gradient(160deg,var(--acs,rgba(255,255,255,.05)),rgba(8,12,28,.8));border:1px solid var(--acg,#2A3358);',
+ ' box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 6px 14px rgba(0,0,0,.4)}',
+ '.ghWay .ic svg{filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}',
+ '.ghWay .bd{flex:1;min-width:0;display:block}',
+ '.ghWay .t{display:block;font-size:15px;font-weight:900;line-height:1.2}',
+ '.ghWay.main .t{font-size:16px}',
+ '.ghWay .s{display:block;font-size:10.5px;color:#8F9BBC;margin-top:3px;line-height:1.5}',
+ '.ghWay .pl{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}',
+ '.ghPill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:9px;font-size:9.5px;font-weight:800;',
+ ' background:rgba(8,12,28,.7);border:1px solid #2C3660;color:#C5CDE3;white-space:nowrap}',
+ '.ghPill svg{flex-shrink:0}',
+ '.ghPill.nr{color:#8F9BBC;border-style:dashed}',
+ '.ghWay .go{color:var(--ac,#8B5CF0);flex-shrink:0;display:flex;filter:drop-shadow(0 0 6px var(--acs,transparent))}',
  '.ghWay.off{opacity:.45;cursor:default}',
  '.ghNote{font-size:9.5px;color:#7E89A8;line-height:1.7;margin-top:4px;text-align:center}'
  ].join('\n');
@@ -21884,52 +21935,53 @@ function partyScr(){
  </div>`);
 }
 
-function ghWay(cls,icon,t,s,call,acc,off){
- return `<button class="ghWay ${cls}${off?' off':''}" style="--ac:${acc};--acs:${clRGBA(acc,.15)}"
+function ghWay(cls,icon,t,s,pills,call,acc,off){
+ return `<button class="ghWay ${cls}${off?' off':''}" style="--ac:${acc};--acs:${clRGBA(acc,.16)};--acg:${clRGBA(acc,.5)}"
   ${off?'disabled':`onclick="${call}"`}>
   <span class="ic">${icon}</span>
-  <span style="flex:1;min-width:0"><span class="t">${esc(t)}</span><span class="s">${esc(s)}</span></span>
-  ${off?'':`<span class="go">${ico('back',15)}</span>`}</button>`;
+  <span class="bd"><span class="t">${esc(t)}</span><span class="s">${esc(s)}</span>
+   ${pills&&pills.length?`<span class="pl">${pills.join('')}</span>`:''}</span>
+  ${off?'':`<span class="go">${ghChev()}</span>`}</button>`;
 }
 
-/** مركز اللعبة — رتبتك فيها ثم طرق لعبها */
+/** مركز اللعبة — بطاقة اللعبة، رتبتك فيها، ثم طرق لعبها كلّ بلونها */
 function gameHub(g){
  hubCss();rankAll();hubRegister();
  const def=GAME_DEFS.find(x=>x.rmKey===g);
  if(!def)return partyScr();
  RM.game=g;
  const p=rankOf(def.id),col=plTierCol(p);
- const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
- const peak=p.placed?rankName({tier:p.seasonBest.tier,div:p.seasonBest.div}):null;
+ const m=GAME_META[g]||{type:'لعبة جماعية',time:'10 - 20 دقيقة',quick:'5 - 10 دقائق'};
+ const pl=ghRange(def.minP,def.maxP,def.maxP>=11?'لاعبًا':'لاعبين');
+ const noRp=ghPill('','بلا نقاط تصنيف').replace('class="ghPill"','class="ghPill nr"');
  go(`<div class="scr on">${tbar(def.ar)}
  <div class="ghHero">
   <div class="row">
    <div class="art">${GAME_ART[g]||''}</div>
-   <div style="flex:1;min-width:0">
+   <div class="bd">
     <div class="nm">${esc(def.ar)}</div>
-    <div class="rk" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</div>
-    <div class="plBarTrk" style="margin-top:8px"><i style="width:${pct}%;background:${p.placed?col:'#3A4470'}"></i></div>
+    <div class="ty">${m.type}</div>
+    <div class="ghPk"><i></i>اختر نمط اللعب</div>
    </div></div>
-  <div class="meta">
-   <span class="ghMeta">${ico('chart',11)} نقاط التصنيف <b>${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV):numPair(p.placementDone,5)+' تحديد'}</b></span>
-   ${peak?`<span class="ghMeta">${ico('trophy',11)} أفضل رتبة <b>${peak}</b></span>`:''}
-   <span class="ghMeta">${ico('swords',11)} مبارياتك <b>${cl3Num(p.gamesPlayed)}</b></span>
-   <span class="ghMeta">${ico('star',11)} الإتقان <b>${cl3Num(masteryLevel(p.masteryXp))}</b></span>
-  </div>
-  <button class="lnk" onclick="push('gameRankScr','${def.id}')">${ico('medal',13)} عرض التصنيف ${ico('back',11)}</button>
+  <div class="pills">${ghPill(ico('group',13),pl)}${ghPill(ico('timer',13),m.time)}</div>
+  <button class="ghRank" onclick="push('gameRankScr','${def.id}')">
+   ${ico('medal',16,col)}
+   <span class="rt" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</span>
+   <span class="rp">${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV)+' نقطة':numPair(p.placementDone,5)+' مباريات تحديد'}</span>
+   <span class="go">${ghChev()}</span></button>
  </div>
 
- <div class="sl" style="margin:0 0 10px">اختر طريقة اللعب</div>
- ${ghWay('main',ico('swords',20),'لعب مصنّف','واجه لاعبًا قريبًا من مستواك وارفع رتبتك',
-   `push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
- ${ghWay('',ico('play',20),'لعب عادي','مباراة بلا تأثير على رتبتك',`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
- ${ghWay('',ico('web',20),'غرفة بكود','أنشئ كودًا وأعطه لمن تعرفهم — لا تمنح نقاط تصنيف',
-   `push('roomScr','${g}')`,'#8B5CF0')}
- ${def.bot?ghWay('',ico('robot',20),'ضد الكمبيوتر','فورًا وبلا انتظار — لا تمنح نقاط تصنيف',
-   `push('soloScr','${g}')`,'#3FCF7F'):''}
- ${def.pass?ghWay('','','تمرير الجوال','جهاز واحد يدور بينكم — لا تمنح نقاط تصنيف',
-   `ptWay='pass';ptOpen('${g}')`,'#F0567F')
-  :ghWay('','','تمرير الجوال','لا يصلح هنا — لكل لاعب يده ولوحه على هاتفه','','#2A3358',1)}
+ <div class="ghSec"><i></i><b></b><span>اختر طريقة اللعب</span><b></b><i></i></div>
+ ${ghWay('main',ico('shield',27),'لعب مصنّف','تنافس مع لاعبين آخرين وارتقِ في التصنيفات',
+   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time)],`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
+ ${ghWay('',ico('play',27,'blue'),'لعب عادي','استمتع بمباراة سريعة دون تأثير على التصنيف',
+   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.quick)],`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
+ ${ghWay('',ico('lock',27,'purple'),'غرفة خاصة','أنشئ غرفة برمز وادعُ أصدقاءك للعب',
+   [ghPill(ico('group',10),pl),ghPill(ico('web',10),'برمز غرفة'),noRp],`push('roomScr','${g}')`,'#B05CF0')}
+ ${def.bot?ghWay('',ico('robot',27),'ضد الكمبيوتر','تدرّب وتحدَّ قدراتك ضد الذكاء الاصطناعي',
+   [ghPill(ico('user',10),'لاعب واحد'),ghPill(ico('timer',10),m.bot||m.quick),noRp],`push('soloScr','${g}')`,'#2FC4A8'):''}
+ ${def.pass?ghWay('',ico('cards',27,'red'),'تمرير الجوال','جهاز واحد يدور بينكم في المجلس نفسه',
+   [ghPill(ico('group',10),pl),ghPill(ico('door',10),'جهاز واحد'),noRp],`ptWay='pass';ptOpen('${g}')`,'#F0567F'):''}
  <div class="ghNote">نقاط التصنيف من «اللعب المصنّف» وحده — لئلّا تُجمع الرتب من غرف الأصدقاء.</div>
  </div>`);
 }
@@ -28727,27 +28779,23 @@ const NAVICO={
  shop:`<svg viewBox="0 0 32 32"><defs>
   <linearGradient id="nvD_c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7BE0F5"/><stop offset="1" stop-color="#2E6FB8"/></linearGradient>
   <linearGradient id="nvD_g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#C9921E"/></linearGradient></defs>
-  <path d="M16 5 l6.5 5.2 -6.5 16 -6.5 -16 z" fill="url(#nvD_c)" stroke="#BFEFFA" stroke-width="1"/>
-  <path d="M16 5 l6.5 5.2 h-13 z" fill="#A5EAF8" opacity=".8"/>
-  <path d="M16 5 v21.2 M9.5 10.2 h13" stroke="#fff" stroke-width=".7" opacity=".6"/>
-  <ellipse cx="7.6" cy="24.2" rx="4.6" ry="2" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
-  <ellipse cx="7.6" cy="22.1" rx="4.6" ry="2" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
-  <ellipse cx="7.6" cy="20" rx="4.6" ry="2" fill="#FFE9A8" stroke="#8A6210" stroke-width=".8"/>
-  <ellipse cx="25.4" cy="23.2" rx="4" ry="1.8" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
-  <ellipse cx="25.4" cy="21.3" rx="4" ry="1.8" fill="#FFE9A8" stroke="#8A6210" stroke-width=".8"/>
-  <circle cx="13.6" cy="8.4" r="1" fill="#fff" opacity=".85"/></svg>`,
+  <path d="M3.2 6.2 h4 l3.3 13.6 h14 l3.2 -9.8 H9.3" fill="none" stroke="url(#nvD_g)" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M10 10.6 h17 l-2.9 9.2 H11.1 z" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".7"/>
+  <path d="M12.2 13.6 h12.3 M13 16.6 h10.8" stroke="#8A6210" stroke-width=".9" opacity=".55"/>
+  <path d="M18.6 3.2 l3.6 2.9 -3.6 8.6 -3.6 -8.6 z" fill="url(#nvD_c)" stroke="#BFEFFA" stroke-width=".8"/>
+  <path d="M18.6 3.2 l3.6 2.9 h-7.2 z" fill="#A5EAF8" opacity=".85"/>
+  <circle cx="12.6" cy="24.8" r="2.5" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
+  <circle cx="22.4" cy="24.8" r="2.5" fill="url(#nvD_g)" stroke="#8A6210" stroke-width=".8"/>
+  <circle cx="11.6" cy="12.4" r=".9" fill="#fff" opacity=".8"/></svg>`,
  more:`<svg viewBox="0 0 32 32"><defs>
-  <linearGradient id="nvE_g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
-  <radialGradient id="nvE_s" cx=".35" cy=".3" r=".95"><stop offset="0" stop-color="#EDF1F9"/><stop offset="1" stop-color="#97A2B8"/></radialGradient></defs>
-  <path d="M6.5 25 a10 12 0 0 1 -2.6 -8.6 M25.5 25 a10 12 0 0 0 2.6 -8.6" stroke="url(#nvE_g)" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-  <path d="M4.6 13 l1.6 2.6 M27.4 13 l-1.6 2.6 M4.2 18.6 l2.2 1.4 M27.8 18.6 l-2.2 1.4" stroke="url(#nvE_g)" stroke-width="1.4" stroke-linecap="round"/>
-  <circle cx="16" cy="12.2" r="5.2" fill="url(#nvE_s)" stroke="url(#nvE_g)" stroke-width="1.3"/>
-  <path d="M7.8 26.5 a8.5 7 0 0 1 16.4 0 z" fill="url(#nvE_s)" stroke="url(#nvE_g)" stroke-width="1.3"/>
-  <circle cx="14.2" cy="10.8" r="1.3" fill="#fff" opacity=".65"/>
-  <path d="M16 3.4 l.8 1.7 1.8.2 -1.3 1.2 .3 1.8 -1.6 -.9 -1.6.9 .3 -1.8 -1.3 -1.2 1.8 -.2 z" fill="url(#nvE_g)"/></svg>`
+  <radialGradient id="nvE_d" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFF3C9"/><stop offset=".55" stop-color="#E8B23A"/><stop offset="1" stop-color="#8A6210"/></radialGradient></defs>
+  <circle cx="7" cy="16" r="4.3" fill="url(#nvE_d)" stroke="#6B4508" stroke-width=".8"/>
+  <circle cx="16" cy="16" r="4.3" fill="url(#nvE_d)" stroke="#6B4508" stroke-width=".8"/>
+  <circle cx="25" cy="16" r="4.3" fill="url(#nvE_d)" stroke="#6B4508" stroke-width=".8"/>
+  <circle cx="5.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/><circle cx="14.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/><circle cx="23.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/></svg>`
 };
 function nav(){
- const items=[['clubs','clubs','النادي'],['cards','cards','البطاقات'],['play','swords','العب'],['shop','shop','المتجر'],['more','user','المزيد']];
+ const items=[['clubs','clubs','النادي'],['cards','cards','البطاقات'],['play','swords','اللعب'],['shop','shop','المتجر'],['more','user','المزيد']];
  // البند 31 — شارة فقط عند فائدة حقيقية: ترقية جاهزة أو هدية جاهزة
  const badge={cards:(S.cards?readyCount():0),shop:(typeof giftReady==='function'&&giftReady())?1:0};
  $('nav').innerHTML=items.map(([k,i,l])=>{
