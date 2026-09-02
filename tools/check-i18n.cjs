@@ -78,6 +78,23 @@ function latin(t){
    const bad=latin(t);
    if(bad.length)fails.push([stateName,label,bad]);
   }
+  // جولات المباراة الستّ عشرة — كانت خارج الفحص فمرّت «Final Duel» بالإنجليزية إصدارات عدّة
+  if(stateName==='مصنَّف'){
+   for(const k of ['quick','odd','timeline','belongs','link','story','reveal','map','match','estimate','twostage','bell','chain','auction','duel','reverse']){
+    const hits=await p.evaluate(k=>{
+     try{if(typeof M!=='undefined'&&M){clearInterval(M.tm);M=null}}catch(e){}
+     try{push('rankedScr');startRanked();M.rounds=[k,'quick'];M.i=0;mRound();return null}
+     catch(e){return ['<تعذّر العرض: '+String(e.message).slice(0,40)+'>']}
+    },k);
+    const label='جولة '+k;
+    if(hits){fails.push([stateName,label,hits]);continue}
+    await p.waitForTimeout(160);
+    const t=await p.evaluate(()=>document.getElementById('app').innerText);
+    const bad=latin(t);
+    if(bad.length)fails.push([stateName,label,bad]);
+   }
+   try{await p.evaluate(()=>{try{if(M){clearInterval(M.tm);M=null}}catch(e){}})}catch(e){}
+  }
   if(stateName==='مصنَّف')for(const g of HUBS){
    await p.evaluate(gg=>{NAV=[{fn:'partyScr'}];partyScr();ptMode('code');gameHub(gg)},g);
    await p.waitForTimeout(160);

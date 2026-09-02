@@ -1,0 +1,34 @@
+# نشر خادم تحدّي على Fly.io — من جذر المستودع:
+#   fly launch --no-deploy --copy-config   ثم   fly volumes create tahaddi_data --size 1   ثم   fly deploy
+# العنوان الناتج https://<app>.fly.dev يقدّم اللعبة والخادم معًا (نفس الأصل: لا حاجة لضبط tahaddi-server).
+app = "tahaddi"
+primary_region = "fra"
+
+[build]
+  dockerfile = "server/Dockerfile"
+
+[env]
+  PORT = "8090"
+  HOST = "0.0.0.0"
+  TAHADDI_DIR = "/app/tahaddi"
+  TAHADDI_DATA_FILE = "/data/tahaddi.json"
+  # أصول مسموح لها بفتح WebSocket (فارغ = الكل). أضف موقع GitHub Pages وتطبيقات المتجر:
+  # TAHADDI_ORIGINS = "https://<user>.github.io,capacitor://localhost,https://localhost"
+
+[http_service]
+  internal_port = 8090
+  force_https = true
+  auto_stop_machines = false      # الغرف حيّة على WebSocket — لا نوقف الآلة
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[mounts]]
+  source = "tahaddi_data"
+  destination = "/data"
+
+[checks.health]
+  type = "http"
+  port = 8090
+  path = "/health"
+  interval = "30s"
+  timeout = "5s"

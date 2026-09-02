@@ -1,0 +1,24 @@
+# نشر خادم تحدّي على Render — اربط المستودع في لوحة Render واختر Blueprint.
+services:
+  - type: web
+    name: tahaddi
+    runtime: docker
+    dockerfilePath: ./server/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8090"
+      - key: HOST
+        value: "0.0.0.0"
+      - key: TAHADDI_DIR
+        value: /app/tahaddi
+      - key: TAHADDI_DATA_FILE
+        value: /data/tahaddi.json
+      # - key: TAHADDI_ORIGINS
+      #   value: https://<user>.github.io,capacitor://localhost,https://localhost
+    disk:
+      name: tahaddi-data
+      mountPath: /data
+      sizeGB: 1

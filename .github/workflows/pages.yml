@@ -1,0 +1,41 @@
+# ينشر نسخة الويب من تحدّي على GitHub Pages عند كل دفعة.
+# التفعيل مرّة واحدة: Settings → Pages → Source: GitHub Actions.
+# لربطها بالخادم: Settings → Secrets and variables → Actions → Variables → TAHADDI_SERVER = https://<خادمك>
+name: نشر الويب
+
+on:
+  push:
+    branches: [main, claude/3d-game-design-c59zac]
+    paths: [tahaddi/**, tools/build-www.cjs, .github/workflows/pages.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: تجهيز www/
+        env:
+          TAHADDI_SERVER: ${{ vars.TAHADDI_SERVER }}
+        run: node tools/build-www.cjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: www
+      - id: deploy
+        uses: actions/deploy-pages@v4

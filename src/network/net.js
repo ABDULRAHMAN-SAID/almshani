@@ -13,15 +13,35 @@ var NET=(function(){
  var listeners={welcome:[],state:[],resultFinal:[]};
  var backoff=1000, wantOpen=false, helloOpts={}, W=(typeof window!=='undefined')?window:null;
 
+ /** أصل الخادم المضبوط صراحةً (https://host) أو '' = الأصل الحالي.
+     الترتيب: window.TAHADDI_SERVER ← <meta name="tahaddi-server"> ← ?server= (ويُحفظ) ← localStorage */
+ function serverOrigin(){
+  var u='';
+  try{u=W.TAHADDI_SERVER||''}catch(e){}
+  if(!u){try{var m=W.document&&W.document.querySelector('meta[name="tahaddi-server"]');if(m)u=m.getAttribute('content')||''}catch(e){}}
+  if(!u){try{var q=new URLSearchParams(W.location.search).get('server');if(q){u=q;try{W.localStorage.setItem('tahaddi.server',q)}catch(e2){}}}catch(e){}}
+  if(!u){try{u=W.localStorage.getItem('tahaddi.server')||''}catch(e){}}
+  u=String(u).trim().replace(/\/+$/,'');
+  if(!u)return '';
+  if(!/^[a-z]+:\/\//i.test(u))u='https://'+u;
+  return u.replace(/^ws(s?):\/\//i,'http$1://');
+ }
  function detect(){
   if(!W)return 'local';
-  if(W.claude&&typeof W.claude.use==='function')return 'artifact';
+  if(W.claude&&typeof W.claude.use==='function')return 'artifact';   // الأرتيفاكت لا يصل إلى مضيف خارجي
+  if(typeof W.WebSocket!=='function')return 'local';
+  if(serverOrigin())return 'server';                                   // خادم مضبوط: يعمل من أي مضيف ثابت أو تطبيق متجر
   try{
-   if(/^https?:$/.test(W.location.protocol)&&typeof W.WebSocket==='function')return 'server';
+   if(/^https?:$/.test(W.location.protocol))return 'server';          // نفس الأصل: يُتحقّق منه بـ /health
   }catch(e){}
   return 'local';
  }
- function wsUrl(){return (W.location.protocol==='https:'?'wss://':'ws://')+W.location.host+'/ws'}
+ function healthUrl(){var o=serverOrigin();return (o||'')+'/health'}
+ function wsUrl(){
+  var o=serverOrigin();
+  if(o)return o.replace(/^http(s?):\/\//i,'ws$1://')+'/ws';
+  return (W.location.protocol==='https:'?'wss://':'ws://')+W.location.host+'/ws';
+ }
  function fire(k,v){(listeners[k]||[]).forEach(function(f){try{f(v)}catch(e){}})}
  function setState(patch){Object.assign(st,patch);fire('state',state())}
  function state(){return {mode:st.mode,connected:st.connected,id:st.id,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
@@ -64,7 +84,7 @@ var NET=(function(){
  function probe(){
   if(st.url)return Promise.resolve(true);
   if(typeof W.fetch!=='function')return Promise.resolve(true);
-  return W.fetch('/health',{cache:'no-store'}).then(function(r){return r.ok?r.json():null})
+  return W.fetch(healthUrl(),{cache:'no-store',mode:'cors'}).then(function(r){return r.ok?r.json():null})
    .then(function(j){return !!(j&&j.ok)}).catch(function(){return false});
  }
  function connect(opts){
@@ -137,6 +157,6 @@ var NET=(function(){
 
  return {boot:boot,connect:connect,disconnect:disconnect,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
-  roomCap:roomCap,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u}};
+  roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u}};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=NET;

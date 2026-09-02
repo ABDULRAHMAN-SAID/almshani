@@ -1,4 +1,4 @@
-# تحدّي أونلاين — الخادم والحسابات (v5.16)
+# تحدّي أونلاين — الخادم والحسابات (v5.16، النشر v5.19)
 
 > المرحلة «ج» من ترتيب المالك: Account → Cloud save → Server-owned profile → Game ranks → Matchmaking → Rooms → Match results → Leaderboards → Clan data → Anti-cheat → economy → purchases.
 > هذه النسخة تغطّي **الأولى إلى الثامنة** على خادم حقيقي، وتترك بيانات النادي والاقتصاد والمشتريات كما هي (محلية).
@@ -24,7 +24,9 @@ node tools/build.mjs             # يحقن وحدات /src في tahaddi/index.h
 PORT=8090 npm run start:tahaddi  # http://localhost:8090
 ```
 
-متغيّرات البيئة: `PORT` (8090) · `TAHADDI_DIR` (مجلّد اللعبة) · `TAHADDI_DATA_FILE` (`.data/tahaddi.json`) · `TAHADDI_RESULT_WAIT_MS` (90000: مهلة انتظار تقارير كل الأطراف).
+متغيّرات البيئة: `PORT` (8090) · `HOST` (0.0.0.0) · `TAHADDI_DIR` (مجلّد اللعبة) · `TAHADDI_DATA_FILE` (`.data/tahaddi.json`) · `TAHADDI_ORIGINS` (أصول مسموح لها بفتح WebSocket؛ فارغ = الكل) · `TAHADDI_RESULT_WAIT_MS` (90000: مهلة انتظار تقارير كل الأطراف).
+
+النشر الفعلي (Docker، Fly.io، Render، GitHub Pages، PWA، Google Play، App Store) مشروح خطوة بخطوة في `docs/DEPLOY.md`. العميل يقرأ عنوان الخادم من `<meta name="tahaddi-server">` أو `?server=` فيعمل من أي مضيف ثابت أو تطبيق متجر، لا من الأصل نفسه فقط.
 
 للنشر: أي مضيف يشغّل Node 20+ ويسمح بـWebSocket (VPS، Fly.io، Render…). ضع الخادم خلف HTTPS فيصير الاتصال `wss://` تلقائيًا. الحفظ حاليًا ملفّ JSON واحد — يكفي لمئات اللاعبين؛ ما بعده قاعدة بيانات بنفس العقد (`server/src/tahaddi/tstore.ts`).
 

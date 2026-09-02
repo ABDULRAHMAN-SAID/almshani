@@ -18,7 +18,17 @@
     "start:tahaddi": "node server/dist/tahaddi.js",
     "test:tahaddi": "node tools/test-rank-core.cjs && node tools/test-router.cjs && node tools/test-carrom-physics.cjs && npm run build:tahaddi && node tools/test-tahaddi-server.cjs",
     "game:build": "node tools/build.mjs",
-    "game:check": "node tools/build.mjs --check"
+    "game:check": "node tools/build.mjs --check",
+    "web:build": "node tools/build-www.cjs",
+    "web:serve": "npm run build:tahaddi && npm run start:tahaddi",
+    "docker:build": "docker build -f server/Dockerfile -t tahaddi .",
+    "docker:run": "docker run --rm -p 8090:8090 -v tahaddi_data:/data tahaddi",
+    "cap:setup": "npm i -D @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios && npx cap add android && npx cap add ios",
+    "cap:sync": "npm run web:build && npx cap sync",
+    "cap:android": "npm run cap:sync && npx cap open android",
+    "cap:ios": "npm run cap:sync && npx cap open ios",
+    "qa:crawl": "node tools/qa-crawl.cjs",
+    "qa:content": "node tools/qa-content.cjs"
   },
   "repository": {
     "type": "git",

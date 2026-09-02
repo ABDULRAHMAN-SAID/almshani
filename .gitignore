@@ -6,3 +6,6 @@ server/dist/
 .qa/
 .qa2/
 .qa-*.log
+www/
+android/
+ios/
