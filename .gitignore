@@ -3,8 +3,7 @@ node_modules/
 client/dist/
 server/dist/
 .data/
-.qa/
-.qa2/
+.qa*/
 .qa-*.log
 www/
 android/
