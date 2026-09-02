@@ -78,6 +78,8 @@ const CAPTURES=[
  // ── مباريات الكمبيوتر ──
  ['carrom-2p',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(500)")],
  ['carrom-shot',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(400);caPlay({x:200,y:360,vx:-1.5,vy:-6});await qaWait(350)")],
+ ['carrom-aim',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(700);_ca.sx=200;_ca.sxV=200;_ca.drag={sx:200,sy:361.5,px:200,py:380,dx:40,dy:70,cancel:false};caRender()")],
+ ['carrom-cancel',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(700);_ca.sx=200;_ca.sxV=200;_ca.drag={sx:200,sy:361.5,px:200,py:380,dx:10,dy:-60,cancel:true};caRender()")],
  ['carrom-4p',R("push('gameHub','carrom');RM.caN=4;soloStart('carrom','hard');await qaWait(500)")],
  ['uno-2p',R("push('gameHub','uno');RM.bots=1;soloStart('uno','mid');await qaWait(700)")],
  ['uno-4p',R("push('gameHub','uno');RM.bots=3;soloStart('uno','hard');await qaWait(700)")],
