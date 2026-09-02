@@ -1,0 +1,692 @@
+[
+ {
+  "screen": "playScr",
+  "btn": "الاحتمالات",
+  "h": "push('oddsScr')",
+  "errs": [
+   "console: [nav] oddsScr TypeError: Cannot read properties of undefined (reading 'n')\n    at oddsScr (http://localhost:8998/index.html:17131:48)\n    at"
+  ]
+ },
+ {
+  "screen": "playScr",
+  "btn": "خانة فارغة",
+  "h": "bcTap(0)",
+  "noEffect": true
+ },
+ {
+  "screen": "playScr",
+  "btn": "خانة فارغة",
+  "h": "bcTap(1)",
+  "noEffect": true
+ },
+ {
+  "screen": "playScr",
+  "btn": "خانة فارغة",
+  "h": "bcTap(2)",
+  "noEffect": true
+ },
+ {
+  "screen": "playScr",
+  "btn": "خانة فارغة",
+  "h": "bcTap(3)",
+  "noEffect": true
+ },
+ {
+  "screen": "playScr",
+  "btn": "نسخة تجريبية 5.28 · وضع ال",
+  "h": "devTap()",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "استلام كل الجاهز",
+  "h": "szClaimAll()",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "123 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "شظيتا تطوّر",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "شظية تطوّر",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "260 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "129 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "270 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "جوكر عادي",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "60 جوهرة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "280 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "141 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "290 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "147 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "15 جوهرة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "جوكر نادر",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "153 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "310 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "159 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "320 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "330 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "171 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "340 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "seasonScr",
+  "btn": "177 عملة",
+  "h": "",
+  "noEffect": true
+ },
+ {
+  "screen": "lbScr",
+  "btn": "عالم المعرفة",
+  "h": "lbGame='knowledge';refresh(lbScr)",
+  "noEffect": true
+ },
+ {
+  "screen": "lbScr",
+  "btn": "كيرم",
+  "h": "lbGame='carrom';refresh(lbScr)",
+  "noEffect": true
+ },
+ {
+  "screen": "lbScr",
+  "btn": "أونو",
+  "h": "lbGame='uno';refresh(lbScr)",
+  "noEffect": true
+ },
+ {
+  "screen": "lbScr",
+  "btn": "مافيا",
+  "h": "lbGame='mafia';refresh(lbScr)",
+  "noEffect": true
+ },
+ {
+  "screen": "lbScr",
+  "btn": "مسابقة الرسم",
+  "h": "lbGame='drawing';refresh(lbScr)",
+  "noEffect": true
+ },
+ {
+  "screen": "lbScr",
+  "btn": "برا السالفة",
+  "h": "lbGame='outsider';refresh(lbScr)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "الكل",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "المعلومات العامة",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "التاريخ",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "كرة القدم",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "الثقافة الإسلامية",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "الحيوانات",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "العلوم",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "الجغرافيا",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "الذكاء والألغاز",
+  "h": "pc(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "سهل",
+  "h": "pd(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "متوسط",
+  "h": "pd(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "صعب",
+  "h": "pd(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "خبير",
+  "h": "pd(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "quickScr",
+  "btn": "أسطوري",
+  "h": "pd(this)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "setAvEmote(null)",
+  "h": "setAvEmote(null)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "setAvEmote('clap')",
+  "h": "setAvEmote('clap')",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "بدون إطار",
+  "h": "setFrame(null)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "')\"> إطار أرشيف الزمن",
+  "h": "toast('يُفتح من مسار الموسم المميز <svg class=",
+  "errs": [
+   "Failed to execute 'click' on 'HTMLElement': Invalid or unexpected token"
+  ],
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "')\"> إطار التاج الملكي",
+  "h": "toast('يُفتح من مسار الموسم المميز <svg class=",
+  "errs": [
+   "Failed to execute 'click' on 'HTMLElement': Invalid or unexpected token"
+  ],
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',0)",
+  "h": "avSet('bg',0)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',1)",
+  "h": "avSet('bg',1)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',2)",
+  "h": "avSet('bg',2)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',3)",
+  "h": "avSet('bg',3)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',4)",
+  "h": "avSet('bg',4)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',5)",
+  "h": "avSet('bg',5)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',6)",
+  "h": "avSet('bg',6)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('bg',7)",
+  "h": "avSet('bg',7)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('skin',0)",
+  "h": "avSet('skin',0)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('skin',1)",
+  "h": "avSet('skin',1)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('skin',2)",
+  "h": "avSet('skin',2)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('skin',3)",
+  "h": "avSet('skin',3)",
+  "noEffect": true
+ },
+ {
+  "screen": "avScr",
+  "btn": "avSet('skin',4)",
+  "h": "avSet('skin',4)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "الكل",
+  "h": "cFilter.r='all';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "الكل",
+  "h": "cFilter.e='all';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "2",
+  "h": "cFilter.e='2';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "3",
+  "h": "cFilter.e='3';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "الكل",
+  "h": "cFilter.t='all';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "إدارة تشكيلة",
+  "h": "cFilter.t='deck';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "مخاطرة",
+  "h": "cFilter.t='risk';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "طاقة",
+  "h": "cFilter.t='energy';cardsScr()",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "الكشاف عادية 1 1",
+  "h": "push('cardDetail',1)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "التدوير عادية 1 1",
+  "h": "push('cardDetail',2)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "الاحتياط عادية 1 1",
+  "h": "push('cardDetail',3)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "التضحية عادية 1 1",
+  "h": "push('cardDetail',4)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "المرساة عادية 2 1",
+  "h": "push('cardDetail',5)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "التأجيل عادية 2 1",
+  "h": "push('cardDetail',6)",
+  "noEffect": true
+ },
+ {
+  "screen": "cardsScr",
+  "btn": "الصاعقة عادية 2 1",
+  "h": "push('cardDetail',7)",
+  "noEffect": true
+ },
+ {
+  "screen": "deckScr",
+  "btn": "الاحتياط عادية 1 1",
+  "h": "toggleDeck(3)",
+  "noEffect": true
+ },
+ {
+  "screen": "deckScr",
+  "btn": "المرساة عادية 2 1",
+  "h": "toggleDeck(5)",
+  "noEffect": true
+ },
+ {
+  "screen": "deckScr",
+  "btn": "التأجيل عادية 2 1",
+  "h": "toggleDeck(6)",
+  "noEffect": true
+ },
+ {
+  "screen": "deckScr",
+  "btn": "المواجهة المكشوفة عادية 1 ",
+  "h": "toggleDeck(10)",
+  "noEffect": true
+ },
+ {
+  "screen": "deckScr",
+  "btn": "الراوي عادية 1 1",
+  "h": "toggleDeck(12)",
+  "noEffect": true
+ },
+ {
+  "screen": "deckScr",
+  "btn": "المؤرّخ عادية 2 1",
+  "h": "toggleDeck(13)",
+  "noEffect": true
+ },
+ {
+  "screen": "clubs",
+  "btn": "5QRMRM",
+  "h": "clCopyTag()",
+  "noEffect": true
+ },
+ {
+  "screen": "clubs",
+  "btn": "الرئيسية",
+  "h": "clTabGo('home')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "الكل",
+  "h": "clMemFilter('all')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "الرتبة",
+  "h": "clMemSort('rank')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "النشاط",
+  "h": "clMemSort('idle')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "الدعم",
+  "h": "clMemSort('don')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "المساهمة",
+  "h": "clMemSort('pts')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "تاريخ الانضمام",
+  "h": "clMemSort('new')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "عبدالرحمن أنت القائد محترف",
+  "h": "clGoMember('umtk9cm6xfs8hgy')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "سلطان آلي نائب القائد فضي ",
+  "h": "clGoMember('bot_vcyrxz')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_vcyrxz')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_2v4fak')",
+  "errs": [
+   "Cannot read properties of undefined (reading 'hold')"
+  ]
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_mtv9g8')",
+  "errs": [
+   "Cannot read properties of undefined (reading 'hold')"
+  ]
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_sdemwx')",
+  "errs": [
+   "Cannot read properties of undefined (reading 'hold')"
+  ]
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_8enylw')",
+  "errs": [
+   "Cannot read properties of undefined (reading 'hold')"
+  ]
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "دانة آلي عضو برونزي منذ 33",
+  "h": "clGoMember('bot_slctgr')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_slctgr')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "⋯",
+  "h": "event.stopPropagation();clMemMenu('bot_33tga6')",
+  "errs": [
+   "Cannot read properties of undefined (reading 'hold')"
+  ]
+ },
+ {
+  "screen": "clChatScr",
+  "btn": "إرسال",
+  "h": "clChatSend()",
+  "noEffect": true
+ },
+ {
+  "screen": "clMoreScr",
+  "btn": "طلبات الانضمام يتطلب مشرف",
+  "h": "clMoreOpen('reqs')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMoreScr",
+  "btn": "سجل الإدارة يتطلب مشرف",
+  "h": "clMoreOpen('log')",
+  "noEffect": true
+ },
+ {
+  "screen": "clInfoScr",
+  "btn": "نسخ",
+  "h": "clCopyTag()",
+  "noEffect": true
+ },
+ {
+  "screen": "soloScr",
+  "btn": "2 لاعبين",
+  "h": "RM.caN=2;soloScr('carrom')",
+  "noEffect": true
+ },
+ {
+  "screen": "soloScr",
+  "btn": "4 لاعبين",
+  "h": "RM.caN=4;soloScr('carrom')",
+  "noEffect": true
+ }
+]

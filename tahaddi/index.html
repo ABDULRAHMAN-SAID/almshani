@@ -181,7 +181,8 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .unoSlot.ok:active{transform:translateY(-22px) scale(1.06)}
 .unoSlot.ok::after{content:'';position:absolute;inset:-3px;border-radius:11px;border:2px solid var(--gold);
  box-shadow:0 0 12px rgba(232,178,58,.5);pointer-events:none}
-.unoSlot:not(.ok){opacity:.42}
+/* غير القابلة للّعب تبهت قليلًا فقط — يبقى اللاعب قادرًا على قراءة يده وهو ينتظر دوره */
+.unoSlot:not(.ok){opacity:.72;filter:saturate(.75)}
 .rmTopMini{display:flex;align-items:center;gap:10px;justify-content:center;font-size:10px;font-weight:800;
  color:var(--tx2);background:rgba(6,9,17,.5);border:1px solid var(--bd);border-radius:10px;padding:5px 10px;margin-bottom:6px}
 /* كيرم */
@@ -201,9 +202,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .unoC{position:relative;width:52px;height:76px;border-radius:9px;display:inline-flex;align-items:center;
  justify-content:center;border:2.5px solid #F2F4F8;box-shadow:0 4px 10px rgba(0,0,0,.5);flex-shrink:0}
 .unoC.big{width:76px;height:110px;border-radius:12px;border-width:3.5px}
-.unoC .unoIn{background:#F7F9FF;color:#12203A;border-radius:50%/38%;width:66%;height:56%;
- display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;
- transform:rotate(-20deg);box-shadow:inset 0 2px 5px rgba(0,0,0,.16)}
+.unoC::before{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+ background:linear-gradient(165deg,rgba(255,255,255,.34),rgba(255,255,255,0) 46%)}
+.unoC .unoIn{background:linear-gradient(160deg,#fff,#E7ECF7);color:#0E1A30;border-radius:50%/38%;width:68%;height:58%;
+ display:flex;align-items:center;justify-content:center;font-size:23px;font-weight:900;
+ transform:rotate(-20deg);box-shadow:0 1px 3px rgba(0,0,0,.3),inset 0 -2px 4px rgba(0,0,0,.1);
+ text-shadow:0 1px 0 rgba(255,255,255,.9)}
 .unoC.big .unoIn{font-size:32px}
 .unoCorner{position:absolute;font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 .unoCorner.tl{top:4px;left:5px}.unoCorner.br{bottom:4px;right:5px;transform:rotate(180deg)}
@@ -325,6 +329,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 /* عام */
 .tbar{display:flex;align-items:center;padding:8px 0 14px}
 .tbar h2{font-size:17px;font-weight:800;flex:1;text-align:center}
+#app button{min-height:36px}
 .bk{background:linear-gradient(160deg,#1E2750,#0C1229);border:1.5px solid rgba(232,178,58,.75);color:#F5D98A;font-size:23px;cursor:pointer;
  width:44px;height:44px;min-width:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:14px;margin:-6px 0;
  box-shadow:0 4px 12px rgba(0,0,0,.45),0 0 14px rgba(232,178,58,.2),inset 0 1px 0 rgba(255,255,255,.12)}
@@ -724,7 +729,7 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
  display:flex;align-items:flex-end;justify-content:center;animation:fi .2s ease}
 .povl .pcard{width:100%;max-width:520px;background:var(--surf);border-top:1px solid var(--bd);
  border-radius:22px 22px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom))}
-.ebtn{background:var(--elev);border:1px solid var(--bd);border-radius:50%;width:30px;height:30px;
+.ebtn{background:var(--elev);border:1px solid var(--bd);border-radius:50%;width:36px;height:36px;min-width:36px;
  padding:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .ebtn svg{width:20px;height:20px}
 .ebar{display:flex;gap:7px;background:var(--card);border:1px solid var(--bd);border-radius:14px;
@@ -979,9 +984,9 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .gpkn{font-size:11.5px;font-weight:800;margin-top:6px}
 .gpkg2{font-size:13px;font-weight:900;color:var(--gem);margin-top:3px}
 .prc{display:inline-block;margin-top:8px;background:linear-gradient(145deg,#2ECC71,#1D8A4E);color:#fff;
- font-size:15px;font-weight:900;border-radius:11px;padding:5px 16px;box-shadow:0 3px 0 #14522F,0 5px 12px rgba(46,204,113,.3);
+ font-size:15px;font-weight:900;border-radius:11px;padding:9px 18px;min-height:38px;box-shadow:0 3px 0 #14522F,0 5px 12px rgba(46,204,113,.3);
  direction:ltr;letter-spacing:.3px}
-.prcbtn{width:auto;padding:8px 14px;font-size:12.5px;white-space:nowrap}
+.prcbtn{width:auto;padding:10px 16px;min-height:38px;font-size:12.5px;white-space:nowrap}
 .prcbig{font-size:30px;font-weight:900;color:#2ECC71;margin:6px 0 4px}
 .sandbox{display:inline-flex;align-items:center;gap:5px;background:rgba(55,138,221,.12);
  border:1px solid rgba(55,138,221,.4);color:#8FC1F0;font-size:10.5px;font-weight:700;
@@ -13092,18 +13097,20 @@ function icoTint(p,k){
  return p.split('tr-gold').join('tr-'+k).split('tg-gold').join('tg-'+k)
   .split('#8A5A10').join(d).split('#6B4508').join(d).split('#5A3706').join(d);
 }
+/** سعر بالدولار داخل نصّ عربي: الرقم معزول ليُقرأ صحيحًا، والعملة كلمة لا رمزًا */
+function usdTxt(v){return '<bdi dir="ltr">'+Number(v).toFixed(2)+'</bdi> دولار'}
 function ico(n,s,c){
  s=s||16;
  const a=window.UI_ICONS&&UI_ICONS[n];          // لوحة أيقونات المالك المرسومة إن وُجدت
- if(a!=null)return '<span class="uico" data-i="'+n+'" style="width:'+s+'px;height:'+s+'px;--ux:'+((a%8)*(100/7))+'%;--uy:'+(Math.floor(a/8)*(100/4))+'%"></span>';
+ if(a!=null)return '<span class="uico" data-ico="'+n+'" style="width:'+s+'px;height:'+s+'px;--ux:'+((a%8)*(100/7))+'%;--uy:'+(Math.floor(a/8)*(100/4))+'%"></span>';
  let p=window.ICO2&&ICO2.get(n);
  if(p){
   if(c){const k=(n==='medal'&&/C0C7D6|silver/i.test(c))?'silver':(n==='medal'&&/B87333|bronze/i.test(c))?'bronze':(ICO_TINT[c]?c:null);if(k)p=icoTint(p,k)}
-  return '<svg class="ico" data-i="'+n+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" style="display:inline-block;vertical-align:-.14em;flex-shrink:0">'+p+'</svg>';
+  return '<svg class="ico" data-ico="'+n+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" style="display:inline-block;vertical-align:-.14em;flex-shrink:0">'+p+'</svg>';
  }
  p=ICO[n];
  if(!p)return '<span style="display:inline-block;width:'+s+'px"></span>';
- return '<svg class="ico" data-i="'+n+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" style="display:inline-block;vertical-align:-.14em;flex-shrink:0'+(c?';color:'+c:'')+'">'+p+'</svg>';
+ return '<svg class="ico" data-ico="'+n+'" viewBox="0 0 24 24" width="'+s+'" height="'+s+'" style="display:inline-block;vertical-align:-.14em;flex-shrink:0'+(c?';color:'+c:'')+'">'+p+'</svg>';
 }
 /** أيقونة داخل دائرة ملوّنة */
 function icoCircle(n,s,bg,fg){
@@ -13585,7 +13592,7 @@ function drawAv(){
   <div class="fc ${!S.frame?'on':''}" onclick="setFrame(null)">بدون إطار</div>
   ${FRAMES.map(f=>{const un=(S.frames||[]).includes(f.k);
    return `<div class="fc ${S.frame===f.k?'on':''}" style="${un?'':'opacity:.42'}"
-    onclick="${un?`setFrame('${f.k}')`:`toast('يُفتح من مسار الموسم المميز ${ico('crown',13)}')`}">${un?'':ico('lock',12)+' '}${f.n}</div>`}).join('')}
+    onclick="${un?`setFrame('${f.k}')`:`toast('يُفتح من مسار الموسم المميّز')`}">${un?'':ico('lock',12)+' '}${f.n}</div>`}).join('')}
  </div></div>
  ${rows.map(r=>`<div style="margin-bottom:14px">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">${r.n}</div>
@@ -16323,7 +16330,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk',
-  'shopScr','chestScr','oddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
+  'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
@@ -16886,7 +16893,7 @@ function energyStrip(ids){
    <div style="display:flex;gap:3px;margin-top:6px">
    ${dist.map((n,i)=>`<div style="flex:${Math.max(n,.35)};height:7px;border-radius:4px;
      background:${n?`linear-gradient(90deg,#B76CF0,#6B3FA0)`:'var(--elev)'};
-     opacity:${n?1:.35}" title="${ico('energy',15)}${i+1}: ${n}"></div>`).join('')}</div>
+     opacity:${n?1:.35}" title="طاقة ${i+1}: ${n} بطاقة"></div>`).join('')}</div>
    <div style="display:flex;gap:9px;margin-top:5px;font-size:9.5px;color:var(--tx2)">
    ${dist.map((n,i)=>`<span>${ico('energy',15)}${i+1}<b style="color:var(--tx)"> ${n}</b></span>`).join('')}</div>
   </div>
@@ -17055,8 +17062,8 @@ function shopScr(){
  ${banner('الجواهر')}
  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
  ${ECON.gemPacks.map(p=>packTile({
-   art:GEM_ART[p.art](),n:p.n+' — $'+p.usd.toFixed(2),amount:p.gems,cur:'gem',tag:p.tag,
-   price:'شراء بـ $'+p.usd.toFixed(2),id:p.id,buy:`buyGemPack('${p.id}')`})).join('')}</div>
+   art:GEM_ART[p.art](),n:p.n+' — '+usdTxt(p.usd),amount:p.gems,cur:'gem',tag:p.tag,
+   price:'شراء بـ '+usdTxt(p.usd),id:p.id,buy:`buyGemPack('${p.id}')`})).join('')}</div>
  <div class="note">شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من Google Play وApp Store</div>
 
  ${banner('العملات')}
@@ -17126,8 +17133,28 @@ function chestScr(key){
  `<div style="margin-top:11px"><button class="rbtn" onclick="doOpen('${key}')"><span>افتح مجانًا</span></button></div>`}
  <div class="note">النسب معروضة بالكامل — لا نخفي احتمالات الصناديق المدفوعة</div></div>`);
 }
+/** احتمالات صناديق المعارك: أيّ صندوق يسقط بعد الفوز، ثم رابط لنسب بطاقات كلّ صندوق */
+function bcOddsScr(){
+ const tot=BC_ODDS.reduce((a,x)=>a+x[1],0);
+ go(`<div class="scr on">${tbar('احتمالات صناديق المعارك')}
+ <div class="orn"><div class="in">${ornCorners()}
+ <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:12px">
+  بعد كل فوز في مباراة أونلاين يسقط صندوق واحد بهذه النسب — معروضة كاملة بلا إخفاء.</div>
+ ${BC_ODDS.map(([k,w])=>{const ch=ECON.chests[k]||{n:BC_LABEL[k]||k};const pc=Math.round(w/tot*1000)/10;
+  return `<div style="margin-bottom:12px">
+   <div style="display:flex;font-size:13px;align-items:center;gap:7px">
+    <span style="flex:1;font-weight:900">${esc(ch.n||BC_LABEL[k])}</span>
+    <span style="font-weight:900;color:var(--gold)"><bdi dir="ltr">${pc}%</bdi></span></div>
+   <div class="plBarTrk" style="margin-top:6px"><i style="width:${pc}%;background:linear-gradient(90deg,#B8871E,#FFE9A8)"></i></div>
+   <div style="font-size:9.5px;color:var(--mut);margin-top:4px">مدّة الفتح: ${bcFmt(BC_TIME[k]||0)}</div>
+   <button class="btn g" style="margin-top:7px;min-height:38px" onclick="push('oddsScr','${k}')">${ico('chart',14)} نسب بطاقات هذا الصندوق</button>
+  </div>`}).join('')}
+ <div class="note">النسب ثابتة ولا تتغيّر بعدد محاولاتك.</div>
+ </div></div></div>`);
+}
 function oddsScr(key){
  const c=ECON.chests[key];
+ if(!c)return bcOddsScr();
  go(`<div class="scr on">${tbar('نسب الظهور',c.n)}
  <div class="orn"><div class="in">${ornCorners()}
  ${RAR_ORDER.map(r=>{const v=c.odds[r],R=RCOL[r];
@@ -17305,9 +17332,9 @@ function emoteScr(){
   <div style="font-size:10.5px;font-weight:800;margin-top:4px;position:relative">${e.n}</div>
   <div style="font-size:8.5px;font-weight:800;color:${T.c};position:relative">${T.n}${e.r==='legendary'?' · متحركة':''}</div>
   ${own?`<div style="display:flex;gap:7px;justify-content:center;margin-top:6px;position:relative">
-   <span onclick="toggleFav('${e.k}')" style="font-size:13px;cursor:pointer;opacity:${fav?1:.32}">${ico('star',14)}</span>
-   <span onclick="toggleDeckE('${e.k}')" style="cursor:pointer;font-weight:900;color:${inD?'var(--gold)':'var(--tx2)'}">${inD?ico('check',14):'+'}</span></div>`
-  :`<div onclick="buyEmote('${e.k}')" style="margin-top:6px;background:var(--elev);border:1px solid ${T.c}66;border-radius:9px;padding:4px 2px;font-size:9.5px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;position:relative">${ico('gem',11)} ${T.cost.toLocaleString('en-US')}</div>
+   <span onclick="toggleFav('${e.k}')" title="مفضّلة" style="min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;opacity:${fav?1:.32}">${ico('star',16)}</span>
+   <span onclick="toggleDeckE('${e.k}')" title="في التشكيلة" style="min-width:36px;min-height:36px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-weight:900;font-size:15px;color:${inD?'var(--gold)':'var(--tx2)'}">${inD?ico('check',16):'+'}</span></div>`
+  :`<div onclick="buyEmote('${e.k}')" style="margin-top:6px;background:var(--elev);border:1px solid ${T.c}66;border-radius:9px;padding:9px 2px;min-height:36px;font-size:9.5px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:3px;position:relative">${ico('gem',11)} ${T.cost.toLocaleString('en-US')}</div>
    <div style="font-size:8px;color:var(--mut);margin-top:3px;position:relative">أو من ${e.src||'اللعب'}</div>`}
  </div>`};
  const sec=t=>{const L=EMOTES.filter(e=>e.r===t&&match(e));if(!L.length)return '';
@@ -17797,8 +17824,8 @@ function mHeader(){
  <span class="qcat" style="border-color:var(--gold);${k==='auction'?'padding:2px 10px 2px 2px':''}">${k==='auction'?auctionBadge():ico(mo.i,14)+' <span class="mtl" style="font-size:11px">'+mo.n+'</span>'}</span>
  <span class="qnum">${M.i+1}/${M.rounds.length}</span>
  <span class="cch" style="color:var(--gem)">${ico('energy',15)} ${M.energy}/10</span>
- <button class="btn g" style="width:34px;padding:5px 0;font-size:17px;margin-right:6px"
-  onclick="toggleMenu()">⋮</button></div>
+ <button class="btn g" style="width:38px;min-height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;margin-right:6px"
+  onclick="toggleMenu()" title="خيارات المباراة">${ico('menu',17)}</button></div>
  ${M.menu?`<div class="mmenu">
   <div onclick="M.muted=!M.muted;M.oppEmote=null;toggleMenu();toast(M.muted?'كُتمت تعبيرات الخصم':'أُلغي الكتم')">${ico('mute',16)} ${M.muted?'إلغاء كتم الخصم':'كتم الخصم'}</div>
   <div onclick="toast('شكرًا — سيُراجع')">${ico('flag',16)} الإبلاغ</div>
@@ -19102,7 +19129,7 @@ function playCss(){
  '.plBar .lv{font-size:10px;color:#8B96B6;margin-top:2px}',
  '.plBar .cch{font-size:11px}',
  '.plChips{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}',
- '.plChip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:10px;cursor:pointer;',
+ '.plChip{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;min-height:36px;border-radius:11px;cursor:pointer;',
  ' background:rgba(255,255,255,.04);border:1px solid #2A3358;font-size:10.5px;font-weight:800;color:#B7C1DC}',
  '.plChip b{color:#EDF1FA}',
  '.plChip:active{transform:scale(.97)}',
@@ -19278,11 +19305,11 @@ function playScr(){
  </div>
  <div class="plSec">
   <div class="plSecT">${ico('chest',14)} صناديق المعارك
-   <span class="mo" onclick="push('oddsScr')">الاحتمالات ${ico('back',10)}</span></div>
+   <span class="mo" onclick="push('bcOddsScr')">الاحتمالات ${ico('back',10)}</span></div>
   ${battleChestRow(1)}
  </div>
  ${plMissions()}
- <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:18px" onclick="devTap()">نسخة تجريبية ${APP_VER}${S.dev?' · وضع المطوّر':''}</div>
+ <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:18px;padding:11px 0;min-height:36px" onclick="devTap()">نسخة تجريبية ${APP_VER}${S.dev?' · وضع المطوّر':''}</div>
  </div></div>`);
  bcTick();
 }
@@ -19405,7 +19432,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.28';
+const APP_VER='5.29';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -19548,7 +19575,7 @@ function buyPassAsk(){
  <div class="qvt">التذكرة المميزة</div>
  <div class="qvd">تفتح مسار المكافآت المميز كاملاً — جوكرات وجواهر مضاعفة وتعبير حصري، وتُستلم كل مستوياتك السابقة فوراً.</div>
  <button class="btn gd" id="qvy">${ico('gem',14)} فتح بـ ${SZ_PASS_COST} جوهرة</button>
- <button class="btn" id="qvd" style="margin-top:9px;background:linear-gradient(145deg,#2ECC71,#1D8A4E)">شراء بـ $9.99 عبر المتجر</button>
+ <button class="btn" id="qvd" style="margin-top:9px;background:linear-gradient(145deg,#2ECC71,#1D8A4E)">شراء بـ ${usdTxt(CATALOG.get('season_pass').usd)} عبر المتجر</button>
  <button class="btn g" id="qvn" style="margin-top:9px">ليس الآن</button></div>`;
  document.body.appendChild(ov);
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
@@ -19591,7 +19618,7 @@ function seasonScr(keep){
    <div style="font-size:10px;color:var(--tx2);margin-top:3px">المستوى ${lv} من ${SZ_MAX} · ${prog}/${SZ_STEP} نقطة للمستوى التالي</div></div>
  </div>
  ${z.prem?`<div class="cch" style="display:inline-flex;margin-top:11px;color:var(--gold)">${ico('ticket',13)} التذكرة المميزة مفعّلة ${ico('crown',13)}</div>`
-  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="prctag">أو $9.99</span></button>`}
+  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="prctag">أو ${usdTxt(CATALOG.get('season_pass').usd)}</span></button>`}
  <button class="btn g" style="margin-top:9px" onclick="szClaimAll()">${ico('gift',15)} استلام كل الجاهز</button>
  </div></div></div>
  <div class="wb" style="text-align:right;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
@@ -20089,7 +20116,7 @@ function roomDraw(){
  else if(RM.game==='uno')body=rmUno(R);
  else if(RM.game==='carrom')body=rmCarrom(R);
  else body=rmMafia(R);
- go(`<div class="scr on nofi" id="rmScr">${tb('غرفة '+(RM.code||''))}${head}${body}
+ go(`<div class="scr on nofi" id="rmScr">${tb(RM.code==='SOLO'?'مع الكمبيوتر':'غرفة '+(RM.code||''))}${head}${body}
  <button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button></div>`);
 }
 /* نهاية اللعبة — بطاقة فوز واضحة لكل ألعاب الغرفة */
@@ -20441,7 +20468,7 @@ function rmDrawEnd(){
 }
 
 /* ── أونو عبر الغرفة: المضيف يحكم واليد تصل لكل لاعب وحده ── */
-const UNO_COL={r:['#E24B4A','#7E1F1F'],g:['#2ECC71','#12602F'],b:['#378ADD','#123C6E'],y:['#E8B23A','#8A6210'],w:['#2A3550','#0B1020']};
+const UNO_COL={r:['#EE4B4A','#9E1416'],g:['#3FC96A','#12662C'],b:['#3B8FEE','#0E3E7E'],y:['#F7C531','#A5720B'],w:['#2A3550','#0B1020']};
 const UNO_SYM={S:'⊘',R:'⇄',D:'+2',W:'★',F:'+4'};
 function unoDeck(){
  const d=[];
@@ -20820,7 +20847,6 @@ function rmUno(R){
  <div id="unoTip" class="unoTip">المس أي بطاقة ليظهر شرحها هنا</div>
  <div class="sl" style="margin:10px 0 5px">يدك — ${hand.length} بطاقة</div>
  <div class="unoHandWrap">
- ${mine?`<span class="unoMyHand">${HAND_SVG}</span>`:''}
  <div class="unoHand">
   ${hand.map((c,i)=>{
    const ok=mine&&unoOk(c,U.top,U.col)&&!U.drawP&&unoW4Ok(c,hand,U.col)
@@ -21770,23 +21796,51 @@ const GAME_ART={
   <circle cx="18" cy="16" r="3" fill="url(#guY)"/><circle cx="86" cy="20" r="2.4" fill="url(#guY)"/>
  </svg>`,
  barra:`<svg viewBox="0 0 100 100"><defs>
-  <radialGradient id="gbB" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#B07A16"/></radialGradient></defs>
-  <circle cx="34" cy="52" r="24" fill="url(#gbB)" stroke="#8A6210" stroke-width="2.5"/>
-  <circle cx="26" cy="46" r="3.2" fill="#2A1B08"/><circle cx="42" cy="46" r="3.2" fill="#2A1B08"/>
-  <path d="M25 62 Q34 57 43 62" stroke="#2A1B08" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <path d="M46 58 L64 50" stroke="#2A1B08" stroke-width="4" stroke-linecap="round"/>
-  <circle cx="72" cy="34" r="16" fill="#1C2540" stroke="#7B4FE0" stroke-width="2.5"/>
-  <text x="72" y="42" text-anchor="middle" font-size="20" font-weight="900" fill="#B76CF0">؟</text>
+  <linearGradient id="gbC" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#F7FAFF"/><stop offset=".55" stop-color="#D7DEEE"/><stop offset="1" stop-color="#9AA6C0"/></linearGradient>
+  <linearGradient id="gbP" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#B98BFF"/><stop offset=".5" stop-color="#7B4FE0"/><stop offset="1" stop-color="#3A1F7A"/></linearGradient>
+  <linearGradient id="gbG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF3C9"/><stop offset=".45" stop-color="#E8B23A"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
+  <radialGradient id="gbGl" cx=".5" cy=".45" r=".6"><stop offset="0" stop-color="#7B4FE0" stop-opacity=".55"/><stop offset="1" stop-color="#7B4FE0" stop-opacity="0"/></radialGradient></defs>
+  <ellipse cx="50" cy="88" rx="34" ry="7" fill="#000" opacity=".45"/>
+  <circle cx="50" cy="48" r="42" fill="url(#gbGl)"/>
+  <g transform="rotate(-13 30 56)">
+   <rect x="12" y="30" width="40" height="54" rx="7" fill="url(#gbC)" stroke="#7C879F" stroke-width="1.6"/>
+   <rect x="16" y="34" width="32" height="46" rx="4" fill="none" stroke="#B9C2D4" stroke-width="1"/>
+   <rect x="20" y="44" width="24" height="4.4" rx="2.2" fill="#93A0BC"/>
+   <rect x="20" y="53" width="18" height="4.4" rx="2.2" fill="#93A0BC"/>
+   <rect x="20" y="62" width="21" height="4.4" rx="2.2" fill="#93A0BC"/>
+   <path d="M12 30 h40 v9 H12 z" fill="#fff" opacity=".45"/></g>
+  <g transform="rotate(12 70 54)">
+   <rect x="50" y="26" width="40" height="54" rx="7" fill="url(#gbP)" stroke="#C6A6FF" stroke-width="1.8"/>
+   <rect x="54" y="30" width="32" height="46" rx="4" fill="none" stroke="#D9C6FF" stroke-width="1" opacity=".55"/>
+   <ellipse cx="63" cy="35" rx="11" ry="5" fill="#fff" opacity=".28"/>
+   <text x="70" y="66" text-anchor="middle" font-size="38" font-weight="900" fill="url(#gbG)" stroke="#6B4508" stroke-width=".9" font-family="serif">؟</text></g>
  </svg>`,
  mafia:`<svg viewBox="0 0 100 100"><defs>
-  <linearGradient id="gmH" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3B4666"/><stop offset="1" stop-color="#141A2C"/></linearGradient></defs>
-  <ellipse cx="50" cy="76" rx="30" ry="16" fill="#1C2540"/>
-  <circle cx="50" cy="48" r="21" fill="#2A3550" stroke="#4A5878" stroke-width="2"/>
-  <path d="M18 40 h64 l-6-9 H24 z" fill="url(#gmH)"/>
-  <ellipse cx="50" cy="40" rx="32" ry="5" fill="#0F1524"/>
-  <rect x="30" y="45" width="40" height="9" rx="4" fill="#0B1020"/>
-  <circle cx="39" cy="49.5" r="2.6" fill="#E24B4A"/><circle cx="61" cy="49.5" r="2.6" fill="#E24B4A"/>
-  <path d="M40 64 Q50 60 60 64" stroke="#0B1020" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <linearGradient id="gmC" x1=".15" y1="0" x2=".75" y2="1"><stop offset="0" stop-color="#46527A"/><stop offset=".45" stop-color="#232D4C"/><stop offset="1" stop-color="#0A0F1E"/></linearGradient>
+  <linearGradient id="gmB" x1=".1" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#3A4569"/><stop offset=".5" stop-color="#1A2238"/><stop offset="1" stop-color="#080C18"/></linearGradient>
+  <linearGradient id="gmG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF3C9"/><stop offset=".45" stop-color="#E8B23A"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
+  <linearGradient id="gmS" x1=".2" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#27314F"/><stop offset="1" stop-color="#0B1020"/></linearGradient>
+  <radialGradient id="gmGl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#E24B4A" stop-opacity=".34"/><stop offset="1" stop-color="#E24B4A" stop-opacity="0"/></radialGradient></defs>
+  <ellipse cx="50" cy="90" rx="33" ry="6" fill="#000" opacity=".5"/>
+  <circle cx="50" cy="52" r="40" fill="url(#gmGl)"/>
+  <path d="M20 88 C20 72 32 64 50 64 C68 64 80 72 80 88 Z" fill="url(#gmS)" stroke="#3D4970" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M50 64 C56 64 60 66 61 69 L54 88 h-8 l-7-19 C41 66 44 64 50 64 Z" fill="#EDF1FA" opacity=".9"/>
+  <path d="M50 65 l6 5 -6 7 -6 -7 z" fill="#B01F1C"/>
+  <path d="M46 77 h8 l3 11 h-14 z" fill="#8A1714"/>
+  <ellipse cx="50" cy="46" rx="19" ry="21" fill="url(#gmS)"/>
+  <ellipse cx="41" cy="47" rx="4" ry="2.6" fill="#FF5B4E" opacity=".95"/>
+  <ellipse cx="59" cy="47" rx="4" ry="2.6" fill="#FF5B4E" opacity=".95"/>
+  <ellipse cx="40.2" cy="46.3" rx="1.5" ry="1" fill="#fff" opacity=".8"/>
+  <ellipse cx="58.2" cy="46.3" rx="1.5" ry="1" fill="#fff" opacity=".8"/>
+  <path d="M28 38 C28 20 37 12 50 12 C63 12 72 20 72 38 Z" fill="url(#gmC)" stroke="#4E5B80" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="M42 13 C40 20 40 30 41 38 L36 38 C34 28 36 18 42 13 Z" fill="#fff" opacity=".13"/>
+  <path d="M50 12 C44 12 40 15 38 20 C42 17 46 16 50 16 C54 16 58 17 62 20 C60 15 56 12 50 12 Z" fill="#0B1020" opacity=".55"/>
+  <path d="M27.5 31 h45 v8 h-45 z" fill="url(#gmG)" stroke="#6B4508" stroke-width=".7"/>
+  <path d="M27.5 31 h45 v3 h-45 z" fill="#fff" opacity=".35"/>
+  <ellipse cx="50" cy="39" rx="36" ry="8" fill="url(#gmB)" stroke="#4E5B80" stroke-width="1.5"/>
+  <ellipse cx="50" cy="37.4" rx="36" ry="8" fill="#2A3555"/>
+  <ellipse cx="50" cy="37.4" rx="36" ry="8" fill="url(#gmC)" opacity=".6"/>
+  <ellipse cx="38" cy="34" rx="13" ry="2.8" fill="#fff" opacity=".18"/>
  </svg>`,
  draw:`<svg viewBox="0 0 100 100"><defs>
   <linearGradient id="gdP" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E8C88A"/><stop offset="1" stop-color="#A9762F"/></linearGradient></defs>
@@ -22352,10 +22406,10 @@ function drawBoard(){
   border:2px solid #3B2F5C;touch-action:none;background:#fff;cursor:crosshair"></canvas>
  <div style="display:flex;gap:7px;margin-top:10px;align-items:center;justify-content:center" id="pdColors">
  ${PD_COLORS.map(c=>`<span onclick="PT.color='${c}';document.querySelectorAll('#pdColors span').forEach(x=>x.style.outline='none');this.style.outline='3px solid #FFE9A8'"
-  style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
+  style="width:36px;height:36px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
   border:2px solid ${c==='#FFFFFF'?'#8A93A8':'#0B1020'};${c===PT.color?'outline:3px solid #FFE9A8':''}"
   title="${c==='#FFFFFF'?'ممحاة':''}"></span>`).join('')}
-  <button class="btn g" style="width:auto;padding:6px 12px;font-size:11px" onclick="pdClear()">مسح</button>
+  <button class="btn g" style="width:auto;padding:9px 16px;min-height:36px;font-size:12px" onclick="pdClear()">مسح</button>
  </div>
  <button class="rbtn" style="margin-top:12px" onclick="pdDone()"><span>${ico('check',14)} انتهيت</span></button>
  </div>`);
@@ -25236,7 +25290,7 @@ function clMemRow(m,topDonor,admin){
    <div style="font-size:10px;font-weight:800;color:var(--info);margin-top:3px">${cl3Num(m.pts)} نقطة</div>
   </div>
   ${canAdmin?`<button class="btn g" style="width:auto;min-width:38px;min-height:44px;padding:6px 8px;font-size:16px;line-height:1"
-    onclick="event.stopPropagation();clMemMenu('${key}')">⋯</button>`:''}
+    onclick="event.stopPropagation();clMemMenu('${key}')" title="إدارة العضو">${ico('menu',15)}</button>`:''}
  </div>`;
 }
 function clMembersScr(){
@@ -25411,7 +25465,7 @@ function clMemberScr(uid){
   // إدارة العضو — قائمة منفصلة لا تُفتح إلا لمن يملك
   if(canAdmin){
    h+=`<button class="btn g" style="margin-top:12px;min-height:48px" onclick="clMemMenu('${key}')">
-    ${ico('gear',14)} ⋯ إدارة العضو</button>`;
+    ${ico('gear',14)} إدارة العضو</button>`;
   }
   return h;
  });
@@ -25465,7 +25519,7 @@ function clMemMenu(key){
  document.body.appendChild(ov);
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#clmX').onclick=()=>ov.remove();
- ov.querySelectorAll('[data-i]').forEach(b=>{
+ ov.querySelectorAll('button[data-i]').forEach(b=>{
   const x=items[+b.dataset.i];
   const run=()=>{ov.remove();clDoAdmin(uid,x.a)};
   // الطرد والحظر بضغط مطوّل — لا يقعان بلمسة عابرة
@@ -26169,7 +26223,7 @@ function clTransferScr(){
  ${bad.length?`<div class="sl">غير مؤهّلين الآن</div>
   ${bad.slice(0,6).map(m=>{const tk=clTok(m.uid);
    return `<div class="li" style="opacity:.6"><div class="lr">
-   <div style="width:32px;height:32px;flex-shrink:0;cursor:pointer" onclick="cl4Open('${tk}')">${face(m.em,32)}</div>
+   <div style="width:36px;height:36px;flex-shrink:0;cursor:pointer" onclick="cl4Open('${tk}')">${face(m.em,36)}</div>
    <div class="lb" style="cursor:pointer" onclick="cl4Open('${tk}')">
     <div class="lt" style="font-size:12px">${esc(m.n||'عضو')}</div>
     <div class="ls">${esc(cl4RankName(m.r))} · آخر نشاط ${esc(ago(m.last))}</div></div>
@@ -26954,8 +27008,11 @@ function clUi5Css(){
 .clBub{max-width:80%;background:var(--card);border:1px solid var(--bd);border-radius:13px;
  padding:8px 10px;position:relative;-webkit-user-select:none;user-select:none;cursor:pointer}
 .clRow.me .clBub{background:#20183C;border-color:#3B2F5C}
-.clNm{font-size:9.5px;font-weight:900;color:#7BD3F7;margin-bottom:3px;
+/* اسم العضو هدف لمس كامل — لأنّ كل اسم يفتح صفحته */
+.clNm{font-size:9.5px;font-weight:900;color:#7BD3F7;margin-bottom:3px;min-height:34px;padding-block:4px;
  display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap;cursor:pointer}
+.clTap{display:inline-flex;align-items:center;min-height:34px;padding-block:3px}
+.rr .lt{display:inline-flex;align-items:center;min-height:30px}
 .clRow.me .clNm{color:#C9A6F5}
 .clTx{font-size:12px;line-height:1.65;color:var(--tx);word-break:break-word;white-space:pre-wrap}
 .clAt{font-size:8.5px;color:var(--mut);margin-top:4px}
@@ -27053,7 +27110,7 @@ function cl5Open(safe){
 function clNameHtml(uid,n,cls){
  const m=clRowOf(uid);
  const nm=n||(m&&m.n)||'عضو سابق';
- return `<span class="${cls||'clNm'}" onclick="cl5Open('${clArg(uid)}')">${esc(nm)}`+
+ return `<span class="${cls||'clNm'} clTap" onclick="cl5Open('${clArg(uid)}')">${esc(nm)}`+
   `${m&&m.bot?' <span class="clTag">آلي</span>':''}${uid===S.uid?' <span class="clTag">أنت</span>':''}</span>`;
 }
 /** عدد «الحاضرين» تقدير محلي من آخر نشاط مسجّل — يُعلَن كذلك في رأس الشاشة */
@@ -27144,7 +27201,7 @@ function clChatScr(){
  ${muted?`<div class="li" style="border-color:var(--warn);margin-top:9px">
   <div class="lt" style="font-size:12.5px">${ico('mute',13)} أنت مكتوم في هذا النادي</div>
   <div class="ls">يرفع الكتم مشرفٌ أو من هو أعلى منه.</div></div>`:''}
- <div class="note">اضغط مطوّلًا على أي رسالة، أو زر ⋯ على البطاقات: رد · نسخ · كتم · إبلاغ.<br>
+ <div class="note">اضغط مطوّلًا على أي رسالة، أو زرّ الخيارات على البطاقات: رد · نسخ · كتم · إبلاغ.<br>
  القواعد تُطبَّق في طبقة النادي لا في الشاشة: ٣ ثوانٍ بين رسالة وأخرى، وقصّ النص وفلترة الألفاظ
  والروابط والتكرار قبل أن تُنشر الرسالة.</div>
  </div>`);
@@ -27701,7 +27758,7 @@ function clDonorsScr(){
       ${first?'padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518)':''}">
       ${m.uid===S.uid&&typeof avatarArt==='function'?avatarArt(first?50:42)
         :(typeof face==='function'?face(m.em,first?50:42):ico('user',first?50:42))}</div>
-     <div onclick="cl5Open('${clArg(m.uid)}')" style="cursor:pointer;font-size:12px;font-weight:900;padding:6px 4px;min-height:36px;display:flex;flex-direction:column;justify-content:center;
+     <div onclick="cl5Open('${clArg(m.uid)}')" style="cursor:pointer;font-size:12px;font-weight:900;padding:6px 4px;min-height:36px;min-width:44px;display:flex;flex-direction:column;justify-content:center;
       text-align:center;line-height:1.3">${esc(m.n||'')}
       ${m.bot?'<div><span class="clTag">آلي</span></div>':''}</div>
      <div style="font-size:12px;font-weight:900;color:#C9A6F5">${clN(clDonVal(m))}</div>
@@ -29129,7 +29186,7 @@ function draw(){
    <div class="i">${ico(p.i,17)}</div><div class="l">${p.l}</div>
    <span class="cnt">${p.c}</span></div>`}).join('')}</div>`:''}
  ${G.ans?`<div style="margin-top:14px"><button class="rbtn" onclick="adv()"><span>${G.i>=G.qs.length-1?'عرض النتيجة':'التالي'}</span></button></div>`:''}
- <div style="text-align:center;margin-top:14px"><button class="btn g" style="width:auto;padding:8px 18px;font-size:13px" onclick="quit()">خروج</button></div></div>`);
+ <div style="text-align:center;margin-top:14px"><button class="btn g" style="width:auto;padding:10px 22px;min-height:38px;font-size:13px" onclick="quit()">خروج</button></div></div>`);
 }
 function vsBar(){
  const dots=G.qs.map((_,i)=>{const h=G.hist[i];
@@ -29371,7 +29428,7 @@ function paySheet(pid,after){
  <div style="font-size:26px">${ico('shop',24)}</div>
  <div class="qvt">${name}</div>
  ${p.d?`<div class="qvd">${p.d}</div>`:''}
- <div class="prcbig">$${p.usd.toFixed(2)}</div>
+ <div class="prcbig">${usdTxt(p.usd)}</div>
  ${st==='store'?`<div class="qvd" style="margin-bottom:6px">يظهر السعر النهائي بعملتك في نافذة المتجر</div>
   <button class="btn gd" id="qvy">${ico('shop',14)} شراء عبر المتجر</button>`
   :`<div class="sandbox">${ico('info',12)} ${why}</div>`}
@@ -29415,14 +29472,14 @@ function storeScr(){
   ${p.bonus?`<div class="gpkb">${p.bonus}</div>`:''}
   <div class="gpki">${ico('gem',26)}</div>
   <div class="gpkn">${p.n}</div>
-  <div class="gpkg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)} <b style="color:#5DE39A">= $${p.usd.toFixed(2)} دولار</b></div>
-  <div class="prc">شراء بـ $${p.usd.toFixed(2)}</div></div>`).join('')}
+  <div class="gpkg2">${p.gems.toLocaleString('en-US')} ${ico('gem',12)} <b style="color:#5DE39A">= ${usdTxt(p.usd)}</b></div>
+  <div class="prc">شراء بـ ${usdTxt(p.usd)}</div></div>`).join('')}
  </div>
 
  <div class="sl">${ico('gift',15)} حزم خاصة</div>
  ${BUNDLES.map(b=>`<div class="li"><div class="lr"><span style="font-size:22px">${ico(b.k==='b2'?'ticket':'gift',18)}</span>
- <div class="lb"><div class="lt">${b.n} — <b style="color:#5DE39A">$${b.usd.toFixed(2)} دولار</b></div><div class="ls">${b.d}</div></div>
- <button class="btn gd prcbtn" onclick="buyBundle('${b.k}')">$${b.usd.toFixed(2)}</button></div></div>`).join('')}
+ <div class="lb"><div class="lt">${b.n} — <b style="color:#5DE39A">${usdTxt(b.usd)}</b></div><div class="ls">${b.d}</div></div>
+ <button class="btn gd prcbtn" onclick="buyBundle('${b.k}')">${usdTxt(b.usd)}</button></div></div>`).join('')}
 
  <div class="sl">${ico('coin',14)} صرف الجواهر عملاتٍ</div>
  ${EXCH.map((e,i)=>`<div class="li"><div class="lr"><span style="font-size:21px">${ico('coin',17)}</span>
@@ -29514,7 +29571,7 @@ function shieldRow(bestIx){
  return `<div style="display:flex;gap:3px;justify-content:space-between;background:linear-gradient(168deg,#1C2540,#0E1526);
   border:1px solid var(--bd);border-radius:12px;padding:9px 7px">
  ${TIERS.map((t,i)=>`<div style="text-align:center;flex:1;min-width:0;${i<=bestIx?'':'filter:grayscale(1);opacity:.28'}">
-  ${tierEmblem(i,27)}<div style="font-size:7px;font-weight:800;color:${t.c};margin-top:1px;white-space:nowrap;overflow:hidden">${t.ar}</div></div>`).join('')}
+  ${tierEmblem(i,27)}<div style="font-size:7px;font-weight:800;color:${t.c};margin-top:1px;line-height:1.25;overflow-wrap:anywhere">${t.ar}</div></div>`).join('')}
  </div>`;
 }
 /** ملفي أنا — من الحالة الحقيقية */

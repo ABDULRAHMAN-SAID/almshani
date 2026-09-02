@@ -157,8 +157,12 @@ const CAPTURES=[
    const app=document.getElementById('app');const vw=document.documentElement.clientWidth;
    const vis=el=>{const r=el.getBoundingClientRect();const cs=getComputedStyle(el);return r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none'};
    const all=[...app.querySelectorAll('*')];
-   const clipped=all.filter(el=>{if(el.childElementCount)return false;const cs=getComputedStyle(el);if(cs.overflow!=='hidden'&&cs.overflowX!=='hidden'&&cs.textOverflow!=='ellipsis')return false;return el.scrollWidth>el.clientWidth+4&&el.innerText.trim().length>0&&vis(el)}).map(el=>el.innerText.trim().slice(0,30));
-   const off=all.filter(el=>{if(!vis(el))return false;const r=el.getBoundingClientRect();return (r.right>vw+3||r.left<-3)&&r.width<vw*1.5}).map(el=>(el.className||el.tagName).toString().slice(0,24));
+   // القصّ يُقاس على مدى النصّ نفسه لا على scrollWidth — فعناصر الزينة المطلقة (لمعان الأزرار) تضخّمه زورًا
+   const clipped=all.filter(el=>{if(el.childElementCount)return false;const cs=getComputedStyle(el);
+    if(cs.overflow!=='hidden'&&cs.overflowX!=='hidden'&&cs.textOverflow!=='ellipsis')return false;
+    const t=(el.textContent||'').trim();if(!t)return false;
+    const r=document.createRange();r.selectNodeContents(el);const tr=r.getBoundingClientRect();const er=el.getBoundingClientRect();
+    return tr.width>er.width+2||tr.height>er.height+2}).map(el=>(el.textContent||'').trim().slice(0,18));   const off=all.filter(el=>{if(!vis(el))return false;const r=el.getBoundingClientRect();return (r.right>vw+3||r.left<-3)&&r.width<vw*1.5}).map(el=>(el.className||el.tagName).toString().slice(0,24));
    const tiny=[...app.querySelectorAll('button,[onclick],a,.fc,.nvi')].filter(el=>vis(el)&&!el.closest('[onclick] [onclick]')).filter(el=>{const r=el.getBoundingClientRect();return r.width<34||r.height<34}).map(el=>{const r=el.getBoundingClientRect();return `${(el.innerText||el.className||el.tagName).toString().trim().slice(0,16)}(${Math.round(r.width)}×${Math.round(r.height)})`});
    const ALLOW=new Set(['Google','Play','App','Store','I','II','III','iOS','Android','MMR','SOLO']);
    const latin=[...new Set((document.body.innerText.match(/[A-Za-z][A-Za-z']{2,}/g)||[]).filter(w=>!ALLOW.has(w)))].slice(0,8);
