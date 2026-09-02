@@ -241,6 +241,12 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .unoInfo{position:absolute;left:33%;top:56.6%;width:34%;text-align:center;font-size:10px;font-weight:900;
  background:rgba(6,9,17,.62);border:1px solid;border-radius:9px;padding:2px 4px;white-space:nowrap;pointer-events:none}
 @media (max-width:360px){.unoZ .unoSeatNm{font-size:9.5px;padding:1px 7px}.unoInfo{font-size:9px}}
+/* قرعة البداية: بطاقة مكشوفة تنقلب في مقعد كل لاعب */
+.unoLotC{animation:unoFlip .45s ease;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
+.unoLotC .unoC{transform:scale(.62)}
+.unoZ.left .unoLotC .unoC,.unoZ.right .unoLotC .unoC{transform:scale(.56)}
+@keyframes unoFlip{0%{transform:rotateY(90deg);opacity:0}100%{transform:rotateY(0);opacity:1}}
+.unoBoard.intro{cursor:pointer}
 .unoTurn.me{color:var(--gold)}
 .unoHand{display:flex;gap:6px;overflow-x:auto;padding:12px 4px 10px}
 .unoHandWrap{position:relative}
@@ -19183,7 +19189,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.21';
+const APP_VER='5.22';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -19670,11 +19676,10 @@ function rmOn(d,m){
   if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
   if(RM.phase==='vote')setTimeout(rmPaintAll,30);}
  else if(d.t==='hand'&&d.to===me){RM.hand=(d.h||[]).slice()}
+ else if(d.t==='unoIntro'){RM.phase='uno';RM.uno=null;unoIntroPlay(d)}
  else if(d.t==='uno'){
-  const prev=RM.uno;
-  RM.uno=d;RM.phase='uno';
-  if(prev&&d.by&&d.top!==prev.top)setTimeout(()=>unoFly(d.by,d.top),40);
-  if(RM.solo&&isBot(d.turn))setTimeout(unoBot,RM.diff==='hard'?1100:1600);}
+  if(RM.unoIntro&&!RM.unoIntro.done){RM.unoIntro.state=d;RM.phase='uno'}   // تُطبَّق عند نهاية المقدّمة
+  else unoApplyState(d);}
  else if(d.t==='aim'){
   _ca.aim={x:d.x,y:d.y,ang:d.ang};
   if(RM.ca)RM.ca.msg='الخصم يصوّب…';
@@ -20239,21 +20244,106 @@ function unoDeck(){
  for(let i=0;i<4;i++){d.push('wW');d.push('wF')}
  return d.sort(()=>Math.random()-.5);
 }
+/* بداية أونو بنظام واضح (طلب المالك):
+   ١) توزيع سبع بطاقات لكل لاعب بالتناوب
+   ٢) قرعة البداية: كل لاعب يسحب بطاقة مكشوفة — الأعلى رقمًا يبدأ، بطاقات الأفعال والجوكر صفر، والتعادل يُعاد بين المتعادلين
+   ٣) أول بطاقة على الطاولة (لا جوكر) وأثرها كما في القوانين
+   المضيف يحسب كل ذلك مرّة ويبثّ «المقدّمة» ثم الحالة؛ كل جهاز يعرض التوزيع والقرعة ثم يطبّق الحالة. */
 function unoDeal(){
  if(!RM.host)return;
  const ps=RM.players;
  const deck=unoDeck();
  RM.U={deck,disc:[],hands:{},dir:1,turn:0,col:'r',top:null,draw:0,drew:null};
- ps.forEach(p=>{RM.U.hands[p.peer]=deck.splice(0,7)});
+ ps.forEach(p=>{RM.U.hands[p.peer]=[]});
+ for(let k=0;k<7;k++)ps.forEach(p=>RM.U.hands[p.peer].push(deck.shift()));
+ const lot=unoLot(deck,ps.map(p=>p.peer));
+ RM.U.turn=Math.max(0,ps.findIndex(p=>p.peer===lot.winner));
  let top=deck.shift();
  while(top[0]==='w'){deck.push(top);top=deck.shift()}   // لا جوكر كأول بطاقة
  RM.U.top=top;RM.U.col=top[0];
- // البطاقة الأولى تُطبَّق كما في القوانين
  if(top[1]==='D')RM.U.draw=2;
- else if(top[1]==='S')RM.U.turn=1%ps.length;
- else if(top[1]==='R'){RM.U.dir=-1;RM.U.turn=(ps.length-1)%ps.length}
+ else if(top[1]==='S')RM.U.turn=(RM.U.turn+1)%ps.length;
+ else if(top[1]==='R'){RM.U.dir=-1;RM.U.turn=(RM.U.turn-1+ps.length)%ps.length}
  ps.forEach(p=>rmSend({t:'hand',to:p.peer,h:RM.U.hands[p.peer]}));
+ rmSend({t:'unoIntro',order:ps.map(p=>p.peer),n:7,lot,starter:lot.winner,first:top,turn:ps[RM.U.turn].peer});
  unoPub();
+}
+/** القرعة: بطاقة مكشوفة لكل مرشّح؛ الأعلى رقمًا يفوز؛ التعادل يعيد السحب بين المتعادلين؛ البطاقات تعود إلى أسفل الكومة */
+function unoLot(deck,peers){
+ const rounds=[];let cands=peers.slice(),winner=null,guard=0;
+ while(!winner&&guard++<8){
+  const cards={};cands.forEach(p=>{cards[p]=deck.shift()});
+  let best=-1,top=[];
+  cands.forEach(p=>{const v=unoLotVal(cards[p]);if(v>best){best=v;top=[p]}else if(v===best)top.push(p)});
+  rounds.push({cards,tie:top.length>1?top:null,winner:top.length===1?top[0]:null});
+  cands.forEach(p=>deck.push(cards[p]));
+  if(top.length===1)winner=top[0];else cands=top;
+ }
+ return {rounds,winner:winner||cands[0]};
+}
+const unoLotVal=c=>(c&&c[0]!=='w'&&/\d/.test(c[1]))?+c[1]:0;
+const unoNm=p=>p===RM.me?'أنت':(((RM.players||[]).find(x=>x.peer===p)||{}).name||'لاعب');
+/* ── المقدّمة على كل جهاز: التوزيع بطاقةً بطاقة، ثم كشف القرعة، ثم أول بطاقة — ثم تُطبَّق الحالة ── */
+function unoIntroPlay(d){
+ clearTimeout(RM.introTm);
+ const I=RM.unoIntro={...d,cnt:{},lot:{},round:0,step:'deal',text:'توزيع الأوراق…',hl:null,top:null,done:false,state:null};
+ d.order.forEach(p=>I.cnt[p]=0);
+ const steps=[];let t=0;const at=(dt,fn)=>{t+=dt;steps.push([t,fn])};
+ for(let k=0;k<d.n;k++)d.order.forEach(p=>at(110,()=>{I.cnt[p]++;I.text=`توزيع الأوراق — ${k+1} من ${d.n}`;unoDealFly(p)}));
+ at(600,()=>{I.step='lot';I.text='قرعة البداية: كل لاعب يسحب بطاقة — الأعلى رقمًا يبدأ'});
+ (d.lot&&d.lot.rounds||[]).forEach((r,ri)=>{
+  if(ri)at(900,()=>{I.lot={};I.text=`إعادة القرعة بين ${(r.tie||Object.keys(r.cards)).map(unoNm).join(' و')}`});
+  Object.keys(r.cards).forEach(p=>at(520,()=>{I.lot[p]=r.cards[p]}));
+  at(900,()=>{if(r.winner){I.hl=r.winner;I.text=`يبدأ ${unoNm(r.winner)} — سحب ${unoLotVal(r.cards[r.winner])}`}else I.text=`تعادل بين ${(r.tie||[]).map(unoNm).join(' و')} — تُعاد القرعة`});
+ });
+ at(1400,()=>{I.step='first';I.lot={};I.top=d.first;
+  const f=d.first[1];
+  I.text=f==='S'?`أول بطاقة تخطٍّ — الدور ينتقل إلى ${unoNm(d.turn)}`:f==='R'?`أول بطاقة عكس — الاتجاه معكوس والدور لـ${unoNm(d.turn)}`:f==='D'?`أول بطاقة +2 — ${unoNm(d.turn)} يسحب بطاقتين`:`أول بطاقة على الطاولة — الدور لـ${unoNm(d.turn)}`});
+ at(1100,()=>unoIntroDone());
+ const run=i=>{if(RM.unoIntro!==I||I.done||i>=steps.length)return;
+  RM.introTm=setTimeout(()=>{if(RM.unoIntro!==I||I.done)return;steps[i][1]();if(document.getElementById('rmScr'))roomDraw();run(i+1)},i?steps[i][0]-steps[i-1][0]:steps[i][0])};
+ run(0);
+ if(document.getElementById('rmScr'))roomDraw();
+}
+function unoIntroDone(){
+ const I=RM.unoIntro;if(!I||I.done)return;
+ clearTimeout(RM.introTm);I.done=true;
+ const st=I.state;RM.unoIntro=null;
+ if(st)unoApplyState(st);
+ if(document.getElementById('rmScr'))roomDraw();
+}
+function unoIntroSkip(){unoIntroDone()}
+/** بطاقة مقلوبة تطير من كومة السحب إلى مقعد اللاعب أثناء التوزيع */
+function unoDealFly(p){
+ const from=document.querySelector('.unoDrawS');
+ const to=p===RM.me?document.querySelector('.unoZ.me .unoZn'):document.querySelector(`.unoZ[data-p="${p}"] .unoZf`);
+ if(!from||!to)return;
+ const a=from.getBoundingClientRect(),b=to.getBoundingClientRect();
+ const d=document.createElement('div');d.className='unoFly';d.innerHTML=unoBack();
+ const x0=a.left+a.width/2-13,y0=a.top+a.height/2-19;
+ d.style.left=x0+'px';d.style.top=y0+'px';document.body.appendChild(d);
+ const dx=(b.left+b.width/2-13)-x0,dy=(b.top+b.height/2-19)-y0;
+ const an=d.animate([{transform:'translate(0,0) rotate(0deg)',opacity:1},{transform:`translate(${dx}px,${dy}px) rotate(${p===RM.me?0:180}deg)`,opacity:.9}],{duration:300,easing:'cubic-bezier(.3,.8,.4,1)',fill:'forwards'});
+ an.onfinish=()=>d.remove();setTimeout(()=>d.remove(),700);
+}
+function unoApplyState(d){
+ const prev=RM.uno;
+ RM.uno=d;RM.phase='uno';
+ if(prev&&d.by&&d.top!==prev.top)setTimeout(()=>unoFly(d.by,d.top),40);
+ if(RM.solo&&isBot(d.turn))setTimeout(unoBot,RM.diff==='hard'?1100:1600);
+}
+function rmUnoIntro(){
+ const I=RM.unoIntro;
+ const cnt=I.order.map(p=>({p,n:I.cnt[p]||0}));
+ const dealt=cnt.reduce((a,c)=>a+c.n,0);
+ const U={intro:true,cnt,turn:I.hl||null,lot:I.lot||{},top:I.top||null,col:I.top?I.top[0]:null,dk:108-dealt,dir:1,
+  info:I.step==='deal'?'توزيع الأوراق':I.step==='lot'?'قرعة البداية':'الورقة الأولى'};
+ const mine=(RM.hand||[]).slice(0,I.cnt[RM.me]||0);
+ return `${rmUnoTable(U,false)}
+ <div class="unoTurn">${I.text}</div>
+ <div style="text-align:center;margin-top:6px"><button class="btn g" style="width:auto;padding:8px 18px;min-height:38px" onclick="unoIntroSkip()">تخطّي المقدّمة ⏭</button></div>
+ <div class="sl" style="margin:10px 0 5px">يدك — ${mine.length} بطاقة</div>
+ <div class="unoHandWrap"><div class="unoHand">${mine.map(c=>`<div class="unoSlot ok" style="transform:none">${unoCard(c)}</div>`).join('')}</div></div>`;
 }
 function unoPub(extra){
  const U=RM.U;
@@ -20452,25 +20542,28 @@ function unoSeats(U){
   const turn=x.p===U.turn, n=Math.min(7,x.n);
   return `<div class="unoZ ${spots[i]||'top'} ${turn?'on':''}" data-p="${x.p}">
    <div class="unoZn"><span class="unoSeatNm ${turn?'on':''}">${nm(x.p)} <b>${x.n}</b>${x.n===1?' 🔔':''}</span>${turn?`<span class="seatHand">${HAND_SVG}</span>`:''}</div>
-   <div class="unoZf"><div class="unoFan">${Array.from({length:n},(_,k)=>
-    `<span style="transform:rotate(${(k-(n-1)/2)*7}deg)">${unoBack()}</span>`).join('')}</div></div>
+   <div class="unoZf">${U.lot&&U.lot[x.p]?`<div class="unoLotC">${unoCard(U.lot[x.p])}</div>`:`<div class="unoFan">${Array.from({length:n},(_,k)=>
+    `<span style="transform:rotate(${(k-(n-1)/2)*7}deg)">${unoBack()}</span>`).join('')}</div>`}</div>
   </div>`}).join('');
 }
 function rmUnoTable(U,mine){
- const dirIco=U.dir===1?'↻':'↺', col=UNO_COL[U.col][0], hand=RM.hand||[];
- return `<div class="unoBoard" data-p="${RM.me}">
+ const dirIco=U.dir===1?'↻':'↺', col=U.col?UNO_COL[U.col][0]:'#E8B23A', hand=RM.hand||[];
+ const myN=U.intro?(((U.cnt||[]).find(c=>c.p===RM.me)||{}).n||0):hand.length;
+ const myLot=U.lot&&U.lot[RM.me], hl=U.intro&&U.turn===RM.me;
+ return `<div class="unoBoard ${U.intro?'intro':''}" data-p="${RM.me}"${U.intro?' onclick="unoIntroSkip()"':''}>
   ${unoSeats(U)}
-  <div class="unoZ me ${mine?'on':''}">
-   <div class="unoZn"><span class="unoSeatNm ${mine?'on':''}">أنت <b>${hand.length}</b>${hand.length===1?' 🔔':''}</span></div>
-   <div class="unoZf">${mine?`<span class="unoTurnTag">${U.drew===RM.me?'العب المسحوبة أو مرِّر':'دورك'}</span>`:''}</div>
+  <div class="unoZ me ${mine||hl?'on':''}">
+   <div class="unoZn"><span class="unoSeatNm ${mine||hl?'on':''}">أنت <b>${myN}</b>${myN===1&&!U.intro?' 🔔':''}</span></div>
+   <div class="unoZf">${myLot?`<div class="unoLotC">${unoCard(myLot)}</div>`:mine?`<span class="unoTurnTag">${U.drew===RM.me?'العب المسحوبة أو مرِّر':'دورك'}</span>`:''}</div>
   </div>
-  <div class="unoDrawL">${U.drawP?`اسحب ${U.drawP}`:'السحب'}</div>
+  <div class="unoDrawL">${U.intro?'':U.drawP?`اسحب ${U.drawP}`:'السحب'}</div>
   <div class="unoDrawS ${mine?'live':''}" onclick="unoDrawCard()">${unoBack(U.dk)}</div>
-  <div class="unoDiscS"><div class="unoTopWrap" style="box-shadow:0 0 22px ${col}66">${unoCard(U.top)}</div></div>
-  <div class="unoInfo" style="color:${col};border-color:${col}">${dirIco} اللون: ${unoColName(U.col)}</div>
+  <div class="unoDiscS">${U.top?`<div class="unoTopWrap" style="box-shadow:0 0 22px ${col}66">${unoCard(U.top)}</div>`:''}</div>
+  <div class="unoInfo" style="color:${col};border-color:${col}">${U.info?U.info:`${dirIco} اللون: ${unoColName(U.col)}`}</div>
  </div>`;
 }
 function rmUno(R){
+ if(RM.unoIntro&&!RM.unoIntro.done)return rmUnoIntro();
  const U=RM.uno;
  if(!U)return '<div class="note">يوزّع المضيف البطاقات…</div>';
  const mine=U.turn===RM.me;
