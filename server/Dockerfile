@@ -9,6 +9,11 @@ COPY package.json ./
 RUN npm install --no-save --no-package-lock --ignore-scripts esbuild@^0.28 ws@^8
 COPY server ./server
 RUN node_modules/.bin/esbuild server/src/tahaddi/index.ts --bundle --platform=node --format=esm --external:ws --outfile=server/dist/tahaddi.js --log-level=warning
+# الصفحات القانونية تُولَّد من نصّ اللعبة نفسه: المتجران يطلبان رابط سياسة خصوصية يعمل،
+# وهذا الخادم يقدّمه من نفس الأصل فلا يحتاج المالك مضيفًا ثانيًا.
+COPY tools/build-www.cjs ./tools/build-www.cjs
+COPY tahaddi ./tahaddi
+RUN node tools/build-www.cjs /app/wwwgen
 
 FROM node:20-alpine
 WORKDIR /app
@@ -21,6 +26,7 @@ RUN mkdir -p /data && npm install --no-save --no-package-lock --ignore-scripts w
 COPY --from=build /app/server/dist/tahaddi.js ./server/dist/tahaddi.js
 COPY tahaddi/index.html tahaddi/sw.js tahaddi/manifest.webmanifest ./tahaddi/
 COPY tahaddi/icons ./tahaddi/icons
+COPY --from=build /app/wwwgen/privacy.html /app/wwwgen/terms.html /app/wwwgen/licenses.html ./tahaddi/
 VOLUME ["/data"]
 EXPOSE 8090
 HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:8090/health || exit 1

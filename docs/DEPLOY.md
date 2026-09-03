@@ -42,6 +42,8 @@ fly open                                      # https://<app>.fly.dev — الل
 | `TAHADDI_RESULT_WAIT_MS` | `90000` | مهلة انتظار تقارير كل المشاركين قبل اعتماد النتيجة |
 | `IOS_BUNDLE_ID` | `com.almshani.tahaddi` | معرّف حزمة iOS — إيصال من تطبيق آخر يُرفض |
 
+الخادم يقدّم كذلك الصفحات القانونية التي يطلبها المتجران على `/privacy.html` و`/terms.html` و`/licenses.html` — تُولَّد وقت البناء من نصّ واحد داخل اللعبة (`⟦legal⟧` في `index.html`) فلا يفترق ما يقرؤه اللاعب عمّا يقرؤه المراجع. املأ `LEGAL.contact` و`LEGAL.entity` و`LEGAL.law` هناك مرّة واحدة قبل الرفع.
+
 `/health` يجيب `{ok:true, …إحصاءات}` مع `access-control-allow-origin:*` ليستطيع عميل على مضيف آخر أن يتأكّد قبل فتح WebSocket.
 
 ## ٢. نسخة الويب على مضيف ثابت (GitHub Pages)

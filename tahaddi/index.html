@@ -16417,7 +16417,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  const R=Router;
  // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
-  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk',
+  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
@@ -16836,6 +16836,95 @@ function tryCard(id){
 }
 
 // ═══════════ الإعدادات ═══════════
+/* ⟦legal⟧ */
+/* النصوص القانونية — مصدر واحد يُعرض داخل اللعبة ويُولَّد منه صفحات www/ التي يطلبها المتجران.
+   المالك يملأ LEGAL.contact و LEGAL.entity و LEGAL.law مرّة واحدة قبل الرفع. */
+const LEGAL={
+ contact:'salalah9818@gmail.com',
+ entity:'مالك لعبة «تحدّي»',
+ law:'المملكة العربية السعودية',
+ updated:'٣ سبتمبر ٢٠٢٦',
+ privacy:{t:'سياسة الخصوصية',s:[
+  {h:'الخلاصة في ثلاثة أسطر',p:[
+   'لا نطلب بريدًا ولا كلمة مرور ولا رقم هاتف ولا موقعك الجغرافي.',
+   'لا إعلانات ولا متتبّعات ولا تحليلات طرف ثالث داخل اللعبة.',
+   'لا نرى بطاقتك البنكية أبدًا — الدفع كلّه داخل App Store أو Google Play.']},
+  {h:'ما الذي نحفظه',p:[
+   'اسم العرض الذي تختاره (حرفان إلى أربعة عشر حرفًا).',
+   'معرّف حساب ورمز دخول يولّدهما الخادم عشوائيًا — لا يرتبطان بهويتك خارج اللعبة.',
+   'تقدّمك في اللعب: العملات والجواهر والبطاقات والرتب والإحصاءات.',
+   'مشترياتك: معرّف عملية الشراء والمنتج والمنصّة وتاريخها — لا تفاصيل دفع.']},
+  {h:'أين يُحفظ',p:[
+   'على جهازك دائمًا، في تخزين المتصفّح أو التطبيق.',
+   'وعلى خادم «تحدّي» الذي يديره '+'مالك اللعبة'+' متى كنت متصلًا، ليعود تقدّمك على أي جهاز تدخل به بحسابك.',
+   'إن لعبت بلا اتصال بقي كل شيء على جهازك وحده.']},
+  {h:'من يراك',p:[
+   'داخل غرفة اللعب: من في غرفتك فقط يرى اسم عرضك ورمز الغرفة.',
+   'في لوحة الصدارة: اسم عرضك ورتبتك.',
+   'لا دردشة حرّة في اللعبة — رسائل جاهزة وتعبيرات فقط.']},
+  {h:'الطرف الثالث الوحيد',p:[
+   'خطّ «Cairo» يُحمَّل من Google Fonts عند أول فتح، فيصل عنوان IP إلى Google كما في أي موقع يستخدم الخطّ نفسه. بعد أول تحميل يعمل الخطّ دون اتصال.',
+   'لا خدمة أخرى: لا إعلانات، ولا تحليلات، ولا شبكات تواصل.']},
+  {h:'الدفع',p:[
+   'الشراء يتم كاملًا داخل نافذة Apple أو Google. اللعبة والخادم لا يريان رقم بطاقتك ولا اسم بنكك ولا عنوانك.',
+   'ما يصل الخادم إيصال من المتجر ومعرّف عملية، ليتأكّد أن الشراء حقيقي ويمنحك ما اشتريته مرّة واحدة.']},
+  {h:'حقوقك',p:[
+   'تصدير بياناتك: الإعدادات ← البيانات ← تصدير بياناتي.',
+   'حذف حسابك نهائيًا: الإعدادات ← البيانات ← حذف الحساب. يُمحى ما على جهازك، ويُطلب من الخادم محو حسابك.',
+   'للاستفسار أو طلب نسخة من بياناتك أو حذفها: راسلنا على LEGAL_CONTACT.']},
+  {h:'الأطفال',p:[
+   'اللعبة لا تجمع بيانات شخصية تُعرِّف بصاحبها، ولا تطلب من اللاعب الإفصاح عن سنّه أو هويته.',
+   'إن كنت وليّ أمر وتظنّ أن طفلك أدخل معلومة تعرّفه، راسلنا لنمحوها.']},
+  {h:'تغيّر السياسة',p:[
+   'إن تغيّرت هذه السياسة كُتب تاريخ التحديث في أعلاها، وظهرت النسخة الجديدة هنا وداخل اللعبة.']}
+ ]},
+ terms:{t:'الشروط والأحكام',s:[
+  {h:'الترخيص',p:[
+   'نمنحك حقّ استخدام «تحدّي» استخدامًا شخصيًا غير تجاري على أجهزتك.',
+   'لا يجوز بيع اللعبة أو إعادة نشرها أو تعديلها أو استخراج محتواها لإعادة استعماله.']},
+  {h:'حسابك',p:[
+   'أنت مسؤول عن رمز حسابك؛ من يملكه يدخل بحسابك.',
+   'اختر اسم عرض لائقًا. للأسماء المسيئة أن تُغيَّر أو يُوقف حسابها.']},
+  {h:'اللعب النظيف',p:[
+   'ممنوع الغشّ أو التلاعب بالتصنيف أو استخدام حسابات متعدّدة للتأثير في النتائج أو استغلال خلل في اللعبة.',
+   'من يفعل ذلك قد تُسحب رتبته أو يُوقف حسابه.']},
+  {h:'المشتريات',p:[
+   'كل ما يُشترى عناصر افتراضية داخل اللعبة: جواهر وعملات وجوكرات وتجميليات وتذكرة موسم. لا تُباع إجابات ولا فوز.',
+   'العناصر الافتراضية لا قيمة نقدية لها خارج اللعبة ولا تُصرف مالًا.',
+   'الاسترداد يخضع لسياسة App Store أو Google Play وحدهما — منهما يُطلب لا منّا.',
+   'تذكرة الموسم تُفعَّل للموسم الجاري وتعود على أجهزتك بحسابك عبر «استعادة المشتريات».']},
+  {h:'استمرار الخدمة',p:[
+   'قد تتوقّف الخدمة الأونلاين أو تتغيّر ميزاتها. نسخة اللعب على جهازك تبقى تعمل بما فيها من ألعاب محلّية.',
+   'اللعبة تُقدَّم «كما هي» بلا ضمان يتجاوز ما يفرضه القانون.']},
+  {h:'القانون الحاكم',p:[
+   'تُفسَّر هذه الشروط وفق أنظمة LEGAL_LAW، وأي نزاع يُنظر أمام محاكمها المختصّة.']}
+ ]},
+ licenses:{t:'التراخيص',s:[
+  {h:'خطّ Cairo',p:['بترخيص SIL Open Font License 1.1 — يُحمَّل من Google Fonts.']},
+  {h:'مكتبة ws',p:['خادم WebSocket، بترخيص MIT.']},
+  {h:'بقيّة اللعبة',p:['الشيفرة والرسوم والأسئلة من إنتاج LEGAL_ENTITY، وكل الحقوق محفوظة.']}
+ ]}
+};
+/* ⟦/legal⟧ */
+/** يعيد نصّ قانونيًا بعد ملء ما يملؤه المالك */
+function legalDoc(k){
+ const d=LEGAL[k];if(!d)return null;
+ const fill=t=>String(t).split('LEGAL_CONTACT').join(LEGAL.contact)
+  .split('LEGAL_LAW').join(LEGAL.law).split('LEGAL_ENTITY').join(LEGAL.entity);
+ return {t:d.t,s:d.s.map(x=>({h:fill(x.h),p:x.p.map(fill)}))};
+}
+/** شاشة النصوص القانونية — النصّ نفسه المنشور على الويب، ويعمل دون اتصال */
+function legalScr(k){
+ const d=legalDoc(k)||legalDoc('privacy');
+ go(`<div class="scr on">${tbar(d.t)}
+ <div style="font-size:10.5px;color:var(--mut);margin-bottom:12px">آخر تحديث: ${LEGAL.updated} · الإصدار ${APP_VER}</div>
+ ${d.s.map(x=>`<div class="li" style="margin-bottom:9px"><div style="padding:2px">
+  <div class="mtl" style="font-size:14px;margin-bottom:7px">${esc(x.h)}</div>
+  ${x.p.map(t=>`<div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-bottom:6px">${esc(t)}</div>`).join('')}
+ </div></div>`).join('')}
+ <div class="note">للتواصل: <span dir="ltr">${esc(LEGAL.contact)}</span></div>
+ </div>`);
+}
 const SETS=[
  {k:`account`,i:`${ico('user',16)}`,n:`الحساب`,d:'الاسم · الشخصية · تسجيل الخروج'},
  {k:`game`,i:`${ico('robot',16)}`,n:`اللعب`,d:'الاهتزاز · التأكيدات · السرعة'},
@@ -16911,9 +17000,9 @@ function setSection(k){
   <div class="note">لا توجد دردشة مفتوحة في اللعبة — رسائل جاهزة فقط</div>`;
  if(SEC==='data')body=`
   <div class="li"><div class="lr"><span style="font-size:19px">${ico('export',16)}</span>
-   <div class="lb"><div class="lt">تصدير بياناتي</div><div class="ls">نسخة من تقدّمك</div></div>
-   <button class="btn g" style="width:auto;padding:6px 13px;font-size:12px"
-    onclick="toast('يعمل في التطبيق')">تصدير</button></div></div>
+   <div class="lb"><div class="lt">تصدير بياناتي</div><div class="ls">نسخة من تقدّمك بصيغة JSON</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="exportData()">تصدير</button></div></div>
   <div class="li" style="border-color:var(--no)"><div class="lr"><span style="font-size:19px">${ico('trash',16)}</span>
    <div class="lb"><div class="lt" style="color:var(--no)">حذف الحساب نهائيًا</div>
    <div class="ls">لا يمكن التراجع — يُحذف كل شيء</div></div></div>
@@ -16928,10 +17017,47 @@ function setSection(k){
   <div style="font-size:11.5px;color:var(--tx2);margin-top:9px">الإصدار ${APP_VER}</div>
   <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">${Q.length} سؤالًا · 40 بطاقة</div>
   </div></div></div>
-  ${[['الشروط والأحكام'],['سياسة الخصوصية'],['التراخيص']].map(([n])=>
-  `<div class="li" style="cursor:pointer" onclick="toast('قيد الإعداد')"><div class="lr">
+  ${[['terms','الشروط والأحكام'],['privacy','سياسة الخصوصية'],['licenses','التراخيص']].map(([k,n])=>
+  `<div class="li" style="cursor:pointer" onclick="push('legalScr','${k}')"><div class="lr">
    <div class="lb"><div class="lt">${n}</div></div><span style="color:var(--mut)">›</span></div></div>`).join('')}`;
  go(`<div class="scr on">${tbar(s.n)}${body}</div>`);
+}
+/** تصدير نسخة من بيانات اللاعب: تنزيل ملفّ، ومعه نسخ ونصّ ظاهر لأنّ بعض البيئات تمنع التنزيل */
+function exportData(){
+ let txt='';
+ try{
+  const out={app:'تحدّي',version:APP_VER,exportedAt:new Date().toISOString(),
+   account:S.account?{id:S.account.id}:null,   // الرمز سرّ الدخول — لا يخرج في نسخة تُشارَك
+   save:Object.keys(S).filter(k=>k[0]!=='_'&&k!=='account').reduce((a,k)=>{a[k]=S[k];return a},{})};
+  txt=JSON.stringify(out,null,1);
+ }catch(e){toast('تعذّر تجهيز النسخة');return}
+ const name='tahaddi-'+(S.account&&S.account.id||'local')+'-'+new Date().toISOString().slice(0,10)+'.json';
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox">
+  <div style="font-size:26px">${ico('export',24)}</div>
+  <div class="qvt">نسخة من بياناتك</div>
+  <div class="qvd">${(txt.length/1024).toFixed(1)} كيلوبايت · بصيغة JSON. رمز دخول حسابك لا يخرج في هذه النسخة.</div>
+  <textarea id="exTx" readonly dir="ltr" style="width:100%;height:120px;margin:8px 0;border-radius:12px;
+   background:#0A0F1E;color:#B0B9CE;border:1px solid var(--bd);padding:9px;font-size:10.5px;font-family:monospace"></textarea>
+  <button class="btn gd" id="exDl">${ico('save',14)} تنزيل الملفّ</button>
+  <button class="btn g" id="exCp" style="margin-top:9px">${ico('export',13)} نسخ النصّ</button>
+  <button class="btn g" id="exNo" style="margin-top:9px">إغلاق</button></div>`;
+ document.body.appendChild(ov);
+ ov.querySelector('#exTx').value=txt;
+ ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+ ov.querySelector('#exNo').onclick=()=>ov.remove();
+ ov.querySelector('#exDl').onclick=()=>{
+  try{
+   const b=new Blob([txt],{type:'application/json'}),u=URL.createObjectURL(b);
+   const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();
+   a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+   toast('نُزّل '+name);
+  }catch(e){toast('التنزيل ممنوع هنا — انسخ النصّ')}
+ };
+ ov.querySelector('#exCp').onclick=async()=>{
+  try{await navigator.clipboard.writeText(txt);toast('نُسخت بياناتك')}
+  catch(e){const t=ov.querySelector('#exTx');t.select();try{document.execCommand('copy');toast('نُسخت بياناتك')}catch(x){toast('حدّد النصّ وانسخه يدويًا')}}
+ };
 }
 function renameAsk(){
  go(`<div class="scr on">${tbar('اسم اللاعب')}
@@ -19533,7 +19659,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.31';
+const APP_VER='5.32';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
