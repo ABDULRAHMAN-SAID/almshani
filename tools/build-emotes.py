@@ -4,7 +4,8 @@
 # ممتازة 6، عادية 8، نادرة 8) — الإحداثيات أدناه معايرة على دقة 1536×1024.
 # أي صورة مفردة باسم مفتاح التعبير (art/emotes/<key>.png) تتقدم على قصّة اللوحة.
 #
-#   python3 tools/build-emotes.py
+#   python3 tools/build-emotes.py          (الممتازة والأسطورية فقط — 12 ميدالية)
+#   python3 tools/build-emotes.py --all    (يضمّن أيضًا وجوه الصفّين الثالث والرابع)
 #
 # كل ميدالية تُقص دائرياً بحافة ناعمة وتُضمّن Data URI في خريطة EMO_IMG،
 # والحلقة المرسومة في اللوحة تبقى هي إطار الميدالية داخل اللعبة.
@@ -46,12 +47,20 @@ def circle_webp(im: Image.Image) -> str:
     im.save(buf, 'WEBP', quality=QUALITY, method=6)
     return 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode()
 
+# الصفّان الثالث والرابع في اللوحة وجوه إيموجي؛ العادية والنادرة في اللعبة شعارات مرسومة برمجيًا
+# (EMO_EMBLEM داخل index.html) فلا تُقصّ من اللوحة إلا بـ --all. صورة مفردة باسم المفتاح تتقدّم دائمًا.
+VECTOR_KEYS = {'laugh', 'sad', 'wink', 'clap', 'think', 'shock', 'thumbs', 'shake',
+               'confident', 'angry', 'tense', 'love', 'sleep', 'salute', 'watch', 'hourglass'}
+
 def main() -> None:
     entries, total = {}, 0
+    use_all = '--all' in sys.argv
     sheet_path = os.path.join(SRC_DIR, 'sheet.png')
     if os.path.exists(sheet_path):
         sheet = Image.open(sheet_path).convert('RGBA')
         for k, cx, cy, r in SHEET_MAP:
+            if k in VECTOR_KEYS and not use_all:
+                continue
             R = round(r * GROW)
             entries[k] = circle_webp(sheet.crop((cx - R, cy - R, cx + R, cy + R)))
     # الصور المفردة تتقدم على اللوحة
