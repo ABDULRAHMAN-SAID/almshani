@@ -17275,7 +17275,7 @@ function setSection(k){
   <div class="li" style="margin-top:11px"><div class="lr">
    <div class="lb"><div class="lt">اسم اللاعب</div><div class="ls">${S.name}</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
-    onclick="renameAsk()">تغيير</button></div></div>
+    onclick="push('renameAsk')">تغيير</button></div></div>
   <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">المشتريات</div><div class="ls">تذكرة الموسم وجواهرك تعود على أي جهاز بحسابك</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
@@ -17303,7 +17303,7 @@ function setSection(k){
    <div class="lb"><div class="lt" style="color:var(--no)">حذف الحساب نهائيًا</div>
    <div class="ls">لا يمكن التراجع — يُحذف كل شيء</div></div></div>
    <button class="btn g" style="margin-top:9px;color:var(--no);border-color:var(--no)"
-    onclick="delAsk()">حذف الحساب</button></div>
+    onclick="push('delAsk')">حذف الحساب</button></div>
   <div class="note">حذف الحساب من داخل التطبيق مطلوب من Google Play وApp Store</div>`;
  if(SEC==='about')body=`
   <div class="orn"><div class="in">${ornCorners()}
@@ -19826,7 +19826,7 @@ function playScr(){
  ${plHero()}
  ${plGames()}
  <div class="plSec">
-  ${plRow(ico('flame',20),'مباراة سريعة','ادخل مباراة غير مصنّفة مباشرة','quickScr()','#4C9AF0')}
+  ${plRow(ico('flame',20),'مباراة سريعة','ادخل مباراة غير مصنّفة مباشرة',"push('quickScr')",'#4C9AF0')}
  </div>
  <div class="plSec">
   ${plRow(ico('group',20),'ليلة العائلة','ألعاب جماعية للأصدقاء والعائلة',"push('partyScr')",'#8B5CF0',
@@ -19961,7 +19961,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.38';
+const APP_VER='5.39';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20272,7 +20272,7 @@ function playModesScr(){
    {k:'ranked',n:'لعب مصنّف',d:'7 جولات · أنماط متغيرة',big:1,go:"push('rankedScr')"},
   ]},
   {t:'سريع',items:[
-   {k:'quick',n:'تحدي سريع',d:'6 أسئلة',go:'quickScr()'},
+   {k:'quick',n:'تحدي سريع',d:'6 أسئلة',go:"push('quickScr')"},
    {k:'journey',n:'رحلة الشبكة',d:'ثماني شبكات · افتح المحطات',go:"push('netsScr')"},
   ]},
   {t:'اجتماعي',items:[

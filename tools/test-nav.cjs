@@ -247,6 +247,19 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
  check('لا كتابة مباشرة على الشريط السفلي خارج النواة (كانت ١٢)',direct===0,direct);
  check('لا شريط علوي بوجهة مكتوبة يدويًا (كانت ١٧)',!/tb\('[^']*',["']/.test(src));
 
+ // ── ف) لا شاشة مسجّلة تُرسم باستدعاء مباشر من زر — الاستدعاء المباشر يتجاوز المكدّس فيختفي زرّ الرجوع ──
+ const regNames=await page.evaluate(()=>Router.names());
+ const directScr=regNames.filter(n=>new RegExp(`onclick="${n}\\(\\)"|'${n}\\(\\)'`).test(src));
+ check('كل شاشة مسجّلة تُفتح بـ push لا باستدعاء مباشر (كانت «مباراة سريعة»)',directScr.length===0,directScr.join());
+ const qk=await page.evaluate(async()=>{tab('play');
+  const row=[...document.querySelectorAll('#app .plRow')].find(b=>b.innerText.includes('مباراة سريعة'));if(!row)return {row:false};
+  row.click();await new Promise(r=>setTimeout(r,450));
+  const bk=[...document.querySelectorAll('#app .tbar .bk')].some(e=>e.offsetWidth>=44&&e.offsetHeight>=44);   // شاشة خارجة قد تبقى في الشجرة أثناء الحركة
+  const d=Router.depth(),cur=Router.current().fn;
+  back(true);await new Promise(r=>setTimeout(r,30));
+  return {row:true,d,cur,bk,after:Router.current().fn}});
+ check('صف «مباراة سريعة» في تبويب اللعب يفتح الشاشة بزرّ رجوع ويعيدك إلى الجذر',qk.row&&qk.d===2&&qk.cur==='quickScr'&&qk.bk&&qk.after==='playScr',JSON.stringify(qk));
+
  check('صفر أخطاء JS طوال الاختبار',errs.length===0,errs.slice(0,3).join(' | '));
  console.log('\n'+(fail?`✗ ${fail} فشل / ${pass} نجح`:`قبول التنقّل ✔ (${pass} فحصًا)`));
  await b.close();srv.close();process.exit(fail?1:0);
