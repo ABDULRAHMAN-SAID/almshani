@@ -554,6 +554,52 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .dbOpt{margin:0;min-height:44px;font-size:13px}
 .dbOpt.ok{border-color:var(--ok);color:var(--ok);background:rgba(46,204,113,.14)}
 .dbOpt.bad{opacity:.4;pointer-events:none}
+/* المسرح: خلفية بجوّ، مقاعد بحالاتها، سجلّ أحداث، وشريط فعل لاصق */
+.vbStage{position:relative;height:214px;border-radius:18px;overflow:hidden;border:1.5px solid #3B2F5C;margin-bottom:12px;background:#0B1020;
+ box-shadow:0 10px 26px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}
+.vbBg{position:absolute;inset:0;width:100%;height:100%;display:block;transition:filter .7s}
+.vbScene.night .vbBg{filter:brightness(.5) saturate(.75)}
+.vbPhase{position:absolute;top:8px;inset-inline:8px;display:flex;align-items:center;gap:6px;background:rgba(6,8,16,.66);border:1px solid rgba(232,178,58,.38);
+ border-radius:10px;padding:5px 10px;font-size:11.5px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.vbPhase b{color:var(--gold)}
+.vbPhase>span:last-child:not(.vbPhI){color:var(--tx2);margin-inline-start:auto;font-size:10.5px}
+.vbPhI{display:flex}
+.vbSeats{position:absolute;bottom:6px;inset-inline:4px;display:flex;justify-content:center;gap:2px 4px;flex-wrap:wrap;row-gap:2px}
+.vbSeat{width:54px;display:flex;flex-direction:column;align-items:center;gap:1px;transition:opacity .4s,filter .4s}
+.vbAv{position:relative;width:44px;height:44px;border-radius:50%;padding:2px;background:var(--sc);box-shadow:0 3px 8px rgba(0,0,0,.6);transition:box-shadow .3s}
+.vbAv>svg,.vbAv>span{display:block;border-radius:50%;width:40px;height:40px}
+.vbSeat.me .vbAv{background:linear-gradient(145deg,#FFF2C4,#E8B23A 50%,#9A6712)}
+.vbSeat.talk .vbAv{box-shadow:0 0 0 3px rgba(255,236,180,.75),0 0 18px rgba(255,214,120,.85)}
+.vbSeat.dead{opacity:.55;filter:grayscale(1)}
+.vbSeat.mark .vbAv{background:#E24B4A}
+.vbBadge{position:absolute;bottom:-3px;right:-3px;width:18px;height:18px;border-radius:50%;background:#0B1020;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center}
+.vbX{position:absolute;inset:2px;display:flex;align-items:center;justify-content:center;background:rgba(226,75,74,.4);border-radius:50%}
+.vbNm{font-size:9.5px;font-weight:800;color:#F2F4F8;text-shadow:0 1px 3px #000;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbNm i{font-style:normal;color:var(--gold);margin-inline-start:3px;font-size:8.5px}
+.vbSub{font-size:8.5px;color:#F0A0A0;text-shadow:0 1px 2px #000}
+.vbFeed{display:flex;flex-direction:column;gap:7px;padding-bottom:14px;min-height:40px}
+.vbNew{animation:pop .25s ease}
+.vbPh{display:flex;align-items:center;gap:8px;margin:8px 0 2px;color:var(--gold);font-size:11px;font-weight:900}
+.vbPh::before,.vbPh::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,178,58,.5),transparent)}
+.vbPh span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.vbN{display:flex;align-items:flex-start;gap:6px;justify-content:center;text-align:center;font-size:11.5px;color:#D6C48F;line-height:1.6;padding:0 8px}
+.vbN.big{font-size:13px;font-weight:800;color:#FFE9A8;background:rgba(232,178,58,.08);border:1px solid rgba(232,178,58,.3);border-radius:12px;padding:8px 12px}
+.vbMsg{display:flex;gap:8px;align-items:flex-end;max-width:88%}
+.vbMsg>svg,.vbMsg>span{flex-shrink:0;border-radius:50%}
+.vbMsg .vbBub{border-radius:14px 14px 14px 4px}
+.vbMsg.me{flex-direction:row-reverse;margin-inline-start:auto}
+.vbMsg.me .vbBub{background:linear-gradient(160deg,#2A2260,#1B1640);border-color:#5B2FB8;border-radius:14px 14px 4px 14px}
+.vbMsg.q .vbBub{border-color:rgba(232,178,58,.5)}
+.vbMsg .vbBub b{display:block;font-size:10px;color:var(--gold);margin-bottom:2px}
+.vbV{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx2);padding-inline-start:6px}
+.vbV>svg,.vbV>span{border-radius:50%;flex-shrink:0}
+.vbV b{color:var(--no)}
+.vbCard{text-align:center;background:linear-gradient(165deg,#1A2237,#0D1424);border:1px solid rgba(232,178,58,.4);border-radius:16px;padding:14px 12px}
+.vbCardD{font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7}
+.vbAct{position:sticky;bottom:0;padding:10px 0 calc(10px + env(safe-area-inset-bottom));background:linear-gradient(to top,var(--bg) 78%,transparent);z-index:5}
+.vbIn{display:flex;gap:8px}
+.vbIn input{flex:1;min-width:0;background:var(--card);border:1.5px solid var(--bd);border-radius:12px;padding:0 12px;min-height:44px;color:var(--tx);font-family:inherit;font-size:13px}
+.vbIn input:focus{outline:none;border-color:var(--gold)}
 .bwn{background:rgba(232,178,58,.14);border:1px solid var(--gold);border-radius:13px;
  padding:11px 14px;margin-top:14px;font-weight:800;color:var(--gold);font-size:13px;animation:pop .4s ease}
 
@@ -19840,7 +19886,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.34';
+const APP_VER='5.35';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20703,8 +20749,8 @@ function soloTransport(n){
   on:()=>()=>{},onPeers:()=>()=>{},connected:()=>true};
 }
 function soloStart(g,diff){
- if(g==='mafia')return mbStart(diff);
- if(g==='barra')return bbStart(diff);
+ if(g==='mafia')return mfStart(diff);
+ if(g==='barra')return brStart(diff);
  if(g==='draw')return dbStart(diff);
  RM.solo=1;RM.diff=diff||'mid';
  const n=g==='carrom'?((RM.caN||2)-1):(RM.bots||1);
@@ -22221,274 +22267,6 @@ function vbChip(i,extra){
 }
 function vbFace(i,s){return i===0?avatarArt(s||30):personArt(VB.names[i],s||30)}
 
-/* ── مافيا ضد الكمبيوتر: التطبيق يروي، والآليون يقتلون وينقذون ويفحصون ويتّهمون ويصوّتون ── */
-function mbStart(diff){
- const n=Math.min(8,Math.max(5,RM.mbN||6));
- Router.enter('vsbot');
- const roles=[];const nMafia=n>=8?2:1;
- for(let i=0;i<nMafia;i++)roles.push('مافيا');
- roles.push('طبيب','محقق');while(roles.length<n)roles.push('شعب');
- roles.sort(()=>Math.random()-.5);
- VB={g:'mafia',diff:diff||'mid',n,names:vbNames(n),roles,alive:Array.from({length:n},(_,i)=>i),day:1,
-  know:{},myKnow:{},heat:{},susp:Array(n).fill(0),detOut:null,log:[],shown:false,
-  victim:null,saved:null,botVictim:null,botSave:null,lastKilled:null,cast:[],dead:false,tm:null};
- mbDeal();
-}
-const mbAlive=i=>VB.alive.includes(i);
-const mbRole=i=>VB.roles[i];
-const mbNm=i=>esc(VB.names[i]);
-const mbOthers=i=>VB.alive.filter(x=>x!==i);
-const mbTeamOf=i=>mbRole(i)==='مافيا'?'mafia':'city';
-function mbDeal(){
- const r=mbRole(0),mates=VB.alive.filter(i=>i!==0&&mbRole(i)==='مافيا');
- go(`<div class="scr on">${vbHead('مافيا — ضد الكمبيوتر')}
- ${mafRoleCard(r,{shown:VB.shown,foot:'أنت بين '+(VB.n-1)+' لاعبين آليين — دورك سرّ',hint:'اضغط لكشف دورك',reveal:'mbReveal()'})}
- <button class="rbtn" id="rcRev" style="margin-top:4px${VB.shown?';display:none':''}" onclick="mbReveal()"><span>اكشف دوري</span></button>
- <div id="mbAfter" style="${VB.shown?'':'display:none'}">
- ${r==='مافيا'&&mates.length?`<div class="wb" style="text-align:start">شريكك في المافيا: <b>${mates.map(mbNm).join('، ')}</b> — لا تصوّتا على بعضكما.</div>`:''}
- <div class="sl">أهل المدينة</div><div class="vbGrid">${VB.alive.map(i=>vbChip(i)).join('')}</div>
- <button class="rbtn" style="margin-top:12px" onclick="mbNight()"><span>الليلة 1 — نامت المدينة</span></button></div>
- </div>`);
-}
-function mbReveal(){VB.shown=true;vbReveal();const a=document.getElementById('mbAfter');if(a)a.style.display=''}
-/** قرارات الآليين ليلًا — بصمت وقبل قرارك */
-function mbBotsNight(){
- const d=VB.diff,alive=VB.alive;
- const botMaf=alive.filter(i=>i!==0&&mbRole(i)==='مافيا');
- VB.botVictim=null;VB.botSave=null;
- if(botMaf.length){
-  const targets=alive.filter(i=>mbRole(i)!=='مافيا');
-  let pick=null;
-  if(d!=='easy'&&targets.length){
-   if(VB.detOut!=null&&targets.includes(VB.detOut))pick=VB.detOut;                 // المحقق المعلن أخطر واحد
-   else if(d==='hard'){const hot=targets.map(i=>[i,VB.heat[i]||0]).sort((a,b)=>b[1]-a[1]);if(hot[0][1]>0)pick=hot[0][0]}
-  }
-  if(pick==null&&targets.length)pick=vbRnd(targets);
-  VB.botVictim=pick;
- }
- const doc=alive.find(i=>i!==0&&mbRole(i)==='طبيب');
- if(doc!=null){
-  if(d==='easy')VB.botSave=vbRnd(alive);
-  else if(VB.detOut!=null&&VB.detOut!==doc&&mbAlive(VB.detOut)&&Math.random()<.7)VB.botSave=VB.detOut;
-  else VB.botSave=Math.random()<.35?doc:vbRnd(alive.filter(i=>i!==doc));
- }
- const det=alive.find(i=>i!==0&&mbRole(i)==='محقق');
- if(det!=null){
-  const unk=alive.filter(i=>i!==det&&VB.know[i]==null);
-  if(unk.length){
-   const t=d==='hard'&&unk.some(i=>VB.susp[i]>0)?unk.slice().sort((a,b)=>VB.susp[b]-VB.susp[a])[0]:vbRnd(unk);
-   VB.know[t]=mbRole(t)==='مافيا';
-  }
- }
-}
-function mbNight(){
- VB.victim=null;VB.saved=null;
- mbBotsNight();
- if(!mbAlive(0)){mbResolveNight();return}
- const me=mbRole(0);
- if(me==='مافيا')mbPickScr('من تغتال الليلة؟','اختر ضحية — الطبيب قد ينقذها',VB.alive.filter(i=>i!==0&&mbRole(i)!=='مافيا'),'mbKill');
- else if(me==='طبيب')mbPickScr('من تنقذ الليلة؟','يمكنك إنقاذ نفسك',VB.alive,'mbSave');
- else if(me==='محقق')mbPickScr('من تفحص الليلة؟','ستعرف إن كان مافيا أو بريئًا',VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null),'mbCheck');
- else mbSleep();
-}
-function mbPickScr(t,d,list,cb){
- go(`<div class="scr on">${vbHead('مافيا — الليلة '+VB.day)}
- ${mafDisc(mbRole(0))}
- <div class="mtl" style="text-align:center;font-size:16px;margin-top:8px">${t}</div>
- <div style="text-align:center;font-size:11.5px;color:var(--tx2);margin:4px 0 12px">${d}</div>
- <div class="vbGrid">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>
- ${list.length?'':`<button class="rbtn" style="margin-top:12px" onclick="mbResolveNight()"><span>لا أحد — أكمل الليل</span></button>`}
- </div>`);
-}
-function mbKill(i){VB.victim=i;mbResolveNight()}
-function mbSave(i){VB.saved=i;mbResolveNight()}
-function mbCheck(i){
- VB.myKnow[i]=mbRole(i)==='مافيا';
- go(`<div class="scr on">${vbHead('مافيا — الليلة '+VB.day)}
- <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
- ${mafDisc(VB.myKnow[i]?'مافيا':'شعب')}
- <div class="mtl" style="font-size:17px;margin-top:9px">${mbNm(i)}: ${VB.myKnow[i]?'مافيا!':'بريء'}</div>
- <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">${VB.myKnow[i]?'اتّهمه في النقاش يصدّقك أهل المدينة أكثر':'استبعده من شكوكك'}</div>
- <button class="rbtn" style="margin-top:14px" onclick="mbResolveNight()"><span>أيقظوا المدينة</span></button>
- </div></div></div></div>`);
-}
-function mbSleep(){
- go(`<div class="scr on">${vbHead('مافيا — الليلة '+VB.day)}
- <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
- ${mafDisc('شعب')}
- <div class="mtl" style="font-size:17px;margin-top:9px">نامت المدينة</div>
- <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">المافيا تتحرّك في الظلام… والطبيب والمحقق يعملان</div>
- <button class="rbtn" style="margin-top:14px" onclick="mbResolveNight()"><span>الصباح</span></button>
- </div></div></div></div>`);
-}
-function mbResolveNight(){
- const victim=mbRole(0)==='مافيا'&&mbAlive(0)&&VB.victim!=null?VB.victim:VB.botVictim;
- const saved=mbRole(0)==='طبيب'&&mbAlive(0)?VB.saved:VB.botSave;
- const killed=victim!=null&&victim!==saved?victim:null;
- if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
- VB.lastKilled=killed;
- VB.log.push(killed!=null?`الليلة ${VB.day}: قُتل ${VB.names[killed]}`:`الليلة ${VB.day}: نجا الجميع — الطبيب أنقذ الضحية`);
- if(mbWin())return;
- if(killed===0){VB.dead=true;mbDeadScr('قُتلت ليلًا');return}
- mbMorning();
-}
-function mbMorning(){
- const k=VB.lastKilled;
- go(`<div class="scr on">${vbHead('مافيا — الصباح '+VB.day)}
- <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
- <div class="mfDisc" style="--rc:${k!=null?'#E24B4A':'#2ECC71'};--rcs:${k!=null?'rgba(226,75,74,.3)':'rgba(46,204,113,.3)'}">${k!=null?ico('orb',46):ico('heart',46)}</div>
- <div class="mtl" style="font-size:17px;margin-top:9px">${k!=null?`قُتل ${mbNm(k)} ليلًا`:'نجا الجميع — الطبيب أنقذ الضحية!'}</div>
- <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">الأحياء: ${VB.alive.length} — ناقشوا ثم صوّتوا</div>
- <button class="rbtn" style="margin-top:14px" onclick="mbTalk()"><span>إلى النقاش</span></button>
- </div></div></div></div>`);
-}
-/** ما يقوله آليّ في النقاش، ومن يتّهم وبأي وزن */
-function mbBotSay(i){
- const d=VB.diff,r=mbRole(i),others=mbOthers(i);
- const top=list=>{const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null};
- if(r==='محقق'){
-  const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mbAlive(x));
-  if(known!=null){
-   if(d==='easy')return {t:known,w:1,s:`أشك في ${mbNm(known)}… شيء فيه غريب`};
-   VB.detOut=i;return {t:known,w:3,s:`أنا المحقق — فحصتُ ${mbNm(known)} ليلًا وهو مافيا!`};
-  }
-  const inn=Object.keys(VB.know).map(Number).filter(x=>!VB.know[x]&&mbAlive(x));
-  if(inn.length&&d==='hard')return {t:null,w:0,s:`${mbNm(inn[0])} بريء — أنا متأكّد`};
- }
- if(r==='مافيا'){
-  const pool=others.filter(x=>mbRole(x)!=='مافيا');
-  if(!pool.length)return {t:null,w:0,s:'…'};
-  const tp=top(pool);
-  const t=VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy'?VB.detOut:(tp!=null?tp:vbRnd(pool));
-  const lines=VB.detOut===t?[`${mbNm(t)} يدّعي أنه محقق ليضلّلنا — هو المافيا`,`لا تصدّقوا ${mbNm(t)}… ادّعاؤه مريب`]
-   :[`${mbNm(t)} صامت أكثر من اللازم`,`أشك في ${mbNm(t)} — تصرّفاته غريبة منذ البداية`,`صوتي على ${mbNm(t)}`];
-  return {t,w:1,s:vbRnd(lines)};
- }
- const tp=top(others);
- const t=tp!=null?tp:(Math.random()<.5?vbRnd(others):null);
- if(t==null)return {t:null,w:0,s:vbRnd(['لا دليل عندي بعد… أستمع','ننتظر من يتكلّم أولًا','من كان قريبًا من الضحية؟'])};
- return {t,w:1,s:vbRnd([`أوافق — ${mbNm(t)} مريب`,`صوتي على ${mbNm(t)} حتى الآن`,`${mbNm(t)} لم يُجب على سؤال أحد`])};
-}
-function mbApplySay(i,o){
- if(o.t==null)return;
- VB.susp[o.t]+=o.w;
- if(mbRole(o.t)==='مافيا')VB.heat[i]=(VB.heat[i]||0)+1;   // من يتّهم المافيا يصير هدفها
-}
-function mbTalk(){
- const talk=[];
- VB.alive.filter(i=>i!==0).forEach(i=>{const o=mbBotSay(i);mbApplySay(i,o);talk.push({i,s:o.s})});
- go(`<div class="scr on">${vbHead('مافيا — النقاش '+VB.day)}
- ${talk.map(x=>`<div class="vbSay">${vbFace(x.i)}<div class="vbBub"><b>${mbNm(x.i)}:</b> ${x.s}</div></div>`).join('')}
- <div class="sl">دورك — مَن تتّهم؟</div>
- <div class="vbGrid">${mbOthers(0).map(i=>vbChip(i,` onclick="mbAccuse(${i})"`)).join('')}</div>
- <button class="btn g" style="margin-top:9px" onclick="mbAccuse(null)">أستمع فقط</button>
- </div>`);
-}
-function mbAccuse(i){
- if(i!=null)mbApplySay(0,{t:i,w:VB.myKnow[i]===true?2:1});
- mbVote();
-}
-function mbVote(){
- go(`<div class="scr on">${vbHead('مافيا — التصويت '+VB.day)}
- <div class="sl" style="text-align:center">على من تصوّت للإعدام؟</div>
- <div class="vbGrid">${mbOthers(0).map(i=>vbChip(i,` onclick="mbTally(${i})"`)).join('')}</div>
- <button class="btn g" style="margin-top:9px;color:var(--tx2)" onclick="mbTally(null)">أمتنع</button>
- </div>`);
-}
-function mbBotVote(i){
- const d=VB.diff,r=mbRole(i),others=mbOthers(i);
- const bySusp=list=>{const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null};
- if(r==='مافيا'){
-  const pool=others.filter(x=>mbRole(x)!=='مافيا');if(!pool.length)return null;
-  if(VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy')return VB.detOut;
-  const t=bySusp(pool);return t!=null?t:vbRnd(pool);
- }
- if(r==='محقق'){const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mbAlive(x));if(known!=null)return known}
- if(d==='easy'&&Math.random()<.6)return vbRnd(others);
- const t=bySusp(others);
- if(t!=null)return t;
- return d==='hard'?null:vbRnd(others);
-}
-function mbCount(votes){let best=null,bn=0,tie=false;Object.entries(votes).forEach(([k,v])=>{if(v>bn){bn=v;best=+k;tie=false}else if(v===bn)tie=true});return tie?null:best}
-function mbTally(my){
- const votes={},cast=[];
- const add=(who,t)=>{if(t==null)return;votes[t]=(votes[t]||0)+1;cast.push({who,t})};
- add(0,my);
- VB.alive.filter(i=>i!==0).forEach(i=>add(i,mbBotVote(i)));
- VB.cast=cast;
- const who=mbCount(votes);
- if(who==null){VB.log.push(`اليوم ${VB.day}: لم تتفق الأغلبية — لا إعدام`);mbLynchScr(null);return}
- VB.alive=VB.alive.filter(i=>i!==who);
- VB.log.push(`اليوم ${VB.day}: أُعدم ${VB.names[who]} — كان ${mbRole(who)}`);
- mbLynchScr(who);
-}
-function mbLynchScr(who){
- if(who!=null&&mbWin())return;
- if(who===0){VB.dead=true;mbDeadScr('أُعدمت بتصويت المدينة');return}
- VB.day++;
- go(`<div class="scr on">${vbHead('مافيا — اليوم')}
- <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
- ${who!=null?mafDisc(mbRole(who)):`<div class="mfDisc">${ico('scale',46)}</div>`}
- <div class="mtl" style="font-size:17px;margin-top:9px">${who!=null?`أُعدم ${mbNm(who)}`:'لم يُعدم أحد اليوم'}</div>
- <div style="font-size:12.5px;color:var(--tx2);margin-top:6px">${who!=null?`كان: <b>${mbRole(who)}</b>`:'لم تتفق الأغلبية على متهم'}</div>
- </div></div></div>
- <div class="sl">الأصوات</div>
- <div class="vbVotes">${VB.cast.map(c=>`<div><span>${mbNm(c.who)}</span><b>${mbNm(c.t)}</b></div>`).join('')||'<div class="note">لم يصوّت أحد</div>'}</div>
- <button class="rbtn" style="margin-top:12px" onclick="mbNight()"><span>الليلة ${VB.day} — نامت المدينة</span></button>
- </div>`);
-}
-function mbWin(){
- const m=VB.alive.filter(i=>mbRole(i)==='مافيا').length,o=VB.alive.length-m;
- let win=null;if(m===0)win='city';else if(m>=o)win='mafia';
- if(!win)return false;
- mbEnd(win);return true;
-}
-function mbDeadScr(why){
- go(`<div class="scr on">${vbHead('مافيا')}
- <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
- <div class="mfDisc" style="--rc:#6C7789;--rcs:rgba(108,119,137,.3)">${ico('broken',46)}</div>
- <div class="mtl" style="font-size:17px;margin-top:9px">${why}</div>
- <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">خرجت من اللعبة — الكمبيوتر يكمل المدينة وستعرف النهاية</div>
- <button class="rbtn" style="margin-top:14px" onclick="mbAuto()"><span>تابع ما جرى</span></button>
- </div></div></div></div>`);
-}
-/** بعد خروجك: الآليون يكملون الليالي والأيام حتى تُحسم المدينة */
-function mbAuto(){
- let guard=0;
- while(guard++<30){
-  mbBotsNight();
-  const victim=VB.botVictim,saved=VB.botSave;
-  const killed=victim!=null&&victim!==saved?victim:null;
-  if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
-  VB.log.push(killed!=null?`الليلة ${VB.day}: قُتل ${VB.names[killed]}`:`الليلة ${VB.day}: نجا الجميع`);
-  if(mbWin())return;
-  VB.alive.forEach(i=>mbApplySay(i,mbBotSay(i)));
-  const votes={};VB.alive.forEach(i=>{const t=mbBotVote(i);if(t!=null)votes[t]=(votes[t]||0)+1});
-  const who=mbCount(votes);
-  if(who!=null){VB.alive=VB.alive.filter(i=>i!==who);VB.log.push(`اليوم ${VB.day}: أُعدم ${VB.names[who]} — كان ${mbRole(who)}`)}
-  else VB.log.push(`اليوم ${VB.day}: لا إعدام`);
-  if(mbWin())return;
-  VB.day++;
- }
- mbEnd('city');
-}
-function mbEnd(win){
- const mine=mbTeamOf(0)===win;
- vbDone();if(mine&&window.FX)FX.win();
- go(`<div class="scr on">${vbHead('النهاية')}
- ${resMedal(mine?'win':'lose',win==='mafia'?'swords':'trophy')}
- <div class="mtl" style="text-align:center;font-size:19px;margin-top:6px">${win==='city'?'فاز الشعب! المدينة نظيفة':'فازت المافيا! سيطرت على المدينة'}</div>
- <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-top:4px">${mine?'فريقك انتصر':'فريقك خسر'} — كنت <b>${mbRole(0)}</b></div>
- <div class="sl">الأدوار كاملة</div>
- ${mafRoleList(VB.roles.map((r,i)=>({n:mbNm(i)+(i===0?' (أنت)':''),r})))}
- <div class="sl">ما جرى</div>
- <div class="vbLog">${VB.log.map(l=>`<div>${esc(l)}</div>`).join('')}</div>
- <button class="rbtn" style="margin-top:14px" onclick="mbStart('${VB.diff}')"><span>جولة أخرى</span></button>
- <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','mafia')">رجوع</button>
- </div>`);
-}
-
-/* ── برا السالفة ضد الكمبيوتر: تلميحات مكتوبة بدل الكلام، وتصويت، وتخمين الجاسوس ── */
 const BARRA_CLUES={
  'مطار':['أسافر منه إلى بلد آخر','فيه بوابات ونداءات كثيرة','تنتظر فيه طويلًا قبل الموعد','ترى فيه حقائب تدور'],
  'مستشفى':['أذهب إليه حين أمرض','فيه أُناس بلباس أبيض','تسمع فيه صفّارة الطوارئ','يفتح ليلًا ونهارًا'],
@@ -22566,136 +22344,585 @@ const BARRA_VAGUE={
  'حيوانات':['حيوان معروف','له قوائم','رأيته في التلفاز','يأكل ويشرب مثلنا','بعض الناس يحبونه','له صوت مميّز'],
  'أندية كرة':['نادٍ كبير','له جمهور واسع','فاز بألقاب','له لون مميّز','لاعبوه مشهورون','أشجّعه أحيانًا']
 };
-function bbStart(diff){
+/* ── المسرح المشترك: خلفية بجوّ، مقاعد بحالاتها، سجلّ أحداث متسلسل، وشريط فعل يتبدّل ── */
+/** تطبيع عربي خفيف للمقارنة: بلا تشكيل ولا همزات مختلفة ولا "ال" */
+function arNorm(t){return String(t||'').replace(/[ً-ْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[^ء-ي0-9a-zA-Z\s]/g,' ').toLowerCase()}
+const AR_STOP=new Set(['في','من','على','عن','الى','هو','هي','ما','لا','انا','انت','و','او','ان','هذا','هذه','ذلك','كل','مع','يا','بس','ايش','وش','شي','شيء','كان','فيه','فيها','له','لها','هم','نحن','احنا','اللي','الذي','التي','ثم','قد','لكن','بل','ايضا','جدا','كثير','مره','مرة','اذا','لو','متى','وين','كيف','ليش','لماذا','هل','نعم','ابد','ابدا','شوي','عاد','بعدين','الحين','يعني','طيب','زين','والله','اكيد','ممكن','عادي','عاده','عادة']);
+function arTokens(t){
+ return arNorm(t).split(/\s+/).map(w=>w.replace(/^(وال|بال|فال|كال|لل|ال)/,'').replace(/^(و|ف|ب|ل|ك)(?=.{3})/,'')).filter(w=>w.length>1&&!AR_STOP.has(w));
+}
+/** عدد كلمات a التي تشبه كلمة في b (تطابق أو اشتراك جذر ≥ 3 أحرف) */
+function arOverlap(a,b){let n=0;a.forEach(x=>{if(b.some(y=>x===y||(x.length>=3&&y.length>=3&&(y.startsWith(x)||x.startsWith(y)))))n++});return n}
+/** هل ذُكر اسم لاعب في النصّ؟ يعيد فهارس المذكورين */
+function vbMentions(text){
+ const t=arNorm(text);
+ return VB.names.map((nm,i)=>[i,arNorm(nm)]).filter(([i,n])=>i!==0&&n&&t.includes(n)).map(([i])=>i);
+}
+/* خلفيات المسرح — مدينة ليلية للمافيا ومجلس بفانوس لبرا السالفة (SVG خفيف) */
+function vbBackdrop(kind){
+ if(kind==='mafia'){
+  const seed=hashStr(VB.names.join('|'));let h=seed;const rnd=()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;return (h%1000)/1000};
+  let far='',near='',win='';
+  for(let x=0;x<400;){const w=18+Math.floor(rnd()*30),hh=50+Math.floor(rnd()*70);far+=`<rect x="${x}" y="${170-hh}" width="${w}" height="${hh}" fill="#0F1630"/>`;x+=w+2}
+  for(let x=-10;x<410;){const w=26+Math.floor(rnd()*44),hh=30+Math.floor(rnd()*60);near+=`<rect x="${x}" y="${190-hh}" width="${w}" height="${hh}" fill="#070B18"/>`;
+   for(let wy=196-hh;wy<184;wy+=9)for(let wx=x+4;wx<x+w-5;wx+=8)if(rnd()<.22)win+=`<rect x="${wx}" y="${wy}" width="3.5" height="4.5" fill="${rnd()<.7?'#F3C56A':'#8FD3FF'}" opacity="${.5+rnd()*.5}"/>`;
+   x+=w+3}
+  return `<svg class="vbBg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+   <defs><radialGradient id="vbMoon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF4D6"/><stop offset=".7" stop-color="#F2DDA0"/><stop offset="1" stop-color="#E8C46A"/></radialGradient>
+   <radialGradient id="vbGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,236,180,.45)"/><stop offset="1" stop-color="rgba(255,236,180,0)"/></radialGradient>
+   <linearGradient id="vbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05081A"/><stop offset="1" stop-color="#16204A"/></linearGradient>
+   <linearGradient id="vbFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(120,140,200,0)"/><stop offset="1" stop-color="rgba(120,140,200,.28)"/></linearGradient>
+   <radialGradient id="vbLamp" cx=".5" cy="0" r="1"><stop offset="0" stop-color="rgba(255,214,120,.55)"/><stop offset="1" stop-color="rgba(255,214,120,0)"/></radialGradient></defs>
+   <rect width="400" height="190" fill="url(#vbSky)"/>
+   <g fill="#fff"><circle cx="40" cy="30" r="1"/><circle cx="120" cy="18" r=".8"/><circle cx="210" cy="40" r=".9"/><circle cx="300" cy="22" r="1.1"/><circle cx="360" cy="52" r=".7"/><circle cx="170" cy="62" r=".6"/><circle cx="255" cy="70" r=".8"/></g>
+   <circle cx="318" cy="46" r="44" fill="url(#vbGlow)"/><circle cx="318" cy="46" r="17" fill="url(#vbMoon)"/><circle cx="326" cy="40" r="15" fill="#16204A" opacity=".0"/>
+   ${far}${near}${win}
+   <rect x="0" y="120" width="400" height="70" fill="url(#vbFog)"/>
+   <path d="M74 190 V128" stroke="#2A2F48" stroke-width="3"/><path d="M62 128 H86" stroke="#2A2F48" stroke-width="3" stroke-linecap="round"/><ellipse cx="74" cy="130" rx="6" ry="3" fill="#FFE1A0"/>
+   <path d="M74 130 L20 190 H128 Z" fill="url(#vbLamp)"/>
+   <rect x="0" y="182" width="400" height="8" fill="#04060F"/></svg>`;
+ }
+ return `<svg class="vbBg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <defs><linearGradient id="vbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1A10"/><stop offset="1" stop-color="#4A2E18"/></linearGradient>
+  <radialGradient id="vbLan" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,196,96,.75)"/><stop offset=".45" stop-color="rgba(255,170,60,.28)"/><stop offset="1" stop-color="rgba(255,170,60,0)"/></radialGradient>
+  <linearGradient id="vbRug" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6E1F24"/><stop offset=".5" stop-color="#8A2A2E"/><stop offset="1" stop-color="#6E1F24"/></linearGradient>
+  <pattern id="vbPat" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="none" stroke="rgba(255,220,150,.22)" stroke-width="1"/></pattern></defs>
+  <rect width="400" height="190" fill="url(#vbWall)"/>
+  <g fill="#1B0F08" opacity=".85"><path d="M40 150 V70 A45 45 0 0 1 130 70 V150 Z"/><path d="M155 150 V62 A45 45 0 0 1 245 62 V150 Z"/><path d="M270 150 V70 A45 45 0 0 1 360 70 V150 Z"/></g>
+  <g fill="none" stroke="#C08A3E" stroke-width="1.4" opacity=".7"><path d="M40 150 V70 A45 45 0 0 1 130 70 V150"/><path d="M155 150 V62 A45 45 0 0 1 245 62 V150"/><path d="M270 150 V70 A45 45 0 0 1 360 70 V150"/></g>
+  <circle cx="200" cy="70" r="70" fill="url(#vbLan)"/>
+  <path d="M200 0 V32" stroke="#C08A3E" stroke-width="1.5"/><path d="M188 34 H212 L208 58 Q200 64 192 58 Z" fill="#E8B23A" stroke="#7A5410" stroke-width="1"/><rect x="190" y="30" width="20" height="5" rx="1.5" fill="#C08A3E"/><circle cx="200" cy="47" r="5" fill="#FFF0C0"/>
+  <rect x="0" y="150" width="400" height="40" fill="url(#vbRug)"/><rect x="0" y="150" width="400" height="40" fill="url(#vbPat)"/>
+  <g><rect x="18" y="128" width="70" height="26" rx="10" fill="#7A2A2E" stroke="#C9921E" stroke-width="1.2"/><rect x="100" y="128" width="70" height="26" rx="10" fill="#3A5A2E" stroke="#C9921E" stroke-width="1.2"/><rect x="230" y="128" width="70" height="26" rx="10" fill="#3A5A2E" stroke="#C9921E" stroke-width="1.2"/><rect x="312" y="128" width="70" height="26" rx="10" fill="#7A2A2E" stroke="#C9921E" stroke-width="1.2"/></g>
+  <g fill="#C9921E"><path d="M186 122 Q200 110 214 122 L212 132 H188 Z"/><rect x="196" y="104" width="8" height="8" rx="2"/><path d="M214 124 Q226 122 222 132" fill="none" stroke="#C9921E" stroke-width="2"/></g>
+  <rect x="0" y="184" width="400" height="6" fill="#120A05"/></svg>`;
+}
+/** رسم المسرح كاملًا (مرّة لكل مرحلة): الخلفية والمقاعد والسجلّ والشريط */
+function vbScene(kind,title){
+ go(`<div class="scr on vbScene ${kind}${VB.night?' night':''}">${tb(title)}
+ <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbPhase" id="vbPhase"></div><div class="vbSeats" id="vbSeats"></div></div>
+ <div class="vbFeed" id="vbFeed"></div>
+ <div class="vbAct" id="vbAct"></div></div>`);
+ vbSeats();
+ (VB.feed||[]).forEach(m=>vbRenderMsg(m,true));
+}
+function vbPhase(icon,label,hint){
+ VB.phaseLbl={icon,label,hint};
+ const el=document.getElementById('vbPhase');
+ if(el)el.innerHTML=`<span class="vbPhI">${ico(icon,16)}</span><b>${label}</b>${hint?`<span>${hint}</span>`:''}`;
+ vbMsg({k:'ph',icon,t:label});
+}
+function vbSeatState(i){return VB.seat&&VB.seat(i)||{}}
+function vbSeats(){
+ const el=document.getElementById('vbSeats');if(!el)return;
+ el.innerHTML=VB.names.map((nm,i)=>{const st=vbSeatState(i);
+  return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}" data-seat="${i}" style="--sc:${st.c||'#E8B23A'}">
+   <div class="vbAv">${vbFace(i,40)}${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}</div>
+   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div>${st.sub?`<div class="vbSub">${st.sub}</div>`:''}</div>`}).join('');
+}
+function vbTalk(i){VB.talking=i;vbSeats()}
+/** رسالة في السجلّ: k = n راوٍ · ph مرحلة · b آليّ · me أنا · v صوت · card بطاقة */
+function vbMsg(m){VB.feed.push(m);vbRenderMsg(m,false);return m}
+function vbRenderMsg(m,silent){
+ const f=document.getElementById('vbFeed');if(!f)return;
+ let h='';
+ if(m.k==='ph')h=`<div class="vbPh"><span>${ico(m.icon||'timer',13)} ${esc(m.t)}</span></div>`;
+ else if(m.k==='n')h=`<div class="vbN${m.big?' big':''}">${m.icon?ico(m.icon,15):''}<span>${m.raw?m.t:esc(m.t)}</span></div>`;
+ else if(m.k==='v')h=`<div class="vbV">${vbFace(m.i,20)}<span>${esc(VB.names[m.i])} ${m.t==null?'يمتنع':'يصوّت على <b>'+esc(VB.names[m.t])+'</b>'}</span></div>`;
+ else if(m.k==='card')h=`<div class="vbCard">${m.t}</div>`;
+ else h=`<div class="vbMsg${m.i===0?' me':''}${m.q?' q':''}">${vbFace(m.i,30)}<div class="vbBub"><b>${esc(VB.names[m.i])}</b>${esc(m.t)}</div></div>`;
+ f.insertAdjacentHTML('beforeend',h);
+ if(!silent){const last=f.lastElementChild;if(last)last.classList.add('vbNew');vbScrollEnd()}
+}
+function vbScrollEnd(){try{const a=document.getElementById('vbAct');const y=document.body.scrollHeight;window.scrollTo({top:y,behavior:VB.fast?'auto':'smooth'})}catch(e){}}
+function vbAct(html){const el=document.getElementById('vbAct');if(el)el.innerHTML=html;vbScrollEnd()}
+/** تسلسل بمهل: يعيد وعدًا — وفي الاختبارات (VB.fast) بلا انتظار */
+function vbWait(ms){return new Promise(r=>{if(VB.fast)return r();VB.tm=setTimeout(r,ms)})}
+function vbAlive(){return !!(VB&&document.getElementById('vbFeed'))}
+/** يقرأ نصّ المدخل ويفرّغه */
+function vbRead(){const el=document.getElementById('vbTxt');const v=el?el.value.trim():'';if(el)el.value='';return v}
+function vbInput(ph,fn,extra){
+ return `<div class="vbIn"><input id="vbTxt" maxlength="140" placeholder="${ph}" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();${fn}()}"><button class="btn gd" style="width:auto;padding:0 16px;min-height:44px" onclick="${fn}()">إرسال</button></div>${extra||''}`;
+}
+
+/* ── مافيا ضد الكمبيوتر — مدينة ليلية، راوٍ، آليون يتكلّمون ويردّون على ما تكتب ── */
+function mfStart(diff){
+ const n=Math.min(8,Math.max(5,RM.mbN||6));
+ Router.enter('vsbot');
+ const roles=[];const nMafia=n>=8?2:1;
+ for(let i=0;i<nMafia;i++)roles.push('مافيا');
+ roles.push('طبيب','محقق');while(roles.length<n)roles.push('شعب');
+ roles.sort(()=>Math.random()-.5);
+ VB={g:'mafia',diff:diff||'mid',n,names:vbNames(n),roles,alive:Array.from({length:n},(_,i)=>i),day:1,night:false,
+  feed:[],know:{},myKnow:{},heat:{},susp:Array(n).fill(0),detOut:null,myClaim:null,msgs:0,
+  victim:null,saved:null,botVictim:null,botSave:null,lastKilled:null,lastLynched:null,cast:[],dead:false,over:false,tm:null,fast:!!window.__vbFast,
+  seat:i=>({dead:!VB.alive.includes(i),talk:VB.talking===i,c:mfRole(i)==='مافيا'&&(i===0||mfRole(0)==='مافيا')?'#E24B4A':'#E8B23A',
+   badge:i===0?ico(MAF_ROLE[mfRole(0)].ic,12,MAF_ROLE[mfRole(0)].tint):(mfRole(0)==='مافيا'&&mfRole(i)==='مافيا'?ico('swords',12,'red'):(VB.myKnow[i]===true?ico('swords',12,'red'):VB.myKnow[i]===false?ico('check',12):'')),
+   sub:!VB.alive.includes(i)?mfRole(i):''})};
+ vbScene('mafia','مافيا — ضد الكمبيوتر');
+ const sp=MAF_ROLE[mfRole(0)],mates=VB.alive.filter(i=>i!==0&&mfRole(i)==='مافيا');
+ vbMsg({k:'card',t:`<div class="mfDisc" style="--rc:${sp.ac};--rcs:${clRGBA(sp.ac,.3)}">${ico(sp.ic,46,sp.tint)}</div>
+  <div class="mtl" style="font-size:18px;margin-top:8px">أنت ${mfRole(0)}</div><div class="vbCardD">${sp.d}</div>
+  ${mfRole(0)==='مافيا'&&mates.length?`<div class="vbCardD" style="color:var(--no)">شريكك في المافيا: <b>${mates.map(mfNm).join('، ')}</b></div>`:''}`});
+ vbMsg({k:'n',icon:'group',t:`مدينة من ${VB.n} أشخاص: بينهم ${nMafia===1?'مافيا واحد':'اثنان من المافيا'} وطبيب ومحقق. في الليل تعمل الأدوار، وفي النهار تناقشون وتصوّتون على متهم. تفوز المدينة إن أعدمت كل المافيا، وتفوز المافيا إن ساوت عدد الباقين.`});
+ vbAct(`<button class="rbtn" onclick="mfNight()"><span>${ico('timer',14)} الليلة الأولى — نامت المدينة</span></button>`);
+}
+const mfRole=i=>VB.roles[i];
+const mfNm=i=>esc(VB.names[i]);
+const mfAliveI=i=>VB.alive.includes(i);
+const mfOthers=i=>VB.alive.filter(x=>x!==i);
+function mfSetNight(on){VB.night=on;const s=document.querySelector('.vbScene');if(s)s.classList.toggle('night',on)}
+/** قرارات الآليين ليلًا */
+function mfBotsNight(){
+ const d=VB.diff,alive=VB.alive;
+ const botMaf=alive.filter(i=>i!==0&&mfRole(i)==='مافيا');
+ VB.botVictim=null;VB.botSave=null;
+ if(botMaf.length){
+  const targets=alive.filter(i=>mfRole(i)!=='مافيا');
+  let pick=null;
+  if(d!=='easy'&&targets.length){
+   if(VB.detOut!=null&&targets.includes(VB.detOut))pick=VB.detOut;
+   else if(VB.myClaim==='محقق'&&targets.includes(0)&&Math.random()<.75)pick=0;
+   else if(VB.myClaim==='طبيب'&&targets.includes(0)&&d==='hard'&&Math.random()<.5)pick=0;
+   else if(d==='hard'){const hot=targets.map(i=>[i,VB.heat[i]||0]).sort((a,b)=>b[1]-a[1]);if(hot[0][1]>0)pick=hot[0][0]}
+  }
+  if(pick==null&&targets.length)pick=vbRnd(targets);
+  VB.botVictim=pick;
+ }
+ const doc=alive.find(i=>i!==0&&mfRole(i)==='طبيب');
+ if(doc!=null){
+  if(d==='easy')VB.botSave=vbRnd(alive);
+  else if(VB.detOut!=null&&VB.detOut!==doc&&mfAliveI(VB.detOut)&&Math.random()<.7)VB.botSave=VB.detOut;
+  else if(VB.myClaim==='محقق'&&mfAliveI(0)&&Math.random()<.6)VB.botSave=0;
+  else VB.botSave=Math.random()<.35?doc:vbRnd(alive.filter(i=>i!==doc));
+ }
+ const det=alive.find(i=>i!==0&&mfRole(i)==='محقق');
+ if(det!=null){
+  const unk=alive.filter(i=>i!==det&&VB.know[i]==null);
+  if(unk.length){const t=d==='hard'&&unk.some(i=>VB.susp[i]>0)?unk.slice().sort((a,b)=>VB.susp[b]-VB.susp[a])[0]:vbRnd(unk);VB.know[t]=mfRole(t)==='مافيا'}
+ }
+}
+async function mfNight(){
+ if(VB.over)return;
+ VB.victim=null;VB.saved=null;VB.talking=null;
+ mfSetNight(true);vbSeats();
+ vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
+ vbMsg({k:'n',icon:'timer',t:'أطفأت المدينة أنوارها… والشوارع فارغة إلا من الظلال.'});
+ mfBotsNight();
+ if(!mfAliveI(0)){vbAct('');await vbWait(700);mfResolveNight();return}
+ const me=mfRole(0);
+ if(me==='مافيا')mfPick('استيقظت المافيا. من تغتال الليلة؟',VB.alive.filter(i=>i!==0&&mfRole(i)!=='مافيا'),'mfKill');
+ else if(me==='طبيب')mfPick('استيقظ الطبيب. من تحمي الليلة؟ (يمكنك حماية نفسك)',VB.alive,'mfSave');
+ else if(me==='محقق')mfPick('استيقظ المحقق. من تفحص الليلة؟',VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null),'mfCheck');
+ else{vbMsg({k:'n',t:'أنت نائم. المافيا تتحرّك في الظلام، والطبيب والمحقق يعملان…'});
+  vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} أذان الفجر — استيقظت المدينة</span></button>`)}
+}
+function mfPick(t,list,cb){
+ vbMsg({k:'n',icon:MAF_ROLE[mfRole(0)].ic,t});
+ vbAct(list.length?`<div class="vbGrid">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>`
+  :`<button class="rbtn" onclick="mfResolveNight()"><span>لا أحد لفحصه — أكمل الليل</span></button>`);
+}
+function mfKill(i){VB.victim=i;vbMsg({k:'me',i:0,t:'اخترتُ '+VB.names[i]+'… بصمت.'});mfResolveNight()}
+function mfSave(i){VB.saved=i;vbMsg({k:'me',i:0,t:'سأحمي '+(i===0?'نفسي':VB.names[i])+' الليلة.'});mfResolveNight()}
+async function mfCheck(i){
+ VB.myKnow[i]=mfRole(i)==='مافيا';vbSeats();
+ vbMsg({k:'n',icon:'search',t:`فحصتَ ${VB.names[i]}: ${VB.myKnow[i]?'مافيا! اتّهمه في النقاش يصدّقك الناس أكثر — أو احتفظ بالسرّ':'بريء. استبعده من شكوكك'}`,big:VB.myKnow[i]});
+ vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} استيقظت المدينة</span></button>`);
+}
+async function mfResolveNight(){
+ if(VB.over)return;
+ const victim=mfRole(0)==='مافيا'&&mfAliveI(0)&&VB.victim!=null?VB.victim:VB.botVictim;
+ const saved=mfRole(0)==='طبيب'&&mfAliveI(0)?VB.saved:VB.botSave;
+ const killed=victim!=null&&victim!==saved?victim:null;
+ if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
+ VB.lastKilled=killed;
+ mfSetNight(false);vbAct('');
+ vbPhase('sparkle','الصباح '+VB.day,'استيقظت المدينة');
+ await vbWait(500);
+ if(killed!=null){vbMsg({k:'n',icon:'orb',big:true,t:`وُجد ${VB.names[killed]} مقتولًا عند الفجر.`});vbSeats()}
+ else vbMsg({k:'n',icon:'heart',big:true,t:victim!=null?'محاولة اغتيال فشلت — الطبيب أنقذ الضحية في اللحظة الأخيرة!':'ليلة هادئة… لم يمت أحد.'});
+ if(mfWinCheck())return;
+ if(killed===0){VB.dead=true;await vbWait(600);vbMsg({k:'n',t:'كنتَ أنت الضحية. تتابع الآن ما يجري في المدينة من بعيد.'});return mfSpectate()}
+ await vbWait(500);
+ vbMsg({k:'n',t:`الأحياء ${VB.alive.length}: ${VB.alive.map(i=>VB.names[i]).join(' · ')}`});
+ mfTalk();
+}
+/* ── النقاش: الآليون يتكلّمون بالدور، ثم تكتب ما تشاء ويردّون عليك ── */
+function mfTop(list){const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null}
+function mfBotLine(i){
+ const d=VB.diff,r=mfRole(i),others=mfOthers(i),k=VB.lastKilled,me=VB.names[0];
+ if(r==='محقق'){
+  const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mfAliveI(x));
+  if(known!=null){
+   if(d==='easy')return {t:known,w:1,s:`أشك في ${VB.names[known]}… شيء فيه غريب.`};
+   VB.detOut=i;return {t:known,w:3,s:`اسمعوني: أنا المحقق. فحصتُ ${VB.names[known]} ليلًا وهو مافيا. صوّتوا عليه.`};
+  }
+  const inn=Object.keys(VB.know).map(Number).filter(x=>!VB.know[x]&&mfAliveI(x));
+  if(inn.length&&d==='hard')return {t:null,w:0,s:`${VB.names[inn[0]]} بريء، أنا متأكّد. ابحثوا في غيره.`};
+ }
+ if(r==='مافيا'){
+  const pool=others.filter(x=>mfRole(x)!=='مافيا');
+  if(!pool.length)return {t:null,w:0,s:'…'};
+  const tp=mfTop(pool);
+  const t=VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy'?VB.detOut:(VB.myClaim==='محقق'&&pool.includes(0)&&d!=='easy'?0:(tp!=null?tp:vbRnd(pool)));
+  const nm=t===0?me:VB.names[t];
+  const lines=(VB.detOut===t||(t===0&&VB.myClaim==='محقق'))?[`${nm} يدّعي أنه محقق ليضلّلنا — المافيا الحقيقي هو.`,`لا تصدّقوا ${nm}… من يعلن نفسه محققًا أوّل يوم يخفي شيئًا.`]
+   :[`${nm} صامت أكثر من اللازم، وهذا يريبني.`,`أشك في ${nm} — تصرّفاته غريبة منذ البداية.`,`صوتي على ${nm}، ولن أغيّره.`,k!=null?`من كان قريبًا من ${VB.names[k]} أمس؟ ${nm}.`:`${nm} لم يُجب على أي سؤال.`];
+  return {t,w:1,s:vbRnd(lines)};
+ }
+ const tp=mfTop(others);
+ const t=tp!=null?tp:(Math.random()<.5?vbRnd(others):null);
+ if(t==null)return {t:null,w:0,s:vbRnd(['لا دليل عندي بعد… أستمع لكم.','ننتظر من يتكلّم أولًا.',k!=null?`رحمة الله على ${VB.names[k]}… من له مصلحة في موته؟`:'ليلة هادئة لا تعني أن المافيا نامت.'])};
+ const nm=t===0?me:VB.names[t];
+ return {t,w:1,s:vbRnd([`أوافق — ${nm} مريب.`,`صوتي على ${nm} حتى الآن.`,`${nm} لم يُجب على سؤال أحد.`,`لاحظتم كيف يغيّر ${nm} الموضوع؟`])};
+}
+function mfApply(i,o){if(o.t==null)return;VB.susp[o.t]+=o.w;if(mfRole(o.t)==='مافيا')VB.heat[i]=(VB.heat[i]||0)+1}
+async function mfTalk(){
+ if(VB.over)return;
+ vbPhase('sound','النقاش '+VB.day,'كل واحد يقول ما عنده');
+ VB.msgs=0;
+ for(const i of VB.alive.filter(x=>x!==0)){
+  vbTalk(i);await vbWait(650);if(!vbAlive())return;
+  const o=mfBotLine(i);mfApply(i,o);vbMsg({k:'b',i,t:o.s});
+ }
+ vbTalk(null);
+ mfMyTurn();
+}
+function mfMyTurn(){
+ vbMsg({k:'n',t:'دورك. اكتب ما تريد: اتّهم أحدًا، دافع عن نفسك، اسأل لاعبًا، أو أعلن دورك.'});
+ vbAct(vbInput('اكتب هنا… مثل: أشك في سلطان / يا نورة وين كنت؟','mfSend',
+  `<button class="btn g" style="margin-top:8px" onclick="mfVote()">${ico('scale',13)} انتقل إلى التصويت</button>`));
+ const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+}
+/** يفهم ما كتبتَ: من ذكرت، وهل تتّهم أم تدافع أم تسأل أم تعلن دورًا */
+function mfParse(text){
+ const t=arNorm(text),m=vbMentions(text);
+ const has=re=>re.test(t);
+ const claim=has(/انا (المحقق|محقق)|فحصت/)?'محقق':has(/انا (الطبيب|طبيب)|انقذت|حميت/)?'طبيب':has(/انا (بريء|شعب|مواطن)/)?'شعب':null;
+ const intent=has(/\?|؟|ليش|لماذا|وين|اين|كيف|ماذا|هل |متى/)&&m.length?'ask'
+  :has(/بريء|اثق|ثقه|مو مافيا|ليس مافيا|ما هو مافيا|ادافع|لا تصوتوا|اتركوا/)?'defend'
+  :has(/اشك|مافيا|صوت|اتهم|مريب|غريب|كاذب|يكذب|قتل|اعدم|هو|هي/)&&m.length?'accuse'
+  :m.length?'accuse':'talk';
+ return {m,intent,claim};
+}
+async function mfSend(){
+ const text=vbRead();if(!text)return;
+ if(VB.msgs>=3){toast('انتقل إلى التصويت — قلت ما يكفي اليوم');return}
+ VB.msgs++;
+ vbMsg({k:'me',i:0,t:text});
+ const p=mfParse(text);
+ if(p.claim){VB.myClaim=p.claim}
+ const target=p.m[0];
+ if(p.intent==='accuse'&&target!=null){const w=p.claim==='محقق'?(VB.myKnow[target]===true?3:2):1;mfApply(0,{t:target,w})}
+ if(p.intent==='defend'&&target!=null)VB.susp[target]=Math.max(0,VB.susp[target]-1);
+ vbAct('');
+ await mfReply(p,text);
+ if(!vbAlive())return;
+ if(VB.msgs>=3){vbMsg({k:'n',t:'انتهى وقت الكلام لليوم.'});vbAct(`<button class="rbtn" onclick="mfVote()"><span>${ico('scale',14)} إلى التصويت</span></button>`)}
+ else mfMyTurn();
+}
+/** ردود الآليين على كلامك — المذكور يردّ أولًا، ثم من يوافق أو يعارض */
+async function mfReply(p,text){
+ const me=VB.names[0],alive=VB.alive.filter(i=>i!==0),d=VB.diff;
+ const say=async(i,s)=>{vbTalk(i);await vbWait(700);if(!vbAlive())return;vbMsg({k:'b',i,t:s});vbTalk(null)};
+ const target=p.m.find(i=>mfAliveI(i));
+ if(p.m.length&&target==null){vbMsg({k:'n',t:`${VB.names[p.m[0]]} لم يعد بيننا… لن يجيب أحد عنه.`});return}
+ if(p.claim==='محقق'){
+  const det=alive.find(i=>mfRole(i)==='محقق');
+  if(mfRole(0)!=='محقق'&&det!=null&&d!=='easy'){VB.detOut=det;VB.susp[0]+=2;await say(det,`كاذب. أنا المحقق الحقيقي، و${me} يدّعي دوري ليحمي نفسه. هذا سلوك مافيا.`)}
+  else if(mfRole(0)==='محقق'&&target!=null&&VB.myKnow[target]===true){const f=alive.filter(i=>mfRole(i)!=='مافيا'&&i!==target);if(f.length)await say(vbRnd(f),`إن كان ${me} محققًا فعلًا فالأمر محسوم — صوتي على ${VB.names[target]}.`)}
+  else if(target==null){const f=alive.filter(i=>mfRole(i)!=='مافيا');if(f.length)await say(vbRnd(f),'محقق؟ قل لنا إذن من فحصت.')}
+ }
+ if(p.claim==='طبيب'&&mfRole(0)==='طبيب'){const f=alive.filter(i=>mfRole(i)!=='مافيا');if(f.length)await say(vbRnd(f),`إن كنت الطبيب يا ${me} فقد كشفت نفسك للمافيا… احذر الليلة.`)}
+ if(target!=null){
+  const r=mfRole(target);
+  if(p.intent==='ask'){
+   const inn=[`كنتُ نائمًا مثل الجميع يا ${me}. ما عندي ما أخفيه.`,`سؤال عادل. أنا مع المدينة، وصوتي سيكون مع الأغلبية.`,`لا أعرف… لكنّي أشك في ${VB.names[mfTop(mfOthers(target))??vbRnd(mfOthers(target).filter(x=>x!==0).length?mfOthers(target).filter(x=>x!==0):mfOthers(target))]}.`];
+   const maf=[`لماذا أنا؟ اسأل من يصمت طوال الوقت.`,`كنتُ في بيتي… ما رأيت شيئًا. تحاول توجيه الشك إليّ يا ${me}؟`,`جوابي واضح: بريء. والأغرب أنك تسألني أنا بالذات.`];
+   await say(target,vbRnd(r==='مافيا'?maf:(r==='محقق'&&d!=='easy'?[`أنا أعمل في الليل لصالح المدينة يا ${me}… ستعرف قريبًا.`]:inn)));
+   if(r==='مافيا'&&d!=='easy')VB.susp[0]+=1;
+  }else if(p.intent==='accuse'){
+   const inn=[`أنا بريء يا ${me}. لو كنتُ مافيا ما تكلّمتُ أصلًا.`,`خطأ. أنا مع المدينة — صوّتوا على غيري.`,`اتهام بلا دليل. ما الذي رأيته منّي؟`];
+   const maf=[`هذا اتهام بلا دليل… بل أنا أشك فيك أنت يا ${me}.`,`${me} يوجّه الشك إليّ ليحمي نفسه. انتبهوا له.`,`طريف. من يتّهم أوّلًا غالبًا يخفي شيئًا.`];
+   await say(target,vbRnd(r==='مافيا'?maf:inn));
+   if(r==='مافيا'){VB.susp[0]+=d==='easy'?0:1}
+   if(!vbAlive())return;
+   const det=alive.find(i=>mfRole(i)==='محقق'&&i!==target);
+   if(det!=null&&VB.know[target]===false&&d!=='easy'){await say(det,`مهلًا — فحصتُ ${VB.names[target]} وهو بريء. لا تصوّتوا عليه.`);VB.susp[target]=Math.max(0,VB.susp[target]-2);return}
+   const backers=alive.filter(i=>i!==target&&mfRole(i)!=='مافيا'&&VB.susp[target]>=2);
+   const other=alive.filter(i=>i!==target);
+   if(backers.length&&Math.random()<.8)await say(vbRnd(backers),vbRnd([`أوافق ${me} — ${VB.names[target]} مريب فعلًا.`,`نفس شكّي. صوتي على ${VB.names[target]}.`]));
+   else if(other.length)await say(vbRnd(other),vbRnd([`ما عندي دليل على ${VB.names[target]}… أريد أن أسمع أكثر.`,`لا تتسرّعوا، قد يكون ${me} هو من يضلّلنا.`]));
+  }else if(p.intent==='defend'){
+   await say(target,vbRnd([`شكرًا يا ${me}… على الأقل أحدهم يفكّر.`,`أقدّر ثقتك. وأنا أثق فيك أيضًا.`]));
+   if(r==='مافيا'&&d==='hard'){const f=alive.filter(i=>mfRole(i)==='محقق'&&VB.know[target]===true);if(f.length){await say(f[0],`${me} يدافع عن مافيا فحصته بنفسي. لماذا؟`);VB.susp[0]+=2}}
+  }
+ }else{
+  const pool=alive.length?alive:[];
+  if(pool.length)await say(vbRnd(pool),vbRnd(['كلام عام… من تقصد بالضبط؟','نريد أسماء لا مواعظ.',`وأنت يا ${me}، على من صوتك؟`]));
+ }
+}
+/* ── التصويت ── */
+function mfVote(){
+ if(VB.over)return;
+ vbPhase('scale','التصويت '+VB.day,'الأغلبية تُعدم — والتعادل يُنجي');
+ vbMsg({k:'n',t:'على من تصوّت للإعدام؟'});
+ vbAct(`<div class="vbGrid">${mfOthers(0).map(i=>vbChip(i,` onclick="mfTally(${i})"`)).join('')}</div>
+ <button class="btn g" style="margin-top:8px;color:var(--tx2)" onclick="mfTally(null)">أمتنع</button>`);
+}
+function mfBotVote(i){
+ const d=VB.diff,r=mfRole(i),others=mfOthers(i);
+ const bySusp=list=>{const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null};
+ if(r==='مافيا'){
+  const pool=others.filter(x=>mfRole(x)!=='مافيا');if(!pool.length)return null;
+  if(VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy')return VB.detOut;
+  if(VB.myClaim==='محقق'&&pool.includes(0)&&d!=='easy')return 0;
+  const t=bySusp(pool);return t!=null?t:vbRnd(pool);
+ }
+ if(r==='محقق'){const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mfAliveI(x));if(known!=null)return known}
+ if(d==='easy'&&Math.random()<.6)return vbRnd(others);
+ const t=bySusp(others);
+ if(t!=null)return t;
+ return d==='hard'?null:vbRnd(others);
+}
+function mfCount(votes){let best=null,bn=0,tie=false;Object.entries(votes).forEach(([k,v])=>{if(v>bn){bn=v;best=+k;tie=false}else if(v===bn)tie=true});return tie?null:best}
+async function mfTally(my){
+ vbAct('');
+ const votes={};
+ const add=(who,t)=>{vbMsg({k:'v',i:who,t});if(t!=null)votes[t]=(votes[t]||0)+1};
+ add(0,my);
+ for(const i of VB.alive.filter(x=>x!==0)){await vbWait(450);if(!vbAlive())return;add(i,mfBotVote(i))}
+ const who=mfCount(votes);
+ await vbWait(500);if(!vbAlive())return;
+ if(who==null){vbMsg({k:'n',icon:'scale',big:true,t:'لم تتفق الأغلبية على متهم — لا إعدام اليوم.'});VB.lastLynched=null}
+ else{
+  VB.alive=VB.alive.filter(i=>i!==who);VB.lastLynched=who;vbSeats();
+  vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} بأغلبية ${votes[who]} — وتبيّن أنه كان ${mfRole(who)}.`});
+  if(mfWinCheck())return;
+  if(who===0){VB.dead=true;await vbWait(600);vbMsg({k:'n',t:'أعدمتك المدينة. تتابع الآن ما يجري من بعيد.'});return mfSpectate()}
+ }
+ VB.day++;
+ vbAct(`<button class="rbtn" onclick="mfNight()"><span>${ico('timer',14)} الليلة ${VB.day} — نامت المدينة</span></button>`);
+}
+function mfWinCheck(){
+ const m=VB.alive.filter(i=>mfRole(i)==='مافيا').length,o=VB.alive.length-m;
+ let win=null;if(m===0)win='city';else if(m>=o)win='mafia';
+ if(!win)return false;
+ mfEnd(win);return true;
+}
+/** بعد خروجك: الليالي والأيام تمضي أمامك خطوة خطوة */
+async function mfSpectate(){
+ vbAct(`<button class="btn g" onclick="VB.skip=1">${ico('next',13)} تخطّي إلى النهاية</button>`);
+ let guard=0;
+ while(guard++<30&&!VB.over){
+  const w=ms=>VB.skip?Promise.resolve():vbWait(ms);
+  mfSetNight(true);vbSeats();vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
+  mfBotsNight();
+  const victim=VB.botVictim,saved=VB.botSave,killed=victim!=null&&victim!==saved?victim:null;
+  await w(700);if(!vbAlive())return;
+  if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
+  mfSetNight(false);vbSeats();vbPhase('sparkle','الصباح '+VB.day,'');
+  vbMsg({k:'n',icon:killed!=null?'orb':'heart',big:true,t:killed!=null?`وُجد ${VB.names[killed]} مقتولًا عند الفجر.`:'ليلة هادئة… لم يمت أحد.'});
+  if(mfWinCheck())return;
+  vbPhase('sound','النقاش '+VB.day,'');
+  for(const i of VB.alive){await w(500);if(!vbAlive())return;const o=mfBotLine(i);mfApply(i,o);vbMsg({k:'b',i,t:o.s})}
+  vbPhase('scale','التصويت '+VB.day,'');
+  const votes={};
+  for(const i of VB.alive){await w(350);if(!vbAlive())return;const t=mfBotVote(i);vbMsg({k:'v',i,t});if(t!=null)votes[t]=(votes[t]||0)+1}
+  const who=mfCount(votes);
+  if(who!=null){VB.alive=VB.alive.filter(i=>i!==who);vbSeats();vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} — كان ${mfRole(who)}.`})}
+  else vbMsg({k:'n',icon:'scale',t:'لا إعدام اليوم.'});
+  if(mfWinCheck())return;
+  VB.day++;
+ }
+ if(!VB.over)mfEnd('city');
+}
+function mfEnd(win){
+ VB.over=true;mfSetNight(false);VB.talking=null;vbSeats();
+ const mine=(mfRole(0)==='مافيا'?'mafia':'city')===win;
+ vbDone();if(mine&&window.FX)FX.win();
+ vbPhase('trophy','النهاية','');
+ vbMsg({k:'card',t:`${resMedal(mine?'win':'lose',win==='mafia'?'swords':'trophy')}
+  <div class="mtl" style="font-size:19px;margin-top:6px">${win==='city'?'فاز الشعب! المدينة نظيفة':'فازت المافيا! سيطرت على المدينة'}</div>
+  <div class="vbCardD">${mine?'فريقك انتصر':'فريقك خسر'} — كنت <b>${mfRole(0)}</b></div>
+  <div class="sl" style="text-align:start">الأدوار كاملة</div>${mafRoleList(VB.roles.map((r,i)=>({n:mfNm(i)+(i===0?' (أنت)':''),r})))}`});
+ vbAct(`<button class="rbtn" onclick="mfStart('${VB.diff}')"><span>جولة أخرى</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','mafia')">رجوع</button>`);
+}
+
+/* ── برا السالفة ضد الكمبيوتر — مجلس بفانوس، تلميحات تكتبها بنفسك، أسئلة وأجوبة، وتصويت ── */
+const BARRA_ASK={
+ 'أماكن':['متى آخر مرّة رحت له؟','مع من تروح له عادةً؟','كم تجلس فيه؟','وش أول شي تشوفه لما تدخل؟'],
+ 'أكلات شعبية':['متى تاكلها عادةً؟','مع أي شي تنأكل؟','من يطبخها عندكم؟','حارّة ولا باردة؟'],
+ 'مهن':['وش أصعب شي فيها؟','وين يشتغل صاحبها؟','وش يلبس عادةً؟','ليش نحتاجه؟'],
+ 'حيوانات':['وين يعيش؟','وش ياكل؟','كبير ولا صغير؟','تخاف منه؟'],
+ 'أندية كرة':['من أشهر لاعب فيه؟','وش لون قميصه؟','من منافسه الأول؟','متى آخر بطولة له؟']
+};
+function brStart(diff){
  const n=Math.min(6,Math.max(4,RM.bbN||5)),cat=PARTY_WORDS[RM.bbCat]?RM.bbCat:'أماكن';
  Router.enter('vsbot');
  const ws=PARTY_WORDS[cat],word=ws[Math.floor(Math.random()*ws.length)];
- VB={g:'barra',diff:diff||'mid',n,cat,word,names:vbNames(n),spy:Math.floor(Math.random()*n),
-  feed:[],usedClue:new Set(),usedVague:new Set(),round:0,shown:false,myVague:0,cast:[],accused:null,opts:[],after:[],tm:null};
- bbDeal();
+ VB={g:'barra',diff:diff||'mid',n,cat,word,names:vbNames(n),spy:Math.floor(Math.random()*n),feed:[],
+  usedClue:new Set(),usedVague:new Set(),round:0,mine:[],vague:Array(n).fill(0),spoke:Array(n).fill(0),
+  asked:0,cast:[],accused:null,over:false,tm:null,fast:!!window.__vbFast,
+  seat:i=>({talk:VB.talking===i,c:i===VB.spy&&(VB.over||i===0)?'#E24B4A':'#E8B23A',
+   badge:i===0?(VB.spy===0?ico('door',12,'red'):ico('lock',12)):(VB.over&&i===VB.spy?ico('door',12,'red'):''),
+   mark:VB.over&&i===VB.spy})};
+ vbScene('barra','برا السالفة — ضد الكمبيوتر');
+ const spy=VB.spy===0;
+ vbMsg({k:'card',t:`<div class="mfDisc" style="--rc:${spy?'#E24B4A':'#E8B23A'};--rcs:${spy?'rgba(226,75,74,.3)':'rgba(232,178,58,.3)'}">${spy?ico('door',46,'red'):ico('lock',46)}</div>
+  <div class="mtl" style="font-size:19px;margin-top:8px">${spy?'أنت برا السالفة!':esc(VB.word)}</div>
+  <div class="vbCardD">${spy?'لا تعرف الكلمة. الفئة: <b>'+esc(VB.cat)+'</b>. استمع لتلميحاتهم، لمّح بغموض يشبه كلامهم، ولا تنكشف.':'الفئة: <b>'+esc(VB.cat)+'</b>. لمّح للكلمة بكلامك دون أن تقولها — التلميح الواضح يُطمئن المجلس، والغامض يجعلهم يشكّون فيك.'}</div>`});
+ vbMsg({k:'n',icon:'group',t:`في المجلس ${VB.n}: ${VB.names.map(esc).join(' · ')}. جولتان من التلميحات بالدور، ثم سؤال وجواب، ثم تصويت على من لا يعرف الكلمة.`});
+ vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('sound',14)} ابدأ الجولة الأولى</span></button>`);
 }
-const bbSpyMe=()=>VB.spy===0;
-function bbDeal(){
- const card=bbSpyMe()?{game:'برا السالفة',title:'أنت برا السالفة!',desc:'لا تعرف الكلمة — استمع لتلميحاتهم، لمّح بغموض، ولا تنكشف.',icon:ico('door',58,'red'),ac:'#E24B4A'}
-  :{game:'برا السالفة',tag:'الكلمة السرية',title:VB.word,desc:'لمّح للكلمة دون قولها — واكشف من لا يعرفها.',icon:ico('lock',58),ac:'#E8B23A'};
- go(`<div class="scr on">${vbHead('برا السالفة — ضد الكمبيوتر')}
- ${roleCard(Object.assign(card,{shown:VB.shown,foot:'الفئة: '+VB.cat+' — '+(VB.n-1)+' لاعبين آليين',hint:'اضغط للكشف',reveal:'bbReveal()'}))}
- <button class="rbtn" id="rcRev" style="margin-top:4px${VB.shown?';display:none':''}" onclick="bbReveal()"><span>اكشف بطاقتي</span></button>
- <button class="rbtn" id="rcNext" style="margin-top:4px${VB.shown?'':';display:none'}" onclick="bbRound()"><span>ابدأ التلميحات</span></button>
- </div>`);
-}
-function bbReveal(){VB.shown=true;vbReveal();const b=document.getElementById('rcNext');if(b)b.style.display=''}
-/** تلميح آليّ: صاحب الكلمة من بنكها، وبرا السالفة من الغامض */
-function bbClueFor(i){
+const brSpyMe=()=>VB.spy===0;
+/** تلميح آليّ: صاحب الكلمة من بنكها، وبرا السالفة يقلّد أسلوب المجلس بغموض */
+function brBotClue(i){
+ const pre=vbRnd(['','','بصراحة، ','أقول لكم: ','عندي: ','اللي أعرفه أنه ']);
  if(i===VB.spy){
   const all=BARRA_VAGUE[VB.cat]||['أعرفها'];const pool=all.filter(c=>!VB.usedVague.has(c));
-  const c=pool.length?vbRnd(pool):vbRnd(all);VB.usedVague.add(c);return c;
+  const c=pool.length?vbRnd(pool):vbRnd(all);VB.usedVague.add(c);return pre+c;
  }
  const all=BARRA_CLUES[VB.word]||['أعرفها جيدًا'];const bank=all.filter(c=>!VB.usedClue.has(c));
- if(bank.length){const c=vbRnd(bank);VB.usedClue.add(c);return c}
+ if(bank.length){const c=vbRnd(bank);VB.usedClue.add(c);return pre+c}
  return 'أوافق من قال: '+vbRnd(all);
 }
-function bbSpeak(i){VB.feed.push({i,c:bbClueFor(i)})}
-function bbRound(){
+/** كم يشبه كلامك كلام من يعرف الكلمة؟ تشابه مع بنك الكلمة أو مع ما قاله المجلس */
+function brSpecificity(text){
+ const mine=arTokens(text);
+ const bank=arTokens((BARRA_CLUES[VB.word]||[]).join(' ')+' '+VB.word);
+ const said=arTokens(VB.feed.filter(m=>m.k==='b').map(m=>m.t).join(' '));
+ const ov=arOverlap(mine,bank)+arOverlap(mine,said);
+ return {tokens:mine.length,ov};
+}
+function brSaidWord(text){const t=arNorm(text),w=arNorm(VB.word);return w&&w.split(/\s+/).every(p=>p.length>1&&t.includes(p))}
+async function brRound(){
+ if(VB.over)return;
  VB.round++;
- const half=Math.ceil(VB.n/2);
- const before=[],after=[];
- for(let i=1;i<VB.n;i++)(i<half?before:after).push(i);
- (VB.round%2?before:after).forEach(bbSpeak);          // في الجولة الثانية يتبدّل من يسبقك
- VB.after=VB.round%2?after:before;
- let opts;
- const vagueAll=BARRA_VAGUE[VB.cat]||[];
- if(bbSpyMe()){const pool=vagueAll.filter(c=>!VB.usedVague.has(c)).sort(()=>Math.random()-.5);opts=(pool.length>=3?pool:vagueAll).slice(0,3).map(c=>({c,v:1}))}
- else{
-  const real=(BARRA_CLUES[VB.word]||[]).filter(c=>!VB.usedClue.has(c)).sort(()=>Math.random()-.5).slice(0,2).map(c=>({c,v:0}));
-  const vg=vagueAll.filter(c=>!VB.usedVague.has(c));
-  opts=real.concat([{c:vbRnd(vg.length?vg:vagueAll),v:1}]).sort(()=>Math.random()-.5);
+ vbPhase('sound','الجولة '+VB.round,'تلميح واحد لكل واحد');
+ const order=VB.names.map((_,i)=>i).filter(i=>i!==0);
+ const mySlot=VB.round===1?Math.floor(order.length/2):order.length;   // في الأولى تتكلّم في الوسط، وفي الثانية آخر واحد
+ const seq=order.slice(0,mySlot).concat([0]).concat(order.slice(mySlot));
+ VB.seq=seq;VB.seqAt=0;
+ brNext();
+}
+async function brNext(){
+ while(VB.seqAt<VB.seq.length){
+  const i=VB.seq[VB.seqAt++];
+  if(i===0){
+   vbTalk(0);
+   vbMsg({k:'n',t:brSpyMe()?'دورك. اكتب تلميحًا يبدو كأنك تعرف الكلمة — بلا تحديد.':'دورك. اكتب تلميحًا عن «'+VB.word+'» دون أن تذكرها.'});
+   vbAct(vbInput('اكتب تلميحك بكلماتك…','brSend'));
+   const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+   return;
+  }
+  vbTalk(i);await vbWait(700);if(!vbAlive())return;
+  vbMsg({k:'b',i,t:brBotClue(i)});VB.spoke[i]++;
  }
- VB.opts=opts;
- go(`<div class="scr on">${vbHead('برا السالفة — الجولة '+VB.round)}
- <div class="wb" style="text-align:start">${bbSpyMe()?'أنت برا السالفة — الفئة: <b>'+esc(VB.cat)+'</b>. لمّح بغموض حتى لا تنكشف، واستنتج الكلمة من تلميحاتهم.':'الكلمة: <b>'+esc(VB.word)+'</b> — لمّح لها دون قولها. التلميح الغامض يجعلهم يشكّون فيك.'}</div>
- ${bbFeed()}
- <div class="sl">دورك — اختر تلميحك</div>
- ${opts.map((o,k)=>`<button class="btn g" style="margin-bottom:8px;text-align:start" onclick="bbSay(${k})">${esc(o.c)}</button>`).join('')}
- </div>`);
+ vbTalk(null);
+ if(VB.round<2){vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('next',14)} الجولة الثانية</span></button>`);return}
+ brAsk();
 }
-function bbFeed(){
- if(!VB.feed.length)return '';
- return `<div class="sl">التلميحات</div>`+VB.feed.map(x=>`<div class="vbSay">${vbFace(x.i)}<div class="vbBub"><b>${esc(VB.names[x.i])}${x.i===0?' (أنت)':''}:</b> ${esc(x.c)}</div></div>`).join('');
-}
-function bbSay(k){
- const o=VB.opts[k]||VB.opts[0];
- VB.feed.push({i:0,c:o.c});
- if(o.v){VB.myVague++;VB.usedVague.add(o.c)}else VB.usedClue.add(o.c);
- VB.after.forEach(bbSpeak);
- if(VB.round<2){
-  go(`<div class="scr on">${vbHead('برا السالفة — الجولة '+VB.round)}
-  ${bbFeed()}
-  <button class="rbtn" style="margin-top:12px" onclick="bbRound()"><span>الجولة الثانية</span></button></div>`);
-  return;
+async function brSend(){
+ const text=vbRead();if(!text)return;
+ if(!brSpyMe()&&brSaidWord(text)){
+  vbMsg({k:'me',i:0,t:text});vbAct('');
+  await vbWait(500);vbMsg({k:'n',icon:'door',big:true,t:'قلتَ الكلمة نفسها! انكشفت أمام برا السالفة.'});
+  return brFinal('guessed');
  }
- bbVote();
+ vbMsg({k:'me',i:0,t:text});VB.mine.push(text);
+ const sp=brSpecificity(text);
+ if(sp.ov===0||sp.tokens<2)VB.vague[0]++;
+ vbTalk(null);vbAct('');
+ await vbWait(300);
+ brNext();
 }
-function bbVote(){
- go(`<div class="scr on">${vbHead('برا السالفة — التصويت')}
- ${bbFeed()}
- <div class="sl">من برا السالفة؟</div>
- <div class="vbGrid">${VB.names.map((_,i)=>i===0?'':vbChip(i,` onclick="bbTally(${i})"`)).join('')}</div>
- </div>`);
+/** سؤال من المجلس لك — وسؤال منك لأحدهم */
+function brAsk(){
+ vbPhase('search','سؤال وجواب','المجلس يستجوب');
+ const asker=vbRnd(VB.names.map((_,i)=>i).filter(i=>i!==0));
+ const q=vbRnd(BARRA_ASK[VB.cat]||['قل لنا أكثر؟']);
+ VB.askQ=q;
+ vbTalk(asker);vbMsg({k:'b',i:asker,q:1,t:`يا ${VB.names[0]}، ${q}`});
+ vbAct(vbInput('جوابك…','brAnswer'));
+ const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
 }
-function bbBotVote(i){
+async function brAnswer(){
+ const text=vbRead();if(!text)return;
+ if(!brSpyMe()&&brSaidWord(text)){vbMsg({k:'me',i:0,t:text});vbAct('');await vbWait(500);vbMsg({k:'n',icon:'door',big:true,t:'قلتَ الكلمة نفسها! انكشفت أمام برا السالفة.'});return brFinal('guessed')}
+ vbMsg({k:'me',i:0,t:text});VB.mine.push(text);
+ const sp=brSpecificity(text);if(sp.ov===0||sp.tokens<2)VB.vague[0]++;
+ vbTalk(null);
+ vbMsg({k:'n',t:'الآن اسأل أنت أحدهم — اكتب اسمه وسؤالك. أو انتقل إلى التصويت.'});
+ vbAct(vbInput('مثل: يا سلطان، وين يكون؟','brMyAsk',`<button class="btn g" style="margin-top:8px" onclick="brVote()">${ico('scale',13)} انتقل إلى التصويت</button>`));
+ const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+}
+async function brMyAsk(){
+ const text=vbRead();if(!text)return;
+ const m=vbMentions(text);
+ vbMsg({k:'me',i:0,q:1,t:text});
+ const i=m.length?m[0]:vbRnd(VB.names.map((_,x)=>x).filter(x=>x!==0));
+ vbAct('');
+ vbTalk(i);await vbWait(800);if(!vbAlive())return;
+ let ans;
+ if(i===VB.spy)ans=vbRnd(['سؤال صعب… خلّنا نسمع غيري أوّلًا.','اللي أعرفه أنه شيء معروف، ما أحب أحدّد.','مثل ما قال الباقون تقريبًا.']);
+ else{const all=BARRA_CLUES[VB.word]||[];const bank=all.filter(c=>!VB.usedClue.has(c));const c=bank.length?vbRnd(bank):vbRnd(all.length?all:['قلت اللي عندي']);VB.usedClue.add(c);ans=vbRnd(['جوابي: ','بكل بساطة: ',''])+c}
+ vbMsg({k:'b',i,t:ans});vbTalk(null);
+ VB.asked++;
+ if(VB.asked<2){vbAct(vbInput('سؤال آخر لأحدهم…','brMyAsk',`<button class="btn g" style="margin-top:8px" onclick="brVote()">${ico('scale',13)} انتقل إلى التصويت</button>`))}
+ else{vbAct(`<button class="rbtn" onclick="brVote()"><span>${ico('scale',14)} إلى التصويت</span></button>`)}
+}
+function brVote(){
+ if(VB.over)return;
+ vbPhase('scale','التصويت','من برا السالفة؟');
+ vbMsg({k:'n',t:'صوّت: من الذي لا يعرف الكلمة؟'});
+ vbAct(`<div class="vbGrid">${VB.names.map((_,i)=>i===0?'':vbChip(i,` onclick="brTally(${i})"`)).join('')}</div>`);
+}
+function brBotVote(i){
  const d=VB.diff,others=VB.names.map((_,x)=>x).filter(x=>x!==i);
- if(i===VB.spy){                       // برا السالفة يوجّه الشك لغيره — ويفضّل من لمّح بغموض
-  if(d!=='easy'&&VB.myVague>0&&Math.random()<.6)return 0;
-  return vbRnd(others);
- }
+ const myV=VB.vague[0];
+ if(i===VB.spy){if(d!=='easy'&&myV>0&&Math.random()<.65)return 0;return vbRnd(others)}
  let p={easy:.45,mid:.65,hard:.85}[d]||.65;
- if(VB.spy===0){if(!VB.myVague)p-=.3}else if(VB.myVague)p-=.15*VB.myVague;
+ if(VB.spy===0){if(myV===0)p-=.35;else if(myV>=2)p+=.1}else if(myV)p-=.15*myV;
  if(Math.random()<p)return VB.spy;
- if(VB.spy!==0&&VB.myVague&&Math.random()<.5)return 0;
+ if(VB.spy!==0&&myV&&Math.random()<.55)return 0;
  return vbRnd(others);
 }
-function bbTally(my){
- const votes={},cast=[];
- const add=(who,t)=>{votes[t]=(votes[t]||0)+1;cast.push({who,t})};
+async function brTally(my){
+ vbAct('');
+ const votes={};const add=(who,t)=>{vbMsg({k:'v',i:who,t});votes[t]=(votes[t]||0)+1};
  add(0,my);
- VB.names.forEach((_,i)=>{if(i!==0)add(i,bbBotVote(i))});
- VB.cast=cast;VB.accused=mbCount(votes);
- if(VB.accused!==VB.spy){bbFinal('escaped');return}
- if(bbSpyMe()){bbGuess();return}
+ for(const i of VB.names.map((_,x)=>x).filter(x=>x!==0)){await vbWait(450);if(!vbAlive())return;add(i,brBotVote(i))}
+ VB.accused=mfCount(votes);
+ await vbWait(500);if(!vbAlive())return;
+ if(VB.accused==null){vbMsg({k:'n',icon:'scale',big:true,t:'تعادل — لم يتفق المجلس على أحد.'});return brFinal('escaped')}
+ if(VB.accused!==VB.spy){vbMsg({k:'n',icon:'scale',big:true,t:`اتُّهم ${VB.names[VB.accused]}… وهو يعرف الكلمة!`});return brFinal('escaped')}
+ vbMsg({k:'n',icon:'door',big:true,t:`أمسك المجلس بـ${VB.names[VB.spy]}${brSpyMe()?' — أنت!':''}. له تخمين واحد.`});
+ if(brSpyMe()){vbAct(vbInput('اكتب الكلمة كما تظنّها…','brGuess'));const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();return}
  const p={easy:.25,mid:.4,hard:.55}[VB.diff]||.4;
- bbFinal(Math.random()<p?'guessed':'caught');
+ await vbWait(700);if(!vbAlive())return;
+ const ok=Math.random()<p;
+ const wrong=vbRnd((PARTY_WORDS[VB.cat]||[]).filter(w=>w!==VB.word));
+ vbMsg({k:'b',i:VB.spy,t:'تخميني: '+(ok?VB.word:wrong)+'!'});
+ brFinal(ok?'guessed':'caught');
 }
-function bbGuess(){
- const pool=(PARTY_WORDS[VB.cat]||[]).filter(w=>w!==VB.word).sort(()=>Math.random()-.5).slice(0,3);
- const opts=pool.concat([VB.word]).sort(()=>Math.random()-.5);
- go(`<div class="scr on">${vbHead('برا السالفة')}
- <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0 6px">
- <div class="mfDisc" style="--rc:#E24B4A;--rcs:rgba(226,75,74,.3)">${ico('door',46,'red')}</div>
- <div class="mtl" style="font-size:17px;margin-top:8px">أمسكوا بك!</div>
- <div style="font-size:12px;color:var(--tx2);margin-top:7px;line-height:1.7">فرصة أخيرة: إن خمّنت الكلمة من أوّل مرّة فزت أنت.</div>
- </div></div></div>
- ${bbFeed()}
- <div class="sl" style="text-align:center">ما الكلمة؟</div>
- <div class="vbGrid">${opts.map(w=>`<button class="btn g" style="margin:0" onclick="bbFinal('${w===VB.word?'guessed':'caught'}')">${esc(w)}</button>`).join('')}</div>
- </div>`);
+function brGuess(){
+ const text=vbRead();if(!text)return;
+ vbMsg({k:'me',i:0,t:'تخميني: '+text});
+ brFinal(brSaidWord(text)?'guessed':'caught');
 }
-function bbFinal(outcome){
- const spyWon=outcome!=='caught',mine=bbSpyMe()?spyWon:!spyWon;
+function brFinal(outcome){
+ VB.over=true;VB.talking=null;vbSeats();vbAct('');
+ const spyWon=outcome!=='caught',mine=brSpyMe()?spyWon:!spyWon;
  vbDone();if(mine&&window.FX)FX.win();
- const title=outcome==='caught'?'أُمسك ببرا السالفة!':outcome==='guessed'?'خمّن الكلمة — فاز برا السالفة!':'نجا برا السالفة!';
- const why=outcome==='caught'?'ولم يعرف الكلمة':outcome==='guessed'?'أُمسك به لكنه عرف الكلمة من أوّل تخمين'
-  :(VB.accused==null?'لم تتفق الأغلبية على أحد':'اتُّهم '+esc(VB.names[VB.accused])+' ظلمًا');
- go(`<div class="scr on">${vbHead('النتيجة')}
- ${resMedal(mine?'win':'lose',spyWon?'door':'trophy')}
- <div class="mtl" style="text-align:center;font-size:18px;margin-top:6px">${title}</div>
- <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-top:4px;line-height:1.7">${mine?'فزت':'خسرت'} — برا السالفة كان <b>${esc(VB.names[VB.spy])}${bbSpyMe()?' (أنت)':''}</b><br>الكلمة: <b>${esc(VB.word)}</b> · ${why}</div>
- <div class="sl">الأصوات</div>
- <div class="vbVotes">${VB.cast.map(c=>`<div><span>${esc(VB.names[c.who])}</span><b>${esc(VB.names[c.t])}</b></div>`).join('')}</div>
- ${bbFeed()}
- <button class="rbtn" style="margin-top:14px" onclick="bbStart('${VB.diff}')"><span>جولة أخرى</span></button>
- <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','barra')">رجوع</button>
- </div>`);
+ const title=outcome==='caught'?'أُمسك ببرا السالفة!':outcome==='guessed'?'عرف الكلمة — فاز برا السالفة!':'نجا برا السالفة!';
+ vbPhase('trophy','النهاية','');
+ vbMsg({k:'card',t:`${resMedal(mine?'win':'lose',spyWon?'door':'trophy')}
+  <div class="mtl" style="font-size:18px;margin-top:6px">${title}</div>
+  <div class="vbCardD">${mine?'فزت':'خسرت'} — برا السالفة كان <b>${esc(VB.names[VB.spy])}${brSpyMe()?' (أنت)':''}</b><br>الكلمة: <b>${esc(VB.word)}</b></div>`});
+ vbAct(`<button class="rbtn" onclick="brStart('${VB.diff}')"><span>جولة أخرى</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','barra')">رجوع</button>`);
 }
 
 /* ── الرسم ضد الكمبيوتر: الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن — كلّما أبكرت كسبت أكثر ── */

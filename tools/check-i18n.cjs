@@ -34,7 +34,8 @@ const HUBS=['carrom','uno','mafia','draw','barra'];
 
 function latin(t){
  return [...new Set((t.match(/[A-Za-z][A-Za-z'’\-]+/g)||[]))]
-  .filter(w=>!ALLOW.has(w) && !(isCode(w) && !NEVER.has(w)));
+  .filter(w=>!ALLOW.has(w) && !(isCode(w) && !NEVER.has(w)))
+  .filter(w=>!/^[A-Z][a-z]$/.test(w));   // رموز العناصر الكيميائية في أسئلة العلوم (Na · Au · Fe) محتوى مشروع
 }
 
 (async()=>{
