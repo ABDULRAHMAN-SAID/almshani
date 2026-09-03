@@ -13284,11 +13284,18 @@ const EMO_EMBLEM=(function(){
    S('M31 16.5 L33 13.5 M35 19 L38 17 M27 15 L27.8 12',GOLD[0],1.5)+
    star(35.5,13,3,'#FFF8E0')+gloss(16,17.5,5,1.8,-16,.35)}}
  {const k='clap';
-  const L='M8.5 30 L12 19.5 Q13 16.5 15.5 17.5 L16 23.5 L17.5 14.5 Q18.5 12 20.8 13 L21 23 L23 21 L24 26 L23.5 38 Q17 42 9.5 36 Z';
-  const Rr='M39.5 30 L36 19.5 Q35 16.5 32.5 17.5 L32 23.5 L30.5 14.5 Q29.5 12 27.2 13 L27 23 L25 21 L24 26 L24.5 38 Q31 42 38.5 36 Z';
-  E[k]={b:['#256B4A','#0A2A1B'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(L)+shadow(Rr)+P(L,G(k))+P(Rr,G(k))+
-   S('M16 24 L16.5 30 M31.5 24 L31 30',RIM,.8,.55)+
-   S('M24 6 L24 10.5 M17.5 8.5 L19.5 12.5 M30.5 8.5 L28.5 12.5',GOLD[0],1.8)+gloss(13,20,3,1.3,-30,.3)+gloss(35,20,3,1.3,30,.3)}}
+  // كفّان يلتقيان: أصابع مستدقّة بمفاصلها، والصدمة شرر فوقهما
+  const finger=(x0,y0,x1,y1,w)=>{const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy),nx=-dy/L*w/2,ny=dx/L*w/2,tx=dx/L*w/2,ty=dy/L*w/2;
+   return `M${(x0+nx).toFixed(1)} ${(y0+ny).toFixed(1)} L${(x1+nx*.8).toFixed(1)} ${(y1+ny*.8).toFixed(1)} Q${(x1+tx).toFixed(1)} ${(y1+ty).toFixed(1)} ${(x1-nx*.8).toFixed(1)} ${(y1-ny*.8).toFixed(1)} L${(x0-nx).toFixed(1)} ${(y0-ny).toFixed(1)} Z`};
+  const palmL='M7 33 Q6 25 11 22 L21 21 Q25 22 24 27 L22 37 Q19 41 12.5 40 Q7 39 7 33 Z';
+  const fL=[finger(12,22,10,12,4.6),finger(15.5,21,15.5,9,4.8),finger(19,21,20.5,10,4.6),finger(22.5,23,25.5,14,4.2)];
+  const mirror=d=>d.replace(/(-?\d+\.?\d*) (-?\d+\.?\d*)/g,(m,x,y)=>(48-parseFloat(x)).toFixed(1)+' '+y);
+  const palmR=mirror(palmL),fR=fL.map(mirror);
+  E[k]={b:['#256B4A','#0A2A1B'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(palmL)+shadow(palmR)+
+   fL.map(d=>P(d,G(k))).join('')+P(palmL,G(k))+fR.map(d=>P(d,G(k))).join('')+P(palmR,G(k))+
+   S('M10 31 Q14 33 20 31 M28 31 Q34 33 38 31',RIM,.7,.5)+
+   S('M24 5 L24 10.5 M18.5 7 L20.5 11.5 M29.5 7 L27.5 11.5 M14 12 L16.5 15 M34 12 L31.5 15',GOLD[0],1.8)+
+   '<circle cx="24" cy="14" r="1.2" fill="#FFF8E0"/>'+gloss(13,27,3,1.4,-25,.3)+gloss(35,27,3,1.4,25,.3)}}
  {const k='think';
   E[k]={b:['#22557A','#0A1F30'],full:1,a:'<defs>'+rad('er'+k,['#FFF8DC','#F3C24C','#B07A14'])+grad('eg'+k,SIL)+'</defs>'+
    S('M11 13 L14 15.5 M37 13 L34 15.5 M8 24 L11.5 24 M40 24 L36.5 24 M12 33 L14.5 31 M36 33 L33.5 31',GOLD[0],1.6,.8)+
@@ -13303,18 +13310,24 @@ const EMO_EMBLEM=(function(){
    S('M10 13 L14.5 17.5 M38 34 L33.5 30.5 M9 31 L13.5 29 M39 15 L34.5 17.5',"#FFFFFF",1.1,.45)+
    shadow(b)+P(b,G(k))+S('M26.5 10 L17.5 24',"#FFF8E0",1.1,.55)}}
  {const k='thumbs';
-  const fist='M14.5 23.5 H27.5 Q31.5 23.5 31.5 27.5 V35.5 Q31.5 39 28 39 H17.5 Q13.5 39 13.5 35 V26 Q13.5 23.5 14.5 23.5 Z',
-   thumb='M17.5 24 V16.5 Q17.5 11.5 21.5 11.5 Q25 11.5 25 15.5 L24.5 24 Z';
-  E[k]={b:['#28479A','#0C1A46'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,SIL,1)+'</defs>'+
-   shadow(fist)+shadow(thumb)+P('M8.5 25.5 H14 V38.5 H8.5 Z','url(#eg2'+k+')',SRIM,.7)+P(fist,G(k))+P(thumb,G(k))+
-   S('M17.5 28.5 H30 M17.5 32.5 H30 M17.5 36 H29',RIM,.8,.55)+gloss(20,15,2,3.2,0,.35)}}
+  // إبهام مرفوع: قبضة بأربع لفّات أصابع ومفاصل، وإبهام بظفر، وكفّ فولاذية
+  const fist='M15.5 24 H28.5 Q32.5 24 32.5 28 V35 Q32.5 39 28.5 39 H19.5 Q15.5 39 15.5 35 Z',
+   thumb='M17.5 24.5 V15.5 Q17.5 10.5 21.5 10.5 Q25.5 10.5 25.5 14.5 L25 24.5 Z';
+  const rolls=[26,29.6,33.2,36.4].map(y=>'<rect x="16.5" y="'+(y-1.2)+'" width="15" height="2.6" rx="1.3" fill="'+GOLD[2]+'" opacity=".45"/><rect x="17.5" y="'+(y-1.5)+'" width="13" height="1" rx=".5" fill="#FFF6D8" opacity=".35"/>').join('');
+  E[k]={b:['#28479A','#0C1A46'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,SIL,1)+'</defs>'+shadow(fist)+shadow(thumb)+
+   P('M8.5 25.5 H14.5 V38.5 H8.5 Z','url(#eg2'+k+')',SRIM,.7)+S('M9.5 27.5 H13.5 M9.5 36.5 H13.5',SRIM,.6,.5)+
+   P(fist,G(k))+rolls+P(thumb,G(k))+
+   '<ellipse cx="21.5" cy="13.4" rx="1.9" ry="2.3" fill="#FFF3E0" opacity=".85"/>'+S('M18.5 20 Q21.5 18.6 24.5 20',RIM,.7,.5)+gloss(20,16,1.6,3,0,.3)}}
  {const k='shake';
-  const L='M5 33 L17 24.5 L25.5 28 L20.5 36.5 L9.5 40.5 Z',Rr='M43 33 L31 24.5 L22.5 28 L27.5 36.5 L38.5 40.5 Z';
-  E[k]={b:['#2B6A47','#0B2A1B'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,SIL)+'</defs>'+
-   shadow(L)+shadow(Rr)+P(Rr,'url(#eg2'+k+')',SRIM)+P(L,G(k))+
-   P('M18.5 26 Q24 22 29.5 26 Q31 30 27 33 L21 33 Q17 30 18.5 26 Z',G(k))+
-   S('M20.5 29 L27.5 29 M21 31.2 L27 31.2',RIM,.8,.55)+
-   S('M24 12 L24 16.5 M18 13.5 L20 17.5 M30 13.5 L28 17.5',GOLD[0],1.6,.9)+gloss(12,31,3,1.2,-35,.3)}}
+  // مصافحة: ذراع ذهبية وذراع فولاذية، كفّان متشابكان بمفاصل ظاهرة
+  const armL='M4 31 L15 22.5 Q19 21 22 24 L25 28 L18 36 Q13 39 7.5 38 Z',armR='M44 31 L33 22.5 Q29 21 26 24 L23 28 L30 36 Q35 39 40.5 38 Z';
+  const clasp='M17.5 26 Q24 21.5 30.5 26 Q32.5 30.5 28.5 33.5 Q24 36 19.5 33.5 Q15.5 30.5 17.5 26 Z';
+  E[k]={b:['#2B6A47','#0B2A1B'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,SIL)+'</defs>'+shadow(armL)+shadow(armR)+
+   P(armR,'url(#eg2'+k+')',SRIM)+P('M40 30 L44 27.5 L46 32 L42.5 35 Z','#1E3A70','#0C1C3A',.6)+
+   P(armL,G(k))+P('M8 30 L4 27.5 L2 32 L5.5 35 Z','#1E3A70','#0C1C3A',.6)+
+   P(clasp,G(k))+S('M19.5 28.5 Q22 27.5 24 29.5 M22 31.5 Q24 30.5 26 32.5 M24.5 34 Q26.5 33 28.5 34.5',RIM,.8,.6)+
+   S('M18.5 30.5 L16 33',RIM,.7,.45)+
+   S('M24 11 L24 16 M18 12.5 L20 17 M30 12.5 L28 17',GOLD[0],1.6,.9)+gloss(12,29,3,1.2,-35,.3)}}
  // ── نادرة ──
  {const k='confident';
   const lz='M8.5 19 H23 Q23 31.5 16 31.5 Q8.5 31.5 8.5 22.5 Z',rz='M39.5 19 H25 Q25 31.5 32 31.5 Q39.5 31.5 39.5 22.5 Z';
@@ -13324,13 +13337,15 @@ const EMO_EMBLEM=(function(){
    S('M23 20 Q24 17.6 25 20',GOLD[1],1.7)+S('M8.5 20.5 L5 18.5 M39.5 20.5 L43 18.5',GOLD[1],1.8)+
    S('M11.5 27 L18.5 21 M28 27 L35 21',"#FFFFFF",1.4,.5)+S('M13.5 29 L15.5 27',"#FFFFFF",1.1,.35)}}
  {const k='angry';
-  const burst=(()=>{let d='';for(let i=0;i<12;i++){const a=i*Math.PI/6,r=i%2?12:21;d+=(i?'L':'M')+(24+Math.cos(a)*r).toFixed(1)+' '+(24+Math.sin(a)*r).toFixed(1)+' '}return d+'Z'})();
-  const palm='M12 25 H36 V34 Q36 38.5 31.5 38.5 H16.5 Q12 38.5 12 34 Z',thumb='M12 27 Q7.5 28 8 32 Q8.5 36 12 35.5 Z';
+  // قبضة أمامية بأربع مفاصل بارزة على شرارة حمراء
+  const burst=(()=>{let d='';for(let i=0;i<14;i++){const a=i*Math.PI/7,r=i%2?12.5:21;d+=(i?'L':'M')+(24+Math.cos(a)*r).toFixed(1)+' '+(24+Math.sin(a)*r).toFixed(1)+' '}return d+'Z'})();
+  const palm='M12 26 H36 V34 Q36 38.5 31.5 38.5 H16.5 Q12 38.5 12 34 Z',thumb='M12 27.5 Q7.5 28.5 8 32.5 Q8.5 36.5 12 36 Z';
+  const knuckle=x=>'M'+x+' 26.5 V20.5 Q'+x+' 17.4 '+(x+2.75)+' 17.4 Q'+(x+5.5)+' 17.4 '+(x+5.5)+' 20.5 V26.5 Z';
   E[k]={b:['#7E2620','#300A08'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+
-   '<path d="'+burst+'" fill="#E24B4A" opacity=".5"/>'+
-   shadow(palm)+P(palm,G(k),'#4A1808')+P(thumb,G(k),'#4A1808')+
-   [13,19,25,31].map((x,i)=>P('M'+x+' 25.5 V19.5 Q'+x+' 17 '+(x+2.75)+' 17 Q'+(x+5.5)+' 17 '+(x+5.5)+' 19.5 V25.5 Z',G(k),'#4A1808')).join('')+
-   S('M15 30 H33 M16 34 H32','#4A1808',.8,.5)+gloss(18,20,1.6,2.2,0,.35)}}
+   '<path d="'+burst+'" fill="#E24B4A" opacity=".5"/>'+shadow(palm)+P(palm,G(k),'#4A1808')+P(thumb,G(k),'#4A1808')+
+   [12.6,18.4,24.2,30].map(x=>P(knuckle(x),G(k),'#4A1808')).join('')+
+   [12.6,18.4,24.2,30].map(x=>'<ellipse cx="'+(x+2.75)+'" cy="19.6" rx="1.6" ry="1" fill="#FFF3D0" opacity=".45"/>').join('')+
+   S('M14.5 30.5 H33.5 M15.5 34.5 H32.5','#4A1808',.8,.5)+gloss(18,22,1.6,2.2,0,.25)}}
  {const k='tense';
   const pulse='M7.5 26 H14.5 L17.5 20 L20.5 32.5 L24 14.5 L27 33 L30 24.5 L32.5 26 H35';
   E[k]={b:['#1B5F5A','#062422'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+
@@ -13346,10 +13361,13 @@ const EMO_EMBLEM=(function(){
   E[k]={b:['#2A2E6E','#0A0C2C'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(c)+P(c,G(k))+
    star(35,14,2.6)+star(39.5,23,1.8)+star(36.5,32.5,2.2)+gloss(17,15,3,5,25,.3)}}
  {const k='salute';
-  const palm='M15.5 22 H32.5 V32 Q32.5 37 27.5 37 H20.5 Q15.5 37 15.5 32 Z',thumb='M15.5 26 Q9.5 24.5 9 29.5 Q9 33 12.5 33.5 L15.5 32.5 Z';
-  const f=[[16.5,11,12.5],[20.7,9,14.5],[24.9,9.5,14],[29.1,11.5,12]].map(([x,y,h])=>P('M'+x+' '+(y+h)+' V'+(y+1.8)+' Q'+x+' '+y+' '+(x+1.8)+' '+y+' Q'+(x+3.6)+' '+y+' '+(x+3.6)+' '+(y+1.8)+' V'+(y+h)+' Z',G(k))).join('');
-  E[k]={b:['#1C3A6C','#08142E'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(palm)+P('M14.5 36.5 H33.5 V41 H14.5 Z','#1E3A70','#0C1C3A',.7)+S('M14.5 38.5 H33.5',GOLD[1],1)+f+P(palm,G(k))+P(thumb,G(k))+
-   S('M20.5 25.5 V21 M24.7 25.5 V21 M28.9 25.5 V21','#3A2405',.8,.45)+gloss(19,28,2.2,3.5,0,.28)}}
+  // كفّ مرفوعة للتحية: أصابع مستدقّة بمفاصل وأظفار، وإبهام جانبي، وكمّ كحلي بخطّ ذهبي
+  const palm='M15.5 22.5 H32.5 V32 Q32.5 37.5 27.5 37.5 H20.5 Q15.5 37.5 15.5 32 Z',thumb='M15.5 26 Q9.5 24.5 9 29.5 Q9 33 12.5 33.5 L15.5 32.5 Z';
+  const f=[[16.6,11.5,12.5],[20.8,9,14.5],[25,9.5,14],[29.2,12,12]].map(([x,y,h])=>P('M'+x+' '+(y+h)+' V'+(y+1.6)+' Q'+x+' '+y+' '+(x+1.75)+' '+y+' Q'+(x+3.5)+' '+y+' '+(x+3.5)+' '+(y+1.6)+' V'+(y+h)+' Z',G(k))).join('');
+  const nails=[[16.6,11.5],[20.8,9],[25,9.5],[29.2,12]].map(([x,y])=>'<ellipse cx="'+(x+1.75)+'" cy="'+(y+2.3)+'" rx="1.1" ry="1.4" fill="#FFF3E0" opacity=".8"/>').join('');
+  const creases=[[16.6,11.5,12.5],[20.8,9,14.5],[25,9.5,14],[29.2,12,12]].map(([x,y,h])=>'M'+(x+.5)+' '+(y+h*.42)+' Q'+(x+1.75)+' '+(y+h*.42-.6)+' '+(x+3)+' '+(y+h*.42)+' M'+(x+.5)+' '+(y+h*.72)+' Q'+(x+1.75)+' '+(y+h*.72-.6)+' '+(x+3)+' '+(y+h*.72)).join(' ');
+  E[k]={b:['#1C3A6C','#08142E'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(palm)+P('M14.5 37 H33.5 V41 H14.5 Z','#1E3A70','#0C1C3A',.7)+S('M14.5 39 H33.5',GOLD[1],1)+f+nails+P(palm,G(k))+P(thumb,G(k))+
+   S(creases,'#3A2405',.7,.45)+S('M18 29 Q24 27 30 29',RIM,.7,.4)+gloss(19,28,2.2,3.5,0,.28)}}
  {const k='watch';
   E[k]={b:['#1B5438','#072414'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+rad('er'+k,['#A6F2E4','#2FB7A6','#0B4A44'])+'</defs>'+
    shadow('M6 24 Q24 8 42 24 Q24 40 6 24 Z')+
@@ -19886,7 +19904,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.35';
+const APP_VER='5.36';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -21202,32 +21220,42 @@ function unoPass(){
 }
 /* يد مرسومة تتحرك — تُظهر مَن يلعب وماذا يفعل */
 const HAND_SVG=`<svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg"><defs>
- <linearGradient id="hnS" x1=".18" y1="0" x2=".9" y2="1">
-  <stop offset="0" stop-color="#FCDFC0"/><stop offset=".52" stop-color="#F0C294"/>
-  <stop offset="1" stop-color="#C68C5C"/></linearGradient>
+ <linearGradient id="hnS" x1=".15" y1="0" x2=".85" y2="1">
+  <stop offset="0" stop-color="#FBE3C8"/><stop offset=".5" stop-color="#EFC397"/><stop offset="1" stop-color="#C58A58"/></linearGradient>
+ <linearGradient id="hnF" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#D9A575"/><stop offset=".35" stop-color="#F6D3AE"/><stop offset=".7" stop-color="#EEC094"/><stop offset="1" stop-color="#C6895A"/></linearGradient>
  <linearGradient id="hnC" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0" stop-color="#3C6ED8"/><stop offset="1" stop-color="#1C3A82"/></linearGradient>
- <radialGradient id="hnG" cx=".34" cy=".26" r=".85">
-  <stop offset="0" stop-color="#FFFFFF" stop-opacity=".42"/>
-  <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient></defs>
- <g stroke="#9C6742" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round">
-  <path d="M30 74 q-17 5 -19 22 q-2 15 11 19 q11 3 16 -9 l6 -18 z" fill="url(#hnS)"/>
-  <rect x="43" y="15" width="18" height="62" rx="9" fill="url(#hnS)"/>
-  <rect x="60" y="9" width="18" height="68" rx="9" fill="url(#hnS)"/>
-  <rect x="77" y="17" width="17" height="60" rx="8.5" fill="url(#hnS)"/>
-  <rect x="92" y="29" width="16" height="48" rx="8" fill="url(#hnS)"/>
-  <path d="M36 60 q-7 9 -5 24 l4 27 q3 19 23 19 h30 q23 0 23 -23 v-44 q0 -9 -10 -9 h-56 q-6 0 -9 6 z" fill="url(#hnS)"/>
-  <path d="M40 119 h56 q5 21 -6 28 h-44 q-11 -7 -6 -28 z" fill="url(#hnC)" stroke="#16306E"/>
+  <stop offset="0" stop-color="#2B3A6E"/><stop offset="1" stop-color="#151F44"/></linearGradient>
+ <linearGradient id="hnN" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#FFF3EA"/><stop offset="1" stop-color="#F3CDB8"/></linearGradient>
+ <radialGradient id="hnG" cx=".38" cy=".3" r=".8">
+  <stop offset="0" stop-color="#FFFFFF" stop-opacity=".38"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+ <radialGradient id="hnSh" cx=".5" cy="0" r="1">
+  <stop offset="0" stop-color="#8A5530" stop-opacity=".42"/><stop offset="1" stop-color="#8A5530" stop-opacity="0"/></radialGradient></defs>
+ <g stroke="#8E5B38" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M35 84 Q21 80 13.5 91 Q8 100 12.5 111 Q17 121.5 27.5 119.5 Q34.5 117.5 37 108 L40 90 Z" fill="url(#hnS)"/>
+  <path d="M41 80 L42.5 26 Q42.5 17.5 50 17.5 Q57.5 17.5 57.5 26 L58 80 Z" fill="url(#hnF)"/>
+  <path d="M59 78 L60 17 Q60 8.5 68 8.5 Q76 8.5 76 17 L77 78 Z" fill="url(#hnF)"/>
+  <path d="M78 79 L78.5 23 Q78.5 14.5 86 14.5 Q93.5 14.5 93.5 23 L94 79 Z" fill="url(#hnF)"/>
+  <path d="M95 84 L95 37 Q95 29 101.5 29 Q108 29 108 37 L108.5 84 Z" fill="url(#hnF)"/>
+  <path d="M34 82 Q31 92 32.5 104 L36 127 Q39 143 59 143 H96 Q113 143 113 125 V86 Q113 78 105 78 H41 Q35.5 78 34 82 Z" fill="url(#hnS)"/>
  </g>
- <g fill="#FFFFFF" opacity=".5">
-  <rect x="46" y="19" width="12" height="10" rx="5"/><rect x="63" y="13" width="12" height="10" rx="5"/>
-  <rect x="80" y="21" width="11" height="9" rx="4.5"/><rect x="95" y="33" width="10" height="9" rx="4.5"/>
+ <path d="M40 78 H108 V88 Q74 96 40 88 Z" fill="url(#hnSh)"/>
+ <g fill="none" stroke="#B5794E" stroke-width="1.3" opacity=".7">
+  <path d="M44 42 q6 -2.5 12 0 M44.5 60 q5.5 -2.5 11.5 0"/><path d="M62 34 q6 -2.5 12 0 M62 55 q6 -2.5 12 0"/>
+  <path d="M80.5 40 q5.5 -2.5 11.5 0 M80.5 59 q5.5 -2.5 11.5 0"/><path d="M97 52 q5 -2 10 0 M97 66 q5 -2 10 0"/>
+  <path d="M20 98 q6 -3 11 -1"/>
  </g>
- <g stroke="#C99263" stroke-width="1.6" fill="none" opacity=".55">
-  <path d="M46 92 q22 7 44 0"/><path d="M48 104 q20 6 40 0"/>
+ <g fill="url(#hnN)" stroke="#D8A88E" stroke-width="1">
+  <ellipse cx="50" cy="24" rx="4.6" ry="5.4"/><ellipse cx="68" cy="15" rx="4.8" ry="5.6"/><ellipse cx="86" cy="21" rx="4.6" ry="5.4"/><ellipse cx="101.5" cy="36" rx="4.2" ry="5"/>
  </g>
- <path d="M36 60 q-7 9 -5 24 l4 27 q3 19 23 19 h30 q23 0 23 -23 v-44 q0 -9 -10 -9 h-56 q-6 0 -9 6 z" fill="url(#hnG)"/>
+ <g fill="none" stroke="#C99263" stroke-width="1.4" opacity=".5"><path d="M48 98 q22 8 44 0"/><path d="M50 110 q20 7 40 0"/><path d="M50 122 q18 6 36 0"/></g>
+ <path d="M34 82 Q31 92 32.5 104 L36 127 Q39 143 59 143 H96 Q113 143 113 125 V86 Q113 78 105 78 H41 Q35.5 78 34 82 Z" fill="url(#hnG)"/>
+ <path d="M38 131 H110 Q113 150 100 150 H47 Q35 150 38 131 Z" fill="url(#hnC)" stroke="#0E1633" stroke-width="1.6"/>
+ <path d="M40 135 H108" stroke="#E8B23A" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+ <path d="M42 140 H106" stroke="#FFFFFF" stroke-width=".8" opacity=".12"/>
 </svg>`;
+
 const UNO_HELP={S:['تخطٍّ','اللاعب التالي يفقد دوره'],R:['عكس','ينعكس اتجاه اللعب — وفي لعبة الثنائي تلعب مرة أخرى'],
  D:['سحب اثنتين','التالي يسحب بطاقتين ويفقد دوره'],W:['جوكر','تختار أنت اللون التالي — تُلعب في أي وقت'],
  F:['جوكر +4','تختار اللون والتالي يسحب أربع بطاقات']};
@@ -22362,41 +22390,87 @@ function vbMentions(text){
 function vbBackdrop(kind){
  if(kind==='mafia'){
   const seed=hashStr(VB.names.join('|'));let h=seed;const rnd=()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;return (h%1000)/1000};
-  let far='',near='',win='';
-  for(let x=0;x<400;){const w=18+Math.floor(rnd()*30),hh=50+Math.floor(rnd()*70);far+=`<rect x="${x}" y="${170-hh}" width="${w}" height="${hh}" fill="#0F1630"/>`;x+=w+2}
-  for(let x=-10;x<410;){const w=26+Math.floor(rnd()*44),hh=30+Math.floor(rnd()*60);near+=`<rect x="${x}" y="${190-hh}" width="${w}" height="${hh}" fill="#070B18"/>`;
-   for(let wy=196-hh;wy<184;wy+=9)for(let wx=x+4;wx<x+w-5;wx+=8)if(rnd()<.22)win+=`<rect x="${wx}" y="${wy}" width="3.5" height="4.5" fill="${rnd()<.7?'#F3C56A':'#8FD3FF'}" opacity="${.5+rnd()*.5}"/>`;
+  let far='',mid='',near='',win='',refl='',roof='';
+  for(let x=-6;x<410;){const w=16+Math.floor(rnd()*26),hh=44+Math.floor(rnd()*64);far+=`<rect x="${x}" y="${162-hh}" width="${w}" height="${hh}" rx="1" fill="#1A2450"/>`;x+=w+1}
+  for(let x=-8;x<412;){const w=22+Math.floor(rnd()*36),hh=36+Math.floor(rnd()*58),top=172-hh;
+   mid+=`<rect x="${x}" y="${top}" width="${w}" height="${hh}" fill="#0E1530"/>`;
+   const r=rnd();if(r<.3)roof+=`<rect x="${x+4}" y="${top-6}" width="7" height="6" fill="#0E1530"/><rect x="${x+3}" y="${top-7}" width="9" height="1.6" fill="#141C3A"/>`;
+   else if(r<.5)roof+=`<path d="M${x+w/2} ${top-14} V${top}" stroke="#141C3A" stroke-width="1"/><path d="M${x+w/2-4} ${top-10} H${x+w/2+4}" stroke="#141C3A" stroke-width="1"/>`;
+   for(let wy=top+5;wy<166;wy+=8)for(let wx=x+3;wx<x+w-4;wx+=6)if(rnd()<.2)win+=`<rect x="${wx}" y="${wy}" width="2.6" height="3.6" fill="${rnd()<.75?'#F0C46A':'#8FD3FF'}" opacity="${.45+rnd()*.5}"/>`;
+   x+=w+2}
+  for(let x=-10;x<414;){const w=30+Math.floor(rnd()*46),hh=22+Math.floor(rnd()*46),top=176-hh;
+   near+=`<rect x="${x}" y="${top}" width="${w}" height="${hh}" fill="#060A17"/>`;
+   for(let wy=top+6;wy<170;wy+=9)for(let wx=x+5;wx<x+w-6;wx+=9)if(rnd()<.24){const c=rnd()<.7?'#F6CF7A':'#9FDBFF',o=(.55+rnd()*.45).toFixed(2);win+=`<rect x="${wx}" y="${wy}" width="3.6" height="4.8" fill="${c}" opacity="${o}"/>`;refl+=`<rect x="${wx}" y="${178+(176-wy)*.28}" width="3.6" height="2.2" fill="${c}" opacity="${(o*.28).toFixed(2)}"/>`}
    x+=w+3}
   return `<svg class="vbBg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-   <defs><radialGradient id="vbMoon" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFF4D6"/><stop offset=".7" stop-color="#F2DDA0"/><stop offset="1" stop-color="#E8C46A"/></radialGradient>
-   <radialGradient id="vbGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,236,180,.45)"/><stop offset="1" stop-color="rgba(255,236,180,0)"/></radialGradient>
-   <linearGradient id="vbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#05081A"/><stop offset="1" stop-color="#16204A"/></linearGradient>
-   <linearGradient id="vbFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(120,140,200,0)"/><stop offset="1" stop-color="rgba(120,140,200,.28)"/></linearGradient>
-   <radialGradient id="vbLamp" cx=".5" cy="0" r="1"><stop offset="0" stop-color="rgba(255,214,120,.55)"/><stop offset="1" stop-color="rgba(255,214,120,0)"/></radialGradient></defs>
+   <defs><radialGradient id="vbMoon" cx=".42" cy=".4" r=".6"><stop offset="0" stop-color="#FFF8E6"/><stop offset=".75" stop-color="#F1DCA2"/><stop offset="1" stop-color="#D9B86A"/></radialGradient>
+   <radialGradient id="vbGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,236,180,.5)"/><stop offset=".55" stop-color="rgba(255,236,180,.12)"/><stop offset="1" stop-color="rgba(255,236,180,0)"/></radialGradient>
+   <linearGradient id="vbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#040718"/><stop offset=".6" stop-color="#121A44"/><stop offset="1" stop-color="#1D2A5E"/></linearGradient>
+   <linearGradient id="vbHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(60,80,150,0)"/><stop offset="1" stop-color="rgba(60,80,150,.45)"/></linearGradient>
+   <linearGradient id="vbFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(120,140,200,0)"/><stop offset="1" stop-color="rgba(120,140,200,.3)"/></linearGradient>
+   <linearGradient id="vbRoad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0E1F"/><stop offset="1" stop-color="#03050C"/></linearGradient>
+   <radialGradient id="vbLamp" cx=".5" cy="0" r="1"><stop offset="0" stop-color="rgba(255,214,120,.6)"/><stop offset="1" stop-color="rgba(255,214,120,0)"/></radialGradient>
+   <radialGradient id="vbLampG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,225,150,.9)"/><stop offset="1" stop-color="rgba(255,225,150,0)"/></radialGradient>
+   <filter id="vbBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>
+   <filter id="vbBlur2" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="1.1"/></filter></defs>
    <rect width="400" height="190" fill="url(#vbSky)"/>
-   <g fill="#fff"><circle cx="40" cy="30" r="1"/><circle cx="120" cy="18" r=".8"/><circle cx="210" cy="40" r=".9"/><circle cx="300" cy="22" r="1.1"/><circle cx="360" cy="52" r=".7"/><circle cx="170" cy="62" r=".6"/><circle cx="255" cy="70" r=".8"/></g>
-   <circle cx="318" cy="46" r="44" fill="url(#vbGlow)"/><circle cx="318" cy="46" r="17" fill="url(#vbMoon)"/><circle cx="326" cy="40" r="15" fill="#16204A" opacity=".0"/>
-   ${far}${near}${win}
-   <rect x="0" y="120" width="400" height="70" fill="url(#vbFog)"/>
-   <path d="M74 190 V128" stroke="#2A2F48" stroke-width="3"/><path d="M62 128 H86" stroke="#2A2F48" stroke-width="3" stroke-linecap="round"/><ellipse cx="74" cy="130" rx="6" ry="3" fill="#FFE1A0"/>
-   <path d="M74 130 L20 190 H128 Z" fill="url(#vbLamp)"/>
-   <rect x="0" y="182" width="400" height="8" fill="#04060F"/></svg>`;
+   <g fill="#fff"><circle cx="40" cy="30" r="1"/><circle cx="120" cy="18" r=".8"/><circle cx="210" cy="40" r=".9"/><circle cx="300" cy="22" r="1.1"/><circle cx="360" cy="52" r=".7"/><circle cx="170" cy="62" r=".6"/><circle cx="255" cy="70" r=".8"/><circle cx="90" cy="58" r=".7"/><circle cx="385" cy="14" r=".9"/><circle cx="20" cy="72" r=".6"/></g>
+   <circle cx="318" cy="46" r="52" fill="url(#vbGlow)"/><circle cx="318" cy="46" r="18" fill="url(#vbMoon)"/>
+   <g fill="#C9A860" opacity=".35"><circle cx="311" cy="41" r="3.2"/><circle cx="323" cy="52" r="2.2"/><circle cx="322" cy="38" r="1.4"/></g>
+   <g filter="url(#vbBlur)" fill="#3A4A80" opacity=".55"><ellipse cx="290" cy="60" rx="46" ry="7"/><ellipse cx="330" cy="70" rx="34" ry="5"/><ellipse cx="90" cy="46" rx="40" ry="6"/></g>
+   ${far}
+   <path d="M232 162 V112 Q233 104 235 104 Q237 104 238 112 V162 Z" fill="#1A2450"/><circle cx="235" cy="101" r="3" fill="#1A2450"/>
+   <path d="M246 162 V128 Q262 108 278 128 V162 Z" fill="#1A2450"/><path d="M262 108 V100" stroke="#1A2450" stroke-width="1.6"/>
+   <rect x="0" y="100" width="400" height="62" fill="url(#vbHaze)"/>
+   ${roof}${mid}${near}${win}
+   <rect x="0" y="176" width="400" height="14" fill="url(#vbRoad)"/>
+   <g filter="url(#vbBlur2)">${refl}</g>
+   <rect x="0" y="126" width="400" height="52" fill="url(#vbFog)"/>
+   <path d="M74 176 V126" stroke="#2A2F48" stroke-width="3.2"/><path d="M60 126 H88" stroke="#2A2F48" stroke-width="3" stroke-linecap="round"/><path d="M66 127 L60 136 M82 127 L88 136" stroke="#2A2F48" stroke-width="1.4"/>
+   <circle cx="74" cy="131" r="10" fill="url(#vbLampG)"/><ellipse cx="74" cy="130" rx="5.5" ry="3" fill="#FFF0C0"/>
+   <path d="M74 132 L18 180 H130 Z" fill="url(#vbLamp)"/>
+   <ellipse cx="74" cy="181" rx="34" ry="3" fill="rgba(255,214,120,.16)"/>
+   <rect x="0" y="184" width="400" height="6" fill="#02040A"/></svg>`;
  }
  return `<svg class="vbBg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-  <defs><linearGradient id="vbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1A10"/><stop offset="1" stop-color="#4A2E18"/></linearGradient>
-  <radialGradient id="vbLan" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,196,96,.75)"/><stop offset=".45" stop-color="rgba(255,170,60,.28)"/><stop offset="1" stop-color="rgba(255,170,60,0)"/></radialGradient>
-  <linearGradient id="vbRug" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6E1F24"/><stop offset=".5" stop-color="#8A2A2E"/><stop offset="1" stop-color="#6E1F24"/></linearGradient>
-  <pattern id="vbPat" width="14" height="14" patternUnits="userSpaceOnUse"><path d="M7 1 L13 7 L7 13 L1 7 Z" fill="none" stroke="rgba(255,220,150,.22)" stroke-width="1"/></pattern></defs>
-  <rect width="400" height="190" fill="url(#vbWall)"/>
-  <g fill="#1B0F08" opacity=".85"><path d="M40 150 V70 A45 45 0 0 1 130 70 V150 Z"/><path d="M155 150 V62 A45 45 0 0 1 245 62 V150 Z"/><path d="M270 150 V70 A45 45 0 0 1 360 70 V150 Z"/></g>
-  <g fill="none" stroke="#C08A3E" stroke-width="1.4" opacity=".7"><path d="M40 150 V70 A45 45 0 0 1 130 70 V150"/><path d="M155 150 V62 A45 45 0 0 1 245 62 V150"/><path d="M270 150 V70 A45 45 0 0 1 360 70 V150"/></g>
-  <circle cx="200" cy="70" r="70" fill="url(#vbLan)"/>
-  <path d="M200 0 V32" stroke="#C08A3E" stroke-width="1.5"/><path d="M188 34 H212 L208 58 Q200 64 192 58 Z" fill="#E8B23A" stroke="#7A5410" stroke-width="1"/><rect x="190" y="30" width="20" height="5" rx="1.5" fill="#C08A3E"/><circle cx="200" cy="47" r="5" fill="#FFF0C0"/>
-  <rect x="0" y="150" width="400" height="40" fill="url(#vbRug)"/><rect x="0" y="150" width="400" height="40" fill="url(#vbPat)"/>
-  <g><rect x="18" y="128" width="70" height="26" rx="10" fill="#7A2A2E" stroke="#C9921E" stroke-width="1.2"/><rect x="100" y="128" width="70" height="26" rx="10" fill="#3A5A2E" stroke="#C9921E" stroke-width="1.2"/><rect x="230" y="128" width="70" height="26" rx="10" fill="#3A5A2E" stroke="#C9921E" stroke-width="1.2"/><rect x="312" y="128" width="70" height="26" rx="10" fill="#7A2A2E" stroke="#C9921E" stroke-width="1.2"/></g>
-  <g fill="#C9921E"><path d="M186 122 Q200 110 214 122 L212 132 H188 Z"/><rect x="196" y="104" width="8" height="8" rx="2"/><path d="M214 124 Q226 122 222 132" fill="none" stroke="#C9921E" stroke-width="2"/></g>
-  <rect x="0" y="184" width="400" height="6" fill="#120A05"/></svg>`;
+  <defs><linearGradient id="vbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22140C"/><stop offset="1" stop-color="#4A2E18"/></linearGradient>
+  <radialGradient id="vbLan" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,200,100,.8)"/><stop offset=".4" stop-color="rgba(255,170,60,.3)"/><stop offset="1" stop-color="rgba(255,170,60,0)"/></radialGradient>
+  <linearGradient id="vbRug" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5E1B20"/><stop offset=".5" stop-color="#86282C"/><stop offset="1" stop-color="#5E1B20"/></linearGradient>
+  <linearGradient id="vbSkyN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A1030"/><stop offset="1" stop-color="#26356E"/></linearGradient>
+  <linearGradient id="vbBrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".5" stop-color="#C9921E"/><stop offset="1" stop-color="#7A5410"/></linearGradient>
+  <pattern id="vbTile" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M10 1 L12.4 7.6 L19 10 L12.4 12.4 L10 19 L7.6 12.4 L1 10 L7.6 7.6 Z" fill="none" stroke="rgba(255,214,140,.16)" stroke-width="1"/><circle cx="10" cy="10" r="1.2" fill="rgba(255,214,140,.14)"/></pattern>
+  <pattern id="vbLat" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M4 0 L8 4 L4 8 L0 4 Z" fill="none" stroke="rgba(240,200,120,.55)" stroke-width="1.1"/></pattern>
+  <pattern id="vbRugPat" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M8 1 L15 8 L8 15 L1 8 Z" fill="none" stroke="rgba(255,220,150,.22)" stroke-width="1"/><path d="M8 5 L11 8 L8 11 L5 8 Z" fill="rgba(255,220,150,.14)"/></pattern>
+  <clipPath id="vbArcM"><path d="M155 150 V64 A45 45 0 0 1 245 64 V150 Z"/></clipPath>
+  <filter id="vbSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
+  <rect width="400" height="190" fill="url(#vbWall)"/><rect width="400" height="150" fill="url(#vbTile)"/>
+  <rect x="0" y="118" width="400" height="32" fill="#1B0F08" opacity=".55"/><path d="M0 118 H400 M0 121 H400" stroke="#C08A3E" stroke-width=".8" opacity=".7"/>
+  <g fill="#150B06"><path d="M40 150 V72 A45 45 0 0 1 130 72 V150 Z"/><path d="M270 150 V72 A45 45 0 0 1 360 72 V150 Z"/></g>
+  <g fill="url(#vbLat)"><path d="M40 150 V72 A45 45 0 0 1 130 72 V150 Z"/><path d="M270 150 V72 A45 45 0 0 1 360 72 V150 Z"/></g>
+  <g clip-path="url(#vbArcM)"><rect x="150" y="60" width="100" height="90" fill="url(#vbSkyN)"/>
+   <g fill="#fff"><circle cx="170" cy="80" r=".9"/><circle cx="228" cy="74" r=".8"/><circle cx="212" cy="96" r=".6"/><circle cx="186" cy="108" r=".7"/></g>
+   <path d="M225 84 A11 11 0 1 0 225 106 A8.5 8.5 0 1 1 225 84 Z" fill="#FFE9A8"/><rect x="150" y="60" width="100" height="90" fill="url(#vbLat)" opacity=".55"/></g>
+  <g fill="none" stroke="url(#vbBrass)" stroke-width="2"><path d="M40 150 V72 A45 45 0 0 1 130 72 V150"/><path d="M155 150 V64 A45 45 0 0 1 245 64 V150"/><path d="M270 150 V72 A45 45 0 0 1 360 72 V150"/></g>
+  <g fill="none" stroke="#C08A3E" stroke-width=".8" opacity=".6"><path d="M46 150 V74 A39 39 0 0 1 124 74 V150"/><path d="M161 150 V66 A39 39 0 0 1 239 66 V150"/><path d="M276 150 V74 A39 39 0 0 1 354 74 V150"/></g>
+  <circle cx="200" cy="74" r="80" fill="url(#vbLan)"/>
+  <g stroke="rgba(255,214,120,.16)" stroke-width="1"><path d="M200 60 L120 150 M200 60 L280 150 M200 60 L160 150 M200 60 L240 150"/></g>
+  <path d="M200 0 V28" stroke="#C08A3E" stroke-width="1.6" stroke-dasharray="3 2"/>
+  <path d="M191 30 H209 L211 36 H189 Z" fill="url(#vbBrass)"/><path d="M190 36 H210 L207 62 Q200 68 193 62 Z" fill="#E8B23A" stroke="#7A5410" stroke-width="1"/>
+  <path d="M190 36 H210 L207 62 Q200 68 193 62 Z" fill="url(#vbTile)" opacity=".9"/><circle cx="200" cy="49" r="5.5" fill="#FFF4D0" filter="url(#vbSoft)"/><path d="M196 68 Q200 72 204 68" stroke="#C08A3E" stroke-width="1.4" fill="none"/>
+  <rect x="0" y="150" width="400" height="40" fill="url(#vbRug)"/><rect x="0" y="150" width="400" height="40" fill="url(#vbRugPat)"/>
+  <path d="M0 153 H400 M0 187 H400" stroke="#E8C25A" stroke-width="1.2" opacity=".7"/><path d="M0 156 H400 M0 184 H400" stroke="#3A5A2E" stroke-width="1.4" opacity=".7"/>
+  <ellipse cx="200" cy="170" rx="70" ry="12" fill="none" stroke="#E8C25A" stroke-width="1" opacity=".5"/><ellipse cx="200" cy="170" rx="56" ry="8" fill="rgba(232,194,90,.12)"/>
+  <g stroke="#C9921E" stroke-width="1.2"><rect x="14" y="126" width="72" height="26" rx="11" fill="#7A2A2E"/><path d="M22 132 H78 M22 146 H78" stroke="#E8C25A" opacity=".6"/><rect x="96" y="128" width="66" height="24" rx="10" fill="#3A5A2E"/><path d="M104 134 H154 M104 146 H154" stroke="#E8C25A" opacity=".6"/>
+   <rect x="238" y="128" width="66" height="24" rx="10" fill="#3A5A2E"/><path d="M246 134 H296 M246 146 H296" stroke="#E8C25A" opacity=".6"/><rect x="314" y="126" width="72" height="26" rx="11" fill="#7A2A2E"/><path d="M322 132 H378 M322 146 H378" stroke="#E8C25A" opacity=".6"/></g>
+  <g fill="#E8C25A"><circle cx="14" cy="126" r="2"/><circle cx="86" cy="126" r="2"/><circle cx="314" cy="126" r="2"/><circle cx="386" cy="126" r="2"/><circle cx="96" cy="152" r="1.6"/><circle cx="162" cy="152" r="1.6"/><circle cx="238" cy="152" r="1.6"/><circle cx="304" cy="152" r="1.6"/></g>
+  <ellipse cx="200" cy="140" rx="40" ry="7" fill="url(#vbBrass)"/><ellipse cx="200" cy="139" rx="36" ry="5" fill="#3A2408" opacity=".6"/>
+  <g fill="url(#vbBrass)" stroke="#5A3A08" stroke-width=".7"><path d="M190 136 Q186 122 191 116 L196 104 Q197 100 200 100 Q203 100 204 104 L209 116 Q214 122 210 136 Z"/><path d="M188 114 Q178 108 180 100 L184 102 Q186 108 191 111 Z"/><path d="M210 114 Q220 112 220 122 Q220 128 214 130" fill="none" stroke="url(#vbBrass)" stroke-width="2"/><rect x="197" y="96" width="6" height="4" rx="1.5"/></g>
+  <g fill="#FAF3E0" stroke="#C9921E" stroke-width=".7"><path d="M226 136 Q226 129 231 129 H239 Q244 129 244 136 Q238 138 226 136 Z"/><path d="M158 136 Q158 129 163 129 H171 Q176 129 176 136 Q170 138 158 136 Z"/></g>
+  <g><path d="M120 128 Q118 118 126 116 Q134 118 132 128 Z" fill="url(#vbBrass)" stroke="#5A3A08" stroke-width=".7"/><rect x="118" y="128" width="16" height="3" rx="1" fill="#7A5410"/>
+   <path d="M126 114 Q122 106 128 100 Q124 94 130 88" fill="none" stroke="rgba(255,240,210,.5)" stroke-width="1.6" stroke-linecap="round" filter="url(#vbSoft)"/></g>
+  <rect x="0" y="186" width="400" height="4" fill="#120A05"/></svg>`;
 }
+
 /** رسم المسرح كاملًا (مرّة لكل مرحلة): الخلفية والمقاعد والسجلّ والشريط */
 function vbScene(kind,title){
  go(`<div class="scr on vbScene ${kind}${VB.night?' night':''}">${tb(title)}
@@ -22931,33 +23005,37 @@ const DB_ART=(function(){
  const C=(cx,cy,r,n)=>{n=n||28;const p=[];for(let i=0;i<=n;i++){const a=i/n*P*2;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return p};
  const A=(cx,cy,r,a0,a1,n)=>{n=n||14;const p=[];for(let i=0;i<=n;i++){const a=a0+(a1-a0)*i/n;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return p};
  const L=(...pts)=>pts;
+ const F=(pts,f,c)=>({p:pts,f,c});            // شكل مغلق يُلوَّن حين يكتمل خطّه
+ const K=(pts,c,w)=>({p:pts,c,w});             // خطّ بلون
  const star=(cx,cy,R,r)=>{const p=[];for(let i=0;i<=10;i++){const a=-P/2+i*P/5,rr=i%2?r:R;p.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr])}return p};
  const heart=()=>{const p=[];for(let i=0;i<=40;i++){const t=i/40*P*2;const x=16*Math.pow(Math.sin(t),3),y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);p.push([50+x*2.1,48-y*2.1])}return p};
  const crescent=()=>A(50,50,32,0.796,2*P-0.796,26).concat(A(60,50,26,-1.074,1.074,18).reverse());
+ const TAN='#E9C58C',RED='#C9462F',GRN='#4F8A3E',BLU='#3E7BB6',YEL='#F0C04A',BRN='#7A4E2A',GRY='#98A0AE',ORG='#E38B3A',TEAL='#3FA7A0',PNK='#D97A8C',WHT='#FAFAF7',INK='#1B2030',SKY='#BFE3F5',DGRN='#2E5E28';
  return [
-  {w:'بيت',s:[L([20,50],[50,20],[80,50]),L([25,50],[25,90],[75,90],[75,50]),L([45,90],[45,65],[58,65],[58,90]),L([30,58],[40,58],[40,68],[30,68],[30,58])]},
-  {w:'شمس',s:[C(50,50,18)].concat([0,45,90,135,180,225,270,315].map(dg=>{const a=dg*P/180;return L([50+Math.cos(a)*24,50+Math.sin(a)*24],[50+Math.cos(a)*36,50+Math.sin(a)*36])}))},
-  {w:'شجرة',s:[L([45,90],[45,60],[55,60],[55,90]),C(50,45,22),C(36,52,12),C(64,52,12)]},
-  {w:'قطة',s:[C(50,55,26),L([30,38],[26,14],[46,30]),L([70,38],[74,14],[54,30]),C(40,50,3,10),C(60,50,3,10),L([47,62],[53,62],[50,66],[47,62]),L([20,60],[40,63]),L([20,70],[40,67]),L([80,60],[60,63]),L([80,70],[60,67])]},
-  {w:'سمكة',s:[L([20,50],[35,32],[60,30],[75,50],[60,70],[35,68],[20,50]),L([75,50],[92,35],[92,65],[75,50]),C(38,45,3,10),A(58,50,12,-0.8,0.8)]},
-  {w:'سيارة',s:[L([15,65],[15,50],[30,50],[40,35],[65,35],[75,50],[88,50],[88,65],[15,65]),C(30,66,8,16),C(72,66,8,16),L([42,50],[45,38],[62,38],[64,50])]},
-  {w:'قارب',s:[L([15,60],[25,78],[75,78],[85,60],[15,60]),L([50,60],[50,20]),L([50,22],[78,58],[52,58]),A(30,86,8,P,2*P),A(50,86,8,P,2*P),A(70,86,8,P,2*P)]},
-  {w:'مظلة',s:[A(50,55,34,P,2*P,20),L([16,55],[84,55]),L([50,55],[50,88]),A(44,88,6,0,P),L([50,21],[50,55]),L([50,21],[20,55]),L([50,21],[80,55])]},
-  {w:'كأس',s:[L([30,35],[35,80],[65,80],[70,35],[30,35]),A(74,55,10,-P/2,P/2),L([40,26],[40,20]),L([50,26],[50,18]),L([60,26],[60,20])]},
-  {w:'نجمة',s:[star(50,52,36,15)]},
-  {w:'هلال',s:[crescent(),star(74,22,5,2),star(82,38,3.5,1.4)]},
-  {w:'قلب',s:[heart()]},
-  {w:'مفتاح',s:[C(30,50,14),C(30,50,5,12),L([44,50],[88,50]),L([80,50],[80,62]),L([72,50],[72,58]),L([88,50],[88,60])]},
-  {w:'ساعة',s:[C(50,50,34),L([50,18],[50,24]),L([82,50],[76,50]),L([50,82],[50,76]),L([18,50],[24,50]),L([50,50],[50,30]),L([50,50],[66,58])]},
-  {w:'جبل',s:[L([5,85],[35,30],[55,60],[70,40],[95,85]),L([28,42],[35,30],[42,42]),C(80,25,8,16)]},
-  {w:'وردة',s:[C(50,45,8,16)].concat([0,1,2,3,4,5].map(k=>{const a=k*P/3;return C(50+Math.cos(a)*14,45+Math.sin(a)*14,9,16)})).concat([L([50,53],[50,90]),L([50,72],[36,66],[34,76],[50,78])])},
-  {w:'طائرة',s:[L([10,52],[70,46],[90,50],[70,56],[10,52]),L([40,50],[30,25],[45,25],[58,49]),L([40,52],[32,74],[46,74],[58,53]),L([12,52],[6,38],[16,40],[22,50])]},
-  {w:'تفاحة',s:[C(50,56,28),L([50,28],[52,15]),L([52,20],[64,14],[66,24],[52,22])]},
-  {w:'عين',s:[L([15,50],[35,30],[65,30],[85,50],[65,70],[35,70],[15,50]),C(50,50,14),C(50,50,6,14),L([30,32],[26,24]),L([50,28],[50,20]),L([70,32],[74,24])]},
-  {w:'جمل',s:[L([20,70],[22,55],[30,45],[40,35],[50,32],[60,36],[70,48],[78,52],[84,40],[88,28],[92,30],[92,45],[86,58],[82,70]),L([26,70],[26,90]),L([36,70],[36,90]),L([70,70],[70,90]),L([80,70],[80,90]),L([20,70],[82,70]),C(88,33,1.6,8)]},
-  {w:'كرة',s:[C(50,50,32),L([50,34],[64,44],[59,60],[41,60],[36,44],[50,34]),L([50,34],[50,19]),L([64,44],[79,40]),L([59,60],[68,74]),L([41,60],[32,74]),L([36,44],[21,40])]}
+  {w:'بيت',s:[F(L([25,50],[25,90],[75,90],[75,50],[25,50]),TAN),F(L([20,50],[50,20],[80,50],[20,50]),RED),F(L([45,90],[45,65],[58,65],[58,90],[45,90]),BRN),F(L([30,58],[40,58],[40,68],[30,68],[30,58]),SKY),K(L([35,58],[35,68]),INK,3),K(L([30,63],[40,63]),INK,3)]},
+  {w:'شمس',s:[F(C(50,50,18),YEL)].concat([0,45,90,135,180,225,270,315].map(dg=>{const a=dg*P/180;return K(L([50+Math.cos(a)*24,50+Math.sin(a)*24],[50+Math.cos(a)*36,50+Math.sin(a)*36]),ORG,7)}))},
+  {w:'شجرة',s:[F(L([45,90],[45,60],[55,60],[55,90],[45,90]),BRN),F(C(50,45,22),GRN),F(C(36,52,12),DGRN),F(C(64,52,12),DGRN)]},
+  {w:'قطة',s:[F(C(50,55,26),ORG),F(L([30,38],[26,14],[46,30],[30,38]),ORG),F(L([70,38],[74,14],[54,30],[70,38]),ORG),F(C(40,50,3,10),INK),F(C(60,50,3,10),INK),F(L([47,62],[53,62],[50,66],[47,62]),PNK),K(L([20,60],[40,63]),INK,4),K(L([20,70],[40,67]),INK,4),K(L([80,60],[60,63]),INK,4),K(L([80,70],[60,67]),INK,4)]},
+  {w:'سمكة',s:[F(L([20,50],[35,32],[60,30],[75,50],[60,70],[35,68],[20,50]),ORG),F(L([75,50],[92,35],[92,65],[75,50]),RED),F(C(38,45,3,10),INK),K(A(58,50,12,-0.8,0.8),RED,5)]},
+  {w:'سيارة',s:[F(L([15,65],[15,50],[30,50],[40,35],[65,35],[75,50],[88,50],[88,65],[15,65]),RED),F(C(30,66,8,16),INK),F(C(72,66,8,16),INK),F(L([42,50],[45,38],[62,38],[64,50],[42,50]),SKY)]},
+  {w:'قارب',s:[F(L([15,60],[25,78],[75,78],[85,60],[15,60]),BRN),K(L([50,60],[50,20]),INK,6),F(L([50,22],[78,58],[52,58],[50,22]),WHT),K(A(30,86,8,P,2*P),BLU,5),K(A(50,86,8,P,2*P),BLU,5),K(A(70,86,8,P,2*P),BLU,5)]},
+  {w:'مظلة',s:[F(A(50,55,34,P,2*P,20).concat([[84,55],[16,55]]),RED),K(L([50,55],[50,88]),BRN,6),K(A(44,88,6,0,P),BRN,6),K(L([50,21],[50,55]),INK,4),K(L([50,21],[20,55]),INK,4),K(L([50,21],[80,55]),INK,4)]},
+  {w:'كأس',s:[F(L([30,35],[35,80],[65,80],[70,35],[30,35]),WHT),K(A(74,55,10,-P/2,P/2),INK,6),K(L([40,26],[40,20]),GRY,5),K(L([50,26],[50,18]),GRY,5),K(L([60,26],[60,20]),GRY,5)]},
+  {w:'نجمة',s:[F(star(50,52,36,15),YEL)]},
+  {w:'هلال',s:[F(crescent(),YEL),F(star(74,22,5,2),YEL),F(star(82,38,3.5,1.4),YEL)]},
+  {w:'قلب',s:[F(heart(),RED)]},
+  {w:'مفتاح',s:[F(C(30,50,14),YEL),F(C(30,50,5,12),WHT),K(L([44,50],[88,50]),YEL,8),K(L([80,50],[80,62]),YEL,7),K(L([72,50],[72,58]),YEL,7),K(L([88,50],[88,60]),YEL,7)]},
+  {w:'ساعة',s:[F(C(50,50,34),WHT),K(L([50,18],[50,24]),INK,5),K(L([82,50],[76,50]),INK,5),K(L([50,82],[50,76]),INK,5),K(L([18,50],[24,50]),INK,5),K(L([50,50],[50,30]),INK,6),K(L([50,50],[66,58]),RED,5)]},
+  {w:'جبل',s:[F(L([5,85],[35,30],[55,60],[70,40],[95,85],[5,85]),GRY),F(L([28,42],[35,30],[42,42],[28,42]),WHT),F(C(80,25,8,16),YEL)]},
+  {w:'وردة',s:[K(L([50,53],[50,90]),GRN,6),F(L([50,72],[36,66],[34,76],[50,78],[50,72]),GRN)].concat([0,1,2,3,4,5].map(k=>{const a=k*P/3;return F(C(50+Math.cos(a)*14,45+Math.sin(a)*14,9,16),PNK)})).concat([F(C(50,45,8,16),YEL)])},
+  {w:'طائرة',s:[F(L([40,50],[30,25],[45,25],[58,49],[40,50]),GRY),F(L([40,52],[32,74],[46,74],[58,53],[40,52]),GRY),F(L([12,52],[6,38],[16,40],[22,50],[12,52]),RED),F(L([10,52],[70,46],[90,50],[70,56],[10,52]),WHT)]},
+  {w:'تفاحة',s:[F(C(50,56,28),RED),K(L([50,28],[52,15]),BRN,6),F(L([52,20],[64,14],[66,24],[52,22],[52,20]),GRN)]},
+  {w:'عين',s:[F(L([15,50],[35,30],[65,30],[85,50],[65,70],[35,70],[15,50]),WHT),F(C(50,50,14),TEAL),F(C(50,50,6,14),INK),K(L([30,32],[26,24]),INK,4),K(L([50,28],[50,20]),INK,4),K(L([70,32],[74,24]),INK,4)]},
+  {w:'جمل',s:[F(L([20,70],[22,55],[30,45],[40,35],[50,32],[60,36],[70,48],[78,52],[84,40],[88,28],[92,30],[92,45],[86,58],[82,70],[20,70]),TAN),K(L([26,70],[26,90]),TAN,7),K(L([36,70],[36,90]),TAN,7),K(L([70,70],[70,90]),TAN,7),K(L([80,70],[80,90]),TAN,7),F(C(88,33,1.6,8),INK)]},
+  {w:'كرة',s:[F(C(50,50,32),WHT),F(L([50,34],[64,44],[59,60],[41,60],[36,44],[50,34]),INK),K(L([50,34],[50,19]),INK,5),K(L([64,44],[79,40]),INK,5),K(L([59,60],[68,74]),INK,5),K(L([41,60],[32,74]),INK,5),K(L([36,44],[21,40]),INK,5)]}
  ];
 })();
+
 function dbStart(diff){
  Router.enter('vsbot');
  const pool=DB_ART.slice().sort(()=>Math.random()-.5);
@@ -22982,20 +23060,24 @@ function dbRound(){
 }
 function dbPaint(cx,art,p){
  cx.fillStyle='#fff';cx.fillRect(0,0,600,600);
- cx.strokeStyle='#1B2030';cx.lineWidth=7;cx.lineCap='round';cx.lineJoin='round';
- const lens=art.s.map(s=>{let l=0;for(let i=1;i<s.length;i++)l+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);return l});
+ cx.lineCap='round';cx.lineJoin='round';
+ const strokes=art.s.map(s=>Array.isArray(s)?{p:s}:s);
+ const lens=strokes.map(s=>{let l=0;for(let i=1;i<s.p.length;i++)l+=Math.hypot(s.p[i][0]-s.p[i-1][0],s.p[i][1]-s.p[i-1][1]);return l});
  const total=lens.reduce((a,b)=>a+b,0);let budget=total*p;
- art.s.forEach((s,si)=>{
+ strokes.forEach((s,si)=>{
   if(budget<=0)return;
-  cx.beginPath();cx.moveTo(s[0][0]*6,s[0][1]*6);
-  for(let i=1;i<s.length;i++){
-   const d=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);
-   if(budget>=d){cx.lineTo(s[i][0]*6,s[i][1]*6);budget-=d}
-   else{const f=budget/d;cx.lineTo((s[i-1][0]+(s[i][0]-s[i-1][0])*f)*6,(s[i-1][1]+(s[i][1]-s[i-1][1])*f)*6);budget=0;break}
+  const pts=s.p;const full=budget>=lens[si]-1e-6;
+  cx.beginPath();cx.moveTo(pts[0][0]*6,pts[0][1]*6);
+  for(let i=1;i<pts.length;i++){
+   const d=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]);
+   if(budget>=d){cx.lineTo(pts[i][0]*6,pts[i][1]*6);budget-=d}
+   else{const f=budget/d;cx.lineTo((pts[i-1][0]+(pts[i][0]-pts[i-1][0])*f)*6,(pts[i-1][1]+(pts[i][1]-pts[i-1][1])*f)*6);budget=0;break}
   }
-  cx.stroke();
+  if(full&&s.f){cx.fillStyle=s.f;cx.fill()}          // يكتمل الخطّ فيتلوّن الشكل — كأن الكمبيوتر يلوّن بعد التخطيط
+  cx.strokeStyle=s.c||'#1B2030';cx.lineWidth=s.w||7;cx.stroke();
  });
 }
+
 function dbAnimate(art){
  const D={easy:14000,mid:11000,hard:8500}[VB.diff]||11000,HOLD=6000;
  VB.t0=performance.now();
