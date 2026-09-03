@@ -263,6 +263,14 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .unoTurn.me{color:var(--gold)}
 .unoHand{display:flex;gap:6px;overflow-x:auto;padding:12px 4px 10px}
 .unoHandWrap{position:relative}
+/* مروحة اليد: كل بطاقة تميل قليلًا حول محور أسفلها، والقابلة للّعب ترتفع وتتوهّج */
+.unoSlot{transform:rotate(var(--rot,0deg)) translateY(var(--lift,0px));transform-origin:50% 125%;transition:transform .2s ease}
+.unoSlot.ok{transform:rotate(var(--rot,0deg)) translateY(calc(var(--lift,0px) - 9px))}
+.unoSlot.ok .unoC{box-shadow:0 0 0 2px #FFE9A8,0 0 18px rgba(255,233,168,.55),0 8px 14px rgba(0,0,0,.5)}
+.unoC{box-shadow:0 6px 12px rgba(0,0,0,.55),inset 0 -3px 5px rgba(0,0,0,.22),inset 0 2px 2px rgba(255,255,255,.4)}
+.unoC::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+ background:linear-gradient(115deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.2) 50%,rgba(255,255,255,0) 62%)}
+.unoBack{box-shadow:0 6px 12px rgba(0,0,0,.55),inset 0 -3px 5px rgba(0,0,0,.3),inset 0 2px 2px rgba(255,255,255,.25)}
 .unoMyHand{position:absolute;z-index:3;width:52px;inset-inline-end:-6px;top:-30px;opacity:.9;
  pointer-events:none;filter:drop-shadow(0 6px 12px rgba(0,0,0,.6));transform-origin:50% 100%;
  animation:myHand 2.6s ease-in-out infinite}
@@ -800,6 +808,13 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .qop2.gone2{opacity:.42;pointer-events:none;filter:grayscale(.65)}
 .qop2.gone2 .qop2t{text-decoration:line-through;text-decoration-thickness:2.5px;text-decoration-color:#E24B4A}
 .qop2.gone2 .qop2n{background:#E24B4A33;color:#E24B4A}
+/* زجاج مضاء: لوح السؤال والخيارات بخطّ ضوء علوي وعمق حقيقي، وبريق عند الضغط */
+.qboxi{background:linear-gradient(170deg,rgba(38,48,80,.94),rgba(13,20,36,.97));box-shadow:inset 0 1px 0 rgba(255,255,255,.18),inset 0 -1px 0 rgba(0,0,0,.4)}
+.qbox{box-shadow:0 14px 34px rgba(0,0,0,.55),0 0 26px rgba(232,178,58,.16)}
+.qtx{background:linear-gradient(170deg,rgba(38,48,80,.94),rgba(13,20,36,.97));box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 10px 26px rgba(0,0,0,.5)}
+.qop2i{background:linear-gradient(170deg,rgba(30,40,68,.93),rgba(14,20,36,.97));box-shadow:inset 0 1px 0 rgba(255,255,255,.14)}
+.qop2:not(.ok2):not(.no2):active .qop2i{background:linear-gradient(170deg,#2A3A66,#1A2440)}
+.qop2n{box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35)}
 
 /* حاوية السؤال المؤطرة */
 .qbox{position:relative;border-radius:2px;padding:2px;margin-bottom:16px;
@@ -876,16 +891,31 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 @keyframes emSheenX{0%,58%{transform:translateX(-16px)}92%,100%{transform:translateX(64px)}}
 @keyframes emRing2{0%{transform:scale(.55);opacity:.7}80%,100%{transform:scale(1.25);opacity:0}}
 /* ═══ ساحات القتال — تتغير من رتبة لرتبة ═══ */
-#arena{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0;transition:opacity .6s}
+#arena{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .6s;overflow:hidden}
 #arena.on{opacity:1}
-#arena .arSky{position:absolute;inset:0}
+#arena .arSky,#arena .vnSky{position:absolute;inset:0}
+#arena .vnSky{background:#0A0806}
+#arena .vnArt{position:absolute;inset:0;width:100%;height:100%;display:block}
+#arena .vnCone{animation:vnFlick 6s ease-in-out infinite}
+@keyframes vnFlick{0%,100%{opacity:1}45%{opacity:.82}60%{opacity:.94}}
+#arena .arHex{position:absolute;top:0;left:0;width:100%;height:60%}
 #arena .arGlow{position:absolute;inset:0;animation:puls 3.4s ease-in-out infinite}
+#arena .arBeam{position:absolute;top:-8%;width:38%;height:84%}
+#arena .arBeam::before{content:'';position:absolute;inset:0;transform-origin:50% 0;
+ background:linear-gradient(to bottom,rgba(var(--bc),.32),rgba(var(--bc),.08) 55%,transparent 84%);
+ clip-path:polygon(46% 0,54% 0,100% 100%,0 100%);animation:arSway 7.5s ease-in-out infinite alternate}
+#arena .arBeam.l{left:-7%;transform:rotate(-17deg)}
+#arena .arBeam.r{right:-7%;transform:rotate(17deg)}#arena .arBeam.r::before{animation-delay:-3.7s}
+#arena .arBeam.c{left:31%;opacity:.7}#arena .arBeam.c::before{animation-duration:9.5s;animation-delay:-1.8s}
+@keyframes arSway{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+#arena .arTruss{position:absolute;top:0;left:0;width:100%;height:44px}
 #arena .arDeco{position:absolute;left:0;right:0;bottom:24%;width:100%;height:36%}
 #arena .arFloor{position:absolute;left:-25%;right:-25%;bottom:0;height:46%;
  transform:perspective(430px) rotateX(58deg);transform-origin:bottom center;
  animation:arScroll 22s linear infinite}
 @keyframes arScroll{from{background-position:0 0,0 0,0 0}to{background-position:0 0,0 0,0 46px}}
 #arena .arFloor::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,transparent 30%,rgba(6,8,16,.9) 96%)}
+#arena .arRing{position:absolute;left:50%;bottom:8%;width:80%;height:15%;transform:translateX(-50%);border-radius:50%;animation:puls 3.4s ease-in-out infinite}
 #arena .arPil{position:absolute;bottom:16%;width:26px;height:36%}
 #arena .arPil.l{left:4px}
 #arena .arPil.r{right:4px}
@@ -988,6 +1018,46 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .cspk{position:absolute;width:13px;height:13px;pointer-events:none;
  animation:twk 1.9s linear infinite}
 .csvg{display:block;width:100%;height:100%}
+/* ═══ البطاقات: إطار معدني بحسب الندرة (ملحمية وأسطورية تلمع)، لوحة مرسومة، لوح اسم ═══ */
+.gc{position:relative;--fa:#3E8C5A;--fb:#1D4A30;--fg:#8FE6C0;border-radius:14px;padding:2px;
+ background:linear-gradient(155deg,var(--fg),var(--fa) 26%,var(--fb) 52%,var(--fa) 78%,var(--fg));
+ box-shadow:0 8px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.45)}
+.gc.sm{border-radius:10px;padding:1.5px;box-shadow:0 5px 12px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4)}
+.gc.r-rare{--fa:#3E7FC4;--fb:#1B3E6B;--fg:#A8E4FF}
+.gc.r-epic{--fa:#8B5CF0;--fb:#4A2C9B;--fg:#E4CCFF}
+.gc.r-legendary{--fa:#E8B23A;--fb:#8A5E12;--fg:#FFF4C8}
+.gc.r-epic,.gc.r-legendary{background-size:240% 240%;animation:gcFoil 6s linear infinite}
+@keyframes gcFoil{from{background-position:0% 0%}to{background-position:100% 100%}}
+.gc.sel{box-shadow:0 0 0 2px var(--gold),0 8px 22px rgba(232,178,58,.4)}
+.gc.locked{opacity:.45}
+.gcIn{position:relative;border-radius:12px;overflow:hidden;background:linear-gradient(172deg,#1A2237,#0B1020 72%);
+ padding:5px 5px 14px;display:flex;flex-direction:column;align-items:center}
+.gc.sm .gcIn{border-radius:8.5px;padding:3.5px 3.5px 11px}
+.gcArt{position:relative;width:100%;aspect-ratio:1;border-radius:9px;overflow:hidden;background:#0B1020;
+ box-shadow:inset 0 0 0 1px rgba(255,255,255,.1),0 4px 10px rgba(0,0,0,.5)}
+.gc.sm .gcArt{border-radius:6px}
+.gcArt svg,.gcArt img{display:block;width:100%;height:100%;object-fit:cover}
+.gcArt .an{transform-box:fill-box;transform-origin:center}
+.gcNm{position:relative;z-index:2;font-size:11.5px;font-weight:900;margin-top:6px;text-align:center;line-height:1.15;color:#F7EFD6;text-shadow:0 1px 2px #000}
+.gc.sm .gcNm{font-size:9px;margin-top:4px}
+.gcS{position:relative;z-index:2;font-size:9.5px;color:var(--tx2);margin-top:2px;text-align:center;line-height:1.2}
+.gcR{position:relative;z-index:2;margin-top:5px;font-size:8.5px;font-weight:800;color:var(--fg);background:rgba(0,0,0,.4);border:1px solid var(--fa);padding:1px 8px;border-radius:8px}
+.gc.sm .gcR{font-size:7.5px;margin-top:4px;padding:0 6px}
+.gcE{position:absolute;top:-5px;right:-4px;width:21px;height:21px;border-radius:50%;background:linear-gradient(150deg,#B76CF0,#6B3FA0);
+ display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.35);z-index:3}
+.gc.sm .gcE{width:17px;height:17px;font-size:9px}
+.gcPh{position:absolute;top:-5px;left:-4px;background:linear-gradient(150deg,#2A3550,#161D30);border:1px solid var(--fg);color:var(--fg);font-size:9.5px;font-weight:900;padding:2px 7px;border-radius:8px;z-index:3}
+.gcLv{position:absolute;bottom:-11px;left:50%;transform:translateX(-50%);width:32px;height:32px;z-index:4;
+ clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+ background:linear-gradient(150deg,var(--fa),var(--fb));border:2px solid var(--fg);display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.6)}
+.gcLv.cap{background:linear-gradient(150deg,#F0B44A,#A8700F);border-color:#FFD98A}
+.gcLv span{font-size:11px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+.gc.sm .gcLv{bottom:-9px;width:26px;height:26px;border-width:1.5px}.gc.sm .gcLv span{font-size:9px}
+.gcCap{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:9.5px;color:var(--warn);white-space:nowrap;z-index:4}
+.gc.sm .gcCap{bottom:-20px}
+.gcLock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3}
+.gcReady{position:absolute;top:-6px;left:-4px;background:linear-gradient(145deg,#5DE39A,#1D8A4E);color:#fff;font-size:9px;font-weight:900;padding:2px 7px;border-radius:9px;z-index:4;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.gc.sm .gcReady{font-size:7.5px}
 .csvg .an{transform-box:fill-box;transform-origin:center}
 .scr.nofi{animation:none}
 
@@ -13515,27 +13585,150 @@ function arPillar(g){
  <circle cx="12" cy="12" r="5" fill="${g}" class="puls"/>
  <circle cx="12" cy="12" r="8.5" fill="none" stroke="${g}" stroke-width="1" opacity=".4" class="puls"/></svg>`;
 }
+/* ═══════════ الأماكن — مكان مميّز بملء الشاشة لكل لعبة ═══════════
+   الساحة (المسابقة) استوديو يتلوّن بالرتبة: جدار سداسيات مضيء، جسر إنارة، أشعة كشّافات تتمايل، حلقة أرضية.
+   الكيرم: مجلس خشبي بمشربية ومصباح نحاسي ومخروط ضوء على طاولة. الأونو: طاولة جوخ بسور نحاسي ورقائق.
+   الرسم: مرسم بنافذة ورفّ ألوان ورذاذ طلاء. مافيا: مدينة الليل بقمر وأفق مبانٍ. برا السالفة: مجلس بفوانيس وسجّاد.
+   كلها SVG وCSS بلا صور؛ لا مرشّحات ثقيلة؛ والألوان لا تزاحم النصوص فوقها. */
+const VENUE_NAMES={carrom:'مجلس الكيرم',uno:'طاولة الأونو',atelier:'المرسم',mafia:'مدينة الليل',barra:'المجلس'};
+const ARENA_FLOWS=/^(match|intro|quiz|room|party|vsbot)$/;   // التدفّقات التي تملك مكانًا خلفها
+function vnRnd(seed){let h=seed|0||7;return()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;h=Math.imul(h^(h>>>13),3266489909)>>>0;return((h^(h>>>16))>>>0)%10000/10000}}
+function vnLattice(id,col,op){   // نقش مشربية: نجمة ثمانية داخل معيّن
+ return `<pattern id="${id}" width="40" height="40" patternUnits="userSpaceOnUse">
+  <path d="M20 3 L23.5 14.5 L35 11 L27.5 20 L35 29 L23.5 25.5 L20 37 L16.5 25.5 L5 29 L12.5 20 L5 11 L16.5 14.5 Z" fill="none" stroke="${col}" stroke-opacity="${op}" stroke-width="1.1"/>
+  <path d="M0 20 L20 0 L40 20 L20 40 Z" fill="none" stroke="${col}" stroke-opacity="${(op*.55).toFixed(2)}" stroke-width=".8"/></pattern>`;
+}
+const VN_VIG='<radialGradient id="vnVig" cx=".5" cy=".5" r=".72"><stop offset=".5" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".78"/></radialGradient>';
+const VN_BRASS='<linearGradient id="vnBrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".5" stop-color="#C98E2E"/><stop offset="1" stop-color="#6E4A10"/></linearGradient>';
+function vnDust(rnd,n,col,x0,x1,y0,y1){let o='';for(let i=0;i<n;i++){const d=(rnd()*3).toFixed(1);o+=`<circle cx="${(x0+rnd()*(x1-x0)).toFixed(0)}" cy="${(y0+rnd()*(y1-y0)).toFixed(0)}" r="${(.8+rnd()*1.6).toFixed(1)}" fill="${col}" opacity="${(.25+rnd()*.5).toFixed(2)}" style="animation:twk ${(2+rnd()*3).toFixed(1)}s ease-in-out infinite ${d}s"/>`}return o}
+const VENUES={
+ carrom(){const r=vnRnd(31);let grain='';for(let i=0;i<9;i++){const x=68+i*33;grain+=`<path d="M${x} 452 L${(x-60+i*15).toFixed(0)} 800" stroke="#000" stroke-opacity=".13" stroke-width="${(1+r()*1.6).toFixed(1)}"/>`}
+  return `<svg class="vnArt" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
+  ${vnLattice('vnLatC','#E0A45A',.24)}${VN_BRASS}${VN_VIG}
+  <linearGradient id="vnWallC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E1A0A"/><stop offset="1" stop-color="#120903"/></linearGradient>
+  <linearGradient id="vnWoodC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A4A22"/><stop offset=".45" stop-color="#4E2D12"/><stop offset="1" stop-color="#1A0D05"/></linearGradient>
+  <radialGradient id="vnConeC" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#FFD98A" stop-opacity=".62"/><stop offset=".45" stop-color="#FFB955" stop-opacity=".17"/><stop offset="1" stop-color="#FFB955" stop-opacity="0"/></radialGradient>
+  <linearGradient id="vnFadeC" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+  <mask id="vnLatMkC"><rect width="400" height="430" fill="url(#vnFadeC)"/></mask></defs>
+  <rect width="400" height="800" fill="url(#vnWallC)"/>
+  <rect width="400" height="430" fill="url(#vnLatC)" mask="url(#vnLatMkC)"/>
+  <rect x="0" y="418" width="400" height="7" fill="#5C3A18"/><rect x="0" y="425" width="400" height="2" fill="#FFD98A" opacity=".3"/>
+  <path d="M-60 800 L58 432 L342 432 L460 800 Z" fill="url(#vnWoodC)"/>
+  <path d="M58 432 L342 432 L338 446 L62 446 Z" fill="#9A6432"/><path d="M62 446 L338 446 L336 452 L64 452 Z" fill="#3A2210"/>
+  ${grain}
+  <path d="M200 0 V90" stroke="#3A2A14" stroke-width="3"/><circle cx="200" cy="90" r="4" fill="url(#vnBrass)"/>
+  <path d="M168 96 H232 L218 134 H182 Z" fill="url(#vnBrass)"/><path d="M172 100 H228" stroke="#FFF3D0" stroke-opacity=".5" stroke-width="2"/>
+  <ellipse cx="200" cy="134" rx="17" ry="4.5" fill="#FFF3D0"/>
+  <path class="vnCone" d="M182 134 L-40 740 L440 740 L218 134 Z" fill="url(#vnConeC)"/>
+  ${vnDust(r,26,'#FFE9A8',40,360,160,700)}
+  <rect width="400" height="800" fill="url(#vnVig)"/></svg>`},
+ uno(){const r=vnRnd(53);let chips='',cards='';
+  const stack=(cx,cy,cols)=>{let o='';for(let i=0;i<6;i++){o+=`<ellipse cx="${cx}" cy="${cy-i*6}" rx="24" ry="8" fill="${cols[i%cols.length]}" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>`}return o+`<ellipse cx="${cx}" cy="${cy-30}" rx="15" ry="5" fill="none" stroke="#fff" stroke-opacity=".5"/>`};
+  chips+=stack(46,760,['#C8312E','#F3F3F0'])+stack(354,760,['#2F62C8','#F3F3F0'])+stack(92,772,['#E8B23A','#F3F3F0']);
+  for(let i=0;i<7;i++){const x=(r()*400).toFixed(0),y=(600+r()*120).toFixed(0),a=(r()*70-35).toFixed(0);cards+=`<rect x="${x}" y="${y}" width="26" height="38" rx="4" transform="rotate(${a} ${x} ${y})" fill="#151A33" stroke="#F3F3F0" stroke-opacity=".28" stroke-width="1.4"/>`}
+  return `<svg class="vnArt" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${VN_BRASS}${VN_VIG}
+  <radialGradient id="vnFelt" cx=".5" cy=".42" r=".8"><stop offset="0" stop-color="#1F7A56"/><stop offset=".55" stop-color="#0E4632"/><stop offset="1" stop-color="#051C14"/></radialGradient>
+  <pattern id="vnFeltP" width="4" height="4" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".6" fill="#000" opacity=".22"/><circle cx="3" cy="3" r=".6" fill="#fff" opacity=".07"/></pattern>
+  <radialGradient id="vnConeU" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#D9FFE8" stop-opacity=".5"/><stop offset=".5" stop-color="#8CE0B0" stop-opacity=".12"/><stop offset="1" stop-color="#8CE0B0" stop-opacity="0"/></radialGradient>
+  <linearGradient id="vnGlass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E9E6A"/><stop offset="1" stop-color="#0F4D33"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#vnFelt)"/><rect width="400" height="800" fill="url(#vnFeltP)"/>
+  <ellipse cx="200" cy="420" rx="262" ry="352" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="22"/>
+  <ellipse cx="200" cy="420" rx="262" ry="352" fill="none" stroke="url(#vnBrass)" stroke-width="12"/>
+  <ellipse cx="200" cy="420" rx="262" ry="352" fill="none" stroke="#FFF3D0" stroke-opacity=".35" stroke-width="2"/>
+  <path d="M200 0 V64" stroke="#2A2416" stroke-width="3"/><path d="M158 68 H242 L226 112 H174 Z" fill="url(#vnGlass)"/><path d="M162 72 H238" stroke="#BFFFD8" stroke-opacity=".5" stroke-width="2"/>
+  <ellipse cx="200" cy="112" rx="24" ry="5" fill="#EFFFF4"/>
+  <path class="vnCone" d="M174 112 L-60 760 L460 760 L226 112 Z" fill="url(#vnConeU)"/>
+  ${cards}${chips}${vnDust(r,20,'#D9FFE8',30,370,140,720)}
+  <rect width="400" height="800" fill="url(#vnVig)"/></svg>`},
+ atelier(){const r=vnRnd(71);let splash='',lights='',planks='';
+  const cols=['#E24B4A','#378ADD','#F2C038','#2ECC71','#B76CF0','#FF8A3D'];
+  for(let i=0;i<9;i++){const x=(r()*400).toFixed(0),y=(120+r()*560).toFixed(0),s=(10+r()*26).toFixed(0);splash+=`<path d="M${x} ${y} c${s} -${s*.6},${s*1.6} ${s*.2},${s*.7} ${s*.8} c-${s*.5} ${s*.4},-${s*1.3} -${s*.1},-${s*.7} -${s*.8} Z" fill="${cols[i%6]}" opacity="${(.12+r()*.16).toFixed(2)}"/>`}
+  for(let i=0;i<9;i++){const x=20+i*45,y=(28+Math.sin(i*1.1)*8).toFixed(0);lights+=`<path d="M${x} ${y} v10" stroke="#3A3430" stroke-width="1.2"/><circle cx="${x}" cy="${+y+13}" r="4" fill="#FFE9A8" style="animation:twk ${(2.2+r()*2).toFixed(1)}s ease-in-out infinite ${(r()*2).toFixed(1)}s"/><circle cx="${x}" cy="${+y+13}" r="9" fill="#FFD98A" opacity=".18"/>`}
+  for(let i=0;i<7;i++){const x=i*60-20;planks+=`<path d="M${x} 800 L${x+90} 570" stroke="#000" stroke-opacity=".28" stroke-width="2"/>`}
+  return `<svg class="vnArt" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${VN_VIG}
+  <linearGradient id="vnWallA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E2826"/><stop offset="1" stop-color="#171212"/></linearGradient>
+  <linearGradient id="vnWin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1E4A"/><stop offset=".55" stop-color="#7A3A3A"/><stop offset="1" stop-color="#C2743A"/></linearGradient>
+  <radialGradient id="vnShaft" cx=".85" cy=".2" r=".9"><stop offset="0" stop-color="#FFD9A0" stop-opacity=".14"/><stop offset=".6" stop-color="#FFD9A0" stop-opacity="0"/></radialGradient>
+  <linearGradient id="vnFloorA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6B4A2C"/><stop offset="1" stop-color="#241609"/></linearGradient></defs>
+  <rect width="400" height="800" fill="url(#vnWallA)"/>
+  <rect x="262" y="52" width="122" height="168" rx="4" fill="url(#vnWin)"/><circle cx="352" cy="92" r="11" fill="#FFF3D0" opacity=".85"/><circle cx="346" cy="88" r="9" fill="#3A2A4A" opacity=".9"/><path d="M323 52 V220 M262 136 H384" stroke="#2A2220" stroke-width="7"/><rect x="258" y="48" width="130" height="176" rx="5" fill="none" stroke="#3E3430" stroke-width="8"/>
+  <rect width="400" height="800" fill="url(#vnShaft)"/>
+  <path d="M0 8 Q100 60 200 20 T400 30" fill="none" stroke="#3A3430" stroke-width="1.5"/>${lights}
+  <rect x="16" y="200" width="200" height="9" rx="2" fill="#5C4028"/><rect x="16" y="209" width="200" height="4" fill="#2E1E12"/>
+  <rect x="26" y="168" width="22" height="32" rx="3" fill="#E24B4A"/><rect x="54" y="176" width="18" height="24" rx="3" fill="#378ADD"/><rect x="80" y="160" width="26" height="40" rx="4" fill="#F2C038"/><rect x="114" y="172" width="20" height="28" rx="3" fill="#2ECC71"/><rect x="142" y="164" width="30" height="36" rx="5" fill="#3A3430" stroke="#6B5A50"/><path d="M150 164 v-30 M157 164 v-38 M165 164 v-26" stroke="#C9A97A" stroke-width="3" stroke-linecap="round"/>
+  ${splash}
+  <path d="M-40 800 L40 566 L360 566 L440 800 Z" fill="url(#vnFloorA)"/>${planks}<path d="M40 566 H360" stroke="#FFD9A0" stroke-opacity=".25" stroke-width="2"/>
+  <rect width="400" height="800" fill="url(#vnVig)"/></svg>`},
+ mafia(){const r=vnRnd(97);let stars='',far='',near='',win='';
+  for(let i=0;i<46;i++)stars+=`<circle cx="${(r()*400).toFixed(0)}" cy="${(r()*420).toFixed(0)}" r="${(.5+r()*1.2).toFixed(1)}" fill="#fff" opacity="${(.3+r()*.6).toFixed(2)}" style="animation:twk ${(2+r()*4).toFixed(1)}s ease-in-out infinite ${(r()*3).toFixed(1)}s"/>`;
+  for(let x=-10;x<420;){const w=18+Math.floor(r()*30),h=60+Math.floor(r()*120);far+=`<rect x="${x}" y="${640-h}" width="${w}" height="${h}" fill="#141C3E"/>`;x+=w+2}
+  for(let x=-14;x<424;){const w=28+Math.floor(r()*44),h=40+Math.floor(r()*110),t=690-h;near+=`<rect x="${x}" y="${t}" width="${w}" height="${h}" fill="#070B19"/>`;
+   for(let wy=t+8;wy<680;wy+=11)for(let wx=x+5;wx<x+w-6;wx+=9)if(r()<.22)win+=`<rect x="${wx}" y="${wy}" width="3.4" height="4.6" fill="${r()<.72?'#F6CF7A':'#9FDBFF'}" opacity="${(.5+r()*.5).toFixed(2)}"/>`;x+=w+3}
+  return `<svg class="vnArt" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${VN_VIG}
+  <linearGradient id="vnSkyM" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#04061A"/><stop offset=".6" stop-color="#0B1232"/><stop offset="1" stop-color="#1A1240"/></linearGradient>
+  <radialGradient id="vnMoon" cx=".5" cy=".5" r=".5"><stop offset=".55" stop-color="#FFF4D6" stop-opacity=".55"/><stop offset="1" stop-color="#FFF4D6" stop-opacity="0"/></radialGradient>
+  <radialGradient id="vnStreet" cx=".5" cy="1" r=".7"><stop offset="0" stop-color="#FF9A3D" stop-opacity=".35"/><stop offset="1" stop-color="#FF9A3D" stop-opacity="0"/></radialGradient></defs>
+  <rect width="400" height="800" fill="url(#vnSkyM)"/>${stars}
+  <circle cx="318" cy="118" r="74" fill="url(#vnMoon)"/><circle cx="318" cy="118" r="34" fill="#FFF3D0"/><circle cx="306" cy="108" r="6" fill="#E9DDBA" opacity=".6"/><circle cx="328" cy="128" r="9" fill="#E9DDBA" opacity=".5"/>
+  <ellipse cx="90" cy="250" rx="90" ry="14" fill="#0A1030" opacity=".9"/><ellipse cx="260" cy="300" rx="120" ry="16" fill="#0A1030" opacity=".8"/>
+  ${far}<rect x="0" y="640" width="400" height="160" fill="#141C3E"/>
+  <rect x="0" y="560" width="400" height="240" fill="url(#vnStreet)"/>
+  ${near}${win}<rect x="0" y="690" width="400" height="110" fill="#05070F"/>
+  <rect width="400" height="800" fill="url(#vnVig)"/></svg>`},
+ barra(){const r=vnRnd(113);let cush='',lant='';
+  const cc=['#8A1E24','#C98E2E','#1D6B4A','#2C4E9E','#8A1E24'];
+  for(let i=0;i<5;i++){const x=6+i*80;cush+=`<rect x="${x}" y="612" width="74" height="46" rx="12" fill="${cc[i]}"/><rect x="${x+6}" y="618" width="62" height="10" rx="5" fill="#fff" opacity=".1"/><path d="M${x+10} 640 H${x+64}" stroke="#FFE9A8" stroke-opacity=".35" stroke-width="1.2" stroke-dasharray="3 3"/>`}
+  [70,200,330].forEach((x,i)=>{const y=[110,80,120][i];lant+=`<path d="M${x} 0 V${y-30}" stroke="#4A3418" stroke-width="2"/><path d="M${x-14} ${y-30} H${x+14} L${x+18} ${y-14} V${y+24} L${x} ${y+40} L${x-18} ${y+24} V${y-14} Z" fill="url(#vnBrass)"/><rect x="${x-11}" y="${y-12}" width="22" height="34" rx="3" fill="#FFB955" opacity=".9"/><circle cx="${x}" cy="${y+4}" r="60" fill="url(#vnGlowB)" class="vnCone"/>`});
+  return `<svg class="vnArt" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>${vnLattice('vnLatB','#F0B35A',.2)}${VN_BRASS}${VN_VIG}
+  <linearGradient id="vnWallB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E1012"/><stop offset=".6" stop-color="#1A0808"/><stop offset="1" stop-color="#0C0404"/></linearGradient>
+  <radialGradient id="vnGlowB" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFB955" stop-opacity=".5"/><stop offset="1" stop-color="#FFB955" stop-opacity="0"/></radialGradient>
+  <pattern id="vnRug" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#6E1C1C"/><path d="M12 2 L22 12 L12 22 L2 12 Z" fill="none" stroke="#E8B23A" stroke-opacity=".55" stroke-width="1.2"/><circle cx="12" cy="12" r="2.2" fill="#E8B23A" opacity=".6"/></pattern>
+  <linearGradient id="vnFadeB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></linearGradient>
+  <mask id="vnLatMkB"><rect width="400" height="560" fill="url(#vnFadeB)"/></mask></defs>
+  <rect width="400" height="800" fill="url(#vnWallB)"/><rect width="400" height="560" fill="url(#vnLatB)" mask="url(#vnLatMkB)"/>
+  ${lant}
+  <rect x="0" y="600" width="400" height="200" fill="url(#vnRug)"/><rect x="0" y="600" width="400" height="6" fill="#E8B23A" opacity=".7"/><rect x="0" y="606" width="400" height="3" fill="#000" opacity=".5"/>
+  ${cush}
+  <rect width="400" height="800" fill="url(#vnVig)"/></svg>`}
+};
 function arenaHTML(ix){
- const A=ARENAS[ix]||ARENAS[0];
+ const A=ARENAS[ix]||ARENAS[0], r=vnRnd(ix*17+5);
  const deco=A.d==='pyr'
   ?'<path d="M0 90 L14 62 L26 90 L38 50 L58 90 L70 68 L82 90 L100 90 Z" fill="#000" opacity=".5"/>'
   :A.d==='ice'
   ?'<path d="M0 90 L8 48 L14 90 L22 60 L30 90 L44 38 L54 90 L66 56 L74 90 L86 46 L94 90 L100 90 Z" fill="#000" opacity=".5"/>'
   :'<path d="M0 90 L0 58 L8 58 L8 70 A6 6 0 0 1 20 70 L20 58 L32 58 L32 70 A6 6 0 0 1 44 70 L44 58 L56 58 L56 70 A6 6 0 0 1 68 70 L68 58 L80 58 L80 70 A6 6 0 0 1 92 70 L92 58 L100 58 L100 90 Z" fill="#000" opacity=".5"/>';
+ const HEX='M12 -1.5 L22.8 4.75 L22.8 17.25 L12 23.5 L1.2 17.25 L1.2 4.75 Z';
+ let led='';for(let i=0;i<14;i++){const c=Math.floor(r()*17),row=Math.floor(r()*7),odd=row%2;led+=`<path d="${HEX}" transform="translate(${c*24+odd*12} ${row*21-11})" fill="${A.g}" opacity="${(.06+r()*.16).toFixed(2)}" style="animation:puls ${(2+r()*3).toFixed(1)}s ease-in-out infinite ${(r()*3).toFixed(1)}s"/>`}
+ let lamps='';for(let i=0;i<6;i++){const x=38+i*65;lamps+=`<rect x="${x-6}" y="20" width="12" height="9" rx="2" fill="#0B0F1C" stroke="${A.g}" stroke-opacity=".5"/><ellipse cx="${x}" cy="31" rx="7" ry="2.5" fill="${A.g}" style="animation:puls 2.4s ease-in-out infinite ${(i*.4).toFixed(1)}s"/>`}
  return `<div class="arSky" style="background:radial-gradient(120% 90% at 50% -8%,${A.s1},${A.s2} 68%)"></div>
+ <svg class="arHex" viewBox="0 0 400 300" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><defs>
+  <pattern id="arHx" width="24" height="42" patternUnits="userSpaceOnUse"><path d="${HEX} M24 19.5 L34.8 25.75 L34.8 38.25 L24 44.5 L13.2 38.25 L13.2 25.75 Z M0 19.5 L10.8 25.75 L10.8 38.25 L0 44.5 L-10.8 38.25 L-10.8 25.75 Z" fill="none" stroke="${A.g}" stroke-opacity=".2" stroke-width="1"/></pattern>
+  <radialGradient id="arHxM" cx=".5" cy=".1" r=".8"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#000"/></radialGradient><mask id="arHxMk"><rect width="400" height="300" fill="url(#arHxM)"/></mask></defs>
+  <g mask="url(#arHxMk)"><rect width="400" height="300" fill="url(#arHx)"/>${led}</g></svg>
  <div class="arGlow" style="background:radial-gradient(58% 34% at 50% 44%,${A.g}44,transparent 70%)"></div>
+ <div class="arBeam l" style="--bc:${A.f}"></div><div class="arBeam r" style="--bc:${A.f}"></div><div class="arBeam c" style="--bc:${A.f}"></div>
+ <svg class="arTruss" viewBox="0 0 400 40" preserveAspectRatio="none" aria-hidden="true"><path d="M0 6 H400 M0 18 H400" stroke="#0B0F1C" stroke-width="4"/><path d="M0 6 H400 M0 18 H400" stroke="${A.g}" stroke-opacity=".35" stroke-width="1"/>
+  ${Array.from({length:17},(_,i)=>`<path d="M${i*25} 6 L${i*25+12} 18 L${i*25+25} 6" fill="none" stroke="${A.g}" stroke-opacity=".3" stroke-width="1"/>`).join('')}${lamps}</svg>
  <svg class="arDeco" viewBox="0 0 100 90" preserveAspectRatio="none">${deco}</svg>
  <div class="arFloor" style="background:linear-gradient(transparent 0,rgba(${A.f},.06) 50%,rgba(${A.f},.2)),repeating-linear-gradient(90deg,rgba(${A.f},.24) 0 1.5px,transparent 1.5px 54px),repeating-linear-gradient(0deg,rgba(${A.f},.2) 0 1.5px,transparent 1.5px 46px)"></div>
+ <div class="arRing" style="background:radial-gradient(ellipse at center,rgba(${A.f},.5),rgba(${A.f},.16) 42%,transparent 70%)"></div>
  <div class="arPil l">${arPillar(A.g)}</div>
  <div class="arPil r">${arPillar(A.g)}</div>
  <div class="arNm" style="color:${A.g};border-color:${A.g}55">${A.n} — رتبة ${TIERS[ix]?TIERS[ix].ar:''}</div>`;
 }
-let _arIx=-1;
-function setArena(ix){
- ix=Math.max(0,Math.min(9,ix|0));
+function venueHTML(kind){
+ const art=(VENUES[kind]||VENUES.carrom)();
+ return `<div class="vnSky"></div>${art}<div class="arNm" style="color:#FFE9A8;border-color:#E8B23A66">${VENUE_NAMES[kind]||''}</div>`;
+}
+let _arKey=null;
+/** setArena(0..9) ساحة المسابقة بلون الرتبة · setArena('carrom'|'uno'|'atelier'|'mafia'|'barra') مكان اللعبة */
+function setArena(k){
+ let key;
+ if(typeof k==='string'&&VENUES[k])key=k;else key=Math.max(0,Math.min(9,k|0));
  let el=document.getElementById('arena');
  if(!el){el=document.createElement('div');el.id='arena';document.body.prepend(el)}
- if(_arIx!==ix){el.innerHTML=arenaHTML(ix);_arIx=ix}
+ if(_arKey!==key){el.innerHTML=typeof key==='string'?venueHTML(key):arenaHTML(key);_arKey=key;el.dataset.kind=typeof key==='string'?key:'studio'}
  el.classList.add('on');
 }
 function hideArena(){const el=document.getElementById('arena');if(el)el.classList.remove('on')}
@@ -16389,74 +16582,89 @@ const CARD_ART={
 39:`<g transform="rotate(24 40 30)"><rect x="37.6" y="8" width="4.8" height="30" rx="1.8" fill="url(#cgSteel)"/><path d="M40 4 L43 9 L37 9 Z" fill="url(#cgSteel)"/><rect x="32" y="36" width="16" height="4" rx="2" fill="url(#cgGold)"/><rect x="38" y="40" width="4" height="9" rx="2" fill="url(#cgWood)"/><circle cx="40" cy="51" r="2.6" fill="url(#cgGold)"/></g><path d="M12 22 Q12 17 17 17 L34 17 Q30 20 30 25 L30 45 Q30 50 25 50 L16 50 Q12 50 12 45 Z" fill="#F0E2C4"/><g stroke="#8A6E42" stroke-width="1.1" opacity=".85"><path d="M16 25 L26 25 M16 30 L26 30 M16 35 L24 35 M16 40 L26 40"/></g><circle cx="25" cy="44" r="5.5" fill="url(#cgGold)" class="an" style="animation:puls 2.2s ease-in-out infinite"/><path d="M22.5 44 L24.5 46 L28 42" stroke="#54331A" stroke-width="1.6" fill="none"/>${_grd}`,
 40:`<circle cx="32" cy="30" r="15" fill="url(#cgOrb)"/><g fill="#C9A94E" opacity=".95"><path d="M24 22 Q30 18 35 22 Q33 27 27 27 Q24 25 24 22 Z"/><path d="M38 28 Q44 28 43 34 Q39 37 35 34 Q34 30 38 28 Z"/><path d="M23 33 Q28 32 29 37 Q26 41 22 38 Q21 35 23 33 Z"/></g><g class="an" style="animation:spin 8s linear infinite"><ellipse cx="32" cy="30" rx="21" ry="7" fill="none" stroke="#FFE9A8" stroke-width="1.4" opacity=".7" transform="rotate(-18 32 30)"/><circle cx="13" cy="24" r="1.8" fill="#FFE9A8"/></g><path d="M10 34 Q8 42 16 46 Q20 48 24 46" stroke="url(#cgGold)" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M54 34 Q56 42 48 46 Q44 48 40 46" stroke="url(#cgGold)" stroke-width="3" fill="none" stroke-linecap="round"/>${_grd}`
 };
+/* ═══════════ لوحات البطاقات — مشهد مرسوم بحسب نوع البطاقة يحتضن شعارها ═══════════
+   تكتيك: غرفة عمليات بأرضية شبكية ورادار · أوراق: مكتبة بشموع · استنتاج: مرصد بنجوم وهلال ·
+   مخاطرة: عاصفة ببرق · مزاد: قاعة ذهبية بأقواس ونقود · طاقة: نواة بلازما.
+   البذرة من رقم البطاقة فتختلف تفاصيل كل لوحة. لا مرشّحات ثقيلة — تدرّجات فقط (شبكة الأربعين). */
+const CARD_SCENES={
+ tactic(r){let lines='';for(let i=0;i<8;i++)lines+=`<path d="M${(i*14.3).toFixed(1)} 100 L${(38+i*3.5).toFixed(1)} 60"/>`;
+  return `<defs><radialGradient id="scTa" cx=".5" cy=".28" r=".95"><stop offset="0" stop-color="#1F4E82"/><stop offset=".55" stop-color="#0C1F3C"/><stop offset="1" stop-color="#040915"/></radialGradient></defs>
+  <rect width="100" height="100" fill="url(#scTa)"/>
+  <g stroke="#5AC8F5" stroke-opacity=".26" stroke-width=".6" fill="none">${lines}<path d="M0 63 H100 M0 70 H100 M0 79 H100 M0 90 H100"/></g>
+  <circle cx="50" cy="50" r="36" fill="none" stroke="#5AC8F5" stroke-opacity=".2" stroke-width=".7"/><circle cx="50" cy="50" r="24" fill="none" stroke="#5AC8F5" stroke-opacity=".16" stroke-width=".7"/>
+  <path d="M50 12 L53 47 L88 50 L53 53 L50 88 L47 53 L12 50 L47 47 Z" fill="#9ADDFF" opacity=".09"/>
+  <path d="M0 0 L34 0 L10 62 Z" fill="#9ADDFF" opacity=".07"/><path d="M100 0 L66 0 L90 62 Z" fill="#9ADDFF" opacity=".07"/>
+  <circle cx="${(20+r()*60).toFixed(0)}" cy="${(20+r()*30).toFixed(0)}" r="1.4" fill="#9ADDFF" opacity=".7"/><circle cx="${(20+r()*60).toFixed(0)}" cy="${(30+r()*30).toFixed(0)}" r="1" fill="#9ADDFF" opacity=".6"/>`},
+ deck(r){let books='';const pal=['#8A2E2E','#2E5F8A','#C98E2E','#2E7A55','#6B3FA0','#B85C2E','#3B4B6B'];
+  [24,46,68].forEach(y=>{for(let x=2;x<98;){const w=3+Math.floor(r()*5),h=10+Math.floor(r()*6);books+=`<rect x="${x}" y="${y-h}" width="${w}" height="${h}" rx=".6" fill="${pal[Math.floor(r()*pal.length)]}" opacity=".85"/><rect x="${x+.6}" y="${y-h+1}" width="${Math.max(.6,w-1.2)}" height=".8" fill="#FFE9A8" opacity=".5"/>`;x+=w+.8}
+   books+=`<rect x="0" y="${y}" width="100" height="2.4" fill="#5C3A18"/><rect x="0" y="${y+2.4}" width="100" height="1" fill="#000" opacity=".45"/>`});
+  return `<defs><linearGradient id="scDk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A2412"/><stop offset="1" stop-color="#110903"/></linearGradient>
+  <radialGradient id="scDkC" cx=".5" cy=".98" r=".7"><stop offset="0" stop-color="#FFB955" stop-opacity=".55"/><stop offset="1" stop-color="#FFB955" stop-opacity="0"/></radialGradient></defs>
+  <rect width="100" height="100" fill="url(#scDk)"/>${books}<rect width="100" height="100" fill="url(#scDkC)"/>`},
+ deduce(r){let stars='';for(let i=0;i<24;i++)stars+=`<circle cx="${(r()*100).toFixed(1)}" cy="${(r()*60).toFixed(1)}" r="${(.4+r()*.9).toFixed(1)}" fill="#fff" opacity="${(.35+r()*.6).toFixed(2)}"/>`;
+  const px=[18,30,44,52,66],py=[30,18,26,12,22];let cons='';for(let i=0;i<4;i++)cons+=`<path d="M${px[i]} ${py[i]} L${px[i+1]} ${py[i+1]}" stroke="#9ADDFF" stroke-opacity=".5" stroke-width=".6"/>`;for(let i=0;i<5;i++)cons+=`<circle cx="${px[i]}" cy="${py[i]}" r="1.3" fill="#DFF4FF"/>`;
+  return `<defs><linearGradient id="scDe" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1B1858"/><stop offset=".7" stop-color="#090C2A"/><stop offset="1" stop-color="#05061A"/></linearGradient></defs>
+  <rect width="100" height="100" fill="url(#scDe)"/>${stars}${cons}
+  <circle cx="82" cy="18" r="9" fill="#FFF3D0"/><circle cx="86" cy="15" r="8" fill="#141650"/>
+  <ellipse cx="50" cy="104" rx="70" ry="22" fill="#0A0D2E"/><ellipse cx="50" cy="106" rx="50" ry="14" fill="#060820"/>
+  <path d="M12 96 L36 66" stroke="#8A93A8" stroke-width="3.2" stroke-linecap="round"/><path d="M12 96 L36 66" stroke="#C9D2E4" stroke-width="1" stroke-linecap="round"/><path d="M14 92 L6 100 M14 92 L20 100" stroke="#5C667C" stroke-width="1.4"/>`},
+ risk(r){let embers='';for(let i=0;i<12;i++)embers+=`<circle cx="${(r()*100).toFixed(1)}" cy="${(40+r()*60).toFixed(1)}" r="${(.5+r()*1).toFixed(1)}" fill="#FFB955" opacity="${(.4+r()*.6).toFixed(2)}"/>`;
+  return `<defs><linearGradient id="scRi" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A0A12"/><stop offset=".5" stop-color="#6B1E12"/><stop offset="1" stop-color="#1A0606"/></linearGradient>
+  <linearGradient id="scRiG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF8A3D" stop-opacity=".0"/><stop offset="1" stop-color="#FF8A3D" stop-opacity=".45"/></linearGradient></defs>
+  <rect width="100" height="100" fill="url(#scRi)"/>
+  <path d="M0 78 L14 58 L26 72 L40 50 L56 74 L70 56 L84 70 L100 60 L100 100 L0 100 Z" fill="#1C0808"/><path d="M0 84 L18 70 L32 80 L50 66 L68 82 L86 72 L100 80 L100 100 L0 100 Z" fill="#0F0404"/>
+  <path d="M62 -2 L52 32 L63 34 L46 70" fill="none" stroke="#FFE9A8" stroke-width="3.6" stroke-opacity=".28" stroke-linejoin="round"/><path d="M62 -2 L52 32 L63 34 L46 70" fill="none" stroke="#FFF6D6" stroke-width="1.3" stroke-linejoin="round"/>
+  <rect width="100" height="100" fill="url(#scRiG)"/>${embers}`},
+ auction(r){let coins='';[[12,92],[88,92],[22,96],[78,97]].forEach(([x,y],k)=>{const n=3+Math.floor(r()*4);for(let i=0;i<n;i++)coins+=`<ellipse cx="${x}" cy="${y-i*2.4}" rx="7" ry="2.6" fill="#E8B23A" stroke="#7A4E0E" stroke-width=".5"/>`;coins+=`<ellipse cx="${x}" cy="${y-(n-1)*2.4}" rx="4" ry="1.4" fill="#FFF0C0" opacity=".8"/>`});
+  return `<defs><radialGradient id="scAu" cx=".5" cy=".2" r="1"><stop offset="0" stop-color="#7A5218"/><stop offset=".6" stop-color="#3A2408"/><stop offset="1" stop-color="#160D03"/></radialGradient>
+  <linearGradient id="scAuP" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5C3A18"/><stop offset=".5" stop-color="#C9954A"/><stop offset="1" stop-color="#4A2C10"/></linearGradient></defs>
+  <rect width="100" height="100" fill="url(#scAu)"/>
+  <path d="M8 90 V44 A16 16 0 0 1 40 44 V90 Z M60 90 V44 A16 16 0 0 1 92 44 V90 Z" fill="#241606" stroke="#E8B23A" stroke-opacity=".4" stroke-width=".8"/>
+  <rect x="4" y="40" width="5" height="52" fill="url(#scAuP)"/><rect x="39" y="40" width="5" height="52" fill="url(#scAuP)"/><rect x="56" y="40" width="5" height="52" fill="url(#scAuP)"/><rect x="91" y="40" width="5" height="52" fill="url(#scAuP)"/>
+  <path d="M0 92 H100" stroke="#E8B23A" stroke-opacity=".5" stroke-width="1.2"/>
+  <circle cx="50" cy="8" r="14" fill="#FFE9A8" opacity=".18"/><path d="M50 0 V10 M42 10 H58 M44 10 L42 15 M56 10 L58 15 M50 10 V16" stroke="#E8B23A" stroke-width="1.2"/>${coins}`},
+ energy(r){let sparks='';for(let i=0;i<10;i++){const a=r()*6.28,d=30+r()*22,x=50+Math.cos(a)*d,y=50+Math.sin(a)*d;sparks+=`<path d="M${x.toFixed(1)} ${y.toFixed(1)} l${(Math.cos(a)*5).toFixed(1)} ${(Math.sin(a)*5).toFixed(1)}" stroke="#DFF4FF" stroke-width=".9" opacity="${(.4+r()*.6).toFixed(2)}"/>`}
+  return `<defs><radialGradient id="scEn" cx=".5" cy=".5" r=".7"><stop offset="0" stop-color="#5AC8F5"/><stop offset=".35" stop-color="#3B2E9E"/><stop offset=".75" stop-color="#140F3A"/><stop offset="1" stop-color="#06061A"/></radialGradient></defs>
+  <rect width="100" height="100" fill="url(#scEn)"/>
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#9ADDFF" stroke-opacity=".25" stroke-width=".8"/><circle cx="50" cy="50" r="30" fill="none" stroke="#B76CF0" stroke-opacity=".35" stroke-width=".8" stroke-dasharray="4 3"/><circle cx="50" cy="50" r="19" fill="none" stroke="#DFF4FF" stroke-opacity=".3" stroke-width=".6"/>${sparks}`}
+};
+const SC_DEFS='<defs><radialGradient id="scVig" cx=".5" cy=".45" r=".72"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient>'+
+ '<linearGradient id="scRim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>';
+/** لوحة البطاقة الكاملة 100×100: مشهد النوع + قاعدة متوهّجة بلون الندرة + الشعار + إطار داخلي وزخارف الزوايا */
 function cardArt(id){
- const a=CARD_ART[id];
- if(!a)return null;
- return '<svg viewBox="0 0 64 64" class="csvg">'+CG_DEFS+a+'</svg>';
+ const a=CARD_ART[id], c=cardById(id);
+ if(!a||!c)return null;
+ const R=RCOL[c.r]||RCOL.common, sc=(CARD_SCENES[c.t]||CARD_SCENES.tactic)(vnRnd(id*31+7));
+ const hi=c.r==='epic'||c.r==='legendary';
+ const corner=(x,y,sx,sy)=>`<path d="M${x} ${y+9} V${y} H${x+9*sx} M${x} ${y} l${3*sx} ${3*sy}" transform="scale(1 1)" fill="none" stroke="#FFE9A8" stroke-width="1.2" stroke-linecap="round"/>`;
+ return '<svg viewBox="0 0 100 100" class="csvg">'+SC_DEFS+sc+
+  `<ellipse cx="50" cy="83" rx="32" ry="6.5" fill="${R.g}" opacity=".32"/><ellipse cx="50" cy="83" rx="19" ry="3.6" fill="${R.g}" opacity=".55"/>`+
+  `<svg x="13" y="11" width="74" height="74" viewBox="0 0 64 64">${CG_DEFS}${a}</svg>`+
+  '<rect width="100" height="100" fill="url(#scVig)"/><rect width="100" height="100" fill="url(#scRim)"/>'+
+  `<rect x="1.2" y="1.2" width="97.6" height="97.6" rx="6.5" fill="none" stroke="${R.g}" stroke-opacity="${hi?'.75':'.45'}" stroke-width="1.2"/>`+
+  (hi?`<path d="M4 13 V4 H13 M87 4 H96 V13 M96 87 V96 H87 M13 96 H4 V87" fill="none" stroke="#FFE9A8" stroke-width="1.4" stroke-linecap="round"/>`:'')+
+  '</svg>';
 }
 
 function gcard(id,o){
  o=o||{};
- const c=cardById(id), R=RCOL[c.r], rar=RARITY[c.r];
+ const c=cardById(id), rar=RARITY[c.r];
  const lv=o.lv, cap=o.cap, locked=o.locked, sel=o.sel, sm=o.sm;
- const capped=lv&&cap&&cap<lv;
- return `<div ${o.tap?`onclick="${o.tap}"`:''} style="position:relative;cursor:${o.tap?'pointer':'default'};
-  border-radius:${sm?10:13}px;padding:1.5px;
-  background:linear-gradient(150deg,${R.a},${R.b} 55%,${R.a});
-  ${sel?`box-shadow:0 0 0 2px var(--gold),0 4px 14px rgba(232,178,58,.3)`:''};
-  ${locked?'opacity:.42':''}">
- <div style="border-radius:${sm?9:11.5}px;overflow:hidden;
-  background:linear-gradient(168deg,#1C2540,#0E1526 70%);position:relative;
-  display:flex;flex-direction:column;align-items:center;
-  padding:${sm?'7px 4px 11px':'11px 6px 15px'}">
-  <div style="position:absolute;top:0;left:0;right:0;height:52%;
-   background:radial-gradient(ellipse at 50% 0%,${R.a}2E,transparent 70%)"></div>
-  ${CARD_IMG[id]?`<div class="chero" style="width:${sm?'40px':'74px'};height:${sm?'40px':'74px'};border-radius:${sm?8:11}px;animation-delay:-${(id%9)*.41}s">
-   <div class="cimgw"><img src="${CARD_IMG[id]}"><div class="csheen" style="animation-delay:-${(id%7)*.5}s"></div></div>
-   <div class="cglow" style="box-shadow:inset 0 0 0 1px ${R.g}55,0 0 ${sm?9:15}px ${R.a}88"></div>
-   ${!sm&&(c.r==='epic'||c.r==='legendary')?`<svg class="cspk" viewBox="0 0 16 16" style="top:-4px;left:-3px;color:${R.g}"><path d="M8 0 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z" fill="currentColor"/></svg>
-   <svg class="cspk" viewBox="0 0 16 16" style="bottom:-3px;right:-3px;color:${R.g};animation-delay:.9s"><path d="M8 0 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z" fill="currentColor"/></svg>`:''}
-  </div>`
-  :cardArt(id)?`<div class="chero" style="width:${sm?'42px':'76px'};height:${sm?'42px':'76px'};border-radius:${sm?8:11}px;animation-delay:-${(id%9)*.41}s">
-   <div class="cimgw" style="background:radial-gradient(ellipse at 50% 16%,#26304E,#0B101E 80%)">${cardArt(id)}<div class="csheen" style="animation-delay:-${(id%7)*.5}s"></div></div>
-   <div class="cglow" style="box-shadow:inset 0 0 0 1px ${R.g}55,0 0 ${sm?9:15}px ${R.a}88"></div>
-   ${!sm&&(c.r==='epic'||c.r==='legendary')?`<svg class="cspk" viewBox="0 0 16 16" style="top:-4px;left:-3px;color:${R.g}"><path d="M8 0 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z" fill="currentColor"/></svg>
-   <svg class="cspk" viewBox="0 0 16 16" style="bottom:-3px;right:-3px;color:${R.g};animation-delay:.9s"><path d="M8 0 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 Z" fill="currentColor"/></svg>`:''}
-  </div>`
-  :`<div class="chero" style="width:${sm?26:38}px;height:${sm?26:38}px;animation-delay:-${(id%9)*.41}s">
-   <div style="position:absolute;inset:0;background-image:var(--icons);background-size:800% 500%;background-repeat:no-repeat;${iconPos(id)}"></div>
-  </div>`}
-  <div style="position:relative;z-index:2;font-size:${sm?9:11.5}px;font-weight:900;
-   margin-top:${sm?4:7}px;text-align:center;line-height:1.15;color:#EDF3F0">${c.n}</div>
-  ${sm?'':`<div style="position:relative;z-index:2;font-size:9.5px;color:var(--tx2);
-   margin-top:2px;text-align:center;line-height:1.2">${c.s}</div>`}
-  <div style="position:relative;z-index:2;margin-top:${sm?4:6}px;
-   font-size:${sm?7.5:8.5}px;font-weight:800;color:${R.g};
-   background:${R.b}66;padding:1px 7px;border-radius:8px">${rar.n}</div>
- </div>
- <div style="position:absolute;top:-5px;right:-4px;width:${sm?17:21}px;height:${sm?17:21}px;
-  border-radius:50%;background:linear-gradient(150deg,#B76CF0,#6B3FA0);
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  font-size:${sm?9:11}px;font-weight:900;box-shadow:0 2px 6px rgba(0,0,0,.5);z-index:3">${c.e}</div>
- ${sm?'':`<div style="position:absolute;top:-5px;left:-4px;background:linear-gradient(150deg,#2A3550,#161D30);
-  border:1px solid ${R.g}88;color:${R.g};font-size:9.5px;font-weight:900;padding:2px 7px;
-  border-radius:8px;z-index:3">${({A:'قبل',B:'أثناء',C:'بعد'})[c.ph]}</div>`}
- ${lv?`<div style="position:absolute;bottom:${sm?-9:-11}px;left:50%;transform:translateX(-50%);
-  width:${sm?26:32}px;height:${sm?26:32}px;z-index:4;
-  clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-  background:linear-gradient(150deg,${capped?'#F0B44A':R.a},${capped?'#A8700F':R.b});
-  border:${sm?1.5:2}px solid ${capped?'#FFD98A':R.g};
-  display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.6)">
-  <span style="font-size:${sm?9:11}px;font-weight:900;color:#fff;
-   text-shadow:0 1px 2px rgba(0,0,0,.7)">${capped?cap:lv}</span></div>
-  ${capped?`<div style="position:absolute;bottom:${sm?-20:-24}px;left:50%;transform:translateX(-50%);
-   font-size:9.5px;color:var(--warn);white-space:nowrap;z-index:4">${ico('down',9)} ${lv}</div>`:''}`:''}
- ${locked?`<div style="position:absolute;inset:0;display:flex;align-items:center;
-  justify-content:center;font-size:${sm?18:24}px;z-index:3">${ico('lock',15)}</div>`:''}
- ${o.ready?`<div style="position:absolute;top:-6px;left:-4px;
-  background:linear-gradient(145deg,#5DE39A,#1D8A4E);color:#fff;font-size:${sm?7.5:9}px;
-  font-weight:900;padding:2px 7px;border-radius:9px;z-index:4;
-  box-shadow:0 2px 6px rgba(0,0,0,.5)">ترقية</div>`:''}
+ const capped=lv&&cap&&cap<lv, hi=c.r==='epic'||c.r==='legendary';
+ const art=CARD_IMG[id]?`<div class="gcArt"><img src="${CARD_IMG[id]}" alt=""></div>`
+  :cardArt(id)?`<div class="gcArt">${cardArt(id)}${hi?`<div class="csheen" style="animation-delay:-${(id%7)*.5}s"></div>`:''}</div>`
+  :`<div class="gcArt"><div style="position:absolute;inset:18%;background-image:var(--icons);background-size:800% 500%;background-repeat:no-repeat;${iconPos(id)}"></div></div>`;
+ return `<div class="gc r-${c.r}${sm?' sm':''}${sel?' sel':''}${locked?' locked':''}"${o.tap?` onclick="${o.tap}" style="cursor:pointer"`:''}>
+  <div class="gcIn">${art}
+   <div class="gcNm">${c.n}</div>
+   ${sm?'':`<div class="gcS">${c.s}</div>`}
+   <div class="gcR">${rar.n}</div>
+  </div>
+  <div class="gcE">${c.e}</div>
+  ${sm?'':`<div class="gcPh">${({A:'قبل',B:'أثناء',C:'بعد'})[c.ph]}</div>`}
+  ${lv?`<div class="gcLv${capped?' cap':''}"><span>${capped?cap:lv}</span></div>${capped?`<div class="gcCap">${ico('down',9)} ${lv}</div>`:''}`:''}
+  ${locked?`<div class="gcLock">${ico('lock',15)}</div>`:''}
+  ${o.ready?`<div class="gcReady">ترقية</div>`:''}
  </div>`;
 }
 
@@ -16653,7 +16861,7 @@ Router.init({
  fail:(fn,e)=>{try{console.error('[nav]',fn,e)}catch(x){}try{clanScrFail(fn,e)}catch(x){}},
  scrollY:()=>window.scrollY,
  restore:y=>{_keepY=y},
- bar:show=>{const el=$('nav');if(el)el.style.display=show?'flex':'none'},
+ bar:(show,fn)=>{const el=$('nav');if(el)el.style.display=show?'flex':'none';if(fn&&!ARENA_FLOWS.test(fn))hideArena()},
  root:()=>{if(!S.tutorial_completed)return;tab(cur||'play')},
  confirmLeave:proceed=>confirmSheet('تغييرات لم تُحفظ','لديك تعديلات في هذه الشاشة لم تُحفظ بعد.','تجاهل والرجوع',proceed),   // تغييرات غير محفوظة تُؤكَّد دائمًا
  atRoot:()=>toast('اضغط رجوع مرّة أخرى للخروج'),
@@ -19961,7 +20169,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.39';
+const APP_VER='5.40';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20628,6 +20836,7 @@ function roomDraw(){
  const R=rmRoster();
  if(!RM.me){const me=rmMine();if(me)RM.me=me.peer}
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
+ if(!playing||RM.phase==='over')hideArena();else setArena(({carrom:'carrom',uno:'uno',draw:'atelier',mafia:'mafia',barra:'barra'})[RM.game]||'carrom');
  const head=playing
   ?`<div class="rmTopMini"><span>${ico('group',11)} ${R.length}</span>
     <span style="color:var(--gold)">${RM.solo?'مع الكمبيوتر':'كود '+RM.code}</span>
@@ -21421,7 +21630,8 @@ function rmUno(R){
   ${hand.map((c,i)=>{
    const ok=mine&&unoOk(c,U.top,U.col)&&!U.drawP&&unoW4Ok(c,hand,U.col)
      &&(U.drew!==RM.me||i===hand.length-1);
-   return `<div class="unoSlot ${ok?'ok':''}" onpointerdown="unoHint(${i})" onclick="unoHint(${i});unoPlay(${i})">
+   const mid=(hand.length-1)/2;
+   return `<div class="unoSlot ${ok?'ok':''}" style="--rot:${((i-mid)*2.6).toFixed(1)}deg;--lift:${(Math.abs(i-mid)*2.2).toFixed(1)}px" onpointerdown="unoHint(${i})" onclick="unoHint(${i});unoPlay(${i})">
     ${unoCard(c)}</div>`}).join('')}
  </div></div>`;
 }
@@ -21909,18 +22119,30 @@ const CA_SPR={};
 function caDisc(t,r){
  const k=t+'|'+Math.round(r*4);
  if(CA_SPR[k])return CA_SPR[k];
- const p=Math.ceil(r*.5)+4, S=Math.ceil(r*2+p*2);
+ const p=Math.ceil(r*.7)+6, S=Math.ceil(r*2+p*2);
  const c=document.createElement('canvas');c.width=c.height=S;
  const x=c.getContext('2d'),X=S/2,Y=S/2;
- x.beginPath();x.arc(X+2,Y+3.4,r,0,7);x.fillStyle='rgba(0,0,0,.30)';x.fill();
- const fill=t==='w'?['#FFFBF2','#D6C4A0']:t==='b'?['#514336','#191210']
-  :t==='q'?['#FF7B78','#8A1F26']:['#FFEBB0','#B8871E'];
- const rg=x.createRadialGradient(X-r*.36,Y-r*.42,r*.12,X,Y,r);
- rg.addColorStop(0,fill[0]);rg.addColorStop(1,fill[1]);
- x.beginPath();x.arc(X,Y,r,0,7);x.fillStyle=rg;x.fill();
- x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=1.4;x.stroke();
- x.beginPath();x.arc(X,Y,r*.62,0,7);x.strokeStyle='rgba(255,255,255,.20)';x.lineWidth=1.1;x.stroke();
- x.beginPath();x.arc(X-r*.34,Y-r*.38,r*.22,0,7);x.fillStyle='rgba(255,255,255,.28)';x.fill();
+ // ظلّ ناعم بثلاث طبقات باتجاه المصباح (أعلى يسار) — يعطي القطعة ارتفاعًا حقيقيًا فوق اللوح
+ for(let i=3;i>=1;i--){x.beginPath();x.arc(X+1+i*.9,Y+1.8+i*1.4,r+i*.7,0,7);x.fillStyle='rgba(0,0,0,'+(.09*i).toFixed(2)+')';x.fill()}
+ const fill=t==='w'?['#FFFDF6','#EBDCB8','#B79E72']:t==='b'?['#5E4D3E','#2A1E16','#0E0906']
+  :t==='q'?['#FF8E88','#C62B33','#6E1018']:['#FFF0C0','#E2B448','#8A5E12'];
+ // الجسم: حافة أسطوانية أغمق أسفل الوجه، ثم وجه علوي بتدرّج شعاعي مائل نحو الضوء
+ x.beginPath();x.arc(X,Y+r*.1,r,0,7);x.fillStyle=fill[2];x.fill();
+ const rg=x.createRadialGradient(X-r*.38,Y-r*.44,r*.1,X,Y,r);
+ rg.addColorStop(0,fill[0]);rg.addColorStop(.62,fill[1]);rg.addColorStop(1,fill[2]);
+ x.beginPath();x.arc(X,Y,r*.96,0,7);x.fillStyle=rg;x.fill();
+ x.beginPath();x.arc(X,Y,r*.96,0,7);x.strokeStyle='rgba(0,0,0,.42)';x.lineWidth=1.2;x.stroke();
+ x.beginPath();x.arc(X,Y,r*.9,Math.PI*1.05,Math.PI*1.75);x.strokeStyle='rgba(255,255,255,.38)';x.lineWidth=1.1;x.stroke();
+ // أخدود محفور ونقش وسطي بحسب القطعة: الملكة بحلقة ذهبية، الضارب بثمانية أشعّة، البيضاء والسوداء بنقطة مطفأة
+ x.beginPath();x.arc(X,Y,r*.64,0,7);x.strokeStyle='rgba(0,0,0,.22)';x.lineWidth=1.3;x.stroke();
+ x.beginPath();x.arc(X,Y,r*.6,0,7);x.strokeStyle='rgba(255,255,255,.18)';x.lineWidth=.9;x.stroke();
+ if(t==='q'){x.beginPath();x.arc(X,Y,r*.3,0,7);x.fillStyle='rgba(255,230,160,.5)';x.fill();x.strokeStyle='#FFE9A8';x.lineWidth=1;x.stroke()}
+ else if(t==='w'||t==='b'){x.beginPath();x.arc(X,Y,r*.2,0,7);x.fillStyle=t==='w'?'rgba(150,120,80,.28)':'rgba(255,255,255,.12)';x.fill()}
+ else{for(let i=0;i<8;i++){const a=i*Math.PI/4;x.beginPath();x.moveTo(X+Math.cos(a)*r*.34,Y+Math.sin(a)*r*.34);x.lineTo(X+Math.cos(a)*r*.52,Y+Math.sin(a)*r*.52);x.strokeStyle='rgba(120,80,10,.5)';x.lineWidth=1.1;x.stroke()}}
+ // بريق علوي ناعم
+ const hg=x.createRadialGradient(X-r*.4,Y-r*.45,0,X-r*.4,Y-r*.45,r*.55);
+ hg.addColorStop(0,'rgba(255,255,255,.5)');hg.addColorStop(1,'rgba(255,255,255,0)');
+ x.beginPath();x.arc(X,Y,r*.96,0,7);x.fillStyle=hg;x.fill();
  c._o=S/2;CA_SPR[k]=c;return c;
 }
 function caHandSprite(w,h){
@@ -22530,6 +22752,7 @@ function vbBackdrop(kind){
 
 /** رسم المسرح كاملًا (مرّة لكل مرحلة): الخلفية والمقاعد والسجلّ والشريط */
 function vbScene(kind,title){
+ setArena(kind==='mafia'?'mafia':'barra');
  go(`<div class="scr on vbScene ${kind}${VB.night?' night':''}">${tb(title)}
  <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbPhase" id="vbPhase"></div><div class="vbSeats" id="vbSeats"></div></div>
  <div class="vbFeed" id="vbFeed"></div>
@@ -23101,6 +23324,7 @@ function dbStart(diff){
 }
 function dbRound(){
  if(VB.i>=VB.rounds.length){dbEnd();return}
+ setArena('atelier');
  const art=VB.rounds[VB.i],nOpt={easy:4,mid:6,hard:8}[VB.diff]||6;
  const others=DB_ART.filter(a=>a.w!==art.w).sort(()=>Math.random()-.5).slice(0,nOpt-1).map(a=>a.w);
  VB.opts=others.concat([art.w]).sort(()=>Math.random()-.5);
@@ -23580,7 +23804,7 @@ function barraStart(){
  PT.idx=0;PT.shown=false;
  barraDeal();
 }
-function barraDeal(){
+function barraDeal(){setArena('barra');
  if(PT.idx>=PT.n){barraTalk();return}
  const n=PT.idx+1,spy=PT.idx===PT.spy;
  const card=spy?{game:'برا السالفة',title:'أنت برا السالفة!',desc:'لا تعرف الكلمة — جاوب بذكاء ولا تنكشف.',icon:ico('door',58,'red'),ac:'#E24B4A'}
@@ -23592,7 +23816,7 @@ function barraDeal(){
  <div style="font-size:10.5px;color:var(--tx2);text-align:center;margin-top:10px;line-height:1.7">تأكد أن غيرك لا يرى الشاشة قبل الكشف.</div>
  </div>`);
 }
-function barraTalk(){
+function barraTalk(){setArena('barra');
  clearInterval(PT.tm);PT.secs=120;
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
  <div class="orn"><div class="in">${ornCorners()}
@@ -23607,7 +23831,7 @@ function barraTalk(){
   if(el)el.textContent=Math.floor(PT.secs/60)+':'+String(PT.secs%60).padStart(2,'0');
   if(PT.secs<=0){clearInterval(PT.tm);barraVote()}},1000);
 }
-function barraVote(){
+function barraVote(){setArena('barra');
  clearInterval(PT.tm);
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
  <div class="sl" style="text-align:center">اتفقوا: من برا السالفة؟</div>
@@ -23714,7 +23938,7 @@ function ptReveal(){
  const a=document.getElementById('rcRev'),b=document.getElementById('rcNext');
  if(a)a.style.display='none';if(b)b.style.display='';
 }
-function mafiaDeal(){
+function mafiaDeal(){setArena('mafia');
  if(PT.idx>=PT.n){mafiaNight('mafia');return}
  const n=PT.idx+1;
  go(`<div class="scr on">${ptHead('مافيا',1)}
@@ -23756,7 +23980,7 @@ function mafNoLynch(){
  <button class="rbtn" style="margin-top:16px" onclick="mafiaNight('mafia')"><span>الليلة ${PT.day} — نامت المدينة</span></button>
  </div></div></div></div>`);
 }
-function mafiaNight(step){
+function mafiaNight(step){setArena('mafia');
  const mafias=PT.alive.filter(i=>PT.roles[i]==='مافيا');
  const doc=PT.alive.find(i=>PT.roles[i]==='طبيب');
  const det=PT.alive.find(i=>PT.roles[i]==='محقق');
@@ -23783,7 +24007,7 @@ function mafCheck(i){
  <button class="rbtn" style="margin-top:16px" onclick="mafiaMorning()"><span>أخفيت — أيقظوا المدينة</span></button>
  </div></div></div></div>`);
 }
-function mafiaMorning(){
+function mafiaMorning(){setArena('mafia');
  const killed=PT.victim!=null&&PT.victim!==PT.saved?PT.victim:null;
  if(killed!=null)PT.alive=PT.alive.filter(i=>i!==killed);
  const end=mafWinCheck();if(end)return;
@@ -23862,6 +24086,7 @@ function drawPass(){
 }
 const PD_COLORS=['#1B2030','#E24B4A','#2ECC71','#378ADD','#E8B23A','#B76CF0','#FFFFFF'];
 function drawBoard(){
+ setArena('atelier');
  go(`<div class="scr on">
  <div style="display:flex;align-items:center;gap:8px;padding:6px 0 10px">
   <button class="bk" onclick="clearInterval(PT.tm);ptExit()">${bkChev()}</button>
