@@ -372,7 +372,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .btn.g{background:transparent;border:1px solid var(--bd);color:var(--tx);font-weight:600;
  font-size:15px;box-shadow:none}
 .btn.gd{background:linear-gradient(145deg,#F0C25A,#C08C18);color:#15100A;box-shadow:0 4px 14px rgba(232,178,58,.3)}
-.sl{font-size:13px;font-weight:800;color:var(--tx2);margin:20px 0 10px}
+.sl{font-size:13px;font-weight:800;color:var(--tx2);margin:16px 0 8px}
 .note{font-size:11px;color:var(--mut);line-height:1.6;text-align:center;margin-top:12px}
 .wb{background:rgba(55,138,221,.1);border:1px solid rgba(55,138,221,.35);border-radius:12px;
  padding:12px;font-size:11.5px;line-height:1.6;margin-bottom:14px}
@@ -780,7 +780,7 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 #arena .arDeco{position:absolute;left:0;right:0;bottom:24%;width:100%;height:36%}
 #arena .arFloor{position:absolute;left:-25%;right:-25%;bottom:0;height:46%;
  transform:perspective(430px) rotateX(58deg);transform-origin:bottom center;
- animation:arScroll 9s linear infinite}
+ animation:arScroll 22s linear infinite}
 @keyframes arScroll{from{background-position:0 0,0 0,0 0}to{background-position:0 0,0 0,0 46px}}
 #arena .arFloor::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,transparent 30%,rgba(6,8,16,.9) 96%)}
 #arena .arPil{position:absolute;bottom:16%;width:26px;height:36%}
@@ -13916,8 +13916,9 @@ var NET=(function(){
  'use strict';
  var st={mode:'local',connected:false,id:null,name:null,peer:null,token:null,url:null,seasonId:null,hasCloud:false,lastError:null};
  var ws=null, ridN=0, waiting={}, topicSubs={}, peerSubs=[], peers=[], myPresence={};
- var listeners={welcome:[],state:[],resultFinal:[]};
+ var listeners={welcome:[],state:[],resultFinal:[],reconnect:[]};
  var backoff=1000, wantOpen=false, helloOpts={}, W=(typeof window!=='undefined')?window:null;
+ var connecting=null, dropped=false, hooked=false;
 
  /** أصل الخادم المضبوط صراحةً (https://host) أو '' = الأصل الحالي.
      الترتيب: window.TAHADDI_SERVER ← <meta name="tahaddi-server"> ← ?server= (ويُحفظ) ← localStorage */
@@ -13969,10 +13970,13 @@ var NET=(function(){
  }
  function onMsg(m){
   if(m.t==='welcome'){
+   var resumed=dropped&&st.peer&&m.peer===st.peer;
    setState({connected:true,id:m.id,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
    backoff=1000;
    if(Object.keys(myPresence).length)send({t:'presence',patch:myPresence});   // بعد إعادة الاتصال يعود حضوري
-   settle(m);fire('welcome',m);return;
+   settle(m);fire('welcome',m);
+   if(dropped){dropped=false;fire('reconnect',{resumed:!!resumed,peer:m.peer})}
+   return;
   }
   if(m.rid&&settle(m))return;
   if(m.t==='peers'){peers=m.list||[];peerSubs.forEach(function(f){try{f(peersView())}catch(e){}});return}
@@ -13996,9 +14000,22 @@ var NET=(function(){
  function connect(opts){
   helloOpts=opts||helloOpts;
   if(st.mode!=='server')return Promise.resolve(false);
+  if(connecting)return connecting;                                  // اتصال جارٍ: لا نفتح ثانيًا
+  if(ws&&ws.readyState===1&&st.connected){
+   // متصلون أصلًا: إن طُلب حساب آخر (رمز جديد) نعيد التعريف على الاتصال نفسه — لا اتصال ثانٍ
+   var want=helloOpts.token||undefined;
+   if(want&&want!==st.token){
+    return new Promise(function(resolve){
+     var off=on('welcome',function(){off();resolve(true)});
+     if(!send({t:'hello',token:want,name:helloOpts.name||undefined,peer:st.peer||undefined})){off();resolve(false);return}
+     setTimeout(function(){off();resolve(!!st.connected)},4000);
+    });
+   }
+   return Promise.resolve(true);
+  }
   wantOpen=true;
-  return new Promise(function(resolve){
-   var done=false, fin=function(v){if(!done){done=true;resolve(v)}};
+  connecting=new Promise(function(resolve){
+   var done=false, fin=function(v){if(!done){done=true;connecting=null;resolve(v)}};
    probe().then(function(has){
     if(!has){wantOpen=false;setState({mode:'local'});fin(false);return}
     open();
@@ -14006,12 +14023,14 @@ var NET=(function(){
    function open(){
    try{ws=new W.WebSocket(st.url||wsUrl())}catch(e){setState({connected:false,lastError:'ws'});fin(false);return}
    var guard=setTimeout(function(){if(!st.connected){try{ws.close()}catch(e){}fin(false)}},4000);
-   ws.onopen=function(){send({t:'hello',token:helloOpts.token||st.token||undefined,name:helloOpts.name||undefined})};
+   ws.onopen=function(){send({t:'hello',token:helloOpts.token||st.token||undefined,name:helloOpts.name||undefined,peer:st.peer||undefined})};
    ws.onmessage=function(ev){var m;try{m=JSON.parse(ev.data)}catch(e){return}
     if(m&&m.t==='welcome'){clearTimeout(guard);onMsg(m);fin(true);return}
     if(m&&typeof m.t==='string')onMsg(m)};
    ws.onclose=function(){
     var was=st.connected;
+    if(was)dropped=true;                                            // انقطاع بعد ترحيب: الترحيب القادم استئناف
+    connecting=null;
     setState({connected:false});
     Object.keys(waiting).forEach(function(k){clearTimeout(waiting[k].tm);waiting[k].rej({code:'offline'});delete waiting[k]});
     fin(false);
@@ -14021,12 +14040,27 @@ var NET=(function(){
    ws.onerror=function(){};
    }
   });
+  return connecting;
  }
- function disconnect(){wantOpen=false;if(ws){try{ws.close()}catch(e){}}ws=null;setState({connected:false})}
+ function disconnect(){wantOpen=false;dropped=false;if(ws){try{ws.close()}catch(e){}}ws=null;setState({connected:false})}
+ /** عادت الشبكة أو عاد التطبيق للواجهة: إن كان هناك خادم مضبوط ولسنا متصلين، نحاول فورًا لا بعد المهلة */
+ function retry(){
+  if(st.connected)return Promise.resolve(true);
+  if(st.mode!=='server'&&detect()==='server')st.mode='server';    // أقلعنا بلا شبكة فصرنا محليين — والآن يوجد خادم
+  if(st.mode!=='server')return Promise.resolve(false);
+  backoff=1000;
+  return connect();
+ }
+ function hook(){
+  if(hooked||!W||!W.addEventListener)return;hooked=true;
+  try{W.addEventListener('online',function(){retry()})}catch(e){}
+  try{W.document.addEventListener('visibilitychange',function(){if(!W.document.hidden)retry()})}catch(e){}
+ }
 
  /** الإقلاع: يحدّد الوضع ويتصل إن كان هناك خادم. لا يرمي أبدًا */
  function boot(opts){
   st.mode=detect();
+  hook();
   if(st.mode!=='server')return Promise.resolve(state());
   return connect(opts||{}).then(function(){return state()});
  }
@@ -14064,10 +14098,11 @@ var NET=(function(){
   };
  }
 
- return {boot:boot,connect:connect,disconnect:disconnect,state:state,on:on,
+ return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   purchase:purchase,purchases:purchases,
-  roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u}};
+  roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
+  _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=NET;
 /* ⟦/src⟧ */
@@ -14464,6 +14499,34 @@ function netReport(gid,o,out){
   .then(r=>{if(r&&r.profile&&r.status!=='pending')netAdoptProfile(gid,r.profile,r.status)}).catch(()=>{});
 }
 function netOnline(){return typeof NET!=='undefined'&&NET.state().mode==='server'&&NET.state().connected}
+/** هل هذه النسخة مربوطة بخادم أصلًا (ولو انقطع الآن)؟ */
+function netHasServer(){try{return typeof NET!=='undefined'&&(NET.state().mode==='server'||!!(NET.serverOrigin&&NET.serverOrigin()))}catch(e){return false}}
+/** يعيد محاولة الاتصال ثم يعيد فتح الشاشة نفسها — أو يقول إن الشبكة ما زالت غائبة */
+async function netRetryThen(fn,arg){
+ toast('جارٍ الاتصال…');
+ let ok=false;try{ok=await NET.retry()}catch(e){}
+ if(!ok){toast('ما زال الخادم بعيد المنال — تأكد من الإنترنت');return}
+ RMcap=undefined;Router.replace(fn,arg);
+}
+/** مشتريات الحساب من الخادم تُطبَّق على هذا الجهاز مرّة واحدة لكل إيصال — جهاز جديد يجد تذكرته وجواهره */
+async function iapSync(quiet){
+ if(!netOnline())return 0;
+ let n=0;
+ try{const r=await NET.purchases();(r&&r.list||[]).forEach(rec=>{if(rec&&rec.txId&&rec.grant&&applyGrant(rec.grant,rec.txId))n++})}catch(e){}
+ if(n&&!quiet)toast('استُعيد '+n+' من مشترياتك على هذا الجهاز');
+ if(n){try{refresh(Router.current()&&Router.current().fn==='storeScr'?storeScr:shopScr)}catch(e){}}
+ return n;
+}
+/** زرّ «استعادة المشتريات»: المتجر (إن وُجد جسره) ثم قائمة الخادم — لا يُخصم شيء أبدًا */
+async function restorePurchases(){
+ if(!netOnline()){toast('استعادة المشتريات تحتاج اتصالًا بخادم تحدّي');return}
+ toast('جارٍ الاستعادة…');
+ let n=0;
+ try{if(window.Billing&&Billing.provider()){const list=await Billing.restore();list.forEach(m=>{if(m&&m.grant&&applyGrant(m.grant,m.txId))n++})}}catch(e){}
+ n+=await iapSync(true);
+ toast(n?('استُعيد '+n+' من مشترياتك'):'لا مشتريات جديدة تُستعاد — كل شيء مطبَّق');
+ try{refresh(Router.current()&&Router.current().fn==='storeScr'?storeScr:(Router.current()&&Router.current().fn==='setSection'?()=>setSection('account'):shopScr))}catch(e){}
+}
 /** حسابات المشاركين في الغرفة الحالية — أنا أوّلهم */
 function netParticipants(){
  const ids=[];const me=NET.state().id;if(me)ids.push(me);
@@ -14484,11 +14547,17 @@ function netBoot(){
  const acc=S.account||{};
  NET.on('resultFinal',m=>{if(m&&m.profile&&m.profile.gameId)netAdoptProfile(m.profile.gameId,m.profile,m.status)});
  NET.on('state',()=>{const el=document.getElementById('netLine');if(el)el.innerHTML=netLine()});
+ // عودة الاتصال: نُعلم اللاعب، وإن كان ضيفًا في غرفة حيّة طلب من المضيف إعادة بثّ الوضع
+ NET.on('reconnect',r=>{
+  try{toast(r&&r.resumed?'عاد الاتصال — تابع من حيث توقّفت':'عاد الاتصال بالخادم')}catch(e){}
+  try{if(RM&&RM.code){RM.msg='';if(document.getElementById('rmScr'))roomDraw()}}catch(e){}   // يزول تنبيه الانقطاع
+  try{if(RM&&RM.code&&RM.code!=='SOLO'&&!RM.host&&RM.me)rmSend({t:'sync',by:RM.me})}catch(e){}
+ });
  NET.boot({token:acc.token,name:S.name}).then(st=>{
   if(st.mode!=='server'||!st.connected)return;
   S.account={token:st.token,id:st.id,name:st.name};
   if(st.name)S.name=st.name;                      // الاسم ملك الحساب على الخادم
-  return NET.loadCloud().then(c=>{netMergeCloud(c);saveState()});
+  return NET.loadCloud().then(c=>{netMergeCloud(c);saveState()}).then(()=>iapSync(true));
  }).catch(()=>{});
 }
 /** الحفظ السحابي إن كان أحدث من المحلي، والرتب من الخادم حيث له سجلّ */
@@ -16821,7 +16890,11 @@ function setSection(k){
   <div class="li" style="margin-top:11px"><div class="lr">
    <div class="lb"><div class="lt">اسم اللاعب</div><div class="ls">${S.name}</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
-    onclick="renameAsk()">تغيير</button></div></div>`;
+    onclick="renameAsk()">تغيير</button></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
+   <div class="lb"><div class="lt">المشتريات</div><div class="ls">تذكرة الموسم وجواهرك تعود على أي جهاز بحسابك</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="restorePurchases()">استعادة</button></div></div>`;
  if(SEC==='game')body=tgl('haptic','الاهتزاز عند اللمس',(window.SFX&&SFX.hapticAvailable())?'نقرات وإصابات ونتائج — تنبيه خفيف لا اهتزاز شاشة':'هذا الجهاز أو المتصفح لا يدعم الاهتزاز')+
   tgl('confirm','طلب التأكيد','قبل الانسحاب من مباراة أو مغادرة غرفة — حذف الحساب يُؤكَّد دائمًا');
  if(SEC==='sound')body=tgl('sfx','المؤثرات الصوتية','نقرات وإصابات ونتائج وضربات الكيرم — مركّبة داخل اللعبة')+
@@ -18650,7 +18723,7 @@ function auctionBid(st){
  </div>
  ${st.oppBid?`<div style="font-size:11.5px;color:var(--no);margin-top:8px">آخر مزايدة من المنافس</div>`:''}
  </div>
- <div class="sl" style="margin:16px 0 8px">ارفع إلى</div>
+ <div class="sl">ارفع إلى</div>
  <div style="display:flex;gap:7px;justify-content:center;flex-wrap:wrap">
  ${nums.map(n=>`<div onclick="aRaisePick(${n})"
   style="width:40px;height:40px;position:relative;cursor:pointer">
@@ -19460,7 +19533,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.30';
+const APP_VER='5.31';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -19649,10 +19722,10 @@ function seasonScr(keep){
   :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="prctag">أو ${usdTxt(CATALOG.get('season_pass').usd)}</span></button>`}
  <button class="btn g" style="margin-top:9px" onclick="szClaimAll()">${ico('gift',15)} استلام كل الجاهز</button>
  </div></div></div>
- <div class="wb" style="text-align:right;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
+ <div class="wb" style="text-align:start;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
  بالأداء لا بالفوز فقط: نقاط كل جولة تلعبها تتحول نقاطَ موسم — كل إجابة صحيحة وسرعتُها وصعوبةُ سؤالها وسلاسلُك المتتالية.
  الفوز يضيف <b>+30</b> والخسارة تمنحك <b>+10</b> على الأقل. كل <b>100 نقطة = مستوى</b>، حتى المستوى 100.</div>
- <div class="wb" style="text-align:right;margin-top:8px">${ico('ticket',13)} <b>ماذا يضيف المميز؟ ${ico('crown',13)}</b>
+ <div class="wb" style="text-align:start;margin-top:8px">${ico('ticket',13)} <b>ماذا يضيف المميز؟ ${ico('crown',13)}</b>
  جواهر مضاعفة (60 بدل 15 كل 5 مستويات + دفعتا 150 و200)، إطاران حصريان لصورتك،
  تعبيران حصريان («توتر» و«البومة الحكيمة»)، وجوكرات أندر حتى جوكرين أسطوريين في المستوى 100.<br>
  ${ico('shard',12)} <b>الشظايا؟</b> شظايا التطوّر تُطوِّر بطاقاتك —
@@ -19661,7 +19734,7 @@ function seasonScr(keep){
   <span class="szht">${ico('user',13)} مجاني</span><span class="szht p">${ico('ticket',13)} مميز ${ico('crown',13)}</span></div>
  <div class="szlist">${rows}</div>
  <div class="note">تكسب نقاط الموسم من كل جولة تلعبها — والفوز يمنحك أكثر. كل ${SZ_STEP} نقطة = مستوى.</div></div>`);
- if(!keep)setTimeout(()=>{const c=document.getElementById('szcur');if(c)c.scrollIntoView({block:'center',behavior:'instant'})},60);
+ if(!keep)setTimeout(()=>{if(Date.now()-_lastRestoreAt<500)return;const c=document.getElementById('szcur');if(c)c.scrollIntoView({block:'center',behavior:'instant'})},60);
 }
 
 // ── المزيد ──
@@ -19787,7 +19860,7 @@ function playModesScr(){
  };
  go(`<div class="scr on">${tbar('العب')}
  ${sections.map(sec=>`
-  <div class="sl" style="margin:14px 0 8px">${sec.t}</div>
+  <div class="sl">${sec.t}</div>
   <div style="display:grid;grid-template-columns:${sec.items.some(x=>x.big)?'1fr':'1fr 1fr'};gap:9px">
   ${sec.items.map(m=>{
     const un=isUnlocked(m.k), u=UNLOCKS.find(x=>x.k===m.k);
@@ -19814,8 +19887,12 @@ const RM_TOPIC='party';
 const RM_MIN={barra:[3,12],mafia:[4,12],draw:[2,8],uno:[2,4],carrom:[2,4]};
 const rmCode=()=>{const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s};
 async function rmCap(){
- if(RMcap!==undefined)return RMcap;
- if(typeof NET!=='undefined'&&NET.state().mode==='server'){RMcap=NET.state().connected?NET.roomCap():null;return RMcap}
+ if(RMcap!==undefined&&RMcap!==null)return RMcap;
+ if(typeof NET!=='undefined'&&(NET.state().mode==='server'||(NET.serverOrigin&&NET.serverOrigin()))){
+  if(!NET.state().connected){try{await NET.retry()}catch(e){}}     // عادت الشبكة؟ نحاول الآن لا بعد المهلة
+  if(NET.state().connected){RMcap=NET.roomCap();return RMcap}
+  RMcap=undefined;return null;                                       // لا نخزّن الفشل: المحاولة القادمة قد تنجح
+ }
  try{RMcap=(typeof window!=='undefined'&&window.claude&&typeof claude.use==='function')?await claude.use('room'):null}
  catch(e){RMcap=null}
  return RMcap;
@@ -19857,6 +19934,13 @@ function quizExit(){
   if(G)clearInterval(G.tm);G=null;hideArena();
   if(!Router.exit('quiz'))tab('play');
  });
+}
+/** ضيف عاد بعد انقطاع: المضيف يعيد بثّ وضع اللعبة الحالي فيلحق به — أونو وكيرم يحملان وضعهما كاملًا */
+function rmResync(){
+ try{
+  if(RM.phase==='uno'&&RM.U)unoPub();
+  else if(RM.phase==='carrom'&&RM.C)caPub(RM.msg||'');
+ }catch(e){}
 }
 function rmSend(o){const c=RMcap;if(!c||!RM.code)return;
  try{c.emit(RM_TOPIC,Object.assign({c:RM.code},o))}catch(e){}}
@@ -19935,6 +20019,7 @@ function rmOn(d,m){
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
  else if(d.t==='role'&&d.to===me){RM.role=d.r;RM.word=d.w||'';RM.cat=d.cat||RM.cat}
+ else if(d.t==='sync'){if(RM.host&&d.by!==me)rmResync()}
  else if(d.t==='ph'){RM.phase=d.p;RM.msg=d.m||'';if(d.p==='vote')RM.votes={};
   if(d.secs)rmTimer(d.secs)}
  else if(d.t==='end'){RM.phase='end';RM.res=d;rmSettle(d)}
@@ -19992,10 +20077,13 @@ async function mmScr(g,mode){
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:16px 0">
    <div style="font-size:44px">${ico('globe',40)}</div>
-   <div class="mtl" style="font-size:17px;margin-top:10px">البحث غير متاح هنا</div>
+   ${netHasServer()?`<div class="mtl" style="font-size:17px;margin-top:10px">لا اتصال بخادم تحدّي الآن</div>
+   <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">تأكد من الإنترنت ثم أعد المحاولة، أو العب مع الكمبيوتر ريثما تعود الشبكة.</div>
+   <button class="rbtn" style="margin-top:16px" onclick="netRetryThen('mmScr',{g:'${g}',mode:'${mode||'casual'}'})"><span>${ico('reset',14)} إعادة المحاولة</span></button>`
+   :`<div class="mtl" style="font-size:17px;margin-top:10px">البحث غير متاح هنا</div>
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
     اللعب مع لاعبين حقيقيين يحتاج فتح اللعبة من <b>رابط اللعبة المنشور</b>.<br>
-    يمكنك اللعب مع الكمبيوتر الآن.</div>
+    يمكنك اللعب مع الكمبيوتر الآن.</div>`}
    ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="push('soloScr','${g}')"><span>${ico('robot',13)} العب مع الكمبيوتر</span></button>`:''}
   </div></div></div></div>`);
   return;
@@ -20041,7 +20129,7 @@ function mmDraw(){
    في البحث الآن: <b style="color:var(--gold)">${S2.length}</b> · نحتاج <b>${lim[0]}</b><br>
    مضى ${RM.mmT||0} ثانية</div>
  </div></div></div>
- ${(RM.mmT||0)>12?`<div class="wb" style="text-align:right;margin-top:12px">${ico('info',12)}
+ ${(RM.mmT||0)>12?`<div class="wb" style="text-align:start;margin-top:12px">${ico('info',12)}
   لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب مع الكمبيوتر.</div>
   ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);Router.replace('soloScr','${RM.game}')"><span>${ico('robot',13)} العب مع الكمبيوتر</span></button>`:''}
   <button class="btn g" style="margin-top:9px" onclick="mmCancel(1);Router.replace('roomScr','${RM.game}')">${ico('next',13)} أنشئ غرفة بكود بدلًا من ذلك</button>`:''}
@@ -20063,21 +20151,25 @@ async function roomScr(game){
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:16px 0">
    <div style="font-size:44px">${ico('web',40)}</div>
-   <div class="mtl" style="font-size:17px;margin-top:10px">غرف الكود غير متاحة هنا</div>
+   ${netHasServer()?`<div class="mtl" style="font-size:17px;margin-top:10px">لا اتصال بخادم تحدّي الآن</div>
+   <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">تأكد من الإنترنت ثم أعد المحاولة — غرفتك ورتبتك تنتظرانك على الخادم.</div>
+   <button class="rbtn" style="margin-top:16px" onclick="netRetryThen('roomScr','${RM.game}')"><span>${ico('reset',14)} إعادة المحاولة</span></button>
+   <button class="btn g" style="margin-top:9px" onclick="ptWay='pass';Router.settle('partyScr')">العب بتمرير الجوال الآن</button>`
+   :`<div class="mtl" style="font-size:17px;margin-top:10px">غرف الكود غير متاحة هنا</div>
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
     اللعب من عدة هواتف يعمل عند فتح اللعبة من <b>رابط اللعبة المنشور</b> ومشاركته مع من سيلعب معك.<br>
     في هذه النسخة المحلية استخدم <b>تمرير الجوال</b>.</div>
-   <button class="rbtn" style="margin-top:16px" onclick="ptWay='pass';Router.settle('partyScr')"><span>العب بتمرير الجوال</span></button>
+   <button class="rbtn" style="margin-top:16px" onclick="ptWay='pass';Router.settle('partyScr')"><span>العب بتمرير الجوال</span></button>`}
   </div></div></div></div>`);
   return;
  }
  if(!RM.name)RM.name=S.name||'لاعب';
  go(`<div class="scr on nofi" id="rmScr">${tb('غرفة بكود')}
- <div class="wb" style="text-align:right">${ico('info',13)} أنشئ غرفة وأعطِ الكود لمن معك — يفتحون <b>نفس رابط اللعبة</b> ويدخلون بالكود، ويرى كلٌّ دوره في هاتفه.</div>
+ <div class="wb" style="text-align:start">${ico('info',13)} أنشئ غرفة وأعطِ الكود لمن معك — يفتحون <b>نفس رابط اللعبة</b> ويدخلون بالكود، ويرى كلٌّ دوره في هاتفه.</div>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:6px 0 5px">اسمك في الغرفة</div>
  <input class="fin" id="rmNm" maxlength="14" value="${RM.name}">
  <button class="rbtn" style="margin-top:14px" onclick="rmCreate()"><span>${ico('plus',14)} أنشئ غرفة جديدة</span></button>
- <div class="sl" style="margin:16px 0 8px">أو ادخل بكود</div>
+ <div class="sl">أو ادخل بكود</div>
  <input class="fin" id="rmCd" maxlength="4" placeholder="ABCD" style="text-align:center;letter-spacing:6px;font-size:22px;font-weight:900">
  <button class="btn g" style="margin-top:10px" onclick="rmJoin()">${ico('next',14)} دخول الغرفة</button>
  </div>`);
@@ -20122,12 +20214,12 @@ function roomDraw(){
  </div>`;
  let body='';
  if(RM.phase==='lobby'){
-  body=`<div class="sl" style="margin:14px 0 8px">في الغرفة الآن</div>
+  body=`<div class="sl">في الغرفة الآن</div>
   ${R.map(p=>`<div class="li" style="margin-bottom:7px;${p.me?'border-color:var(--gold)':''}"><div class="lr">
    <span style="font-size:22px">${p.host?ico('crown',20):ico('user',20)}</span>
    <div class="lb"><div class="lt" style="font-size:12.5px">${p.name}${p.me?' <span style="font-size:9.5px;color:var(--gold)">أنت</span>':''}</div></div>
    </div></div>`).join('')||'<div class="note">بانتظار انضمام اللاعبين…</div>'}
-  ${RM.host?`<div class="sl" style="margin:14px 0 8px">اللعبة</div>
+  ${RM.host?`<div class="sl">اللعبة</div>
    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
     ${[['barra',ico('mute',20),'برا السالفة'],['mafia',ico('search',20),'مافيا'],['draw',ico('palette',20),'مسابقة الرسم'],
        ['uno',ico('cards',20),'أونو'],['carrom',ico('ball',20),'كيرم']].map(([g,e,n])=>
@@ -20234,7 +20326,7 @@ function rmBarra(R){
  if(RM.phase==='vote'){
   const myVote=(R.find(p=>p.me)||{}).vote;
   const tally={};R.forEach(p=>{if(p.vote)tally[p.vote]=(tally[p.vote]||0)+1});
-  return `<div class="sl" style="margin:14px 0 9px;text-align:center">من برا السالفة؟</div>
+  return `<div class="sl" style="text-align:center">من برا السالفة؟</div>
   ${R.map(p=>`<button class="btn ${myVote===p.peer?'gd':'g'}" style="margin-bottom:8px;text-align:right"
    onclick="rmVote('${p.peer}')">${p.name}${p.me?' (أنت)':''} ${tally[p.peer]?`<b style="color:var(--gold)">— ${tally[p.peer]} صوت</b>`:''}</button>`).join('')}
   <div class="note">صوّت الجميع: ${R.filter(p=>p.vote).length}/${R.length}</div>
@@ -20274,13 +20366,13 @@ function soloScr(g){
  const row=PT_GAMES.find(x=>x[3]===g)||[];
  go(`<div class="scr on">${tb('مع الكمبيوتر')}
  <div class="gHero sm">${GAME_ART[g]||''}</div>
- <div class="sl" style="margin:14px 0 9px">مستوى الخصم</div>
+ <div class="sl">مستوى الخصم</div>
  ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard" onclick="soloStart('${g}','${k}')">
   <span class="wIco">${e}</span><div style="flex:1"><div class="wT">${n}</div><div class="wD">${d}</div></div>
   <span class="wGo">›</span></div>`).join('')}
- ${g==='uno'?`<div class="sl" style="margin:16px 0 9px">عدد اللاعبين (أنت + الكمبيوتر)</div>
+ ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
- ${g==='carrom'?`<div class="sl" style="margin:16px 0 9px">عدد اللاعبين</div>
+ ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
  <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div></div>`);
 }
@@ -20396,7 +20488,7 @@ function rmDraw(R){
    border:2px solid #3B2F5C;touch-action:none;background:#fff;cursor:crosshair"></canvas>
   <div style="display:flex;gap:6px;margin-top:9px;align-items:center;justify-content:center" id="rmCols">
   ${PD_COLORS.map((c,i)=>`<span onclick="RM.ci=${i};document.querySelectorAll('#rmCols span').forEach(x=>x.style.outline='none');this.style.outline='3px solid #FFE9A8'"
-   style="width:30px;height:30px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
+   style="width:36px;height:36px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
    border:2px solid ${c==='#FFFFFF'?'#8A93A8':'#0B1020'};${(RM.ci||0)===i?'outline:3px solid #FFE9A8':''}"></span>`).join('')}
   </div>
   <div class="note">الجميع يرسم في نفس الوقت — تُرسل خطوطك مباشرة</div>
@@ -21662,7 +21754,7 @@ function rmMafia(R){
    <div class="mtl" style="font-size:16px;margin-top:8px">الليلة ${RM.day} — ${ttl}</div>
    ${canAct?'':`<div style="font-size:11.5px;color:var(--tx2);margin-top:7px">${dead?'أنت خارج اللعبة — تابع بصمت':'أغمض عينيك… ينتظر الجميع'}</div>`}
   </div></div></div>
-  ${canAct?`<div class="sl" style="margin:14px 0 8px;text-align:center">اختر لاعبًا</div>
+  ${canAct?`<div class="sl" style="text-align:center">اختر لاعبًا</div>
    ${aliveList().filter(p=>!(RM.step==='det'&&p.peer===RM.me)).map(p=>
     `<button class="btn g" style="margin-bottom:8px" onclick="rmAct('${p.peer}')">${nm(p.peer)}</button>`).join('')}`:''}
   ${RM.detRes?`<div class="hint" style="text-align:center;margin-top:12px">${RM.detRes}</div>`:''}`;
@@ -21681,7 +21773,7 @@ function rmMafia(R){
   const myVote=(R.find(p=>p.me)||{}).vote;
   const tally={};R.forEach(p=>{if(p.vote)tally[p.vote]=(tally[p.vote]||0)+1});
   const dead=!RM.alive.includes(RM.me);
-  return `<div class="sl" style="margin:14px 0 9px;text-align:center">على من تصوتون للإعدام؟</div>
+  return `<div class="sl" style="text-align:center">على من تصوتون للإعدام؟</div>
   ${dead?'<div class="note">أنت خارج اللعبة — لا تصويت</div>':
    aliveList().map(p=>`<button class="btn ${myVote===p.peer?'gd':'g'}" style="margin-bottom:8px"
     onclick="rmVote('${p.peer}')">${p.name}${p.peer===RM.me?' (أنت)':''} ${tally[p.peer]?`<b style="color:var(--gold)">— ${tally[p.peer]}</b>`:''}</button>`).join('')}
@@ -22033,10 +22125,10 @@ function partyScr(){
  go(`<div class="scr on">${tb('ليلة العائلة')}
  <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:4px">
   ألعاب جماعية للأصدقاء والعائلة — اختر اللعبة ثم اختر طريقة اللعب.</div>
- ${cont?`<div class="sl" style="margin:16px 0 9px">تابع لعبك</div>${gRow(cont,1)}
-  <div class="sl" style="margin:18px 0 9px">كل الألعاب</div>
+ ${cont?`<div class="sl">تابع لعبك</div>${gRow(cont,1)}
+  <div class="sl">كل الألعاب</div>
   ${defs.filter(g=>g.id!==cont.id).map(g=>gRow(g)).join('')}`
-  :`<div class="sl" style="margin:16px 0 9px">اختر اللعبة</div>
+  :`<div class="sl">اختر اللعبة</div>
   ${defs.map(g=>gRow(g)).join('')}`}
  </div>`);
 }
@@ -22159,10 +22251,10 @@ function ptOpen(g){
  if(row&&!row[4])return push('gameHub',g);
  push(({barra:'barraSetup',mafia:'mafiaSetup',draw:'drawSetup'})[g]);
 }
-const ptCount=(min,max)=>`<div class="sl" style="margin:14px 0 8px">عدد اللاعبين</div>
+const ptCount=(min,max)=>`<div class="sl">عدد اللاعبين</div>
  <div class="cr">${Array.from({length:max-min+1},(_,i)=>min+i).map(n=>
   `<div class="fc ${PT.n===n?'on':''}" onclick="PT.n=${n};${PT.g==='barra'?'barraSetup':PT.g==='mafia'?'mafiaSetup':'drawSetup'}(1)">${n}</div>`).join('')}</div>`;
-const ptCats=f=>`<div class="sl" style="margin:14px 0 8px">الفئة</div>
+const ptCats=f=>`<div class="sl">الفئة</div>
  <div class="cr">${Object.keys(PARTY_WORDS).map(c=>
   `<div class="fc ${PT.cat===c?'on':''}" onclick="PT.cat='${c}';${f}(1)">${c}</div>`).join('')}</div>`;
 
@@ -22170,7 +22262,7 @@ const ptCats=f=>`<div class="sl" style="margin:14px 0 8px">الفئة</div>
 function barraSetup(keep){
  if(!keep||!PT||PT.g!=='barra')PT={g:'barra',n:5,cat:'أماكن'};
  go(`<div class="scr on">${tb('برا السالفة')}
- <div class="wb" style="text-align:right">الكل يرى الكلمة السرية إلا لاعبًا واحدًا. اسألوا بعضكم بالدور ثم صوّتوا: من برا السالفة؟</div>
+ <div class="wb" style="text-align:start">الكل يرى الكلمة السرية إلا لاعبًا واحدًا. اسألوا بعضكم بالدور ثم صوّتوا: من برا السالفة؟</div>
  ${ptCount(3,8)}${ptCats('barraSetup')}
  <button class="rbtn" style="margin-top:18px" onclick="barraStart()"><span>ابدأ — مرروا الجوال</span></button></div>`);
 }
@@ -22212,23 +22304,44 @@ function barraTalk(){
 function barraVote(){
  clearInterval(PT.tm);
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
- <div class="sl" style="margin:14px 0 10px;text-align:center">اتفقوا: من برا السالفة؟</div>
+ <div class="sl" style="text-align:center">اتفقوا: من برا السالفة؟</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
  ${Array.from({length:PT.n},(_,i)=>`<button class="btn g" onclick="barraEnd(${i})">اللاعب ${i+1}</button>`).join('')}
  </div></div>`);
 }
 function barraEnd(acc){
- const right=acc===PT.spy;
+ if(acc===PT.spy)return barraGuess();       // أُمسك به: له تخمين واحد
+ barraFinal('escaped',acc);
+}
+/** تخمين الجاسوس: الكلمة الحقيقية بين ثلاث كلمات من الفئة نفسها */
+function barraGuess(){
+ const pool=(PARTY_WORDS[PT.cat]||[]).filter(w=>w!==PT.word).sort(()=>Math.random()-.5).slice(0,3);
+ const opts=pool.concat([PT.word]).sort(()=>Math.random()-.5);
+ go(`<div class="scr on">${ptHead('برا السالفة',1)}
+ <div class="orn"><div class="in">${ornCorners()}
+ <div style="text-align:center;padding:14px 0 6px">
+ <div style="font-size:40px">${ico('door',36,'red')}</div>
+ <div class="mtl" style="font-size:17px;margin-top:8px">أُمسك باللاعب ${PT.spy+1}!</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:7px;line-height:1.7">مرّروا له الجوال: إن خمّن الكلمة من أوّل مرّة فاز هو، وإلا فازت المجموعة.</div>
+ </div></div></div>
+ <div class="sl" style="text-align:center">ما الكلمة يا برا السالفة؟</div>
+ <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ ${opts.map(w=>`<button class="btn g" onclick="barraFinal('${w===PT.word?'guessed':'caught'}',${PT.spy})">${esc(w)}</button>`).join('')}
+ </div></div>`);
+}
+function barraFinal(outcome,acc){
+ const groupWon=outcome==='caught';
  evtParty();
  if(window.FX)FX.win();
+ const title=outcome==='caught'?'أمسكتم به!':outcome==='guessed'?'خمّن الكلمة — فاز برا السالفة!':'نجا برا السالفة!';
+ const why=outcome==='caught'?'ولم يعرف الكلمة — فازت المجموعة':outcome==='guessed'?'أُمسك به لكنه عرف الكلمة من أوّل تخمين':'اتهمتم اللاعب '+(acc+1)+' — فاز برا السالفة';
  go(`<div class="scr on">${ptHead('النتيجة')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:14px 0">
- <div style="font-size:44px">${right?'':ico('broken',20)}</div>
- <div class="mtl" style="font-size:18px;margin-top:9px">${right?'أمسكتم به!':'نجا برا السالفة!'}</div>
+ <div style="font-size:44px">${groupWon?ico('trophy',22):ico('door',22,'red')}</div>
+ <div class="mtl" style="font-size:18px;margin-top:9px">${title}</div>
  <div style="font-size:13px;color:var(--tx2);margin-top:9px">برا السالفة كان: <b class="mtl">اللاعب ${PT.spy+1}</b><br>
- الكلمة: <b>${PT.word}</b><br>
- ${right?'فازت المجموعة':'اتهمتم اللاعب '+(acc+1)+' — فاز برا السالفة'}</div>
+ الكلمة: <b>${PT.word}</b><br>${why}</div>
  </div></div></div>
  <button class="rbtn" style="margin-top:14px" onclick="barraStart()"><span>جولة جديدة — نفس اللاعبين</span></button>
  <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
@@ -22238,7 +22351,7 @@ function barraEnd(acc){
 function mafiaSetup(keep){
  if(!keep||!PT||PT.g!=='mafia')PT={g:'mafia',n:6};
  go(`<div class="scr on">${tb('مافيا')}
- <div class="wb" style="text-align:right">أدوار سرية: مافيا ${ico('swords',13)} وطبيب ${ico('heart',13)} ومحقق ${ico('search',13)} وشعب ${ico('group',13)}.
+ <div class="wb" style="text-align:start">أدوار سرية: مافيا ${ico('swords',13)} وطبيب ${ico('heart',13)} ومحقق ${ico('search',13)} وشعب ${ico('group',13)}.
  التطبيق يوزع الأدوار ويروي الليل والنهار — بلا حاجة لراوٍ بشري.</div>
  ${ptCount(5,12)}
  <button class="rbtn" style="margin-top:18px" onclick="mafiaStart()"><span>وزّع الأدوار</span></button></div>`);
@@ -22246,7 +22359,7 @@ function mafiaSetup(keep){
 function mafiaStart(){
  Router.enter('party');
  const roles=[];
- const nMafia=PT.n>=8?2:1;
+ const nMafia=PT.n>=10?3:PT.n>=8?2:1;   // ثلث المجلس تقريبًا كما في اللعبة الأصلية
  for(let i=0;i<nMafia;i++)roles.push('مافيا');
  roles.push('طبيب','محقق');
  while(roles.length<PT.n)roles.push('شعب');
@@ -22312,20 +22425,34 @@ function mafGate(title,emoji,desc,next){
  <button class="rbtn" style="margin-top:16px" onclick="${next}"><span>جاهز — اكشف</span></button>
  </div></div></div></div>`);
 }
-function mafPick(title,cb,exclude){
- go(`<div class="scr on">${ptHead('مافيا — الليلة '+PT.day,1)}
- <div class="sl" style="margin:14px 0 10px;text-align:center">${title}</div>
+function mafPick(title,cb,exclude,day){
+ go(`<div class="scr on">${ptHead(day?'مافيا — الصباح '+PT.day:'مافيا — الليلة '+PT.day,1)}
+ <div class="sl" style="text-align:center">${title}</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
  ${PT.alive.filter(i=>!(exclude||[]).includes(i)).map(i=>
   `<button class="btn g" onclick="${cb}(${i})">اللاعب ${i+1}</button>`).join('')}
- </div></div>`);
+ </div>
+ ${day?`<button class="btn g" style="margin-top:12px;color:var(--tx2)" onclick="mafNoLynch()">لا إعدام اليوم — لم تتفق الأغلبية</button>`:''}
+ </div>`);
+}
+/** يوم بلا إعدام: القانون الأصلي يسمح بذلك إن لم تتفق الأغلبية — تمضي المدينة إلى الليل */
+function mafNoLynch(){
+ PT.day++;PT.victim=null;PT.saved=null;
+ go(`<div class="scr on">${ptHead('مافيا',1)}
+ <div class="orn"><div class="in">${ornCorners()}
+ <div style="text-align:center;padding:14px 0">
+ <div style="font-size:44px">${ico('scale',20)}</div>
+ <div class="mtl" style="font-size:17px;margin-top:9px">لم يُعدم أحد اليوم</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:6px">لم تتفق الأغلبية على متهم — المافيا ما زالت بينكم</div>
+ <button class="rbtn" style="margin-top:16px" onclick="mafiaNight('mafia')"><span>الليلة ${PT.day} — نامت المدينة</span></button>
+ </div></div></div></div>`);
 }
 function mafiaNight(step){
  const mafias=PT.alive.filter(i=>PT.roles[i]==='مافيا');
  const doc=PT.alive.find(i=>PT.roles[i]==='طبيب');
  const det=PT.alive.find(i=>PT.roles[i]==='محقق');
  if(step==='mafia')mafGate('نامت المدينة — مرر للمافيا',ico('swords',20),
-  'مرر الجوال لعضو المافيا'+(mafias.length>1?' (يتشاورون بصمت)':''),'mafPick(\'من تغتالون الليلة؟\',\'mafKill\')');
+  'مرر الجوال لعضو المافيا'+(mafias.length>1?' (يتشاورون بصمت)':''),'mafPick(\'من تغتالون الليلة؟\',\'mafKill\',['+mafias.join(',')+'])');
  else if(step==='doc'){
   if(doc==null){mafiaMorning();return}
   mafGate('مرر للطبيب',ico('heart',20),'الطبيب يختار من ينقذ الليلة','mafPick(\'من تنقذ الليلة؟\',\'mafSave\')');
@@ -22357,7 +22484,7 @@ function mafiaMorning(){
  <div style="font-size:44px">${killed!=null?ico('orb',20):ico('energy',20)}</div>
  <div class="mtl" style="font-size:17px;margin-top:9px">${killed!=null?`قُتل اللاعب ${killed+1} ليلًا`:'نجا الجميع — الطبيب أنقذ الضحية!'}</div>
  <div style="font-size:12px;color:var(--tx2);margin-top:8px">الأحياء: ${PT.alive.map(i=>i+1).join(' · ')}<br>ناقشوا ثم صوّتوا على متهم</div>
- <button class="rbtn" style="margin-top:16px" onclick="mafPick('على من تصوتون للإعدام؟','mafLynch')"><span>إلى التصويت</span></button>
+ <button class="rbtn" style="margin-top:16px" onclick="mafPick('على من تصوتون للإعدام؟','mafLynch',null,1)"><span>إلى التصويت</span></button>
  </div></div></div></div>`);
 }
 function mafLynch(i){
@@ -22401,7 +22528,7 @@ function mafWinCheck(note){
 function drawSetup(keep){
  if(!keep||!PT||PT.g!=='draw')PT={g:'draw',n:3,cat:'حيوانات'};
  go(`<div class="scr on">${tb('مسابقة الرسم')}
- <div class="wb" style="text-align:right">كلمة واحدة للجميع — كلٌّ يرسمها في 60 ثانية بالتناوب، ثم صوّتوا لأفضل لوحة. الترتيب النهائي بالميداليات!</div>
+ <div class="wb" style="text-align:start">كلمة واحدة للجميع — كلٌّ يرسمها في 60 ثانية بالتناوب، ثم صوّتوا لأفضل لوحة. الترتيب النهائي بالميداليات!</div>
  ${ptCount(2,6)}${ptCats('drawSetup')}
  <button class="rbtn" style="margin-top:18px" onclick="drawStart()"><span>ابدأ المسابقة</span></button></div>`);
 }
@@ -22472,7 +22599,7 @@ function pdDone(){
 function drawVote(){
  if(PT.vi>=PT.n){drawEnd();return}
  go(`<div class="scr on">${ptHead('التصويت',1)}
- <div class="sl" style="margin:12px 0 8px;text-align:center">اللاعب ${PT.vi+1}: صوّت لأفضل رسمة «${PT.word}» (غير رسمتك)</div>
+ <div class="sl" style="text-align:center">اللاعب ${PT.vi+1}: صوّت لأفضل رسمة «${PT.word}» (غير رسمتك)</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
  ${PT.imgs.map((im,i)=>i===PT.vi?'':`<div onclick="PT.votes[${i}]++;PT.vi++;drawVote()"
   style="cursor:pointer;border:2px solid #3B2F5C;border-radius:14px;overflow:hidden;background:#fff">
@@ -22482,12 +22609,14 @@ function drawVote(){
 }
 function drawEnd(){
  const rank=PT.imgs.map((im,i)=>({im,i,v:PT.votes[i]})).sort((a,b)=>b.v-a.v);
+ const top=rank.length?rank[0].v:0, tied=rank.filter(r=>r.v===top).length;
  evtParty();
  if(window.FX)FX.win();
  go(`<div class="scr on">${ptHead('النتائج')}
  <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">الكلمة كانت: <b class="mtl" style="font-size:15px">${PT.word}</b></div>
- ${rank.map((r,pos)=>`<div class="li" style="margin-bottom:9px;${pos===0?'border-color:var(--gold)':''}"><div class="lr">
-  <span style="font-size:24px;flex-shrink:0">${pos===0?ico('medal',20,'#E8B23A'):pos===1?ico('medal',20,'#C0C7D6'):pos===2?ico('medal',20,'#B87333'):(pos+1)+'.'}</span>
+ ${tied>1?`<div class="note" style="margin-bottom:8px">${ico('scale',12)} تعادل في الصدارة بين ${tied} لوحات — الذهب للجميع</div>`:''}
+ ${rank.map((r,pos)=>`<div class="li" style="margin-bottom:9px;${r.v===top?'border-color:var(--gold)':''}"><div class="lr">
+  <span style="font-size:24px;flex-shrink:0">${r.v===top?ico('medal',20,'#E8B23A'):pos===1?ico('medal',20,'#C0C7D6'):pos===2?ico('medal',20,'#B87333'):(pos+1)+'.'}</span>
   <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #3B2F5C;background:#fff">
    <img src="${r.im}" style="width:100%;height:100%;object-fit:cover"></div>
   <div class="lb"><div class="lt">اللاعب ${r.i+1}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
@@ -23273,7 +23402,8 @@ var NAV_NOBAR={clEditIdentityScr:1,clEditJoinScr:1,clEditPermsScr:1,clTransferSc
 /** يُخفي الشريط السفلي في الشاشات التي تحتاج الشاشة كاملة */
 function navBar(){
  try{
-  var t0=(typeof NAV!=='undefined'&&NAV.length)?NAV[NAV.length-1]:null;
+  var cur0=(typeof Router==='object'&&Router.current)?Router.current():null;
+  var t0=cur0||((typeof NAV!=='undefined'&&NAV.length)?NAV[NAV.length-1]:null);
   var q=!!(t0&&(t0.fn==='clubHome'||String(t0.fn).indexOf('cl')===0));
   document.body.classList.toggle('clQuiet',q);
  }catch(e){}
@@ -24924,7 +25054,8 @@ function clanCss2(){
  '.clHdrP h2{margin:0;font-size:19px;font-weight:900;letter-spacing:.4px;color:#F4F6FC}',
  '.clHdrP .dm{display:block;width:9px;height:9px;margin-top:6px;border-radius:2px;transform:rotate(45deg);',
  ' background:linear-gradient(135deg,#FFEDB4,#C9921E)}',
- '.clHdrT{position:absolute;inset-inline-end:-9px;top:7px;bottom:7px;width:24px;',
+ /* لسان الزينة كان يبرز خارج حافة الشاشة فيبدو مربّعًا مقصوصًا — أُخفي */
+ '.clHdrT{display:none;position:absolute;inset-inline-end:-9px;top:7px;bottom:7px;width:24px;',
  ' background:linear-gradient(150deg,#1B2549,#0C1329);border:1.5px solid #39456F;border-radius:9px;',
  ' clip-path:polygon(100% 0,100% 100%,0 100%,58% 50%,0 0)}',
  '.clHdrT::after{content:"";position:absolute;inset-inline-end:0;top:0;bottom:0;width:5px;',
@@ -25670,7 +25801,7 @@ function clInfoScr(){
    <button class="btn g" style="width:auto;padding:9px 13px;font-size:11.5px;min-height:44px" onclick="clCopyTag()">
     ${ico('export',13)} نسخ</button></div></div>`;
 
-  h+=`<div class="wb" style="text-align:right;margin-top:14px">${ico('info',13)}
+  h+=`<div class="wb" style="text-align:start;margin-top:14px">${ico('info',13)}
    هذا النادي <b>محلي على جهازك</b>: لا خادم، ولا يراه لاعبون آخرون، والأعضاء المعلَّمون بـ«آلي» محاكون محليًا.</div>`;
   return h;
  });
@@ -25753,9 +25884,9 @@ function clAdminLogScr(){
    if(ix[k]==null){ix[k]=days.length;days.push({at:e.at||0,rows:[]})}
    days[ix[k]].rows.push(e);
   });
-  let h=`<div class="wb" style="text-align:right">${ico('info',13)}
+  let h=`<div class="wb" style="text-align:start">${ico('info',13)}
    السجل مكتوب على هذا الجهاز وحده، بسقف ${cl3Num(200)} إجراء، ولا يوجد زر لحذفه.</div>`;
-  h+=days.map(g=>`<div class="sl" style="margin:16px 0 8px">${clLogDay(g.at)}</div>
+  h+=days.map(g=>`<div class="sl">${clLogDay(g.at)}</div>
    ${g.rows.map(e=>`<div class="rr" style="align-items:flex-start;padding:10px 11px">
     <span style="font-size:10px;font-weight:900;color:var(--tx2);flex-shrink:0;padding-top:2px">${clHM(e.at)}</span>
     <div class="lb" style="font-size:11.5px;line-height:1.8">${clLogLine(e)}</div></div>`).join('')}`).join('');
@@ -25809,7 +25940,7 @@ function clMoreScr(){
      <span style="color:var(--mut)">${open?ico('back',13):ico('lock',15)}</span>
     </div></div>`;
   });
-  h+=`<div class="wb" style="text-align:right;margin-top:14px">${ico('info',13)}
+  h+=`<div class="wb" style="text-align:start;margin-top:14px">${ico('info',13)}
    البنود المقفلة تحتاج رتبة أعلى في النادي — وهي لا تُفتح ولو ضغطتها. لا تنبيهات على الهاتف:
    «تنبيهاتي» تضبط ما يظهر لك داخل التطبيق فقط.</div>`;
   return h;
@@ -27666,7 +27797,7 @@ function clRequestSupportScr(){
    ['common','rare','epic'].forEach(r=>{
     const list=pool.filter(c=>c.r===r);
     if(!list.length)return;
-    h+=`<div class="sl" style="margin:16px 0 8px">${clRarAr(r)} — المطلوب ${clN(E.REQ_NEED[r]||0)} نسخة
+    h+=`<div class="sl">${clRarAr(r)} — المطلوب ${clN(E.REQ_NEED[r]||0)} نسخة
      · حصة المتبرّع ${clN(E.FILL_STEP[r]||0)}</div>`;
     h+=list.map(c=>{
      const st=owned[c.id]||{};
@@ -27723,8 +27854,8 @@ function clSupportScr(){
  كل تبرّع يُؤكَّد قبل تنفيذه ولا تراجع بعده، وتبرّع واحد لكل طلب.</div>
  <button class="btn" onclick="push('clRequestSupportScr')">${ico('plus',13)} اطلب دعمًا لبطاقة</button>`;
   if(mine.length)
-   h+=`<div class="sl" style="margin:16px 0 8px">طلبي</div>`+mine.map(d=>clDrCard(d,'sup')).join('');
-  h+=`<div class="sl" style="margin:16px 0 8px">طلبات الأعضاء</div>`;
+   h+=`<div class="sl">طلبي</div>`+mine.map(d=>clDrCard(d,'sup')).join('');
+  h+=`<div class="sl">طلبات الأعضاء</div>`;
   if(rest.length)h+=rest.map(d=>clDrCard(d,'sup')).join('');
   else h+=`<div class="li" style="text-align:center;padding:22px 14px">
    <div style="opacity:.7">${ico('gift',28)}</div>
@@ -27732,7 +27863,7 @@ function clSupportScr(){
    <div class="ls">افتح طلبك أنت، أو ذكّر ناديك في الدردشة.</div>
    <button class="btn g" style="margin-top:11px" onclick="push('clChatScr')">افتح الدردشة</button></div>`;
   if(doneList.length){
-   h+=`<div class="sl" style="margin:16px 0 8px">اكتملت أخيرًا</div>`+
+   h+=`<div class="sl">اكتملت أخيرًا</div>`+
     doneList.map(d=>`<div class="li"><div class="lr">${clCardThumb(d.cid,34)}
       <div class="lb"><div class="lt" style="font-size:12px">${esc(clCardName(d.cid))}</div>
        <div style="margin-top:2px">${clNameHtml(d.uid,d.n)}</div></div>
@@ -28064,7 +28195,7 @@ function clEvEmpty() {
 /* بطاقة القواعد — «حرب معرفة لا حرب محفظة» */
 function clEvRules() {
  return '' +
- '<div class="sl" style="margin:14px 0 8px">قواعد المضمار</div>' +
+ '<div class="sl">قواعد المضمار</div>' +
  '<div class="li"><div style="padding:2px">' +
   '<div class="lt" style="font-size:12.5px">' + ico('scale', 14) + ' مستويات البطاقات موحّدة</div>' +
   '<div class="ls" style="line-height:1.9;margin-top:6px">' +
@@ -28111,7 +28242,7 @@ function clEvBody(ev) {
  '</div></div>';
 
  /* بطاقة المواجهة — نادينا ضد الخصم المحاكى */
- h += '<div class="sl" style="margin:14px 0 8px">المواجهة</div>' +
+ h += '<div class="sl">المواجهة</div>' +
  '<div class="li"><div style="padding:2px">' +
   '<div style="display:flex;align-items:center;gap:10px">' +
    '<div style="flex:1;min-width:0;text-align:center">' +
@@ -28126,8 +28257,8 @@ function clEvBody(ev) {
   '</div>' +
   '<div class="pbf" style="margin-top:10px"><div class="pbi"><i style="width:' + pc + '%"></i></div></div>' +
   '<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">' +
-   '<span class="cch" style="font-size:10px">' + ico('search', 11) + ' MMR ناديك ' + clNum(clEvClubMmr()) + '</span>' +
-   '<span class="cch" style="font-size:10px">' + ico('search', 11) + ' MMR الخصم ' + clNum(gh.mmr) + '</span>' +
+   '<span class="cch" style="font-size:10px">' + ico('search', 11) + ' تقييم ناديك ' + clNum(clEvClubMmr()) + '</span>' +
+   '<span class="cch" style="font-size:10px">' + ico('search', 11) + ' تقييم الخصم ' + clNum(gh.mmr) + '</span>' +
    '<span class="cch" style="font-size:10px;color:var(--warn)">' + ico('robot', 11) + ' محاكى</span>' +
   '</div>' +
  '</div></div>' + clEvHonest();
@@ -28136,14 +28267,14 @@ function clEvBody(ev) {
  h += clEvActions(ev, ph, isMem, canAdm, mine);
 
  /* جدول النقاط */
- h += '<div class="sl" style="margin:16px 0 8px">جدول النقاط</div>' + clEvTable(ev, us, them, gh);
+ h += '<div class="sl">جدول النقاط</div>' + clEvTable(ev, us, them, gh);
 
  /* قائمة المشاركين */
- h += '<div class="sl" style="margin:16px 0 8px">قائمة المشاركين · ' +
+ h += '<div class="sl">قائمة المشاركين · ' +
   seats.length + '/' + CL_EV.SEATS + '</div>' + clEvSeatList(ev, seats, ph);
 
  /* مكافآت الأسبوع */
- h += '<div class="sl" style="margin:16px 0 8px">مكافآت الأسبوع</div>' + clEvRewards(ev, mine);
+ h += '<div class="sl">مكافآت الأسبوع</div>' + clEvRewards(ev, mine);
 
  h += clEvRules();
  return h;
@@ -28432,7 +28563,7 @@ function clAchScr() {
   '<div class="pbf" style="margin-top:8px"><div class="pbi"><i style="width:' +
    Math.round(done / CL_ACH.length * 100) + '%"></i></div></div></div>' +
  '</div></div>' +
- '<div class="sl" style="margin:14px 0 8px">الإنجازات</div>' +
+ '<div class="sl">الإنجازات</div>' +
  CL_ACH.map(clAchRow).join('') +
  '<div class="note">الإنجازات تُحسب من حالة ناديك على هذا الجهاز — لا مقارنة بأندية أخرى ولا ترتيب عالمي.</div>' +
  '</div>');
@@ -28835,8 +28966,19 @@ function toast(m){const t=$('tst');
  t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400)}
 function trk(k,a=1){S.mis[k]=(S.mis[k]||0)+a;S.ach[k]=(S.ach[k]||0)+a}
 let _keepY=null;
+let _lastRestoreAt=0,_goTok=0;
 const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();app.innerHTML=h;
- if(_keepY!=null){window.scrollTo(0,_keepY);_keepY=null}else window.scrollTo(0,0)};
+ const tok=++_goTok;                                   // رسم أحدث يلغي أي تثبيت مؤجّل من رسم سابق
+ if(_keepY!=null){
+  const y=_keepY;_keepY=null;_lastRestoreAt=Date.now();
+  window.scrollTo(0,y);
+  // شاشة تكمل رسمها بعد لحظة (قوائم طويلة، صور) قد تقصّر الصفحة عند الاستعادة — نثبّت الموضع مرّة أخرى
+  // ولا نلمس التمرير إن كان اللاعب قد حرّكه بنفسه أو رُسمت شاشة أخرى
+  const again=()=>{if(tok===_goTok&&Math.abs(window.scrollY-y)>2&&window.scrollY===0)window.scrollTo(0,y)};
+  requestAnimationFrame(again);setTimeout(again,120);
+ }else window.scrollTo(0,0);
+ setTimeout(()=>{try{if(typeof navBar==='function')navBar()}catch(e){}},0);   // هدوء النادي وشريط التنقّل يتبعان الشاشة الحالية
+};
 /* إعادة رسم بلا قفزة — الشاشة تبقى مكانها عند الاستلام والشراء */
 function refresh(fn){_keepY=window.scrollY;fn()}
 /** شريط علوي لأي شاشة: رجوع إن كان هناك ما يُرجع إليه، وإلا عنوان فقط — الوجهة قرار المكدّس لا الشاشة */
@@ -29492,9 +29634,10 @@ function buyJoker(i){const j=JOKERS[i];
 function storeScr(){
  go(`<div class="scr on">${tb('المتجر')}
  <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. ${(window.Billing?Billing.status():'no_store')==='store'?'الشراء عبر متجر التطبيقات والخادم يتحقّق من كل إيصال.':'الشراء بالمال متاح داخل تطبيق تحدّي على المتاجر؛ هنا تُعرض الأسعار فقط.'}</div>
- <div style="display:flex;gap:9px;justify-content:center;margin-bottom:16px">
+ <div style="display:flex;gap:9px;justify-content:center;margin-bottom:8px">
  <span class="cch" style="font-size:14px;padding:9px 15px">${ico('coin',15)} ${S.coins.toLocaleString('en-US')}</span>
  <span class="cch" style="font-size:14px;padding:9px 15px;color:var(--gem)">${ico('gem',15)} ${S.gems.toLocaleString('en-US')}</span></div>
+ <div style="text-align:center;margin-bottom:12px"><button class="btn g" style="width:auto;padding:9px 16px;font-size:11.5px;min-height:38px" onclick="restorePurchases()">${ico('reset',13)} استعادة المشتريات</button></div>
 
  <div class="sl">${ico('gem',14)} باقات الجواهر</div>
  <div class="gpkg">
@@ -29677,7 +29820,7 @@ function profileView(p,backCall){
   <div style="flex-shrink:0">${tierEmblem(p.tierIx,80)}</div>
   <div style="flex:1;min-width:0">
    <div style="font-size:15px;font-weight:900;color:${t.c}">${t.ar}${t.div?' '+(['','I','II','III'][p.div]||''):''}</div>
-   <div style="font-size:10.5px;color:var(--tx2);margin-top:2px">MMR ${p.mmr.toLocaleString('en-US')}</div>
+   <div style="font-size:10.5px;color:var(--tx2);margin-top:2px">التقييم ${p.mmr.toLocaleString('en-US')}</div>
    <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:7px">
     <i style="width:${Math.min(100,Math.round(p.rp/RP_PER_DIV*100))}%;background:linear-gradient(90deg,${t.c}CC,${t.c})"></i></div></div>
    <div style="font-size:9.5px;color:var(--mut);margin-top:3px">${p.rp}/${RP_PER_DIV} نقطة للترقية</div>
@@ -29791,7 +29934,7 @@ splash();
  function frame(ts){
   requestAnimationFrame(frame);
   if(_slow){cv.style.opacity='.55';return}
-  if(_bgPaused||document.getElementById('arena')||document.querySelector('.unoBoard,#caCv')){
+  if(_bgPaused||document.querySelector('#arena.on')||document.querySelector('.unoBoard,#caCv')){   // الساحة تبقى في الصفحة مخفيّة — نسأل عن ظهورها لا وجودها
    if(cv.style.opacity!=='0.35')cv.style.opacity='0.35';
    return;
   }

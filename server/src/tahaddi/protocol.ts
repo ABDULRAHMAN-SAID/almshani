@@ -34,7 +34,7 @@ export interface PurchaseGrant { gems: number; coins: number; wild: string | nul
 export interface PurchaseRec { txId: string; platform: Platform; productId: string; accountId: string; at: number; grant: PurchaseGrant }
 
 export type ClientMsg =
-  | { t: 'hello'; rid?: string; token?: string; name?: string }
+  | { t: 'hello'; rid?: string; token?: string; name?: string; peer?: string }   // peer: معرّف الاتصال السابق لاستئناف الغرفة بعد انقطاع
   | { t: 'setName'; rid?: string; name: string }
   | { t: 'saveCloud'; rid?: string; save: CloudSave }
   | { t: 'loadCloud'; rid?: string }

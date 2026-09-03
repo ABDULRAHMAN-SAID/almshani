@@ -1,14 +1,6 @@
 [
  {
   "screen": "playScr",
-  "btn": "الاحتمالات",
-  "h": "push('oddsScr')",
-  "errs": [
-   "console: [nav] oddsScr TypeError: Cannot read properties of undefined (reading 'n')\n    at oddsScr (http://localhost:8998/index.html:17131:48)\n    at"
-  ]
- },
- {
-  "screen": "playScr",
   "btn": "خانة فارغة",
   "h": "bcTap(0)",
   "noEffect": true
@@ -33,7 +25,7 @@
  },
  {
   "screen": "playScr",
-  "btn": "نسخة تجريبية 5.28 · وضع ال",
+  "btn": "نسخة تجريبية 5.31 · وضع ال",
   "h": "devTap()",
   "noEffect": true
  },
@@ -176,6 +168,12 @@
   "noEffect": true
  },
  {
+  "screen": "storeScr",
+  "btn": "استعادة المشتريات",
+  "h": "restorePurchases()",
+  "noEffect": true
+ },
+ {
   "screen": "lbScr",
   "btn": "عالم المعرفة",
   "h": "lbGame='knowledge';refresh(lbScr)",
@@ -315,20 +313,14 @@
  },
  {
   "screen": "avScr",
-  "btn": "')\"> إطار أرشيف الزمن",
-  "h": "toast('يُفتح من مسار الموسم المميز <svg class=",
-  "errs": [
-   "Failed to execute 'click' on 'HTMLElement': Invalid or unexpected token"
-  ],
+  "btn": "إطار أرشيف الزمن",
+  "h": "toast('يُفتح من مسار الموسم المميّز')",
   "noEffect": true
  },
  {
   "screen": "avScr",
-  "btn": "')\"> إطار التاج الملكي",
-  "h": "toast('يُفتح من مسار الموسم المميز <svg class=",
-  "errs": [
-   "Failed to execute 'click' on 'HTMLElement': Invalid or unexpected token"
-  ],
+  "btn": "إطار التاج الملكي",
+  "h": "toast('يُفتح من مسار الموسم المميّز')",
   "noEffect": true
  },
  {
@@ -537,7 +529,7 @@
  },
  {
   "screen": "clubs",
-  "btn": "5QRMRM",
+  "btn": "RLC4HB",
   "h": "clCopyTag()",
   "noEffect": true
  },
@@ -586,72 +578,50 @@
  {
   "screen": "clMembersScr",
   "btn": "عبدالرحمن أنت القائد محترف",
-  "h": "clGoMember('umtk9cm6xfs8hgy')",
+  "h": "clGoMember('umtlfqef85t2mpq')",
   "noEffect": true
  },
  {
   "screen": "clMembersScr",
-  "btn": "سلطان آلي نائب القائد فضي ",
-  "h": "clGoMember('bot_vcyrxz')",
+  "btn": "أثير آلي نائب القائد فضي م",
+  "h": "clGoMember('bot_ybvcsj')",
   "noEffect": true
  },
  {
   "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_vcyrxz')",
+  "btn": "event.stopPropagation();clMemM",
+  "h": "event.stopPropagation();clMemMenu('bot_ybvcsj')",
   "noEffect": true
  },
  {
   "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_2v4fak')",
-  "errs": [
-   "Cannot read properties of undefined (reading 'hold')"
-  ]
- },
- {
-  "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_mtv9g8')",
-  "errs": [
-   "Cannot read properties of undefined (reading 'hold')"
-  ]
- },
- {
-  "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_sdemwx')",
-  "errs": [
-   "Cannot read properties of undefined (reading 'hold')"
-  ]
- },
- {
-  "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_8enylw')",
-  "errs": [
-   "Cannot read properties of undefined (reading 'hold')"
-  ]
- },
- {
-  "screen": "clMembersScr",
-  "btn": "دانة آلي عضو برونزي منذ 33",
-  "h": "clGoMember('bot_slctgr')",
+  "btn": "نورة آلي مشرف فضي منذ يوم ",
+  "h": "clGoMember('bot_eews5u')",
   "noEffect": true
  },
  {
   "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_slctgr')",
+  "btn": "event.stopPropagation();clMemM",
+  "h": "event.stopPropagation();clMemMenu('bot_eews5u')",
   "noEffect": true
  },
  {
   "screen": "clMembersScr",
-  "btn": "⋯",
-  "h": "event.stopPropagation();clMemMenu('bot_33tga6')",
-  "errs": [
-   "Cannot read properties of undefined (reading 'hold')"
-  ]
+  "btn": "جود آلي عضو فضي منذ 32 دقي",
+  "h": "clGoMember('bot_ee7836')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "دانة آلي عضو ذهبي منذ ساعة",
+  "h": "clGoMember('bot_y47nf7')",
+  "noEffect": true
+ },
+ {
+  "screen": "clMembersScr",
+  "btn": "event.stopPropagation();clMemM",
+  "h": "event.stopPropagation();clMemMenu('bot_y47nf7')",
+  "noEffect": true
  },
  {
   "screen": "clChatScr",

@@ -43,8 +43,20 @@ const wss = new WebSocketServer({
   server: http, path: '/ws', maxPayload: 512 * 1024,
   verifyClient: (info, cb) => { const ok = originOk(info.origin); cb(ok, ok ? 200 : 403, ok ? undefined : 'origin not allowed'); }
 });
+// نبض حياة: هاتف نام أو شبكة سقطت بصمت — نطرد الاتصال الميت فلا يبقى «متصلًا» في غرفته
+const alive = new WeakMap<WebSocket, boolean>();
+const heartbeat = setInterval(() => {
+  for (const ws of wss.clients) {
+    if (alive.get(ws) === false) { try { ws.terminate(); } catch { /* أُغلق */ } continue; }
+    alive.set(ws, false);
+    try { ws.ping(); } catch { /* أُغلق */ }
+  }
+}, 25000);
+(heartbeat as any).unref?.();
 wss.on('connection', (ws: WebSocket) => {
   let session: Session | null = null;
+  alive.set(ws, true);
+  ws.on('pong', () => alive.set(ws, true));
   const send = (m: ServerMsg) => { if (ws.readyState === ws.OPEN) ws.send(JSON.stringify(m)); };
   ws.on('message', raw => {
     let msg: ClientMsg;
@@ -52,7 +64,7 @@ wss.on('connection', (ws: WebSocket) => {
     if (!msg || typeof msg.t !== 'string') return;
     if (msg.t === 'hello') {
       if (session) svc.drop(session);
-      session = svc.hello(send, msg.token, msg.name, msg.rid); return;
+      session = svc.hello(send, msg.token, msg.name, msg.rid, (msg as any).peer); return;
     }
     if (!session) return send({ t: 'error', rid: (msg as any).rid, code: 'no_hello' });
     svc.handle(session, msg);

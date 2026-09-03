@@ -13,6 +13,8 @@ export type Verified = { ok: true; txId: string } | { ok: false; code: string; d
 const TEST_SECRET = process.env.TAHADDI_IAP_TEST_SECRET ?? '';
 const APPLE_SECRET = process.env.APPLE_SHARED_SECRET ?? '';
 const ANDROID_PACKAGE = process.env.ANDROID_PACKAGE ?? 'com.almshani.tahaddi';
+const IOS_BUNDLE = process.env.IOS_BUNDLE_ID ?? 'com.almshani.tahaddi';
+const FETCH_MS = 15000;   // المتجر لا يجيب؟ لا نعلّق الطلب إلى الأبد
 const GOOGLE_SA = loadServiceAccount(process.env.GOOGLE_SERVICE_ACCOUNT_JSON);
 
 interface ServiceAccount { client_email: string; private_key: string; token_uri?: string }
@@ -26,7 +28,7 @@ function loadServiceAccount(v: string | undefined): ServiceAccount | null {
   } catch { return null; }
 }
 
-export function iapStatus() { return { test: !!TEST_SECRET, ios: !!APPLE_SECRET, android: !!GOOGLE_SA, androidPackage: ANDROID_PACKAGE }; }
+export function iapStatus() { return { test: !!TEST_SECRET, ios: !!APPLE_SECRET, android: !!GOOGLE_SA, androidPackage: ANDROID_PACKAGE, iosBundle: IOS_BUNDLE }; }
 
 /** إيصال الاختبار كما يبنيه محقّق الاختبار — تستعمله الاختبارات لتوليد إيصالات صالحة */
 export function testReceipt(productId: string, txId: string, secret = TEST_SECRET): string {
@@ -60,6 +62,8 @@ async function verifyApple(productId: string, receipt: string, txHint?: string):
   let j = await postJSON('https://buy.itunes.apple.com/verifyReceipt', body);
   if (j?.status === 21007) j = await postJSON('https://sandbox.itunes.apple.com/verifyReceipt', body);
   if (!j || j.status !== 0) return { ok: false, code: 'verify_failed', detail: 'apple status ' + (j?.status ?? '?') };
+  const bundle = j.receipt?.bundle_id;
+  if (typeof bundle === 'string' && bundle && bundle !== IOS_BUNDLE) return { ok: false, code: 'verify_failed', detail: 'bundle ' + bundle };
   const items: any[] = ([] as any[]).concat(j.latest_receipt_info ?? [], j.receipt?.in_app ?? []);
   const mine = items.filter(x => x && x.product_id === productId && typeof x.transaction_id === 'string');
   if (!mine.length) return { ok: false, code: 'verify_failed', detail: 'product not in receipt' };
@@ -82,7 +86,7 @@ async function googleAccessToken(): Promise<string> {
   });
   const sig = createSign('RSA-SHA256').update(unsigned).sign(sa.private_key).toString('base64url');
   const res = await fetch(sa.token_uri ?? 'https://oauth2.googleapis.com/token', {
-    method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, signal: AbortSignal.timeout(FETCH_MS),
     body: 'grant_type=' + encodeURIComponent('urn:ietf:params:oauth:grant-type:jwt-bearer') + '&assertion=' + unsigned + '.' + sig
   });
   const j: any = await res.json();
@@ -94,18 +98,18 @@ async function verifyGoogle(productId: string, purchaseToken: string): Promise<V
   if (!GOOGLE_SA) return { ok: false, code: 'iap_unavailable' };
   const token = await googleAccessToken();
   const base = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${encodeURIComponent(ANDROID_PACKAGE)}/purchases/products/${encodeURIComponent(productId)}/tokens/${encodeURIComponent(purchaseToken)}`;
-  const res = await fetch(base, { headers: { authorization: 'Bearer ' + token } });
+  const res = await fetch(base, { headers: { authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(FETCH_MS) });
   if (!res.ok) return { ok: false, code: 'verify_failed', detail: 'google ' + res.status };
   const j: any = await res.json();
   if (j.purchaseState !== 0) return { ok: false, code: 'verify_failed', detail: 'purchaseState ' + j.purchaseState };
   if (j.acknowledgementState === 0) {
-    await fetch(base + ':acknowledge', { method: 'POST', headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' }, body: '{}' }).catch(() => {});
+    await fetch(base + ':acknowledge', { method: 'POST', headers: { authorization: 'Bearer ' + token, 'content-type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(FETCH_MS) }).catch(() => {});
   }
   const id = typeof j.orderId === 'string' && j.orderId ? j.orderId : createHmac('sha256', 'tahaddi').update(purchaseToken).digest('hex').slice(0, 32);
   return { ok: true, txId: 'android:' + id };
 }
 
 async function postJSON(url: string, body: string): Promise<any> {
-  const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body });
+  const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body, signal: AbortSignal.timeout(FETCH_MS) });
   return res.json();
 }

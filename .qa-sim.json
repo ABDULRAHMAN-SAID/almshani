@@ -1,0 +1,103 @@
+[
+ {
+  "k": "مباراة الأسئلة (16 نوع جولة)",
+  "steps": 16,
+  "seen": 16,
+  "ended": true,
+  "fn": "mResult",
+  "me": 3,
+  "opp": 2,
+  "matches": 1
+ },
+ {
+  "k": "مباراة الأسئلة الطبيعية",
+  "steps": 6,
+  "fn": "mResult",
+  "me": 2,
+  "opp": 4,
+  "resultShown": true,
+  "backBtn": true
+ },
+ {
+  "k": "أونو 2 لاعبين",
+  "it": 96,
+  "over": true,
+  "stalls": 0,
+  "myPlays": 8,
+  "myDraws": 3,
+  "unoCalls": 1,
+  "catches": 0,
+  "hands": {
+   "me": 2,
+   "bot0": 0
+  },
+  "overTxt": "فاز سلطان!",
+  "deck": 90,
+  "disc": 15
+ },
+ {
+  "k": "أونو 4 لاعبين",
+  "it": 329,
+  "over": true,
+  "stalls": 1,
+  "myPlays": 13,
+  "myDraws": 5,
+  "unoCalls": 0,
+  "catches": 2,
+  "hands": {
+   "me": 0,
+   "bot0": 3,
+   "bot1": 3,
+   "bot2": 3
+  },
+  "overTxt": "فاز المستكشف!",
+  "deck": 50,
+  "disc": 48
+ },
+ {
+  "k": "كيرم 2 لاعبين",
+  "shots": 17,
+  "waited": 900,
+  "botStalls": 0,
+  "over": false,
+  "pcsLeft": 17,
+  "sc": {
+   "me": 1,
+   "bot0": 1
+  },
+  "overTxt": ""
+ },
+ {
+  "k": "كيرم 4 لاعبين",
+  "shots": 7,
+  "waited": 900,
+  "botStalls": 0,
+  "over": false,
+  "pcsLeft": 17,
+  "sc": {
+   "me": 0,
+   "bot0": 0,
+   "bot1": 1,
+   "bot2": 1
+  },
+  "overTxt": ""
+ },
+ {
+  "k": "مافيا",
+  "nights": 2,
+  "alive": 3,
+  "ended": true,
+  "txt": "فاز الشعب! المدينة نظيفة"
+ },
+ {
+  "k": "برا السالفة",
+  "caught": true,
+  "word": true,
+  "spyShown": true
+ },
+ {
+  "k": "الرسم",
+  "results": true,
+  "rows": 3
+ }
+]

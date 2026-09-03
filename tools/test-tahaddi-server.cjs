@@ -97,17 +97,46 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
   const lbx=await A.req({t:'leaderboard',gameId:'nope'});
   check('لعبة مجهولة تُرفض',lbx.t==='error');
 
-  sec('الغرف: حضور وبثّ');
+  sec('الغرف: حضور وبثّ — مقيَّدان بالغرفة');
   A.send({t:'presence',patch:{pc:'ABCD',nm:'عبدالرحمن',hs:1}});await sleep(80);
-  check('حضوري يصل للجميع مع هوية الحساب',B.peers.some(p=>p.by===wa.id&&p.presence.pc==='ABCD'&&p.presence.hs===1),JSON.stringify(B.peers));
+  check('من خارج الغرفة لا يرى أهلها',!B.peers.some(p=>p.by===wa.id),JSON.stringify(B.peers));
+  B.send({t:'presence',patch:{pc:'ABCD',nm:'ضيف'}});await sleep(80);
+  check('من دخل الغرفة يرى مضيفها بهوية الحساب',B.peers.some(p=>p.by===wa.id&&p.presence.pc==='ABCD'&&p.presence.hs===1),JSON.stringify(B.peers));
   A.send({t:'presence',patch:{hs:null}});await sleep(80);
   check('null يحذف الحقل',B.peers.find(p=>p.by===wa.id).presence.hs===undefined);
+  const Cc=client();const wc=await hello(Cc,undefined,'غريب');Cc.send({t:'presence',patch:{pc:'WXYZ',nm:'غريب'}});await sleep(80);
   B.send({t:'emit',topic:'party',data:{c:'ABCD',t:'start'}});await sleep(80);
-  check('البثّ يصل للكلّ والمرسل يسمع نفسه',A.msgs.length===1&&A.msgs[0].from.by===wb.id&&B.msgs.length===1&&B.msgs[0].data.t==='start');
+  check('البثّ يصل لأهل الغرفة والمرسل يسمع نفسه',A.msgs.length===1&&A.msgs[0].from.by===wb.id&&B.msgs.length===1&&B.msgs[0].data.t==='start');
+  check('غرفة أخرى لا تسمع شيئًا ولا ترى أحدًا',Cc.msgs.length===0&&!Cc.peers.some(p=>p.by===wa.id||p.by===wb.id),JSON.stringify(Cc.peers));
+  Cc.send({t:'emit',topic:'party',data:{c:'ABCD',t:'spoof'}});await sleep(60);
+  check('غريب يحاول التسلّل برمز غرفتنا لا يصل بثّه إليها',A.msgs.length===1&&B.msgs.length===1);
   B.send({t:'emit',topic:'Bad:topic',data:{}});await sleep(50);
   check('موضوع مخالف للصيغة يُرفض',A.msgs.length===1);
+  // ردهة المطابقة: من بلا رمز غرفة يرى من بلا رمز فقط
+  const M1=client(),M2=client();await hello(M1,undefined,'م١');await hello(M2,undefined,'م٢');
+  M1.send({t:'presence',patch:{lf:'uno',nm:'م١'}});M2.send({t:'presence',patch:{lf:'uno',nm:'م٢'}});await sleep(80);
+  check('باحثان عن مباراة يريان بعضهما ولا يريان الغرف',M1.peers.some(p=>p.presence.lf==='uno'&&p.by!==M1.welcome.id)&&!M1.peers.some(p=>p.presence.pc),JSON.stringify(M1.peers));
+  await M1.close();await M2.close();await Cc.close();
   await B.close();await sleep(80);
   check('المغادرة تُحدّث الحضور',!A.peers.some(p=>p.by===wb.id));
+
+  sec('انقطاع ثم عودة: الهوية نفسها في الغرفة');
+  const peerA=A.welcome.peer;
+  await A.close();await sleep(60);
+  const Ar=client();const war=await hello(Ar,wa.token);
+  check('بلا طلب استئناف: معرّف اتصال جديد',war.peer!==peerA,war.peer);
+  await Ar.close();await sleep(60);
+  const Ar2=client();
+  await Ar2.open;const war2=await Ar2.req({t:'hello',token:wa.token,peer:peerA});
+  check('طلب الاستئناف بالرمز الصحيح يعيد معرّف الاتصال السابق نفسه',war2.peer===peerA,JSON.stringify([peerA,war2.peer]));
+  const Thief=client();await Thief.open;const wt=await Thief.req({t:'hello',token:undefined,name:'لصّ',peer:peerA});
+  check('حساب آخر يطلب معرّفًا ليس له لا يناله',wt.peer!==peerA,wt.peer);
+  await Thief.close();
+  const Ar3=client();await Ar3.open;const war3=await Ar3.req({t:'hello',token:wa.token,peer:peerA});
+  check('الحساب نفسه من جلسة ثانية يستولي على معرّفه (الجلسة القديمة تُسقط)',war3.peer===peerA);
+  await Ar2.close();await Ar3.close();await sleep(60);
+  const A4=client();const wa4=await hello(A4,wa.token);
+  Object.assign(A,A4);   // بقيّة الاختبارات تستعمل A
 
   sec('البقاء بعد إعادة التشغيل');
   await A.close();

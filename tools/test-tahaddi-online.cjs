@@ -122,6 +122,22 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   },{rc:receipt('gems_500','tx-online-1'),tx:'tx-online-1'});
   check('الإيصال نفسه من حساب آخر يُرفض برسالة عربية واضحة',/^already_used\|/.test(stolen)&&/حساب آخر/.test(stolen),stolen);
 
+  sec('انقطاع الضيف وعودته أثناء أونو');
+  await A.evaluate(async()=>{try{rmLeave(1)}catch(e){}push('gameHub','uno');push('roomScr','uno');await new Promise(r=>setTimeout(r,200));await rmCreate()});
+  await sleep(300);const code2=await A.evaluate(()=>RM.code);
+  await B.evaluate(async c=>{try{rmLeave(1)}catch(e){}push('gameHub','uno');push('roomScr','uno');await new Promise(r=>setTimeout(r,200));document.getElementById('rmCd').value=c;await rmJoin()},code2);
+  await sleep(500);await A.evaluate(()=>rmStart());await sleep(900);
+  await B.evaluate(()=>{try{unoIntroSkip()}catch(e){}});await A.evaluate(()=>{try{unoIntroSkip()}catch(e){}});await sleep(300);
+  const peerB0=await B.evaluate(()=>NET.state().peer),handB0=await B.evaluate(()=>(RM.hand||[]).length);
+  await B.evaluate(()=>NET._drop());await sleep(600);
+  const cut=await B.evaluate(()=>({c:NET.state().connected,msg:RM.msg}));
+  check('السقوط يُرى: غير متصل ورسالة انقطاع في الغرفة',!cut.c&&/انقطع/.test(cut.msg),JSON.stringify(cut));
+  await B.waitForFunction(()=>NET.state().connected,null,{timeout:12000}).catch(()=>{});await sleep(1200);
+  const back=await B.evaluate(()=>({peer:NET.state().peer,me:RM.me,ph:RM.phase,hand:(RM.hand||[]).length,msg:RM.msg,roster:rmRoster().length,toast:document.body.innerText.includes('عاد الاتصال')}));
+  const rosterA2=await A.evaluate(()=>rmRoster().length);
+  check('العودة تلقائيًا بالهوية نفسها: المعرّف واليد والدور كما كانت والمضيف ما زال يرى اثنين',
+   back.peer===peerB0&&back.me===peerB0&&back.ph==='uno'&&back.hand===handB0&&rosterA2===2&&back.roster===2&&back.msg==='',JSON.stringify({peerB0,handB0,back,rosterA2}));
+  check('اللاعب يُعلَم بعودة الاتصال',back.toast);
   check('صفر أخطاء JS في المتصفحين',A._errs.length===0&&B._errs.length===0,(A._errs.concat(B._errs)).slice(0,3).join(' | '));
   const health=await A.evaluate(async p=>{const r=await fetch(`http://localhost:${p}/health`);return r.json()},PORT);
   check('/health: ثلاثة حسابات (الجهاز C أخذ حسابًا مؤقتًا قبل دخوله برمز A) ومتّصلان',health.ok&&health.accounts===3&&health.online>=2&&health.pending===0,JSON.stringify(health));

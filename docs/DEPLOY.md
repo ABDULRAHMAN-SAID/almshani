@@ -40,6 +40,7 @@ fly open                                      # https://<app>.fly.dev — الل
 | `TAHADDI_DATA_FILE` | `.data/tahaddi.json` | ملفّ الحالة (ضعه على قرص دائم) |
 | `TAHADDI_ORIGINS` | فارغ = الكل | أصول مسموح لها بفتح WebSocket، مثل `https://<user>.github.io,capacitor://localhost,https://localhost` |
 | `TAHADDI_RESULT_WAIT_MS` | `90000` | مهلة انتظار تقارير كل المشاركين قبل اعتماد النتيجة |
+| `IOS_BUNDLE_ID` | `com.almshani.tahaddi` | معرّف حزمة iOS — إيصال من تطبيق آخر يُرفض |
 
 `/health` يجيب `{ok:true, …إحصاءات}` مع `access-control-allow-origin:*` ليستطيع عميل على مضيف آخر أن يتأكّد قبل فتح WebSocket.
 

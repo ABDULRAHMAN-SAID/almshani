@@ -45,13 +45,16 @@
 | `APPLE_SHARED_SECRET` | يفعّل التحقّق من إيصالات App Store (`verifyReceipt`، الإنتاج ثم الساندبوكس) |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | مسار ملفّ حساب الخدمة أو محتواه — يفعّل `purchases.products.get` والإقرار (acknowledge) |
 | `ANDROID_PACKAGE` | افتراضي `com.almshani.tahaddi` |
+| `IOS_BUNDLE_ID` | افتراضي `com.almshani.tahaddi` — يُقارن بـ`bundle_id` في إيصال Apple فيُرفض إيصال تطبيق آخر |
 | `TAHADDI_IAP_TEST_SECRET` | محقّق اختبار للاختبارات الآلية فقط — **لا تضبطه في الإنتاج** |
 
-بلا متغيّر منصّة ما، يُرفض شراؤها بـ `iap_unavailable` ولا يُمنح شيء. `/health` يعرض `iap:{ios,android,test}` لتعرف ما المفعّل.
+بلا متغيّر منصّة ما، يُرفض شراؤها بـ `iap_unavailable` ولا يُمنح شيء. كل طلب إلى Apple أو Google له مهلة 15 ثانية؛ إن لم يجب المتجر عاد `verify_failed` ولم يُمنح شيء — والهاتف يعيد المحاولة عند «استعادة المشتريات». `/health` يعرض `iap:{ios,android,test}` لتعرف ما المفعّل.
 
 الرسائل: `purchase {claim:{platform, productId, receipt, transactionId?}}` → `purchased {grant, txId, duplicate}` أو `error {code}`؛ `purchases` → قائمة مشتريات الحساب. الإيصال المستخدم في حساب آخر يُرفض بـ `already_used`، وفي الحساب نفسه يعود `duplicate:true` بلا منح ثانٍ (استعادة آمنة).
 
 ## الهاتف
+
+زرّ **استعادة المشتريات** في المتجر وفي إعدادات الحساب: يسأل جسر المتجر (إن وُجد) ثم قائمة مشتريات الحساب على الخادم، ويطبّق كل إيصال مرّة واحدة على الجهاز (`S.iapTx`). وعند كل دخول بحساب متصل تُزامَن المشتريات بصمت، فجهاز جديد يجد تذكرة الموسم وجواهره.
 
 - **نسخة الويب** (GitHub Pages، PWA): لا شراء بالمال. الورقة تقول ذلك بصراحة، والأسعار تُعرض فقط.
 - **تطبيق المتجر** (Capacitor): يضع جسرًا على `window.TahaddiBilling` بعقد ثلاث دوال (`buy`, `finish`, `restore`) مشروح في `src/economy/billing.js`. أسهل تنفيذ له: إضافة `cordova-plugin-purchase` (يعمل مع Capacitor) وكتابة الجسر في `www/billing-bridge.js` — عشرون سطرًا تحوّل `store.order()` إلى `{receipt, transactionId}`.

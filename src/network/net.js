@@ -10,8 +10,9 @@ var NET=(function(){
  'use strict';
  var st={mode:'local',connected:false,id:null,name:null,peer:null,token:null,url:null,seasonId:null,hasCloud:false,lastError:null};
  var ws=null, ridN=0, waiting={}, topicSubs={}, peerSubs=[], peers=[], myPresence={};
- var listeners={welcome:[],state:[],resultFinal:[]};
+ var listeners={welcome:[],state:[],resultFinal:[],reconnect:[]};
  var backoff=1000, wantOpen=false, helloOpts={}, W=(typeof window!=='undefined')?window:null;
+ var connecting=null, dropped=false, hooked=false;
 
  /** أصل الخادم المضبوط صراحةً (https://host) أو '' = الأصل الحالي.
      الترتيب: window.TAHADDI_SERVER ← <meta name="tahaddi-server"> ← ?server= (ويُحفظ) ← localStorage */
@@ -63,10 +64,13 @@ var NET=(function(){
  }
  function onMsg(m){
   if(m.t==='welcome'){
+   var resumed=dropped&&st.peer&&m.peer===st.peer;
    setState({connected:true,id:m.id,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
    backoff=1000;
    if(Object.keys(myPresence).length)send({t:'presence',patch:myPresence});   // بعد إعادة الاتصال يعود حضوري
-   settle(m);fire('welcome',m);return;
+   settle(m);fire('welcome',m);
+   if(dropped){dropped=false;fire('reconnect',{resumed:!!resumed,peer:m.peer})}
+   return;
   }
   if(m.rid&&settle(m))return;
   if(m.t==='peers'){peers=m.list||[];peerSubs.forEach(function(f){try{f(peersView())}catch(e){}});return}
@@ -90,9 +94,22 @@ var NET=(function(){
  function connect(opts){
   helloOpts=opts||helloOpts;
   if(st.mode!=='server')return Promise.resolve(false);
+  if(connecting)return connecting;                                  // اتصال جارٍ: لا نفتح ثانيًا
+  if(ws&&ws.readyState===1&&st.connected){
+   // متصلون أصلًا: إن طُلب حساب آخر (رمز جديد) نعيد التعريف على الاتصال نفسه — لا اتصال ثانٍ
+   var want=helloOpts.token||undefined;
+   if(want&&want!==st.token){
+    return new Promise(function(resolve){
+     var off=on('welcome',function(){off();resolve(true)});
+     if(!send({t:'hello',token:want,name:helloOpts.name||undefined,peer:st.peer||undefined})){off();resolve(false);return}
+     setTimeout(function(){off();resolve(!!st.connected)},4000);
+    });
+   }
+   return Promise.resolve(true);
+  }
   wantOpen=true;
-  return new Promise(function(resolve){
-   var done=false, fin=function(v){if(!done){done=true;resolve(v)}};
+  connecting=new Promise(function(resolve){
+   var done=false, fin=function(v){if(!done){done=true;connecting=null;resolve(v)}};
    probe().then(function(has){
     if(!has){wantOpen=false;setState({mode:'local'});fin(false);return}
     open();
@@ -100,12 +117,14 @@ var NET=(function(){
    function open(){
    try{ws=new W.WebSocket(st.url||wsUrl())}catch(e){setState({connected:false,lastError:'ws'});fin(false);return}
    var guard=setTimeout(function(){if(!st.connected){try{ws.close()}catch(e){}fin(false)}},4000);
-   ws.onopen=function(){send({t:'hello',token:helloOpts.token||st.token||undefined,name:helloOpts.name||undefined})};
+   ws.onopen=function(){send({t:'hello',token:helloOpts.token||st.token||undefined,name:helloOpts.name||undefined,peer:st.peer||undefined})};
    ws.onmessage=function(ev){var m;try{m=JSON.parse(ev.data)}catch(e){return}
     if(m&&m.t==='welcome'){clearTimeout(guard);onMsg(m);fin(true);return}
     if(m&&typeof m.t==='string')onMsg(m)};
    ws.onclose=function(){
     var was=st.connected;
+    if(was)dropped=true;                                            // انقطاع بعد ترحيب: الترحيب القادم استئناف
+    connecting=null;
     setState({connected:false});
     Object.keys(waiting).forEach(function(k){clearTimeout(waiting[k].tm);waiting[k].rej({code:'offline'});delete waiting[k]});
     fin(false);
@@ -115,12 +134,27 @@ var NET=(function(){
    ws.onerror=function(){};
    }
   });
+  return connecting;
  }
- function disconnect(){wantOpen=false;if(ws){try{ws.close()}catch(e){}}ws=null;setState({connected:false})}
+ function disconnect(){wantOpen=false;dropped=false;if(ws){try{ws.close()}catch(e){}}ws=null;setState({connected:false})}
+ /** عادت الشبكة أو عاد التطبيق للواجهة: إن كان هناك خادم مضبوط ولسنا متصلين، نحاول فورًا لا بعد المهلة */
+ function retry(){
+  if(st.connected)return Promise.resolve(true);
+  if(st.mode!=='server'&&detect()==='server')st.mode='server';    // أقلعنا بلا شبكة فصرنا محليين — والآن يوجد خادم
+  if(st.mode!=='server')return Promise.resolve(false);
+  backoff=1000;
+  return connect();
+ }
+ function hook(){
+  if(hooked||!W||!W.addEventListener)return;hooked=true;
+  try{W.addEventListener('online',function(){retry()})}catch(e){}
+  try{W.document.addEventListener('visibilitychange',function(){if(!W.document.hidden)retry()})}catch(e){}
+ }
 
  /** الإقلاع: يحدّد الوضع ويتصل إن كان هناك خادم. لا يرمي أبدًا */
  function boot(opts){
   st.mode=detect();
+  hook();
   if(st.mode!=='server')return Promise.resolve(state());
   return connect(opts||{}).then(function(){return state()});
  }
@@ -158,9 +192,10 @@ var NET=(function(){
   };
  }
 
- return {boot:boot,connect:connect,disconnect:disconnect,state:state,on:on,
+ return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   purchase:purchase,purchases:purchases,
-  roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u}};
+  roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
+  _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=NET;

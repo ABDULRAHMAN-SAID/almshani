@@ -75,8 +75,9 @@ export class TahaddiService {
   close(): void { clearInterval(this.sweeper); this.flush(); }
 
   /* ── الحساب ── */
-  hello(send: (m: ServerMsg) => void, token?: string, name?: string, rid?: string): Session {
-    let account = typeof token === 'string' ? this.accounts.get(token) : undefined;
+  hello(send: (m: ServerMsg) => void, token?: string, name?: string, rid?: string, peerWant?: string): Session {
+    const found = typeof token === 'string' ? this.accounts.get(token) : undefined;
+    let account = found;
     if (!account) {
       account = {
         token: randomBytes(16).toString('hex'),
@@ -89,7 +90,13 @@ export class TahaddiService {
     }
     // الاسم ملك الحساب: جهاز جديد بالرمز نفسه يأخذ اسم الحساب ولا يفرض اسمه المحلي (setName هو الطريق الوحيد للتغيير)
     account.lastSeen = Date.now();
-    const peer = 'k' + randomBytes(8).toString('hex');
+    // استئناف بعد انقطاع: الحساب نفسه يطلب معرّف اتصاله السابق فيبقى في غرفته بالهوية نفسها.
+    // لا يُمنح إلا لصاحب الرمز، ولا يُنتزع من جلسة حيّة لحساب آخر.
+    let peer = 'k' + randomBytes(8).toString('hex');
+    if (found && typeof peerWant === 'string' && /^k[0-9a-f]{16}$/.test(peerWant)) {
+      const held = this.sessions.get(peerWant);
+      if (!held || held.account === account) { if (held) this.sessions.delete(peerWant); peer = peerWant; }
+    }
     const session: Session = { peer, account, presence: {}, send };
     this.sessions.set(peer, session);
     send({ t: 'welcome', rid, token: account.token, id: account.id, name: account.name, peer,
@@ -270,14 +277,20 @@ export class TahaddiService {
     if (typeof topic !== 'string' || !TOPIC_RE.test(topic)) return s.send({ t: 'error', code: 'bad_topic' });
     if (bytes(data) > MAX_EMIT_BYTES) return s.send({ t: 'error', code: 'msg_too_big' });
     const m: ServerMsg = { t: 'msg', topic, data, from: { peer: s.peer, by: s.account.id } };
-    for (const x of this.sessions.values()) x.send(m);
+    // البثّ لا يغادر الغرفة: من يحمل رمز غرفة (pc) يسمعه أهل غرفته فقط، ومن بلا رمز يسمعه من بلا رمز
+    const pc = s.presence.pc ?? null;
+    for (const x of this.sessions.values()) if ((x.presence.pc ?? null) === pc) x.send(m);
   }
   peers(): PeerView[] {
     return [...this.sessions.values()].map(x => ({ peer: x.peer, by: x.account.id, kind: 'viewer' as const, presence: x.presence }));
   }
   private broadcastPeers(): void {
-    const m: ServerMsg = { t: 'peers', list: this.peers() };
-    for (const x of this.sessions.values()) x.send(m);
+    // كلٌّ يرى أهل غرفته فقط — لا قائمة عالمية بكل المتصلين
+    const all = this.peers();
+    for (const x of this.sessions.values()) {
+      const pc = x.presence.pc ?? null;
+      x.send({ t: 'peers', list: all.filter(p => ((p.presence as any).pc ?? null) === pc) });
+    }
   }
   private toAccount(id: string, m: ServerMsg): void {
     for (const x of this.sessions.values()) if (x.account.id === id) x.send(m);
