@@ -1,18 +1,17 @@
-صور التعبيرات المرسومة من المالك — ملف واحد (اللوحة كاملة) أو صور مفردة باسم مفتاح كل تعبير.
+صور التعبيرات المرسومة من المالك — أربع لوحات تُقصّ وتُضمَّن في `tahaddi/index.html` بأمر واحد:
 
-- الصفّان الأوّلان في `sheet.png` (الأسطورية والممتازة) هما الشخصيات المرسومة، وتُضمَّن كما هي.
-- الصفّان الثالث والرابع كانا وجوه إيموجي، فاستُبدلت بهما شعارات مرسومة برمجيًا داخل اللعبة (`EMO_EMBLEM`) إلى أن تُرسم وجوه حقيقية.
-- **لوجوه حقيقية للعادية والنادرة:** ولِّد لوحة **`faces.png`** بالوصف أدناه (شبكة 4×4 = 16 ميدالية بهذا الترتيب صفًّا صفًّا:
-  ضحك · حزن · غمزة · تصفيق · تفكير · صدمة · بالتوفيق · لعب رائع · ثقة · غضب · توتر · إعجاب · نعسان · تحية · مراقبة · الوقت يمضي)،
-  ضعها في `art/emotes/faces.png` وشغّل `python3 tools/build-emotes.py` — تُقصّ وتُضمَّن وتتقدّم على الشعارات تلقائيًا.
-- صورة مفردة `art/emotes/<المفتاح>.png` تتقدّم على كل شيء.
+```
+python3 tools/build-emotes-v2.py
+```
 
-## الوصف الجاهز (انسخه كما هو إلى مولّد الصور)
+| اللوحة | الشبكة | ماذا تصير في اللعبة | الشكل |
+|---|---|---|---|
+| `sheet-chibi.png` | 8×6 وجوه صغيرة بخلفيات ضبابية | 48 ميدالية دائرية، اللعبة ترسم حلقة الندرة حولها | `ring` |
+| `sheet-tiles.png` | 8×5 بلاطات على أبيض | 40 بلاطة مستديرة الزوايا بإطار بلون الندرة (ممتازة) | `tile` |
+| `sheet-premium-1.png` و`-2.png` | 5×2 ملصقات كبيرة بخلفية داكنة | 20 ملصقًا أسطوريًا بشفافية (الفقاعة والمعاينة) + ميدالية من صدره للرأس الصغير | `tall` |
+| `sheet.png` | الصفّان الأوّلان | الميداليات الاثنتا عشرة القديمة (ممتازة/أسطورية) تبقى كما هي | `medal` |
 
-> A single sprite sheet of 16 premium mobile-game emote medallions in a strict 4x4 grid, equal cells, each medallion centered with equal padding, plain flat dark background (#0B1020) with no borders between cells. All 16 are the SAME character: a charismatic golden falcon knight mascot (stylized, expressive, painted 3D game art like Clash Royale / Brawl Stars emotes, NOT emoji, NOT flat vector). Each medallion is a round coin with a metallic ring: rows 1-2 silver ring, rows 3-4 sapphire-blue ring. Consistent light from top-left, rich enamel colors, soft rim light, no text.
-> Expressions in this exact order, left to right, top to bottom:
-> 1 laughing hard with eyes shut, 2 sad with a single tear, 3 playful wink, 4 clapping hands proudly, 5 thinking with a finger on beak and a raised brow, 6 shocked with wide eyes and open beak, 7 thumbs up cheering, 8 shaking hands warmly with a second identical falcon (good game), 9 confident smirk wearing gold aviator sunglasses, 10 furious with steam and flame-red eyes, 11 nervous sweating and biting a feather, 12 heart-eyes in love, 13 sleepy yawning with a nightcap, 14 sharp military salute, 15 watching suspiciously through binoculars, 16 tapping an hourglass impatiently.
-
-## التكلفة على OpenArt
-
-أرخص نموذج صور يكلّف 10 نقاط للصورة (Kling 3 Omni 1K)، وSeedream 4.5 بدقّة 2K يكلّف 15. الحساب فيه 8 نقاط الآن — أضف نقاطًا أو ولِّد اللوحة بمولّدك المعتاد ثم ضعها في المسار أعلاه.
+- القائمة (المفتاح، الصف، العمود، الندرة، الاسم، العبارة) في `ROSTER` داخل الأداة؛ المفاتيح القديمة الستّة عشر (ضحك، حزن، غمزة…) مربوطة بوجوه من اللوحة الصغيرة فتبقى تشكيلات اللاعبين صالحة.
+- الفصل عن الخلفية الداكنة: تنعيم يقتل الحبيبات، ثم الانحراف المعياري المحلي (الجسم حادّ التفاصيل والخلفية بقعة ضوء)، سدّ الفجوات، تعبئة الخارج من الحواف، حذف البقع والأجزاء الدخيلة من الخلية المجاورة. البلاطات تُفصل عن الأبيض بالتعبئة من الحواف.
+- الأداة القديمة `tools/build-emotes.py` (لوحة `sheet.png` وحدها) لم تعد تُستخدم إلا لإعادة قصّ الميداليات القديمة.
+- الدروع: `art/rank-emblems-owner.png` → `python3 tools/build-rank-owner.py` (الطريقة نفسها).

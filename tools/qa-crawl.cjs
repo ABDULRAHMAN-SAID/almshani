@@ -195,7 +195,7 @@ const CAPTURES=[
   n++;errs=[];
   let fail=null;
   try{await page.evaluate(`(async()=>{qaReset();${code}})()`)}catch(e){fail=e.message.split('\n')[0].slice(0,160)}
-  await page.waitForTimeout(name==='tryCard'?900:450);
+  await page.waitForTimeout(name==='tryCard'?900:650);   // الصفحة أثقل بعد تضمين التعبيرات المرسومة
   let m={};try{m=await page.evaluate(()=>qaMeasure())}catch(e){fail=fail||('measure: '+e.message.slice(0,100))}
   const file=`${String(n).padStart(3,'0')}-${name}.png`;
   try{await page.screenshot({path:path.join(OUT,file)})}catch(e){}
