@@ -17,9 +17,9 @@ from PIL import Image, ImageFilter, ImageDraw
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ART = os.path.join(ROOT, 'art', 'emotes')
 GAME = os.path.join(ROOT, 'tahaddi', 'index.html')
-MEDAL = 150          # دقة الميدالية والبلاطة
-STK_W, STK_H = 236, 372   # أقصى مقاس للملصق الكبير
-QUALITY = 76
+MEDAL = 200          # دقة الميدالية والبلاطة (تُعرض حتى 64 بكسل على شاشات 3×)
+STK_W, STK_H = 300, 470   # أقصى مقاس للملصق الكبير
+QUALITY = 82
 
 # ═══════════ القائمة: (المفتاح، اللوحة، الصف، العمود، الندرة، الاسم، العبارة) — الصف والعمود من 1 ═══════════
 CH, TL, P1, P2 = 'chibi', 'tiles', 'prem1', 'prem2'
@@ -236,18 +236,20 @@ def to_uri(im, q=QUALITY):
 
 def medal_ring(cell):
     """وجه صغير بخلفية ضبابية: قصّ دائري من وسط الخلية (مرفوع قليلًا) — الحلقة ترسمها اللعبة."""
-    w, h = cell.size; r = int(min(w, h) / 2) - 1; cx, cy = w // 2, int(h * .48)
+    w, h = cell.size; r = int(min(w, h) / 2) - 1; cx, cy = w // 2, h // 2
     c = cell.convert('RGBA').crop((cx - r, cy - r, cx + r, cy + r)).resize((MEDAL, MEDAL), Image.LANCZOS)
     c.putalpha(circle_mask(MEDAL)); return c
 
 def medal_tile(cell):
-    t = trim(cut_white(cell)); t.thumbnail((MEDAL, MEDAL), Image.LANCZOS)
+    """بلاطة: نفصلها عن الأبيض ثم نقصّ إطارها الأسود وحاشيتها البيضاء (7% من كل جهة) — الإطار ترسمه اللعبة بلون الندرة."""
+    t = trim(cut_white(cell), pad=0); w, h = t.size; k = .07
+    t = t.crop((int(w * k), int(h * k), int(w * (1 - k)), int(h * (1 - k)))); t.thumbnail((MEDAL, MEDAL), Image.LANCZOS)
     c = Image.new('RGBA', (MEDAL, MEDAL), (0, 0, 0, 0)); c.alpha_composite(t, ((MEDAL - t.size[0]) // 2, (MEDAL - t.size[1]) // 2)); return c
 
 def sticker_and_medal(cell):
     """ملصق كبير بشفافية + ميدالية دائرية من صدره على قرص متدرّج ذهبي داكن."""
     s = trim(cut_dark(cell), pad=6); s.thumbnail((STK_W, STK_H), Image.LANCZOS)
-    w, h = s.size; r = int(w * .45); cx, cy = w // 2, int(h * .33)
+    w, h = s.size; r = int(w * .40); cx, cy = w // 2, max(r, int(h * .27))   # الرأس والصدر — يُقرأ في 40 بكسل
     disc = Image.new('RGBA', (2 * r, 2 * r), (0, 0, 0, 0)); px = disc.load()
     for y in range(2 * r):
         for x in range(2 * r):
@@ -288,7 +290,7 @@ def main():
         elif sh == TL: med = medal_tile(cell); shape[key] = 'tile'
         else:
             stk, med = sticker_and_medal(cell); shape[key] = 'tall'
-            big[key], n = to_uri(stk, 82); sizes[key + '@big'] = n
+            big[key], n = to_uri(stk, 84); sizes[key + '@big'] = n
         img[key], n = to_uri(med); sizes[key] = n
     for key, rar, name, msg in LEGACY:
         if key not in old: sys.exit('الميدالية القديمة %s غير موجودة في index.html' % key)

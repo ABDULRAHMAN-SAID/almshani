@@ -134,7 +134,7 @@ const CAPTURES=[
  ...['mafia','barra','draw'].map(g=>[`soloScr-${g}`,R(`push('gameHub','${g}');push('soloScr','${g}')`)]),
  ['mf-intro',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid')")],
  ['mf-night',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مافيا';VB.roles[1]='شعب';mfNight()")],
- ['mf-talk',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';VB.roles[1]='محقق';VB.roles[2]='مافيا';VB.know[2]=true;mfTalk()")],
+ ['mf-talk',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles=['شعب','محقق','مافيا','شعب','طبيب','شعب'];VB.know[2]=true;mfTalk()")],
  ['mf-vote',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';mfVote()")],
  ['mf-end',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';mfEnd('city')")],
  ['br-round',R("window.__vbFast=1;RM.bbN=5;RM.bbCat='أماكن';soloStart('barra','mid');VB.spy=1;brRound()")],
