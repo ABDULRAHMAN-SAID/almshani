@@ -25,7 +25,7 @@ QUALITY = 82
 CH, TL, P1, P2 = 'chibi', 'tiles', 'prem1', 'prem2'
 ROSTER = [
  # ── عادية (المفاتيح القديمة الثمانية مجانية) ──
- ('laugh',   CH, 1, 2, 'common', 'ضحك',        'ههههه!'),
+ ('laugh',   CH, 1, 2, 'common', 'ضحك',        'ضحكتني!'),
  ('sad',     CH, 4, 1, 'common', 'حزن',        'آه…'),
  ('wink',    CH, 1, 1, 'common', 'غمزة',       'سهلة'),
  ('clap',    CH, 5, 7, 'common', 'تصفيق',      'أحسنت!'),
@@ -52,8 +52,8 @@ ROSTER = [
  ('hourglass',CH, 6, 2, 'rare', 'الوقت يمضي',  'الوقت يمضي!'),
  ('c_hood',  CH, 1, 7, 'rare', 'المتخفّي',     'أراقب من الظل'),
  ('c_heartgirl',CH, 2, 2, 'rare', 'قلب كبير',  'حبّيتك'),
- ('c_panda', CH, 2, 3, 'rare', 'باندا',        'براحة…'),
- ('c_penguin',CH, 2, 4, 'rare', 'بطريق يلوّح', 'سلااام'),
+ ('c_panda', CH, 2, 3, 'rare', 'باندا',        'على مهلي'),
+ ('c_penguin',CH, 2, 4, 'rare', 'بطريق يلوّح', 'سلام عليكم'),
  ('c_monster',CH, 2, 8, 'rare', 'وحش مبتهج',   'يا سلام!'),
  ('c_witch', CH, 3, 2, 'rare', 'الساحرة',      'سحر!'),
  ('c_music', CH, 3, 3, 'rare', 'على المزاج',   'موسيقى!'),
@@ -63,9 +63,9 @@ ROSTER = [
  ('c_pinkgirl',CH, 4, 3, 'rare', 'هيا!',       'هيا هيا!'),
  ('c_catsleep',CH, 4, 4, 'rare', 'قط نائم',    'نمت'),
  ('c_bomb',  CH, 4, 5, 'rare', 'قنبلة',        'بنفجر!'),
- ('c_pizza', CH, 4, 6, 'rare', 'بيتزا كول',    'كول'),
- ('c_skull', CH, 4, 7, 'rare', 'هيكل الروك',   'روك!'),
- ('c_frog',  CH, 4, 8, 'rare', 'ضفدع',         'يااااه!'),
+ ('c_pizza', CH, 4, 6, 'rare', 'بيتزا كول',    'على راحتي'),
+ ('c_skull', CH, 4, 7, 'rare', 'هيكل الروك',   'صخب!'),
+ ('c_frog',  CH, 4, 8, 'rare', 'ضفدع',         'مرحى!'),
  ('c_facepalm',CH, 5, 1, 'rare', 'يا خيبة',    'يا خيبتي'),
  ('c_duck',  CH, 5, 2, 'rare', 'بطة الثراء',   'فلوس فلوس'),
  ('c_bunny', CH, 5, 3, 'rare', 'أرنب مشجّع',   'شجّعوا!'),
@@ -90,23 +90,23 @@ ROSTER = [
  ('t_shocked',TL, 2, 5, 'epic', 'مستحيل!',     'مستحيل!'),
  ('t_sweat', TL, 2, 6, 'epic', 'توتّر',        'يا ويلي'),
  ('t_coolcat',TL, 2, 7, 'epic', 'القط الفخم',  'ستايل'),
- ('t_robot', TL, 2, 8, 'epic', 'الروبوت',      'بيب بوب'),
+ ('t_robot', TL, 2, 8, 'epic', 'الروبوت',      'تمّت المعالجة'),
  ('t_ghost', TL, 3, 1, 'epic', 'الشبح',        'بوو!'),
  ('t_dino',  TL, 3, 2, 'epic', 'الديناصور الباكي', 'ليش…'),
  ('t_dog',   TL, 3, 3, 'epic', 'كلب التشجيع',  'أحسنت!'),
  ('t_facepalm',TL, 3, 4, 'epic', 'يا خسارة',   'يا خسارة'),
- ('t_laughcry',TL, 3, 5, 'epic', 'ضحك حتى الدموع', 'هههههه'),
+ ('t_laughcry',TL, 3, 5, 'epic', 'ضحك حتى الدموع', 'ما قدرت أمسك نفسي'),
  ('t_hearts',TL, 3, 6, 'epic', 'حب',           'حبّيتك'),
  ('t_panda', TL, 3, 7, 'epic', 'باندا نعسان',  'تصبحون على خير'),
  ('t_angrybird',TL, 3, 8, 'epic', 'طير غاضب',  'زعلان'),
  ('t_salute',TL, 4, 1, 'epic', 'تحية عسكرية',  'احترامي'),
  ('t_thumbs',TL, 4, 2, 'epic', 'ممتاز!',       'ممتاز!'),
- ('t_star',  TL, 4, 3, 'epic', 'نجمة الحفلة',  'سلاااام'),
+ ('t_star',  TL, 4, 3, 'epic', 'نجمة الحفلة',  'حفلتنا الليلة'),
  ('t_bunny', TL, 4, 4, 'epic', 'أرنب يبكي',    'ظلمتني'),
  ('t_fist',  TL, 4, 5, 'epic', 'يلا!',         'يلا!'),
  ('t_king',  TL, 4, 6, 'epic', 'الملك والكأس', 'الكأس لي'),
  ('t_party', TL, 4, 7, 'epic', 'احتفال',       'مبروك!'),
- ('t_rapper',TL, 4, 8, 'epic', 'بطريق الراب',  'يو يو'),
+ ('t_rapper',TL, 4, 8, 'epic', 'بطريق الراب',  'أنا الأسطورة'),
  ('t_book',  TL, 5, 1, 'epic', 'كتاب الأسرار', 'سرّ'),
  ('t_chest', TL, 5, 2, 'epic', 'الصندوق',      'كنز!'),
  ('t_coins', TL, 5, 3, 'epic', 'كنز',          'غني!'),
@@ -117,10 +117,10 @@ ROSTER = [
  ('t_shield',TL, 5, 8, 'epic', 'الدرع',        'محمي'),
  # ── أسطورية: ملصقات كبيرة ──
  ('p_king',  P1, 1, 1, 'legendary', 'الملك المتكبّر', 'التاج لي'),
- ('p_jester',P1, 1, 2, 'legendary', 'المهرج',        'هاهاها!'),
+ ('p_jester',P1, 1, 2, 'legendary', 'المهرج',        'مهرجان الضحك'),
  ('p_penguin',P1, 1, 3, 'legendary', 'بطريق الغرور', 'ولا يهمّني'),
  ('p_reaper',P1, 1, 4, 'legendary', 'حاصد الأرواح',  'انتهى أمرك'),
- ('p_goblin',P1, 1, 5, 'legendary', 'الغول الساخر',  'بلييييه'),
+ ('p_goblin',P1, 1, 5, 'legendary', 'الغول الساخر',  'تستاهل!'),
  ('p_richcat',P1, 2, 1, 'legendary', 'القط الثري',   'صحّة!'),
  ('p_mirror',P1, 2, 2, 'legendary', 'مرآة الظل',     'شوف حالك'),
  ('p_orc',   P1, 2, 3, 'legendary', 'محطّم الدروع',  'كسرت درعك'),
@@ -193,6 +193,7 @@ def cut_dark(cell, pre=3.0, t=6, pre_open=1, close=4, open_=2, min_area=400):
         if b.sum() < min_area: continue
         ys, xs = np.nonzero(b)
         if ((xs.min() <= 1) or (xs.max() >= w - 2)) and not ((xs > w / 3) & (xs < 2 * w / 3)).any(): continue
+        if ((ys.min() <= 1) or (ys.max() >= h - 2)) and not ((ys > h / 3) & (ys < 2 * h / 3)).any(): continue   # جزء من الملصق المجاور فوق أو تحت
         keep |= b
     A = Lmask(keep).filter(ImageFilter.GaussianBlur(.9)); out = cell.convert('RGBA'); out.putalpha(A); return out
 
@@ -235,15 +236,18 @@ def to_uri(im, q=QUALITY):
     return 'data:image/webp;base64,' + base64.b64encode(buf.getvalue()).decode(), len(buf.getvalue())
 
 def medal_ring(cell):
-    """وجه صغير بخلفية ضبابية: قصّ دائري من وسط الخلية (مرفوع قليلًا) — الحلقة ترسمها اللعبة."""
-    w, h = cell.size; r = int(min(w, h) / 2) - 1; cx, cy = w // 2, h // 2
-    c = cell.convert('RGBA').crop((cx - r, cy - r, cx + r, cy + r)).resize((MEDAL, MEDAL), Image.LANCZOS)
-    c.putalpha(circle_mask(MEDAL)); return c
+    """وجه صغير: نفصله عن خلفيته الضبابية (شفافية كاملة) ثم نضعه داخل دائرة — الحلقة والقرص ترسمهما اللعبة."""
+    s = trim(cut_dark(cell, pre=2.6, t=6, close=4, open_=2, min_area=300), pad=2)
+    s.thumbnail((int(MEDAL * .86), int(MEDAL * .86)), Image.LANCZOS)
+    c = Image.new('RGBA', (MEDAL, MEDAL), (0, 0, 0, 0)); c.alpha_composite(s, ((MEDAL - s.size[0]) // 2, (MEDAL - s.size[1]) // 2))
+    c.putalpha(Image.fromarray(np.minimum(np.asarray(c.getchannel('A')), np.asarray(circle_mask(MEDAL))).astype(np.uint8), 'L')); return c
 
 def medal_tile(cell):
     """بلاطة: نفصلها عن الأبيض ثم نقصّ إطارها الأسود وحاشيتها البيضاء (7% من كل جهة) — الإطار ترسمه اللعبة بلون الندرة."""
-    t = trim(cut_white(cell), pad=0); w, h = t.size; k = .07
-    t = t.crop((int(w * k), int(h * k), int(w * (1 - k)), int(h * (1 - k)))); t.thumbnail((MEDAL, MEDAL), Image.LANCZOS)
+    t = trim(cut_white(cell), pad=0); w, h = t.size; k = .08
+    t = t.crop((int(w * k), int(h * k), int(w * (1 - k)), int(h * (1 - k))))
+    t = trim(cut_white(t, thr=222), pad=2)          # الأبيض داخل البلاطة (والحاشية البيضاء) يصير شفافًا
+    t.thumbnail((int(MEDAL * .9), int(MEDAL * .9)), Image.LANCZOS)
     c = Image.new('RGBA', (MEDAL, MEDAL), (0, 0, 0, 0)); c.alpha_composite(t, ((MEDAL - t.size[0]) // 2, (MEDAL - t.size[1]) // 2)); return c
 
 def sticker_and_medal(cell):
@@ -261,7 +265,7 @@ def sticker_and_medal(cell):
 
 # ═══════════ التجميع ═══════════
 def load_sheets():
-    chibi = fixed_grid(Image.open(os.path.join(ART, 'sheet-chibi.png')), 8, 6)
+    ch = Image.open(os.path.join(ART, 'sheet-chibi.png')); chibi = grid_by_content(ch, 8, 6, sdmap(ch, 3.0) > 6)   # الوجوه ليست على شبكة دقيقة: القصّ في الفجوات بين الملصقات
     tl = Image.open(os.path.join(ART, 'sheet-tiles.png')); rgb = np.asarray(tl.convert('RGB')).astype(np.int16)
     tiles = grid_by_content(tl, 8, 5, ~(rgb.min(axis=2) > 228))
     prem = {}

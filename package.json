@@ -39,6 +39,7 @@
   },
   "homepage": "https://github.com/ABDULRAHMAN-SAID/almshani#readme",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
     "@types/node": "^26.4.0",
     "@types/ws": "^8.18.1",
     "esbuild": "^0.28.2",

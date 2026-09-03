@@ -41,10 +41,20 @@ fly open                                      # https://<app>.fly.dev — الل
 | `TAHADDI_ORIGINS` | فارغ = الكل | أصول مسموح لها بفتح WebSocket، مثل `https://<user>.github.io,capacitor://localhost,https://localhost` |
 | `TAHADDI_RESULT_WAIT_MS` | `90000` | مهلة انتظار تقارير كل المشاركين قبل اعتماد النتيجة |
 | `IOS_BUNDLE_ID` | `com.almshani.tahaddi` | معرّف حزمة iOS — إيصال من تطبيق آخر يُرفض |
+| `ANTHROPIC_API_KEY` | فارغ = معطّل | مفتاح واجهة Anthropic لآليي «ضد الكمبيوتر» بالذكاء الاصطناعي (5.43). يُضبط سرًّا فقط: `fly secrets set ANTHROPIC_API_KEY=...` — لا في الشيفرة ولا في المستودع |
+| `TAHADDI_AI_MODEL` | `claude-opus-5` | النموذج الذي يحرّك الآليين |
+| `TAHADDI_AI_RPM` | `40` | حدّ نداءات `/ai/chat` لكل عنوان IP في الدقيقة |
 
 الخادم يقدّم كذلك الصفحات القانونية التي يطلبها المتجران على `/privacy.html` و`/terms.html` و`/licenses.html` — تُولَّد وقت البناء من نصّ واحد داخل اللعبة (`⟦legal⟧` في `index.html`) فلا يفترق ما يقرؤه اللاعب عمّا يقرؤه المراجع. املأ `LEGAL.contact` و`LEGAL.entity` و`LEGAL.law` هناك مرّة واحدة قبل الرفع.
 
 `/health` يجيب `{ok:true, …إحصاءات}` مع `access-control-allow-origin:*` ليستطيع عميل على مضيف آخر أن يتأكّد قبل فتح WebSocket.
+
+**الآليون بالذكاء الاصطناعي (5.43)**: في مافيا وبرا السالفة ضد الكمبيوتر يقرأ الآليون النقاش ويفهمون ما يكتبه اللاعب عبر نموذج لغوي. العميل لا يحمل أي مفتاح: يسأل `/ai/status` (`{on,model}`) ثم يرسل `POST /ai/chat {prompt}` ويستلم `{json,text}`. بلا `ANTHROPIC_API_KEY` يجيب الخادم 503 فيعمل العقل المحلي في العميل كما هو. حدّ الطلبات لكل عنوان `TAHADDI_AI_RPM`، وحجم الطلب ≤ 96 ك.ب. في نسخة الأرتيفاكت على claude.ai لا يُستخدم الخادم أصلًا: القدرة `sample` تعمل على حساب المشاهد وبموافقته عند أول ردّ.
+
+```bash
+fly secrets set ANTHROPIC_API_KEY=sk-ant-...        # يُعاد نشر التطبيق تلقائيًّا
+curl -s https://<app>.fly.dev/ai/status             # {"on":true,"model":"claude-opus-5"}
+```
 
 ## ٢. نسخة الويب على مضيف ثابت (GitHub Pages)
 

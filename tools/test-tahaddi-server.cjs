@@ -177,6 +177,16 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
   check('قائمة مشتريات الحساب: اثنان، ولا يرى الخصم شيئًا',plist.t==='purchaseList'&&plist.list.length===2&&(await Q.req({t:'purchases'})).list.length===0,JSON.stringify(plist).slice(0,200));
   const hs=await new Promise(r=>require('http').get(`http://localhost:${PORT}/health`,res=>{let d='';res.on('data',c=>d+=c);res.on('end',()=>r(JSON.parse(d)))}));
   check('/health يفصح عمّا هو مفعّل: test فقط، ولا ios ولا android، وعدد المشتريات',hs.iap&&hs.iap.test===true&&hs.iap.ios===false&&hs.iap.android===false&&hs.purchases===2,JSON.stringify(hs));
+  // 5.43: الذكاء الاصطناعي بلا مفتاح — /ai/status يقول معطّل، و/ai/chat يجيب 503 فيعمل العقل المحلي في العميل، وOPTIONS يمرّ عبر CORS
+  const ai=await new Promise(r=>require('http').get(`http://localhost:${PORT}/ai/status`,res=>{let d='';res.on('data',c=>d+=c);res.on('end',()=>r({code:res.statusCode,cors:res.headers['access-control-allow-origin'],j:JSON.parse(d)}))}));
+  check('/ai/status بلا ANTHROPIC_API_KEY → {on:false,model:null} مع CORS',ai.code===200&&ai.cors==='*'&&ai.j.on===false&&ai.j.model===null,JSON.stringify(ai));
+  const post=(method,body)=>new Promise(r=>{const q=require('http').request({host:'localhost',port:PORT,path:'/ai/chat',method,headers:{'content-type':'application/json'}},res=>{let d='';res.on('data',c=>d+=c);res.on('end',()=>r({code:res.statusCode,d}))});q.end(body)});
+  const chat=await post('POST',JSON.stringify({prompt:'مرحبا'}));
+  check('/ai/chat بلا مفتاح → 503 {off:true}',chat.code===503&&/"off":true/.test(chat.d),JSON.stringify(chat));
+  const opt=await post('OPTIONS');
+  check('/ai/chat OPTIONS → 204 (CORS من مضيف آخر)',opt.code===204,String(opt.code));
+  const get=await post('GET');
+  check('/ai/chat GET → 405',get.code===405,String(get.code));
   await P.close();await Q.close();
   server.kill('SIGTERM');await sleep(400);server=startServer();await sleep(700);
   const P2=client();await hello(P2,wa.token);

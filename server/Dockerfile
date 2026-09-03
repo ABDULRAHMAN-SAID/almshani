@@ -6,7 +6,7 @@ FROM node:20-alpine AS build
 WORKDIR /app
 COPY package.json ./
 # البناء يحتاج esbuild فقط؛ لا نثبّت بقية الاعتماديات الثقيلة (three, sharp, typescript)
-RUN npm install --no-save --no-package-lock --ignore-scripts esbuild@^0.28 ws@^8
+RUN npm install --no-save --no-package-lock --ignore-scripts esbuild@^0.28 ws@^8 @anthropic-ai/sdk@^0.123
 COPY server ./server
 RUN node_modules/.bin/esbuild server/src/tahaddi/index.ts --bundle --platform=node --format=esm --external:ws --outfile=server/dist/tahaddi.js --log-level=warning
 # الصفحات القانونية تُولَّد من نصّ اللعبة نفسه: المتجران يطلبان رابط سياسة خصوصية يعمل،
