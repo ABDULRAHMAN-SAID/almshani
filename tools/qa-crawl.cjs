@@ -29,6 +29,8 @@ const CAPTURES=[
  ['partyScr',R("push('partyScr')")],
  ...['carrom','uno','mafia','draw','barra'].map(g=>[`gameHub-${g}`,R(`push('gameHub','${g}')`)]),
  ...['knowledge','carrom','uno','mafia','drawing','outsider'].map(g=>[`gameRankScr-${g}`,R(`push('gameRankScr','${g}')`)]),
+ ['rankGuideScr-placed',R("const p=rankOf('carrom');p.placed=true;p.tier=5;p.div=1;p.rp=40;push('rankGuideScr','carrom')")],
+ ['rankGuideScr-unplaced',R("rankOf('knowledge').placed=false;push('rankGuideScr','knowledge')")],
  ['rankedScr-unplaced',R("rankOf('knowledge').placed=false;push('rankedScr')")],
  ['rankedScr-placed',R("const p=rankOf('knowledge');p.placed=true;p.tier=4;p.div=2;p.rp=64;push('rankedScr')")],
  ['evtScr',R("push('evtScr')")],['seasonScr',R("push('seasonScr')")],['misScr',R("push('misScr')")],['achScr',R("push('achScr')")],

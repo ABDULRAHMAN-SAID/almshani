@@ -993,6 +993,43 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 
 /* ═══ طبقة العمق والمتعة: خلفية حية + حركات ثلاثية الأبعاد + بريق ═══ */
 #bg3d{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.9}
+/* طبقات الخلفية: ضوء علوي بنفسجي وأفق ذهبي، وشبكة نجمية تنزلق ببطء */
+#bgBeam{position:fixed;inset:0;z-index:0;pointer-events:none;
+ background:radial-gradient(ellipse 62% 42% at 50% -8%,rgba(123,79,224,.30),transparent 70%),radial-gradient(ellipse 90% 26% at 50% 106%,rgba(232,178,58,.16),transparent 72%),linear-gradient(180deg,#0A0D1E 0%,#080B14 40%,#0B0A1A 100%)}
+#bgLat{position:fixed;inset:-96px;z-index:0;pointer-events:none;opacity:.075;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cpath d='M48 6 L58 38 L90 48 L58 58 L48 90 L38 58 L6 48 L38 38 Z' fill='none' stroke='%23FFE0A0' stroke-width='1.2'/%3E%3Cpath d='M48 30 L54 48 L48 66 L42 48 Z' fill='%23FFE0A0' opacity='.5'/%3E%3Ccircle cx='6' cy='6' r='1.6' fill='%23FFE0A0'/%3E%3Ccircle cx='90' cy='90' r='1.6' fill='%23FFE0A0'/%3E%3C/svg%3E") repeat;
+ animation:bgLat 120s linear infinite}
+@keyframes bgLat{from{transform:translate(0,0)}to{transform:translate(96px,96px)}}
+body.clQuiet #bgBeam,body.clQuiet #bgLat{opacity:.03!important}
+@media (prefers-reduced-motion:reduce){#bgLat{animation:none}}
+/* خلفية تبويب: مشهد ثابت خلف محتوى الشاشة وفوق البلّورات */
+.tabBg{position:fixed;inset:0;z-index:-1;pointer-events:none}
+.tabBg svg{width:100%;height:100%;display:block}
+/* دليل التصنيف */
+.rgRow{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px 10px;margin-bottom:8px}
+.rgRow.here{border-color:var(--tc);box-shadow:0 0 18px color-mix(in srgb,var(--tc) 40%,transparent);background:linear-gradient(168deg,#1C2540,#0E1526)}
+.rgAv{width:76px;height:76px;flex-shrink:0}
+.rgTx{flex:1;min-width:0}
+.rgNm{font-size:15px;font-weight:900;color:var(--tc)}
+.rgNm i{font-style:normal;font-size:9.5px;color:#15100A;background:var(--tc);border-radius:8px;padding:1px 7px;margin-inline-start:6px;vertical-align:middle}
+.rgD{font-size:10.5px;color:var(--tx2);margin-top:2px}
+.rgF{font-size:11px;color:var(--tx);margin-top:3px;opacity:.85}
+.rgNo{font-size:12px;font-weight:900;color:var(--mut);width:22px;text-align:center;flex-shrink:0}
+.rgIc{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 40% 30%,#2A3556,#111828);border:1px solid rgba(232,178,58,.3);flex-shrink:0}
+/* تشكيلتي داخل البطاقات */
+.dkPanel{margin-top:10px;background:rgba(6,8,16,.38);border:1px solid rgba(232,178,58,.3);border-radius:14px;padding:10px}
+.dkHead{display:flex;align-items:center;gap:8px}
+.dkMeta{font-size:10.5px;color:var(--tx2);flex:1;min-width:0}
+.dkEdit{width:auto;padding:0 12px;min-height:36px;font-size:11.5px;margin:0}
+.dkSlots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.dkSlot{position:relative;min-height:44px}
+.dkSlot.empty{border:1.5px dashed rgba(232,178,58,.4);border-radius:10px;display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;color:var(--mut);background:rgba(255,255,255,.02)}
+.dkX{position:absolute;top:-5px;left:-5px;width:18px;height:18px;border-radius:50%;background:var(--no);color:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #0B1020;pointer-events:none;z-index:2}
+.dkNote{font-size:10px;color:var(--tx2);margin-top:8px;line-height:1.6}
+.cgWrap{position:relative}
+.cgWrap.in>div:first-child{outline:2px solid var(--gold);outline-offset:1px;border-radius:12px}
+.cgChip{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:9.5px;font-weight:800;background:rgba(6,8,16,.88);border:1px solid rgba(232,178,58,.55);color:#FFE9A8;border-radius:10px;padding:3px 8px;min-height:24px;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;cursor:pointer;z-index:2}
+.cgWrap.in .cgChip{border-color:var(--ok);color:var(--ok)}
 #fxc{position:fixed;inset:0;z-index:90;pointer-events:none}
 #app{position:relative;z-index:1}
 body.clQuiet #bg3d{opacity:.07!important}
@@ -13253,142 +13290,113 @@ const EMO_TIER={
 // كل وجه: b=تدرج الخلفية · a=الرسم · full=مشهد كامل بلا وجه بشري
 /* شعارات التعبيرات العادية والنادرة — مطلية بالمينا والذهب داخل الميدالية، لا وجوه إيموجي.
    كل شعار رمز واحد جريء يُقرأ عند 26 بكسل ويجمُل عند 132: قناع، عين، كفّان، مصباح، صاعقة… */
+/* شخصية التعبيرات: صقر فارس ذهبي — وجه واحد بستّ عشرة حالة داخل الميدالية، لا وجوه إيموجي ولا رموز.
+   رأس بريش مظلّل وقناع وجه كريمي وخطّ الدمعة الصقري، عينان كبيرتان بقزحية كهرمانية، منقار معقوف،
+   عرف ذهبي وياقة درع؛ ولكل حالة حاجباه وعيناه ومنقاره وأدواته (دمعة، نظارة، بخار، قلوب، ساعة رمل…). */
 const EMO_EMBLEM=(function(){
- const GOLD=['#FFF4C8','#E8B23A','#8E5E0E'],RIM='#3A2405';
- const SIL=['#FFFFFF','#B9C3D3','#5A6478'],SRIM='#262D3B';
- const grad=(id,c,v)=>'<linearGradient id="'+id+'" x1="0" y1="0" x2="'+(v?0:.4)+'" y2="1"><stop offset="0" stop-color="'+c[0]+'"/><stop offset=".5" stop-color="'+c[1]+'"/><stop offset="1" stop-color="'+c[2]+'"/></linearGradient>';
- const rad=(id,c)=>'<radialGradient id="'+id+'" cx=".38" cy=".3" r=".9"><stop offset="0" stop-color="'+c[0]+'"/><stop offset=".55" stop-color="'+c[1]+'"/><stop offset="1" stop-color="'+c[2]+'"/></radialGradient>';
- const P=(d,f,r,w,x)=>'<path d="'+d+'" fill="'+f+'" stroke="'+(r||RIM)+'" stroke-width="'+(w==null?.9:w)+'" stroke-linejoin="round" stroke-linecap="round"'+(x||'')+'/>';
+ const HEAD=['#E8B872','#B0722E','#5E3410'],DK='#3A2008',CREAM='#F7E7C9',BEAK=['#FFD658','#E69B2C','#96560F'],GOLD=['#FFF4C8','#E8B23A','#8E5E0E'],AMB='#F5A932';
+ const P=(d,f,s,w,x)=>'<path d="'+d+'" fill="'+f+'"'+(s?' stroke="'+s+'" stroke-width="'+(w||.8)+'" stroke-linejoin="round" stroke-linecap="round"':'')+(x||'')+'/>';
  const S=(d,c,w,o)=>'<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"'+(o!=null?' opacity="'+o+'"':'')+'/>';
- const shadow=d=>'<path d="'+d+'" fill="#000" opacity=".32" transform="translate(0 1.8)"/>';
- const gloss=(x,y,rx,ry,rot,o)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#fff" opacity="'+(o==null?.28:o)+'"'+(rot?' transform="rotate('+rot+' '+x+' '+y+')"':'')+'/>';
- const star=(x,y,r,f)=>{const s=r*.42;return '<path d="M'+x+' '+(y-r)+' L'+(x+s)+' '+(y-s)+' L'+(x+r)+' '+y+' L'+(x+s)+' '+(y+s)+' L'+x+' '+(y+r)+' L'+(x-s)+' '+(y+s)+' L'+(x-r)+' '+y+' L'+(x-s)+' '+(y-s)+' Z" fill="'+(f||'#FFF8E0')+'"/>'};
- const G=k=>'url(#eg'+k+')',R=k=>'url(#er'+k+')';
+ const gl=(x,y,rx,ry,rot,o)=>'<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#fff" opacity="'+(o==null?.28:o)+'"'+(rot?' transform="rotate('+rot+' '+x+' '+y+')"':'')+'/>';
+ const defs=k=>'<defs><radialGradient id="fh'+k+'" cx=".4" cy=".28" r=".95"><stop offset="0" stop-color="'+HEAD[0]+'"/><stop offset=".55" stop-color="'+HEAD[1]+'"/><stop offset="1" stop-color="'+HEAD[2]+'"/></radialGradient>'+
+  '<linearGradient id="fb'+k+'" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="'+BEAK[0]+'"/><stop offset=".55" stop-color="'+BEAK[1]+'"/><stop offset="1" stop-color="'+BEAK[2]+'"/></linearGradient>'+
+  '<linearGradient id="fg'+k+'" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="'+GOLD[0]+'"/><stop offset=".5" stop-color="'+GOLD[1]+'"/><stop offset="1" stop-color="'+GOLD[2]+'"/></linearGradient>'+
+  '<radialGradient id="fe'+k+'" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#FFD26A"/><stop offset=".6" stop-color="'+AMB+'"/><stop offset="1" stop-color="#B8641A"/></radialGradient></defs>';
+ /* جناح-يد: كفّ ريشية بثلاثة أطراف ذهبية */
+ const wing=(x,y,rot,sc,flip)=>'<g transform="translate('+x+' '+y+') rotate('+rot+') scale('+(sc*(flip||1))+' '+sc+')">'+
+  P('M-4 5 Q-5 -1 -1 -3 L2 -7 Q3.5 -8.5 4 -6 L3 -2.5 L6 -6 Q8 -7 7.5 -4.5 L5.5 -1 L8.5 -3 Q10 -3 9 -1 L6 2 Q5 6 0 6.5 Q-3 6.5 -4 5 Z','url(#fgW)',DK,.7)+
+  S('M-1 1 Q2 -1 4 0',DK,.6,.5)+'</g>';
+ /* عين: بيضاء بقزحية وبؤبؤ ولمعة — أو حالات: happy مغلقة سعيدة · closed مغلقة · narrow نصف مغلقة · wide واسعة · heart قلب · low تنظر أسفل */
+ const eye=(k,x,y,st,dir)=>{
+  const dx=dir==='left'?-1:dir==='right'?1:0,dy=st==='low'?1:st==='up'?-1:0;
+  if(st==='happy')return S('M'+(x-3.6)+' '+(y+.6)+' Q'+x+' '+(y-3.6)+' '+(x+3.6)+' '+(y+.6),DK,1.6);
+  if(st==='closed')return S('M'+(x-3.6)+' '+(y-.4)+' Q'+x+' '+(y+2.4)+' '+(x+3.6)+' '+(y-.4),DK,1.5);
+  if(st==='heart')return P('M'+x+' '+(y+3.2)+' c-2.6-2.2 -4.6-3.6 -4.6-5.6 c0-1.8 1.4-3 3-3 c.9 0 1.4 .5 1.6 .9 c.2-.4 .7-.9 1.6-.9 c1.6 0 3 1.2 3 3 c0 2 -2 3.4 -4.6 5.6 Z','#FF5C8A','#8A1030',.6);
+  const rx=st==='wide'?4.4:3.8,ry=st==='wide'?4.8:st==='narrow'?2.6:4.2,ir=st==='wide'?2.2:2.5,pu=st==='wide'?1.1:1.35;
+  return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#FFFDF6" stroke="'+DK+'" stroke-width=".7"/>'+
+   '<circle cx="'+(x+dx*1.2)+'" cy="'+(y+dy*1.1)+'" r="'+ir+'" fill="url(#fe'+k+')"/><circle cx="'+(x+dx*1.3)+'" cy="'+(y+dy*1.2)+'" r="'+pu+'" fill="#120A04"/>'+
+   '<circle cx="'+(x+dx*1.2-.9)+'" cy="'+(y+dy*1.1-1)+'" r=".75" fill="#fff" opacity=".95"/>'+
+   (st==='narrow'?P('M'+(x-4)+' '+(y-3)+' Q'+x+' '+(y-.2)+' '+(x+4)+' '+(y-3)+' L'+(x+4)+' '+(y-5)+' L'+(x-4)+' '+(y-5)+' Z','url(#fh'+k+')'):'')+
+   S('M'+(x-3.8)+' '+(y-1.4)+' Q'+x+' '+(y-4.6)+' '+(x+3.8)+' '+(y-1.4),DK,.9);
+ };
+ /* حاجب: من زاوية داخلية (in) وخارجية (out) بالنسبة للعين */
+ const brow=(x,y,inY,outY,side)=>{const s=side;return S('M'+(x-s*3.8)+' '+(y+outY)+' Q'+x+' '+(y+Math.min(inY,outY)-1.2)+' '+(x+s*3.4)+' '+(y+inY),DK,1.9)};
+ /* منقار: closed · open · grin · frown · clench · yawn · smirk */
+ const beak=(k,st)=>{
+  const up='M19.6 24.6 Q24 22.4 28.4 24.6 L27.6 28.4 Q24 33 20.4 28.4 Z';
+  let s=P(up,'url(#fb'+k+')',DK,.8)+'<circle cx="22.4" cy="25.6" r=".55" fill="'+DK+'" opacity=".7"/>'+gl(22.6,25.4,1.6,.7,-20,.45);
+  if(st==='open'||st==='yawn')s=P('M17.8 27.2 Q24 30.8 30.2 27.2 L28.8 33.6 Q24 37.2 19.2 33.6 Z','#7A1F1F',DK,.8)+P('M20.6 31.4 Q24 34.4 27.4 31.4 L26.6 34.2 Q24 36 21.4 34.2 Z','#E86A70')+P(up.replace('L27.6 28.4 Q24 33 20.4 28.4','L28.2 27.6 Q24 30.6 19.8 27.6'),'url(#fb'+k+')',DK,.8)+gl(22.6,25.2,1.6,.7,-20,.45);
+  else if(st==='grin')s=P('M18.6 27.4 Q24 32.6 29.4 27.4 L28 29.6 Q24 33.4 20 29.6 Z','#7A1F1F',DK,.7)+P(up,'url(#fb'+k+')',DK,.8)+gl(22.6,25.4,1.6,.7,-20,.45);
+  else if(st==='frown')s=P('M19.6 25.2 Q24 23.2 28.4 25.2 L27.4 28.6 Q24 30.4 20.6 28.6 Z','url(#fb'+k+')',DK,.8)+S('M20.4 30.6 Q24 28.4 27.6 30.6',DK,1.1);
+  else if(st==='clench')s=P(up,'url(#fb'+k+')',DK,.8)+S('M20.6 29.2 L27.4 29.2',DK,1.1)+S('M22.4 29.2 V30.6 M25.6 29.2 V30.6',DK,.8);
+  else if(st==='smirk')s=P('M19.6 24.6 Q24 22.4 28.4 24.6 L28.8 27.4 Q25 31.6 20.4 28.4 Z','url(#fb'+k+')',DK,.8)+S('M27.6 29.4 Q29.6 28.6 30 27',DK,1);
+  return s;
+ };
+ const CFG={
+  laugh:    {b:['#7A5014','#2A1806'],eyes:['happy','happy'],brow:[[-1,-2],[-1,-2]],beak:'open',tilt:-6,
+   props:k=>P('M11 15 q-2.2 2.6 0 4.6 q2.2 -2 0 -4.6 Z','#8FD8FF','#2E7EA8',.5)+P('M37 15 q2.2 2.6 0 4.6 q-2.2 -2 0 -4.6 Z','#8FD8FF','#2E7EA8',.5)+S('M6 26 L9 25 M6 30 L9.5 30 M42 26 L39 25 M42 30 L38.5 30','#FFF6D8',1.2,.7)},
+  sad:      {b:['#34437E','#101838'],eyes:['low','low'],brow:[[-2.2,.6],[-2.2,.6]],beak:'frown',
+   props:k=>P('M17 25.5 C14.6 29.4 14.4 31.8 17 32.5 C19.6 31.8 19.4 29.4 17 25.5 Z','#8FD8FF','#2E7EA8',.5)+'<circle cx="16.2" cy="29.6" r=".7" fill="#fff" opacity=".85"/>'},
+  wink:     {b:['#5E337E','#1E0E36'],eyes:['open','closed'],brow:[[-.6,-1.4],[.6,-2.4]],beak:'smirk',
+   props:k=>P('M37 9 l1 2.2 2.2 1 -2.2 1 -1 2.2 -1 -2.2 -2.2 -1 2.2 -1 Z','#FFF6D8')+P('M40.5 15.5 l.6 1.3 1.3 .6 -1.3 .6 -.6 1.3 -.6 -1.3 -1.3 -.6 1.3 -.6 Z','#FFF6D8')},
+  clap:     {b:['#256B4A','#0A2A1B'],eyes:['happy','happy'],brow:[[-.8,-2],[-.8,-2]],beak:'grin',
+   props:k=>wing(15,38,-25,1.05)+wing(33,38,25,1.05,-1)+S('M24 31 L24 34.4 M20.2 32 L21.6 34.6 M27.8 32 L26.4 34.6','#FFF6D8',1.3,.9)},
+  think:    {b:['#22557A','#0A1F30'],eyes:['up','up'],brow:[[-.2,-.8],[-2.6,-1.2]],beak:'closed',dir:'right',
+   props:k=>wing(30,33,-40,1)+'<g fill="#FFF6D8" opacity=".85"><circle cx="37.5" cy="14.5" r="1.1"/><circle cx="40.5" cy="11" r="1.6"/><circle cx="43.5" cy="7" r="2.2"/></g>'},
+  shock:    {b:['#3A4B6E','#0E1626'],eyes:['wide','wide'],brow:[[-3,-3.4],[-3,-3.4]],beak:'open',crestUp:1,
+   props:k=>S('M7 12 L10 15 M41 12 L38 15 M5.5 22 L9 22 M42.5 22 L39 22 M8 31 L11 29 M40 31 L37 29','#FFFFFF',1.1,.55)},
+  thumbs:   {b:['#28479A','#0C1A46'],eyes:['open','happy'],brow:[[-.8,-1.6],[.4,-2.4]],beak:'grin',
+   props:k=>'<g transform="translate(35 34) rotate(-8) scale(1.02)">'+P('M-5 0 H4 Q6.5 0 6.5 2.5 V7 Q6.5 9.5 4 9.5 H-3 Q-5 9.5 -5 7 Z','url(#fgW)',DK,.7)+P('M-3.5 .2 V-5.5 Q-3.5 -8.5 -.8 -8.5 Q1.8 -8.5 1.8 -6 L1.4 .2 Z','url(#fgW)',DK,.7)+S('M-3 3 H4 M-3 6 H4',DK,.6,.5)+'</g>'},
+  shake:    {b:['#2B6A47','#0B2A1B'],eyes:['happy','happy'],brow:[[-.8,-1.8],[-.8,-1.8]],beak:'grin',
+   props:k=>P('M8 39 L16 33 Q19 32 21 34 L23 37 L18 42 Q14 44 10 43 Z','url(#fgW)',DK,.7)+P('M40 39 L32 33 Q29 32 27 34 L25 37 L30 42 Q34 44 38 43 Z','url(#fsW)','#262D3B',.7)+P('M20 35 Q24 32.5 28 35 Q29.5 38 27 40 Q24 41.6 21 40 Q18.5 38 20 35 Z','url(#fgW)',DK,.7)+S('M21.5 36.6 Q23.5 36 25 37.4 M23 38.6 Q25 38 26.5 39.4',DK,.6,.55)},
+  confident:{b:['#5A3612','#1A0E04'],eyes:['open','open'],brow:[[-.6,-2.2],[-.6,-2.2]],beak:'smirk',
+   props:k=>P('M10 18.5 H23 Q23 26.5 17 26.5 Q10 26.5 10 20.5 Z','url(#fsh)',GOLD[1],1.2)+P('M38 18.5 H25 Q25 26.5 31 26.5 Q38 26.5 38 20.5 Z','url(#fsh)',GOLD[1],1.2)+S('M23 19.6 Q24 18.2 25 19.6',GOLD[1],1.3)+S('M10 19.8 L7.5 18.4 M38 19.8 L40.5 18.4',GOLD[1],1.2)+S('M12.5 24 L18.5 20.2 M27.5 24 L33.5 20.2','#FFFFFF',1.1,.45)},
+  angry:    {b:['#7E2620','#300A08'],eyes:['narrow','narrow'],brow:[[3.2,-2.2],[3.2,-2.2]],beak:'clench',flush:'rgba(226,75,74,.28)',
+   props:k=>'<g fill="#FFFFFF" opacity=".8"><circle cx="8.5" cy="9" r="1.7"/><circle cx="11.5" cy="6" r="2.4"/><circle cx="7" cy="5" r="1.4"/><circle cx="39.5" cy="9" r="1.7"/><circle cx="36.5" cy="6" r="2.4"/><circle cx="41" cy="5" r="1.4"/></g>'},
+  tense:    {b:['#1B5F5A','#062422'],eyes:['open','open'],brow:[[-2,-.4],[-2,-.4]],beak:'frown',dir:'left',
+   props:k=>P('M35.5 11 C33.6 14 33.5 15.8 35.5 16.3 C37.5 15.8 37.4 14 35.5 11 Z','#8FE8FF','#2E7EA8',.5)+P('M39.5 15.5 C38.1 17.8 38 19.2 39.5 19.6 C41 19.2 40.9 17.8 39.5 15.5 Z','#8FE8FF','#2E7EA8',.5)+S('M20.6 31.4 q1.7 1.4 3.4 0 q1.7 1.4 3.4 0',DK,.9,.7)},
+  love:     {b:['#7E2447','#300A1C'],eyes:['heart','heart'],brow:[[-1.2,-2.4],[-1.2,-2.4]],beak:'grin',flush:'rgba(255,120,150,.16)',
+   props:k=>P('M40 9 c-1.4-1.2 -2.6-2 -2.6-3.2 c0-1 .8-1.8 1.8-1.8 c.5 0 .7 .3 .8 .5 c.1-.2 .3-.5 .8-.5 c1 0 1.8 .8 1.8 1.8 c0 1.2 -1.2 2 -2.6 3.2 Z','#FF5C8A','#8A1030',.4)+P('M8.5 13 c-1.1-.9 -2-1.5 -2-2.4 c0-.8 .6-1.4 1.4-1.4 c.4 0 .5 .2 .6 .4 c.1-.2 .2-.4 .6-.4 c.8 0 1.4 .6 1.4 1.4 c0 .9 -.9 1.5 -2 2.4 Z','#FF8CAB','#8A1030',.4)},
+  sleep:    {b:['#2A2E6E','#0A0C2C'],eyes:['closed','closed'],brow:[[-.4,-.8],[-.4,-.8]],beak:'yawn',noCrest:1,
+   props:k=>P('M11 15 Q14 4 26 6 Q32 6.5 40 2 Q38 9 32 12 L14 17 Z','#3E63C8','#1C2F70',.8)+'<circle cx="40" cy="2.5" r="2.4" fill="#FFF3D0" stroke="#1C2F70" stroke-width=".6"/>'+P('M10.5 15.5 Q24 9 34 12 L34.5 15 Q24 12.5 11 18 Z','#FFF3D0','#1C2F70',.6)+'<g fill="#FFF6D8" opacity=".85"><path d="M40 20 a2.2 2.2 0 1 0 2.4 3.4 a1.7 1.7 0 1 1 -2.4 -3.4 Z"/><path d="M44 14 a1.6 1.6 0 1 0 1.8 2.4 a1.2 1.2 0 1 1 -1.8 -2.4 Z"/></g>'},
+  salute:   {b:['#1C3A6C','#08142E'],eyes:['open','narrow'],brow:[[-.4,-1.8],[.8,-2.6]],beak:'closed',
+   props:k=>wing(33,17,-55,1.05)},
+  watch:    {b:['#1B5438','#072414'],eyes:['open','open'],brow:[[-.6,-1.2],[-.6,-1.2]],beak:'closed',dir:'left',
+   props:k=>'<g>'+P('M8.5 15.5 H21.5 Q23.5 15.5 23.5 17.5 V24.5 Q23.5 26.5 21.5 26.5 H8.5 Q6.5 26.5 6.5 24.5 V17.5 Q6.5 15.5 8.5 15.5 Z','#1B2030',GOLD[1],1)+P('M26.5 15.5 H39.5 Q41.5 15.5 41.5 17.5 V24.5 Q41.5 26.5 39.5 26.5 H26.5 Q24.5 26.5 24.5 24.5 V17.5 Q24.5 15.5 26.5 15.5 Z','#1B2030',GOLD[1],1)+S('M23.5 19 H24.5 M23.5 23 H24.5',GOLD[1],1.4)+'<circle cx="15" cy="21" r="4.6" fill="#0D1A26" stroke="#2B3A5A" stroke-width=".8"/><circle cx="33" cy="21" r="4.6" fill="#0D1A26" stroke="#2B3A5A" stroke-width=".8"/><circle cx="15" cy="21" r="2.2" fill="'+AMB+'"/><circle cx="33" cy="21" r="2.2" fill="'+AMB+'"/><circle cx="13.8" cy="19.8" r=".9" fill="#fff" opacity=".8"/><circle cx="31.8" cy="19.8" r=".9" fill="#fff" opacity=".8"/>'+wing(9,31,20,.9)+wing(39,31,-20,.9,-1)+'</g>',hideEyes:1},
+  hourglass:{b:['#452A80','#160A36'],eyes:['low','low'],brow:[[-.6,-1.4],[1.4,-2.2]],beak:'closed',dir:'right',
+   props:k=>'<g transform="translate(35 32) scale(.9)">'+P('M-5 -8 H5 V-6 H-5 Z','url(#fgW)',DK,.6)+P('M-5 6 H5 V8 H-5 Z','url(#fgW)',DK,.6)+'<path d="M-4 -6 H4 L.8 0 L4 6 H-4 L-.8 0 Z" fill="#DCE8F8" opacity=".55" stroke="'+GOLD[1]+'" stroke-width=".5"/>'+P('M-2.6 -5.2 H2.6 L0 -.6 Z','#F0A830')+P('M-3 5.4 H3 L0 2.2 Z','#F0A830')+'</g>'+wing(30,38,20,.85,-1)+S('M40 27 L42.5 25 M41.5 31 L44 31','#FFF6D8',1.1,.7)},
+ };
  const E={};
- // ── عادية ──
- {const k='laugh',m='M12 15 Q24 8.5 36 15 Q38.5 26 32.5 34 Q24 40.5 15.5 34 Q9.5 26 12 15 Z';
-  E[k]={b:['#7A5014','#2A1806'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(m)+
-   P('M11.5 17 L5.5 13.5 L7 19.5 Z','#B8322E','#5A1210',.7)+P('M36.5 17 L42.5 13.5 L41 19.5 Z','#B8322E','#5A1210',.7)+
-   P(m,G(k))+
-   '<path d="M15 20.5 Q18.8 16 22.6 20.5 Q18.8 19.3 15 20.5 Z" fill="#2A1608"/><path d="M25.4 20.5 Q29.2 16 33 20.5 Q29.2 19.3 25.4 20.5 Z" fill="#2A1608"/>'+
-   '<path d="M14.5 26.5 Q24 36.5 33.5 26.5 Q24 30.5 14.5 26.5 Z" fill="#2A1608"/><path d="M17 27.6 Q24 29.6 31 27.6 L30.4 26.9 Q24 28.6 17.6 26.9 Z" fill="#FFF6E0" opacity=".9"/>'+
-   gloss(18,13.5,5,2.2,-22,.32)}}
- {const k='sad',m='M12 15 Q24 8.5 36 15 Q38.5 26 32.5 34 Q24 40.5 15.5 34 Q9.5 26 12 15 Z';
-  E[k]={b:['#34437E','#101838'],full:1,a:'<defs>'+grad('eg'+k,SIL)+'</defs>'+shadow(m)+
-   P('M11.5 17 L5.5 13.5 L7 19.5 Z','#3E6AB0','#1A2E5A',.7)+P('M36.5 17 L42.5 13.5 L41 19.5 Z','#3E6AB0','#1A2E5A',.7)+
-   P(m,G(k),SRIM)+
-   '<ellipse cx="18.8" cy="20.3" rx="3.4" ry="2.3" fill="#1A2030"/><ellipse cx="29.2" cy="20.3" rx="3.4" ry="2.3" fill="#1A2030"/>'+
-   '<path d="M15.5 33 Q24 25.5 32.5 33 Q24 30 15.5 33 Z" fill="#1A2030"/>'+
-   '<path d="M19.2 23.4 C16.8 27.2 16.6 29.6 19.2 30.3 C21.8 29.6 21.6 27.2 19.2 23.4 Z" fill="#5AC8F5" stroke="#1E5A88" stroke-width=".6"/><circle cx="18.3" cy="27.6" r=".8" fill="#fff" opacity=".85"/>'+
-   gloss(18,13.5,5,2.2,-22,.34)}}
- {const k='wink';
-  E[k]={b:['#5E337E','#1E0E36'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+rad('er'+k,['#9FF0E0','#2FB7A6','#0B4A44'])+'</defs>'+
-   shadow('M7 25 Q24 11 41 25 Q24 39 7 25 Z')+
-   '<path d="M9.5 25 Q24 14 38.5 25 Q24 36 9.5 25 Z" fill="#F6F2E6"/>'+
-   '<circle cx="24" cy="26.5" r="7" fill="'+R(k)+'"/><circle cx="24" cy="26.5" r="3.4" fill="#0A0E16"/><circle cx="22" cy="24.4" r="1.3" fill="#fff" opacity=".9"/>'+
-   P('M7 25 Q24 11 41 25 Q24 27.5 7 25 Z',G(k))+
-   P('M7 25 Q24 39 41 25 Q24 33 7 25 Z',G(k))+
-   S('M31 16.5 L33 13.5 M35 19 L38 17 M27 15 L27.8 12',GOLD[0],1.5)+
-   star(35.5,13,3,'#FFF8E0')+gloss(16,17.5,5,1.8,-16,.35)}}
- {const k='clap';
-  // كفّان يلتقيان: أصابع مستدقّة بمفاصلها، والصدمة شرر فوقهما
-  const finger=(x0,y0,x1,y1,w)=>{const dx=x1-x0,dy=y1-y0,L=Math.hypot(dx,dy),nx=-dy/L*w/2,ny=dx/L*w/2,tx=dx/L*w/2,ty=dy/L*w/2;
-   return `M${(x0+nx).toFixed(1)} ${(y0+ny).toFixed(1)} L${(x1+nx*.8).toFixed(1)} ${(y1+ny*.8).toFixed(1)} Q${(x1+tx).toFixed(1)} ${(y1+ty).toFixed(1)} ${(x1-nx*.8).toFixed(1)} ${(y1-ny*.8).toFixed(1)} L${(x0-nx).toFixed(1)} ${(y0-ny).toFixed(1)} Z`};
-  const palmL='M7 33 Q6 25 11 22 L21 21 Q25 22 24 27 L22 37 Q19 41 12.5 40 Q7 39 7 33 Z';
-  const fL=[finger(12,22,10,12,4.6),finger(15.5,21,15.5,9,4.8),finger(19,21,20.5,10,4.6),finger(22.5,23,25.5,14,4.2)];
-  const mirror=d=>d.replace(/(-?\d+\.?\d*) (-?\d+\.?\d*)/g,(m,x,y)=>(48-parseFloat(x)).toFixed(1)+' '+y);
-  const palmR=mirror(palmL),fR=fL.map(mirror);
-  E[k]={b:['#256B4A','#0A2A1B'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(palmL)+shadow(palmR)+
-   fL.map(d=>P(d,G(k))).join('')+P(palmL,G(k))+fR.map(d=>P(d,G(k))).join('')+P(palmR,G(k))+
-   S('M10 31 Q14 33 20 31 M28 31 Q34 33 38 31',RIM,.7,.5)+
-   S('M24 5 L24 10.5 M18.5 7 L20.5 11.5 M29.5 7 L27.5 11.5 M14 12 L16.5 15 M34 12 L31.5 15',GOLD[0],1.8)+
-   '<circle cx="24" cy="14" r="1.2" fill="#FFF8E0"/>'+gloss(13,27,3,1.4,-25,.3)+gloss(35,27,3,1.4,25,.3)}}
- {const k='think';
-  E[k]={b:['#22557A','#0A1F30'],full:1,a:'<defs>'+rad('er'+k,['#FFF8DC','#F3C24C','#B07A14'])+grad('eg'+k,SIL)+'</defs>'+
-   S('M11 13 L14 15.5 M37 13 L34 15.5 M8 24 L11.5 24 M40 24 L36.5 24 M12 33 L14.5 31 M36 33 L33.5 31',GOLD[0],1.6,.8)+
-   shadow('M15 20.5 A9 9 0 1 1 33 20.5 Q33 26.5 28.5 30 L19.5 30 Q15 26.5 15 20.5 Z')+
-   '<path d="M15 20.5 A9 9 0 1 1 33 20.5 Q33 26.5 28.5 30 L19.5 30 Q15 26.5 15 20.5 Z" fill="'+R(k)+'" stroke="'+RIM+'" stroke-width=".9"/>'+
-   S('M21 26 L22.6 21 L24 25 L25.4 21 L27 26',"#8A4A10",1.2)+
-   P('M19.5 30.5 H28.5 V33.5 H19.5 Z',G(k),SRIM,.7)+P('M20.2 34 H27.8 V36.6 H20.2 Z',G(k),SRIM,.7)+P('M21.5 37.2 H26.5 V39 H21.5 Z',G(k),SRIM,.7)+
-   gloss(20,16,3.2,4.8,-20,.45)}}
- {const k='shock',b='M27.5 7 L14.5 27 L22.8 27 L19.5 41 L34 20.5 L25.6 20.5 Z';
-  E[k]={b:['#3A4B6E','#0E1626'],full:1,a:'<defs>'+grad('eg'+k,['#FFF8D0','#F7C64A','#B8781A'],1)+'</defs>'+
-   '<circle cx="24" cy="24" r="14" fill="#fff" opacity=".07"/>'+
-   S('M10 13 L14.5 17.5 M38 34 L33.5 30.5 M9 31 L13.5 29 M39 15 L34.5 17.5',"#FFFFFF",1.1,.45)+
-   shadow(b)+P(b,G(k))+S('M26.5 10 L17.5 24',"#FFF8E0",1.1,.55)}}
- {const k='thumbs';
-  // إبهام مرفوع: قبضة بأربع لفّات أصابع ومفاصل، وإبهام بظفر، وكفّ فولاذية
-  const fist='M15.5 24 H28.5 Q32.5 24 32.5 28 V35 Q32.5 39 28.5 39 H19.5 Q15.5 39 15.5 35 Z',
-   thumb='M17.5 24.5 V15.5 Q17.5 10.5 21.5 10.5 Q25.5 10.5 25.5 14.5 L25 24.5 Z';
-  const rolls=[26,29.6,33.2,36.4].map(y=>'<rect x="16.5" y="'+(y-1.2)+'" width="15" height="2.6" rx="1.3" fill="'+GOLD[2]+'" opacity=".45"/><rect x="17.5" y="'+(y-1.5)+'" width="13" height="1" rx=".5" fill="#FFF6D8" opacity=".35"/>').join('');
-  E[k]={b:['#28479A','#0C1A46'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,SIL,1)+'</defs>'+shadow(fist)+shadow(thumb)+
-   P('M8.5 25.5 H14.5 V38.5 H8.5 Z','url(#eg2'+k+')',SRIM,.7)+S('M9.5 27.5 H13.5 M9.5 36.5 H13.5',SRIM,.6,.5)+
-   P(fist,G(k))+rolls+P(thumb,G(k))+
-   '<ellipse cx="21.5" cy="13.4" rx="1.9" ry="2.3" fill="#FFF3E0" opacity=".85"/>'+S('M18.5 20 Q21.5 18.6 24.5 20',RIM,.7,.5)+gloss(20,16,1.6,3,0,.3)}}
- {const k='shake';
-  // مصافحة: ذراع ذهبية وذراع فولاذية، كفّان متشابكان بمفاصل ظاهرة
-  const armL='M4 31 L15 22.5 Q19 21 22 24 L25 28 L18 36 Q13 39 7.5 38 Z',armR='M44 31 L33 22.5 Q29 21 26 24 L23 28 L30 36 Q35 39 40.5 38 Z';
-  const clasp='M17.5 26 Q24 21.5 30.5 26 Q32.5 30.5 28.5 33.5 Q24 36 19.5 33.5 Q15.5 30.5 17.5 26 Z';
-  E[k]={b:['#2B6A47','#0B2A1B'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,SIL)+'</defs>'+shadow(armL)+shadow(armR)+
-   P(armR,'url(#eg2'+k+')',SRIM)+P('M40 30 L44 27.5 L46 32 L42.5 35 Z','#1E3A70','#0C1C3A',.6)+
-   P(armL,G(k))+P('M8 30 L4 27.5 L2 32 L5.5 35 Z','#1E3A70','#0C1C3A',.6)+
-   P(clasp,G(k))+S('M19.5 28.5 Q22 27.5 24 29.5 M22 31.5 Q24 30.5 26 32.5 M24.5 34 Q26.5 33 28.5 34.5',RIM,.8,.6)+
-   S('M18.5 30.5 L16 33',RIM,.7,.45)+
-   S('M24 11 L24 16 M18 12.5 L20 17 M30 12.5 L28 17',GOLD[0],1.6,.9)+gloss(12,29,3,1.2,-35,.3)}}
- // ── نادرة ──
- {const k='confident';
-  const lz='M8.5 19 H23 Q23 31.5 16 31.5 Q8.5 31.5 8.5 22.5 Z',rz='M39.5 19 H25 Q25 31.5 32 31.5 Q39.5 31.5 39.5 22.5 Z';
-  E[k]={b:['#5A3612','#1A0E04'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+grad('eg2'+k,['#2C3A5A','#0B1220','#05080F'],1)+'</defs>'+
-   shadow(lz)+shadow(rz)+
-   P(lz,'url(#eg2'+k+')',GOLD[1],1.7)+P(rz,'url(#eg2'+k+')',GOLD[1],1.7)+
-   S('M23 20 Q24 17.6 25 20',GOLD[1],1.7)+S('M8.5 20.5 L5 18.5 M39.5 20.5 L43 18.5',GOLD[1],1.8)+
-   S('M11.5 27 L18.5 21 M28 27 L35 21',"#FFFFFF",1.4,.5)+S('M13.5 29 L15.5 27',"#FFFFFF",1.1,.35)}}
- {const k='angry';
-  // قبضة أمامية بأربع مفاصل بارزة على شرارة حمراء
-  const burst=(()=>{let d='';for(let i=0;i<14;i++){const a=i*Math.PI/7,r=i%2?12.5:21;d+=(i?'L':'M')+(24+Math.cos(a)*r).toFixed(1)+' '+(24+Math.sin(a)*r).toFixed(1)+' '}return d+'Z'})();
-  const palm='M12 26 H36 V34 Q36 38.5 31.5 38.5 H16.5 Q12 38.5 12 34 Z',thumb='M12 27.5 Q7.5 28.5 8 32.5 Q8.5 36.5 12 36 Z';
-  const knuckle=x=>'M'+x+' 26.5 V20.5 Q'+x+' 17.4 '+(x+2.75)+' 17.4 Q'+(x+5.5)+' 17.4 '+(x+5.5)+' 20.5 V26.5 Z';
-  E[k]={b:['#7E2620','#300A08'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+
-   '<path d="'+burst+'" fill="#E24B4A" opacity=".5"/>'+shadow(palm)+P(palm,G(k),'#4A1808')+P(thumb,G(k),'#4A1808')+
-   [12.6,18.4,24.2,30].map(x=>P(knuckle(x),G(k),'#4A1808')).join('')+
-   [12.6,18.4,24.2,30].map(x=>'<ellipse cx="'+(x+2.75)+'" cy="19.6" rx="1.6" ry="1" fill="#FFF3D0" opacity=".45"/>').join('')+
-   S('M14.5 30.5 H33.5 M15.5 34.5 H32.5','#4A1808',.8,.5)+gloss(18,22,1.6,2.2,0,.25)}}
- {const k='tense';
-  const pulse='M7.5 26 H14.5 L17.5 20 L20.5 32.5 L24 14.5 L27 33 L30 24.5 L32.5 26 H35';
-  E[k]={b:['#1B5F5A','#062422'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+
-   S(pulse,'#5DE3CF',5,.22)+S(pulse,'#5DE3CF',2.2)+
-   shadow('M39 33 c-1.7-2.3 -5.4-1.6 -5.4 1.4 c0 2.4 3.1 4.3 5.4 6.1 c2.3-1.8 5.4-3.7 5.4-6.1 c0-3 -3.7-3.7 -5.4-1.4 Z')+
-   P('M39 33 c-1.7-2.3 -5.4-1.6 -5.4 1.4 c0 2.4 3.1 4.3 5.4 6.1 c2.3-1.8 5.4-3.7 5.4-6.1 c0-3 -3.7-3.7 -5.4-1.4 Z',G(k))+
-   P('M13 9.5 C11.5 12.5 11.4 14.4 13 14.9 C14.6 14.4 14.5 12.5 13 9.5 Z','#8FE8FF','#2E7EA8',.5)+P('M18 7.5 C16.8 10 16.7 11.6 18 12 C19.3 11.6 19.2 10 18 7.5 Z','#8FE8FF','#2E7EA8',.5)}}
- {const k='love',h='M24 40 C13.5 31.5 7.5 26.5 7.5 18.5 C7.5 13 11.5 9 16.5 9 C20 9 22.5 11 24 13.8 C25.5 11 28 9 31.5 9 C36.5 9 40.5 13 40.5 18.5 C40.5 26.5 34.5 31.5 24 40 Z';
-  E[k]={b:['#7E2447','#300A1C'],full:1,a:'<defs>'+grad('eg'+k,['#FFB4BE','#D8314C','#5E0A1E'])+'</defs>'+shadow(h)+P(h,G(k),'#3A0810')+
-   S('M24 13.8 L15.5 22 L24 40 M24 13.8 L32.5 22 L24 40 M15.5 22 L32.5 22 M9 18.5 L15.5 22 M39 18.5 L32.5 22',"#FFFFFF",.8,.35)+
-   gloss(16.5,15,3.6,2,-30,.5)}}
- {const k='sleep',c='M34.25 11.71 A16 16 0 1 0 34.25 36.29 A13 13 0 1 1 34.25 11.71 Z';
-  E[k]={b:['#2A2E6E','#0A0C2C'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(c)+P(c,G(k))+
-   star(35,14,2.6)+star(39.5,23,1.8)+star(36.5,32.5,2.2)+gloss(17,15,3,5,25,.3)}}
- {const k='salute';
-  // كفّ مرفوعة للتحية: أصابع مستدقّة بمفاصل وأظفار، وإبهام جانبي، وكمّ كحلي بخطّ ذهبي
-  const palm='M15.5 22.5 H32.5 V32 Q32.5 37.5 27.5 37.5 H20.5 Q15.5 37.5 15.5 32 Z',thumb='M15.5 26 Q9.5 24.5 9 29.5 Q9 33 12.5 33.5 L15.5 32.5 Z';
-  const f=[[16.6,11.5,12.5],[20.8,9,14.5],[25,9.5,14],[29.2,12,12]].map(([x,y,h])=>P('M'+x+' '+(y+h)+' V'+(y+1.6)+' Q'+x+' '+y+' '+(x+1.75)+' '+y+' Q'+(x+3.5)+' '+y+' '+(x+3.5)+' '+(y+1.6)+' V'+(y+h)+' Z',G(k))).join('');
-  const nails=[[16.6,11.5],[20.8,9],[25,9.5],[29.2,12]].map(([x,y])=>'<ellipse cx="'+(x+1.75)+'" cy="'+(y+2.3)+'" rx="1.1" ry="1.4" fill="#FFF3E0" opacity=".8"/>').join('');
-  const creases=[[16.6,11.5,12.5],[20.8,9,14.5],[25,9.5,14],[29.2,12,12]].map(([x,y,h])=>'M'+(x+.5)+' '+(y+h*.42)+' Q'+(x+1.75)+' '+(y+h*.42-.6)+' '+(x+3)+' '+(y+h*.42)+' M'+(x+.5)+' '+(y+h*.72)+' Q'+(x+1.75)+' '+(y+h*.72-.6)+' '+(x+3)+' '+(y+h*.72)).join(' ');
-  E[k]={b:['#1C3A6C','#08142E'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+shadow(palm)+P('M14.5 37 H33.5 V41 H14.5 Z','#1E3A70','#0C1C3A',.7)+S('M14.5 39 H33.5',GOLD[1],1)+f+nails+P(palm,G(k))+P(thumb,G(k))+
-   S(creases,'#3A2405',.7,.45)+S('M18 29 Q24 27 30 29',RIM,.7,.4)+gloss(19,28,2.2,3.5,0,.28)}}
- {const k='watch';
-  E[k]={b:['#1B5438','#072414'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+rad('er'+k,['#A6F2E4','#2FB7A6','#0B4A44'])+'</defs>'+
-   shadow('M6 24 Q24 8 42 24 Q24 40 6 24 Z')+
-   '<path d="M9 24 Q24 12 39 24 Q24 36 9 24 Z" fill="#F6F2E6"/>'+
-   '<circle cx="24" cy="24" r="7.6" fill="'+R(k)+'"/><circle cx="24" cy="24" r="3.7" fill="#0A0E16"/><circle cx="21.8" cy="21.8" r="1.5" fill="#fff" opacity=".9"/>'+
-   S('M6 24 Q24 8 42 24',G(k),3.2)+S('M6 24 Q24 40 42 24',G(k),3.2)+S('M6 24 Q24 8 42 24 M6 24 Q24 40 42 24',RIM,.7,.6)+
-   S('M12 15.5 Q24 6.5 36 15.5',GOLD[1],1.4,.7)+gloss(16,18,4,1.6,-20,.4)}}
- {const k='hourglass';
-  E[k]={b:['#452A80','#160A36'],full:1,a:'<defs>'+grad('eg'+k,GOLD)+'</defs>'+
-   shadow('M13 8 H35 V11.5 H13 Z')+shadow('M13 36.5 H35 V40 H13 Z')+
-   '<path d="M15.5 12 H32.5 L25.5 24 L32.5 36 H15.5 L22.5 24 Z" fill="#DCE8F8" opacity=".5" stroke="'+GOLD[1]+'" stroke-width=".8"/>'+
-   '<path d="M18 13 H30 L24 22.5 Z" fill="#F0A830"/><path d="M17 35 H31 L24 29 Z" fill="#F0A830"/>'+S('M24 22.5 V29.5','#F0A830',1.3)+
-   S('M14.5 12 V36 M33.5 12 V36',G(k),1.8)+
-   P('M13 8 H35 V11.5 H13 Z',G(k))+P('M13 36.5 H35 V40 H13 Z',G(k))+gloss(19,17,1.6,4,18,.45)}}
+ Object.keys(CFG).forEach(k=>{
+  const c=CFG[k];
+  const sharedDefs='<defs><linearGradient id="fgW" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#FFF4C8"/><stop offset=".5" stop-color="#E8B23A"/><stop offset="1" stop-color="#8E5E0E"/></linearGradient>'+
+   '<linearGradient id="fsW" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset=".5" stop-color="#B9C3D3"/><stop offset="1" stop-color="#5A6478"/></linearGradient>'+
+   '<linearGradient id="fsh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2C3A5A"/><stop offset=".6" stop-color="#0B1220"/><stop offset="1" stop-color="#05080F"/></linearGradient></defs>';
+  const tilt=c.tilt?' transform="rotate('+c.tilt+' 24 24)"':'';
+  let a=defs(k)+sharedDefs;
+  // العنق والياقة الدرعية
+  a+=P('M11 41 Q24 33 37 41 L39 48 L9 48 Z','#4A2A10',DK,.6)+P('M12.5 39.2 Q24 33.4 35.5 39.2 L36.6 43.6 Q24 38.8 11.4 43.6 Z','url(#fgW)',DK,.7)+S('M14 41.2 Q24 36.6 34 41.2',GOLD[2],.6,.6)+'<circle cx="24" cy="39.4" r="1.4" fill="#C0392B" stroke="'+DK+'" stroke-width=".5"/>';
+  a+='<g'+tilt+'>';
+  // الرأس
+  a+='<ellipse cx="24" cy="24" rx="14" ry="13.4" fill="#000" opacity=".28" transform="translate(0 1.6)"/>';
+  a+='<ellipse cx="24" cy="23.2" rx="13.8" ry="13.2" fill="url(#fh'+k+')" stroke="'+DK+'" stroke-width=".8"/>';
+  a+=S('M13 30 q3 2.4 6 0 q3 2.4 6 0 q3 2.4 6 0 q3 2.4 6 0',HEAD[2],.7,.35)+S('M14.5 33.5 q3 2.2 6 0 q3 2.2 6 0 q3 2.2 6 0',HEAD[2],.7,.3);
+  // العرف الذهبي
+  if(!c.noCrest){const up=c.crestUp?-3:0;a+=P('M18.5 12 L15 '+(3+up)+' L21.5 10 Z','url(#fgW)',DK,.6)+P('M24 10.5 L24 '+(1.5+up*1.4)+' L27.5 10 Z','url(#fgW)',DK,.6)+P('M29.5 12 L33 '+(3+up)+' L26.5 10 Z','url(#fgW)',DK,.6)+P('M21.5 10.6 L24 9 L26.5 10.6 L24 12.6 Z','#C0392B',DK,.5)}
+  // قناع الوجه الكريمي وخطّا الدمعة الصقريان
+  a+=P('M12.5 19.5 Q18 14.5 24 16.4 Q30 14.5 35.5 19.5 Q34 27 30.5 30 Q24 33.5 17.5 30 Q14 27 12.5 19.5 Z',CREAM,'#C9A06A',.5);
+  a+=S('M15.6 24 Q15 28.6 16.8 31.4',DK,1.5,.85)+S('M32.4 24 Q33 28.6 31.2 31.4',DK,1.5,.85);
+  if(c.flush)a+='<ellipse cx="24" cy="24" rx="12" ry="9" fill="'+c.flush+'"/>';
+  // المنقار ثم العينان والحاجبان
+  a+=beak(k,c.beak);
+  if(!c.hideEyes){a+=eye(k,18.6,20.2,c.eyes[0],c.dir)+eye(k,29.4,20.2,c.eyes[1],c.dir)}
+  a+=brow(18.6,15.4,c.brow[0][0],c.brow[0][1],-1)+brow(29.4,15.4,c.brow[1][0],c.brow[1][1],1);
+  // لمعة الريش
+  a+=gl(17,13.5,4.6,2,-28,.22);
+  a+='</g>';
+  a+=c.props?c.props(k):'';
+  E[k]={b:c.b,full:1,a};
+ });
  return E;
 })();
 const EMO_ART={
@@ -16662,7 +16670,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  const R=Router;
  // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
-  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr',
+  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
@@ -16742,15 +16750,57 @@ function drawLesson(){
    :`<button class="rbtn" style="flex:1" onclick="back()"><span>${ico('check',14)} فهمت — إلى بطاقاتي</span></button>`}
  </div></div>`);
 }
+/** خلفية خزانة البطاقات: قاعة بأقواس ورفوف تتوهّج عليها بطاقات وثريّا وغبار ذهبي */
+function cardsBackdrop(){
+ let cards='',dust='';let h=1234;const rnd=()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;return (h%1000)/1000};
+ const tints=['#7B4FE0','#378ADD','#E8B23A','#B76CF0','#2ECC71'];
+ [[40,178,120],[280,178,120],[40,318,120],[280,318,120],[150,90,100]].forEach(([x0,y,w])=>{for(let x=x0;x<x0+w;x+=24){const c=tints[Math.floor(rnd()*tints.length)],rot=(rnd()-.5)*10;
+  cards+=`<g transform="translate(${x} ${y}) rotate(${rot.toFixed(1)})"><rect x="-9" y="-14" width="18" height="26" rx="2.5" fill="${c}" opacity=".55" stroke="#FFE9A8" stroke-width=".6"/><rect x="-6" y="-11" width="12" height="9" rx="1.5" fill="#fff" opacity=".18"/><ellipse cx="0" cy="14" rx="12" ry="3" fill="${c}" opacity=".25"/></g>`}});
+ for(let i=0;i<70;i++){dust+=`<circle cx="${(rnd()*400).toFixed(0)}" cy="${(rnd()*720).toFixed(0)}" r="${(0.5+rnd()*1.4).toFixed(1)}" fill="${rnd()<.7?'#FFE9A8':'#B76CF0'}" opacity="${(0.15+rnd()*.5).toFixed(2)}"/>`}
+ return `<svg viewBox="0 0 400 720" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <defs><linearGradient id="cbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A0E36"/><stop offset=".45" stop-color="#0C1130"/><stop offset="1" stop-color="#04060F"/></linearGradient>
+  <radialGradient id="cbSpot" cx=".5" cy="0" r=".8"><stop offset="0" stop-color="rgba(232,178,58,.35)"/><stop offset=".5" stop-color="rgba(232,178,58,.08)"/><stop offset="1" stop-color="rgba(232,178,58,0)"/></radialGradient>
+  <linearGradient id="cbGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".5" stop-color="#C9921E"/><stop offset="1" stop-color="#7A5410"/></linearGradient>
+  <pattern id="cbStar" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M14 2 L17 11 L26 14 L17 17 L14 26 L11 17 L2 14 L11 11 Z" fill="none" stroke="rgba(255,214,140,.12)" stroke-width=".8"/></pattern>
+  <filter id="cbBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+  <rect width="400" height="720" fill="url(#cbSky)"/><rect width="400" height="720" fill="url(#cbStar)"/>
+  <rect width="400" height="420" fill="url(#cbSpot)"/>
+  <g fill="#0B0A22" opacity=".9"><path d="M20 400 V150 A70 70 0 0 1 160 150 V400 Z"/><path d="M240 400 V150 A70 70 0 0 1 380 150 V400 Z"/><path d="M130 360 V70 A70 70 0 0 1 270 70 V360 Z"/></g>
+  <g fill="none" stroke="url(#cbGold)" stroke-width="2"><path d="M20 400 V150 A70 70 0 0 1 160 150 V400"/><path d="M240 400 V150 A70 70 0 0 1 380 150 V400"/><path d="M130 360 V70 A70 70 0 0 1 270 70 V360"/></g>
+  <g stroke="#C9921E" stroke-width="2.2" opacity=".8"><path d="M30 196 H150 M30 336 H150 M250 196 H370 M250 336 H370 M140 108 H260"/></g>
+  <g stroke="#7A5410" stroke-width="1" opacity=".8"><path d="M30 199 H150 M30 339 H150 M250 199 H370 M250 339 H370 M140 111 H260"/></g>
+  ${cards}
+  <path d="M200 0 V28" stroke="#C9921E" stroke-width="1.6"/><ellipse cx="200" cy="34" rx="34" ry="6" fill="none" stroke="url(#cbGold)" stroke-width="2.4"/>
+  <g filter="url(#cbBlur)" fill="#FFD27A" opacity=".8"><circle cx="170" cy="28" r="4"/><circle cx="185" cy="24" r="4"/><circle cx="200" cy="22" r="4.5"/><circle cx="215" cy="24" r="4"/><circle cx="230" cy="28" r="4"/></g>
+  <g fill="#FFF3D0"><circle cx="170" cy="28" r="1.6"/><circle cx="185" cy="24" r="1.6"/><circle cx="200" cy="22" r="1.8"/><circle cx="215" cy="24" r="1.6"/><circle cx="230" cy="28" r="1.6"/></g>
+  <ellipse cx="200" cy="700" rx="260" ry="90" fill="rgba(123,79,224,.12)"/>
+  ${dust}
+  <rect width="400" height="720" fill="url(#cbSky)" opacity=".28"/></svg>`;
+}
+/** تشكيلتي داخل تبويب البطاقات: ثماني خانات تُرى وتُعدَّل هنا — بطاقة في التشكيلة تُزال بلمسة، وبطاقة من مجموعتك تُضاف */
+function deckPanel(r){
+ const d=S.cards.decks[S.cards.active],errs=validateDeck(d.cards);
+ const avg=d.cards.length?(d.cards.reduce((a,i)=>a+cardById(i).e,0)/d.cards.length).toFixed(1):'0';
+ return `<div class="dkPanel">
+  <div class="dkHead"><span class="mtl" style="font-size:15px">${ico('target',15)} تشكيلتي</span>
+   <span class="dkMeta">${d.cards.length}/8 · متوسّط الطاقة <bdi>${avg}</bdi></span>
+   <button class="btn g dkEdit" onclick="push('deckScr')">التفاصيل</button></div>
+  <div class="dkSlots">${Array.from({length:8},(_,i)=>{const id=d.cards[i];
+   return id!=null?`<div class="dkSlot">${gcard(id,{lv:S.cards.owned[id]?.lv,cap:cardCap(r),sm:1,tap:`toggleDeck(${id})`})}<span class="dkX">${ico('cross',10)}</span></div>`
+   :`<div class="dkSlot empty">${ico('plus',16)}</div>`}).join('')}</div>
+  <div class="dkNote">${errs.length?`<span style="color:var(--no)">${ico('cross',12)} ${errs[0]}</span>`:`<span style="color:var(--ok)">${ico('check',12)} التشكيلة صالحة</span>`} · المس بطاقة هنا لإزالتها، أو «أضف» تحت أي بطاقة من مجموعتك</div>
+ </div>`;
+}
 function cardsScr(){
  if(!S.cards)S.cards=defaultCards();
  const r=S.ranked||defaultRanked();
+ const dk=S.cards.decks[S.cards.active];
  const own=Object.keys(S.cards.owned).length;
  let list=CARDS.filter(c=>
    (cFilter.r==='all'||c.r===cFilter.r)&&
    (cFilter.e==='all'||c.e===+cFilter.e)&&
    (cFilter.t==='all'||c.t===cFilter.t));
- go(`<div class="scr on">${NAV.length>1?tbar('البطاقات'):`<div class="tbar"><span class="sp"></span><h2>البطاقات</h2><span class="sp"></span></div>`}
+ go(`<div class="scr on"><div class="tabBg">${cardsBackdrop()}</div>${NAV.length>1?tbar('البطاقات'):`<div class="tbar"><span class="sp"></span><h2>البطاقات</h2><span class="sp"></span></div>`}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;gap:8px">
  ${[[`${ico('cards',16)}`,`${own}/40`,`مملوكة`],[`${ico('up',14)}`,cardCap(r),`سقف الرتبة`],
@@ -16758,7 +16808,7 @@ function cardsScr(){
  `<div style="flex:1;text-align:center"><div style="font-size:15px">${i}</div>
   <div class="mtl" style="font-size:14px">${v}</div>
   <div style="font-size:9.5px;color:var(--tx2)">${l}</div></div>`).join('')}</div>
- <button class="rbtn" style="margin-top:11px" onclick="push('deckScr')"><span>${ico('target',16)} تشكيلتي</span></button>
+ ${deckPanel(r)}
  <button class="btn g" style="margin-top:9px" onclick="cardLessonScr()">${ico('cap',13)} درس البطاقات — كيف تُستخدم أثناء اللعب؟</button>
  </div></div>
  <div class="sl">الندرة</div>
@@ -16773,9 +16823,9 @@ function cardsScr(){
   `<div class="fc ${cFilter.t===k?'on':''}" onclick="cFilter.t='${k}';cardsScr()">${n}</div>`).join('')}</div>
  <div class="sl">${list.length} بطاقة</div>
  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
- ${list.map(c=>{const st=S.cards.owned[c.id];
-  return gcard(c.id,{lv:st?.lv,cap:cardCap(r),locked:!st,sm:1,ready:st&&canUpgrade(c.id),
-   tap:`push('cardDetail',${c.id})`})}).join('')}</div>
+ ${list.map(c=>{const st=S.cards.owned[c.id],inDk=dk.cards.includes(c.id);
+  return `<div class="cgWrap${inDk?' in':''}">${gcard(c.id,{lv:st?.lv,cap:cardCap(r),locked:!st,sm:1,ready:st&&canUpgrade(c.id),
+   tap:`push('cardDetail',${c.id})`})}${st?`<span class="cgChip" onclick="event.stopPropagation();toggleDeck(${c.id})">${inDk?ico('check',11)+' في التشكيلة':ico('plus',11)+' أضف'}</span>`:''}</div>`}).join('')}</div>
  <div class="note">البطاقات المقفلة تظهر ويمكن الضغط عليها لمعرفة كيف تُفتح</div></div>`);
 }
 
@@ -19911,7 +19961,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.37';
+const APP_VER='5.38';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23477,7 +23527,7 @@ function gameRankScr(gameId){
   </div>
  </div></div>
 
- <div class="sl">مسار الرتب</div>
+ <div class="sl" style="display:flex;justify-content:space-between;align-items:center">مسار الرتب<span onclick="push('rankGuideScr','${gameId}')" style="font-size:11px;color:var(--info);font-weight:800;cursor:pointer;min-height:36px;display:inline-flex;align-items:center;gap:4px">${ico('shield',12)} الرتب العشر كاملة وشرحها</span></div>
  <div class="cr" style="padding-bottom:6px">${TIERS.map((t,i)=>{
    const here=p.placed&&i===p.tier;
    return `<div style="flex-shrink:0;width:74px;text-align:center;padding:9px 4px;border-radius:13px;
@@ -31000,9 +31050,42 @@ function achWall(p){
  }).join('');
  return {html,earned,total:ACH_FAM.length*3};
 }
-/** دروع الرتب العشرة: صفّان من خمسة، درع كبير واسمه، المحرَز مضيء والأعلى بهالة، والمقفَل باهت بقفل */
+/* ═══ دليل التصنيف: الرتب العشر بدروعها كاملة، وكيف تصعد ═══ */
+const TIER_FLAVOR=['البداية — كل مباراة تعلّمك شيئًا','تعرف اللعبة وتثبت فيها','لاعب ثابت يفوز أكثر مما يخسر','أفضل من أغلب اللاعبين','دقّة وسرعة وقرارات صائبة','من النخبة — الأخطاء غالية هنا','قلّة يصلون إلى هنا','الأوائل في الموسم','أساطير الموسم','القمّة — لا درجات بعدها'];
+function rankGuideScr(g){
+ g=(typeof g==='string'&&gameDef(g))?g:'knowledge';
+ const p=rankOf(g),gm=gameDef(g);
+ const divs=i=>TIERS[i].div===0?'درجة واحدة':'ثلاث درجات: III ثم II ثم I';
+ const left=Math.max(0,5-(p.placementDone||0));
+ go(`<div class="scr on">${tb('دليل التصنيف',gm?gm.ar:'')}
+ <div class="orn"><div class="in">${ornCorners()}
+  <div style="display:flex;align-items:center;gap:12px">
+   <div style="width:96px;height:96px;flex-shrink:0">${tierEmblem(p.placed?p.tier:0,96)}</div>
+   <div style="flex:1;min-width:0">
+    <div style="font-size:11px;color:var(--tx2)">${gm?gm.ar:''} — رتبتك الآن</div>
+    <div class="mtl" style="font-size:19px;margin-top:2px">${p.placed?rankLabel(p):'غير مصنَّف بعد'}</div>
+    <div style="font-size:11.5px;color:var(--tx2);margin-top:4px;line-height:1.6">${p.placed?`${p.rp} من 100 نقطة في هذه الدرجة`:`${left} مباريات تحديد متبقّية`}</div>
+   </div></div>
+ </div></div>
+ <div class="sl">الرتب العشر</div>
+ ${TIERS.map((tt,i)=>`<div class="rgRow${p.placed&&i===p.tier?' here':''}" style="--tc:${tt.c}">
+  <div class="rgAv">${tierEmblem(i,76)}</div>
+  <div class="rgTx"><div class="rgNm">${tt.ar}${p.placed&&i===p.tier?'<i>أنت هنا</i>':''}</div>
+   <div class="rgD">${divs(i)} · 100 نقطة لكل درجة</div>
+   <div class="rgF">${TIER_FLAVOR[i]}</div></div>
+  <div class="rgNo">${i+1}</div></div>`).join('')}
+ <div class="sl">كيف تصعد</div>
+ ${[['target','مباريات التحديد','خمس مباريات مصنّفة أولًا بلا نقاط، ثم تُمنح رتبة ابتدائية بحسب عدد انتصاراتك فيها.'],
+    ['up','النقاط','الفوز يمنح حتى 30 نقطة والخسارة تخصم حتى 28 بحسب قوّة النتيجة وفرق المهارة مع الخصم. مئة نقطة تصعدك درجة.'],
+    ['shield','الحماية','بعد كل ترقية لك مباراة حماية واحدة لا تهبط فيها ولو خسرت.'],
+    ['timer','الموسم','موسم واحد للجميع، ورتبة مستقلّة لكل لعبة. عند بداية الموسم تنزل درجتين فقط، لا إلى البرونزي.'],
+    ['scale','ما يُحتسب','المباريات المصنّفة فقط. اللعب العادي والغرف والكمبيوتر تحفظ إحصاءاتك ولا تمسّ رتبتك.']].map(([ic,h,d])=>
+  `<div class="li"><div class="lr"><span class="rgIc">${ico(ic,20)}</span><div class="lb"><div class="lt">${h}</div><div class="ls" style="line-height:1.6;white-space:normal">${d}</div></div></div></div>`).join('')}
+ </div>`);
+}
+/** دروع الرتب العشرة: صفّان من خمسة، درع كبير واسمه، المحرَز مضيء والأعلى بهالة، والمقفَل باهت بقفل — واللمسة تفتح الدليل */
 function shieldRow(bestIx){
- return `<div class="rkRow">
+ return `<div class="rkRow" onclick="push('rankGuideScr')" style="cursor:pointer">
  ${TIERS.map((t,i)=>`<div class="rkCell${i<=bestIx?' got':''}${i===bestIx?' best':''}" style="--tc:${t.c}">
   <div class="rkAv">${tierEmblem(i,52)}${i<=bestIx?'':`<span class="rkLock">${ico('lock',12)}</span>`}</div>
   <div class="rkNm">${t.ar}</div></div>`).join('')}
@@ -31093,6 +31176,7 @@ function profileView(p,backCall){
  </div>
  <div class="sl">دروع الرتب</div>
  ${shieldRow(p.bestIx)}
+ <div class="note" style="margin-top:-4px">اضغط الدروع لعرض الرتب العشر كاملة وشرح الصعود</div>
 
  ${banner('الإحصائيات')}
  ${statGrid([
@@ -31188,6 +31272,9 @@ splash();
  let last=0;
  let dim=.9;
  const floor=document.createElement('div');floor.id='floor3d';document.body.prepend(floor);
+ const lat=document.createElement('div');lat.id='bgLat';document.body.prepend(lat);
+ const beam=document.createElement('div');beam.id='bgBeam';document.body.prepend(beam);
+ const DUST=[];for(let i=0;i<44;i++)DUST.push({x:Math.random(),y:Math.random(),s:.5+Math.random()*1.3,v:.00035+Math.random()*.0007,ph:Math.random()*6.28,g:Math.random()<.7});
  var _bgPaused=0;
  // إيقاف كامل حين لا تُرى الصفحة أو حين تعمل ساحة لعب — إطارات اللعبة أهمّ من الزينة
  try{document.addEventListener('visibilitychange',function(){_bgPaused=document.hidden?1:0})}catch(e){}
@@ -31205,6 +31292,9 @@ splash();
   floor.classList.toggle('on',quiz);
   dim+=((quiz?.3:.9)-dim)*.06;cv.style.opacity=dim.toFixed(2);
   cx.clearRect(0,0,W,H);
+  for(const d of DUST){d.y-=d.v;if(d.y<-.02)d.y=1.02;const dx=d.x*W+Math.sin(ts/1600+d.ph)*7,dy=d.y*H;
+   cx.globalAlpha=.22+.28*Math.abs(Math.sin(ts/900+d.ph));cx.fillStyle=d.g?'#FFE9A8':'#D9C8FF';cx.beginPath();cx.arc(dx,dy,d.s,0,6.283);cx.fill()}
+  cx.globalAlpha=1;
   const F=430;
   for(const g of GEMS){
    g.a+=g.va;g.y+=g.vy;if(g.y<-620)g.y=620;
@@ -31212,12 +31302,14 @@ splash();
    if(r<1.5)continue;
    const al=Math.min(.5,.6*s);
    cx.save();cx.translate(px,py);cx.rotate(g.a);
-   const gr=cx.createLinearGradient(0,-r,0,r);
-   gr.addColorStop(0,`hsla(${g.hue},80%,68%,${al})`);gr.addColorStop(1,`hsla(${g.hue},85%,42%,${al*.8})`);
-   cx.beginPath();cx.moveTo(0,-r);cx.lineTo(r*.62,0);cx.lineTo(0,r);cx.lineTo(-r*.62,0);cx.closePath();
-   cx.fillStyle=gr;cx.fill();
-   cx.globalAlpha=al*.9;cx.strokeStyle=`hsla(${g.hue},90%,80%,.8)`;cx.lineWidth=1;
-   cx.beginPath();cx.moveTo(0,-r);cx.lineTo(0,r);cx.moveTo(-r*.62,0);cx.lineTo(r*.62,0);cx.stroke();
+   const h=g.hue,w=r*.58;
+   const glow=cx.createRadialGradient(0,0,r*.2,0,0,r*1.7);glow.addColorStop(0,`hsla(${h},90%,70%,${(al*.32).toFixed(3)})`);glow.addColorStop(1,`hsla(${h},90%,70%,0)`);
+   cx.fillStyle=glow;cx.beginPath();cx.arc(0,0,r*1.7,0,6.283);cx.fill();
+   // بلّورة بوجوه: علوي فاتح، جانبان، سفلي داكن — ثم خطّ حافة مضيء
+   const FC=[[[0,-r],[w,-r*.35],[0,-r*.15],[-w,-r*.35]],[[-w,-r*.35],[0,-r*.15],[0,r*.2],[-w*.9,r*.25]],[[w,-r*.35],[0,-r*.15],[0,r*.2],[w*.9,r*.25]],[[-w*.9,r*.25],[0,r*.2],[w*.9,r*.25],[0,r]]],LT=[76,60,52,38];
+   FC.forEach((f,i)=>{cx.beginPath();f.forEach((p,j)=>j?cx.lineTo(p[0],p[1]):cx.moveTo(p[0],p[1]));cx.closePath();cx.fillStyle=`hsla(${h},82%,${LT[i]}%,${al})`;cx.fill()});
+   cx.globalAlpha=al;cx.strokeStyle=`hsla(${h},90%,86%,.9)`;cx.lineWidth=1;
+   cx.beginPath();cx.moveTo(0,-r);cx.lineTo(w,-r*.35);cx.lineTo(w*.9,r*.25);cx.lineTo(0,r);cx.lineTo(-w*.9,r*.25);cx.lineTo(-w,-r*.35);cx.closePath();cx.stroke();
    cx.restore();cx.globalAlpha=1;
   }
  }
