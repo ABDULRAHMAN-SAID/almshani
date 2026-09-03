@@ -52,13 +52,41 @@ def circle_webp(im: Image.Image) -> str:
 VECTOR_KEYS = {'laugh', 'sad', 'wink', 'clap', 'think', 'shock', 'thumbs', 'shake',
                'confident', 'angry', 'tense', 'love', 'sleep', 'salute', 'watch', 'hourglass'}
 
+# الوجوه العادية والنادرة الستّة عشر بترتيب الشبكة 4×4 في art/emotes/faces.png (صفًّا صفًّا)
+FACE_KEYS = ['laugh', 'sad', 'wink', 'clap', 'think', 'shock', 'thumbs', 'shake',
+             'confident', 'angry', 'tense', 'love', 'sleep', 'salute', 'watch', 'hourglass']
+
+def faces_grid(path: str) -> dict:
+    """يقصّ لوحة 4×4 خلايا متساوية إلى ستّ عشرة ميدالية دائرية بترتيب FACE_KEYS."""
+    im = Image.open(path).convert('RGBA')
+    w, h = im.size
+    cw, ch = w / 4, h / 4
+    out = {}
+    for i, k in enumerate(FACE_KEYS):
+        r, c = divmod(i, 4)
+        cell = im.crop((round(c * cw), round(r * ch), round((c + 1) * cw), round((r + 1) * ch)))
+        side = min(cell.size)
+        cx, cy = cell.size[0] // 2, cell.size[1] // 2
+        cell = cell.crop((cx - side // 2, cy - side // 2, cx + side // 2, cy + side // 2))
+        # قصّ داخلي بنسبة 6% كي لا تدخل حواف الخلايا المجاورة
+        inset = round(side * 0.06)
+        cell = cell.crop((inset, inset, side - inset, side - inset))
+        out[k] = circle_webp(cell)
+    return out
+
 def main() -> None:
     entries, total = {}, 0
     use_all = '--all' in sys.argv
+    faces = os.path.join(SRC_DIR, 'faces.png')
+    if os.path.exists(faces):
+        entries.update(faces_grid(faces))
+        print(f'قُصّت 16 ميدالية من faces.png')
     sheet_path = os.path.join(SRC_DIR, 'sheet.png')
     if os.path.exists(sheet_path):
         sheet = Image.open(sheet_path).convert('RGBA')
         for k, cx, cy, r in SHEET_MAP:
+            if k in entries:
+                continue
             if k in VECTOR_KEYS and not use_all:
                 continue
             R = round(r * GROW)

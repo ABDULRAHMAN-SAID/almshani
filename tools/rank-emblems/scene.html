@@ -1,151 +1,105 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>دروع الرتب — مشهد ثلاثي الأبعاد يُخبَز إلى ملصق</title>
+<title>دروع الرتب — عشرة دروع مرسومة بالمتّجهات تُخبَز إلى ملصق</title>
 <style>body{margin:0;background:#111}canvas{display:block}</style>
-<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
 <canvas id="sheet"></canvas>
-<script type="module">
-/* عشر رتب × درع واحد يزداد بهاءً: معدن لامع، مينا مشبّعة، أحجار شفّافة، أجنحة وتاج وأكاليل،
-   ثم هالة ملوّنة وخطّ خارجي داكن حتى يبرز على واجهة داكنة ولو كان صغيرًا.
-   يُرسم كل درع بمحرّك WebGL ثم يُلصق في خلية ملصق واحد يُضمَّن في اللعبة — الهاتف يعرض صورًا لا مشاهد. */
-import * as THREE from 'three';
+<script>
+/* عشر رتب × درع واحد يزداد بهاءً: معدن بحوافه وبريقه، مينا مشبّعة بلمعتها، أحجار مسنّنة،
+   أجنحة ريشية وأكاليل غار وتيجان وسلاسل، ثم هالة بلون الرتبة وخطّ خارجي داكن ليبرز الدرع
+   على واجهة داكنة ولو كان صغيرًا. يُرسم كل درع SVG عالي الدقّة ثم يُصغَّر إلى خلية الملصق. */
 try{
-const CELL=320, RENDER=1024;
+const CELL=320, RENDER=1280;
 const TIERS=[
- {k:'bronze',      metal:0xd8843c, metalR:0.28, enamel:0x8a4418, glow:'#d8843c', g:0.28, rivets:1, boss:1},
- {k:'silver',      metal:0xeaeff5, metalR:0.2,  enamel:0x2f4f78, glow:'#cfe0ff', g:0.3,  rivets:1, ring:1, star:0.75},
- {k:'gold',        metal:0xffc93c, metalR:0.18, enamel:0x9a5f0a, glow:'#ffc93c', g:0.38, laurel:1, star:0.85},
- {k:'platinum',    metal:0xf2f7fb, metalR:0.14, enamel:0x0f8f70, glow:'#7fffe0', g:0.45, wings:1, laurel:1, star:0.85},
- {k:'diamond',     metal:0xe9f6ff, metalR:0.13, enamel:0x1f6fdc, glow:'#7fe0ff', g:0.6,  wings:1, gem:0x8ae8ff, gemR:0.36},
- {k:'master',      metal:0xffc93c, metalR:0.18, enamel:0x7e3cf0, glow:'#c98cff', g:0.65, wings:2, gem:0xd39cff, gemR:0.32, star:1},
- {k:'grandmaster', metal:0xf0f3f8, metalR:0.16, enamel:0x5a20d8, glow:'#a86bff', g:0.7,  wings:2, gem:0xb875ff, gemR:0.32, star:1, laurel:1},
- {k:'champion',    metal:0xffc93c, metalR:0.18, enamel:0xe63838, glow:'#ff7a7a', g:0.75, wings:3, gem:0xff8080, gemR:0.34, star:1, laurel:1, sideGems:1},
- {k:'mythic',      metal:0xffcfc2, metalR:0.16, enamel:0xe2359a, glow:'#ff8ccf', g:0.85, wings:3, gem:0xff9ad4, gemR:0.36, crown:1.15, sun:1, sideGems:1},
- {k:'legend',      metal:0xffd84a, metalR:0.14, enamel:0xd98f14, glow:'#ffe27a', g:0.95, wings:4, gem:0xc4f7ff, gemR:0.4,  crown:1.5,  sun:1, laurel:1, sideGems:1}
+ {k:'bronze',     metal:['#F6C08A','#C97C3C','#5E2E0E'],enamel:['#9A5228','#3E1C0A'],glow:'#D8843C',boss:1,rivets:1,g:.35},
+ {k:'silver',     metal:['#FFFFFF','#C6D1DE','#4E5C70'],enamel:['#3F6FB0','#142B58'],glow:'#CFE0FF',rivets:1,ring:1,star:1,g:.4},
+ {k:'gold',       metal:['#FFF4C8','#F0BE3C','#7E520A'],enamel:['#C0361F','#5A1206'],glow:'#FFC93C',laurel:1,star:1,rivets:1,g:.48},
+ {k:'platinum',   metal:['#FFFFFF','#DCE6EE','#6E7E8C'],enamel:['#1FA38A','#083E33'],glow:'#7FFFE0',wings:1,laurel:1,gem:['#E6FFFA','#7FE9D6','#178C78'],g:.5},
+ {k:'diamond',    metal:['#F8FCFF','#CCE0F2','#5E7C9E'],enamel:['#2C82E6','#0C2F6E'],glow:'#7FD0FF',wings:2,gem:['#FFFFFF','#BEEBFF','#2C88D8'],sparkle:1,g:.55},
+ {k:'master',     metal:['#FFF6D0','#F1C245','#7E5608'],enamel:['#8E4CDD','#331066'],glow:'#C48CFF',wings:2,gem:['#FFFFFF','#E4C6FF','#7A3AD0'],star:1,chain:1,g:.58},
+ {k:'grandmaster',metal:['#FFFFFF','#D2DAE8','#4E586C'],enamel:['#6B2AC9','#230A52'],glow:'#B070FF',wings:3,gem:['#FFFFFF','#E4D0FF','#6A2AC8'],sideGems:1,chain:1,g:.62},
+ {k:'champion',   metal:['#FFF6D0','#F1C245','#7E5608'],enamel:['#CC3328','#520C0A'],glow:'#FF7A6A',wings:3,gem:['#FFFFFF','#FFD6CC','#D8382A'],crown:1,laurel:1,g:.66},
+ {k:'mythic',     metal:['#FFFFFF','#E4D8F4','#665088'],enamel:['#DC3A90','#560C38'],glow:'#FF8AC8',wings:3,gem:['#FFFFFF','#FFD8EC','#DC3A90'],crown:1,rays:1,sideGems:1,sparkle:1,g:.72},
+ {k:'legend',     metal:['#FFFAE0','#FFD24A','#8E6208'],enamel:['#F0B030','#7A4A08'],glow:'#FFD700',wings:3,gem:['#FFFFFF','#FFF4C4','#E8A820'],crown:2,rays:2,sideGems:1,laurel:1,sparkle:1,chain:1,g:.8}
 ];
-
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});
-renderer.setPixelRatio(1);renderer.setSize(RENDER,RENDER);
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;
-renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.setClearColor(0x000000,0);
-document.body.appendChild(renderer.domElement);
-const pmrem=new THREE.PMREMGenerator(renderer);
-/* استوديو عالي التباين: قبّة رمادية ونوافذ ضوء ساطعة — المعدن يلمع والمينا تحتفظ بلونها */
-function studio(){
- const sc=new THREE.Scene();
- sc.add(new THREE.Mesh(new THREE.SphereGeometry(30,24,16),new THREE.MeshBasicMaterial({color:0x3a4050,side:THREE.BackSide})));
- const box=(w,h,col,pos)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({color:col,side:THREE.DoubleSide}));m.position.set(...pos);m.lookAt(0,0,0);sc.add(m)};
- box(10,5,new THREE.Color(16,15,13.5),[-6,9,5]);    // مفتاحي دافئ كبير أعلى اليسار
- box(6,4,new THREE.Color(10,10.5,12),[7,8,3]);      // ثانٍ أعلى اليمين
- box(5,5,new THREE.Color(9,9,9),[0,2,12]);          // أمامي: وجه المعدن يعكسه
- box(6,2,new THREE.Color(4,3.4,2.6),[2,-6,8]);      // دافئ من الأسفل
- box(1.5,10,new THREE.Color(6,8,12),[9,2,-5]);      // شريط بارد خلفي
- return sc;
+/* هندسة الدرع: قلب بحواف مشدودة، يُحجَّم حول المركز للإطار والمينا */
+const SH=(s)=>{const c=[100,102];const P=[[100,24],[164,44],[170,122],[100,178],[30,122],[36,44]];
+ const p=P.map(([x,y])=>[c[0]+(x-c[0])*s,c[1]+(y-c[1])*s]);
+ return `M${p[0][0]} ${p[0][1]} L${p[1][0]} ${p[1][1]} Q${p[2][0]} ${p[2][1]} ${p[3][0]} ${p[3][1]} Q${p[4][0]} ${p[4][1]} ${p[5][0]} ${p[5][1]} Z`};
+const star=(cx,cy,R,r,n)=>{let d='';for(let i=0;i<n*2;i++){const a=-Math.PI/2+i*Math.PI/n,rad=i%2?r:R;d+=(i?'L':'M')+(cx+Math.cos(a)*rad).toFixed(2)+' '+(cy+Math.sin(a)*rad).toFixed(2)+' '}return d+'Z'};
+const feather=(sx,sy,len,rot,flip)=>{const w=len*.34;
+ return `<path d="M0 0 C ${len*.2} ${-w*.9}, ${len*.66} ${-w*1.05}, ${len} ${-w*.5} C ${len*.7} ${-w*.2}, ${len*.42} ${w*.05}, ${len*.2} ${w*.5} Z" transform="translate(${sx} ${sy}) scale(${flip} 1) rotate(${rot})"/>`};
+function gemSvg(cx,cy,r,cols,id){
+ const [hi,mid,lo]=cols;
+ const pts=(k)=>[[cx,cy-r*1.35*k],[cx+r*k,cy-r*.35*k],[cx+r*.62*k,cy+r*1.1*k],[cx-r*.62*k,cy+r*1.1*k],[cx-r*k,cy-r*.35*k]];
+ const o=pts(1),poly=o.map(p=>p.join(' ')).join(' ');
+ return `<polygon points="${poly}" fill="${lo}" stroke="#20102A" stroke-width="1.1" stroke-linejoin="round"/>
+ <polygon points="${o[0].join(' ')} ${o[1].join(' ')} ${cx} ${cy}" fill="${mid}"/><polygon points="${o[0].join(' ')} ${o[4].join(' ')} ${cx} ${cy}" fill="${hi}" opacity=".95"/>
+ <polygon points="${o[1].join(' ')} ${o[2].join(' ')} ${cx} ${cy}" fill="${mid}" opacity=".8"/><polygon points="${o[3].join(' ')} ${o[4].join(' ')} ${cx} ${cy}" fill="${mid}" opacity=".7"/>
+ <polygon points="${o[2].join(' ')} ${o[3].join(' ')} ${cx} ${cy}" fill="${lo}"/>
+ <path d="M${cx-r*.5} ${cy-r*.62} L${cx-r*.1} ${cy-r*1.05} L${cx+r*.12} ${cy-r*.8} L${cx-r*.28} ${cy-r*.42} Z" fill="#fff" opacity=".85"/>`;
 }
-const env=pmrem.fromScene(studio(),0.02).texture;
-
-const scene=new THREE.Scene();scene.environment=env;
-const camera=new THREE.PerspectiveCamera(26,1,0.1,100);
-camera.position.set(0,0.25,8.8);camera.lookAt(0,0.05,0);
-const key=new THREE.DirectionalLight(0xfff1dc,2.6);key.position.set(3,5,5);scene.add(key);
-const rim=new THREE.DirectionalLight(0xa9d8ff,2.2);rim.position.set(-4,3,-3);scene.add(rim);
-const fill=new THREE.DirectionalLight(0xffffff,0.5);fill.position.set(-3,0,5);scene.add(fill);
-scene.add(new THREE.AmbientLight(0xffffff,0.18));
-
-/* ── موادّ ── */
-const metal=(hex,r)=>new THREE.MeshStandardMaterial({color:hex,metalness:1,roughness:r??0.22,envMapIntensity:1.6,emissive:new THREE.Color(hex).multiplyScalar(0.05)});
-const enamel=hex=>new THREE.MeshPhysicalMaterial({color:hex,metalness:0,roughness:0.42,clearcoat:0.7,clearcoatRoughness:0.22,envMapIntensity:0.3});
-const gemMat=hex=>new THREE.MeshPhysicalMaterial({color:hex,metalness:0,roughness:0.03,transmission:0.7,thickness:0.7,ior:2.3,clearcoat:1,
- emissive:new THREE.Color(hex).multiplyScalar(0.35),envMapIntensity:2.0});
-
-/* ── أشكال ── */
-function shieldShape(s){
- const sh=new THREE.Shape();
- sh.moveTo(-1*s,1.0*s);sh.quadraticCurveTo(0,1.2*s,1*s,1.0*s);
- sh.lineTo(1*s,0.05*s);sh.quadraticCurveTo(0.97*s,-0.98*s,0,-1.38*s);
- sh.quadraticCurveTo(-0.97*s,-0.98*s,-1*s,0.05*s);sh.closePath();return sh;
+function crownSvg(cx,cy,s,mid,cols,lvl,id){
+ const pts=lvl>1?[[-30,0],[-30,-14],[-18,-30],[-10,-12],[0,-36],[10,-12],[18,-30],[30,-14],[30,0]]:[[-26,0],[-26,-12],[-14,-26],[0,-10],[14,-26],[26,-12],[26,0]];
+ const d=pts.map((p,i)=>(i?'L':'M')+(cx+p[0]*s)+' '+(cy+p[1]*s)).join(' ')+' Z';
+ const gems=(lvl>1?[[-18,-30],[0,-36],[18,-30]]:[[-14,-26],[14,-26]]).map(([x,y])=>`<circle cx="${cx+x*s}" cy="${cy+y*s}" r="${3.2*s}" fill="${cols[1]}" stroke="#20102A" stroke-width=".8"/><circle cx="${cx+x*s-1*s}" cy="${cy+y*s-1*s}" r="${1.1*s}" fill="#fff"/>`).join('');
+ return `<path d="${d}" fill="url(#m${id})" stroke="#1A1006" stroke-width="1.6" stroke-linejoin="round"/><rect x="${cx-30*s}" y="${cy-4*s}" width="${60*s}" height="${5*s}" fill="url(#mB${id})" stroke="#1A1006" stroke-width="1"/>${gems}`;
 }
-function starShape(R,r,n){const sh=new THREE.Shape();for(let i=0;i<n*2;i++){const a=Math.PI/2+i*Math.PI/n,rad=i%2?r:R;const x=Math.cos(a)*rad,y=Math.sin(a)*rad;i?sh.lineTo(x,y):sh.moveTo(x,y)}sh.closePath();return sh}
-function featherShape(){const sh=new THREE.Shape();sh.moveTo(0,0);sh.bezierCurveTo(0.25,0.75,1.0,1.05,1.7,0.7);sh.bezierCurveTo(1.25,0.45,0.8,0.12,0.32,-0.2);sh.closePath();return sh}
-function crownShape(){const sh=new THREE.Shape();const P=[[-0.6,0],[0.6,0],[0.6,0.2],[0.4,0.62],[0.24,0.24],[0,0.74],[-0.24,0.24],[-0.4,0.62],[-0.6,0.2]];P.forEach((p,i)=>i?sh.lineTo(p[0],p[1]):sh.moveTo(p[0],p[1]));sh.closePath();return sh}
-const extrude=(shape,depth,bevel,seg)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:bevel,bevelSize:bevel*0.9,bevelSegments:seg||5,curveSegments:32});
-
-/* ── بناء درع رتبة ── */
-function buildTier(t){
- const g=new THREE.Group();
- const M=metal(t.metal,t.metalR), E=enamel(t.enamel), G=t.gem?gemMat(t.gem):null;
- const body=new THREE.Mesh(extrude(shieldShape(1),0.46,0.14,8),M);body.position.z=-0.23;g.add(body);
- const frame=shieldShape(0.86);frame.holes.push(shieldShape(0.78));
- const fr=new THREE.Mesh(extrude(frame,0.07,0.025,3),M);fr.position.z=0.32;g.add(fr);
- const panel=new THREE.Mesh(extrude(shieldShape(0.78),0.05,0.03,4),E);panel.position.z=0.31;g.add(panel);
- if(t.ring){const r=shieldShape(0.66);r.holes.push(shieldShape(0.62));const m=new THREE.Mesh(extrude(r,0.02,0.01,2),M);m.position.z=0.38;g.add(m)}
- if(t.rivets){[[0.86,0.86],[-0.86,0.86],[0.9,0.05],[-0.9,0.05]].forEach(([x,y])=>{const s=new THREE.Mesh(new THREE.SphereGeometry(0.08,20,16),M);s.position.set(x,y,0.36);g.add(s)})}
- if(t.laurel){
-  const R=1.42, cy=-0.12, span=Math.PI*0.5;
-  [-1,1].forEach(side=>{
-   const start=side>0?-Math.PI*0.56:Math.PI+Math.PI*0.06;
-   const arc=new THREE.Mesh(new THREE.TorusGeometry(R,0.055,10,40,span),M);arc.rotation.z=start;arc.position.set(0,cy,-0.02);g.add(arc);
-   for(let i=0;i<10;i++){const a=start+span*(i+0.5)/10;
-    const leaf=new THREE.Mesh(new THREE.SphereGeometry(0.12,14,10),M);leaf.scale.set(1,0.48,0.4);
-    leaf.position.set(Math.cos(a)*R,Math.sin(a)*R+cy,0.06);leaf.rotation.z=a+Math.PI/2+side*0.55;g.add(leaf)}
-  });
- }
- if(t.wings){
-  // أجنحة تحضن الكتفين ولا تبتعد — فيبقى الدرع كبيرًا في الخلية
-  const W=metal(t.metal,Math.max(0.16,t.metalR-0.03));W.side=THREE.DoubleSide;
-  [-1,1].forEach(side=>{
-   for(let k=0;k<t.wings+1;k++){
-    const f=new THREE.Mesh(extrude(featherShape(),0.09,0.03,3),W);
-    const s=0.7+k*0.14;f.scale.set(side*s,s,1);
-    f.rotation.z=side*(0.86-k*0.3);
-    f.position.set(side*(0.66+k*0.06),0.42-k*0.21,-0.36-k*0.05);
-    g.add(f);
-   }
-  });
- }
- if(t.star){const st=t.star===1?1:t.star;const s=new THREE.Mesh(extrude(starShape(0.36*st,0.16*st,5),0.07,0.025,3),M);s.position.set(0,G?0.44:0.05,0.38);g.add(s)}
- if(t.boss){const b=new THREE.Mesh(new THREE.SphereGeometry(0.32,28,20),M);b.scale.z=0.55;b.position.set(0,0.05,0.36);g.add(b)}
- if(G){const gem=new THREE.Mesh(new THREE.OctahedronGeometry(t.gemR,0),G);gem.scale.set(1,1.35,0.72);gem.position.set(0,t.star?-0.26:0.02,0.44);g.add(gem);
-  const seat=new THREE.Mesh(new THREE.TorusGeometry(t.gemR*0.78,0.04,10,28),M);seat.position.copy(gem.position);seat.position.z-=0.02;g.add(seat)}
- if(t.sideGems&&G){[[-0.5,0.55],[0.5,0.55]].forEach(([x,y])=>{const s=new THREE.Mesh(new THREE.OctahedronGeometry(0.14,0),G);s.scale.set(1,1.3,0.7);s.position.set(x,y,0.42);g.add(s)})}
- if(t.crown){
-  const cs=t.crown;
-  const c=new THREE.Mesh(extrude(crownShape(),0.22,0.035,4),M);c.scale.set(cs,cs,1);c.position.set(0,1.08,0);g.add(c);
-  [[-0.4,0.62],[0,0.74],[0.4,0.62]].forEach(([x,y])=>{const s=new THREE.Mesh(new THREE.SphereGeometry(0.09*cs,16,12),G||M);s.position.set(x*cs,1.08+y*cs,0.2);g.add(s)});
- }
- if(t.sun){const S=metal(t.metal,0.3);S.emissive=new THREE.Color(t.metal).multiplyScalar(0.9);
-  const sun=new THREE.Mesh(extrude(starShape(1.62,1.24,12),0.04,0.01,2),S);sun.position.set(0,-0.05,-0.66);sun.rotation.z=0.13;g.add(sun)}
- g.rotation.set(0.1,-0.3,0);
- // الجسم يملأ الخلية: ارتفاع الدرع نفسه ثابت عبر الرتب، والزينة تتّسع حوله
- const bb=new THREE.Box3().setFromObject(body);const bs=new THREE.Vector3();bb.getSize(bs);
- let s=2.75/bs.y;g.scale.setScalar(s);
- const gb=new THREE.Box3().setFromObject(g);const gs=new THREE.Vector3();gb.getSize(gs);
- const lim=3.75;if(Math.max(gs.x,gs.y)>lim){s*=lim/Math.max(gs.x,gs.y);g.scale.setScalar(s)}
- const gb2=new THREE.Box3().setFromObject(g);const c=new THREE.Vector3();gb2.getCenter(c);g.position.sub(c);
- return g;
+function buildTier(t,id){
+ const [m0,m1,m2]=t.metal,[e0,e1]=t.enamel;
+ const defs=`<defs>
+  <linearGradient id="m${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${m0}"/><stop offset=".45" stop-color="${m1}"/><stop offset="1" stop-color="${m2}"/></linearGradient>
+  <linearGradient id="mB${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${m0}"/><stop offset=".5" stop-color="${m1}"/><stop offset="1" stop-color="${m2}"/></linearGradient>
+  <linearGradient id="mW${id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${m2}"/><stop offset=".5" stop-color="${m1}"/><stop offset="1" stop-color="${m0}"/></linearGradient>
+  <radialGradient id="e${id}" cx=".42" cy=".28" r=".85"><stop offset="0" stop-color="${e0}"/><stop offset=".7" stop-color="${e1}"/><stop offset="1" stop-color="#0A0610"/></radialGradient>
+  <radialGradient id="boss${id}" cx=".36" cy=".3" r=".8"><stop offset="0" stop-color="${m0}"/><stop offset=".55" stop-color="${m1}"/><stop offset="1" stop-color="${m2}"/></radialGradient>
+  <radialGradient id="g${id}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${t.glow}" stop-opacity="${t.g}"/><stop offset=".6" stop-color="${t.glow}" stop-opacity="${(t.g*.35).toFixed(2)}"/><stop offset="1" stop-color="${t.glow}" stop-opacity="0"/></radialGradient>
+  <filter id="bl${id}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+  <filter id="sh${id}" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="3" stdDeviation="2.4" flood-color="#000" flood-opacity=".55"/></filter>
+ </defs>`;
+ let back='',body='',front='';
+ // هالة الرتبة
+ back+=`<circle cx="100" cy="100" r="96" fill="url(#g${id})"/>`;
+ if(t.rays){const n=t.rays>1?18:14,L=t.rays>1?98:88;let d='';for(let i=0;i<n;i++){const a=i/n*Math.PI*2,a2=a+.06;d+=`M100 100 L${(100+Math.cos(a)*L).toFixed(1)} ${(100+Math.sin(a)*L).toFixed(1)} L${(100+Math.cos(a2)*L).toFixed(1)} ${(100+Math.sin(a2)*L).toFixed(1)} Z `}
+  back+=`<path d="${d}" fill="${t.glow}" opacity=".32"/>`}
+ // أجنحة ريشية خلف الكتفين
+ if(t.wings){const n=2+t.wings;for(const side of [-1,1]){const flip=side;for(let k=n-1;k>=0;k--){const len=54+k*9+t.wings*4,rot=-62+k*17-(t.wings*3);const sx=100+side*(48+k*2),sy=62+k*9;
+   back+=`<g fill="url(#mW${id})" stroke="#150E06" stroke-width="1.3" stroke-linejoin="round" filter="url(#sh${id})">${feather(sx,sy,len,rot,flip)}</g>`;
+   back+=`<g fill="none" stroke="${m0}" stroke-width=".9" opacity=".55"><path d="M0 0 C ${len*.3} ${-len*.2}, ${len*.6} ${-len*.28}, ${len*.92} ${-len*.17}" transform="translate(${sx} ${sy}) scale(${flip} 1) rotate(${rot})"/></g>`}}}
+ // إكليل الغار
+ if(t.laurel){for(const side of [-1,1]){let leaves='';for(let i=0;i<9;i++){const a=(200+i*11.5)*Math.PI/180,R=74,x=100+Math.cos(a)*R*side*-1,y=112+Math.sin(a)*R*-1;const rot=(a*180/Math.PI+90)*-side;
+   leaves+=`<path d="M0 0 Q7 -7 16 0 Q7 7 0 0 Z" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)}) scale(${side} 1)" fill="url(#m${id})" stroke="#1A1006" stroke-width=".9"/><path d="M1 0 L15 0" transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(1)}) scale(${side} 1)" stroke="${m2}" stroke-width=".6" opacity=".8"/>`}
+   back+=`<path d="M${100-side*72} 112 A72 72 0 0 ${side>0?0:1} 100 184" fill="none" stroke="url(#m${id})" stroke-width="3.2" stroke-linecap="round"/>`+leaves}}
+ // سلسلة تحت الدرع
+ if(t.chain){let c='';for(let i=0;i<13;i++){const a=(206+i*10.6)*Math.PI/180,x=100+Math.cos(a)*80*-1,y=104+Math.sin(a)*80*-1;c+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="url(#m${id})" stroke="#1A1006" stroke-width=".7"/>`}back+=c}
+ // جسم الدرع: خطّ داكن، معدن، حافّة مضيئة، ثم لوح المينا وبريقه
+ body+=`<path d="${SH(1)}" fill="url(#m${id})" stroke="#120C04" stroke-width="3" stroke-linejoin="round" filter="url(#sh${id})"/>`;
+ body+=`<path d="${SH(.93)}" fill="none" stroke="${m0}" stroke-width="1.6" opacity=".85"/><path d="${SH(.88)}" fill="none" stroke="${m2}" stroke-width="1.4" opacity=".7"/>`;
+ body+=`<path d="${SH(.8)}" fill="url(#e${id})" stroke="#120C04" stroke-width="1.2"/>`;
+ body+=`<path d="M52 42 L100 36 L100 92 Q70 100 46 82 Z" fill="#fff" opacity=".12"/><path d="${SH(.8)}" fill="none" stroke="#fff" stroke-width=".8" opacity=".25"/>`;
+ if(t.ring)body+=`<path d="${SH(.66)}" fill="none" stroke="url(#m${id})" stroke-width="2.2"/><path d="${SH(.62)}" fill="none" stroke="#120C04" stroke-width=".6" opacity=".6"/>`;
+ if(t.rivets)[[48,46],[152,46],[40,100],[160,100]].forEach(([x,y])=>{body+=`<circle cx="${x}" cy="${y}" r="3.4" fill="url(#boss${id})" stroke="#120C04" stroke-width=".8"/><circle cx="${x-1}" cy="${y-1}" r="1.1" fill="#fff" opacity=".8"/>`});
+ // زخرفة المينا للرتب العليا
+ if(t.wings>=2)body+=`<g fill="none" stroke="${m1}" stroke-width="1.1" opacity=".55"><path d="M72 60 Q100 48 128 60"/><path d="M66 132 Q100 150 134 132"/><path d="M60 92 Q56 108 66 122"/><path d="M140 92 Q144 108 134 122"/></g>`;
+ // الرمز الأوسط
+ const gy=t.star&&t.gem?116:100;
+ if(t.boss)front+=`<circle cx="100" cy="102" r="26" fill="url(#boss${id})" stroke="#120C04" stroke-width="1.4"/><circle cx="100" cy="102" r="20" fill="none" stroke="${m2}" stroke-width="1" opacity=".6"/><ellipse cx="91" cy="92" rx="8" ry="5" fill="#fff" opacity=".45" transform="rotate(-30 91 92)"/>`;
+ if(t.star)front+=`<path d="${star(100,t.gem?72:104,t.gem?20:32,t.gem?8.5:13.5,5)}" fill="url(#m${id})" stroke="#120C04" stroke-width="1.4" stroke-linejoin="round" filter="url(#sh${id})"/><path d="${star(100,t.gem?72:104,t.gem?11:18,t.gem?4.6:7.5,5)}" fill="#fff" opacity=".28"/>`;
+ if(t.gem){front+=`<ellipse cx="100" cy="${gy}" rx="26" ry="32" fill="none" stroke="url(#m${id})" stroke-width="3"/>`+gemSvg(100,gy,20,t.gem,id)}
+ if(t.sideGems)[[64,52],[136,52]].forEach(([x,y])=>{front+=gemSvg(x,y,8,t.gem,id)});
+ if(t.crown)front+=crownSvg(100,26,t.crown>1?1.15:.95,m1,t.gem||t.metal,t.crown,id);
+ if(t.sparkle)[[112,gy-18,5],[88,gy+12,3.4],[100,40,4]].forEach(([x,y,r])=>{front+=`<path d="${star(x,y,r,r*.28,4)}" fill="#fff"/>`});
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="${RENDER}" height="${RENDER}">${defs}
+  <g filter="url(#bl${id})" opacity=".55"><path d="${SH(1.06)}" fill="${t.glow}"/></g>${back}${body}${front}</svg>`;
 }
-
-/* ── معالجة ثنائية الأبعاد: هالة بلون الرتبة وخطّ خارجي داكن ── */
-function tinted(src,color){const c=document.createElement('canvas');c.width=c.height=RENDER;const x=c.getContext('2d');x.drawImage(src,0,0);x.globalCompositeOperation='source-in';x.fillStyle=color;x.fillRect(0,0,RENDER,RENDER);return c}
-function post(src,t){
- const c=document.createElement('canvas');c.width=c.height=RENDER;const x=c.getContext('2d');
- x.save();x.filter='blur(34px)';x.globalAlpha=t.g;x.drawImage(tinted(src,t.glow),0,0);x.restore();
- x.save();x.filter='blur(14px)';x.globalAlpha=t.g*0.5;x.drawImage(tinted(src,t.glow),0,0);x.restore();
- const dark=tinted(src,'#0b0e18');
- for(const [dx,dy] of [[3,0],[-3,0],[0,3],[0,-3],[2,2],[-2,2],[2,-2],[-2,-2]])x.drawImage(dark,dx,dy);
- x.drawImage(src,0,0);
- return c;
-}
-
 const sheet=document.getElementById('sheet');sheet.width=CELL*TIERS.length;sheet.height=CELL;
-const ctx=sheet.getContext('2d');ctx.imageSmoothingQuality='high';
-const groups=[];
-for(let i=0;i<TIERS.length;i++){
- const g=buildTier(TIERS[i]);groups.forEach(x=>scene.remove(x));groups.push(g);scene.add(g);
- renderer.render(scene,camera);renderer.render(scene,camera);
- ctx.drawImage(post(renderer.domElement,TIERS[i]),0,0,RENDER,RENDER,i*CELL,0,CELL,CELL);
-}
-window.__OUT={webp:sheet.toDataURL('image/webp',0.86),png:sheet.toDataURL('image/png'),cells:TIERS.length,cell:CELL,keys:TIERS.map(t=>t.k)};
+const ctx=sheet.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+Promise.all(TIERS.map((t,i)=>new Promise((res,rej)=>{
+ const img=new Image();img.onload=()=>{
+  const mid=document.createElement('canvas');mid.width=mid.height=640;const mx=mid.getContext('2d');mx.imageSmoothingQuality='high';mx.drawImage(img,0,0,640,640);
+  ctx.drawImage(mid,0,0,640,640,i*CELL,0,CELL,CELL);res()};
+ img.onerror=()=>rej(new Error('svg '+t.k));
+ img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(buildTier(t,i));
+}))).then(()=>{window.__OUT={webp:sheet.toDataURL('image/webp',0.9),png:sheet.toDataURL('image/png'),cells:TIERS.length,cell:CELL,keys:TIERS.map(t=>t.k)}})
+ .catch(e=>{window.__ERR=String(e&&e.stack||e)});
 }catch(e){window.__ERR=String(e&&e.stack||e)}
 </script>
