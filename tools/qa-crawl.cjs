@@ -128,6 +128,18 @@ const CAPTURES=[
  ['draw-board',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();drawBoard()")],
  ['draw-vote',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();PT.imgs=[qaImg('#E24B4A'),qaImg('#2ECC71'),qaImg('#378ADD')];PT.idx=PT.n;drawVote()")],
  ['draw-end',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();PT.imgs=[qaImg('#E24B4A'),qaImg('#2ECC71'),qaImg('#378ADD')];PT.votes=[2,1,0];drawEnd()")],
+ // ── ضد الكمبيوتر: مافيا وبرا السالفة والرسم ──
+ ...['mafia','barra','draw'].map(g=>[`soloScr-${g}`,R(`push('gameHub','${g}');push('soloScr','${g}')`)]),
+ ['mb-deal',R("RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مافيا';VB.roles[1]='شعب';mbDeal();mbReveal()")],
+ ['mb-night',R("RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مافيا';VB.roles[1]='شعب';mbNight()")],
+ ['mb-talk',R("RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';VB.roles[1]='محقق';VB.roles[2]='مافيا';VB.know[2]=true;mbTalk()")],
+ ['mb-lynch',R("RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';VB.cast=[{who:0,t:2},{who:1,t:2},{who:3,t:4}];VB.alive=VB.alive.filter(i=>i!==2);mbLynchScr(2)")],
+ ['mb-end',R("RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';VB.log=['الليلة 1: قُتل نورة','اليوم 1: أُعدم ريان — كان مافيا'];mbEnd('city')")],
+ ['bb-round',R("RM.bbN=5;RM.bbCat='أماكن';soloStart('barra','mid');VB.spy=1;bbReveal();bbRound()")],
+ ['bb-vote',R("RM.bbN=5;RM.bbCat='مهن';soloStart('barra','mid');VB.spy=2;bbRound();bbSay(0);bbRound();bbSay(0)")],
+ ['bb-final',R("RM.bbN=5;RM.bbCat='حيوانات';soloStart('barra','mid');VB.spy=1;bbRound();bbSay(0);bbRound();bbSay(0);VB.cast=[{who:0,t:1},{who:1,t:3},{who:2,t:1},{who:3,t:1},{who:4,t:2}];VB.accused=1;bbFinal('caught')")],
+ ['db-round',R("soloStart('draw','mid');VB.t0=performance.now()-6000")],
+ ['db-end',R("soloStart('draw','mid');VB.res=[{w:'بيت',pts:88},{w:'شمس',pts:61},{w:'قطة',pts:0},{w:'سمكة',pts:74},{w:'قلب',pts:40},{w:'ساعة',pts:92}];VB.total=355;VB.i=6;dbEnd()")],
  // ── أوراق وحوارات ──
  ['paySheet',R("tab('shop');paySheet('season_pass')")],
  ['confirmSheet',R("tab('more');confirmSheet('حذف الحساب','سيُمحى كل شيء.','احذف',()=>{})")],

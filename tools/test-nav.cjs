@@ -50,7 +50,7 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
    rewardScr:{list:[],title:'اختبار'},mapScr:NETS[0].id,gameHub:'carrom',gameRankScr:'carrom',soloScr:'carrom',roomScr:'carrom',
    mmScr:{g:'uno',mode:'casual'},clMemberScr:uid,profileView:myProfile()};
   const skip=new Set(['playScr','moreScr','cardsScr','shopScr','home','netsScr','welcomeScr','askTut','skipAsk','clubHome','clSearchScr',
-   'match','intro','mResult','tutorial','room','party','quiz','clTransferScr']);
+   'match','intro','mResult','tutorial','room','party','vsbot','quiz','clTransferScr']);
   const out=[];
   for(const n of Router.names()){
    if(skip.has(n))continue;

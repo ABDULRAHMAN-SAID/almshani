@@ -532,6 +532,28 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .mfRoles{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;text-align:start}
 .mfRole{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid var(--rc);border-radius:10px;padding:6px 9px;font-size:11.5px;min-height:36px}
 .mfRole b{color:var(--rc);margin-inline-start:auto;font-size:11.5px}
+/* ضد الكمبيوتر — رقاقات اللاعبين والحوار والأصوات ولوحة الرسم */
+.vbGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vbP{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:6px 10px;min-height:46px;cursor:pointer;font-size:12.5px;font-weight:800;min-width:0}
+.vbP:active{transform:scale(.985)}
+.vbP.me{border-color:var(--gold)}
+.vbP span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbP i{font-style:normal;color:var(--gold);font-size:10px;margin-inline-start:4px}
+.vbP svg{flex-shrink:0;border-radius:50%}
+.vbSay{display:flex;gap:8px;align-items:flex-start;margin-bottom:7px}
+.vbSay>svg,.vbSay>span{flex-shrink:0;border-radius:50%;margin-top:2px}
+.vbBub{background:var(--card);border:1px solid var(--bd);border-radius:12px 12px 12px 3px;padding:7px 10px;font-size:12px;line-height:1.6;flex:1;min-width:0}
+.vbBub b{color:var(--gold)}
+.vbVotes{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vbVotes>div{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 9px;font-size:11.5px;min-width:0}
+.vbVotes>div span,.vbVotes>div b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbVotes b{color:var(--no)}
+.vbLog{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:8px 11px;font-size:11.5px;line-height:1.8;color:var(--tx2)}
+.dbBar{height:8px;background:var(--elev);border-radius:6px;overflow:hidden;margin-top:10px}
+.dbBar>i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#C9921E,#FFE9A8);border-radius:6px;transition:width .12s linear}
+.dbOpt{margin:0;min-height:44px;font-size:13px}
+.dbOpt.ok{border-color:var(--ok);color:var(--ok);background:rgba(46,204,113,.14)}
+.dbOpt.bad{opacity:.4;pointer-events:none}
 .bwn{background:rgba(232,178,58,.14);border:1px solid var(--gold);border-radius:13px;
  padding:11px 14px;margin-top:14px;font-weight:800;color:var(--gold);font-size:13px;animation:pop .4s ease}
 
@@ -13842,13 +13864,13 @@ var RankCore=(function(){
    scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:0,minP:2,maxP:4,status:'live'},
   {id:'mafia',    ar:'مافيا',       icon:'user',rmKey:'mafia',
    desc:'مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي.',
-   scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:0,pass:1,minP:5,maxP:12,status:'live'},
+   scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:1,pass:1,minP:5,maxP:12,status:'live'},
   {id:'drawing',  ar:'مسابقة الرسم',icon:'palette',rmKey:'draw',
    desc:'كلمة واحدة والكلّ يرسم — صوّتوا لأفضل لوحة.',
-   scoreModel:'placement', ranked:1,casual:1,room:1,bot:0,pass:1,minP:3,maxP:10,status:'live'},
+   scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:10,status:'live'},
   {id:'outsider', ar:'برا السالفة', icon:'bulb',rmKey:'barra',
    desc:'الكلّ يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة.',
-   scoreModel:'roundsAggregate',ranked:1,casual:1,room:1,bot:0,pass:1,minP:3,maxP:8,status:'live'}
+   scoreModel:'roundsAggregate',ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:8,status:'live'}
  ];
  function gameDef(id){for(var i=0;i<GAME_DEFS.length;i++)if(GAME_DEFS[i].id===id)return GAME_DEFS[i];return null}
 
@@ -16596,6 +16618,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  R.register('tutorial',{bar:false,render:()=>tDraw(),     leave:()=>push('skipAsk')});
  R.register('room',    {bar:false,render:()=>roomDraw(),  leave:()=>rmBack()});
  R.register('party',   {bar:false,render:()=>{},          leave:()=>ptExit()});   // لا يُدفع فوقه شيء
+ R.register('vsbot',   {bar:false,render:()=>{},          leave:()=>vbExit()});   // مافيا وبرا السالفة والرسم ضد الكمبيوتر
  R.register('quiz',    {bar:false,render:()=>draw(),      leave:()=>quizExit()});
 })();
 /** أي حقل في الشاشة كُتب فيه شيء */
@@ -19817,7 +19840,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.33';
+const APP_VER='5.34';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -20658,6 +20681,15 @@ function soloScr(g){
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
  <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
+ ${g==='mafia'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
+ <div class="cr">${[5,6,7,8].map(n=>`<div class="fc ${(RM.mbN||6)===n?'on':''}" onclick="RM.mbN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
+ <div class="wb" style="text-align:start">تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.</div>`:''}
+ ${g==='barra'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
+ <div class="cr">${[4,5,6].map(n=>`<div class="fc ${(RM.bbN||5)===n?'on':''}" onclick="RM.bbN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
+ <div class="sl">الفئة</div>
+ <div class="cr">${Object.keys(PARTY_WORDS).map(c=>`<div class="fc ${(RM.bbCat||'أماكن')===c?'on':''}" onclick="RM.bbCat='${c}';soloScr('${g}')">${c}</div>`).join('')}</div>
+ <div class="wb" style="text-align:start">جولتان من التلميحات المكتوبة ثم تصويت. إن كنت برا السالفة فلمّح بغموض واستنتج الكلمة — وإن أُمسك بك فلك تخمين واحد.</div>`:''}
+ ${g==='draw'?`<div class="wb" style="text-align:start">الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.</div>`:''}
  <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div></div>`);
 }
 function soloTransport(n){
@@ -20671,6 +20703,9 @@ function soloTransport(n){
   on:()=>()=>{},onPeers:()=>()=>{},connected:()=>true};
 }
 function soloStart(g,diff){
+ if(g==='mafia')return mbStart(diff);
+ if(g==='barra')return bbStart(diff);
+ if(g==='draw')return dbStart(diff);
  RM.solo=1;RM.diff=diff||'mid';
  const n=g==='carrom'?((RM.caN||2)-1):(RM.bots||1);
  soloTransport(n);
@@ -22161,6 +22196,627 @@ function ptExit(){
  confirmSheet('إنهاء اللعبة','ستتوقف الجولة الحالية ويعود الجميع لقائمة ليلة العائلة.','إنهاء',()=>{
   clearInterval(PT&&PT.tm);if(PT)PT.tm=null;Router.settle('partyScr')});
 }
+/* ═══════════ ضد الكمبيوتر — مافيا وبرا السالفة والرسم: أنت وحدك بين لاعبين آليين ═══════════ */
+const VB_NAMES=['سلطان','نورة','ريان','حكيم','أثير','لين','فهد','دانة','طلال','جود','ليان'];
+let VB=null;
+function vbNames(n){const pool=VB_NAMES.slice().sort(()=>Math.random()-.5);return [S.name||'أنت'].concat(pool.slice(0,n-1))}
+function vbHead(t){return tb(t)}
+function vbExit(){
+ confirmSheet('مغادرة المباراة','ستنتهي هذه الجولة ضد الكمبيوتر ولن تُحتسب.','مغادرة',()=>{
+  if(VB){clearInterval(VB.tm);VB.tm=null;if(VB.raf)cancelAnimationFrame(VB.raf);VB.raf=null}
+  Router.settle('gameHub',(VB&&VB.g)||'mafia')});
+}
+/** جولة ضد الكمبيوتر تُحتسب جولة ليلة عائلة في الأهداف اليومية والمهام */
+function vbDone(){evtParty();saveState()}
+function vbRnd(arr){return arr[Math.floor(Math.random()*arr.length)]}
+/** يقلب بطاقة الدور في مكانها ويخفي زرّ الكشف */
+function vbReveal(){
+ const c=document.getElementById('rcCard');if(c){c.classList.add('up');c.removeAttribute('onclick')}
+ const a=document.getElementById('rcRev');if(a)a.style.display='none';
+}
+/** رقاقة لاعب: وجهه المرسوم واسمه — أنت بإطار ذهبي */
+function vbChip(i,extra){
+ const me=i===0;
+ return `<div class="vbP${me?' me':''}"${extra||''}>${me?avatarArt(34):personArt(VB.names[i],34)}<span>${esc(VB.names[i])}${me?' <i>أنت</i>':''}</span></div>`;
+}
+function vbFace(i,s){return i===0?avatarArt(s||30):personArt(VB.names[i],s||30)}
+
+/* ── مافيا ضد الكمبيوتر: التطبيق يروي، والآليون يقتلون وينقذون ويفحصون ويتّهمون ويصوّتون ── */
+function mbStart(diff){
+ const n=Math.min(8,Math.max(5,RM.mbN||6));
+ Router.enter('vsbot');
+ const roles=[];const nMafia=n>=8?2:1;
+ for(let i=0;i<nMafia;i++)roles.push('مافيا');
+ roles.push('طبيب','محقق');while(roles.length<n)roles.push('شعب');
+ roles.sort(()=>Math.random()-.5);
+ VB={g:'mafia',diff:diff||'mid',n,names:vbNames(n),roles,alive:Array.from({length:n},(_,i)=>i),day:1,
+  know:{},myKnow:{},heat:{},susp:Array(n).fill(0),detOut:null,log:[],shown:false,
+  victim:null,saved:null,botVictim:null,botSave:null,lastKilled:null,cast:[],dead:false,tm:null};
+ mbDeal();
+}
+const mbAlive=i=>VB.alive.includes(i);
+const mbRole=i=>VB.roles[i];
+const mbNm=i=>esc(VB.names[i]);
+const mbOthers=i=>VB.alive.filter(x=>x!==i);
+const mbTeamOf=i=>mbRole(i)==='مافيا'?'mafia':'city';
+function mbDeal(){
+ const r=mbRole(0),mates=VB.alive.filter(i=>i!==0&&mbRole(i)==='مافيا');
+ go(`<div class="scr on">${vbHead('مافيا — ضد الكمبيوتر')}
+ ${mafRoleCard(r,{shown:VB.shown,foot:'أنت بين '+(VB.n-1)+' لاعبين آليين — دورك سرّ',hint:'اضغط لكشف دورك',reveal:'mbReveal()'})}
+ <button class="rbtn" id="rcRev" style="margin-top:4px${VB.shown?';display:none':''}" onclick="mbReveal()"><span>اكشف دوري</span></button>
+ <div id="mbAfter" style="${VB.shown?'':'display:none'}">
+ ${r==='مافيا'&&mates.length?`<div class="wb" style="text-align:start">شريكك في المافيا: <b>${mates.map(mbNm).join('، ')}</b> — لا تصوّتا على بعضكما.</div>`:''}
+ <div class="sl">أهل المدينة</div><div class="vbGrid">${VB.alive.map(i=>vbChip(i)).join('')}</div>
+ <button class="rbtn" style="margin-top:12px" onclick="mbNight()"><span>الليلة 1 — نامت المدينة</span></button></div>
+ </div>`);
+}
+function mbReveal(){VB.shown=true;vbReveal();const a=document.getElementById('mbAfter');if(a)a.style.display=''}
+/** قرارات الآليين ليلًا — بصمت وقبل قرارك */
+function mbBotsNight(){
+ const d=VB.diff,alive=VB.alive;
+ const botMaf=alive.filter(i=>i!==0&&mbRole(i)==='مافيا');
+ VB.botVictim=null;VB.botSave=null;
+ if(botMaf.length){
+  const targets=alive.filter(i=>mbRole(i)!=='مافيا');
+  let pick=null;
+  if(d!=='easy'&&targets.length){
+   if(VB.detOut!=null&&targets.includes(VB.detOut))pick=VB.detOut;                 // المحقق المعلن أخطر واحد
+   else if(d==='hard'){const hot=targets.map(i=>[i,VB.heat[i]||0]).sort((a,b)=>b[1]-a[1]);if(hot[0][1]>0)pick=hot[0][0]}
+  }
+  if(pick==null&&targets.length)pick=vbRnd(targets);
+  VB.botVictim=pick;
+ }
+ const doc=alive.find(i=>i!==0&&mbRole(i)==='طبيب');
+ if(doc!=null){
+  if(d==='easy')VB.botSave=vbRnd(alive);
+  else if(VB.detOut!=null&&VB.detOut!==doc&&mbAlive(VB.detOut)&&Math.random()<.7)VB.botSave=VB.detOut;
+  else VB.botSave=Math.random()<.35?doc:vbRnd(alive.filter(i=>i!==doc));
+ }
+ const det=alive.find(i=>i!==0&&mbRole(i)==='محقق');
+ if(det!=null){
+  const unk=alive.filter(i=>i!==det&&VB.know[i]==null);
+  if(unk.length){
+   const t=d==='hard'&&unk.some(i=>VB.susp[i]>0)?unk.slice().sort((a,b)=>VB.susp[b]-VB.susp[a])[0]:vbRnd(unk);
+   VB.know[t]=mbRole(t)==='مافيا';
+  }
+ }
+}
+function mbNight(){
+ VB.victim=null;VB.saved=null;
+ mbBotsNight();
+ if(!mbAlive(0)){mbResolveNight();return}
+ const me=mbRole(0);
+ if(me==='مافيا')mbPickScr('من تغتال الليلة؟','اختر ضحية — الطبيب قد ينقذها',VB.alive.filter(i=>i!==0&&mbRole(i)!=='مافيا'),'mbKill');
+ else if(me==='طبيب')mbPickScr('من تنقذ الليلة؟','يمكنك إنقاذ نفسك',VB.alive,'mbSave');
+ else if(me==='محقق')mbPickScr('من تفحص الليلة؟','ستعرف إن كان مافيا أو بريئًا',VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null),'mbCheck');
+ else mbSleep();
+}
+function mbPickScr(t,d,list,cb){
+ go(`<div class="scr on">${vbHead('مافيا — الليلة '+VB.day)}
+ ${mafDisc(mbRole(0))}
+ <div class="mtl" style="text-align:center;font-size:16px;margin-top:8px">${t}</div>
+ <div style="text-align:center;font-size:11.5px;color:var(--tx2);margin:4px 0 12px">${d}</div>
+ <div class="vbGrid">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>
+ ${list.length?'':`<button class="rbtn" style="margin-top:12px" onclick="mbResolveNight()"><span>لا أحد — أكمل الليل</span></button>`}
+ </div>`);
+}
+function mbKill(i){VB.victim=i;mbResolveNight()}
+function mbSave(i){VB.saved=i;mbResolveNight()}
+function mbCheck(i){
+ VB.myKnow[i]=mbRole(i)==='مافيا';
+ go(`<div class="scr on">${vbHead('مافيا — الليلة '+VB.day)}
+ <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
+ ${mafDisc(VB.myKnow[i]?'مافيا':'شعب')}
+ <div class="mtl" style="font-size:17px;margin-top:9px">${mbNm(i)}: ${VB.myKnow[i]?'مافيا!':'بريء'}</div>
+ <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">${VB.myKnow[i]?'اتّهمه في النقاش يصدّقك أهل المدينة أكثر':'استبعده من شكوكك'}</div>
+ <button class="rbtn" style="margin-top:14px" onclick="mbResolveNight()"><span>أيقظوا المدينة</span></button>
+ </div></div></div></div>`);
+}
+function mbSleep(){
+ go(`<div class="scr on">${vbHead('مافيا — الليلة '+VB.day)}
+ <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
+ ${mafDisc('شعب')}
+ <div class="mtl" style="font-size:17px;margin-top:9px">نامت المدينة</div>
+ <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">المافيا تتحرّك في الظلام… والطبيب والمحقق يعملان</div>
+ <button class="rbtn" style="margin-top:14px" onclick="mbResolveNight()"><span>الصباح</span></button>
+ </div></div></div></div>`);
+}
+function mbResolveNight(){
+ const victim=mbRole(0)==='مافيا'&&mbAlive(0)&&VB.victim!=null?VB.victim:VB.botVictim;
+ const saved=mbRole(0)==='طبيب'&&mbAlive(0)?VB.saved:VB.botSave;
+ const killed=victim!=null&&victim!==saved?victim:null;
+ if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
+ VB.lastKilled=killed;
+ VB.log.push(killed!=null?`الليلة ${VB.day}: قُتل ${VB.names[killed]}`:`الليلة ${VB.day}: نجا الجميع — الطبيب أنقذ الضحية`);
+ if(mbWin())return;
+ if(killed===0){VB.dead=true;mbDeadScr('قُتلت ليلًا');return}
+ mbMorning();
+}
+function mbMorning(){
+ const k=VB.lastKilled;
+ go(`<div class="scr on">${vbHead('مافيا — الصباح '+VB.day)}
+ <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
+ <div class="mfDisc" style="--rc:${k!=null?'#E24B4A':'#2ECC71'};--rcs:${k!=null?'rgba(226,75,74,.3)':'rgba(46,204,113,.3)'}">${k!=null?ico('orb',46):ico('heart',46)}</div>
+ <div class="mtl" style="font-size:17px;margin-top:9px">${k!=null?`قُتل ${mbNm(k)} ليلًا`:'نجا الجميع — الطبيب أنقذ الضحية!'}</div>
+ <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">الأحياء: ${VB.alive.length} — ناقشوا ثم صوّتوا</div>
+ <button class="rbtn" style="margin-top:14px" onclick="mbTalk()"><span>إلى النقاش</span></button>
+ </div></div></div></div>`);
+}
+/** ما يقوله آليّ في النقاش، ومن يتّهم وبأي وزن */
+function mbBotSay(i){
+ const d=VB.diff,r=mbRole(i),others=mbOthers(i);
+ const top=list=>{const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null};
+ if(r==='محقق'){
+  const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mbAlive(x));
+  if(known!=null){
+   if(d==='easy')return {t:known,w:1,s:`أشك في ${mbNm(known)}… شيء فيه غريب`};
+   VB.detOut=i;return {t:known,w:3,s:`أنا المحقق — فحصتُ ${mbNm(known)} ليلًا وهو مافيا!`};
+  }
+  const inn=Object.keys(VB.know).map(Number).filter(x=>!VB.know[x]&&mbAlive(x));
+  if(inn.length&&d==='hard')return {t:null,w:0,s:`${mbNm(inn[0])} بريء — أنا متأكّد`};
+ }
+ if(r==='مافيا'){
+  const pool=others.filter(x=>mbRole(x)!=='مافيا');
+  if(!pool.length)return {t:null,w:0,s:'…'};
+  const tp=top(pool);
+  const t=VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy'?VB.detOut:(tp!=null?tp:vbRnd(pool));
+  const lines=VB.detOut===t?[`${mbNm(t)} يدّعي أنه محقق ليضلّلنا — هو المافيا`,`لا تصدّقوا ${mbNm(t)}… ادّعاؤه مريب`]
+   :[`${mbNm(t)} صامت أكثر من اللازم`,`أشك في ${mbNm(t)} — تصرّفاته غريبة منذ البداية`,`صوتي على ${mbNm(t)}`];
+  return {t,w:1,s:vbRnd(lines)};
+ }
+ const tp=top(others);
+ const t=tp!=null?tp:(Math.random()<.5?vbRnd(others):null);
+ if(t==null)return {t:null,w:0,s:vbRnd(['لا دليل عندي بعد… أستمع','ننتظر من يتكلّم أولًا','من كان قريبًا من الضحية؟'])};
+ return {t,w:1,s:vbRnd([`أوافق — ${mbNm(t)} مريب`,`صوتي على ${mbNm(t)} حتى الآن`,`${mbNm(t)} لم يُجب على سؤال أحد`])};
+}
+function mbApplySay(i,o){
+ if(o.t==null)return;
+ VB.susp[o.t]+=o.w;
+ if(mbRole(o.t)==='مافيا')VB.heat[i]=(VB.heat[i]||0)+1;   // من يتّهم المافيا يصير هدفها
+}
+function mbTalk(){
+ const talk=[];
+ VB.alive.filter(i=>i!==0).forEach(i=>{const o=mbBotSay(i);mbApplySay(i,o);talk.push({i,s:o.s})});
+ go(`<div class="scr on">${vbHead('مافيا — النقاش '+VB.day)}
+ ${talk.map(x=>`<div class="vbSay">${vbFace(x.i)}<div class="vbBub"><b>${mbNm(x.i)}:</b> ${x.s}</div></div>`).join('')}
+ <div class="sl">دورك — مَن تتّهم؟</div>
+ <div class="vbGrid">${mbOthers(0).map(i=>vbChip(i,` onclick="mbAccuse(${i})"`)).join('')}</div>
+ <button class="btn g" style="margin-top:9px" onclick="mbAccuse(null)">أستمع فقط</button>
+ </div>`);
+}
+function mbAccuse(i){
+ if(i!=null)mbApplySay(0,{t:i,w:VB.myKnow[i]===true?2:1});
+ mbVote();
+}
+function mbVote(){
+ go(`<div class="scr on">${vbHead('مافيا — التصويت '+VB.day)}
+ <div class="sl" style="text-align:center">على من تصوّت للإعدام؟</div>
+ <div class="vbGrid">${mbOthers(0).map(i=>vbChip(i,` onclick="mbTally(${i})"`)).join('')}</div>
+ <button class="btn g" style="margin-top:9px;color:var(--tx2)" onclick="mbTally(null)">أمتنع</button>
+ </div>`);
+}
+function mbBotVote(i){
+ const d=VB.diff,r=mbRole(i),others=mbOthers(i);
+ const bySusp=list=>{const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null};
+ if(r==='مافيا'){
+  const pool=others.filter(x=>mbRole(x)!=='مافيا');if(!pool.length)return null;
+  if(VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy')return VB.detOut;
+  const t=bySusp(pool);return t!=null?t:vbRnd(pool);
+ }
+ if(r==='محقق'){const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mbAlive(x));if(known!=null)return known}
+ if(d==='easy'&&Math.random()<.6)return vbRnd(others);
+ const t=bySusp(others);
+ if(t!=null)return t;
+ return d==='hard'?null:vbRnd(others);
+}
+function mbCount(votes){let best=null,bn=0,tie=false;Object.entries(votes).forEach(([k,v])=>{if(v>bn){bn=v;best=+k;tie=false}else if(v===bn)tie=true});return tie?null:best}
+function mbTally(my){
+ const votes={},cast=[];
+ const add=(who,t)=>{if(t==null)return;votes[t]=(votes[t]||0)+1;cast.push({who,t})};
+ add(0,my);
+ VB.alive.filter(i=>i!==0).forEach(i=>add(i,mbBotVote(i)));
+ VB.cast=cast;
+ const who=mbCount(votes);
+ if(who==null){VB.log.push(`اليوم ${VB.day}: لم تتفق الأغلبية — لا إعدام`);mbLynchScr(null);return}
+ VB.alive=VB.alive.filter(i=>i!==who);
+ VB.log.push(`اليوم ${VB.day}: أُعدم ${VB.names[who]} — كان ${mbRole(who)}`);
+ mbLynchScr(who);
+}
+function mbLynchScr(who){
+ if(who!=null&&mbWin())return;
+ if(who===0){VB.dead=true;mbDeadScr('أُعدمت بتصويت المدينة');return}
+ VB.day++;
+ go(`<div class="scr on">${vbHead('مافيا — اليوم')}
+ <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
+ ${who!=null?mafDisc(mbRole(who)):`<div class="mfDisc">${ico('scale',46)}</div>`}
+ <div class="mtl" style="font-size:17px;margin-top:9px">${who!=null?`أُعدم ${mbNm(who)}`:'لم يُعدم أحد اليوم'}</div>
+ <div style="font-size:12.5px;color:var(--tx2);margin-top:6px">${who!=null?`كان: <b>${mbRole(who)}</b>`:'لم تتفق الأغلبية على متهم'}</div>
+ </div></div></div>
+ <div class="sl">الأصوات</div>
+ <div class="vbVotes">${VB.cast.map(c=>`<div><span>${mbNm(c.who)}</span><b>${mbNm(c.t)}</b></div>`).join('')||'<div class="note">لم يصوّت أحد</div>'}</div>
+ <button class="rbtn" style="margin-top:12px" onclick="mbNight()"><span>الليلة ${VB.day} — نامت المدينة</span></button>
+ </div>`);
+}
+function mbWin(){
+ const m=VB.alive.filter(i=>mbRole(i)==='مافيا').length,o=VB.alive.length-m;
+ let win=null;if(m===0)win='city';else if(m>=o)win='mafia';
+ if(!win)return false;
+ mbEnd(win);return true;
+}
+function mbDeadScr(why){
+ go(`<div class="scr on">${vbHead('مافيا')}
+ <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0">
+ <div class="mfDisc" style="--rc:#6C7789;--rcs:rgba(108,119,137,.3)">${ico('broken',46)}</div>
+ <div class="mtl" style="font-size:17px;margin-top:9px">${why}</div>
+ <div style="font-size:11.5px;color:var(--tx2);margin-top:6px">خرجت من اللعبة — الكمبيوتر يكمل المدينة وستعرف النهاية</div>
+ <button class="rbtn" style="margin-top:14px" onclick="mbAuto()"><span>تابع ما جرى</span></button>
+ </div></div></div></div>`);
+}
+/** بعد خروجك: الآليون يكملون الليالي والأيام حتى تُحسم المدينة */
+function mbAuto(){
+ let guard=0;
+ while(guard++<30){
+  mbBotsNight();
+  const victim=VB.botVictim,saved=VB.botSave;
+  const killed=victim!=null&&victim!==saved?victim:null;
+  if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
+  VB.log.push(killed!=null?`الليلة ${VB.day}: قُتل ${VB.names[killed]}`:`الليلة ${VB.day}: نجا الجميع`);
+  if(mbWin())return;
+  VB.alive.forEach(i=>mbApplySay(i,mbBotSay(i)));
+  const votes={};VB.alive.forEach(i=>{const t=mbBotVote(i);if(t!=null)votes[t]=(votes[t]||0)+1});
+  const who=mbCount(votes);
+  if(who!=null){VB.alive=VB.alive.filter(i=>i!==who);VB.log.push(`اليوم ${VB.day}: أُعدم ${VB.names[who]} — كان ${mbRole(who)}`)}
+  else VB.log.push(`اليوم ${VB.day}: لا إعدام`);
+  if(mbWin())return;
+  VB.day++;
+ }
+ mbEnd('city');
+}
+function mbEnd(win){
+ const mine=mbTeamOf(0)===win;
+ vbDone();if(mine&&window.FX)FX.win();
+ go(`<div class="scr on">${vbHead('النهاية')}
+ ${resMedal(mine?'win':'lose',win==='mafia'?'swords':'trophy')}
+ <div class="mtl" style="text-align:center;font-size:19px;margin-top:6px">${win==='city'?'فاز الشعب! المدينة نظيفة':'فازت المافيا! سيطرت على المدينة'}</div>
+ <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-top:4px">${mine?'فريقك انتصر':'فريقك خسر'} — كنت <b>${mbRole(0)}</b></div>
+ <div class="sl">الأدوار كاملة</div>
+ ${mafRoleList(VB.roles.map((r,i)=>({n:mbNm(i)+(i===0?' (أنت)':''),r})))}
+ <div class="sl">ما جرى</div>
+ <div class="vbLog">${VB.log.map(l=>`<div>${esc(l)}</div>`).join('')}</div>
+ <button class="rbtn" style="margin-top:14px" onclick="mbStart('${VB.diff}')"><span>جولة أخرى</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','mafia')">رجوع</button>
+ </div>`);
+}
+
+/* ── برا السالفة ضد الكمبيوتر: تلميحات مكتوبة بدل الكلام، وتصويت، وتخمين الجاسوس ── */
+const BARRA_CLUES={
+ 'مطار':['أسافر منه إلى بلد آخر','فيه بوابات ونداءات كثيرة','تنتظر فيه طويلًا قبل الموعد','ترى فيه حقائب تدور'],
+ 'مستشفى':['أذهب إليه حين أمرض','فيه أُناس بلباس أبيض','تسمع فيه صفّارة الطوارئ','يفتح ليلًا ونهارًا'],
+ 'مدرسة':['كنت أذهب إليه كل صباح','فيه جرس وطابور','فيه سبّورة وطباشير','تصادق فيه من هم في عمرك'],
+ 'ملعب كرة':['يمتلئ بالهتاف','فيه عشب أخضر وخطوط بيضاء','له مدرّجات كبيرة','تُقام فيه مباريات'],
+ 'مسجد':['يُرفع فيه الأذان','تخلع حذاءك عند بابه','يمتلئ يوم الجمعة','فيه مئذنة'],
+ 'سوق شعبي':['تساوم فيه على السعر','رائحة البهارات في كل مكان','دكاكين متلاصقة وقديمة','تجد فيه كل شيء تقليدي'],
+ 'مطعم':['أطلب فيه ما أشتهي','فيه نادل وقائمة','تدفع بعد أن تشبع','بعضه يوصّل إلى البيت'],
+ 'شاطئ':['رمل وموج','آخذ معي مظلّة وكرسيًا','يزدحم في الصيف','تسمع فيه صوت النوارس'],
+ 'صيدلية':['أذهب إليه بورقة من الطبيب','رفوف مليئة بالعلب','فيه من يلبس معطفًا أبيض','بعضه يفتح 24 ساعة'],
+ 'مكتبة':['مكان هادئ جدًّا','رفوف عالية مرتّبة','تستعير منه شيئًا وتعيده','فيه صوت تقليب الورق'],
+ 'محطة بنزين':['أقف عندها بالسيارة','رائحته قوية مميّزة','فيه بقالة صغيرة غالبًا','تدفع بحسب الخزّان'],
+ 'فندق':['أنام فيه حين أسافر','فيه استقبال ومصعد','تأخذ بطاقة لباب الغرفة','بعضه له نجوم'],
+ 'سينما':['مكان مظلم فيه شاشة كبيرة','أشتري فيه فشارًا','تجلس وتصمت ساعتين','تذاكره بأرقام مقاعد'],
+ 'حديقة حيوانات':['ترى فيه أقفاصًا كبيرة','تسمع فيه أصواتًا غريبة','يحبه الأطفال كثيرًا','ممنوع الإطعام فيه'],
+ 'مخبز':['أذهب إليه في الصباح الباكر','رائحته تفتح النفس','فيه فرن حار','أخرج منه بكيس دافئ'],
+ 'صالة أفراح':['تلبس فيه أفخم ثيابك','فيه أضواء وموسيقى','تتناول فيه العشاء متأخرًا','يُحجز قبل أشهر'],
+ 'كبسة':['طبق الجمعة عند أكثر البيوت','رزّ وبهارات ولحم','تُقدَّم في صحن كبير للجميع','لونها من الطماطم والبهار'],
+ 'مندي':['يُطبخ تحت الأرض','رزّه أبيض ولحمه طريّ','مشهور في الجنوب واليمن','يُحضَّر في حفرة ودخان'],
+ 'برياني':['أصله من الهند','ألوانه صفراء وبرتقالية','فيه بهارات قوية','رزّ طويل وطبقات'],
+ 'شاورما':['تدور على سيخ','تُلفّ في خبز','تُباع في عربات ومطاعم صغيرة','تُؤكل باليد'],
+ 'فلافل':['أقراص مقلية خضراء من الداخل','تُوضع في ساندويتش','فطور رخيص ولذيذ','من الحمّص أو الفول'],
+ 'مضغوط':['رزّ ولحم يُطبخ بالضغط','أخو المندي','لونه بنّي مميّز','يُطهى في قدر مغلق'],
+ 'جريش':['قمح مطحون خشن','طبق شتوي دافئ','يُقدَّم بالتقلية فوقه','طبقه أبيض كالعصيدة'],
+ 'قرصان':['رقاق مغموس بالمرق','من أكلات نجد','خضار ولحم فوق الخبز','يُطبخ في قدر عميق'],
+ 'مطازيز':['عجين مقطّع في مرق','أكلة شتوية نجدية','قطع دائرية صغيرة','فيه كوسا وجزر'],
+ 'سليق':['رزّ بالحليب','أبيض تمامًا','مشهور في الطائف والحجاز','يُقدَّم مع الدجاج'],
+ 'معصوب':['موز وخبز وعسل','حلو ودسم','يُقدَّم في المطاعم الشعبية صباحًا','يُهرس باليد'],
+ 'مرقوق':['عجين رقيق جدًّا في المرق','يُرقّ بالشوبك','من أكلات القصيم','فيه لحم وخضار'],
+ 'هريس':['قمح ولحم يُطبخ ساعات','يُهرس حتى يصير عجينة','مشهور في رمضان','قوامه ناعم ولزج'],
+ 'بليلة':['حمّص مسلوق','يُباع في العربات','يُؤكل بالملعقة ساخنًا','فيه كمّون وليمون'],
+ 'طبيب':['يلبس معطفًا أبيض','يكتب وصفة بخط لا يُقرأ','تراه حين تمرض','يضع سماعة على صدرك'],
+ 'معلم':['يقف أمام سبّورة','يصحّح الواجبات ليلًا','يرفع صوته أحيانًا','له عطلة صيف طويلة'],
+ 'مهندس':['يرسم مخططات','يلبس خوذة أحيانًا','يحسب ويقيس','يبني ويصمّم'],
+ 'طيار':['يجلس في المقدّمة','يرى الغيوم من فوق','له زيّ أنيق وقبّعة','يسافر كل يوم'],
+ 'شرطي':['يلبس زيًّا رسميًّا','يوقف السيارات','يحمل صفّارة أحيانًا','تراه عند الحوادث'],
+ 'طباخ':['يلبس قبّعة بيضاء عالية','يمسك ملعقة كبيرة','يعمل قرب النار','يتذوّق قبل أن يقدّم'],
+ 'نجار':['يعمل بالخشب','عنده منشار ومسامير','يصنع الأبواب والطاولات','رائحة نشارته مميّزة'],
+ 'كهربائي':['يعمل بالأسلاك','يحمل مفكًّا','تناديه حين تنطفئ الأنوار','يحذر من الماء'],
+ 'مزارع':['يعمل مع الفجر','يداه في التراب','ينتظر المطر','يحصد ما زرع'],
+ 'صياد':['يحمل شبكة','ينتظر بصبر','يخرج بقارب','يعود بما لذّ وطاب'],
+ 'مصور':['يقول: ابتسم','يحمل عدسة كبيرة','يبحث عن الضوء','يحضر الأفراح'],
+ 'محامي':['يدافع بالكلام','يقرأ القوانين','تراه في المحكمة','يحمل ملفّات كثيرة'],
+ 'صيدلي':['يقرأ وصفة الطبيب','يعرف الأدوية بأسمائها','يقف خلف طاولة ورفوف','يحذّرك من جرعة زائدة'],
+ 'ممرض':['يعطيك الإبرة','يسهر مع المرضى','يلبس زيًّا أبيض أو أزرق','يقيس ضغطك وحرارتك'],
+ 'حلاق':['يمسك مقصًّا','تجلس أمامه قبالة مرآة','يحدّثك كثيرًا','تزوره كل شهر'],
+ 'أسد':['ملك الغابة','له لبدة كبيرة','زئيره يُسمع من بعيد','يصطاد في مجموعات'],
+ 'جمل':['سفينة الصحراء','يصبر على العطش','له سنام','يُركب في الرحلات'],
+ 'صقر':['عيناه حادّتان','يحبه العرب ويربّونه','يصطاد من الجو','له مخالب قوية'],
+ 'غزال':['رشيق وسريع','عيونه مشهورة في الشعر','يعيش في البراري','يهرب بقفزات'],
+ 'ذئب':['يعوي في الليل','يعيش في قطيع','عدو الغنم','ماكر وحذر'],
+ 'قط':['يموء','يحب اللعب بالخيط','ينام كثيرًا','في كثير من البيوت'],
+ 'حصان':['يصهل','يُركب في السباقات','له حوافر','رمز الأصالة'],
+ 'دلفين':['ذكي ويحب البشر','يقفز فوق الماء','يصدر أصواتًا للتواصل','يعيش في البحر'],
+ 'نمر':['مخطط برتقالي وأسود','يسبح جيدًا','يعيش وحيدًا','أكبر القطط'],
+ 'فيل':['له خرطوم','أكبر حيوان في البر','لا ينسى','له أذنان كبيرتان'],
+ 'بومة':['تسهر الليل','تدير رأسها كثيرًا','عيونها كبيرة','رمز الحكمة عند بعضهم'],
+ 'ثعلب':['ماكر في الحكايات','ذيله كثيف','يسرق الدجاج','لونه بنّي محمرّ'],
+ 'الهلال':['زعيم آسيا','لونه أزرق','أكثر الألقاب في بلده','جمهوره في الرياض كبير'],
+ 'النصر':['العالمي','لونه أصفر','جاءه نجم عالمي مؤخرًا','من الرياض'],
+ 'الاتحاد':['العميد','أصفر وأسود','أقدم نادٍ في بلده','من جدة'],
+ 'الأهلي':['الراقي','أخضر وأبيض','من جدة','له بطولات آسيوية'],
+ 'ريال مدريد':['الملكي','أبيض دائمًا','أكثر من فاز بدوري الأبطال','من إسبانيا'],
+ 'برشلونة':['البلوغرانا','أزرق وأحمر','ميسي كان فيه','من كتالونيا'],
+ 'ليفربول':['الريدز','أحمر','لن تمشي وحدك','من إنجلترا'],
+ 'مانشستر يونايتد':['الشياطين الحمر','ملعبه مسرح الأحلام','السير فيرغسون درّبه','من إنجلترا'],
+ 'يوفنتوس':['السيدة العجوز','أبيض وأسود','من تورينو','أكثر ألقاب إيطاليا'],
+ 'بايرن ميونخ':['البافاري','أحمر','يسيطر على دوريه','من ألمانيا']
+};
+/** تلميحات غامضة يقولها من لا يعرف الكلمة — بحسب الفئة */
+const BARRA_VAGUE={
+ 'أماكن':['مكان يعرفه الجميع','ذهبت إليه أكثر من مرّة','فيه ناس كثير عادةً','له باب ومدخل واضح','يزدحم في أوقات معيّنة','مكان مفيد'],
+ 'أكلات شعبية':['لذيذة جدًّا','تُؤكل باليد أو بالملعقة','أمي تطبخها','تُقدَّم ساخنة','أحبها كثيرًا','مشهورة عندنا'],
+ 'مهن':['مهنة مهمّة','يتعب فيها الإنسان','لها زيّ خاص أحيانًا','نحتاجه كلّنا','يعمل ساعات طويلة','مهنة قديمة'],
+ 'حيوانات':['حيوان معروف','له قوائم','رأيته في التلفاز','يأكل ويشرب مثلنا','بعض الناس يحبونه','له صوت مميّز'],
+ 'أندية كرة':['نادٍ كبير','له جمهور واسع','فاز بألقاب','له لون مميّز','لاعبوه مشهورون','أشجّعه أحيانًا']
+};
+function bbStart(diff){
+ const n=Math.min(6,Math.max(4,RM.bbN||5)),cat=PARTY_WORDS[RM.bbCat]?RM.bbCat:'أماكن';
+ Router.enter('vsbot');
+ const ws=PARTY_WORDS[cat],word=ws[Math.floor(Math.random()*ws.length)];
+ VB={g:'barra',diff:diff||'mid',n,cat,word,names:vbNames(n),spy:Math.floor(Math.random()*n),
+  feed:[],usedClue:new Set(),usedVague:new Set(),round:0,shown:false,myVague:0,cast:[],accused:null,opts:[],after:[],tm:null};
+ bbDeal();
+}
+const bbSpyMe=()=>VB.spy===0;
+function bbDeal(){
+ const card=bbSpyMe()?{game:'برا السالفة',title:'أنت برا السالفة!',desc:'لا تعرف الكلمة — استمع لتلميحاتهم، لمّح بغموض، ولا تنكشف.',icon:ico('door',58,'red'),ac:'#E24B4A'}
+  :{game:'برا السالفة',tag:'الكلمة السرية',title:VB.word,desc:'لمّح للكلمة دون قولها — واكشف من لا يعرفها.',icon:ico('lock',58),ac:'#E8B23A'};
+ go(`<div class="scr on">${vbHead('برا السالفة — ضد الكمبيوتر')}
+ ${roleCard(Object.assign(card,{shown:VB.shown,foot:'الفئة: '+VB.cat+' — '+(VB.n-1)+' لاعبين آليين',hint:'اضغط للكشف',reveal:'bbReveal()'}))}
+ <button class="rbtn" id="rcRev" style="margin-top:4px${VB.shown?';display:none':''}" onclick="bbReveal()"><span>اكشف بطاقتي</span></button>
+ <button class="rbtn" id="rcNext" style="margin-top:4px${VB.shown?'':';display:none'}" onclick="bbRound()"><span>ابدأ التلميحات</span></button>
+ </div>`);
+}
+function bbReveal(){VB.shown=true;vbReveal();const b=document.getElementById('rcNext');if(b)b.style.display=''}
+/** تلميح آليّ: صاحب الكلمة من بنكها، وبرا السالفة من الغامض */
+function bbClueFor(i){
+ if(i===VB.spy){
+  const all=BARRA_VAGUE[VB.cat]||['أعرفها'];const pool=all.filter(c=>!VB.usedVague.has(c));
+  const c=pool.length?vbRnd(pool):vbRnd(all);VB.usedVague.add(c);return c;
+ }
+ const all=BARRA_CLUES[VB.word]||['أعرفها جيدًا'];const bank=all.filter(c=>!VB.usedClue.has(c));
+ if(bank.length){const c=vbRnd(bank);VB.usedClue.add(c);return c}
+ return 'أوافق من قال: '+vbRnd(all);
+}
+function bbSpeak(i){VB.feed.push({i,c:bbClueFor(i)})}
+function bbRound(){
+ VB.round++;
+ const half=Math.ceil(VB.n/2);
+ const before=[],after=[];
+ for(let i=1;i<VB.n;i++)(i<half?before:after).push(i);
+ (VB.round%2?before:after).forEach(bbSpeak);          // في الجولة الثانية يتبدّل من يسبقك
+ VB.after=VB.round%2?after:before;
+ let opts;
+ const vagueAll=BARRA_VAGUE[VB.cat]||[];
+ if(bbSpyMe()){const pool=vagueAll.filter(c=>!VB.usedVague.has(c)).sort(()=>Math.random()-.5);opts=(pool.length>=3?pool:vagueAll).slice(0,3).map(c=>({c,v:1}))}
+ else{
+  const real=(BARRA_CLUES[VB.word]||[]).filter(c=>!VB.usedClue.has(c)).sort(()=>Math.random()-.5).slice(0,2).map(c=>({c,v:0}));
+  const vg=vagueAll.filter(c=>!VB.usedVague.has(c));
+  opts=real.concat([{c:vbRnd(vg.length?vg:vagueAll),v:1}]).sort(()=>Math.random()-.5);
+ }
+ VB.opts=opts;
+ go(`<div class="scr on">${vbHead('برا السالفة — الجولة '+VB.round)}
+ <div class="wb" style="text-align:start">${bbSpyMe()?'أنت برا السالفة — الفئة: <b>'+esc(VB.cat)+'</b>. لمّح بغموض حتى لا تنكشف، واستنتج الكلمة من تلميحاتهم.':'الكلمة: <b>'+esc(VB.word)+'</b> — لمّح لها دون قولها. التلميح الغامض يجعلهم يشكّون فيك.'}</div>
+ ${bbFeed()}
+ <div class="sl">دورك — اختر تلميحك</div>
+ ${opts.map((o,k)=>`<button class="btn g" style="margin-bottom:8px;text-align:start" onclick="bbSay(${k})">${esc(o.c)}</button>`).join('')}
+ </div>`);
+}
+function bbFeed(){
+ if(!VB.feed.length)return '';
+ return `<div class="sl">التلميحات</div>`+VB.feed.map(x=>`<div class="vbSay">${vbFace(x.i)}<div class="vbBub"><b>${esc(VB.names[x.i])}${x.i===0?' (أنت)':''}:</b> ${esc(x.c)}</div></div>`).join('');
+}
+function bbSay(k){
+ const o=VB.opts[k]||VB.opts[0];
+ VB.feed.push({i:0,c:o.c});
+ if(o.v){VB.myVague++;VB.usedVague.add(o.c)}else VB.usedClue.add(o.c);
+ VB.after.forEach(bbSpeak);
+ if(VB.round<2){
+  go(`<div class="scr on">${vbHead('برا السالفة — الجولة '+VB.round)}
+  ${bbFeed()}
+  <button class="rbtn" style="margin-top:12px" onclick="bbRound()"><span>الجولة الثانية</span></button></div>`);
+  return;
+ }
+ bbVote();
+}
+function bbVote(){
+ go(`<div class="scr on">${vbHead('برا السالفة — التصويت')}
+ ${bbFeed()}
+ <div class="sl">من برا السالفة؟</div>
+ <div class="vbGrid">${VB.names.map((_,i)=>i===0?'':vbChip(i,` onclick="bbTally(${i})"`)).join('')}</div>
+ </div>`);
+}
+function bbBotVote(i){
+ const d=VB.diff,others=VB.names.map((_,x)=>x).filter(x=>x!==i);
+ if(i===VB.spy){                       // برا السالفة يوجّه الشك لغيره — ويفضّل من لمّح بغموض
+  if(d!=='easy'&&VB.myVague>0&&Math.random()<.6)return 0;
+  return vbRnd(others);
+ }
+ let p={easy:.45,mid:.65,hard:.85}[d]||.65;
+ if(VB.spy===0){if(!VB.myVague)p-=.3}else if(VB.myVague)p-=.15*VB.myVague;
+ if(Math.random()<p)return VB.spy;
+ if(VB.spy!==0&&VB.myVague&&Math.random()<.5)return 0;
+ return vbRnd(others);
+}
+function bbTally(my){
+ const votes={},cast=[];
+ const add=(who,t)=>{votes[t]=(votes[t]||0)+1;cast.push({who,t})};
+ add(0,my);
+ VB.names.forEach((_,i)=>{if(i!==0)add(i,bbBotVote(i))});
+ VB.cast=cast;VB.accused=mbCount(votes);
+ if(VB.accused!==VB.spy){bbFinal('escaped');return}
+ if(bbSpyMe()){bbGuess();return}
+ const p={easy:.25,mid:.4,hard:.55}[VB.diff]||.4;
+ bbFinal(Math.random()<p?'guessed':'caught');
+}
+function bbGuess(){
+ const pool=(PARTY_WORDS[VB.cat]||[]).filter(w=>w!==VB.word).sort(()=>Math.random()-.5).slice(0,3);
+ const opts=pool.concat([VB.word]).sort(()=>Math.random()-.5);
+ go(`<div class="scr on">${vbHead('برا السالفة')}
+ <div class="orn"><div class="in">${ornCorners()}<div style="text-align:center;padding:14px 0 6px">
+ <div class="mfDisc" style="--rc:#E24B4A;--rcs:rgba(226,75,74,.3)">${ico('door',46,'red')}</div>
+ <div class="mtl" style="font-size:17px;margin-top:8px">أمسكوا بك!</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:7px;line-height:1.7">فرصة أخيرة: إن خمّنت الكلمة من أوّل مرّة فزت أنت.</div>
+ </div></div></div>
+ ${bbFeed()}
+ <div class="sl" style="text-align:center">ما الكلمة؟</div>
+ <div class="vbGrid">${opts.map(w=>`<button class="btn g" style="margin:0" onclick="bbFinal('${w===VB.word?'guessed':'caught'}')">${esc(w)}</button>`).join('')}</div>
+ </div>`);
+}
+function bbFinal(outcome){
+ const spyWon=outcome!=='caught',mine=bbSpyMe()?spyWon:!spyWon;
+ vbDone();if(mine&&window.FX)FX.win();
+ const title=outcome==='caught'?'أُمسك ببرا السالفة!':outcome==='guessed'?'خمّن الكلمة — فاز برا السالفة!':'نجا برا السالفة!';
+ const why=outcome==='caught'?'ولم يعرف الكلمة':outcome==='guessed'?'أُمسك به لكنه عرف الكلمة من أوّل تخمين'
+  :(VB.accused==null?'لم تتفق الأغلبية على أحد':'اتُّهم '+esc(VB.names[VB.accused])+' ظلمًا');
+ go(`<div class="scr on">${vbHead('النتيجة')}
+ ${resMedal(mine?'win':'lose',spyWon?'door':'trophy')}
+ <div class="mtl" style="text-align:center;font-size:18px;margin-top:6px">${title}</div>
+ <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-top:4px;line-height:1.7">${mine?'فزت':'خسرت'} — برا السالفة كان <b>${esc(VB.names[VB.spy])}${bbSpyMe()?' (أنت)':''}</b><br>الكلمة: <b>${esc(VB.word)}</b> · ${why}</div>
+ <div class="sl">الأصوات</div>
+ <div class="vbVotes">${VB.cast.map(c=>`<div><span>${esc(VB.names[c.who])}</span><b>${esc(VB.names[c.t])}</b></div>`).join('')}</div>
+ ${bbFeed()}
+ <button class="rbtn" style="margin-top:14px" onclick="bbStart('${VB.diff}')"><span>جولة أخرى</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','barra')">رجوع</button>
+ </div>`);
+}
+
+/* ── الرسم ضد الكمبيوتر: الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن — كلّما أبكرت كسبت أكثر ── */
+const DB_ART=(function(){
+ const P=Math.PI;
+ const C=(cx,cy,r,n)=>{n=n||28;const p=[];for(let i=0;i<=n;i++){const a=i/n*P*2;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return p};
+ const A=(cx,cy,r,a0,a1,n)=>{n=n||14;const p=[];for(let i=0;i<=n;i++){const a=a0+(a1-a0)*i/n;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return p};
+ const L=(...pts)=>pts;
+ const star=(cx,cy,R,r)=>{const p=[];for(let i=0;i<=10;i++){const a=-P/2+i*P/5,rr=i%2?r:R;p.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr])}return p};
+ const heart=()=>{const p=[];for(let i=0;i<=40;i++){const t=i/40*P*2;const x=16*Math.pow(Math.sin(t),3),y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);p.push([50+x*2.1,48-y*2.1])}return p};
+ const crescent=()=>A(50,50,32,0.796,2*P-0.796,26).concat(A(60,50,26,-1.074,1.074,18).reverse());
+ return [
+  {w:'بيت',s:[L([20,50],[50,20],[80,50]),L([25,50],[25,90],[75,90],[75,50]),L([45,90],[45,65],[58,65],[58,90]),L([30,58],[40,58],[40,68],[30,68],[30,58])]},
+  {w:'شمس',s:[C(50,50,18)].concat([0,45,90,135,180,225,270,315].map(dg=>{const a=dg*P/180;return L([50+Math.cos(a)*24,50+Math.sin(a)*24],[50+Math.cos(a)*36,50+Math.sin(a)*36])}))},
+  {w:'شجرة',s:[L([45,90],[45,60],[55,60],[55,90]),C(50,45,22),C(36,52,12),C(64,52,12)]},
+  {w:'قطة',s:[C(50,55,26),L([30,38],[26,14],[46,30]),L([70,38],[74,14],[54,30]),C(40,50,3,10),C(60,50,3,10),L([47,62],[53,62],[50,66],[47,62]),L([20,60],[40,63]),L([20,70],[40,67]),L([80,60],[60,63]),L([80,70],[60,67])]},
+  {w:'سمكة',s:[L([20,50],[35,32],[60,30],[75,50],[60,70],[35,68],[20,50]),L([75,50],[92,35],[92,65],[75,50]),C(38,45,3,10),A(58,50,12,-0.8,0.8)]},
+  {w:'سيارة',s:[L([15,65],[15,50],[30,50],[40,35],[65,35],[75,50],[88,50],[88,65],[15,65]),C(30,66,8,16),C(72,66,8,16),L([42,50],[45,38],[62,38],[64,50])]},
+  {w:'قارب',s:[L([15,60],[25,78],[75,78],[85,60],[15,60]),L([50,60],[50,20]),L([50,22],[78,58],[52,58]),A(30,86,8,P,2*P),A(50,86,8,P,2*P),A(70,86,8,P,2*P)]},
+  {w:'مظلة',s:[A(50,55,34,P,2*P,20),L([16,55],[84,55]),L([50,55],[50,88]),A(44,88,6,0,P),L([50,21],[50,55]),L([50,21],[20,55]),L([50,21],[80,55])]},
+  {w:'كأس',s:[L([30,35],[35,80],[65,80],[70,35],[30,35]),A(74,55,10,-P/2,P/2),L([40,26],[40,20]),L([50,26],[50,18]),L([60,26],[60,20])]},
+  {w:'نجمة',s:[star(50,52,36,15)]},
+  {w:'هلال',s:[crescent(),star(74,22,5,2),star(82,38,3.5,1.4)]},
+  {w:'قلب',s:[heart()]},
+  {w:'مفتاح',s:[C(30,50,14),C(30,50,5,12),L([44,50],[88,50]),L([80,50],[80,62]),L([72,50],[72,58]),L([88,50],[88,60])]},
+  {w:'ساعة',s:[C(50,50,34),L([50,18],[50,24]),L([82,50],[76,50]),L([50,82],[50,76]),L([18,50],[24,50]),L([50,50],[50,30]),L([50,50],[66,58])]},
+  {w:'جبل',s:[L([5,85],[35,30],[55,60],[70,40],[95,85]),L([28,42],[35,30],[42,42]),C(80,25,8,16)]},
+  {w:'وردة',s:[C(50,45,8,16)].concat([0,1,2,3,4,5].map(k=>{const a=k*P/3;return C(50+Math.cos(a)*14,45+Math.sin(a)*14,9,16)})).concat([L([50,53],[50,90]),L([50,72],[36,66],[34,76],[50,78])])},
+  {w:'طائرة',s:[L([10,52],[70,46],[90,50],[70,56],[10,52]),L([40,50],[30,25],[45,25],[58,49]),L([40,52],[32,74],[46,74],[58,53]),L([12,52],[6,38],[16,40],[22,50])]},
+  {w:'تفاحة',s:[C(50,56,28),L([50,28],[52,15]),L([52,20],[64,14],[66,24],[52,22])]},
+  {w:'عين',s:[L([15,50],[35,30],[65,30],[85,50],[65,70],[35,70],[15,50]),C(50,50,14),C(50,50,6,14),L([30,32],[26,24]),L([50,28],[50,20]),L([70,32],[74,24])]},
+  {w:'جمل',s:[L([20,70],[22,55],[30,45],[40,35],[50,32],[60,36],[70,48],[78,52],[84,40],[88,28],[92,30],[92,45],[86,58],[82,70]),L([26,70],[26,90]),L([36,70],[36,90]),L([70,70],[70,90]),L([80,70],[80,90]),L([20,70],[82,70]),C(88,33,1.6,8)]},
+  {w:'كرة',s:[C(50,50,32),L([50,34],[64,44],[59,60],[41,60],[36,44],[50,34]),L([50,34],[50,19]),L([64,44],[79,40]),L([59,60],[68,74]),L([41,60],[32,74]),L([36,44],[21,40])]}
+ ];
+})();
+function dbStart(diff){
+ Router.enter('vsbot');
+ const pool=DB_ART.slice().sort(()=>Math.random()-.5);
+ VB={g:'draw',diff:diff||'mid',rounds:pool.slice(0,6),i:0,total:0,res:[],raf:null,tm:null,opts:[],p:0,wrong:0,done:false,t0:0};
+ dbRound();
+}
+function dbRound(){
+ if(VB.i>=VB.rounds.length){dbEnd();return}
+ const art=VB.rounds[VB.i],nOpt={easy:4,mid:6,hard:8}[VB.diff]||6;
+ const others=DB_ART.filter(a=>a.w!==art.w).sort(()=>Math.random()-.5).slice(0,nOpt-1).map(a=>a.w);
+ VB.opts=others.concat([art.w]).sort(()=>Math.random()-.5);
+ VB.p=0;VB.wrong=0;VB.done=false;
+ go(`<div class="scr on">${vbHead('الكمبيوتر يرسم')}
+ <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--tx2)">
+  <span>اللوحة ${VB.i+1} من ${VB.rounds.length}</span><span class="mtl" style="font-size:14px" id="dbPts">${VB.total} نقطة</span></div>
+ <canvas id="dbc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;border:2px solid #3B2F5C;background:#fff;display:block"></canvas>
+ <div class="dbBar"><i id="dbBar"></i></div>
+ <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin:6px 0 8px"><span>الخطأ يخصم 15</span><span id="dbAvail">100 نقطة إن خمّنت الآن</span></div>
+ <div class="vbGrid">${VB.opts.map((w,k)=>`<button class="btn g dbOpt" id="dbo${k}" onclick="dbGuess(${k})">${esc(w)}</button>`).join('')}</div>
+ </div>`);
+ dbAnimate(art);
+}
+function dbPaint(cx,art,p){
+ cx.fillStyle='#fff';cx.fillRect(0,0,600,600);
+ cx.strokeStyle='#1B2030';cx.lineWidth=7;cx.lineCap='round';cx.lineJoin='round';
+ const lens=art.s.map(s=>{let l=0;for(let i=1;i<s.length;i++)l+=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);return l});
+ const total=lens.reduce((a,b)=>a+b,0);let budget=total*p;
+ art.s.forEach((s,si)=>{
+  if(budget<=0)return;
+  cx.beginPath();cx.moveTo(s[0][0]*6,s[0][1]*6);
+  for(let i=1;i<s.length;i++){
+   const d=Math.hypot(s[i][0]-s[i-1][0],s[i][1]-s[i-1][1]);
+   if(budget>=d){cx.lineTo(s[i][0]*6,s[i][1]*6);budget-=d}
+   else{const f=budget/d;cx.lineTo((s[i-1][0]+(s[i][0]-s[i-1][0])*f)*6,(s[i-1][1]+(s[i][1]-s[i-1][1])*f)*6);budget=0;break}
+  }
+  cx.stroke();
+ });
+}
+function dbAnimate(art){
+ const D={easy:14000,mid:11000,hard:8500}[VB.diff]||11000,HOLD=6000;
+ VB.t0=performance.now();
+ const step=now=>{
+  const cv=document.getElementById('dbc');if(!cv||VB.done||VB.g!=='draw')return;
+  const p=Math.min(1,(now-VB.t0)/D);VB.p=p;
+  dbPaint(cv.getContext('2d'),art,p);
+  const bar=document.getElementById('dbBar');if(bar)bar.style.width=Math.round((1-p)*100)+'%';
+  const av=document.getElementById('dbAvail');if(av)av.textContent=dbAvail()+' نقطة إن خمّنت الآن';
+  if(now-VB.t0>=D+HOLD){dbTimeout();return}
+  VB.raf=requestAnimationFrame(step);
+ };
+ VB.raf=requestAnimationFrame(step);
+}
+function dbAvail(){return Math.max(10,Math.round(100-80*VB.p)-15*VB.wrong)}
+function dbGuess(k){
+ if(VB.done)return;
+ const art=VB.rounds[VB.i],w=VB.opts[k],b=document.getElementById('dbo'+k);
+ if(w!==art.w){VB.wrong++;if(b)b.classList.add('bad');toast('ليست هي');return}
+ VB.done=true;if(VB.raf)cancelAnimationFrame(VB.raf);
+ const pts=dbAvail();VB.total+=pts;VB.res.push({w:art.w,pts});
+ const cv=document.getElementById('dbc');if(cv)dbPaint(cv.getContext('2d'),art,1);
+ if(b)b.classList.add('ok');
+ const el=document.getElementById('dbPts');if(el)el.textContent=VB.total+' نقطة';
+ toast('صحيح! +'+pts);
+ VB.tm=setTimeout(()=>{if(VB&&VB.g==='draw'){VB.i++;dbRound()}},1000);
+}
+function dbTimeout(){
+ if(VB.done)return;VB.done=true;
+ const art=VB.rounds[VB.i];VB.res.push({w:art.w,pts:0});
+ const k=VB.opts.indexOf(art.w),b=document.getElementById('dbo'+k);if(b)b.classList.add('ok');
+ toast('كانت: '+art.w);
+ VB.tm=setTimeout(()=>{if(VB&&VB.g==='draw'){VB.i++;dbRound()}},1400);
+}
+function dbEnd(){
+ const max=VB.rounds.length*100,good=VB.total>=max*.5;
+ vbDone();if(good&&window.FX)FX.win();
+ go(`<div class="scr on">${vbHead('النتيجة')}
+ ${resMedal(good?'win':'retry','palette')}
+ <div class="mtl" style="text-align:center;font-size:19px;margin-top:6px">${VB.total} من ${max}</div>
+ <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-top:4px">${good?'عين رسّام — خمّنت أغلب اللوحات مبكرًا':'تحتاج نظرة أسرع — جرّب مرّة أخرى'}</div>
+ <div class="sl">اللوحات</div>
+ <div class="vbVotes">${VB.res.map(r=>`<div><span>${esc(r.w)}</span><b style="color:${r.pts?'var(--ok)':'var(--mut)'}">${r.pts?'+'+r.pts:'فاتتك'}</b></div>`).join('')}</div>
+ <button class="rbtn" style="margin-top:14px" onclick="dbStart('${VB.diff}')"><span>جولة أخرى</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('gameHub','draw')">رجوع</button>
+ </div>`);
+}
+
 const GAME_ART={
  carrom:`<svg viewBox="0 0 100 100"><defs>
   <linearGradient id="gaW" x1="0" y1="0" x2="1" y2="1">
@@ -22281,9 +22937,9 @@ var _hubCss=0;
 const GAME_META={
  carrom:{type:'لعبة لوح',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة'},
  uno:   {type:'لعبة بطاقات',  time:'10 - 20 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة'},
- mafia: {type:'لعبة أدوار',   time:'20 - 40 دقيقة',quick:'15 - 25 دقيقة'},
- draw:  {type:'لعبة رسم',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق'},
- barra: {type:'لعبة تخمين',   time:'10 - 20 دقيقة',quick:'5 - 10 دقائق'}
+ mafia: {type:'لعبة أدوار',   time:'20 - 40 دقيقة',quick:'15 - 25 دقيقة',bot:'8 - 15 دقيقة'},
+ draw:  {type:'لعبة رسم',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'3 - 5 دقائق'},
+ barra: {type:'لعبة تخمين',   time:'10 - 20 دقيقة',quick:'5 - 10 دقائق',bot:'4 - 8 دقائق'}
 };
 function ghRange(a,b,unit){return a+' - '+b+' '+unit}
 /** حبّة معلومات — أي مدى رقمي فيها يُعزل ليُقرأ تصاعديًا داخل النصّ العربي */

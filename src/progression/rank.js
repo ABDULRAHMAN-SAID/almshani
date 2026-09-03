@@ -40,13 +40,13 @@ var RankCore=(function(){
    scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:0,minP:2,maxP:4,status:'live'},
   {id:'mafia',    ar:'مافيا',       icon:'user',rmKey:'mafia',
    desc:'مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي.',
-   scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:0,pass:1,minP:5,maxP:12,status:'live'},
+   scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:1,pass:1,minP:5,maxP:12,status:'live'},
   {id:'drawing',  ar:'مسابقة الرسم',icon:'palette',rmKey:'draw',
    desc:'كلمة واحدة والكلّ يرسم — صوّتوا لأفضل لوحة.',
-   scoreModel:'placement', ranked:1,casual:1,room:1,bot:0,pass:1,minP:3,maxP:10,status:'live'},
+   scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:10,status:'live'},
   {id:'outsider', ar:'برا السالفة', icon:'bulb',rmKey:'barra',
    desc:'الكلّ يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة.',
-   scoreModel:'roundsAggregate',ranked:1,casual:1,room:1,bot:0,pass:1,minP:3,maxP:8,status:'live'}
+   scoreModel:'roundsAggregate',ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:8,status:'live'}
  ];
  function gameDef(id){for(var i=0;i<GAME_DEFS.length;i++)if(GAME_DEFS[i].id===id)return GAME_DEFS[i];return null}
 
