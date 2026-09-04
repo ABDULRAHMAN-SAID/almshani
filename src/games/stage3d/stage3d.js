@@ -6,6 +6,9 @@ const VB3_FEMALE=new Set(['نورة','أثير','لين','دانة','جود','ل
 const VB3_COL={thobe:['#F6F2E8','#EDE4D0','#E9EAEE','#DDD6C6'],shayla:['#26365F','#1F5B5B','#4B2A5C','#6E1F2E','#2E4A3B'],cushion:['#1F5B3C','#1E2F63','#7A2230','#5A3A14','#2B4C6E']};
 /** هل يُتاح المشهد المجسّم؟ لا في الاختبارات السريعة إلا بطلب صريح (__vb3d) ولا عند تعطيله (__vbNo3d) */
 function vb3dOk(){return typeof THREE!=='undefined'&&!window.__vbNo3d&&!(window.__vbFast&&!window.__vb3d)}
+/** مخزن الأشكال: الشكل نفسه (نوعه ومقاساته) يُبنى مرّة ويُشارَك — كان بناء المجلس يستغرق ثوانيَ ويحجز الشاشة */
+const VB3_GEO={};
+function vb3dG(kind,...a){const k=kind+'|'+a.join(',');let g=VB3_GEO[k];if(!g){g=new THREE[kind+'Geometry'](...a);g.userData.shared=1;VB3_GEO[k]=g}return g}
 function vb3dMat(col,o){o=o||{};const m=new THREE.MeshStandardMaterial({color:new THREE.Color(col),roughness:o.rough!=null?o.rough:.85,metalness:o.metal||0});
  if(o.map)m.map=o.map;if(o.emis){m.emissive=new THREE.Color(o.emis);m.emissiveIntensity=o.ei!=null?o.ei:1}
  if(o.tr){m.transparent=true;m.opacity=o.op!=null?o.op:1}if(o.side)m.side=o.side;if(o.at)m.alphaTest=o.at;return m}
@@ -15,10 +18,10 @@ function vb3dMesh(geo,mat,x,y,z,o){const m=new THREE.Mesh(geo,mat);m.position.se
 function vb3dLimb(a,b,r,mat){const len=Math.max(.01,a.distanceTo(b)-r*1.2);const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,4,10),mat);m.castShadow=true;m.userData.len=len;vb3dAim(m,a,b);return m}
 function vb3dAim(m,a,b){m.position.copy(a).add(b).multiplyScalar(.5);const d=new THREE.Vector3().subVectors(b,a).normalize();m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d)}
 /* ── قوام: نسيج من قماش الكانفس (لا صور خارجية) ── */
-function vb3dTex(key,w,h,draw,rep){
+function vb3dTex(key,w,h,draw,rep,linear){
  if(VB3.tex[key])return VB3.tex[key];
  const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');draw(g,w,h);
- const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;
+ const t=new THREE.CanvasTexture(c);if(!linear)t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;
  if(rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep[0],rep[1])}
  VB3.tex[key]=t;return t;
 }
@@ -77,61 +80,136 @@ function vb3dTexFacade(){return vb3dTex('facade',256,512,(g,w,h)=>{
   g.fillStyle='#3A3558';g.fillRect(x-6,y+46,52,5)}
  g.fillStyle='#3A3558';g.fillRect(0,0,w,14)},[1,1])}
 function vb3dTexGlow(){return vb3dTex('glow',128,128,(g,w,h)=>{const gr=g.createRadialGradient(64,64,2,64,64,64);gr.addColorStop(0,'rgba(255,240,200,1)');gr.addColorStop(.35,'rgba(255,220,150,.45)');gr.addColorStop(1,'rgba(255,200,120,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)})}
-/* ── مظهر كل لاعب من أفاتاره (بشرة وشعر ولحية) واسمه (ثوب/عباءة، غترة/شيلة) — ثابت طوال الجولة ── */
+/* ── مظهر كل لاعب من أفاتار ملفّه الشخصي: بشرة، شعر وقصّته، عينان، فم، لحية، إكسسوار — الشخصية المجسّمة هي صورته نفسها ── */
+function vb3dAvatarOf(i,model){if(i===model.me)return S.av||AV_DEFAULT;if(model.avs&&model.avs[i])return model.avs[i];return avFromSeed(model.names[i]||'لاعب')}
 function vb3dLook(i,model){
- const me=i===model.me,nm=model.names[i]||'لاعب',av=me?(S.av||AV_DEFAULT):avFromSeed(nm),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
- return {f,me,host:i===model.host,skin:AV.skin[av.skin]||'#E8B88A',hair:AV.hair[av.hair]||'#3B2416',beard:!f&&(av.beard===1||av.beard===2),mustache:!f&&av.beard===3,
-  thobe:f?'#1A1A22':VB3_COL.thobe[h%4],ghutra:!f&&(h>>3)%3===0?'check':'white',shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5]};
+ const me=i===model.me,nm=model.names[i]||'لاعب',av=vb3dAvatarOf(i,model),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
+ const id=(k,v)=>((AV[k][v]||AV[k][0]).id);
+ return {f,me,host:i===model.host,skin:AV.skin[av.skin]||AV.skin[0],hair:AV.hair[av.hair]||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
+  beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%4],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5]};
 }
-/** شخصية جالسة: جذع بمخرطة، حضن أو ساقان، ذراعان على الحضن، رأس بوجه، غترة وعقال أو شيلة — posture: floor (وسادة) | chair (كرسي) */
+function vb3dTexIris(){return vb3dTex('iris',64,64,(g,w,h)=>{g.clearRect(0,0,w,h);const gr=g.createRadialGradient(32,32,2,32,32,30);gr.addColorStop(0,'#0C0A10');gr.addColorStop(.4,'#0C0A10');gr.addColorStop(.45,'#7A4A22');gr.addColorStop(.72,'#3B2314');gr.addColorStop(.95,'#24140A');gr.addColorStop(1,'rgba(36,20,10,0)');
+ g.fillStyle=gr;g.beginPath();g.arc(32,32,31,0,7);g.fill();g.strokeStyle='rgba(140,90,40,.45)';g.lineWidth=1;for(let k=0;k<26;k++){const a=k/26*Math.PI*2;g.beginPath();g.moveTo(32+Math.cos(a)*14,32+Math.sin(a)*14);g.lineTo(32+Math.cos(a)*29,32+Math.sin(a)*29);g.stroke()}
+ g.fillStyle='rgba(255,255,255,.92)';g.beginPath();g.arc(23,23,5.5,0,7);g.fill();g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(40,42,2.5,0,7);g.fill()})}
+function vb3dTexWeave(){return vb3dTex('weave',128,128,(g,w,h)=>{g.fillStyle='#808080';g.fillRect(0,0,w,h);for(let y=0;y<h;y+=4){g.fillStyle=y%8?'#8c8c8c':'#727272';g.fillRect(0,y,w,2)}for(let x=0;x<w;x+=4){g.fillStyle=x%8?'rgba(150,150,150,.5)':'rgba(100,100,100,.5)';g.fillRect(x,0,2,h)}vb3dNoise(g,w,h,2500,.12)},[7,7],true)}
+/** طيّات قماش: تموّج نصف قطر المخرطة حول المحيط تحت ارتفاع معيّن */
+function vb3dFolds(geo,amp,freq,maxY){const p=geo.attributes.position;for(let k=0;k<p.count;k++){const x=p.getX(k),y=p.getY(k),z=p.getZ(k);if(y>maxY)continue;const r=Math.hypot(x,z);if(r<1e-4)continue;const a=Math.atan2(z,x),f=1+amp*Math.sin(freq*a)*(1-y/maxY);p.setXYZ(k,x*f,y,z*f)}geo.computeVertexNormals();return geo}
+/** شخصية جالسة من أفاتار اللاعب: جذع بطيّات، حضن أو ساقان، ذراعان ويدان بأصابع، رأس بجفون وقزحيات وحاجبين وأنف وشفاه،
+    شعر بقصّته أو غترة وعقال أو شيلة، لحية، وإكسسوار ملفّه — posture: floor (وسادة) | chair (كرسي) */
 function vb3dChar(look,posture){
- const T=THREE,g=new T.Group(),mats=[];
+ const T=THREE,g=new T.Group(),mats=[],weave=vb3dTexWeave();
  const M=(c,o)=>{const m=vb3dMat(c,o);m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
- const skin=M(look.skin),cloth=M(look.thobe,{rough:.9}),hairM=M(look.hair,{rough:.95}),white=M('#F8F6F0'),black=M('#0E0E12'),lip=M('#7A3A3A');
- const prof=[[0.03,0],[0.36,0.02],[0.385,0.14],[0.33,0.42],[0.31,0.60],[0.27,0.68],[0.15,0.72],[0.11,0.79]].map(p=>new T.Vector2(p[0],p[1]));
- const body=new T.Mesh(new T.LatheGeometry(prof,28),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
- if(look.me){   // بشت داكن بحاشية ذهبية فوق الثوب، مفتوح من الأمام
-  const bisht=M('#2A1E16',{rough:.8});const bp=prof.map(v=>new T.Vector2(v.x*1.07+.01,v.y));
-  const bm=new T.Mesh(new T.LatheGeometry(bp.slice(1,7),28,0.45,Math.PI*2-0.9),bisht);bm.castShadow=true;g.add(bm);
-  g.add(vb3dMesh(new T.TorusGeometry(0.29,0.014,8,32),M('#E8B23A',{metal:.6,rough:.35}),0,0.66,0,{rot:[Math.PI/2,0,0],noCast:1}));
- }
+ const reg=m=>{m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
+ const skin=M(look.skin,{rough:.62}),cloth=M(look.thobe,{rough:.96});cloth.bumpMap=weave;cloth.bumpScale=.3;
+ const hairM=M(look.hair,{rough:.5,metal:.06}),dark=M('#15141C',{rough:.5}),lipM=M('#8A4A3A',{rough:.55}),white=M('#F7F4EC',{rough:.3});
+ const eyeM=reg(new T.MeshPhysicalMaterial({color:new T.Color('#F7F4EC'),roughness:.12,clearcoat:1,clearcoatRoughness:.06}));
+ const irisM=reg(new T.MeshBasicMaterial({map:vb3dTexIris(),transparent:true}));
+ const Z=new T.Vector3(0,0,1);
+ // الجذع (ثوب/عباءة) بطيّات، والعنق والياقة وفتحة الصدر بأزرارها
+ const prof=[[0.03,0],[0.34,0.02],[0.37,0.16],[0.32,0.46],[0.29,0.66],[0.25,0.74],[0.13,0.78],[0.1,0.86]].map(p=>new T.Vector2(p[0],p[1]));
+ const body=new T.Mesh(vb3dFolds(new T.LatheGeometry(prof,26),.013,9,.62),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
+ g.add(vb3dMesh(vb3dG('Cylinder',.075,.088,.13,14),skin,0,.86,0));
+ if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.105,.014,6,18),cloth,0,.855,0,{rot:[Math.PI/2,0,0],noCast:1}));
+  g.add(vb3dMesh(vb3dG('Capsule',.007,.2,3,6),M(shade(look.thobe,-22),{rough:.9}),0,.665,.292,{rot:[.2,0,0],noCast:1}));
+  [.75,.69].forEach(y=>g.add(vb3dMesh(vb3dG('Sphere',.011,6,5),M('#E9E2D0',{rough:.4}),0,y,.302-(.75-y)*.4,{noCast:1})))}
+ if(look.me){const bisht=M('#2A1E16',{rough:.85});bisht.bumpMap=weave;bisht.bumpScale=.4;const bp=prof.map(v=>new T.Vector2(v.x*1.07+.01,v.y));
+  g.add(new T.Mesh(vb3dFolds(new T.LatheGeometry(bp.slice(1,7),26,0.45,Math.PI*2-0.9),.01,11,.62),bisht));
+  g.add(vb3dMesh(vb3dG('Torus',.29,.013,6,24),M('#E8B23A',{metal:.75,rough:.3}),0,.66,0,{rot:[Math.PI/2,0,0],noCast:1}))}
+ // الحضن على الوسادة، أو فخذان وساقان وحذاءان على الكرسي
  if(posture==='chair'){[-1,1].forEach(s=>{const hip=new T.Vector3(s*.15,.09,.06),knee=new T.Vector3(s*.17,.12,.44),foot=new T.Vector3(s*.17,-.40,.47);
-   g.add(vb3dLimb(hip,knee,.095,cloth),vb3dLimb(knee,foot,.075,cloth),vb3dMesh(new T.BoxGeometry(.13,.06,.22),black,s*.17,-.45,.52))})}
- else g.add(vb3dMesh(new T.SphereGeometry(0.43,22,14),cloth,0,0.09,0.13,{sc:[1,.32,.82]}));
+   g.add(vb3dLimb(hip,knee,.095,cloth),vb3dLimb(knee,foot,.075,cloth),vb3dMesh(vb3dG('Capsule',.045,.1,3,6),dark,s*.17,-.45,.5,{rot:[Math.PI/2,0,0]}))})}
+ else g.add(vb3dMesh(vb3dG('Sphere',0.43,18,12),cloth,0,0.09,0.13,{sc:[1,.32,.82]}));
+ // الذراعان واليدان (راحة وأصابع وإبهام) على الحضن
  const arms={};[-1,1].forEach(s=>{const sh=new T.Vector3(s*.3,.6,.04),el=new T.Vector3(s*.37,.36,.2),hd=new T.Vector3(s*.14,.22,.37);
-  const up=vb3dLimb(sh,el,.064,cloth),lo=vb3dLimb(el,hd,.056,cloth),hand=vb3dMesh(new T.SphereGeometry(0.062,12,10),skin,hd.x,hd.y,hd.z);
-  g.add(up,lo,hand);arms[s<0?'l':'r']={up,lo,hand,sh,el,hd,rest:{el:el.clone(),hd:hd.clone()}}});
- const head=new T.Group();head.position.set(0,0.99,0.03);g.add(head);
- head.add(vb3dMesh(new T.SphereGeometry(0.22,28,20),skin));
- const eyes=[];[-1,1].forEach(s=>{const wh=vb3dMesh(new T.SphereGeometry(0.056,12,10),white,s*.088,.02,.185,{sc:[1,1,.5],noCast:1}),pu=vb3dMesh(new T.SphereGeometry(0.031,10,8),black,s*.088,.02,.216,{noCast:1});
-  const br=vb3dMesh(new T.BoxGeometry(0.1,0.022,0.02),hairM,s*.088,.105,.2,{noCast:1});br.rotation.z=s*.1;head.add(wh,pu,br);eyes.push(wh,pu)});
- head.add(vb3dMesh(new T.SphereGeometry(0.03,10,8),skin,0,-.03,.215,{noCast:1}));
- const mouth=vb3dMesh(new T.BoxGeometry(0.09,0.022,0.02),lip,0,-.095,look.beard?.235:.207,{noCast:1});head.add(mouth);
- if(look.f){const sh=M(look.shayla,{rough:.92});
-  head.add(vb3dMesh(new T.SphereGeometry(0.252,28,18,0,Math.PI*2,0,Math.PI*.72),sh,0,.012,-.01));
-  [-1,1].forEach(s=>head.add(vb3dMesh(new T.BoxGeometry(.1,.5,.2),sh,s*.2,-.24,-.02,{rot:[0,0,s*.05]})));
-  head.add(vb3dMesh(new T.BoxGeometry(.34,.26,.1),sh,0,-.36,.13));
- }else{const gh=look.ghutra==='check'?M('#F4F0E8',{map:vb3dTexShemagh(),rough:.92}):M('#F8F6F0',{rough:.92});
-  head.add(vb3dMesh(new T.SphereGeometry(0.252,28,18,0,Math.PI*2,0,Math.PI*.56),gh,0,.012,-.01));
-  [-1,1].forEach(s=>head.add(vb3dMesh(new T.BoxGeometry(.07,.42,.2),gh,s*.215,-.15,-.03,{rot:[0,0,s*.07]})));
-  head.add(vb3dMesh(new T.BoxGeometry(.4,.38,.07),gh,0,-.13,-.2));
-  const ag=new T.TorusGeometry(0.236,0.024,8,32);head.add(vb3dMesh(ag,black,0,.145,0,{rot:[Math.PI/2,0,0]}),vb3dMesh(ag,black,0,.105,.012,{rot:[Math.PI/2+.06,0,0]}));
-  if(look.beard)head.add(vb3dMesh(new T.SphereGeometry(0.21,20,14),hairM,0,-.15,-.005,{sc:[1,.62,1]}));
-  if(look.mustache||look.beard)head.add(vb3dMesh(new T.BoxGeometry(.12,.03,.03),hairM,0,-.06,.212,{noCast:1}));
- }
- if(look.host){const gold=M('#E8B23A',{metal:.7,rough:.3});head.add(vb3dMesh(new T.CylinderGeometry(.16,.14,.07,10),gold,0,.27,0,{noCast:1}));for(let k=0;k<5;k++){const a=k/5*Math.PI*2;head.add(vb3dMesh(new T.ConeGeometry(.035,.09,6),gold,Math.cos(a)*.14,.34,Math.sin(a)*.14,{noCast:1}))}}   // تاج المضيف في الردهة
- g.userData={mats,head,mouth,eyes,arms,body,base:g.position.clone()};
+  const up=vb3dLimb(sh,el,.064,cloth),lo=vb3dLimb(el,hd,.056,cloth);
+  const hand=new T.Group();hand.position.copy(hd);hand.quaternion.setFromUnitVectors(Z,new T.Vector3().subVectors(hd,el).normalize());
+  hand.add(vb3dMesh(vb3dG('Sphere',.05,10,8),skin,0,0,0,{sc:[1,.55,1.2]}));
+  for(let k=0;k<4;k++)hand.add(vb3dMesh(vb3dG('Capsule',.0115,.04,2,5),skin,(k-1.5)*.025,-.004,.068,{rot:[Math.PI/2+.2,0,0]}));
+  hand.add(vb3dMesh(vb3dG('Capsule',.012,.034,2,5),skin,-s*.052,.004,.018,{rot:[Math.PI/2-.4,0,s*.8]}));
+  const cuff=vb3dLimb(hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.03),hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.08),.06,cloth);
+  g.add(up,lo,hand,cuff);arms[s<0?'l':'r']={up,lo,hand,sh,el,hd,rest:{el:el.clone(),hd:hd.clone()}}});
+ // الرأس: جمجمة وفكّ وأذنان
+ const head=new T.Group();head.position.set(0,1.03,.03);g.add(head);
+ head.add(vb3dMesh(vb3dG('Sphere',.19,24,16),skin,0,0,0,{sc:[1,1.08,1]}));
+ head.add(vb3dMesh(vb3dG('Sphere',.15,18,12),skin,0,-.085,0,{sc:[1,.82,1.02]}));
+ const onFace=(x,y,off)=>new T.Vector3(x,y,Math.sqrt(Math.max(0,.0361-x*x-(y/1.08)*(y/1.08)))+(off||0));
+ [-1,1].forEach(s=>head.add(vb3dMesh(vb3dG('Sphere',.036,10,8),skin,s*.19,-.005,-.01,{sc:[.55,1,.85],noCast:1})));
+ // العينان: مقلة لامعة وقزحية وجفن علوي وسفلي بحسب شكل العينين في الأفاتار
+ const ey=look.eyes,eyes=[],big=ey==='wide'?1.22:1;
+ [-1,1].forEach(s=>{const eg=new T.Group();eg.position.set(s*.072,.035,.16);head.add(eg);
+  eg.add(vb3dMesh(vb3dG('Sphere',.036*big,14,10),eyeM,0,0,0,{noCast:1}));
+  eg.add(vb3dMesh(vb3dG('Circle',.021*big,14),irisM,0,0,.0348*big,{noCast:1}));
+  const cover=ey==='happy'?2.7:ey==='sharp'?1.15:ey==='wide'?.6:.95;
+  const lid=vb3dMesh(vb3dG('Sphere',.0392*big,14,8,0,Math.PI*2,0,cover),skin,0,0,0,{noCast:1});lid.rotation.x=-.12;if(ey==='sharp')lid.rotation.z=-s*.38;eg.add(lid);
+  eg.add(vb3dMesh(vb3dG('Sphere',.0392*big,14,6,0,Math.PI*2,Math.PI-.6,.6),skin,0,0,0,{noCast:1}));
+  if(ey==='happy'){const cr=vb3dMesh(vb3dG('Torus',.028,.0055,6,16,2.2),M(shade(look.skin,-58),{rough:.6}),0,.004,.034,{noCast:1});cr.rotation.z=Math.PI/2-1.1;eg.add(cr)}
+  eyes.push({lid,closed:ey==='happy'})});
+ // الحاجبان أنابيب على منحنٍ، والأنف بفتحتيه، وحمرة الخدّين
+ const browM=M(look.hs==='bald'?'#3A2B1E':shade(look.hair,-16),{rough:.6});
+ [-1,1].forEach(s=>{const y0=ey==='sharp'?.084:ey==='happy'||ey==='wide'?.1:.092,tilt=ey==='sharp'?.028:0;
+  const cv=new T.QuadraticBezierCurve3(onFace(s*.03,y0-tilt,.009),onFace(s*.075,y0+.026,.014),onFace(s*.122,y0-.004+tilt*.4,.007));
+  head.add(vb3dMesh(new T.TubeGeometry(cv,7,.011,5,false),browM,0,0,0,{noCast:1}))});
+ head.add(vb3dMesh(vb3dG('Capsule',.013,.05,3,6),skin,0,-.006,.178,{rot:[.35,0,0],noCast:1}));
+ head.add(vb3dMesh(vb3dG('Sphere',.026,8,6),skin,0,-.046,.19,{sc:[1.05,.9,1],noCast:1}));
+ const nostM=M(shade(look.skin,-45),{rough:.7});[-1,1].forEach(s=>head.add(vb3dMesh(vb3dG('Sphere',.009,6,5),nostM,s*.017,-.059,.196,{noCast:1})));
+ const blushM=reg(new T.MeshBasicMaterial({color:new T.Color('#E86A6A'),transparent:true,opacity:.2,depthWrite:false}));
+ [-1,1].forEach(s=>{const b=vb3dMesh(vb3dG('Circle',.032,12),blushM,s*.115,-.046,.152,{noCast:1});b.rotation.y=s*.62;b.scale.y=.6;head.add(b)});
+ // الفم بحسب الأفاتار: ابتسامة، ضحكة بأسنان، هادئ، ماكر — وفم يُفتح عند الكلام
+ const mouth=new T.Group();mouth.position.set(0,-.1,.176);head.add(mouth);const mo=look.mouth;
+ const arc=(r,tube,len,rz,x,y,z,mat)=>{const t=vb3dMesh(vb3dG('Torus',r,tube,6,14,len),mat||lipM,x||0,y||0,z||0,{noCast:1});t.rotation.z=rz;return t};
+ if(mo==='smile')mouth.add(arc(.046,.009,2.4,-Math.PI/2-1.2));
+ else if(mo==='calm')mouth.add(vb3dMesh(vb3dG('Capsule',.008,.056,3,6),lipM,0,0,0,{rot:[0,0,Math.PI/2],noCast:1}));
+ else if(mo==='smirk')mouth.add(arc(.05,.009,2.0,-Math.PI/2-1.0+.32,.008,.004,0));
+ else{mouth.add(vb3dMesh(vb3dG('Sphere',.045,12,8),M('#6E2828',{rough:.6}),0,-.008,-.012,{sc:[1.1,.5,.4],noCast:1}));mouth.add(vb3dMesh(vb3dG('Capsule',.011,.05,3,6),white,0,.008,.01,{rot:[0,0,Math.PI/2],noCast:1}));mouth.add(arc(.046,.008,2.4,-Math.PI/2-1.2,0,.014,0))}
+ const open=vb3dMesh(vb3dG('Sphere',.03,10,8),M('#4A1E1E',{rough:.7}),0,-.02,-.004,{sc:[1.3,.05,.5],noCast:1});mouth.add(open);
+ // اللحية: خدّان وذقن (والفم مكشوف)، خفيفة نصف شفّافة، أو شارب
+ const bd=look.beard;
+ if(bd==='full'||bd==='short'){const bm=bd==='short'?M(look.hair,{rough:.7,tr:1,op:.7}):hairM;
+  head.add(vb3dMesh(vb3dG('Sphere',.2,20,8,Math.PI/2+.5,Math.PI*2-1,Math.PI*.58,Math.PI*.18),bm,0,-.01,.012,{sc:[1.02,1.1,1.02]}));
+  head.add(vb3dMesh(vb3dG('Sphere',.2,20,8,0,Math.PI*2,Math.PI*.72,Math.PI*.28),bm,0,-.01,.012,{sc:[1.02,1.16,1.02]}));
+  if(bd==='full')head.add(vb3dMesh(vb3dG('Sphere',.11,14,10),bm,0,-.205,.03,{sc:[1.1,.85,1]}))}
+ if(bd==='mustache'||bd==='full'){const m=arc(.04,.011,2.3,Math.PI/2-1.15,0,.042,.03,hairM);m.scale.y=.7;mouth.add(m)}
+ // الشعر بقصّته (قصير، مموّج، مجعّد، طويل، حليق) — أو الغترة والعقال إن كانت في الأفاتار — أو الشيلة
+ const hs=look.hs,ac=look.acc;let hat=false;
+ const cap=(th,rx)=>{const c=vb3dMesh(vb3dG('Sphere',.2,24,14,0,Math.PI*2,0,th),hairM,0,.012,-.005,{sc:[1.02,1.06,1.03]});c.rotation.x=rx;head.add(c);return c};
+ if(look.f){const sh=M(look.shayla,{rough:.92});sh.bumpMap=weave;sh.bumpScale=.25;hat=true;
+  const dome=vb3dMesh(vb3dG('Sphere',.212,24,14,0,Math.PI*2,0,1.45),sh,0,.02,-.005,{sc:[1.02,1.05,1.04]});dome.rotation.x=-.5;head.add(dome);
+  const dp=[[.212,.02],[.24,-.14],[.29,-.32],[.33,-.5],[.3,-.6]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(dp,22,Math.PI*.36,Math.PI*1.28),sh,0,0,-.005));
+  const np=[[.13,-.17],[.2,-.3],[.3,-.45],[.32,-.58]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(np,22),sh,0,0,0));
+ }else if(ac==='shemagh'){const gh=M('#F6F1E8',{map:vb3dTexShemagh(),rough:.92});hat=true;
+  const dome=vb3dMesh(vb3dG('Sphere',.215,24,14,0,Math.PI*2,0,1.5),gh,0,.02,-.01,{sc:[1.02,1.05,1.05]});dome.rotation.x=-.45;head.add(dome);
+  const dp=[[.215,-.02],[.235,-.14],[.255,-.28],[.27,-.42],[.26,-.5]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(dp,22,Math.PI*.3,Math.PI*1.4),gh,0,0,-.01));
+  const ag=vb3dG('Torus',.2,.02,8,24);head.add(vb3dMesh(ag,dark,0,.13,0,{rot:[Math.PI/2-.1,0,0]}),vb3dMesh(ag,dark,0,.095,.012,{rot:[Math.PI/2-.02,0,0]}));
+ }else if(hs==='short')cap(1.5,-.55);
+ else if(hs==='wavy'){cap(1.55,-.5);for(let k=0;k<5;k++){const a=-.9+k*.45;const w=vb3dMesh(vb3dG('Torus',.045,.02,6,10,2.6),hairM,Math.sin(a)*.17,.118-Math.abs(a)*.03,Math.cos(a)*.16,{noCast:1});w.rotation.set(-.6+k*.1,a,Math.PI/2);head.add(w)}}
+ else if(hs==='curly'){cap(1.6,-.45);let hh=hashStr(look.hair+'c');const rnd=()=>{hh=Math.imul(hh^(hh>>>15),2246822507)>>>0;return (hh%1000)/1000};
+  for(let k=0;k<20;k++){const th=.15+rnd()*1.35,ph=rnd()*Math.PI*2;if(th>.95&&Math.abs(((ph-Math.PI/2+Math.PI)%(2*Math.PI))-Math.PI)<.8)continue;
+   head.add(vb3dMesh(vb3dG('Sphere',.05,8,6),hairM,-.19*Math.cos(ph)*Math.sin(th),.19*Math.cos(th)*1.06+.02,.19*Math.sin(ph)*Math.sin(th),{noCast:1}))}}
+ else if(hs==='long'){cap(1.5,-.55);const lp=[[.2,.04],[.215,-.08],[.225,-.22],[.235,-.38],[.22,-.5]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(lp,20,Math.PI*.38,Math.PI*1.24),hairM,0,0,0))}
+ // الإكسسوارات: نظارة، نظارة عالِم، تاج، وشاح ذهبي، عصابة
+ if(ac==='glasses'||ac==='sci'){const gm=ac==='sci'?M('#5DCAA5',{rough:.35,metal:.3}):M('#1F2230',{rough:.4,metal:.4});const R=ac==='sci'?.052:.048,tb=ac==='sci'?.006:.0045;
+  [-1,1].forEach(s=>{head.add(vb3dMesh(vb3dG('Torus',R,tb,6,20),gm,s*.072,.035,.2,{noCast:1}));head.add(vb3dLimb(new T.Vector3(s*.12,.04,.19),new T.Vector3(s*.19,.03,-.01),.004,gm));
+   if(ac==='sci')head.add(vb3dMesh(vb3dG('Circle',R-.004,20),reg(new T.MeshBasicMaterial({color:0x5DCAA5,transparent:true,opacity:.22,depthWrite:false})),s*.072,.035,.199,{noCast:1}))});
+  head.add(vb3dMesh(vb3dG('Capsule',.0035,.03,3,6),gm,0,.04,.2,{rot:[0,0,Math.PI/2],noCast:1}))}
+ if(ac==='crown'){const gold=M('#E8B23A',{metal:.85,rough:.3});gold.side=T.DoubleSide;const cy=hs==='bald'||hat?.16:.19;
+  head.add(vb3dMesh(vb3dG('Cylinder',.15,.155,.05,20,1,true),gold,0,cy,-.01,{noCast:1}));
+  for(let k=0;k<6;k++){const a=k/6*Math.PI*2;head.add(vb3dMesh(vb3dG('Cone',.022,.07,6),gold,Math.cos(a)*.15,cy+.055,Math.sin(a)*.15-.01));head.add(vb3dMesh(vb3dG('Sphere',.011,6,5),M(k%2?'#5AC8F5':'#E24B4A',{rough:.25}),Math.cos(a)*.15,cy+.02,Math.sin(a)*.15-.01,{noCast:1}))}}
+ if(ac==='gold'){const gold=M('#E8B23A',{metal:.85,rough:.3});const pts=[[.25,.72,.1],[.08,.55,.31],[-.2,.34,.28],[-.3,.22,.02],[-.16,.4,-.26],[.1,.62,-.28],[.25,.74,-.06]].map(p=>new T.Vector3(p[0],p[1],p[2]));
+  g.add(vb3dMesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts,true),64,.024,8,true),gold,0,0,0,{noCast:1}));g.add(vb3dMesh(vb3dG('Sphere',.026,8,6),M('#E24B4A',{rough:.25}),.05,.56,.32,{noCast:1}))}
+ if(ac==='headband'){const hb=M('#C93A34',{rough:.7});const R=hs==='bald'?.196:.212;head.add(vb3dMesh(vb3dG('Torus',R,.02,6,26),hb,0,.078,0,{rot:[Math.PI/2-.12,0,0],noCast:1}));
+  [-1,1].forEach(s=>head.add(vb3dMesh(vb3dG('Capsule',.012,.16,2,5),hb,s*.05,-.04,-.2,{rot:[.35,0,s*.3],noCast:1})))}
+ g.userData={mats,head,mouth,open,eyes,arms,body,base:g.position.clone(),blinkAt:performance.now()+1500+Math.random()*3000};
  return g;
 }
 /* ── الغرفتان ── */
 function vb3dRoomMajlis(sc){
  const T=THREE,wood=vb3dTexWood();
- const floor=vb3dMesh(new T.PlaneGeometry(10,10),vb3dMat('#fff',{map:vb3dTexCarpet(),rough:.95}),0,0,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1});sc.add(floor);
- sc.add(vb3dMesh(new T.PlaneGeometry(30,30),vb3dMat('#3A2A1C',{rough:1}),0,-.01,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1}));
+ const floor=vb3dMesh(vb3dG('Plane',10,10),vb3dMat('#fff',{map:vb3dTexCarpet(),rough:.95}),0,0,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1});sc.add(floor);
+ sc.add(vb3dMesh(vb3dG('Plane',30,30),vb3dMat('#3A2A1C',{rough:1}),0,-.01,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1}));
  const plaster=vb3dMat('#fff',{map:vb3dTexPlaster(),rough:.95}),wainM=vb3dMat('#5A3418',{map:wood,rough:.8}),brass=vb3dMat('#C9921E',{metal:.7,rough:.32});
- const wall=(w,h,x,y,z,ry)=>{const m=vb3dMesh(new T.PlaneGeometry(w,h),plaster,x,y,z,{rot:[0,ry,0],recv:1,noCast:1});sc.add(m);return m};
+ const wall=(w,h,x,y,z,ry)=>{const m=vb3dMesh(vb3dG('Plane',w,h),plaster,x,y,z,{rot:[0,ry,0],recv:1,noCast:1});sc.add(m);return m};
  wall(12,4.2,0,2.1,-3.7,0);wall(12,4.2,-4.6,2.1,0,Math.PI/2);wall(12,4.2,4.6,2.1,0,-Math.PI/2);
- [[0,-3.66,0],[-4.56,0,Math.PI/2],[4.56,0,-Math.PI/2]].forEach(([x,z,ry])=>{sc.add(vb3dMesh(new T.BoxGeometry(12,.62,.08),wainM,x,.31,z,{rot:[0,ry,0],noCast:1}));sc.add(vb3dMesh(new T.BoxGeometry(12,.06,.1),brass,x,.65,z,{rot:[0,ry,0],noCast:1}));sc.add(vb3dMesh(new T.BoxGeometry(12,.08,.1),brass,x,3.2,z,{rot:[0,ry,0],noCast:1}))});
+ [[0,-3.66,0],[-4.56,0,Math.PI/2],[4.56,0,-Math.PI/2]].forEach(([x,z,ry])=>{sc.add(vb3dMesh(vb3dG('Box',12,.62,.08),wainM,x,.31,z,{rot:[0,ry,0],noCast:1}));sc.add(vb3dMesh(vb3dG('Box',12,.06,.1),brass,x,.65,z,{rot:[0,ry,0],noCast:1}));sc.add(vb3dMesh(vb3dG('Box',12,.08,.1),brass,x,3.2,z,{rot:[0,ry,0],noCast:1}))});
  const skyM=vb3dMat('#fff',{map:vb3dTexSky('warm'),emis:'#FFB070',ei:.35,rough:1}),latM=vb3dMat('#fff',{map:vb3dTexLattice(),tr:1,at:.5,side:T.DoubleSide,rough:.8});
  const arch=(x,z,ry,w,h)=>{const grp=new T.Group();grp.position.set(x,0,z);grp.rotation.y=ry;
   const shp=new T.Shape();shp.moveTo(-w/2,0);shp.lineTo(-w/2,h-w/2);shp.absarc(0,h-w/2,w/2,Math.PI,0,true);shp.lineTo(w/2,0);shp.closePath();
@@ -140,65 +218,67 @@ function vb3dRoomMajlis(sc){
   const hole=new T.Path();hole.moveTo(-w/2,0);hole.lineTo(-w/2,h-w/2);hole.absarc(0,h-w/2,w/2,Math.PI,0,true);hole.lineTo(w/2,0);hole.closePath();fr.holes.push(hole);
   grp.add(vb3dMesh(new T.ExtrudeGeometry(fr,{depth:.08,bevelEnabled:false}),brass,0,1.05,.04,{noCast:1}));sc.add(grp)};
  arch(-2.3,-3.68,0,1.15,1.95);arch(0,-3.68,0,1.4,2.3);arch(2.3,-3.68,0,1.15,1.95);arch(-4.58,-1.2,Math.PI/2,1.0,1.8);arch(4.58,-1.2,-Math.PI/2,1.0,1.8);
- const sadu=vb3dTexSadu();const cush=(x,z,ry,c,w)=>{const grp=new T.Group();grp.position.set(x,0,z);grp.rotation.y=ry;
-  grp.add(vb3dMesh(new T.BoxGeometry(w,.3,.5),vb3dMat(c,{rough:.95}),0,.15,0));grp.add(vb3dMesh(new T.BoxGeometry(w-.1,.06,.44),vb3dMat('#fff',{map:sadu,rough:.95}),0,.32,0,{noCast:1}));
-  grp.add(vb3dMesh(new T.BoxGeometry(w-.16,.36,.16),vb3dMat(c,{rough:.95}),0,.5,-.18));sc.add(grp)};
+ const sadu=vb3dTexSadu();const cush=(x,z,ry,c,w)=>{const grp=new T.Group();grp.position.set(x,0,z);grp.rotation.y=ry;const cm=vb3dMat(c,{rough:.95});
+  grp.add(vb3dMesh(vb3dG('Capsule',.2,w-.5,4,12),cm,0,.2,.02,{rot:[0,0,Math.PI/2]}));grp.add(vb3dMesh(vb3dG('Capsule',.17,w-.55,4,12),cm,0,.5,-.2,{rot:[0,0,Math.PI/2]}));
+  grp.add(vb3dMesh(vb3dG('Cylinder',.206,.206,.26,18,1,true),vb3dMat('#fff',{map:sadu,rough:.95,side:T.DoubleSide}),0,.2,.02,{rot:[0,0,Math.PI/2],noCast:1}));sc.add(grp)};
  const cc=VB3_COL.cushion;for(let k=0;k<5;k++)cush(-3.3+k*1.65,-3.35,0,cc[k%5],1.4);
  for(let k=0;k<3;k++){cush(-4.25,-1.9+k*1.6,Math.PI/2,cc[(k+2)%5],1.3);cush(4.25,-1.9+k*1.6,-Math.PI/2,cc[(k+3)%5],1.3)}
  // الطاولة: صينية نحاس على قاعدة خشب، ودلّة وفناجين وصحن تمر
- sc.add(vb3dMesh(new T.CylinderGeometry(.6,.66,.3,24),vb3dMat('#5A3418',{map:wood,rough:.8}),0,.15,0));
- sc.add(vb3dMesh(new T.CylinderGeometry(.98,.98,.05,48),brass,0,.335,0));sc.add(vb3dMesh(new T.TorusGeometry(.98,.03,10,48),brass,0,.36,0,{rot:[Math.PI/2,0,0],noCast:1}));
+ sc.add(vb3dMesh(vb3dG('Cylinder',.6,.66,.3,24),vb3dMat('#5A3418',{map:wood,rough:.8}),0,.15,0));
+ sc.add(vb3dMesh(vb3dG('Cylinder',.98,.98,.05,48),brass,0,.335,0));sc.add(vb3dMesh(vb3dG('Torus',.98,.03,10,48),brass,0,.36,0,{rot:[Math.PI/2,0,0],noCast:1}));
  const dp=[[0,0],[.12,.01],[.15,.08],[.11,.2],[.09,.3],[.13,.38],[.06,.44],[.07,.5]].map(p=>new T.Vector2(p[0],p[1]));
- const dal=new T.Group();dal.position.set(.32,.36,-.12);dal.add(vb3dMesh(new T.LatheGeometry(dp,20),brass));dal.add(vb3dMesh(new T.TorusGeometry(.08,.02,8,20),brass,-.16,.28,0,{rot:[0,0,Math.PI/2]}));
- dal.add(vb3dMesh(new T.ConeGeometry(.035,.3,10),brass,.18,.36,0,{rot:[0,0,-.8]}));sc.add(dal);
- const cupM=vb3dMat('#F4E6C8',{rough:.5});for(let k=0;k<5;k++){const a=k/5*Math.PI*2+.4;sc.add(vb3dMesh(new T.CylinderGeometry(.045,.03,.07,12),cupM,Math.cos(a)*.62,.4,Math.sin(a)*.62))}
- sc.add(vb3dMesh(new T.CylinderGeometry(.22,.24,.03,20),cupM,-.35,.375,.2));const dateM=vb3dMat('#5A2A12',{rough:.6});for(let k=0;k<9;k++)sc.add(vb3dMesh(new T.SphereGeometry(.035,8,6),dateM,-.35+(k%3-1)*.07,.42,.2+(Math.floor(k/3)-1)*.07,{noCast:1}));
+ const dal=new T.Group();dal.position.set(.32,.36,-.12);dal.add(vb3dMesh(new T.LatheGeometry(dp,20),brass));dal.add(vb3dMesh(vb3dG('Torus',.08,.02,8,20),brass,-.16,.28,0,{rot:[0,0,Math.PI/2]}));
+ dal.add(vb3dMesh(vb3dG('Cone',.035,.3,10),brass,.18,.36,0,{rot:[0,0,-.8]}));sc.add(dal);
+ const cupM=vb3dMat('#F4E6C8',{rough:.5});for(let k=0;k<5;k++){const a=k/5*Math.PI*2+.4;sc.add(vb3dMesh(vb3dG('Cylinder',.045,.03,.07,12),cupM,Math.cos(a)*.62,.4,Math.sin(a)*.62))}
+ sc.add(vb3dMesh(vb3dG('Cylinder',.22,.24,.03,20),cupM,-.35,.375,.2));const dateM=vb3dMat('#5A2A12',{rough:.6});for(let k=0;k<9;k++)sc.add(vb3dMesh(vb3dG('Sphere',.035,8,6),dateM,-.35+(k%3-1)*.07,.42,.2+(Math.floor(k/3)-1)*.07,{noCast:1}));
  // الفانوس المعلّق فوق الطاولة
  const lan=new T.Group();lan.position.set(0,2.15,0);lan.add(vb3dLimb(new T.Vector3(0,1.7,0),new T.Vector3(0,.3,0),.012,brass));
- lan.add(vb3dMesh(new T.ConeGeometry(.2,.16,8),brass,0,.3,0),vb3dMesh(new T.CylinderGeometry(.14,.14,.34,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.6,tr:1,op:.55,side:T.DoubleSide}),0,.05,0,{noCast:1}),vb3dMesh(new T.CylinderGeometry(.17,.15,.05,8),brass,0,-.14,0));
- for(let k=0;k<8;k++){const a=k/8*Math.PI*2;lan.add(vb3dMesh(new T.BoxGeometry(.012,.34,.012),brass,Math.cos(a)*.14,.05,Math.sin(a)*.14,{noCast:1}))}
+ lan.add(vb3dMesh(vb3dG('Cone',.2,.16,8),brass,0,.3,0),vb3dMesh(vb3dG('Cylinder',.14,.14,.34,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.6,tr:1,op:.55,side:T.DoubleSide}),0,.05,0,{noCast:1}),vb3dMesh(vb3dG('Cylinder',.17,.15,.05,8),brass,0,-.14,0));
+ for(let k=0;k<8;k++){const a=k/8*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.34,.012),brass,Math.cos(a)*.14,.05,Math.sin(a)*.14,{noCast:1}))}
  sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.6,1.6,1);glow.position.set(0,2.2,0);sc.add(glow);
- const L={};L.hemi=new T.HemisphereLight(0xFFE7C6,0x4A2A1A,1.15);sc.add(L.hemi);
+ const L={};L.hemi=new T.HemisphereLight(0xFFE7C6,0x4A2A1A,.95);sc.add(L.hemi);
  L.key=new T.DirectionalLight(0xFFF0D8,2.2);L.key.position.set(2.6,5.5,3.2);L.key.castShadow=true;L.key.shadow.mapSize.set(768,768);
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0006;L.key.shadow.normalBias=.02;sc.add(L.key);
  L.lamp=new T.PointLight(0xFFC98A,26,11,1.7);L.lamp.position.set(0,2.05,0);sc.add(L.lamp);
+ L.fill=new T.DirectionalLight(0xFFE2C4,.45);L.fill.position.set(0,3,7);sc.add(L.fill);
  L.warm=new T.PointLight(0xFFB070,10,10,1.8);L.warm.position.set(0,1.6,-3.2);sc.add(L.warm);
- return {L,glow,day:{hemi:1.15,key:2.2,lamp:26,bg:'#3A2A1C'},night:{hemi:.3,key:.5,lamp:14,bg:'#1A1512'}};
+ return {L,glow,day:{hemi:.95,key:2.0,lamp:24,bg:'#3A2A1C'},night:{hemi:.3,key:.5,lamp:14,bg:'#1A1512'}};
 }
 function vb3dRoomSquare(sc){
  const T=THREE,wood=vb3dTexWood();
- sc.add(vb3dMesh(new T.PlaneGeometry(40,40),vb3dMat('#fff',{map:vb3dTexCobble(),rough:.95}),0,0,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1}));
- const sky=vb3dMesh(new T.SphereGeometry(42,32,16),new T.MeshBasicMaterial({map:vb3dTexSky('dusk'),side:T.BackSide,fog:false}),0,0,0,{noCast:1});sc.add(sky);
+ sc.add(vb3dMesh(vb3dG('Plane',40,40),vb3dMat('#fff',{map:vb3dTexCobble(),rough:.95}),0,0,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1}));
+ const sky=vb3dMesh(vb3dG('Sphere',42,32,16),new T.MeshBasicMaterial({map:vb3dTexSky('dusk'),side:T.BackSide,fog:false}),0,0,0,{noCast:1});sc.add(sky);
  const pts=[];for(let k=0;k<420;k++){const a=Math.random()*Math.PI*2,e=Math.random()*1.2+.15;pts.push(Math.cos(a)*Math.cos(e)*40,Math.sin(e)*40,Math.sin(a)*Math.cos(e)*40)}
  const stars=new T.Points(new T.BufferGeometry().setAttribute('position',new T.Float32BufferAttribute(pts,3)),new T.PointsMaterial({color:0xFFFFFF,size:.22,transparent:true,opacity:.7,fog:false}));sc.add(stars);
- const moon=vb3dMesh(new T.SphereGeometry(1.3,20,14),new T.MeshBasicMaterial({color:0xFFF4D6,fog:false}),-15,13,-27,{noCast:1});sc.add(moon);
+ const moon=vb3dMesh(vb3dG('Sphere',1.3,20,14),new T.MeshBasicMaterial({color:0xFFF4D6,fog:false}),-15,13,-27,{noCast:1});sc.add(moon);
  const mg=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFF0C8,transparent:true,opacity:.7,blending:T.AdditiveBlending,depthWrite:false,fog:false}));mg.scale.set(9,9,1);mg.position.copy(moon.position);sc.add(mg);
  const fac=vb3dMat('#fff',{map:vb3dTexFacade(),rough:.95}),par=vb3dMat('#3A3558',{rough:.95});
- const bld=(x,z,w,h,d,ry)=>{const b=vb3dMesh(new T.BoxGeometry(w,h,d),fac,x,h/2,z,{rot:[0,ry||0,0],noCast:1});b.receiveShadow=true;sc.add(b);sc.add(vb3dMesh(new T.BoxGeometry(w+.2,.3,d+.2),par,x,h+.1,z,{rot:[0,ry||0,0],noCast:1}))};
+ const bld=(x,z,w,h,d,ry)=>{const b=vb3dMesh(vb3dG('Box',w,h,d),fac,x,h/2,z,{rot:[0,ry||0,0],noCast:1});b.receiveShadow=true;sc.add(b);sc.add(vb3dMesh(vb3dG('Box',w+.2,.3,d+.2),par,x,h+.1,z,{rot:[0,ry||0,0],noCast:1}))};
  [[-6.5,-6.5,3.2,5,3],[-3.2,-7.5,2.6,4,3],[0,-8,3.4,6,3],[3.2,-7.5,2.6,4.4,3],[6.5,-6.5,3.2,5.4,3],[-8.5,-2,3,4.2,3,Math.PI/2],[8.5,-2,3,4.6,3,-Math.PI/2],[-8.5,3,3,3.6,3,Math.PI/2],[8.5,3,3,3.8,3,-Math.PI/2]].forEach(a=>bld(...a));
- sc.add(vb3dMesh(new T.CylinderGeometry(.5,.6,9,10),par,-1.2,4.5,-14,{noCast:1}),vb3dMesh(new T.SphereGeometry(.7,12,8),par,-1.2,9.3,-14,{noCast:1}),vb3dMesh(new T.SphereGeometry(2.2,16,10,0,Math.PI*2,0,Math.PI/2),par,4,5.5,-14,{noCast:1}),vb3dMesh(new T.BoxGeometry(6,5.5,4),par,4,2.75,-14,{noCast:1}));
- const palm=(x,z)=>{const grp=new T.Group();grp.position.set(x,0,z);grp.add(vb3dMesh(new T.CylinderGeometry(.09,.14,3.4,8),vb3dMat('#4A3524',{rough:1}),0,1.7,0));
-  const fm=vb3dMat('#1F5B3C',{rough:.9,side:T.DoubleSide});for(let k=0;k<7;k++){const a=k/7*Math.PI*2;const f=vb3dMesh(new T.PlaneGeometry(1.6,.34),fm,Math.cos(a)*.7,3.35,Math.sin(a)*.7,{noCast:1});f.rotation.set(0,-a,-.45);grp.add(f)}sc.add(grp)};
+ sc.add(vb3dMesh(vb3dG('Cylinder',.5,.6,9,10),par,-1.2,4.5,-14,{noCast:1}),vb3dMesh(vb3dG('Sphere',.7,12,8),par,-1.2,9.3,-14,{noCast:1}),vb3dMesh(vb3dG('Sphere',2.2,16,10,0,Math.PI*2,0,Math.PI/2),par,4,5.5,-14,{noCast:1}),vb3dMesh(vb3dG('Box',6,5.5,4),par,4,2.75,-14,{noCast:1}));
+ const palm=(x,z)=>{const grp=new T.Group();grp.position.set(x,0,z);grp.add(vb3dMesh(vb3dG('Cylinder',.09,.14,3.4,8),vb3dMat('#4A3524',{rough:1}),0,1.7,0));
+  const fm=vb3dMat('#1F5B3C',{rough:.9,side:T.DoubleSide});for(let k=0;k<7;k++){const a=k/7*Math.PI*2;const f=vb3dMesh(vb3dG('Plane',1.6,.34),fm,Math.cos(a)*.7,3.35,Math.sin(a)*.7,{noCast:1});f.rotation.set(0,-a,-.45);grp.add(f)}sc.add(grp)};
  palm(-4.6,-4.2);palm(4.8,-4);palm(-5.4,2.4);
  const post=(x,z)=>{const grp=new T.Group();grp.position.set(x,0,z);const pm=vb3dMat('#3A3E58',{metal:.4,rough:.6});
-  grp.add(vb3dMesh(new T.CylinderGeometry(.06,.09,2.8,8),pm,0,1.4,0),vb3dMesh(new T.CylinderGeometry(.22,.26,.12,8),pm,0,.06,0),vb3dMesh(new T.BoxGeometry(.3,.38,.3),vb3dMat('#FFE2A0',{emis:'#FFD27A',ei:1.5,tr:1,op:.7}),0,3.0,0,{noCast:1}),vb3dMesh(new T.ConeGeometry(.26,.2,4),pm,0,3.28,0,{rot:[0,Math.PI/4,0]}));
+  grp.add(vb3dMesh(vb3dG('Cylinder',.06,.09,2.8,8),pm,0,1.4,0),vb3dMesh(vb3dG('Cylinder',.22,.26,.12,8),pm,0,.06,0),vb3dMesh(vb3dG('Box',.3,.38,.3),vb3dMat('#FFE2A0',{emis:'#FFD27A',ei:1.5,tr:1,op:.7}),0,3.0,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.26,.2,4),pm,0,3.28,0,{rot:[0,Math.PI/4,0]}));
   const pl=new T.PointLight(0xFFD08A,18,9,1.8);pl.position.set(0,2.95,0);grp.add(pl);sc.add(grp);return pl};
  const p1=post(-3.4,1.4),p2=post(3.4,1.4);
  // طاولة خشب مستديرة بفانوس وأوراق
  const wm=vb3dMat('#5A3418',{map:wood,rough:.75});
- sc.add(vb3dMesh(new T.CylinderGeometry(1.0,1.0,.08,48),wm,0,.72,0),vb3dMesh(new T.TorusGeometry(1.0,.035,10,48),vb3dMat('#3B2412',{rough:.8}),0,.74,0,{rot:[Math.PI/2,0,0],noCast:1}),vb3dMesh(new T.CylinderGeometry(.1,.12,.7,10),wm,0,.35,0),vb3dMesh(new T.CylinderGeometry(.45,.5,.06,20),wm,0,.03,0));
+ sc.add(vb3dMesh(vb3dG('Cylinder',1.0,1.0,.08,48),wm,0,.72,0),vb3dMesh(vb3dG('Torus',1.0,.035,10,48),vb3dMat('#3B2412',{rough:.8}),0,.74,0,{rot:[Math.PI/2,0,0],noCast:1}),vb3dMesh(vb3dG('Cylinder',.1,.12,.7,10),wm,0,.35,0),vb3dMesh(vb3dG('Cylinder',.45,.5,.06,20),wm,0,.03,0));
  const brass=vb3dMat('#C9921E',{metal:.7,rough:.32});const lan=new T.Group();lan.position.set(0,.76,0);
- lan.add(vb3dMesh(new T.CylinderGeometry(.13,.15,.04,8),brass,0,.02,0),vb3dMesh(new T.CylinderGeometry(.1,.1,.3,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.8,tr:1,op:.6,side:T.DoubleSide}),0,.19,0,{noCast:1}),vb3dMesh(new T.ConeGeometry(.14,.12,8),brass,0,.4,0),vb3dMesh(new T.TorusGeometry(.06,.012,6,16),brass,0,.5,0,{noCast:1}));
- for(let k=0;k<6;k++){const a=k/6*Math.PI*2;lan.add(vb3dMesh(new T.BoxGeometry(.012,.3,.012),brass,Math.cos(a)*.1,.19,Math.sin(a)*.1,{noCast:1}))}sc.add(lan);
+ lan.add(vb3dMesh(vb3dG('Cylinder',.13,.15,.04,8),brass,0,.02,0),vb3dMesh(vb3dG('Cylinder',.1,.1,.3,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.8,tr:1,op:.6,side:T.DoubleSide}),0,.19,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.14,.12,8),brass,0,.4,0),vb3dMesh(vb3dG('Torus',.06,.012,6,16),brass,0,.5,0,{noCast:1}));
+ for(let k=0;k<6;k++){const a=k/6*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.3,.012),brass,Math.cos(a)*.1,.19,Math.sin(a)*.1,{noCast:1}))}sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.6,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.3,1.3,1);glow.position.set(0,.98,0);sc.add(glow);
- const paper=vb3dMat('#E9D8B4',{rough:.9});for(let k=0;k<4;k++)sc.add(vb3dMesh(new T.BoxGeometry(.16,.006,.24),paper,-.45+k*.09,.765+k*.006,.3,{rot:[0,-.3+k*.15,0],noCast:1}));
- sc.add(vb3dMesh(new T.CylinderGeometry(.05,.04,.09,10),vb3dMat('#F4E6C8',{rough:.5}),.55,.8,.25));
+ const paper=vb3dMat('#E9D8B4',{rough:.9});for(let k=0;k<4;k++)sc.add(vb3dMesh(vb3dG('Box',.16,.006,.24),paper,-.45+k*.09,.765+k*.006,.3,{rot:[0,-.3+k*.15,0],noCast:1}));
+ sc.add(vb3dMesh(vb3dG('Cylinder',.05,.04,.09,10),vb3dMat('#F4E6C8',{rough:.5}),.55,.8,.25));
  sc.fog=new T.FogExp2(0x0B0E22,.052);
  const L={};L.hemi=new T.HemisphereLight(0x7A86C8,0x1A1420,.62);sc.add(L.hemi);
  L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-4,7,-2);L.key.castShadow=true;L.key.shadow.mapSize.set(768,768);
  Object.assign(L.key.shadow.camera,{left:-5,right:5,top:5,bottom:-5,near:.5,far:20});L.key.shadow.bias=-.0006;L.key.shadow.normalBias=.02;sc.add(L.key);
  L.lamp=new T.PointLight(0xFFB760,34,10,1.7);L.lamp.position.set(0,1.25,0);sc.add(L.lamp);L.posts=[p1,p2];
+ L.fill=new T.DirectionalLight(0xFFD2A8,.5);L.fill.position.set(0,3,7);sc.add(L.fill);
  return {L,glow,sky,stars,day:{hemi:.9,key:1.5,lamp:44,post:20,skyc:'#FFFFFF',starO:.7},night:{hemi:.26,key:.75,lamp:18,post:9,skyc:'#5A6090',starO:1}};
 }
 /* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
@@ -213,23 +293,29 @@ function vb3dMount(kindOrModel){
  const st=document.getElementById(model.stage);if(!st)return false;
  const T=THREE;let renderer;
  try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){return false}
- const cv=renderer.domElement;cv.className='vb3d';st.insertBefore(cv,st.firstChild);
+ const cv=renderer.domElement;cv.className='vb3d';st.insertBefore(cv,st.firstChild);const vig=document.createElement('div');vig.className='vb3dVig';cv.after(vig);
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.outputColorSpace=T.SRGBColorSpace;
  const sc=new T.Scene();const cam=new T.PerspectiveCamera(48,1.2,.1,80);
  const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.72+Math.max(0,n-6)*.1,Rz=1.45,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
+ sc.environmentIntensity=kind==='mafia'?.1:.2;
+ const envIn=()=>{try{if(!VB3.on||!VB3.sc)return;if(!VB3.envTex){const pm=new T.PMREMGenerator(VB3.renderer);VB3.envTex=pm.fromScene(new T.RoomEnvironment(),.04).texture;pm.dispose()}VB3.sc.environment=VB3.envTex;VB3.dirty=true}catch(e){}};
+ if(VB3.envTex)sc.environment=VB3.envTex;else (window.requestIdleCallback||(f=>setTimeout(f,600)))(envIn,{timeout:1500});   // الانعكاسات الناعمة تُحسب بعد أول رسم كي لا تتأخّر الغرفة في الظهور
  sc.background=new T.Color(kind==='mafia'?'#0B0E22':room.day.bg);
  const chars=[];const seatH=kind==='mafia'?.5:.15;
  for(let i=0;i<n;i++){const a=i===0?Math.PI/2:Math.PI+((i-1)/Math.max(1,n-2))*Math.PI,x=i===0?0:Math.cos(a)*Rx,z=i===0?Rz+.55:Math.sin(a)*Rz,empty=model.empty.has(i);
   const seat=new T.Group();seat.position.set(x,0,z);seat.rotation.y=Math.atan2(-x,-z);sc.add(seat);
-  if(kind==='mafia'){const cm=vb3dMat('#4A2C16',{map:vb3dTexWood(),rough:.8});
-   seat.add(vb3dMesh(new T.BoxGeometry(.56,.06,.54),cm,0,.47,0),vb3dMesh(new T.BoxGeometry(.56,.6,.06),cm,0,.8,-.26),vb3dMesh(new T.BoxGeometry(.5,.05,.05),cm,0,.66,-.26,{noCast:1}));
-   [[-.24,-.22],[.24,-.22],[-.24,.22],[.24,.22]].forEach(([lx,lz])=>seat.add(vb3dMesh(new T.CylinderGeometry(.025,.03,.46,8),cm,lx,.23,lz)))}
-  else{const look0=empty?{cushion:VB3_COL.cushion[i%5]}:null;seat.add(vb3dMesh(new T.CylinderGeometry(.44,.5,.16,28),vb3dMat(empty?look0.cushion:vb3dLook(i,model).cushion,{rough:.95}),0,.08,0));seat.add(vb3dMesh(new T.CylinderGeometry(.44,.44,.04,28),vb3dMat('#fff',{map:vb3dTexSadu(),rough:.95}),0,.15,0,{noCast:1}))}
-  const ringM=new T.MeshBasicMaterial({color:0xE8B23A,transparent:true,opacity:0,depthWrite:false});const ring=vb3dMesh(new T.RingGeometry(.5,.62,40),ringM,0,.012,0,{rot:[-Math.PI/2,0,0],noCast:1});seat.add(ring);
+  if(kind==='mafia'){const cm=vb3dMat('#4A2C16',{map:vb3dTexWood(),rough:.75});
+   seat.add(vb3dMesh(vb3dG('Cylinder',.3,.3,.06,20),cm,0,.47,0),vb3dMesh(vb3dG('Torus',.3,.02,6,20),cm,0,.47,0,{rot:[Math.PI/2,0,0],noCast:1}));
+   [-1,1].forEach(sx=>seat.add(vb3dMesh(vb3dG('Capsule',.022,.52,3,6),cm,sx*.23,.78,-.25)));
+   [.62,.76,.9].forEach(y=>seat.add(vb3dMesh(vb3dG('Capsule',.014,.42,2,6),cm,0,y,-.25,{rot:[0,0,Math.PI/2],noCast:1})));
+   [[-.22,-.2],[.22,-.2],[-.22,.2],[.22,.2]].forEach(([lx,lz])=>seat.add(vb3dMesh(vb3dG('Capsule',.024,.42,3,6),cm,lx,.23,lz)))}
+  else{const cc=empty?VB3_COL.cushion[i%5]:vb3dLook(i,model).cushion;seat.add(vb3dMesh(vb3dG('Sphere',.5,20,12),vb3dMat(cc,{rough:.95}),0,.03,0,{sc:[1,.34,1]}));
+   seat.add(vb3dMesh(vb3dG('Cylinder',.48,.48,.1,20,1,true),vb3dMat('#fff',{map:vb3dTexSadu(),rough:.95,side:T.DoubleSide}),0,.06,0,{noCast:1}))}
+  const ringM=new T.MeshBasicMaterial({color:0xE8B23A,transparent:true,opacity:0,depthWrite:false});const ring=vb3dMesh(vb3dG('Ring',.5,.62,28),ringM,0,.012,0,{rot:[-Math.PI/2,0,0],noCast:1});seat.add(ring);
   let ch=null,hit=null;
   if(!empty){ch=vb3dChar(vb3dLook(i,model),kind==='mafia'?'chair':'floor');ch.position.y=seatH;seat.add(ch);
-   hit=vb3dMesh(new T.CapsuleGeometry(.42,.9,3,8),new T.MeshBasicMaterial({visible:false}),0,seatH+.55,.05,{noCast:1});hit.userData.seat=i;seat.add(hit)}
+   hit=vb3dMesh(vb3dG('Capsule',.42,.9,2,6),new T.MeshBasicMaterial({visible:false}),0,seatH+.55,.05,{noCast:1});hit.userData.seat=i;seat.add(hit)}
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
@@ -250,9 +336,9 @@ function vb3dMount(kindOrModel){
 function vb3dMountLobby(seats,game){
  if(!vb3dOk())return false;
  const st=document.getElementById('rmStage');if(!st)return false;
- const names=seats.map(p=>p?p.name:''),sig=game+'|'+names.join('|')+'|'+seats.map(p=>p&&p.host?1:0).join('')+'|'+seats.map(p=>p&&p.me?1:0).join('');
- if(VB3.on&&VB3.lobby&&VB3.sig===sig&&VB3.cv){st.insertBefore(VB3.cv,st.firstChild);const s=st.closest('.rmRing');if(s)s.classList.add('is3d');VB3.anch=null;vb3dResize();return true}
- const model={kind:game==='mafia'?'mafia':'majlis',names,me:seats.findIndex(p=>p&&p.me),host:seats.findIndex(p=>p&&p.host),empty:new Set(seats.map((p,i)=>p?-1:i).filter(i=>i>=0)),
+ const names=seats.map(p=>p?p.name:''),avs=seats.map(p=>p&&p.av||null),sig=game+'|'+names.join('|')+'|'+seats.map(p=>p&&p.host?1:0).join('')+'|'+seats.map(p=>p&&p.me?1:0).join('')+'|'+JSON.stringify(avs);
+ if(VB3.on&&VB3.lobby&&VB3.sig===sig&&VB3.cv){st.insertBefore(VB3.cv,st.firstChild);const vg=VB3.cv.nextSibling;if(!vg||vg.className!=='vb3dVig'){const d=document.createElement('div');d.className='vb3dVig';VB3.cv.after(d)}const s=st.closest('.rmRing');if(s)s.classList.add('is3d');VB3.anch=null;vb3dResize();return true}
+ const model={kind:game==='mafia'?'mafia':'majlis',names,avs,me:seats.findIndex(p=>p&&p.me),host:seats.findIndex(p=>p&&p.host),empty:new Set(seats.map((p,i)=>p?-1:i).filter(i=>i>=0)),
   stage:'rmStage',seats:'.rmRing .rmSeat',scene:'.rmRing',lobby:true,alive:()=>!!document.getElementById('rmStage'),night:()=>false,state:i=>({}),tap:i=>{}};
  const ok=vb3dMount(model);if(ok)VB3.sig=sig;return ok;
 }
@@ -309,13 +395,14 @@ function vb3dLoop(now){
   v.yaw=lerp(v.yaw,yaw,dt*5);u.head.rotation.y=v.yaw;
   u.head.rotation.x=v.sleep*.38+v.dead*.55+Math.sin(t*6.5)*.045*v.talk+Math.sin(t*.9+c.i*2)*.015*(1-v.sleep-v.dead)*calm;
   u.head.rotation.z=Math.sin(t*.7+c.i)*.02*(1-v.sleep)*calm;
-  u.mouth.scale.y=1+Math.max(0,Math.sin(t*15+c.i))*2.6*v.talk;u.mouth.position.y=-.095-.012*v.talk;
-  const ey=Math.max(.1,1-v.sleep*.92-v.dead*.85);u.eyes.forEach(e=>{e.scale.y=ey});
+  u.open.scale.y=.05+Math.max(0,Math.sin(t*15+c.i))*.9*v.talk;u.mouth.position.y=-.1-.012*v.talk;
+  let blink=0;if(now>u.blinkAt){const k=(now-u.blinkAt)/170;if(k<1)blink=Math.sin(k*Math.PI);else u.blinkAt=now+2200+Math.random()*4200}
+  const shut=Math.min(1,Math.max(v.sleep,v.dead)*1+blink);u.eyes.forEach(e=>{if(!e.closed)e.lid.scale.y=1+1.5*shut});
   const r=u.arms.r;let el=r.rest.el,hd=r.rest.hd;
   if(c.pt!=null&&now<c.ptT&&VB3.chars[c.pt]){VB3.chars[c.pt].seat.getWorldPosition(tmp);tmp.y+=c.headY;c.ch.worldToLocal(tmp);tmp2.subVectors(tmp,r.sh).normalize();el=r.sh.clone().addScaledVector(tmp2,.33);hd=el.clone().addScaledVector(tmp2,.3);v.point=lerp(v.point,1,dt*7)}
   else if(v.ready>.02&&!s.dead){el=new T.Vector3(r.sh.x+.16,r.sh.y+.2,r.sh.z+.08);hd=new T.Vector3(r.sh.x+.14,r.sh.y+.52,r.sh.z+.1);v.point=lerp(v.point,v.ready,dt*6)}
   else{v.point=lerp(v.point,0,dt*5);if(c.pt!=null&&now>=c.ptT)c.pt=null}
-  if(v.point>.01||c._armMoved){const e2=r.rest.el.clone().lerp(el,v.point),h2=r.rest.hd.clone().lerp(hd,v.point);vb3dAim(r.up,r.sh,e2);vb3dAim(r.lo,e2,h2);r.hand.position.copy(h2);c._armMoved=v.point>.01}
+  if(v.point>.01||c._armMoved){const e2=r.rest.el.clone().lerp(el,v.point),h2=r.rest.hd.clone().lerp(hd,v.point);vb3dAim(r.up,r.sh,e2);vb3dAim(r.lo,e2,h2);r.hand.position.copy(h2);r.hand.quaternion.setFromUnitVectors(VB3._z||(VB3._z=new T.Vector3(0,0,1)),tmp2.subVectors(h2,e2).normalize());c._armMoved=v.point>.01}
   const g=v.dead;if(g>.001||c._grey){u.mats.forEach(m=>{const b=m.userData.base;const l=(b.r+b.g+b.b)/3;m.color.setRGB(b.r+(l-b.r)*g*.9,b.g+(l-b.g)*g*.9,b.b+(l-b.b)*g*.9);m.opacity=1-g*.5});c._grey=g>.001}
  });
  const R=VB3.room,L=R.L,night=VB3.model.night();VB3.lightK=lerp(VB3.lightK,night?0:1,dt*2.2);const k=VB3.lightK,mix=(a,b)=>b+(a-b)*k;
@@ -325,13 +412,14 @@ function vb3dLoop(now){
  else{VB3.sc.background.set(R.night.bg).lerp((VB3._c||(VB3._c=new T.Color())).set(R.day.bg),k);if(L.warm)L.warm.intensity=mix(10,2)}
  R.glow.material.opacity=mix(.55,.35)+Math.sin(t*3)*.05*calm;
  const sp=VB3.spot;if(talker&&!night){talker.u.head.getWorldPosition(tmp);sp.target.position.lerp(tmp,Math.min(1,dt*6));sp.intensity=lerp(sp.intensity,22,dt*4)}else sp.intensity=lerp(sp.intensity,0,dt*4);
- VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.lookAt(0,.45,-.45);
+ if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.lookAt(0,.45,-.45)}
  VB3.renderer.render(VB3.sc,VB3.cam);
 }
 function vb3dDispose(){
  if(!VB3.on)return;VB3.on=false;VB3.lobby=false;VB3.sig=null;
+
  if(VB3.raf)cancelAnimationFrame(VB3.raf);VB3.raf=null;if(VB3.ro){try{VB3.ro.disconnect()}catch(e){}VB3.ro=null}
- try{const keep=Object.values(VB3.tex);VB3.sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map&&!keep.includes(m.map))m.map.dispose();m.dispose()})}});VB3.renderer.dispose()}catch(e){}
+ try{const keep=Object.values(VB3.tex);VB3.sc.traverse(o=>{if(o.geometry&&!o.geometry.userData.shared)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map&&!keep.includes(m.map))m.map.dispose();m.dispose()})}});VB3.renderer.dispose()}catch(e){}
  if(VB3.cv&&VB3.cv.parentNode)VB3.cv.remove();
  const s=VB3.model&&document.querySelector(VB3.model.scene);if(s)s.classList.remove('is3d');
  VB3.sc=VB3.cam=VB3.renderer=VB3.cv=VB3.model=null;VB3.chars=[];VB3.anch=null;
