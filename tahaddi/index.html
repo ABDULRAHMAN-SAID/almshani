@@ -20537,7 +20537,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.48';
+const APP_VER='5.49';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -22927,9 +22927,18 @@ let VB=null;
 function vbNames(n){const pool=VB_NAMES.slice().sort(()=>Math.random()-.5);return [S.name||'أنت'].concat(pool.slice(0,n-1))}
 function vbHead(t){return tb(t)}
 function vbExit(){
- confirmSheet('مغادرة المباراة','ستنتهي هذه الجولة ضد الكمبيوتر ولن تُحتسب.','مغادرة',()=>{
-  if(VB){clearInterval(VB.tm);VB.tm=null;if(VB.tmI)clearInterval(VB.tmI);VB.tmI=null;if(VB.raf)cancelAnimationFrame(VB.raf);VB.raf=null}
-  Router.settle('gameHub',(VB&&VB.g)||'mafia')});
+ const g=(VB&&VB.g)||'mafia';
+ if(!VB||VB.over){vbKill();Router.settle('gameHub',g);return}   // انتهت الجولة أصلًا: رجوع بلا سؤال
+ confirmSheet('مغادرة المباراة','ستنتهي هذه الجولة ضد الكمبيوتر ولن تُحتسب.','مغادرة',()=>{vbKill();Router.settle('gameHub',g)});
+}
+/** يوقف الجولة الحالية نهائيًّا: مؤقّتاتها ومهلها وحلقاتها ونداءات الذكاء الاصطناعي المعلّقة — كانت الجولة المهجورة تواصل اللعب في الخلفية */
+function vbKill(){
+ if(!VB)return;
+ VB.over=true;VB.gone=true;VB.voting=false;VB.tallying=false;VB.replying=false;
+ clearTimeout(VB.tm);clearInterval(VB.tm);VB.tm=null;
+ if(VB.tmI)clearInterval(VB.tmI);VB.tmI=null;VB.timer=null;
+ if(VB.raf)cancelAnimationFrame(VB.raf);VB.raf=null;
+ VB.nightAi=null;
 }
 /** جولة ضد الكمبيوتر تُحتسب جولة ليلة عائلة في الأهداف اليومية والمهام */
 function vbDone(){evtParty();saveState()}
@@ -23247,12 +23256,21 @@ function vbFmt(sec){sec=Math.max(0,Math.ceil(sec));return String(Math.floor(sec/
 /** مؤقّت المرحلة: يرسم في شريط المرحلة ولوحة الدور، وينفّذ onEnd عند الصفر — معطّل في الاختبارات (VB.fast) */
 function vbTimer(sec,onEnd){
  vbTimerStop();
- if(!VB||VB.fast||!sec)return;
- const my=VB;VB.timer={end:Date.now()+sec*1000,total:sec,onEnd};
+ if(!VB||!sec||VB.over)return;
+ const sc=vbScale();if(VB.fast&&!sc)return;   // في الاختبارات السريعة بلا مقياس: لا مؤقّتات
+ const k=sc||1,my=VB;VB.timer={end:Date.now()+sec*1000*k,total:sec,onEnd,k};
  const tick=()=>{if(VB!==my||!VB.timer){clearInterval(my.tmI);my.tmI=null;return}
-  const left=Math.max(0,VB.timer.end-Date.now())/1000;vbTimerDraw(left,VB.timer.total);
+  const left=Math.max(0,VB.timer.end-Date.now())/1000/VB.timer.k;vbTimerDraw(left,VB.timer.total);
   if(left<=0){const f=VB.timer.onEnd;vbTimerStop();try{if(f)f()}catch(e){}}};
- VB.tmI=setInterval(tick,250);tick();
+ VB.tmI=setInterval(tick,Math.max(20,Math.min(250,250*k)));tick();
+}
+/** مقياس الزمن للاختبارات: window.__vbTimeScale=0.02 يجعل كل المؤقّتات أسرع خمسين مرّة (0 = معطّل) */
+function vbScale(){const v=+window.__vbTimeScale;return v>0?v:0}
+/** يضمن أن يبقى في المؤقّت الجاري min ثانية على الأقل (حين تكتب في آخر النقاش يُعطى الآليون وقتًا للردّ) */
+function vbTimerExtend(min){
+ if(!VB||!VB.timer)return;
+ const t=VB.timer,left=(t.end-Date.now())/1000/t.k;
+ if(left<min)t.end=Date.now()+min*1000*t.k;
 }
 function vbTimerStop(){if(VB&&VB.tmI){clearInterval(VB.tmI);VB.tmI=null}if(VB)VB.timer=null;vbTimerDraw(null)}
 function vbTimerDraw(left,total){
@@ -23308,6 +23326,8 @@ function vbAct(html){
  if(el){el.innerHTML=html;const sc=document.querySelector('.vbScene');if(sc)sc.style.paddingBottom=(html?el.offsetHeight+14:24)+'px'}   // الشريط ثابت أسفل الشاشة، والمحتوى يترك له مكانه
  vbScrollEnd();
 }
+/** ينتظر الوعد بحدّ أقصى ms (في الاختبارات بلا حدّ) — قرار متأخّر من النموذج لا يجمّد الجولة */
+function vbRace(p,ms){if(!VB||VB.fast)return p;return Promise.race([p,new Promise(r=>setTimeout(r,ms))])}
 /** تسلسل بمهل: يعيد وعدًا — وفي الاختبارات (VB.fast) بلا انتظار */
 function vbWait(ms){return new Promise(r=>{if(VB.fast)return r();VB.tm=setTimeout(r,ms)})}
 function vbAlive(){return !!(VB&&document.getElementById('vbFeed'))}
@@ -23395,6 +23415,7 @@ function vbMic(){
    الرفض أو الفشل المتكرّر، يعمل العقل المحلي (5.42) كاملًا. كل نداء يحمل حالة اللعبة والسجلّ ويعيد JSON
    يُتحقّق منه (أرقام اللاعبين، الأحياء، المافيا لا تصوّت على شريكها…) قبل تطبيقه على حالة اللعبة الرقمية. */
 const AI_TIER='default';   // طبقة النموذج في الأرتيفاكت: default يفكّر قبل الجواب (quick أسرع وأضعف، complex أعمق وأبطأ)
+const AI_TIMEOUT=90000;   // أقصى انتظار لنداء واحد؛ بعده يتولّى العقل المحلي هذه الخطوة
 const AI=(function(){
  const st={probe:null,on:false,src:null,fail:0,sample:null,busy:0,onLost:null,lostFired:false};
  function lost(why){if(st.lostFired)return;st.lostFired=true;try{if(typeof st.onLost==='function')st.onLost(why)}catch(e){}}
@@ -23422,16 +23443,18 @@ const AI=(function(){
  async function json(prompt,tier){
   if(!enabled())return null;
   thinking(true);
+  const ac=typeof AbortController==='function'?new AbortController():null,to=ac?setTimeout(()=>{try{ac.abort()}catch(e){}},AI_TIMEOUT):null;   // نداء معلّق لا يجمّد الجولة
   try{
-   if(st.src==='sample')return await st.sample.json(prompt,{modelTier:tier||AI_TIER,cache:false});
-   const r=await fetch(srvUrl('/ai/chat'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})});
+   const signal=ac?ac.signal:undefined;
+   if(st.src==='sample')return await st.sample.json(prompt,{modelTier:tier||AI_TIER,cache:false,signal});
+   const r=await fetch(srvUrl('/ai/chat'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt}),signal});
    if(r.status===503){st.on=false;lost('الخادم بلا مفتاح');return null}
    if(!r.ok)throw new Error('ai '+r.status);
    const j=await r.json();return j&&j.json!=null?j.json:null;   // الإخفاقات (نقلًا أو جوابًا بلا فائدة) تتراكم في الجولة وتُصفَّر عند بدء جولة جديدة
   }catch(e){
    if(e&&e.code==='not_granted'){st.on=false;lost('لم يُسمح به')}else{st.fail++;if(st.fail>=3)lost('تعذّر الاتصال')}
    return null;
-  }finally{thinking(false)}
+  }finally{if(to)clearTimeout(to);thinking(false)}
  }
  function reset(){st.fail=0;st.lostFired=false}
  function miss(){st.fail++;if(st.fail>=3)lost('أجوبة غير مفهومة')}   // جواب صالح الشكل لكنه بلا فائدة يُحسب إخفاقًا أيضًا
@@ -23600,7 +23623,7 @@ function mfBotsNight(){
  }
 }
 async function mfNight(){
- if(VB.over)return;
+ if(VB.over||VB.night||VB.nightDone===VB.day)return;vbTimerStop();
  VB.victim=null;VB.saved=null;VB.talking=null;
  mfSetNight(true);vbSeats();
  vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
@@ -23620,11 +23643,12 @@ async function mfNight(){
 }
 /** انتهى وقت الليل بلا اختيار: المافيا تضرب عشوائيًّا، الطبيب يحمي نفسه، المحقق يفحص أحدًا */
 function mfNightAuto(){
- if(!VB||VB.over||!VB.night)return;
+ if(!VB||VB.over||!VB.night||VB.nightDone===VB.day)return;
  const me=mfRole(0);
- if(me==='مافيا'){const l=VB.alive.filter(i=>i!==0&&mfRole(i)!=='مافيا');if(l.length)return mfKill(vbRnd(l))}
+ if(me!=='شعب')vbMsg({k:'n',icon:'timer',t:'انتهى وقت الليل بلا اختيار — اختير عنك.'});
+ if(me==='مافيا'){const l=VB.alive.filter(i=>i!==0&&mfRole(i)!=='مافيا');if(l.length)return mfKill(VB.botVictim!=null&&l.includes(VB.botVictim)?VB.botVictim:vbRnd(l))}   // شريكك الآليّ اختار: خذ اختياره
  if(me==='طبيب')return mfSave(0);
- if(me==='محقق'){const l=VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null);if(l.length)return mfCheck(vbRnd(l))}
+ if(me==='محقق'){const l=VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null);if(l.length)return mfCheck(vbRnd(l),true)}
  mfResolveNight();
 }
 function mfPick(t,list,cb){
@@ -23635,16 +23659,20 @@ function mfPick(t,list,cb){
 }
 function mfKill(i){VB.victim=i;vbMsg({k:'me',i:0,t:'اخترتُ '+VB.names[i]+'… بصمت.'});mfResolveNight()}
 function mfSave(i){VB.saved=i;vbMsg({k:'me',i:0,t:'سأحمي '+(i===0?'نفسي':VB.names[i])+' الليلة.'});mfResolveNight()}
-async function mfCheck(i){
+async function mfCheck(i,auto){
+ if(VB.over||!VB.night||VB.myKnow[i]!=null)return;
  VB.myKnow[i]=mfRole(i)==='مافيا';vbSeats();
  vbMsg({k:'ban',icon:'search',i,t:`نتيجة الفحص: ${VB.names[i]} ${VB.myKnow[i]?'مافيا!':'بريء'}`,d:VB.myKnow[i]?'في النهار أعلنها بزرّ «أعلن فحصي» فيصدّقك الناس أكثر — أو احتفظ بالسرّ':'استبعده من شكوكك، وافحص غيره الليلة القادمة'});
  mfRoleHint('day');
+ const sec=auto?8:20;
+ vbTurn('search','نتيجة الفحص','الفجر يحلّ بانتهاء الوقت أو بضغطة الزرّ',sec);
  vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} استيقظت المدينة</span></button>`);
- vbTimer(20,()=>mfResolveNight());
+ vbTimer(sec,()=>mfResolveNight());
 }
 async function mfResolveNight(){
  if(VB.over||VB.nightDone===VB.day)return;VB.nightDone=VB.day;vbTimerStop();
- if(VB.nightAi){const p=VB.nightAi;VB.nightAi=null;vbAct('');await p;if(!vbAlive())return}
+ if(VB.nightAi){const p=VB.nightAi,my=VB;VB.nightAi=null;vbAct('');vbTurn('timer','تمضي الليلة…','المافيا والطبيب والمحقق يقرّرون في الظلام');await vbRace(p,45000);if(VB!==my||!vbAlive())return}
+ VB.nightRes=VB.day;   // ما يصل من النموذج بعد الآن عن هذه الليلة يُهمل
  const victim=mfRole(0)==='مافيا'&&mfAliveI(0)&&VB.victim!=null?VB.victim:VB.botVictim;
  const saved=mfRole(0)==='طبيب'&&mfAliveI(0)?VB.saved:VB.botSave;
  const killed=victim!=null&&victim!==saved?victim:null;
@@ -23755,6 +23783,7 @@ async function mfAiVotes(voters){
 }
 /** قرارات الليل من النموذج: هدف المافيا الآليّة، حماية الطبيب الآليّ، فحص المحقق الآليّ — بعد التحقّق، وإلا تبقى قرارات العقل المحلي */
 async function mfAiNight(){
+ const my=VB,day=VB.day;
  const botMaf=VB.alive.filter(i=>i!==0&&mfRole(i)==='مافيا'),doc=VB.alive.find(i=>i!==0&&mfRole(i)==='طبيب'),det=VB.alive.find(i=>i!==0&&mfRole(i)==='محقق');
  const humanMaf=mfRole(0)==='مافيا'&&mfAliveI(0);
  const asks=[];
@@ -23763,6 +23792,7 @@ async function mfAiNight(){
  if(det!=null){const unk=VB.alive.filter(i=>i!==det&&VB.know[i]==null);if(unk.length)asks.push(`"check": من يفحص المحقق ${VB.names[det]}؟ من بين من لم يفحصهم بعد فقط: ${unk.map(i=>i+' '+VB.names[i]).join('، ')} — الأكثر إفادة للمدينة لا الأوضح.`)}
  if(!asks.length)return null;
  const r=await AI.json(mfAiState()+`\n\nالمطلوب الآن: قرارات الليلة ${VB.day}. كل دور يقرّر وحده بما يعرفه هو فقط:\n${asks.join('\n')}\nأعد JSON فقط: {"analysis":"<سطر لكل قرار>","kill":<رقم أو null>,"save":<رقم أو null>,"check":<رقم أو null>,${MF_AI_NOTES}}`);
+ if(VB!==my||VB.over||VB.nightRes===day||VB.day!==day)return null;   // وصل بعد الفجر: قرارات العقل المحلي مضت
  if(!r||typeof r!=='object'){AI.miss();return null}
  mfAiNotes(r);
  if(botMaf.length&&!humanMaf){const k=vbNameIdx(r.kill);if(k!=null&&mfAliveI(k)&&mfRole(k)!=='مافيا')VB.botVictim=k}
@@ -23875,11 +23905,12 @@ async function mfTalk(){
 }
 /** ساعة النقاش: وقت محدود، والآليون يجهزون تدريجيًّا؛ التصويت يبدأ حين يجهز الجميع أو ينتهي الوقت */
 function mfDiscussClock(){
- const sec={easy:120,mid:90,hard:75}[VB.diff]||90,my=VB;
+ const sec={easy:120,mid:90,hard:75}[VB.diff]||90,my=VB,k=vbScale()||1;
+ VB.voteWhenDone=false;
  vbTurn('sound','النقاش '+VB.day,'اتّهم أو اسأل أو دافع بكلماتك، وإذا انتهيت اضغط «جاهز» — التصويت يبدأ باتفاق الجميع أو بانتهاء الوقت',sec);
  mfReadyCheck();
- vbTimer(sec,()=>{if(VB===my&&!VB.over&&!VB.voting)mfVote()});
- if(!VB.fast)VB.alive.filter(i=>i!==0).forEach(i=>{const at=sec*1000*(.45+Math.random()*.4);
+ vbTimer(sec,()=>{if(VB!==my||VB.over||VB.voting)return;if(VB.replying){VB.voteWhenDone=true;return}mfVote()});
+ if(!VB.fast||vbScale())VB.alive.filter(i=>i!==0).forEach(i=>{const at=sec*1000*k*(.45+Math.random()*.4);
   setTimeout(()=>{if(VB!==my||VB.voting||VB.over||!mfAliveI(i))return;VB.ready.add(i);vbSeats();mfReadyCheck()},at)});
 }
 /** «جاهز»: تعلن أنك انتهيت؛ من لم يجهز من الآليين يجهز خلال ثوانٍ، وحين يجهز الجميع يبدأ التصويت */
@@ -23895,7 +23926,7 @@ function mfReadyCheck(){
  if(!VB||VB.over||VB.voting)return;
  const total=VB.alive.length,r=VB.ready.size+(VB.meReady?1:0);
  const row=document.getElementById('vbReadyRow');if(row){row.hidden=false;row.innerHTML=`${ico('group',12)} جاهزون ${r}/${total}${!VB.meReady&&r>=total-1&&total>1?' — الجميع بانتظارك':''}`}
- if(r>=total)mfVote();
+ if(r>=total){if(VB.replying){VB.voteWhenDone=true;return}mfVote()}
 }
 function mfMyTurn(){
  if(VB.voting)return;
@@ -23916,16 +23947,20 @@ function mfParse(text){
  return {m,intent,claim,confess};
 }
 async function mfSend(){
- const text=vbRead();if(!text||VB.voting||VB.over)return;
+ const text=vbRead();if(!text||VB.voting||VB.over||VB.replying||VB.night)return;
  if(VB.msgs>=6){toast('قلت ما يكفي اليوم — اضغط «جاهز»');return}
- VB.msgs++;VB.askedMe=null;
+ const my=VB;VB.msgs++;VB.askedMe=null;VB.replying=true;vbTimerExtend(20);   // كتبتَ في آخر النقاش: يبقى وقت للردّ عليك
  vbMsg({k:'me',i:0,t:text});
  vbBar({ph:'…',fn:'mfSend',ready:true,disabled:true});
  const p=mfParse(text);
- let handled=false;
- if(AI.enabled()){handled=await mfAiReply(p,text);if(!vbAlive())return}   // النموذج يقرأ المقصد ويردّ؛ وإن تعذّر فالعقل المحلي
- if(!handled){mfApplyHuman(p);await mfReplyLocal(p,text)}
- if(!vbAlive()||VB.voting)return;
+ try{
+  let handled=false;
+  if(AI.enabled()){handled=await mfAiReply(p,text);if(VB!==my||!vbAlive())return}   // النموذج يقرأ المقصد ويردّ؛ وإن تعذّر فالعقل المحلي
+  if(!handled){mfApplyHuman(p);await mfReplyLocal(p,text)}
+ }catch(e){}finally{my.replying=false}
+ if(VB!==my||!vbAlive()||VB.over)return;
+ if(VB.voteWhenDone){VB.voteWhenDone=false;mfVote();return}   // اتفق الجميع (أو انتهى الوقت) والآليون يردّون عليك: التصويت بعد ردّهم
+ if(VB.voting)return;
  mfMyTurn();
 }
 /** سألتَ عن لاعب خارج اللعبة: من صوّت عليه، من قتله، ما دوره — يجيب حيّ من السجلّ، لا «لم يعد بيننا» */
@@ -24054,7 +24089,7 @@ function mfAfterLynch(who,votes){
 }
 function mfCount(votes){let best=null,bn=0,tie=false;Object.entries(votes).forEach(([k,v])=>{if(v>bn){bn=v;best=+k;tie=false}else if(v===bn)tie=true});return tie?null:best}
 async function mfTally(my){
- if(VB.tallying)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();
+ if(VB.tallying||VB.over)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();
  vbAct('');
  const votes={},byWho={};VB.tallyNow={};
  const add=(who,t)=>{vbMsg({k:'v',i:who,t});byWho[who]=t;(VB.voteLog||(VB.voteLog=[])).push({day:VB.day,by:who,t});if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}};
@@ -24073,7 +24108,7 @@ async function mfTally(my){
   vbMsg({k:'ban',icon:MAF_ROLE[mfRole(who)].ic,i:who,t:`أُعدم ${VB.names[who]} بأغلبية ${votes[who]}`,d:`وتبيّن أنه كان ${mfRole(who)}`});
   mfAfterLynch(who,Object.fromEntries(Object.entries(byWho).filter(([k,v])=>v===who)));
   if(mfWinCheck())return;
-  if(who===0){VB.dead=true;await vbWait(600);vbMsg({k:'n',t:'أعدمتك المدينة. تتابع الآن ما يجري من بعيد.'});return mfSpectate()}
+  if(who===0){VB.dead=true;vbRoleStrip('خرجتَ من اللعبة — تتابع ما يجري من بعيد');await vbWait(600);vbMsg({k:'n',t:'أعدمتك المدينة. تتابع الآن ما يجري من بعيد.'});return mfSpectate(true)}
  }
  VB.day++;VB.voting=false;VB.tallying=false;
  vbTurn('timer','انتهى اليوم','الليلة تبدأ بانتهاء الوقت أو بضغطة الزرّ',15);
@@ -24087,16 +24122,18 @@ function mfWinCheck(){
  mfEnd(win);return true;
 }
 /** بعد خروجك: الليالي والأيام تمضي أمامك خطوة خطوة */
-async function mfSpectate(){
+async function mfSpectate(afterLynch){
  VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();
  vbAct(`<button class="btn g" onclick="VB.skip=1">${ico('next',13)} تخطّي إلى النهاية</button>`);
- let guard=0,first=true;const my=VB;   // إن بدأت جولة جديدة أثناء المتابعة تتوقّف هذه الحلقة
+ if(afterLynch)VB.day++;   // أُعدمتَ نهارًا: انتهى هذا اليوم، والمتابعة تبدأ من الليلة التالية
+ let guard=0,first=!afterLynch;const my=VB;   // إن بدأت جولة جديدة أثناء المتابعة تتوقّف هذه الحلقة
  while(guard++<30&&!VB.over&&VB===my){
   const w=ms=>VB.skip?Promise.resolve():vbWait(ms);
-  if(!first){   // اليوم الذي متّ فيه يكمل نقاشه وتصويته أوّلًا، ثم تتوالى الليالي
-   mfSetNight(true);vbSeats();vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
+  if(!first){   // قُتلتَ ليلًا: يوم موتك يكمل نقاشه وتصويته أوّلًا، ثم تتوالى الليالي
+   mfSetNight(true);vbSeats();vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');VB.nightDone=VB.day;
    mfBotsNight();
-   if(AI.enabled()&&!VB.skip){await mfAiNight().catch(()=>null);if(!vbAlive()||VB!==my)return}
+   if(AI.enabled()&&!VB.skip){await vbRace(mfAiNight().catch(()=>null),45000);if(!vbAlive()||VB!==my)return}
+   VB.nightRes=VB.day;
    const victim=VB.botVictim,saved=VB.botSave,killed=victim!=null&&victim!==saved?victim:null;
    await w(700);if(!vbAlive())return;
    VB.lastKilled=killed;VB.lastSave=saved;
@@ -24278,7 +24315,7 @@ function brSpecificity(text){
 }
 function brSaidWord(text){const t=arNorm(text),w=arNorm(VB.word);return w&&w.split(/\s+/).every(p=>p.length>1&&t.includes(p))}
 async function brRound(){
- if(VB.over)return;
+ if(VB.over||VB.round>=2||(VB.seq&&VB.seqAt<VB.seq.length))return;
  VB.round++;vbStep(1);vbTimerStop();
  vbPhase('sound','الجولة '+VB.round,'تلميح واحد لكل واحد');
  const order=VB.names.map((_,i)=>i).filter(i=>i!==0);
@@ -24308,7 +24345,7 @@ async function brNext(){
   vbMsg({k:'b',i,t:c||brBotClue(i)});VB.spoke[i]++;
  }
  vbTalk(null);
- if(VB.round<2){vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('next',14)} الجولة الثانية</span></button>`);return}
+ if(VB.round<2){vbTurn('next','انتهت الجولة الأولى','الجولة الثانية تبدأ بانتهاء الوقت أو بضغطة الزرّ',12);vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('next',14)} الجولة الثانية</span></button>`);vbTimer(12,()=>brRound());return}
  brAsk();
 }
 /** انتهى وقتك بلا تلميح: يُحسب غموضًا ويكمل الدور */
@@ -24318,6 +24355,7 @@ function brSkipClue(){
  vbTalk(null);vbAct('');brNext();
 }
 async function brSend(){
+ if(VB.over||VB.replying)return;
  const text=vbRead();if(!text)return;vbTimerStop();
  if(!brSpyMe()&&brSaidWord(text)){
   vbMsg({k:'me',i:0,t:text});vbAct('');
@@ -24326,7 +24364,9 @@ async function brSend(){
  }
  vbMsg({k:'me',i:0,t:text});VB.mine.push(text);
  vbTalk(null);vbAct('');
- await brHumanSaid(text,'clue');if(!vbAlive())return;
+ const my=VB;VB.replying=true;
+ try{await brHumanSaid(text,'clue')}catch(e){}finally{my.replying=false}
+ if(VB!==my||!vbAlive()||VB.over)return;
  await vbWait(300);
  brNext();
 }
@@ -24348,14 +24388,18 @@ async function brAsk(){
  vbTalk(asker);vbMsg({k:'b',i:asker,q:1,t:`يا ${VB.names[0]}، ${q}`});
  vbTurn('search','سؤال المجلس','أجب قبل انتهاء الوقت',45);
  vbBar({ph:'جوابك…',fn:'brAnswer'});
- vbTimer(45,()=>{const el=document.getElementById('vbTxt');if(el)el.value='…';brAnswer()});
+ vbTimer(45,()=>brAnswer(true));
 }
-async function brAnswer(){
- const text=vbRead();if(!text)return;vbTimerStop();
+async function brAnswer(auto){
+ if(VB.over||VB.replying)return;
+ const text=auto?'…':vbRead();if(!text)return;vbTimerStop();
+ if(auto)vbMsg({k:'n',icon:'timer',t:'انتهى وقت الجواب — المجلس لاحظ صمتك.'});
  if(!brSpyMe()&&brSaidWord(text)){vbMsg({k:'me',i:0,t:text});vbAct('');await vbWait(500);vbMsg({k:'n',icon:'door',big:true,t:'قلتَ الكلمة نفسها! انكشفت أمام برا السالفة.'});return brFinal('guessed')}
  vbMsg({k:'me',i:0,t:text});VB.mine.push(text);
  vbTalk(null);vbAct('');
- await brHumanSaid(text,'answer');if(!vbAlive())return;
+ const my=VB;VB.replying=true;
+ try{await brHumanSaid(text,'answer')}catch(e){}finally{my.replying=false}
+ if(VB!==my||!vbAlive()||VB.over)return;
  vbMsg({k:'n',t:'الآن اسأل أنت أحدهم — اكتب اسمه وسؤالك. أو انتقل إلى التصويت.'});
  brMyAskBar();
 }
@@ -24365,12 +24409,13 @@ function brMyAskBar(){
  vbTimer(30,()=>brVote());
 }
 async function brMyAsk(){
- const text=vbRead();if(!text)return;vbTimerStop();
+ if(VB.over||VB.voting||VB.replying)return;
+ const text=vbRead();if(!text)return;vbTimerStop();VB.replying=true;const my=VB;
  const m=vbMentions(text);
  vbMsg({k:'me',i:0,q:1,t:text});
  const i=m.length?m[0]:vbRnd(VB.names.map((_,x)=>x).filter(x=>x!==0));
  vbAct('');
- vbTalk(i);await vbWait(800);if(!vbAlive())return;
+ vbTalk(i);await vbWait(800);if(VB!==my||!vbAlive()){my.replying=false;return}
  let ans=null;
  if(AI.enabled()){   // جواب حقيقي عن سؤالك: صاحب الكلمة يجيب بدقّة دون ذكرها، وبرا السالفة يراوغ
   const r=await AI.json(brAiState(i!==VB.spy)+`
@@ -24378,17 +24423,20 @@ async function brMyAsk(){
 البشري ${VB.names[0]} سأل ${i} ${VB.names[i]}: «${aiTxt(text,200)}»
 المطلوب: جواب ${VB.names[i]} القصير ${i===VB.spy?'وهو لا يعرف الكلمة: جواب واثق يبدو محدّدًا لكنه لا يلتزم بتفصيل قد يفضحه، ويصلح للكلمات الأرجح من الفئة':'وهو يعرف الكلمة «'+VB.word+'»: جواب صحيح محدّد يجيب عن السؤال نفسه فعلًا دون ذكر الكلمة أو مرادفها'}. فكّر أوّلًا في think.
 أعد JSON فقط: {"think":"<سرّي>","a":"<الجواب>"}`);
-  if(!vbAlive())return;if(r&&r.a&&!(i!==VB.spy&&brSaidWord(String(r.a))))ans=aiTxt(r.a,160);
+  if(VB!==my||!vbAlive()){my.replying=false;return}if(r&&r.a&&!(i!==VB.spy&&brSaidWord(String(r.a))))ans=aiTxt(r.a,160);
  }
  if(ans==null&&i===VB.spy)ans=vbRnd(['سؤال صعب… خلّنا نسمع غيري أوّلًا.','اللي أعرفه أنه شيء معروف، ما أحب أحدّد.','مثل ما قال الباقون تقريبًا.']);
  else if(ans==null){const all=BARRA_CLUES[VB.word]||[];const bank=all.filter(c=>!VB.usedClue.has(c));const c=bank.length?vbRnd(bank):vbRnd(all.length?all:['قلت اللي عندي']);VB.usedClue.add(c);ans=vbRnd(['جوابي: ','بكل بساطة: ',''])+c}
- vbMsg({k:'b',i,t:ans});vbTalk(null);
+ vbMsg({k:'b',i,t:ans});vbTalk(null);my.replying=false;
  VB.asked++;
+ if(VB.voteWhenDone){VB.voteWhenDone=false;return brVote()}
  if(VB.asked<2)brMyAskBar();
  else{vbTurn('scale','انتهت الأسئلة','التصويت يبدأ الآن',8);vbAct(`<button class="rbtn" onclick="brVote()"><span>${ico('scale',14)} إلى التصويت</span></button>`);vbTimer(8,()=>brVote())}
 }
 function brVote(){
- if(VB.over||VB.voting)return;VB.voting=true;vbStep(3);vbTimerStop();
+ if(VB.over||VB.voting)return;
+ if(VB.replying){VB.voteWhenDone=true;return}   // الآليّ يجيب عن سؤالك الآن: التصويت بعد جوابه
+ VB.voting=true;vbStep(3);vbTimerStop();
  vbPhase('scale','التصويت','');
  vbTurn('scale','التصويت','من الذي لا يعرف الكلمة؟ اختر قبل انتهاء الوقت وإلا امتنعت',30);
  vbMsg({k:'n',t:'صوّت: من الذي لا يعرف الكلمة؟'});
@@ -24422,7 +24470,7 @@ function brSpyGuess(){
  return scored[0][0];
 }
 async function brTally(my){
- if(VB.tallying)return;VB.tallying=true;vbTimerStop();vbTurnHide();
+ if(VB.tallying||VB.over)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();
  vbAct('');
  const votes={};const add=(who,t)=>{vbMsg({k:'v',i:who,t});if(t!=null)votes[t]=(votes[t]||0)+1};
  add(0,my);
