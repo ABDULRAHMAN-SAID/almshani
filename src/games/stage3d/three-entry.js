@@ -16,5 +16,6 @@ export { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 export { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 export { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 export { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+export { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 export { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 export { VignetteShader } from 'three/examples/jsm/shaders/VignetteShader.js';
