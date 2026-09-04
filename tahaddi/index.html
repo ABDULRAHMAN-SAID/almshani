@@ -112,6 +112,11 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .wayCard{display:flex;align-items:center;gap:12px;padding:13px;margin-bottom:10px;border-radius:15px;cursor:pointer;
  background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--bd);
  box-shadow:0 6px 16px rgba(0,0,0,.4);transition:border-color .2s,transform .15s}
+.wayCard.pick{position:relative}
+.wayCard.pick.on{border-color:var(--gold);background:linear-gradient(160deg,rgba(232,178,58,.18),rgba(232,178,58,.05));box-shadow:0 6px 18px rgba(232,178,58,.18)}
+.wPick{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--bd);color:var(--gold);flex-shrink:0}
+.wayCard.pick.on .wPick{border-color:var(--gold);background:rgba(232,178,58,.16)}
+.soloGo{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));margin-top:14px;padding-top:8px;background:linear-gradient(to top,var(--bg) 72%,transparent);z-index:5}
 .wayCard:active{transform:scale(.985)}
 .wIco{font-size:27px;flex-shrink:0;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
 .wT{font-weight:900;font-size:13px}
@@ -741,25 +746,27 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 @media (min-width:480px){.vbScene.is3d .vbStage{height:340px}}
 .vbScene.is3d .vbBg,.vbScene.is3d .vbCenter{display:none}
 .vbScene.is3d .vbSeats{pointer-events:none}
-.vbScene.is3d .vbSeat{pointer-events:auto;width:66px}
-.vbScene.is3d .vbAv{width:40px;height:40px;background:transparent!important;box-shadow:none;padding:0}
-.vbScene.is3d .vbAv>svg,.vbScene.is3d .vbAv>span.avEm{display:block;position:absolute;width:22px;height:22px;top:-9px;right:-13px;border-radius:50%;border:1.5px solid #E8B23A;background:#0F1524;box-shadow:0 2px 6px rgba(0,0,0,.6)}
-.vbScene.is3d .vbAv>span.vbSeatCard{right:-11px;top:14px;bottom:auto}
+/* لوحة اللاعب فوق رأسه (5.56): صفّ واحد مرتّب — رقم، صورة، اسم، وبطاقة الدور — بمحاذاة واحدة للجميع */
+.vbScene.is3d .vbSeat{pointer-events:auto;width:auto;flex-direction:row;align-items:center;gap:4px;
+ background:rgba(8,11,20,.72);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:2px 8px 2px 3px;
+ -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);box-shadow:0 3px 10px rgba(0,0,0,.5);white-space:nowrap}
+.vbScene.is3d .vbSeat.me{border-color:rgba(232,178,58,.75);background:rgba(26,18,6,.8)}
+.vbScene.is3d .vbSeat.talk{border-color:rgba(46,204,113,.85);box-shadow:0 0 0 2px rgba(46,204,113,.3),0 3px 10px rgba(0,0,0,.5)}
+.vbScene.is3d .vbSeat.pick{border-color:var(--pk,#E8B23A);box-shadow:0 0 0 2px var(--pk,#E8B23A),0 0 14px var(--pk,#E8B23A)}
+.vbScene.is3d .vbSeat.dead{opacity:.55;filter:grayscale(1)}
+.vbScene.is3d .vbAv{width:22px;height:22px;padding:0;background:none;box-shadow:none;border-radius:50%;flex-shrink:0;order:2}
+.vbScene.is3d .vbAv>svg,.vbScene.is3d .vbAv>span.avEm{display:block;position:static;width:22px;height:22px;border-radius:50%;border:1px solid rgba(232,178,58,.65);background:#0F1524;box-shadow:none}
 .vbScene.is3d .vbSeat.talk .vbAv{box-shadow:none}
-.vbScene.is3d .vbSeat.talk .vbAv::before,.vbScene.is3d .vbSeat.talk .vbAv::after{display:none}
-.vbScene.is3d .vbSeat.pick .vbAv{box-shadow:0 0 0 2px var(--pk,#E8B23A),0 0 14px var(--pk,#E8B23A)}
-.vbScene.is3d .vbSeat.me{flex-direction:column-reverse}
-.vbScene.is3d .vbNm{font-size:10px;background:rgba(6,8,16,.58);padding:1px 6px;border-radius:7px;max-width:72px}
-.vbScene.is3d .vbPill{margin-top:2px}
-/* ردهة الغرفة مجسّمة: القماش داخل الحلقة، والمقاعد فوق رؤوس الشخصيات، ورقاقة اللعبة في الزاوية */
-.rmRing.is3d{height:320px;border-radius:18px;overflow:hidden;border:1.5px solid #3B2F5C;background:#0B1020;box-shadow:0 10px 26px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}
-.rmRing.is3d .rmSeat{width:70px;pointer-events:none}
-.rmRing.is3d .rmAv{width:40px;height:40px;background:transparent;border:none;box-shadow:none}
-.rmRing.is3d .rmAv>svg,.rmRing.is3d .rmAv>span.avEm{display:block;position:absolute;width:22px;height:22px;top:-9px;left:-12px;border-radius:50%;border:1.5px solid #E8B23A;background:#0F1524;box-shadow:0 2px 6px rgba(0,0,0,.6)}
-.rmRing.is3d .rmSeat.empty .rmAv{border:2px dashed rgba(232,178,58,.6);background:rgba(6,9,17,.45);color:#FFE9A8}
-.rmRing.is3d .rmSeat.me{flex-direction:column-reverse}
-.rmRing.is3d .rmTable{left:auto;right:10px;top:10px;transform:none;width:auto;height:40px;flex-direction:row;gap:6px;padding:0 10px 0 5px;border-radius:12px;border-width:1.5px}
-.rmRing.is3d .rmTable .art{width:30px;height:30px}
+.vbScene.is3d .vbNum{position:static;order:1;width:17px;height:17px;min-width:17px;font-size:9.5px;line-height:17px;padding:0;border-radius:50%;
+ background:rgba(232,178,58,.9);color:#1A1206;font-weight:900;text-align:center;box-shadow:none;border:none;flex-shrink:0;display:block}
+.vbScene.is3d .vbSeat.me .vbNum{background:#FFE9A8}
+.vbScene.is3d .vbNm{order:3;font-size:10px;font-weight:800;background:none;border:none;padding:0;max-width:66px;text-shadow:none}
+.vbScene.is3d .vbNm i{font-size:8.5px;color:var(--gold);font-style:normal;margin-inline-start:2px}
+.vbScene.is3d .vbPill.dim{display:none}
+.vbScene.is3d .vbPill{order:4;font-size:8px;padding:0 5px;margin:0;border-radius:7px;max-width:52px;overflow:hidden;text-overflow:ellipsis}
+.vbScene.is3d .vbAv>span.vbSeatCard{display:none}   /* البطاقة في يد الشخصية المجسّمة نفسها — واللوحة تبقى صفًّا نظيفًا */
+.vbScene.is3d .vbBadge,.vbScene.is3d .vbX{width:14px;height:14px;top:auto;bottom:-3px;right:-3px}
+.vbScene.is3d .vbSeat>.vbAv{display:flex;align-items:center;justify-content:center}
 .vb3dBub{position:absolute;transform:translateX(-50%);max-width:150px;background:rgba(250,246,236,.96);color:#1B1408;font-size:10.5px;font-weight:700;line-height:1.4;padding:5px 8px;border-radius:11px;border:1px solid rgba(232,178,58,.6);box-shadow:0 4px 12px rgba(0,0,0,.45);pointer-events:none;z-index:6;animation:pop .22s ease;text-align:center}
 .vb3dBub::after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:inherit;border-inline-end:1px solid rgba(232,178,58,.6);border-bottom:1px solid rgba(232,178,58,.6);transform:translateX(-50%) rotate(45deg)}
 .vb3dBub.me{background:#2A2260;color:#F2F4F8;border-color:#5B2FB8}
@@ -17583,6 +17590,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // شاشة كاملة بلا شريط سفلي
  ['welcomeScr','askTut','skipAsk','clTransferScr','clSupportScr','clRequestSupportScr','clCreateScr']
   .forEach(n=>R.register(n,{bar:false}));
+ R.register('askName',{bar:false,render:a=>askName(a),dirty:()=>{const el=document.getElementById('nmFirst');return !!el&&el.value.trim()!==(S.name||'')}});
  // وسيط مركّب
  R.register('mmScr',{render:a=>mmScr(a&&a.g,a&&a.mode),leave:()=>mmCancel()});
  R.register('profileView',{render:p=>profileView(p)});
@@ -18176,9 +18184,9 @@ function setSection(k){
   <button class="btn g" style="margin-top:11px" onclick="push('avScr')">تعديل الشخصية</button>
   </div></div>
   <div class="li" style="margin-top:11px"><div class="lr">
-   <div class="lb"><div class="lt">اسم اللاعب</div><div class="ls">${S.name}</div></div>
+   <div class="lb"><div class="lt">اسمك في اللعبة</div><div class="ls">${S.name?esc(S.name):'<span style="color:var(--gold)">لم تختر اسمًا بعد — اضغط «اختر»</span>'}</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
-    onclick="push('renameAsk')">تغيير</button></div></div>
+    onclick="push('renameAsk')">${S.name?'تغيير':'اختر'}</button></div></div>
   <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">المشتريات</div><div class="ls">تذكرة الموسم وجواهرك تعود على أي جهاز بحسابك</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
@@ -18285,7 +18293,7 @@ function delAsk(){
 }
 function doDelete(){
  wipeSave();
- S={name:'المستكشف',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,
+ S={name:'',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,
   tutDone:0,ranked:null,cards:null,unlocked:{journey:1,quick:1},matches:0,wins:0,
   mis:{},claimed:{},ach:{},correct:0,nets:{},tab:'play',opt:S.opt};
  bindLegacyRanked();
@@ -18959,7 +18967,37 @@ function welcomeScr(){
   <div style="font-size:19px;font-weight:800;margin-top:22px">أهلًا بك في تحدي</div>
  <div style="font-size:13.5px;color:var(--tx2);margin-top:7px">عالم من المعرفة والمنافسة ينتظرك.</div>
  <div style="width:100%;margin-top:auto;padding-top:40px">
- <button class="rbtn" onclick="push('askTut')"><span>ابدأ</span></button></div></div>`);
+ <button class="rbtn" onclick="push('askName')"><span>ابدأ</span></button></div></div>`);
+}
+/** أوّل خطوة: اسمك أنت — يظهر للاعبين معك، والرتبة تُكتب بجانبه ولا تحلّ محلّه */
+function askName(next){
+ VBnameNext=typeof next==='function'?next:null;
+ go(`<div class="scr on" style="display:flex;flex-direction:column;min-height:88vh;padding:0 20px 20px">
+ ${tbar('اسمك في اللعبة')}
+ <div style="text-align:center;margin-top:auto">${avatarArt(76)}</div>
+ <div style="font-size:20px;font-weight:900;margin-top:16px;text-align:center">ما اسمك؟</div>
+ <div style="font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.7;text-align:center">
+  اكتب الاسم الذي يراه من يلعب معك. رتبتك تُكتب بجانبه — والاسم لك أنت.</div>
+ <input class="fin" id="nmFirst" maxlength="14" placeholder="اسمك" style="margin-top:16px;text-align:center;font-size:17px;font-weight:800" value="${esc(S.name||'')}"
+  onkeydown="if(event.key==='Enter'){event.preventDefault();nameSave()}">
+ <div class="note" id="nmHint">حرفان على الأقل</div>
+ <div style="width:100%;margin-top:auto;padding-top:30px">
+ <button class="rbtn" onclick="nameSave()"><span>${ico('check',15)} هذا اسمي</span></button></div></div>`);
+ setTimeout(()=>{const el=document.getElementById('nmFirst');if(el)el.focus()},120);
+}
+let VBnameNext=null;
+function nameSave(){
+ const el=document.getElementById('nmFirst');const v=(el?el.value:'').trim();
+ if(v.length<2){const h=document.getElementById('nmHint');if(h){h.textContent='اكتب اسمًا من حرفين على الأقل';h.style.color='var(--no)'}return}
+ S.name=v;saveState();if(typeof netOnline==='function'&&netOnline()&&window.NET)NET.setName(v).catch(()=>{});
+ const nx=VBnameNext;VBnameNext=null;
+ if(nx){back();setTimeout(nx,60);return}
+ push('askTut');
+}
+/** يضمن أن للاعب اسمًا قبل أي لعبة — يفتح شاشة الاسم ثم يعود لما كان يفعله */
+function nameReady(after){
+ if((S.name||'').trim().length>=2)return true;
+ push('askName',after);return false;
 }
 function askTut(){
  go(`<div class="scr on" style="display:flex;flex-direction:column;
@@ -20865,7 +20903,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.55';
+const APP_VER='5.56';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -21422,7 +21460,8 @@ async function mmScr(g,mode){
   </div></div></div></div>`);
   return;
  }
- RM.name=RM.name||S.name||'لاعب';RM.mm=1;RM.mmT=0;
+ if(!nameReady(()=>mmScr(g,mode)))return;   // الاسم قبل الدخول في طابور البحث
+ RM.name=S.name||RM.name||'لاعب';RM.mm=1;RM.mmT=0;
  try{await c.presence({pc:null,lf:g,nm:RM.name,hs:null,vt:null})}catch(e){}
  RM.unsub.forEach(u=>{try{u()}catch(e){}});
  RM.unsub=[c.onPeers(()=>mmTick())];
@@ -21512,7 +21551,9 @@ async function roomScr(game){
 function rmName(){const el=document.getElementById('rmNm');if(el&&el.value.trim())RM.name=el.value.trim().slice(0,14);return RM.name}
 async function rmCreate(){
  const c=await rmCap();if(!c)return;
- rmName();RM.code=rmCode();RM.host=1;RM.phase='lobby';RM.players=[];RM.acts={};
+ rmName();
+ if(!nameReady(()=>rmCreate()))return;   // الاسم قبل إنشاء الغرفة
+ RM.code=rmCode();RM.host=1;RM.phase='lobby';RM.players=[];RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
  try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null})}catch(e){}
  rmBind();roomDraw();
@@ -21522,7 +21563,9 @@ async function rmJoin(){
  const el=document.getElementById('rmCd');
  const code=((el&&el.value)||'').trim().toUpperCase();
  if(code.length!==4){toast('اكتب كود الغرفة (4 رموز)');return}
- rmName();RM.code=code;RM.host=0;RM.phase='lobby';RM.acts={};
+ rmName();
+ if(!nameReady(()=>rmJoin()))return;   // الاسم قبل دخول الغرفة
+ RM.code=code;RM.host=0;RM.phase='lobby';RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
  try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null})}catch(e){}
  rmBind();roomDraw();
@@ -21717,9 +21760,9 @@ function soloScr(g){
  go(`<div class="scr on">${tb('مع الكمبيوتر')}
  <div class="gHero sm">${GAME_ART[g]||''}</div>
  <div class="sl">مستوى الخصم</div>
- ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard" onclick="soloStart('${g}','${k}')">
+ ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard pick${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
   <span class="wIco">${e}</span><div style="flex:1"><div class="wT">${n}</div><div class="wD">${d}</div></div>
-  <span class="wGo">›</span></div>`).join('')}
+  <span class="wPick">${(RM.diff||'mid')===k?ico('check',15):''}</span></div>`).join('')}
  ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
@@ -21735,7 +21778,8 @@ function soloScr(g){
  <div class="wb" style="text-align:start">جولتان من التلميحات المكتوبة ثم تصويت. إن كنت برا السالفة فلمّح بغموض واستنتج الكلمة — وإن أُمسك بك فلك تخمين واحد.</div>
  <div class="note" id="vbAiNote">…</div>`:''}
  ${g==='draw'?`<div class="wb" style="text-align:start">الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.</div>`:''}
- <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div></div>`);
+ <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div>
+ <div class="soloGo"><button class="rbtn" onclick="soloBegin('${g}')"><span>${ico('play',15)} ابدأ اللعب — ${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff||'mid']}</span></button></div></div>`);
  if(g==='mafia'||g==='barra')AI.probe().then(on=>{const el=document.getElementById('vbAiNote');if(!el)return;
   el.textContent=on?'الآليون هنا يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم':'الآليون يعملون بعقلهم المحلي الآن — الذكاء الاصطناعي يحتاج اتصالًا بخادم مضبوط أو نسخة الأرتيفاكت'});
 }
@@ -21748,6 +21792,11 @@ function soloTransport(n){
   emit:(t,d)=>{rmOn(d,{});return Promise.resolve()},
   presence:p=>{Object.keys(p).forEach(k=>{p[k]==null?delete me.presence[k]:me.presence[k]=p[k]});return Promise.resolve()},
   on:()=>()=>{},onPeers:()=>()=>{},connected:()=>true};
+}
+/** زرّ البدء: يبدأ بالمستوى المختار (الاختيار لم يعد هو البدء) — ويطلب اسمك أوّلًا إن لم تختره */
+function soloBegin(g){
+ if(!nameReady(()=>soloBegin(g)))return;
+ soloStart(g,RM.diff||'mid');
 }
 function soloStart(g,diff){
  if(g==='mafia')return mfStart(diff);
@@ -28666,9 +28715,22 @@ function vb3dAnchors(){
 }
 function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return vb3dAnchors()[i]}
 /** يضع عناصر المقاعد (DOM) فوق رؤوس الشخصيات */
+/** يضع لوحات اللاعبين فوق الرؤوس ثم يرفع المتداخلة منها صفًّا صفًّا فلا تتراكب الأسماء */
 function vb3dLayout(){
- if(!VB3.on)return;const a=vb3dAnchors();
- document.querySelectorAll(VB3.model.seats).forEach(el=>{const i=+el.dataset.seat;if(!a[i])return;el.style.left=a[i].x.toFixed(1)+'%';el.style.top=a[i].y.toFixed(1)+'%'});
+ if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
+ const W=st.clientWidth||1,H=st.clientHeight||1,placed=[];
+ const els=[...document.querySelectorAll(VB3.model.seats)]
+  .map(el=>({el,i:+el.dataset.seat})).filter(o=>a[o.i])
+  .sort((p,q)=>a[p.i].y-a[q.i].y||a[p.i].x-a[q.i].x);   // الأبعد أوّلًا: يُرفع الخلفيّ لا الأماميّ
+ els.forEach(({el,i})=>{
+  const w=el.offsetWidth||70,h=el.offsetHeight||20,pad=3;
+  let x=a[i].x/100*W,y=a[i].y/100*H,tries=0;
+  x=Math.max(w/2+2,Math.min(W-w/2-2,x));
+  while(tries++<6&&placed.some(r=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad))y-=h+pad;
+  y=Math.max(h/2+2,Math.min(H-h/2-2,y));
+  placed.push({x,y,w,h});
+  el.style.left=(x/W*100).toFixed(2)+'%';el.style.top=(y/H*100).toFixed(2)+'%';
+ });
 }
 /** فقاعة كلام فوق رأس المتكلّم لثوانٍ — فقاعة آليّ واحدة في كل مرّة (فقاعتك تبقى) */
 function vb3dBubble(i,text){
@@ -28883,20 +28945,20 @@ function vbSeats(){
  const n=VB.names.length;
  el.innerHTML=VB.names.map((nm,i)=>{const st=vbSeatState(i),p=vbSeatPos(i,n),note=i!==0&&VB.notes&&VB_NOTE[VB.notes[i]];
   const ready=(VB.ready&&VB.ready.has(i))||(i===0&&VB.meReady);
-  let pill,pc;
+  let pill,pc,dim=0;
   if(st.dead){pill=st.sub?'خارج · '+st.sub:'خارج اللعبة';pc='#8C93A8'}
   else if(st.talk){pill=VB.g==='barra'?'يلمّح الآن':'يتحدث الآن';pc='#2ECC71'}
   else if(ready){pill='جاهز';pc='#4C9AF0'}
   else if(i===0){pill=st.me||'أنت';pc='#E8B23A'}
   else if(note){pill=note.t;pc=note.c}
   else if(st.pill){pill=st.pill;pc=st.pc||'#8C93A8'}
-  else{pill='هادئ';pc='#8C93A8'}
+  else{pill='هادئ';pc='#8C93A8';dim=1}
   const pk=!!(VB.pick&&VB.pick.list.includes(i)&&!st.dead);
   const face=VB.g==='mafia'&&((VB.reveal&&i!==0)||(st.dead&&st.sub&&VB.lastLynched===i))?MAF_ROLE[mfRole(i)]:null;   // بطاقة الآليّ تُقلب حين يُكشف دوره
   const card=VB.dealt&&i!==0?`<span class="vbSeatCard${face?' face':''}">${face?ico(face.ic,9,face.tint):''}</span>`:'';
   return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}${pk?' pick':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}${pk?';--pk:'+(VB.pick.c||'#E8B23A'):''}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
    <div class="vbAv">${vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}${card}</div>
-   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div><div class="vbPill" style="--pc:${pc}">${esc(pill)}</div></div>`}).join('');
+   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div><div class="vbPill${dim?' dim':''}" style="--pc:${pc}">${esc(pill)}</div></div>`}).join('');
  const c=document.getElementById('vbCount');if(c)c.textContent=(VB.alive?VB.alive.length:n)+'/'+n;
  if(typeof VB3!=='undefined'&&VB3.on){vb3dSync();vb3dLayout()}
 }
@@ -37420,7 +37482,7 @@ const MIS=[{k:'ans20',t:'أجب عن 20 سؤالًا',n:20,co:40,xp:60,gm:0},
 {k:'uno_win',t:'افز بجولة أونو',n:1,co:70,xp:80,gm:1},
 {k:'party_round',t:'أنهِ 3 جولات من ليلة العائلة',n:3,co:60,xp:70,gm:1}];
 
-let S={name:'المستكشف',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,tutDone:0,account:null,
+let S={name:'',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,tutDone:0,account:null,
  ranked:null,cards:null,unlocked:{journey:1,quick:1},tutorial_completed:false,
  colXP:0,wild:null,shards:0,emotes:null,emoteDeck:null,favEmotes:null,
  chestInv:null,evolved:[],dealsBought:[],lastGift:null,
@@ -38442,6 +38504,7 @@ function loadState(){
   Object.assign(S,d.s);S._savedAt=d.t||0;
   bindLegacyRanked();migrateRanks(legacyRank);
   // إصلاح أي حقل ناقص من نسخة أقدم
+  if(S.name==='المستكشف')S.name='';   // الاسم القديم الافتراضي: يُطلب من اللاعب اختيار اسمه
   if(!S.cards)S.cards=defaultCards();
   if(!S.stars)S.stars={};
   ensureEcon();

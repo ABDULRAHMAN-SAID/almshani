@@ -35,6 +35,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
  try{
   sec('الحساب والاتصال');
   const A=await mk('A'),B=await mk('B');
+  await B.evaluate(()=>{S.name='سلطان';saveState()});   // كل لاعب يختار اسمه بنفسه منذ 5.56
   const sa=await A.evaluate(()=>NET.state()),sb=await B.evaluate(()=>NET.state());
   check('كلا المتصفحين في وضع الخادم ومتصلان بحسابين مختلفين',sa.mode==='server'&&sa.connected&&sb.connected&&sa.id!==sb.id,JSON.stringify([sa,sb]));
   await A.evaluate(()=>{S.name='عبدالرحمن';doRename;});

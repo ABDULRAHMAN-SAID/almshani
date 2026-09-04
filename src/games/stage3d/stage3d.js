@@ -424,9 +424,22 @@ function vb3dAnchors(){
 }
 function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return vb3dAnchors()[i]}
 /** يضع عناصر المقاعد (DOM) فوق رؤوس الشخصيات */
+/** يضع لوحات اللاعبين فوق الرؤوس ثم يرفع المتداخلة منها صفًّا صفًّا فلا تتراكب الأسماء */
 function vb3dLayout(){
- if(!VB3.on)return;const a=vb3dAnchors();
- document.querySelectorAll(VB3.model.seats).forEach(el=>{const i=+el.dataset.seat;if(!a[i])return;el.style.left=a[i].x.toFixed(1)+'%';el.style.top=a[i].y.toFixed(1)+'%'});
+ if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
+ const W=st.clientWidth||1,H=st.clientHeight||1,placed=[];
+ const els=[...document.querySelectorAll(VB3.model.seats)]
+  .map(el=>({el,i:+el.dataset.seat})).filter(o=>a[o.i])
+  .sort((p,q)=>a[p.i].y-a[q.i].y||a[p.i].x-a[q.i].x);   // الأبعد أوّلًا: يُرفع الخلفيّ لا الأماميّ
+ els.forEach(({el,i})=>{
+  const w=el.offsetWidth||70,h=el.offsetHeight||20,pad=3;
+  let x=a[i].x/100*W,y=a[i].y/100*H,tries=0;
+  x=Math.max(w/2+2,Math.min(W-w/2-2,x));
+  while(tries++<6&&placed.some(r=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad))y-=h+pad;
+  y=Math.max(h/2+2,Math.min(H-h/2-2,y));
+  placed.push({x,y,w,h});
+  el.style.left=(x/W*100).toFixed(2)+'%';el.style.top=(y/H*100).toFixed(2)+'%';
+ });
 }
 /** فقاعة كلام فوق رأس المتكلّم لثوانٍ — فقاعة آليّ واحدة في كل مرّة (فقاعتك تبقى) */
 function vb3dBubble(i,text){
