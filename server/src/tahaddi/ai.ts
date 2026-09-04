@@ -2,22 +2,27 @@
 // ويستلم JSON. المفتاح لا يغادر الخادم أبدًا: ANTHROPIC_API_KEY يُضبط بـ `fly secrets set` (لا في الشيفرة).
 //   ANTHROPIC_API_KEY   مفتاح واجهة Anthropic (بدونه يعود /ai/chat بالحالة 503 فيعمل العقل المحلي في العميل)
 //   TAHADDI_AI_MODEL    النموذج (افتراضي claude-opus-5) · TAHADDI_AI_RPM حدّ الطلبات لكل عنوان في الدقيقة (افتراضي 40)
+//   TAHADDI_AI_EFFORT   عمق التفكير low/medium/high/xhigh/max (افتراضي high — الآليون يفكّرون قبل كل جواب)
 import Anthropic from '@anthropic-ai/sdk';
 
 const KEY = process.env.ANTHROPIC_API_KEY ?? '';
 const MODEL = process.env.TAHADDI_AI_MODEL ?? 'claude-opus-5';
 const RPM = parseInt(process.env.TAHADDI_AI_RPM ?? '40', 10);
-const client = KEY ? new Anthropic({ apiKey: KEY, maxRetries: 1, timeout: 45_000 }) : null;
+const EFFORTS = ['low', 'medium', 'high', 'xhigh', 'max'] as const;
+type Effort = typeof EFFORTS[number];
+const EFFORT: Effort = (EFFORTS as readonly string[]).includes(process.env.TAHADDI_AI_EFFORT ?? '') ? process.env.TAHADDI_AI_EFFORT as Effort : 'high';
+const client = KEY ? new Anthropic({ apiKey: KEY, maxRetries: 1, timeout: 120_000 }) : null;
 
 /** تعليمات ثابتة (تُخزَّن مؤقّتًا): مدير لعبة عربي يحرّك شخصيات آلية ويعيد JSON فقط */
 const SYSTEM = [
-  'أنت مدير لعبة ذكي يحرّك شخصيات آلية في ألعاب جماعية عربية (مافيا، برا السالفة).',
-  'اقرأ حالة اللعبة والسجلّ كاملًا، وافهم ما كتبه اللاعب البشري بدقّة (اتهام، دفاع، سؤال، اعتراف، سخرية، ادّعاء دور)،',
-  'ثم اجعل كل شخصية تتصرّف بعقل وبما يخدم هدفها السرّي، بلهجة خليجية بسيطة وجمل قصيرة طبيعية، دون تكرار جمل سابقة.',
-  'لا تكشف ما لا تعرفه الشخصية. أعد JSON صالحًا فقط بالشكل المطلوب، بلا أي نصّ خارجه.'
+  'أنت مدير لعبة محترف ولاعب خبير في ألعاب الخداع الاجتماعي العربية (مافيا، برا السالفة)، تحرّك عدّة شخصيات آلية في وقت واحد.',
+  'اقرأ حالة اللعبة والوقائع والسجلّ كاملًا، وفكّر كلاعب محترف قبل كل جملة: ما الذي يعرفه هذا الآليّ فعلًا؟ من ينتفع ممّا حدث؟ ما الذي يخدم فريقه الآن؟',
+  'افهم ما كتبه اللاعب البشري بدقّة بلهجته ومزاحه وأخطائه (اتهام، دفاع، سؤال، اعتراف، سخرية، ادّعاء دور)، وردّ على كلماته نفسها لا بكلام عام.',
+  'اجعل كل شخصية متّسقة مع دورها السرّي وشخصيتها وذاكرتها، بلهجة خليجية طبيعية وجمل متفاوتة الطول، دون تكرار جمل سابقة ودون عبارات جاهزة.',
+  'لا تكشف ما لا تعرفه الشخصية. التزم بدليل اللعبة المرفق في الطلب. أعد JSON صالحًا فقط بالشكل المطلوب، بلا أي نصّ خارجه.'
 ].join(' ');
 
-export function aiStatus() { return { on: !!client, model: client ? MODEL : null }; }
+export function aiStatus() { return { on: !!client, model: client ? MODEL : null, effort: client ? EFFORT : null }; }
 
 const buckets = new Map<string, { n: number; t: number }>();
 /** حدّ بسيط لكل عنوان: RPM طلبًا في الدقيقة */
@@ -44,8 +49,9 @@ export async function aiChat(prompt: string): Promise<{ json: unknown; text: str
   if (!client) throw new Error('ai_off');
   const res = await client.messages.create({
     model: MODEL,
-    max_tokens: 1500,
-    output_config: { effort: 'low' },
+    max_tokens: 8000,
+    thinking: { type: 'adaptive' },       // يفكّر قبل الجواب بقدر ما يحتاج (Claude Opus 5)
+    output_config: { effort: EFFORT },
     system: [{ type: 'text', text: SYSTEM, cache_control: { type: 'ephemeral' } }],
     messages: [{ role: 'user', content: prompt }]
   });

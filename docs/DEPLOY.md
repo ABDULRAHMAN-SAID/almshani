@@ -44,6 +44,7 @@ fly open                                      # https://<app>.fly.dev — الل
 | `ANTHROPIC_API_KEY` | فارغ = معطّل | مفتاح واجهة Anthropic لآليي «ضد الكمبيوتر» بالذكاء الاصطناعي (5.43). يُضبط سرًّا فقط: `fly secrets set ANTHROPIC_API_KEY=...` — لا في الشيفرة ولا في المستودع |
 | `TAHADDI_AI_MODEL` | `claude-opus-5` | النموذج الذي يحرّك الآليين |
 | `TAHADDI_AI_RPM` | `40` | حدّ نداءات `/ai/chat` لكل عنوان IP في الدقيقة |
+| `TAHADDI_AI_EFFORT` | `high` | عمق تفكير النموذج قبل كل جواب (`low`/`medium`/`high`/`xhigh`/`max`) — الأعلى أذكى وأبطأ وأغلى (5.44) |
 
 الخادم يقدّم كذلك الصفحات القانونية التي يطلبها المتجران على `/privacy.html` و`/terms.html` و`/licenses.html` — تُولَّد وقت البناء من نصّ واحد داخل اللعبة (`⟦legal⟧` في `index.html`) فلا يفترق ما يقرؤه اللاعب عمّا يقرؤه المراجع. املأ `LEGAL.contact` و`LEGAL.entity` و`LEGAL.law` هناك مرّة واحدة قبل الرفع.
 

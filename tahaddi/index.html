@@ -20426,7 +20426,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.43';
+const APP_VER='5.44';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23066,6 +23066,7 @@ function vbInput(ph,fn,extra){
    (المفتاح ANTHROPIC_API_KEY على الخادم فقط — لا في العميل ولا في المستودع). بلا أيّ منهما، أو عند
    الرفض أو الفشل المتكرّر، يعمل العقل المحلي (5.42) كاملًا. كل نداء يحمل حالة اللعبة والسجلّ ويعيد JSON
    يُتحقّق منه (أرقام اللاعبين، الأحياء، المافيا لا تصوّت على شريكها…) قبل تطبيقه على حالة اللعبة الرقمية. */
+const AI_TIER='default';   // طبقة النموذج في الأرتيفاكت: default يفكّر قبل الجواب (quick أسرع وأضعف، complex أعمق وأبطأ)
 const AI=(function(){
  const st={probe:null,on:false,src:null,fail:0,sample:null,busy:0};
  function enabled(){return !window.__vbFast&&!(S&&S.opt&&S.opt.aiBots===0)&&st.on&&st.fail<3}
@@ -23093,7 +23094,7 @@ const AI=(function(){
   if(!enabled())return null;
   thinking(true);
   try{
-   if(st.src==='sample')return await st.sample.json(prompt,{modelTier:tier||'quick',cache:false});
+   if(st.src==='sample')return await st.sample.json(prompt,{modelTier:tier||AI_TIER,cache:false});
    const r=await fetch(srvUrl('/ai/chat'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})});
    if(r.status===503){st.on=false;return null}
    if(!r.ok)throw new Error('ai '+r.status);
@@ -23243,7 +23244,7 @@ function mfBotsNight(){
  const det=alive.find(i=>i!==0&&mfRole(i)==='محقق');
  if(det!=null){
   const unk=alive.filter(i=>i!==det&&VB.know[i]==null);
-  if(unk.length){const t=d==='easy'?vbRnd(unk):unk.slice().sort((a,b)=>VB.sus[det][b]-VB.sus[det][a])[0];VB.know[t]=mfRole(t)==='مافيا'}
+  if(unk.length){const t=d==='easy'?vbRnd(unk):unk.slice().sort((a,b)=>VB.sus[det][b]-VB.sus[det][a])[0];VB.know[t]=mfRole(t)==='مافيا';VB.detLocal=t;VB.detLocalDay=VB.day}
  }
 }
 async function mfNight(){
@@ -23253,6 +23254,7 @@ async function mfNight(){
  vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
  vbMsg({k:'n',icon:'timer',t:'أطفأت المدينة أنوارها… والشوارع فارغة إلا من الظلال.'});
  mfBotsNight();
+ VB.nightAi=AI.enabled()?mfAiNight().catch(()=>null):null;   // قرارات الليل من النموذج تجري بالتوازي مع اختيارك، وتُنتظر عند الفجر
  if(!mfAliveI(0)){vbAct('');await vbWait(700);mfResolveNight();return}
  const me=mfRole(0);
  if(me==='مافيا')mfPick('استيقظت المافيا. من تغتال الليلة؟',VB.alive.filter(i=>i!==0&&mfRole(i)!=='مافيا'),'mfKill');
@@ -23275,11 +23277,13 @@ async function mfCheck(i){
 }
 async function mfResolveNight(){
  if(VB.over)return;
+ if(VB.nightAi){const p=VB.nightAi;VB.nightAi=null;vbAct('');await p;if(!vbAlive())return}
  const victim=mfRole(0)==='مافيا'&&mfAliveI(0)&&VB.victim!=null?VB.victim:VB.botVictim;
  const saved=mfRole(0)==='طبيب'&&mfAliveI(0)?VB.saved:VB.botSave;
  const killed=victim!=null&&victim!==saved?victim:null;
  if(killed!=null)VB.alive=VB.alive.filter(i=>i!==killed);
- VB.lastKilled=killed;
+ VB.lastKilled=killed;VB.lastSave=saved;
+ mfHist(killed!=null?`الليلة ${VB.day}: قُتل ${VB.names[killed]}`:victim!=null?`الليلة ${VB.day}: محاولة اغتيال فشلت — الطبيب أنقذ الضحية`:`الليلة ${VB.day}: لم يمت أحد`);
  mfSetNight(false);vbAct('');
  vbPhase('sparkle','الصباح '+VB.day,'استيقظت المدينة');
  await vbWait(500);
@@ -23292,29 +23296,51 @@ async function mfResolveNight(){
  mfTalk();
 }
 /* ═══ مافيا بالذكاء الاصطناعي (5.43): النموذج يقرأ الأدوار والأدلة والسجلّ كاملًا ويحرّك كل آليّ بحسب دوره ═══ */
-const MF_AI_PERSONA={calm:'هادئ يزن كلامه',hot:'حادّ ينفعل بسرعة',joker:'مازح ساخر',quiet:'قليل الكلام',leader:'قائد يحشد الأصوات'};
-const MF_AI_RULES=`قواعد مافيا: ليلًا تقتل المافيا واحدًا، الطبيب يحمي واحدًا، المحقق يفحص واحدًا. نهارًا نقاش ثم تصويت؛ الأغلبية تُعدم والتعادل يُنجي. تفوز المدينة إن أُعدمت كل المافيا، وتفوز المافيا إن ساوت عدد الباقين.
-كل آليّ يعرف دوره فقط (المافيا تعرف بعضها، والمحقق يعرف نتائج فحوصه) ويستنتج الباقي من السجلّ — لا يكشف آليّ دور غيره. أهل المدينة يبحثون عن المافيا بأدلة حقيقية من السجلّ: من صوّت على بريء أُعدم، من دافع عن مافيا، تناقض القول مع التصويت، الصمت، ادّعاء دور كاذب. المافيا تخفي نفسها وتصرف الشكّ نحو الأبرياء وتشكّك في من يقترب منها ولا تتّهم شريكها.
-افهم كلام البشري بمعناه لا بكلماته: إن اعترف أنه مافيا فصدّقوه وأعلنوا أنكم ستصوّتون عليه (وشريكه المافيا يتبرّأ منه بحذر)؛ إن ادّعى المحقق فاطلبوا نتائج فحصه وقارنوها بما تعرفون؛ إن سأل أحدًا فيجيبه المسؤول جوابًا محدّدًا؛ إن اتّهم أحدًا فيردّ المتّهم بدفاع محدّد ويعلّق آخر بحسب مصلحته؛ إن مزح أو خرج عن الموضوع فردّوا عليه بطبيعية ثم أعيدوه إلى اللعبة. لا تكرّروا جملًا قيلت في السجلّ. كل جملة ≤ 25 كلمة بلهجة خليجية خفيفة مفهومة وبأسلوب شخصية المتكلّم. أعد JSON فقط.`;
+const MF_AI_PERSONA={calm:'هادئ يزن كلامه ويكره الاستعجال',hot:'حادّ ينفعل بسرعة ويقاطع',joker:'مازح ساخر يخفي ذكاءه وراء النكتة',quiet:'قليل الكلام، جمله قصيرة وثقيلة',leader:'قائد يحشد الأصوات ويرتّب الخطط'};
+const MF_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين آليين في «مافيا»، وكل آليّ لاعب خبير يلعب ليفوز فريقه ويفكّر قبل أن يتكلّم.
+القواعد: ليلًا تقتل المافيا واحدًا، الطبيب يحمي واحدًا (يجوز نفسه)، المحقق يفحص واحدًا فيعرف أمافيا هو أم لا. نهارًا نقاش ثم تصويت؛ الأغلبية تُعدم والتعادل يُنجي، ويُكشف دور المُعدَم للجميع. تفوز المدينة إن أُعدمت كل المافيا، وتفوز المافيا إن ساوى عددها عدد الباقين.
+المعرفة: كل آليّ يعرف دوره فقط. المافيا تعرف بعضها. المحقق يعرف نتائج فحوصه. الطبيب يعرف من حمى. كل ما عدا ذلك يُستنتج من السجلّ العلني فقط — لا يجوز لآليّ أن يستعمل معلومة لا يملكها (لا تدع الشعب «يعرف» المافيا، ولا تدع المافيا تعرف من فحصه المحقق).
+طريقة التفكير قبل كل جملة (حقل think): ماذا حدث فعلًا الليلة والنهار السابق؟ من ينتفع من موت القتيل (من اتّهمه القتيل؟ من كان يقترب منه؟) من غيّر رأيه بين كلامه وصوته؟ من صوّت على بريء أُعدم ولم يراجع نفسه؟ من دافع عن مافيا مكشوف؟ من ادّعى دورًا يناقض الوقائع؟ ماذا قال البشري بالضبط وماذا يقصد؟ ثم: ما الذي يخدم فريقي الآن؟ وقله.
+اليوم الأول: لا أدلة بعد، فلا اتهام جازم، ولا حجّة «فلان هادئ» أو «ساكت» (الجميع بدأ للتوّ)، ولا كلام عن القتيل بأنه كان هادئًا أو مسالمًا. بدلًا من ذلك: أسئلة مباشرة كاشفة («يا فلان، لو كنتَ مافيا لماذا كنتَ ستقتل فلانًا بالذات؟»، «من تراه كان أقرب إلى القتيل؟»)، وملاحظات عن ردود الفعل، وفخاخ (من يوافق بسرعة بلا سبب؟ من يستعجل التصويت؟). التصويت الأول على أضعف تفسير لا على الأقلّ كلامًا.
+المدينة: تتّهم بدليل محدّد من السجلّ مستشهدةً بالكلمة التي قيلت («قلتَ أمس إنك تشك في نورة ثم صوّتَّ على فهد»)، تسأل المتّهم سؤالًا لا يُلتفّ عليه، تصدّق ادّعاء المحقق إن اتّسق مع الوقائع، وتشكّ فيمن يقفز إلى أوّل اتهام وفيمن ينقاد للأغلبية بلا سبب. لا تُعدم على الظن إن كان على غيره دليل أقوى.
+المافيا: تذوب في المدينة: تتّهم بريئًا بحجّة متماسكة مبنيّة على شيء قاله فعلًا، تساند شكّ المدينة على غيرها لتبدو نظيفة، تدافع عن نفسها بأدلة مضادّة لا بالإنكار، لا تتّهم شريكها ولا تدفع هي وشريكها الهدف نفسه في اليوم نفسه، وإن قارب شريكها الإعدام ابتعدت عنه، وفي آخر اللعبة تضحّي به لتنجو. تكذب بثقة وتفاصيل، وفي الصعبة قد تدّعي دور المحقق لتشويش المحقق الحقيقي. ليلًا تقتل الأخطر عليها: المحقق المعلن، ثم من يقود المدينة بأدلة صحيحة، ثم البشري إن كان يصيب.
+المحقق: يخفي دوره حتى يجد مافيا أو يوشك على الإعدام، ثم يعلن بدقّة («فحصتُ فلانًا في الليلة الثانية: مافيا») ويفنّد المدّعي الكاذب بالوقائع، ويفحص ليلًا الأكثر إفادة لا الأوضح. الطبيب: يخفي دوره، يحمي المحقق المعلن أو الأثمن، ولا يكشف نفسه إلا لإثبات أن محاولة اغتيال أُنقذت بيده.
+البشري: افهم لهجته وسخريته ومزاحه وأخطاءه الإملائية، وصنّف مقصده: اتهام، دفاع، سؤال، ادّعاء دور، اعتراف، مزاح، خروج عن الموضوع. إن اعترف أنه مافيا فصدّقوه وأعلنوا التصويت عليه (وشريكه يتبرّأ منه بحذر)؛ إن ادّعى المحقق فاطلبوا نتائج فحصه وقارنوها بما تعرفون؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه جوابًا محدّدًا؛ إن اتّهم أحدًا ردّ المتّهم بنقطة مضادّة محدّدة وعلّق آخر بحسب مصلحته؛ إن مزح جاروه بخفّة ثم عادوا إلى اللعبة؛ إن قال شيئًا غامضًا سألوه ماذا يقصد.
+الأسلوب: لهجة خليجية طبيعية يفهمها كل العرب، جمل متفاوتة الطول (بعضها كلمتان وبعضها جملتان)، كل آليّ بشخصيته الثابتة، مخاطبة بالأسماء، ردّ على آخر ما قيل لا كلام عام، لا تكرار لجملة قيلت، لا مواعظ ولا عبارات جاهزة ولا شرح للقواعد، لا يذكر أحد أنه آليّ أو نموذج. كل جملة ≤ 30 كلمة. أعد JSON صالحًا فقط بلا أي نصّ خارجه.`;
+const mfHist=t=>{(VB.hist||(VB.hist=[])).push(t)};
+const mfVoteHist=byWho=>mfHist(`اليوم ${VB.day} — التصويت: `+Object.entries(byWho).map(([k,v])=>VB.names[k]+' → '+(v==null?'امتنع':VB.names[v])).join('، '));
+/** ذاكرة كل آليّ السرّية التي يعيدها النموذج مع كل جواب — تُغذّى في النداء التالي فتبقى خطّته متّسقة عبر الأيام */
+function mfAiNotes(r){
+ if(!r||!r.notes||typeof r.notes!=='object')return;
+ VB.aiNotes=VB.aiNotes||{};
+ Object.entries(r.notes).forEach(([k,v])=>{const i=vbNameIdx(k);if(i!=null&&i!==0&&v)VB.aiNotes[i]=aiTxt(v,240)});
+}
 function mfAiState(){
  const nm=i=>VB.names[i];
- const diff={easy:'سهلة — الآليون يخطئون أحيانًا ويثقون بسرعة',mid:'متوسطة',hard:'صعبة — الآليون حادّون والمافيا ماكرة'}[VB.diff]||'متوسطة';
+ const diff={easy:'سهلة — الآليون يخطئون أحيانًا، يثقون بسرعة، ولا يخفون أدوارهم جيدًا',mid:'متوسطة — لعب سليم منطقي',hard:'صعبة — لعب محترف: المافيا ماكرة تكذب بتفاصيل، والمدينة دقيقة لا تنقاد'}[VB.diff]||'متوسطة';
  const pl=VB.names.map((n,i)=>{const alive=mfAliveI(i);
-  let s=`${i}: ${n}${i===0?' (البشري)':''} — ${alive?'حيّ':'ميت'} · الدور الحقيقي: ${mfRole(i)}${!alive&&VB.lastLynched===i?' (أُعدم وكُشف دوره علنًا)':''}`;
+  let s=`${i}: ${n}${i===0?' (البشري)':''} — ${alive?'حيّ':'ميت'} · الدور الحقيقي: ${mfRole(i)}${!alive&&VB.lastLynched===i?' (أُعدم وكُشف دوره علنًا)':!alive?' (قُتل ليلًا — دوره غير معلن)':''}`;
   if(i>0&&alive)s+=` · الشخصية: ${MF_AI_PERSONA[mfP(i).k]||'عادي'}`;
-  const ev=(VB.ev&&VB.ev[i]||[]).slice().sort((a,b)=>Math.abs(b.w)-Math.abs(a.w)).slice(0,3).map(e=>e.txt+(e.w<0?' (لصالحه)':''));
-  if(ev.length)s+=' · أدلة علنية: '+ev.join('؛ ');
+  const ev=(VB.ev&&VB.ev[i]||[]).slice().sort((a,b)=>Math.abs(b.w)-Math.abs(a.w)).slice(0,4).map(e=>e.txt+(e.w<0?' (لصالحه)':''));
+  if(ev.length)s+=' · وقائع علنية: '+ev.join('؛ ');
   return s});
- const det=VB.alive.find(i=>i!==0&&mfRole(i)==='محقق');
+ const det=VB.alive.find(i=>i!==0&&mfRole(i)==='محقق'),doc=VB.alive.find(i=>i!==0&&mfRole(i)==='طبيب');
  const known=Object.keys(VB.know).map(Number).map(x=>`${nm(x)}: ${VB.know[x]?'مافيا':'بريء'}`);
- return [MF_AI_RULES,`اليوم ${VB.day} · الصعوبة: ${diff}`,
-  'اللاعبون (الأدوار سرّية؛ تعرفها أنت لتحرّك كل شخصية بصدق، ولا يكشفها آليّ عن غيره):',...pl,
+ const mafs=VB.names.map((_,i)=>i).filter(i=>mfRole(i)==='مافيا');
+ const notes=Object.entries(VB.aiNotes||{}).filter(([k,v])=>v&&mfAliveI(+k)).map(([k,v])=>`${nm(+k)}: ${v}`);
+ const mine=(VB.feed||[]).filter(m=>m.k==='me').map(m=>'«'+m.t+'»');
+ return [MF_AI_RULES,`اليوم ${VB.day} · الصعوبة: ${diff} · الأحياء الآن: ${VB.alive.map(nm).join('، ')}`,
+  'اللاعبون (الأدوار سرّية؛ تعرفها أنت لتحرّك كل شخصية بصدق، ولا يستعملها آليّ عن غيره):',...pl,
+  `المافيا (يعرف بعضهم بعضًا): ${mafs.map(nm).join('، ')}`,
   det!=null&&known.length?`نتائج فحوص المحقق الآليّ ${nm(det)} (يعرفها هو وحده): ${known.join('، ')}`:'',
-  VB.detOut!=null?`من أعلن نفسه محققًا: ${nm(VB.detOut)}`:'',
+  doc!=null&&VB.lastSave!=null?`الطبيب الآليّ ${nm(doc)} حمى الليلة الماضية: ${nm(VB.lastSave)} (يعرفه هو وحده)`:'',
+  VB.detOut!=null?`من أعلن نفسه محققًا علنًا: ${nm(VB.detOut)}`:'',
   VB.myClaim?`البشري ادّعى علنًا أنه: ${VB.myClaim}`:'',
-  `مصداقية البشري عند المدينة: ${(VB.cred[0]||0)>0?'عالية':(VB.cred[0]||0)<0?'منخفضة':'عادية'}`,
-  VB.lastKilled!=null?`قتيل الليلة الماضية: ${nm(VB.lastKilled)}`:'',
-  'السجلّ (الأحدث آخرًا):',vbFeedText(70)].filter(Boolean).join('\n');
+  `مصداقية البشري عند المدينة: ${(VB.cred[0]||0)>0?'عالية (أصاب مافيا من قبل)':(VB.cred[0]||0)<0?'منخفضة (أعدم بريئًا)':'عادية'}`,
+  VB.hist&&VB.hist.length?'ما جرى بالترتيب:\n'+VB.hist.join('\n'):'لم يجرِ شيء بعد — هذه بداية اللعبة.',
+  mine.length?'كل ما كتبه البشري في هذه الجولة: '+mine.join(' · '):'',
+  notes.length?'ذاكرة كل آليّ السرّية (ما قرّره في نداءات سابقة):\n'+notes.join('\n'):'',
+  'السجلّ الكامل بالترتيب (الأحدث آخرًا):',vbFeedText(90)].filter(Boolean).join('\n');
 }
 /** يطبّق سطرًا أعاده النموذج على حالة اللعبة الرقمية (شكّ وسجلّ وإعلان دور) ثم يعرضه */
 function mfAiLine(i,L,w){
@@ -23325,20 +23351,23 @@ function mfAiLine(i,L,w){
  vbMsg({k:'b',i,t:aiTxt(L.text)});
  return tt;
 }
-/** نقاش الصباح من النموذج: سطر لكل آليّ حيّ بالترتيب المطلوب */
+const MF_AI_NOTES='"notes":{"<رقم>":"<ما يريد هذا الآليّ تذكّره لاحقًا: شكوكه وخطّته، ≤ 30 كلمة>"}';
+/** نقاش الصباح من النموذج: كل آليّ يفكّر سرًّا ثم يتكلّم مرّة بترتيبه */
 async function mfAiDay(order){
- const r=await AI.json(mfAiState()+`\n\nالمطلوب: نقاش الصباح. يتكلّم كل آليّ حيّ مرّة واحدة بهذا الترتيب: ${order.map(i=>i+' '+VB.names[i]).join('، ')}. كل واحد يبني على ما قيل قبله في السجلّ وعلى ما قاله البشري، ويتّهم بدليل أو يسأل أو يدافع بحسب دوره ومصلحته.\nأعد JSON فقط بهذا الشكل:\n{"lines":[{"i":<رقم المتكلّم>,"text":"<جملته>","target":<رقم من يتّهم أو null>,"ask":<رقم من يوجّه له سؤالًا أو null>,"answer":"<إن سأل آليًّا: جواب المسؤول القصير، وإلا null>","claim":"<محقق أو طبيب إن أعلن دوره علنًا، وإلا null>"}]}`,'quick');
+ const r=await AI.json(mfAiState()+`\n\nالمطلوب الآن: نقاش الصباح ${VB.day}. يتكلّم كل آليّ حيّ مرّة واحدة بهذا الترتيب: ${order.map(i=>i+' '+VB.names[i]).join('، ')}. كل واحد يفكّر أوّلًا في think (سرّي لا يُعرض: ماذا أعرف؟ من أشكّ ولماذا؟ ما هدف فريقي اليوم؟ ماذا أقول ليخدمه؟) ثم يتكلّم مبنيًّا على ما قيل قبله في السجلّ وفي هذا النقاش نفسه، فيتّهم بدليل أو يسأل سؤالًا محدّدًا أو يدافع أو يضع فخًّا بحسب دوره.\nأعد JSON فقط بهذا الشكل:\n{"lines":[{"i":<رقم المتكلّم>,"think":"<تحليله السرّي في سطر>","text":"<ما يقوله علنًا>","target":<رقم من يتّهم صراحةً أو null>,"ask":<رقم من يوجّه له سؤالًا أو null>,"answer":"<إن سأل آليًّا: جواب المسؤول القصير، وإلا null>","claim":"<محقق أو طبيب إن أعلن دوره علنًا الآن، وإلا null>"}],${MF_AI_NOTES}}`);
+ mfAiNotes(r);
  const lines=r&&Array.isArray(r.lines)?r.lines.filter(L=>L&&L.text):[];
  if(!lines.length)AI.miss();
  return lines.length?lines:null;
 }
-/** ردود النموذج على ما كتبه البشري — مع قراءته لمقصده (اتهام/دفاع/سؤال/ادّعاء/اعتراف) */
+/** ردود النموذج على ما كتبه البشري — مع قراءته لمقصده (اتهام/دفاع/سؤال/ادّعاء/اعتراف/مزاح) */
 async function mfAiReply(p,text){
- const r=await AI.json(mfAiState()+`\n\nالبشري ${VB.names[0]} (رقم 0) كتب الآن: «${aiTxt(text,300)}»\nالمطلوب: افهم رسالته بدقّة (اتهام، دفاع عن أحد، سؤال لأحد، ادّعاء دور، اعتراف بأنه مافيا، كلام عام) ثم يردّ عليه من يعنيه الأمر أوّلًا (المذكور أو المسؤول) ثم واحد أو اثنان يعلّقون بحسب مصلحتهم وأدلّتهم — ردود محدّدة على ما قاله لا كلامًا عامًّا.\nأعد JSON فقط:\n{"human":{"intent":"accuse|defend|ask|claim|confess|talk","target":<رقم المقصود أو null>,"claim":"<محقق|طبيب|شعب|مافيا|null>"},"lines":[{"i":<رقم المتكلّم>,"text":"<الرد>","target":<رقم من يتّهمه الآن أو null>}]}`,'quick');
+ const r=await AI.json(mfAiState()+`\n\nالبشري ${VB.names[0]} (رقم 0) كتب الآن: «${aiTxt(text,300)}»\nالمطلوب: افهم رسالته بدقّة بلهجتها ومعناها (اتهام، دفاع عن أحد، سؤال لأحد، ادّعاء دور، اعتراف بأنه مافيا، مزاح، كلام عام) ثم يردّ عليه من يعنيه الأمر أوّلًا (المذكور أو المسؤول) ثم واحد أو اثنان يعلّقون بحسب مصلحتهم وأدلّتهم — ردود محدّدة على ما قاله بالضبط (اقتبس كلمته إن لزم)، لا كلامًا عامًّا. كل متكلّم يفكّر أوّلًا في think.\nأعد JSON فقط:\n{"human":{"intent":"accuse|defend|ask|claim|confess|joke|talk","target":<رقم المقصود أو null>,"claim":"<محقق|طبيب|شعب|مافيا|null>"},"lines":[{"i":<رقم المتكلّم>,"think":"<سرّي>","text":"<الرد>","target":<رقم من يتّهمه الآن أو null>}],${MF_AI_NOTES}}`);
+ mfAiNotes(r);
  const lines=r&&Array.isArray(r.lines)?r.lines.filter(L=>L&&L.text):[];
  if(!lines.length){AI.miss();return false}
  const h=r.human||{},ht=vbNameIdx(h.target);
- mfApplyHuman({m:ht!=null?[ht]:p.m,intent:['accuse','defend','ask','claim','confess','talk'].includes(h.intent)?h.intent:p.intent,
+ mfApplyHuman({m:ht!=null?[ht]:p.m,intent:['accuse','defend','ask','claim','confess','talk'].includes(h.intent)?h.intent:(h.intent==='joke'?'talk':p.intent),
   claim:['محقق','طبيب','شعب'].includes(h.claim)?h.claim:(h.claim==='مافيا'?null:p.claim),confess:p.confess||h.claim==='مافيا'||h.intent==='confess'});
  let n=0;
  for(const L of lines.slice(0,3)){const i=vbNameIdx(L.i);if(i==null||i===0||!mfAliveI(i))continue;vbTalk(i);await vbWait(700);if(!vbAlive())return true;mfAiLine(i,L,.6);n++}
@@ -23346,14 +23375,35 @@ async function mfAiReply(p,text){
 }
 /** أصوات الآليين من النموذج، بعد التحقّق: حيّ، ليس نفسه، والمافيا لا تصوّت على شريكها، والمحقق لا يصوّت على من عرف براءته */
 async function mfAiVotes(voters){
- const r=await AI.json(mfAiState()+`\n\nالمطلوب: التصويت. انظر آخر الأسطر في السجلّ لتعرف ما صوّت عليه البشري. قرّر صوت كل آليّ حيّ من هؤلاء: ${voters.map(i=>i+' '+VB.names[i]).join('، ')} — بحسب دوره وأدلّته وما دار في النقاش (المافيا لا تصوّت على شريكها؛ المحقق يصوّت على من عرف أنه مافيا؛ المدينة على أقوى مشتبه بدليل؛ من اعترف أنه مافيا يُصوَّت عليه). null فقط لمن لا يجد أيّ سبب.\nأعد JSON فقط: {"votes":{"<رقم المصوّت>":<رقم المتّهم أو null>}}`,'quick');
+ const r=await AI.json(mfAiState()+`\n\nالمطلوب الآن: التصويت في اليوم ${VB.day}. انظر آخر الأسطر في السجلّ لتعرف ما صوّت عليه البشري. قرّر صوت كل آليّ حيّ من هؤلاء: ${voters.map(i=>i+' '+VB.names[i]).join('، ')} — كلٌّ بحسب دوره وأدلّته وما دار في النقاش وذاكرته (المافيا لا تصوّت على شريكها إلا تضحيةً في آخر اللعبة؛ المحقق يصوّت على من عرف أنه مافيا؛ المدينة على أقوى مشتبه بدليل لا على الأقلّ كلامًا؛ من اعترف أنه مافيا يُصوَّت عليه). null فقط لمن لا يجد أيّ سبب. اكتب في analysis سطرًا لكل مصوّت يشرح سببه.\nأعد JSON فقط: {"analysis":"<سطر لكل مصوّت>","votes":{"<رقم المصوّت>":<رقم المتّهم أو null>},${MF_AI_NOTES}}`);
+ mfAiNotes(r);
  const v=r&&r.votes&&typeof r.votes==='object'?r.votes:null;if(!v){AI.miss();return null}
  const out={};voters.forEach(i=>{const t=vbNameIdx(v[i]!=null?v[i]:v[VB.names[i]]);
   if(t==null||t===i||!mfAliveI(t))return;
-  if(mfRole(i)==='مافيا'&&mfRole(t)==='مافيا')return;
+  if(mfRole(i)==='مافيا'&&mfRole(t)==='مافيا'&&VB.alive.length>3)return;
   if(mfRole(i)==='محقق'&&VB.know[t]===false)return;
   out[i]=t});
  return out;
+}
+/** قرارات الليل من النموذج: هدف المافيا الآليّة، حماية الطبيب الآليّ، فحص المحقق الآليّ — بعد التحقّق، وإلا تبقى قرارات العقل المحلي */
+async function mfAiNight(){
+ const botMaf=VB.alive.filter(i=>i!==0&&mfRole(i)==='مافيا'),doc=VB.alive.find(i=>i!==0&&mfRole(i)==='طبيب'),det=VB.alive.find(i=>i!==0&&mfRole(i)==='محقق');
+ const humanMaf=mfRole(0)==='مافيا'&&mfAliveI(0);
+ const asks=[];
+ if(botMaf.length&&!humanMaf)asks.push(`"kill": من تقتل المافيا (${botMaf.map(i=>VB.names[i]).join(' و')}) الليلة؟ فكّر: من أخطر عليها (محقق معلن، من يقود المدينة بأدلة صحيحة، البشري إن كان يصيب)، ومن يجعل موته المدينة تتّهم بريئًا؟ لا يجوز قتل مافيا.`);
+ if(doc!=null)asks.push(`"save": من يحمي الطبيب ${VB.names[doc]}؟ (يجوز نفسه) فكّر: من الأرجح أن تستهدفه المافيا الليلة؟`);
+ if(det!=null){const unk=VB.alive.filter(i=>i!==det&&VB.know[i]==null);if(unk.length)asks.push(`"check": من يفحص المحقق ${VB.names[det]}؟ من بين من لم يفحصهم بعد فقط: ${unk.map(i=>i+' '+VB.names[i]).join('، ')} — الأكثر إفادة للمدينة لا الأوضح.`)}
+ if(!asks.length)return null;
+ const r=await AI.json(mfAiState()+`\n\nالمطلوب الآن: قرارات الليلة ${VB.day}. كل دور يقرّر وحده بما يعرفه هو فقط:\n${asks.join('\n')}\nأعد JSON فقط: {"analysis":"<سطر لكل قرار>","kill":<رقم أو null>,"save":<رقم أو null>,"check":<رقم أو null>,${MF_AI_NOTES}}`);
+ if(!r||typeof r!=='object'){AI.miss();return null}
+ mfAiNotes(r);
+ if(botMaf.length&&!humanMaf){const k=vbNameIdx(r.kill);if(k!=null&&mfAliveI(k)&&mfRole(k)!=='مافيا')VB.botVictim=k}
+ if(doc!=null){const sv=vbNameIdx(r.save);if(sv!=null&&mfAliveI(sv))VB.botSave=sv}
+ if(det!=null){const c=vbNameIdx(r.check);
+  if(c!=null&&c!==det&&mfAliveI(c)&&(VB.know[c]==null||(VB.detLocal===c&&VB.detLocalDay===VB.day))){
+   if(VB.detLocal!=null&&VB.detLocal!==c&&VB.detLocalDay===VB.day)delete VB.know[VB.detLocal];   // فحص العقل المحلي لهذه الليلة يُستبدل
+   VB.know[c]=mfRole(c)==='مافيا';VB.detLocal=c;VB.detLocalDay=VB.day}}
+ return r;
 }
 /** اعتراف البشري بأنه مافيا: دليل ثقيل عند كل أهل المدينة — يصوّتون عليه */
 function mfConfess(){if(VB.confessed)return;VB.confessed=true;VB.myClaim='مافيا';mfEvAdd(0,'confess','من اعترف بنفسه أنه مافيا',3)}
@@ -23525,7 +23575,7 @@ async function mfReplyLocal(p,text){
    const backers=alive.filter(i=>i!==target&&mfRole(i)!=='مافيا'&&VB.sus[i][target]>=1.2);
    const doubters=alive.filter(i=>i!==target&&mfRole(i)!=='مافيا'&&VB.sus[i][0]>=1.2);
    const mafs=alive.filter(i=>i!==target&&mfRole(i)==='مافيا');
-   if(backers.length&&Math.random()<.85){const b=vbRnd(backers);await say(b,mfFill(mfP(b).agr,{t:nm(target),e:bad||MF_EV.silent()}))}
+   if(backers.length&&Math.random()<.85){const b=vbRnd(backers);const e2=bad||(VB.day>1?MF_EV.silent():null);await say(b,e2?mfFill(mfP(b).agr,{t:nm(target),e:e2}):`أوافقك يا ${me}… لكن لنسمع ما عند ${nm(target)} أوّلًا.`)}
    else if(doubters.length&&Math.random()<.7){const b=vbRnd(doubters);await say(b,`${me} ${mfTopEv(0)||'يتّهم بلا دليل'}… وأنت تريدنا أن نصدّقك؟`)}
    else if(mafs.length&&r!=='مافيا'&&d==='hard'&&Math.random()<.5){const b=vbRnd(mafs);await say(b,mfFill(mfP(b).agr,{t:nm(target),e:bad||`من يتكلّم بحذر زائد`}))}
    else{const o=alive.filter(i=>i!==target);if(o.length){const b=vbRnd(o);await say(b,mfFill(mfP(b).dbt,{t:nm(target)}))}}
@@ -23599,11 +23649,11 @@ async function mfTally(my){
  VB.mySaid=null;
  const voters=VB.alive.filter(x=>x!==0),aiV=AI.enabled()?await mfAiVotes(voters):null;if(!vbAlive())return;
  for(const i of voters){await vbWait(450);if(!vbAlive())return;add(i,aiV&&aiV[i]!=null?aiV[i]:mfBotVote(i))}
- const who=mfCount(votes);
+ const who=mfCount(votes);mfVoteHist(byWho);
  await vbWait(500);if(!vbAlive())return;
- if(who==null){vbMsg({k:'n',icon:'scale',big:true,t:'لم تتفق الأغلبية على متهم — لا إعدام اليوم.'});VB.lastLynched=null}
+ if(who==null){vbMsg({k:'n',icon:'scale',big:true,t:'لم تتفق الأغلبية على متهم — لا إعدام اليوم.'});VB.lastLynched=null;mfHist(`اليوم ${VB.day}: لا إعدام (لا أغلبية)`)}
  else{
-  VB.alive=VB.alive.filter(i=>i!==who);VB.lastLynched=who;vbSeats();
+  VB.alive=VB.alive.filter(i=>i!==who);VB.lastLynched=who;vbSeats();mfHist(`اليوم ${VB.day}: أُعدم ${VB.names[who]} وتبيّن أنه ${mfRole(who)}`);
   vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} بأغلبية ${votes[who]} — وتبيّن أنه كان ${mfRole(who)}.`});
   mfAfterLynch(who,Object.fromEntries(Object.entries(byWho).filter(([k,v])=>v===who)));
   if(mfWinCheck())return;
@@ -23627,8 +23677,11 @@ async function mfSpectate(){
   if(!first){   // اليوم الذي متّ فيه يكمل نقاشه وتصويته أوّلًا، ثم تتوالى الليالي
    mfSetNight(true);vbSeats();vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
    mfBotsNight();
+   if(AI.enabled()&&!VB.skip){await mfAiNight().catch(()=>null);if(!vbAlive()||VB!==my)return}
    const victim=VB.botVictim,saved=VB.botSave,killed=victim!=null&&victim!==saved?victim:null;
    await w(700);if(!vbAlive())return;
+   VB.lastKilled=killed;VB.lastSave=saved;
+   mfHist(killed!=null?`الليلة ${VB.day}: قُتل ${VB.names[killed]}`:victim!=null?`الليلة ${VB.day}: محاولة اغتيال فشلت — الطبيب أنقذ الضحية`:`الليلة ${VB.day}: لم يمت أحد`);
    if(killed!=null){VB.alive=VB.alive.filter(i=>i!==killed);mfVictimClue(killed)}
    mfSetNight(false);vbSeats();vbPhase('sparkle','الصباح '+VB.day,'');
    vbMsg({k:'n',icon:killed!=null?'orb':'heart',big:true,t:killed!=null?`وُجد ${VB.names[killed]} مقتولًا عند الفجر.`:'ليلة هادئة… لم يمت أحد.'});
@@ -23644,9 +23697,9 @@ async function mfSpectate(){
   const votes={},byWho={};VB.tallyNow={};
   const aiV=AI.enabled()&&!VB.skip?await mfAiVotes(VB.alive):null;if(!vbAlive()||VB!==my)return;
   for(const i of VB.alive){await w(350);if(!vbAlive())return;const t=aiV&&aiV[i]!=null?aiV[i]:mfBotVote(i);vbMsg({k:'v',i,t});byWho[i]=t;if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}}
-  const who=mfCount(votes);
-  if(who!=null){VB.alive=VB.alive.filter(i=>i!==who);vbSeats();vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} — كان ${mfRole(who)}.`});mfAfterLynch(who,Object.fromEntries(Object.entries(byWho).filter(([k,v])=>v===who)))}
-  else vbMsg({k:'n',icon:'scale',t:'لا إعدام اليوم.'});
+  const who=mfCount(votes);mfVoteHist(byWho);
+  if(who!=null){VB.alive=VB.alive.filter(i=>i!==who);vbSeats();vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} — كان ${mfRole(who)}.`});mfHist(`اليوم ${VB.day}: أُعدم ${VB.names[who]} وتبيّن أنه ${mfRole(who)}`);mfAfterLynch(who,Object.fromEntries(Object.entries(byWho).filter(([k,v])=>v===who)))}
+  else{vbMsg({k:'n',icon:'scale',t:'لا إعدام اليوم.'});mfHist(`اليوم ${VB.day}: لا إعدام`)}
   if(mfWinCheck())return;
   VB.day++;
  }
@@ -23693,34 +23746,46 @@ function brStart(diff){
  vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('sound',14)} ابدأ الجولة الأولى</span></button>`);
 }
 const brSpyMe=()=>VB.spy===0;
-/* ═══ برا السالفة بالذكاء الاصطناعي (5.43): من يعرف الكلمة يلمّح لها فعلًا، وبرا السالفة الآليّ يُسأل بنداء منفصل لا يعرف الكلمة ═══ */
-const BR_AI_RULES=`قواعد برا السالفة: الجميع يعرف كلمة سرّية من فئة معلنة إلا واحدًا (برا السالفة) لا يعرفها. جولتان من التلميحات بالدور: من يعرف الكلمة يلمّح لها بشيء صحيح ومحدّد دون أن يقول الكلمة نفسها أو مرادفًا فاضحًا، وبرا السالفة يقلّد أسلوب الآخرين بتلميح غامض يصلح لأي كلمة من الفئة. ثم سؤال وجواب، ثم تصويت على من لا يعرف الكلمة؛ إن أُمسك به فله تخمين واحد. تلميح غامض جدًّا أو لا يناسب الكلمة يجعل صاحبه مشبوهًا، ومن يعلن أنه لا يعرف الكلمة يُصوَّت عليه. كل جملة ≤ 18 كلمة بلهجة خليجية خفيفة. لا تكرّروا تلميحًا قيل. أعد JSON فقط.`;
+/* ═══ برا السالفة بالذكاء الاصطناعي (5.44): من يعرف الكلمة يلمّح لها بدقّة تثبت معرفته، وبرا السالفة الآليّ يُسأل بنداء منفصل لا يعرف الكلمة ═══ */
+const BR_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين آليين في «برا السالفة»، وكل آليّ لاعب خبير يفكّر قبل أن يتكلّم.
+القواعد: الجميع يعرف كلمة سرّية من فئة معلنة إلا واحدًا (برا السالفة) لا يعرفها. جولتان من التلميحات بالدور، ثم سؤال من المجلس للبشري وسؤال منه لأحدهم، ثم تصويت على من لا يعرف الكلمة؛ إن أُمسك به فله تخمين واحد يفوز به إن أصاب. من يقول الكلمة نفسها يخسر فورًا.
+من يعرف الكلمة: تلميحه صحيح ودقيق يثبت معرفته لمن يعرف، ولا يكشف الكلمة لمن لا يعرف: في الجولة الأولى صفة ثانوية صحيحة لا أشهر صفة، وفي الثانية أدقّ قليلًا ويبني على تلميح سابق («مثل ما قال فلان، وزيادة…»). يراقب: من تلميحه عامّ يصلح لأي كلمة في الفئة؟ من ناقض الكلمة؟ من كرّر كلام غيره بلا إضافة؟ من تهرّب من التحديد عند السؤال؟ ويسأل سؤالًا لا يجيب عنه إلا من يعرف دون أن يكشف الكلمة. لا يتّهم بحجّة «قليل الكلام».
+برا السالفة: يقرأ التلميحات كلّها، يستنتج المرشّحين من الفئة ويرتّبهم، ويكتب تلميحًا يشبه أسلوب المجلس ويصلح للمرشّحَين الأوّلَين معًا، بثقة وبلا تردّد، ولا يقول «ما أعرف» ولا يعتذر. عند السؤال يجيب جوابًا يبدو محدّدًا لكنه لا يلتزم بتفصيل قد يفضحه. يصوّت على من يبدو مشبوهًا عند الآخرين ليبعد الشكّ عنه، وعند الإمساك به يخمّن المرشّح الأرجح. في الصعوبة السهلة يخطئ أحيانًا ويكشف نفسه بتلميح لا يناسب.
+البشري: افهم لهجته ومزاحه وأخطاءه الإملائية. إن قال إنه لا يعرف الكلمة أو إنه برا السالفة فصدّقوه وصوّتوا عليه؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه؛ إن مزح جاروه ثم عادوا إلى اللعبة.
+الأسلوب: لهجة خليجية طبيعية، جمل قصيرة متفاوتة (≤ 20 كلمة)، شخصية ثابتة لكل واحد، لا تكرار لتلميح قيل، لا يذكر أحد أنه آليّ أو نموذج. أعد JSON صالحًا فقط بلا أي نصّ خارجه.`;
+const BR_AI_NOTES='"notes":{"<رقم>":"<ما يريد هذا الآليّ تذكّره: من يشكّ فيه ولماذا، ≤ 25 كلمة>"}';
 function brAiState(withWord){
- const diff={easy:'سهلة — المجلس يتساهل ويخطئ أحيانًا',mid:'متوسطة',hard:'صعبة — المجلس دقيق وبرا السالفة ماكر'}[VB.diff]||'متوسطة';
+ const diff={easy:'سهلة — المجلس يتساهل ويخطئ أحيانًا وبرا السالفة يكشف نفسه أحيانًا',mid:'متوسطة',hard:'صعبة — المجلس دقيق وبرا السالفة ماكر يقلّد ببراعة'}[VB.diff]||'متوسطة';
+ const notes=Object.entries(VB.aiNotes||{}).filter(([k,v])=>v).map(([k,v])=>`${VB.names[+k]}: ${v}`);
  return [BR_AI_RULES,`الفئة: ${VB.cat} · الصعوبة: ${diff} · الجولة ${VB.round}`,
   withWord?`الكلمة السرّية: «${VB.word}». هوية برا السالفة مجهولة لمن يعرف الكلمة — احكم على كل واحد بما قاله فقط.`:`الكلمة السرّية غير معروفة هنا. الكلمات الممكنة في الفئة: ${(PARTY_WORDS[VB.cat]||[]).join('، ')}`,
   'اللاعبون: '+VB.names.map((n,i)=>`${i} ${n}${i===0?' (البشري)':''}`).join('، '),
+  VB.mine&&VB.mine.length?'كل ما كتبه البشري: '+VB.mine.map(t=>'«'+t+'»').join(' · '):'',
   VB.confessed?`البشري ${VB.names[0]} أعلن أنه لا يعرف الكلمة (برا السالفة).`:'',
-  'السجلّ (الأحدث آخرًا):',vbFeedText(50)].filter(Boolean).join('\n');
+  notes.length?'ذاكرة كل آليّ السرّية:\n'+notes.join('\n'):'',
+  'السجلّ (الأحدث آخرًا):',vbFeedText(60)].filter(Boolean).join('\n');
 }
 /** تلميحات دفعة من الآليين المتتالين حتى دور البشري — نداء لمن يعرف الكلمة ونداء آخر (بلا كلمة) لبرا السالفة */
 async function brAiClues(batch){
  const out={};batch.forEach(i=>{out[i]=null});
  const know=batch.filter(i=>i!==VB.spy),spy=batch.includes(VB.spy)?VB.spy:null;
  if(know.length){
-  const r=await AI.json(brAiState(true)+`\n\nالمطلوب: تلميح واحد لكل من: ${know.map(i=>i+' '+VB.names[i]).join('، ')} — تلميح صحيح ومحدّد عن «${VB.word}» يختلف عمّا قيل، دون ذكر الكلمة أو جزء منها. إن كان أحدهم قد ارتاب في تلميح سابق فليقله في تلميحه بإيجاز.\nأعد JSON فقط: {"clues":{"<رقم>":"<التلميح>"}}`,'quick');
+  const r=await AI.json(brAiState(true)+`\n\nالمطلوب الآن (الجولة ${VB.round}): تلميح واحد لكل من: ${know.map(i=>i+' '+VB.names[i]).join('، ')} — كلّهم يعرفون «${VB.word}». كل واحد يفكّر أوّلًا في think (ما الصفات التي قيلت؟ ما الصفة الصحيحة غير المكشوفة التي أضيفها؟ هل تلميح أحدهم لا يناسب الكلمة؟) ثم يكتب تلميحًا صحيحًا محدّدًا يختلف عمّا قيل ولا يذكر الكلمة أو جزءًا منها أو مرادفها. إن ارتاب في تلميح سابق أشار إليه بإيجاز.\nأعد JSON فقط: {"clues":{"<رقم>":"<التلميح>"},"think":{"<رقم>":"<سرّي>"},${BR_AI_NOTES}}`);
+  mfAiNotes(r);
   if(r&&r.clues&&typeof r.clues==='object')know.forEach(i=>{const c=r.clues[i]!=null?r.clues[i]:r.clues[VB.names[i]];if(c&&!brSaidWord(String(c)))out[i]=aiTxt(c,160)});
   else AI.miss();
  }
  if(spy!=null&&vbAlive()){
-  const r=await AI.json(brAiState(false)+`\n\nالمطلوب: أنت تحرّك ${spy} ${VB.names[spy]} وهو برا السالفة: لا يعرف الكلمة ويريد ألا ينكشف. اقرأ تلميحات الآخرين، خمّن الكلمة الأقرب من الفئة، واكتب تلميحًا غامضًا يشبه أسلوبهم ويصلح للكلمة المرجّحة دون أن يحدّدها.\nأعد JSON فقط: {"clue":"<التلميح>","guess":"<أقرب كلمة من القائمة>"}`,'quick');
+  const r=await AI.json(brAiState(false)+`\n\nالمطلوب الآن (الجولة ${VB.round}): أنت تحرّك ${spy} ${VB.names[spy]} وهو برا السالفة: لا يعرف الكلمة ويريد ألا ينكشف. فكّر أوّلًا في think: من تلميحات الآخرين، ما الكلمات الثلاث الأرجح من الفئة بالترتيب ولماذا؟ ثم اكتب تلميحًا يشبه أسلوبهم ويصلح للمرشّحَين الأوّلَين معًا دون أن يحدّد أحدهما.\nأعد JSON فقط: {"think":"<سرّي>","clue":"<التلميح>","guess":"<أقرب كلمة من القائمة>","notes":{"${spy}":"<ما يتذكّره>"}}`);
+  mfAiNotes(r);
   if(r&&r.clue)out[spy]=aiTxt(r.clue,160);
  }
  return out;
 }
 /** حكم النموذج على ما كتبه البشري: هل يناسب الكلمة؟ هل أعلن أنه لا يعرفها؟ وتعليق قصير من أحدهم إن استحقّ */
 async function brAiJudge(text,kind){
- const r=await AI.json(brAiState(true)+`\n\nالبشري ${VB.names[0]} (رقم 0) كتب ${kind==='answer'?'جوابه عن سؤال المجلس':'تلميحه'} الآن: «${aiTxt(text,300)}»\nالمطلوب: احكم: هل يناسب الكلمة «${VB.word}» تحديدًا (fit=2)، أم عامّ يصلح لأي كلمة من الفئة (fit=1)، أم لا يناسبها أو يناقضها (fit=0)؟ وهل أعلن أنه لا يعرف الكلمة أو أنه برا السالفة (confess)؟ ثم إن كان في كلامه ما يستحقّ تعليقًا (غموض، تناقض، اعتراف، سؤال، مزاح) فليعلّق آليّ واحد بجملة قصيرة تردّ على ما قاله فعلًا، وإلا اترك lines فارغة.\nأعد JSON فقط: {"fit":<0|1|2>,"confess":<true|false>,"lines":[{"i":<رقم>,"text":"<التعليق>"}]}`,'quick');
+ const r=await AI.json(brAiState(true)+`\n\nالبشري ${VB.names[0]} (رقم 0) كتب ${kind==='answer'?'جوابه عن سؤال المجلس':'تلميحه'} الآن: «${aiTxt(text,300)}»\nالمطلوب: احكم بدقّة: هل يناسب الكلمة «${VB.word}» تحديدًا (fit=2)، أم عامّ يصلح لأي كلمة من الفئة (fit=1)، أم لا يناسبها أو يناقضها (fit=0)؟ وهل أعلن أنه لا يعرف الكلمة أو أنه برا السالفة (confess)؟ ثم إن كان في كلامه ما يستحقّ تعليقًا (غموض، تناقض مع الكلمة، اعتراف، سؤال، مزاح، تكرار لكلام غيره) فليعلّق آليّ واحد بجملة قصيرة تردّ على ما قاله فعلًا مقتبسةً كلمته، وإلا اترك lines فارغة.\nأعد JSON فقط: {"think":"<سرّي>","fit":<0|1|2>,"confess":<true|false>,"lines":[{"i":<رقم>,"text":"<التعليق>"}],${BR_AI_NOTES}}`);
+ mfAiNotes(r);
  if(!r||typeof r!=='object'||r.fit==null){AI.miss();return null}
  return {fit:[0,1,2].includes(r.fit)?r.fit:1,confess:!!r.confess,lines:Array.isArray(r.lines)?r.lines.filter(L=>L&&L.text).slice(0,1):[]};
 }
@@ -23747,12 +23812,14 @@ async function brHumanSaid(text,kind){
 async function brAiVotes(){
  const out={},know=VB.names.map((_,i)=>i).filter(i=>i!==0&&i!==VB.spy);
  if(know.length){
-  const r=await AI.json(brAiState(true)+`\n\nالمطلوب: التصويت. انظر آخر الأسطر في السجلّ لتعرف ما صوّت عليه البشري. قرّر صوت كل واحد من: ${know.map(i=>i+' '+VB.names[i]).join('، ')} — كلّهم يعرفون الكلمة، ويصوّتون على صاحب أغمض التلميحات أو من ناقض الكلمة أو من أعلن أنه لا يعرفها، لا على أنفسهم.\nأعد JSON فقط: {"votes":{"<رقم المصوّت>":<رقم المتّهم>}}`,'quick');
+  const r=await AI.json(brAiState(true)+`\n\nالمطلوب الآن: التصويت. انظر آخر الأسطر في السجلّ لتعرف ما صوّت عليه البشري. قرّر صوت كل واحد من: ${know.map(i=>i+' '+VB.names[i]).join('، ')} — كلّهم يعرفون الكلمة. في analysis قيّم لكل لاعب آخر: هل تلميحاته وأجوبته تناسب «${VB.word}» تحديدًا أم عامّة أم تناقضها؟ ثم يصوّت كل واحد على من لا يعرف الكلمة في رأيه (أو على من أعلن أنه لا يعرفها)، لا على نفسه ولا على من أثبت معرفته.\nأعد JSON فقط: {"analysis":"<تقييم كل لاعب>","votes":{"<رقم المصوّت>":<رقم المتّهم>},${BR_AI_NOTES}}`);
+  mfAiNotes(r);
   const v=r&&r.votes&&typeof r.votes==='object'?r.votes:null;
   if(v)know.forEach(i=>{const t=vbNameIdx(v[i]!=null?v[i]:v[VB.names[i]]);if(t!=null&&t!==i)out[i]=t});
+  else AI.miss();
  }
  if(VB.spy!==0&&vbAlive()){
-  const r=await AI.json(brAiState(false)+`\n\nالمطلوب: أنت تحرّك ${VB.spy} ${VB.names[VB.spy]} وهو برا السالفة. يصوّت على من يبدو مشبوهًا عند الآخرين (أو على من أعلن أنه لا يعرف الكلمة) ليبعد الشكّ عن نفسه — لا على نفسه.\nأعد JSON فقط: {"vote":<رقم المتّهم>}`,'quick');
+  const r=await AI.json(brAiState(false)+`\n\nالمطلوب الآن: أنت تحرّك ${VB.spy} ${VB.names[VB.spy]} وهو برا السالفة. فكّر: من يبدو مشبوهًا عند الآخرين (أو من أعلن أنه لا يعرف الكلمة)؟ يصوّت عليه ليبعد الشكّ عن نفسه — لا على نفسه.\nأعد JSON فقط: {"think":"<سرّي>","vote":<رقم المتّهم>}`);
   const t=r?vbNameIdx(r.vote):null;if(t!=null&&t!==VB.spy)out[VB.spy]=t;
  }
  return out;
@@ -23760,7 +23827,7 @@ async function brAiVotes(){
 /** تخمين برا السالفة الآليّ من النموذج (بلا كلمة): يختار من قائمة الفئة فقط */
 async function brAiGuess(){
  const cands=PARTY_WORDS[VB.cat]||[];
- const r=await AI.json(brAiState(false)+`\n\nالمطلوب: أنت تحرّك ${VB.spy} ${VB.names[VB.spy]} وهو برا السالفة وقد أُمسك به؛ له تخمين واحد. من تلميحات الآخرين وأجوبتهم في السجلّ اختر الكلمة الأرجح من هذه القائمة فقط: ${cands.join('، ')}.\nأعد JSON فقط: {"guess":"<الكلمة>"}`,'quick');
+ const r=await AI.json(brAiState(false)+`\n\nالمطلوب الآن: أنت تحرّك ${VB.spy} ${VB.names[VB.spy]} وهو برا السالفة وقد أُمسك به؛ له تخمين واحد. فكّر: من تلميحات الآخرين وأجوبتهم في السجلّ، أيّ كلمة من هذه القائمة تناسب كل التلميحات معًا؟ ${cands.join('، ')}.\nأعد JSON فقط: {"think":"<سرّي>","guess":"<الكلمة>"}`);
  const g=r&&r.guess?String(r.guess).trim():'';if(!g)return null;
  return cands.includes(g)?g:(cands.find(w=>arNorm(w)===arNorm(g))||null);
 }
@@ -23842,8 +23909,8 @@ async function brAsk(){
  if(AI.enabled()){   // سؤال يبني على تلميحات البشري — وبرا السالفة الآليّ يسأل سؤالًا عامًّا لأنه لا يعرف الكلمة
   const r=await AI.json(brAiState(asker!==VB.spy)+`
 
-المطلوب: ${asker} ${VB.names[asker]} يوجّه سؤالًا قصيرًا واحدًا للبشري ${VB.names[0]} يكشف إن كان يعرف الكلمة${asker===VB.spy?' (هو نفسه لا يعرفها فيسأل سؤالًا عامًّا يناسب الفئة)':' دون أن يذكرها أو يلمّح لها بوضوح'} — سؤال يختلف عمّا سُئل في السجلّ ويبني على ما قاله البشري إن أمكن.
-أعد JSON فقط: {"q":"<السؤال>"}`,'quick');
+المطلوب: ${asker} ${VB.names[asker]} يوجّه سؤالًا قصيرًا واحدًا للبشري ${VB.names[0]} يكشف إن كان يعرف الكلمة${asker===VB.spy?' (هو نفسه لا يعرفها فيسأل سؤالًا عامًّا يناسب الفئة ويبدو واثقًا)':' دون أن يذكرها أو يلمّح لها بوضوح: سؤال عن تفصيل لا يجيب عنه إلا من يعرف'} — يبني على ما قاله البشري نفسه (اقتبس تلميحه إن كان غامضًا) ويختلف عمّا سُئل في السجلّ. فكّر أوّلًا في think.
+أعد JSON فقط: {"think":"<سرّي>","q":"<السؤال>"}`);
   if(!vbAlive())return;if(r&&r.q)q=aiTxt(r.q,140);
  }
  if(!q)q=vbRnd(BARRA_ASK[VB.cat]||['قل لنا أكثر؟']);
@@ -23874,8 +23941,8 @@ async function brMyAsk(){
   const r=await AI.json(brAiState(i!==VB.spy)+`
 
 البشري ${VB.names[0]} سأل ${i} ${VB.names[i]}: «${aiTxt(text,200)}»
-المطلوب: جواب ${VB.names[i]} القصير ${i===VB.spy?'وهو لا يعرف الكلمة: جواب غامض يصلح لأي كلمة من الفئة دون أن ينكشف':'وهو يعرف الكلمة «'+VB.word+'»: جواب صحيح محدّد يجيب عن السؤال فعلًا دون ذكر الكلمة'}.
-أعد JSON فقط: {"a":"<الجواب>"}`,'quick');
+المطلوب: جواب ${VB.names[i]} القصير ${i===VB.spy?'وهو لا يعرف الكلمة: جواب واثق يبدو محدّدًا لكنه لا يلتزم بتفصيل قد يفضحه، ويصلح للكلمات الأرجح من الفئة':'وهو يعرف الكلمة «'+VB.word+'»: جواب صحيح محدّد يجيب عن السؤال نفسه فعلًا دون ذكر الكلمة أو مرادفها'}. فكّر أوّلًا في think.
+أعد JSON فقط: {"think":"<سرّي>","a":"<الجواب>"}`);
   if(!vbAlive())return;if(r&&r.a&&!(i!==VB.spy&&brSaidWord(String(r.a))))ans=aiTxt(r.a,160);
  }
  if(ans==null&&i===VB.spy)ans=vbRnd(['سؤال صعب… خلّنا نسمع غيري أوّلًا.','اللي أعرفه أنه شيء معروف، ما أحب أحدّد.','مثل ما قال الباقون تقريبًا.']);
