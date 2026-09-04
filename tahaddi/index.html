@@ -630,33 +630,54 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbSub{font-size:8.5px;color:#F0A0A0;text-shadow:0 1px 2px #000}
 .vbFeed{display:flex;flex-direction:column;gap:7px;padding-bottom:14px;min-height:40px}
 /* المحادثة جنب المشهد (5.55): عمودان — المسرح والسجلّ — فتقصر الشاشة بدل أن يمتدّ السجلّ تحتها */
-.vbPlay{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
-.vbPlay .vbStage{flex:1 1 auto;min-width:0;margin-bottom:0;height:auto}
-.vbPlay .vbFeed{flex:0 0 41%;max-width:172px;overflow-y:auto;overscroll-behavior:contain;padding:8px 8px 10px;margin:0;font-size:11px;scrollbar-width:thin}
-.vbPlay .vbFeed::-webkit-scrollbar{width:4px}
-.vbPlay .vbFeed::-webkit-scrollbar-thumb{background:rgba(232,178,58,.35);border-radius:3px}
-.vbPlay,.vbPlay .vbStage,.vbPlay .vbFeed{height:318px}
-.vbPlay .vbMsg{max-width:100%;gap:5px}
-.vbPlay .vbMsg>svg,.vbPlay .vbMsg>span{width:20px!important;height:20px!important}
-.vbPlay .vbBub{padding:5px 7px;font-size:10.5px;line-height:1.55}
-.vbPlay .vbBub b{font-size:9px}
-.vbPlay .vbBub time{display:none}
-.vbPlay .vbPh{font-size:10px;margin:5px 0 1px}
-.vbPlay .vbN{font-size:10.5px;padding:0 2px}
-.vbPlay .vbN.big{font-size:11.5px;padding:6px 8px}
-.vbPlay .vbBan{padding:6px 7px;gap:7px}
-.vbPlay .vbBan b{font-size:11px}
-.vbPlay .vbBan span{font-size:10px}
-.vbPlay .vbCard{padding:10px 8px}
-.vbPlay .vbV{font-size:10px;gap:4px}
-.vbPlay .vbTag{font-size:9px}
-.vbPlay .vbReact .vbRt{font-size:10px}
-.vbPlay .vbNm{font-size:9px;max-width:60px;padding:1px 4px}
-.vbPlay .vbPill{display:none}
-.vbPlay .vbSeat{width:56px}
-@media (min-width:430px){.vbPlay,.vbPlay .vbStage,.vbPlay .vbFeed{height:352px}.vbPlay .vbFeed{flex-basis:38%;max-width:196px}}
-@media (min-width:500px){.vbPlay .vbPill{display:inline-flex}.vbPlay .vbNm{font-size:10px;max-width:72px}.vbPlay .vbSeat{width:66px}}
-@media (max-width:359px){.vbPlay,.vbPlay .vbStage,.vbPlay .vbFeed{height:292px}.vbPlay .vbFeed{flex-basis:44%}}
+/* شاشة اللعب ملء الجهاز (5.57): لا تنزيل — رأس مضغوط، مشهد كبير، دردشة واضحة على جانبه، وشريط أوامر أسفل */
+.vbScene.full{position:fixed;inset:0;padding:0;margin:0;max-width:none;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);animation:none}
+.vbScene.full .vbTop{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:linear-gradient(180deg,rgba(8,11,20,.92),rgba(8,11,20,.6));border-bottom:1px solid rgba(255,255,255,.07)}
+.vbScene.full .vbTopL{flex:1;min-width:0}
+.vbScene.full .vbTt b{font-size:14px}
+.vbScene.full .vbTt small{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tx2)}
+.vbScene.full .vbLeave{min-height:34px;padding:0 9px;flex-shrink:0}
+.vbScene.full .vbChip{min-height:34px;padding:0 9px;flex-shrink:0}
+.vbScene.full .vbChip.ico{width:34px;padding:0;justify-content:center}
+.vbScene.full .vbTop .vbPhase{max-width:38%;min-height:34px;padding:4px 8px}
+.vbMain{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
+.vbScene.full .vbStage{position:absolute;inset:0;height:auto;width:auto;margin:0;border-radius:0;border:none;box-shadow:none}
+.vbScene.full .vbRole{position:absolute;top:70px;right:8px;left:auto;width:auto;max-width:52%;margin:0;z-index:6;padding:6px 9px;background:rgba(10,14,26,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.vbScene.full .vbRole span{display:none}
+.vbScene.full .vbTurn[hidden]+.vbRole{top:8px}
+/* بطاقة الدور المكشوفة تقف يمين المشهد بعيدًا عن الدردشة */
+.vbScene.full .vbBigCard{left:auto;right:10px;top:50%;transform:translateY(-50%)}
+.vbScene.full .vbBigCard.out{transform:translateY(-60%) scale(.8)}
+.vbScene.full .vbTurn{position:absolute;left:8px;right:8px;top:8px;width:auto;max-width:none;margin:0;z-index:6;background:rgba(10,14,26,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:5px 8px;gap:8px;border-radius:13px}
+.vbScene.full .vbTurn .vbTurnT{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbScene.full .vbTurn .vbTurnD{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:1}
+.vbScene.full .vbTurn .vbTurnI{width:26px;height:26px;flex-shrink:0}
+.vbScene.full .vbTurn .vbRing{width:38px;height:38px;flex-shrink:0}
+.vbScene.full .vbTurn .vbRing b{font-size:10px}
+.vbScene.full .vbSteps{position:absolute;right:8px;bottom:8px;margin:0;z-index:6;flex-direction:column;gap:3px;width:auto}
+.vbScene.full .vbNotes{position:absolute;inset:auto 8px 8px 8px;z-index:8;max-height:60%;overflow-y:auto;background:rgba(10,14,26,.95)}
+.vbFeedW{position:absolute;left:8px;bottom:8px;width:46%;max-width:220px;max-height:50%;display:flex;flex-direction:column;z-index:5;
+ background:rgba(8,11,20,.88);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);border:1px solid rgba(232,178,58,.28);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.5);overflow:hidden}
+.vbScene.full .vbFeed{background:none;border:none;border-radius:0;padding:8px 9px 10px;margin:0;overflow-y:auto;overscroll-behavior:contain;font-size:11.5px;scrollbar-width:thin;min-height:0}
+.vbScene.full .vbFeed::-webkit-scrollbar{width:4px}
+.vbScene.full .vbFeed::-webkit-scrollbar-thumb{background:rgba(232,178,58,.4);border-radius:3px}
+.vbScene.full .vbMsg{max-width:100%;gap:6px}
+.vbScene.full .vbMsg>svg,.vbScene.full .vbMsg>span{width:22px!important;height:22px!important}
+.vbScene.full .vbBub{padding:6px 8px;font-size:11.5px;line-height:1.6}
+.vbScene.full .vbBub b{font-size:9.5px}
+.vbScene.full .vbBub time{display:none}
+.vbScene.full .vbPh{font-size:10px;margin:6px 0 2px}
+.vbScene.full .vbN{font-size:11px;padding:0 2px}
+.vbScene.full .vbN.big{font-size:12px;padding:7px 9px}
+.vbScene.full .vbBan{padding:7px 8px;gap:8px}
+.vbScene.full .vbV{font-size:10.5px}
+.vbScene.full .vbDetB b{font-size:13px}
+.vbScene.full .vbAct{position:static;transform:none;width:100%;max-width:none;flex:0 0 auto;padding:6px 10px calc(6px + env(safe-area-inset-bottom));background:linear-gradient(0deg,rgba(8,11,20,.96),rgba(8,11,20,.86));border-top:1px solid rgba(255,255,255,.07);z-index:20}
+.vbScene.full .vbQuick{margin-bottom:5px}
+.vbScene.full .vbBar{gap:6px}
+.vbScene.full .vbBar2{margin-top:5px}
+@media (max-height:700px){.vbFeedW{max-height:44%}.vbScene.full .vbQuick{display:none}}
+@media (min-width:520px){.vbFeedW{width:38%;max-width:280px}.vbScene.full .vbFeed{font-size:12px}}
 .vbNew{animation:pop .25s ease}
 .vbPh{display:flex;align-items:center;gap:8px;margin:8px 0 2px;color:var(--gold);font-size:11px;font-weight:900}
 .vbPh::before,.vbPh::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,178,58,.5),transparent)}
@@ -742,7 +763,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 /* المجلس المجسّم (5.52): قماش WebGL تحت طبقة المقاعد؛ الأسماء والشارات فوق رؤوس الشخصيات، وفقاعات كلام */
 .vb3d{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:manipulation}
 .vb3dVig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 52%,rgba(0,0,0,.42) 100%)}
-.vbScene.is3d .vbPlay .vbStage{height:100%}
+.vbScene.is3d .vbStage{height:100%}
 @media (min-width:480px){.vbScene.is3d .vbStage{height:340px}}
 .vbScene.is3d .vbBg,.vbScene.is3d .vbCenter{display:none}
 .vbScene.is3d .vbSeats{pointer-events:none}
@@ -760,7 +781,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.is3d .vbNum{position:static;order:1;width:17px;height:17px;min-width:17px;font-size:9.5px;line-height:17px;padding:0;border-radius:50%;
  background:rgba(232,178,58,.9);color:#1A1206;font-weight:900;text-align:center;box-shadow:none;border:none;flex-shrink:0;display:block}
 .vbScene.is3d .vbSeat.me .vbNum{background:#FFE9A8}
-.vbScene.is3d .vbNm{order:3;font-size:10px;font-weight:800;background:none;border:none;padding:0;max-width:66px;text-shadow:none}
+.vbScene.is3d .vbNm{order:3;font-size:11px;font-weight:800;background:none;border:none;padding:0;max-width:66px;text-shadow:none}
 .vbScene.is3d .vbNm i{font-size:8.5px;color:var(--gold);font-style:normal;margin-inline-start:2px}
 .vbScene.is3d .vbPill.dim{display:none}
 .vbScene.is3d .vbPill{order:4;font-size:8px;padding:0 5px;margin:0;border-radius:7px;max-width:52px;overflow:hidden;text-overflow:ellipsis}
@@ -20903,7 +20924,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.56';
+const APP_VER='5.57';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -28702,6 +28723,9 @@ function vb3dResize(){
  const w=st.clientWidth||360,h=st.clientHeight||300;VB3.w=w;VB3.h=h;
  VB3.renderer.setSize(w,h,false);if(VB3.comp){const dpr=VB3.renderer.getPixelRatio();VB3.comp.setSize(w,h);VB3.comp.setPixelRatio&&VB3.comp.setPixelRatio(dpr)}
  const asp=w/h;VB3.cam.aspect=asp;
+ // الدردشة تحتلّ جانب الشاشة: نُزيح مركز الرؤية إلى الجهة الأخرى فيبقى الجالسون مكشوفين لا خلف اللوحة
+ const fw=(()=>{const p=document.querySelector('.vbFeedW');if(!p||!p.offsetWidth)return 0;const r=p.getBoundingClientRect(),s2=st.getBoundingClientRect();return r.bottom>s2.top+s2.height*.35?p.offsetWidth:0})();
+ if(fw>24)VB3.cam.setViewOffset(w,h,-Math.round(fw*.42),0,w,h);else VB3.cam.clearViewOffset();
  const hf=VB3.hfov||62,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
  VB3.cam.fov=Math.min(74,vf);VB3.cam.updateProjectionMatrix();
  const back=asp<1?(1-asp)*3.4:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.25;
@@ -28718,18 +28742,29 @@ function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return 
 /** يضع لوحات اللاعبين فوق الرؤوس ثم يرفع المتداخلة منها صفًّا صفًّا فلا تتراكب الأسماء */
 function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
- const W=st.clientWidth||1,H=st.clientHeight||1,placed=[];
+ const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
+ // ألواح الواجهة فوق المشهد (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) عوائق تُزاح عنها لوحات اللاعبين
+ document.querySelectorAll('.vbFeedW,.vbBigCard,.vbScene.full .vbRole,.vbScene.full .vbTurn,.vbScene.full .vbSteps').forEach(p=>{
+  if(!p.offsetWidth||!p.offsetHeight)return;const r=p.getBoundingClientRect();
+  placed.push({x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,w:r.width,h:r.height})});
+ const hit=(r,x,y,w,h,pad)=>{const ox=(r.w+w)/2+pad-Math.abs(r.x-x),oy=(r.h+h)/2+pad-Math.abs(r.y-y);return ox>0&&oy>0?ox*oy:0};
  const els=[...document.querySelectorAll(VB3.model.seats)]
   .map(el=>({el,i:+el.dataset.seat})).filter(o=>a[o.i])
   .sort((p,q)=>a[p.i].y-a[q.i].y||a[p.i].x-a[q.i].x);   // الأبعد أوّلًا: يُرفع الخلفيّ لا الأماميّ
  els.forEach(({el,i})=>{
-  const w=el.offsetWidth||70,h=el.offsetHeight||20,pad=3;
-  let x=a[i].x/100*W,y=a[i].y/100*H,tries=0;
-  x=Math.max(w/2+2,Math.min(W-w/2-2,x));
-  while(tries++<6&&placed.some(r=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad))y-=h+pad;
-  y=Math.max(h/2+2,Math.min(H-h/2-2,y));
-  placed.push({x,y,w,h});
-  el.style.left=(x/W*100).toFixed(2)+'%';el.style.top=(y/H*100).toFixed(2)+'%';
+  const w=el.offsetWidth||70,h=el.offsetHeight||20,pad=3,step=h+pad;
+  const x0=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H;
+  let best=null;
+  // مرشّحون قرب الرأس أوّلًا (فوقه ثم جانبيه) — يُختار أقلّهم تداخلًا وأقربهم للرأس، فلا تهيم اللوحة بعيدًا
+  cand: for(const my of [0,-.6,-1,-1.6,-2,-2.6,-3,-4,.6,1])for(const mx of [0,.5,-.5,1,-1,1.5,-1.5,2,-2]){const dy=my*step,dx=mx*w;
+   const x=Math.max(w/2+2,Math.min(W-w/2-2,x0+dx)),y=Math.max(h/2+2,Math.min(H-h/2-2,y0+dy));
+   let ov=0;placed.forEach(r=>ov+=hit(r,x,y,w,h,pad));
+   const sc=ov*200+Math.abs(dx)*.5+Math.abs(dy);
+   if(!best||sc<best.sc)best={x,y,sc,ov};
+   if(!ov)break cand;
+  }
+  placed.push({x:best.x,y:best.y,w,h});
+  el.style.left=(best.x/W*100).toFixed(2)+'%';el.style.top=(best.y/H*100).toFixed(2)+'%';
  });
 }
 /** فقاعة كلام فوق رأس المتكلّم لثوانٍ — فقاعة آليّ واحدة في كل مرّة (فقاعتك تبقى) */
@@ -28817,32 +28852,38 @@ const RING_C=2*Math.PI*19;
 function vbScene(kind,title,sub){
  setArena(kind==='mafia'?'mafia':'barra');
  const n=VB.names.length;
- go(`<div class="scr on vbScene ${kind}${VB.night?' night':''}">
+ go(`<div class="scr on vbScene full ${kind}${VB.night?' night':''}">
  <div class="vbTop">
-  <div class="vbTopL"><span class="vbGi">${ico(kind==='mafia'?'search':'orb',24)}</span><div class="vbTt"><b>${title}</b><small>${sub||'ضد الكمبيوتر'}</small></div></div>
+  <button class="vbLeave" onclick="vbExit()">${ico('door',13)}</button>
+  <div class="vbTopL"><div class="vbTt"><b>${title}</b><small id="vbCntW">${ico('group',11)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></small></div></div>
   <div class="vbPhase" id="vbPhase"></div>
-  <button class="vbLeave" onclick="vbExit()">${ico('door',13)} مغادرة</button>
+  <button class="vbChip ai" id="vbAiChip" onclick="vbAiSheet()" hidden>${ico('sparkle',12)}</button>
+  <button class="vbChip ico" onclick="vbMenuSheet()">${ico('menu',14)}</button>
  </div>
- <div class="vbInfo">
-  <span class="vbChip">${ico('group',13)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></span>
-  <button class="vbChip ai" id="vbAiChip" onclick="vbAiSheet()" hidden>${ico('sparkle',13)} ذكاء اصطناعي</button>
-  <span class="sp"></span>
-  ${kind==='mafia'?`<button class="vbChip" onclick="vbNotesToggle()">${ico('scroll',13)} ملاحظاتي</button>`:''}
-  <button class="vbChip" onclick="vbInfoSheet()">${ico('bulb',13)} ${kind==='mafia'?'دوري':'السالفة'}</button>
-  <button class="vbChip" onclick="vbRules()">${ico('info',13)} القوانين</button>
- </div>
- <div class="vbRole" id="vbRole" onclick="vbRoleGuide()"></div>
- <div class="vbPlay">
+ <div class="vbMain">
   <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbCenter">${vbCenterPiece(kind)}</div><div class="vbSeats" id="vbSeats"></div></div>
-  <div class="vbFeed" id="vbFeed"></div>
+  <div class="vbTurn" id="vbTurn" hidden></div>
+  <div class="vbRole" id="vbRole" onclick="vbRoleGuide()"></div>
+  <div class="vbFeedW"><div class="vbFeed" id="vbFeed"></div></div>
+  ${kind==='barra'?`<div class="vbSteps" id="vbSteps">${['التلميحات','سؤال وجواب','التصويت','النتيجة'].map((t,i)=>`<span data-step="${i+1}"><i>${i+1}</i>${t}</span>`).join('')}</div>`:''}
+  <div class="vbNotes" id="vbNotes" hidden></div>
  </div>
- <div class="vbTurn" id="vbTurn" hidden></div>
- ${kind==='barra'?`<div class="vbSteps" id="vbSteps">${['التلميحات','سؤال وجواب','التصويت','النتيجة'].map((t,i)=>`<span data-step="${i+1}"><i>${i+1}</i>${t}</span>`).join('')}</div>`:''}
- <div class="vbNotes" id="vbNotes" hidden></div>
  <div class="vbAct" id="vbAct"></div></div>`);
  if(typeof vb3dMount==='function')vb3dMount(kind);
  vbSeats();vbAiChip();vbRoleStrip();
  (VB.feed||[]).forEach(m=>vbRenderMsg(m,true));
+}
+/** ورقة أدوات الجولة: ملاحظاتي ودوري والقوانين — بدل صفّ الرقاقات الذي كان يأكل ارتفاع الشاشة */
+function vbMenuSheet(){
+ const mafia=VB&&VB.g==='mafia';
+ vbSheet(`<div class="shh"><div><div class="t">أدوات الجولة</div><div class="d">كل ما تحتاجه أثناء اللعب</div></div></div>
+ <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px">
+  ${mafia?`<button class="btn g" onclick="closeSheet();vbNotesToggle()">${ico('scroll',14)} ملاحظاتي عن اللاعبين</button>`:''}
+  <button class="btn g" onclick="closeSheet();vbInfoSheet()">${ico('bulb',14)} ${mafia?'دوري وما أفعله':'السالفة ودوري'}</button>
+  <button class="btn g" onclick="closeSheet();vbRules()">${ico('info',14)} قوانين اللعبة</button>
+  <button class="btn g" onclick="closeSheet();vbAiSheet()">${ico('sparkle',14)} تفكير اللاعبين الآليين</button>
+  <button class="btn g" style="color:var(--no);border-color:var(--no)" onclick="closeSheet();vbExit()">${ico('door',14)} مغادرة المباراة</button>
+ </div>`);
 }
 /** شريط الدور تحت الرقاقات: دورك (أو السالفة) وإرشاد المرحلة الحالية — الضغط يفتح دليل دورك */
 function vbRoleStrip(hint){
@@ -28981,10 +29022,10 @@ function vbDealReveal(kind){
  const front=m?`<div class="vbBigF" style="--rc:${sp.ac}">${ico(sp.ic,40,sp.tint)}<b>${r}</b><small>${sp.d}</small></div>`
   :`<div class="vbBigF" style="--rc:${spy?'#E24B4A':'#E8B23A'}">${spy?ico('door',40,'red'):ico('lock',40)}<b>${spy?'برا السالفة':esc(VB.word)}</b><small>${spy?'لا تعرف الكلمة — لمّح بغموض':'الفئة: '+esc(VB.cat)}</small></div>`;
  const el=document.createElement('div');el.className='vbBigCard';el.innerHTML=`<div class="in"><div class="face back"></div><div class="face frontW">${front}</div></div>`;
- el.onclick=()=>el.classList.toggle('up');st.appendChild(el);VB.bigCard=el;
+ el.onclick=()=>el.classList.toggle('up');st.appendChild(el);VB.bigCard=el;if(typeof vb3dLayout==='function')vb3dLayout();   // اللوحات تبتعد عن البطاقة
  setTimeout(()=>{if(VB.bigCard===el)el.classList.add('up')},350);
 }
-function vbDealClear(){const el=VB&&VB.bigCard;if(el){el.classList.add('out');setTimeout(()=>el.remove(),450);VB.bigCard=null}}
+function vbDealClear(){const el=VB&&VB.bigCard;if(el){el.classList.add('out');setTimeout(()=>{el.remove();if(typeof vb3dLayout==='function')vb3dLayout()},450);VB.bigCard=null}}
 /** رسالة في السجلّ: k = n راوٍ · ph مرحلة · ban لافتة كبيرة بصورة · b آليّ · me أنا · v صوت · card بطاقة — react تفاعل سريع، tg من اتُّهم */
 function vbMsg(m){m.at=m.at||Date.now();VB.feed.push(m);vbRenderMsg(m,false);return m}
 function vbTime(t){const d=new Date(t||Date.now());return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
@@ -29006,7 +29047,7 @@ function vbRenderMsg(m,silent){
  if(!silent){const last=f.lastElementChild;if(last)last.classList.add('vbNew');vbScrollEnd()}
 }
 function vbScrollEnd(){try{const f=document.getElementById('vbFeed');
- if(f&&f.closest('.vbPlay')){f.scrollTo({top:f.scrollHeight,behavior:VB.fast?'auto':'smooth'});return}
+ if(f&&f.closest('.vbFeedW')){f.scrollTo({top:f.scrollHeight,behavior:VB.fast?'auto':'smooth'});return}
  const y=document.body.scrollHeight;window.scrollTo({top:y,behavior:VB.fast?'auto':'smooth'})}catch(e){}}
 function vbAct(html){
  const el=document.getElementById('vbAct');
@@ -29015,7 +29056,7 @@ function vbAct(html){
   const focus=!!(old&&document.activeElement===old),pos=focus?old.selectionStart:null;
   el.innerHTML=html;
   if(keep){const nu=document.getElementById('vbTxt');if(nu&&!nu.disabled){nu.value=keep;if(focus){try{nu.focus();nu.setSelectionRange(pos,pos)}catch(e){}}}}
-  const sc=document.querySelector('.vbScene');if(sc)sc.style.paddingBottom=(html?el.offsetHeight+14:24)+'px'}   // الشريط ثابت أسفل الشاشة، والمحتوى يترك له مكانه
+  const sc=document.querySelector('.vbScene:not(.full)');if(sc)sc.style.paddingBottom=(html?el.offsetHeight+14:24)+'px'}   // الشريط ثابت أسفل الشاشة، والمحتوى يترك له مكانه
  vbScrollEnd();
 }
 /** ينتظر الوعد بحدّ أقصى ms (في الاختبارات بلا حدّ) — قرار متأخّر من النموذج لا يجمّد الجولة */
