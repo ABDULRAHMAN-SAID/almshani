@@ -20536,7 +20536,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.46';
+const APP_VER='5.47';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -21300,7 +21300,7 @@ function rmStart(){
   for(let i=0;i<nM;i++)roles.push('مافيا');
   roles.push('طبيب','محقق');
   while(roles.length<ps.length)roles.push('شعب');
-  roles.sort(()=>Math.random()-.5);
+  vbShuffle(roles);
   RM.secret={roles:{}};
   ps.forEach((p,i)=>RM.secret.roles[p.peer]=roles[i]);
   rmSend({t:'start',g:'mafia',ps,mid:rmNewMid()});
@@ -22933,6 +22933,8 @@ function vbExit(){
 /** جولة ضد الكمبيوتر تُحتسب جولة ليلة عائلة في الأهداف اليومية والمهام */
 function vbDone(){evtParty();saveState()}
 function vbRnd(arr){return arr[Math.floor(Math.random()*arr.length)]}
+/** خلط عادل في مكانه (فيشر–ييتس) — sort بعشوائية يُنحّز توزيع الأدوار */
+function vbShuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
 /** يقلب بطاقة الدور في مكانها ويخفي زرّ الكشف */
 function vbReveal(){
  const c=document.getElementById('rcCard');if(c){c.classList.add('up');c.removeAttribute('onclick')}
@@ -23036,91 +23038,94 @@ function vbMentions(text){
  const t=arNorm(text);
  return VB.names.map((nm,i)=>[i,arNorm(nm)]).filter(([i,n])=>i!==0&&n&&t.includes(n)).map(([i])=>i);
 }
-/* خلفيات المسرح — مدينة ليلية للمافيا ومجلس بفانوس لبرا السالفة (SVG خفيف) */
+/* خلفيات المسرح (5.47) — مشهدان مرسومان بالطبقات: ساحة بلدة ليلية بطاولة مستديرة وكراسٍ خشبية حول الحلقة للمافيا،
+   ومجلس عربي بأقواس ومشربيات وفوانيس ووسائد سدو حول صينية الشاي لبرا السالفة. الكراسي والوسائد تُرسم في المواضع
+   نفسها التي يحسبها vbSeatPos فيجلس كل لاعب في مكانه. إن وُجدت صورة مرسومة في VB_SCENE_IMG تُستعمل بدل الرسم. */
+const VB_SCENE_IMG={};   // {mafia:'data:image/webp;base64,…', barra:'…'} — تُضمَّن بأداة tools/build-scenes.py من art/scenes/
 function vbBackdrop(kind){
+ const W=400,H=246,n=VB.names.length;
+ if(VB_SCENE_IMG[kind])return `<svg class="vbBg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><image href="${VB_SCENE_IMG[kind]}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/></svg>`;
+ let h=hashStr(VB.names.join('|'));const rnd=()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;return (h%1000)/1000};
+ const seats=VB.names.map((_,i)=>{const p=vbSeatPos(i,n);return {x:p.x*W/100,y:p.y*H/100}});
  if(kind==='mafia'){
-  const seed=hashStr(VB.names.join('|'));let h=seed;const rnd=()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;return (h%1000)/1000};
-  let far='',mid='',near='',win='',refl='',roof='';
-  for(let x=-6;x<410;){const w=16+Math.floor(rnd()*26),hh=44+Math.floor(rnd()*64);far+=`<rect x="${x}" y="${162-hh}" width="${w}" height="${hh}" rx="1" fill="#1A2450"/>`;x+=w+1}
-  for(let x=-8;x<412;){const w=22+Math.floor(rnd()*36),hh=36+Math.floor(rnd()*58),top=172-hh;
-   mid+=`<rect x="${x}" y="${top}" width="${w}" height="${hh}" fill="#0E1530"/>`;
-   const r=rnd();if(r<.3)roof+=`<rect x="${x+4}" y="${top-6}" width="7" height="6" fill="#0E1530"/><rect x="${x+3}" y="${top-7}" width="9" height="1.6" fill="#141C3A"/>`;
-   else if(r<.5)roof+=`<path d="M${x+w/2} ${top-14} V${top}" stroke="#141C3A" stroke-width="1"/><path d="M${x+w/2-4} ${top-10} H${x+w/2+4}" stroke="#141C3A" stroke-width="1"/>`;
-   for(let wy=top+5;wy<166;wy+=8)for(let wx=x+3;wx<x+w-4;wx+=6)if(rnd()<.2)win+=`<rect x="${wx}" y="${wy}" width="2.6" height="3.6" fill="${rnd()<.75?'#F0C46A':'#8FD3FF'}" opacity="${.45+rnd()*.5}"/>`;
+  let stars='';for(let k=0;k<48;k++){stars+=`<circle cx="${(rnd()*W).toFixed(1)}" cy="${(rnd()*105).toFixed(1)}" r="${(.4+rnd()*.9).toFixed(1)}" opacity="${(.3+rnd()*.7).toFixed(2)}"/>`}
+  let far='',mid='',win='';
+  for(let x=-8;x<W+8;){const w=18+Math.floor(rnd()*22),hh=28+Math.floor(rnd()*40),top=118-hh;far+=`<path d="M${x} 118 V${top} L${x+w/2} ${top-9} L${x+w} ${top} V118 Z" fill="#1A2450"/>`;x+=w+1}
+  for(let x=-10;x<W+10;){const w=26+Math.floor(rnd()*30),hh=34+Math.floor(rnd()*42),top=134-hh,c=['#0E1530','#111A3C','#0C1229'][Math.floor(rnd()*3)];
+   mid+=`<path d="M${x} 134 V${top} L${x+w/2} ${top-12} L${x+w} ${top} V134 Z" fill="${c}"/>`;
+   if(rnd()<.5)mid+=`<rect x="${x+w-9}" y="${top-7}" width="4" height="9" fill="${c}"/>`;
+   for(let wy=top+6;wy<128;wy+=9)for(let wx=x+4;wx<x+w-5;wx+=7)if(rnd()<.3)win+=`<rect x="${wx}" y="${wy}" width="3" height="4.2" rx=".4" fill="${rnd()<.8?'#F6CF7A':'#9FDBFF'}" opacity="${(.5+rnd()*.5).toFixed(2)}"/>`;
    x+=w+2}
-  for(let x=-10;x<414;){const w=30+Math.floor(rnd()*46),hh=22+Math.floor(rnd()*46),top=176-hh;
-   near+=`<rect x="${x}" y="${top}" width="${w}" height="${hh}" fill="#060A17"/>`;
-   for(let wy=top+6;wy<170;wy+=9)for(let wx=x+5;wx<x+w-6;wx+=9)if(rnd()<.24){const c=rnd()<.7?'#F6CF7A':'#9FDBFF',o=(.55+rnd()*.45).toFixed(2);win+=`<rect x="${wx}" y="${wy}" width="3.6" height="4.8" fill="${c}" opacity="${o}"/>`;refl+=`<rect x="${wx}" y="${178+(176-wy)*.28}" width="3.6" height="2.2" fill="${c}" opacity="${(o*.28).toFixed(2)}"/>`}
-   x+=w+3}
-  return `<svg class="vbBg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-   <defs><radialGradient id="vbMoon" cx=".42" cy=".4" r=".6"><stop offset="0" stop-color="#FFF8E6"/><stop offset=".75" stop-color="#F1DCA2"/><stop offset="1" stop-color="#D9B86A"/></radialGradient>
-   <radialGradient id="vbGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,236,180,.5)"/><stop offset=".55" stop-color="rgba(255,236,180,.12)"/><stop offset="1" stop-color="rgba(255,236,180,0)"/></radialGradient>
-   <linearGradient id="vbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#040718"/><stop offset=".6" stop-color="#121A44"/><stop offset="1" stop-color="#1D2A5E"/></linearGradient>
-   <linearGradient id="vbHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(60,80,150,0)"/><stop offset="1" stop-color="rgba(60,80,150,.45)"/></linearGradient>
-   <linearGradient id="vbFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(120,140,200,0)"/><stop offset="1" stop-color="rgba(120,140,200,.3)"/></linearGradient>
-   <linearGradient id="vbRoad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A0E1F"/><stop offset="1" stop-color="#03050C"/></linearGradient>
-   <radialGradient id="vbLamp" cx=".5" cy="0" r="1"><stop offset="0" stop-color="rgba(255,214,120,.6)"/><stop offset="1" stop-color="rgba(255,214,120,0)"/></radialGradient>
-   <radialGradient id="vbLampG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,225,150,.9)"/><stop offset="1" stop-color="rgba(255,225,150,0)"/></radialGradient>
-   <filter id="vbBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.2"/></filter>
-   <filter id="vbBlur2" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="1.1"/></filter></defs>
-   <rect width="400" height="190" fill="url(#vbSky)"/>
-   <g fill="#fff"><circle cx="40" cy="30" r="1"/><circle cx="120" cy="18" r=".8"/><circle cx="210" cy="40" r=".9"/><circle cx="300" cy="22" r="1.1"/><circle cx="360" cy="52" r=".7"/><circle cx="170" cy="62" r=".6"/><circle cx="255" cy="70" r=".8"/><circle cx="90" cy="58" r=".7"/><circle cx="385" cy="14" r=".9"/><circle cx="20" cy="72" r=".6"/></g>
-   <circle cx="318" cy="46" r="52" fill="url(#vbGlow)"/><circle cx="318" cy="46" r="18" fill="url(#vbMoon)"/>
-   <g fill="#C9A860" opacity=".35"><circle cx="311" cy="41" r="3.2"/><circle cx="323" cy="52" r="2.2"/><circle cx="322" cy="38" r="1.4"/></g>
-   <g filter="url(#vbBlur)" fill="#3A4A80" opacity=".55"><ellipse cx="290" cy="60" rx="46" ry="7"/><ellipse cx="330" cy="70" rx="34" ry="5"/><ellipse cx="90" cy="46" rx="40" ry="6"/></g>
+  const chairs=seats.map(p=>`<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><ellipse cx="0" cy="27" rx="23" ry="6" fill="rgba(0,0,0,.5)"/><path d="M-19 -30 Q-19 -41 -9 -41 H9 Q19 -41 19 -30 V19 H-19 Z" fill="#3B2412" stroke="#6B4424" stroke-width="1.2"/><path d="M-13 -34 H13 V11 H-13 Z" fill="#26150A" opacity=".85"/><path d="M-19 15 H19" stroke="#7A5230" stroke-width="2"/><path d="M-9 -36 H9" stroke="rgba(255,220,170,.18)" stroke-width="1.2"/></g>`).join('');
+  return `<svg class="vbBg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
+   <linearGradient id="vbSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#030614"/><stop offset=".55" stop-color="#0F1740"/><stop offset="1" stop-color="#1B2758"/></linearGradient>
+   <radialGradient id="vbMoon" cx=".42" cy=".4" r=".6"><stop offset="0" stop-color="#FFF9EA"/><stop offset=".8" stop-color="#F0DBA3"/><stop offset="1" stop-color="#D3B06A"/></radialGradient>
+   <radialGradient id="vbGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,236,180,.55)"/><stop offset=".5" stop-color="rgba(255,236,180,.12)"/><stop offset="1" stop-color="rgba(255,236,180,0)"/></radialGradient>
+   <linearGradient id="vbGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#181C30"/><stop offset="1" stop-color="#05070F"/></linearGradient>
+   <radialGradient id="vbPool" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,196,96,.45)"/><stop offset="1" stop-color="rgba(255,196,96,0)"/></radialGradient>
+   <radialGradient id="vbTable" cx=".5" cy=".35" r=".7"><stop offset="0" stop-color="#8A5A31"/><stop offset=".7" stop-color="#4A2C14"/><stop offset="1" stop-color="#2A1709"/></radialGradient>
+   <radialGradient id="vbLampG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,225,150,.95)"/><stop offset="1" stop-color="rgba(255,225,150,0)"/></radialGradient>
+   <radialGradient id="vbVig" cx=".5" cy=".5" r=".72"><stop offset=".55" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="rgba(0,0,0,.72)"/></radialGradient>
+   <linearGradient id="vbFog" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(120,140,200,0)"/><stop offset="1" stop-color="rgba(120,140,200,.35)"/></linearGradient>
+   <pattern id="vbCob" width="18" height="10" patternUnits="userSpaceOnUse"><path d="M0 5 H18 M9 0 V5 M0 5 V10 M18 5 V10" stroke="rgba(255,255,255,.06)" stroke-width="1"/></pattern>
+   <filter id="vbBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.4"/></filter></defs>
+   <rect width="${W}" height="${H}" fill="url(#vbSky)"/>
+   <g fill="#fff">${stars}</g>
+   <circle cx="330" cy="42" r="70" fill="url(#vbGlow)"/><circle cx="330" cy="42" r="24" fill="url(#vbMoon)"/><g fill="#C9A860" opacity=".3"><circle cx="322" cy="36" r="4"/><circle cx="337" cy="50" r="3"/><circle cx="336" cy="34" r="1.8"/></g>
+   <g filter="url(#vbBlur)" fill="#2A3A70" opacity=".5"><ellipse cx="80" cy="50" rx="50" ry="7"/><ellipse cx="250" cy="70" rx="60" ry="6"/></g>
    ${far}
-   <path d="M232 162 V112 Q233 104 235 104 Q237 104 238 112 V162 Z" fill="#1A2450"/><circle cx="235" cy="101" r="3" fill="#1A2450"/>
-   <path d="M246 162 V128 Q262 108 278 128 V162 Z" fill="#1A2450"/><path d="M262 108 V100" stroke="#1A2450" stroke-width="1.6"/>
-   <rect x="0" y="100" width="400" height="62" fill="url(#vbHaze)"/>
-   ${roof}${mid}${near}${win}
-   <rect x="0" y="176" width="400" height="14" fill="url(#vbRoad)"/>
-   <g filter="url(#vbBlur2)">${refl}</g>
-   <rect x="0" y="126" width="400" height="52" fill="url(#vbFog)"/>
-   <path d="M74 176 V126" stroke="#2A2F48" stroke-width="3.2"/><path d="M60 126 H88" stroke="#2A2F48" stroke-width="3" stroke-linecap="round"/><path d="M66 127 L60 136 M82 127 L88 136" stroke="#2A2F48" stroke-width="1.4"/>
-   <circle cx="74" cy="131" r="10" fill="url(#vbLampG)"/><ellipse cx="74" cy="130" rx="5.5" ry="3" fill="#FFF0C0"/>
-   <path d="M74 132 L18 180 H130 Z" fill="url(#vbLamp)"/>
-   <ellipse cx="74" cy="181" rx="34" ry="3" fill="rgba(255,214,120,.16)"/>
-   <rect x="0" y="184" width="400" height="6" fill="#02040A"/></svg>`;
+   <path d="M186 118 V60 L200 44 L214 60 V118 Z" fill="#1A2450"/><circle cx="200" cy="82" r="9" fill="#0B1020" stroke="#C9A860" stroke-width="1.2"/><path d="M200 82 V76 M200 82 L205 84" stroke="#F0DBA3" stroke-width="1.2"/>
+   ${mid}${win}
+   <rect x="0" y="132" width="${W}" height="${H-132}" fill="url(#vbGround)"/><rect x="0" y="132" width="${W}" height="${H-132}" fill="url(#vbCob)"/>
+   <rect x="0" y="112" width="${W}" height="40" fill="url(#vbFog)"/>
+   <ellipse cx="200" cy="168" rx="150" ry="70" fill="url(#vbPool)"/>
+   <g transform="translate(200 121)"><path d="M-40 -18 H40 L34 0 H-34 Z" fill="#5E2A2A" stroke="#C08A3E" stroke-width="1"/><text x="0" y="-6" font-size="7" font-weight="900" fill="#FFE9A8" text-anchor="middle" font-family="Cairo,sans-serif">الحقيقة دائمًا لها وجه آخر</text></g>
+   ${chairs}
+   <ellipse cx="200" cy="152" rx="94" ry="34" fill="#1E1208"/><ellipse cx="200" cy="148" rx="92" ry="32" fill="url(#vbTable)" stroke="#6B4424" stroke-width="1.5"/>
+   <g fill="none" stroke="rgba(255,220,170,.12)" stroke-width="1"><ellipse cx="200" cy="148" rx="70" ry="23"/><ellipse cx="200" cy="148" rx="46" ry="15"/><ellipse cx="200" cy="148" rx="22" ry="7"/></g>
+   <g transform="translate(150 150) rotate(-8)"><rect x="-22" y="-8" width="44" height="16" rx="1.5" fill="#E9D8B4"/><path d="M-16 -3 H10 M-16 1 H14 M-16 5 H4" stroke="#8A6B3A" stroke-width="1"/></g>
+   <path d="M232 156 l30 -10 l2.5 3.5 l-29 10.5 z" fill="#D5DAE3"/><rect x="262" y="143" width="9" height="5" rx="1.5" fill="#5A3A1E" transform="rotate(-18 266 145)"/>
+   <circle cx="200" cy="132" r="30" fill="url(#vbLampG)" opacity=".85"/><rect x="194" y="116" width="12" height="20" rx="3" fill="#C9921E"/><rect x="196.5" y="119" width="7" height="13" rx="2" fill="#FFF0C0"/><rect x="191" y="135" width="18" height="3.5" rx="1" fill="#7A5410"/><rect x="198" y="112" width="4" height="5" rx="1" fill="#7A5410"/>
+   <circle cx="246" cy="139" r="6" fill="url(#vbLampG)"/><rect x="244.5" y="136" width="3" height="7" fill="#F4E6C8"/><circle cx="246" cy="135" r="1.6" fill="#FFD27A"/>
+   <rect width="${W}" height="${H}" fill="url(#vbVig)"/></svg>`;
  }
- return `<svg class="vbBg" viewBox="0 0 400 190" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-  <defs><linearGradient id="vbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22140C"/><stop offset="1" stop-color="#4A2E18"/></linearGradient>
-  <radialGradient id="vbLan" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,200,100,.8)"/><stop offset=".4" stop-color="rgba(255,170,60,.3)"/><stop offset="1" stop-color="rgba(255,170,60,0)"/></radialGradient>
-  <linearGradient id="vbRug" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5E1B20"/><stop offset=".5" stop-color="#86282C"/><stop offset="1" stop-color="#5E1B20"/></linearGradient>
+ const cushions=seats.map(p=>`<g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><ellipse cx="0" cy="25" rx="27" ry="7" fill="rgba(0,0,0,.42)"/><rect x="-28" y="3" width="56" height="25" rx="9" fill="#7A2A2A" stroke="#C08A3E" stroke-width="1"/><rect x="-28" y="3" width="56" height="25" rx="9" fill="url(#vbSadu)"/><rect x="-25" y="-1" width="50" height="10" rx="5" fill="#8E3434"/></g>`).join('');
+ return `<svg class="vbBg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
+  <linearGradient id="vbWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E110A"/><stop offset="1" stop-color="#4A2C16"/></linearGradient>
+  <pattern id="vbArab" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M12 1 L15 9 L23 12 L15 15 L12 23 L9 15 L1 12 L9 9 Z" fill="none" stroke="rgba(255,214,140,.14)" stroke-width="1"/><circle cx="12" cy="12" r="1.6" fill="rgba(255,214,140,.16)"/></pattern>
+  <pattern id="vbLat" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M4 0 L8 4 L4 8 L0 4 Z" fill="none" stroke="rgba(240,200,120,.6)" stroke-width="1.1"/></pattern>
+  <pattern id="vbSadu" width="12" height="24" patternUnits="userSpaceOnUse"><rect width="12" height="4" y="6" fill="rgba(20,20,20,.55)"/><rect width="12" height="2" y="11" fill="rgba(255,236,190,.6)"/><rect width="12" height="4" y="14" fill="rgba(30,90,60,.7)"/><path d="M0 22 L3 19 L6 22 L9 19 L12 22" fill="none" stroke="rgba(255,236,190,.55)" stroke-width="1"/></pattern>
+  <pattern id="vbRugPat" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M8 1 L15 8 L8 15 L1 8 Z" fill="none" stroke="rgba(255,220,150,.22)" stroke-width="1"/><path d="M8 5 L11 8 L8 11 L5 8 Z" fill="rgba(255,220,150,.18)"/></pattern>
+  <linearGradient id="vbRug" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A2328"/><stop offset="1" stop-color="#4A1216"/></linearGradient>
   <linearGradient id="vbSkyN" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A1030"/><stop offset="1" stop-color="#26356E"/></linearGradient>
   <linearGradient id="vbBrass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset=".5" stop-color="#C9921E"/><stop offset="1" stop-color="#7A5410"/></linearGradient>
-  <pattern id="vbTile" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M10 1 L12.4 7.6 L19 10 L12.4 12.4 L10 19 L7.6 12.4 L1 10 L7.6 7.6 Z" fill="none" stroke="rgba(255,214,140,.16)" stroke-width="1"/><circle cx="10" cy="10" r="1.2" fill="rgba(255,214,140,.14)"/></pattern>
-  <pattern id="vbLat" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M4 0 L8 4 L4 8 L0 4 Z" fill="none" stroke="rgba(240,200,120,.55)" stroke-width="1.1"/></pattern>
-  <pattern id="vbRugPat" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M8 1 L15 8 L8 15 L1 8 Z" fill="none" stroke="rgba(255,220,150,.22)" stroke-width="1"/><path d="M8 5 L11 8 L8 11 L5 8 Z" fill="rgba(255,220,150,.14)"/></pattern>
-  <clipPath id="vbArcM"><path d="M155 150 V64 A45 45 0 0 1 245 64 V150 Z"/></clipPath>
-  <filter id="vbSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter></defs>
-  <rect width="400" height="190" fill="url(#vbWall)"/><rect width="400" height="150" fill="url(#vbTile)"/>
-  <rect x="0" y="118" width="400" height="32" fill="#1B0F08" opacity=".55"/><path d="M0 118 H400 M0 121 H400" stroke="#C08A3E" stroke-width=".8" opacity=".7"/>
-  <g fill="#150B06"><path d="M40 150 V72 A45 45 0 0 1 130 72 V150 Z"/><path d="M270 150 V72 A45 45 0 0 1 360 72 V150 Z"/></g>
-  <g fill="url(#vbLat)"><path d="M40 150 V72 A45 45 0 0 1 130 72 V150 Z"/><path d="M270 150 V72 A45 45 0 0 1 360 72 V150 Z"/></g>
-  <g clip-path="url(#vbArcM)"><rect x="150" y="60" width="100" height="90" fill="url(#vbSkyN)"/>
-   <g fill="#fff"><circle cx="170" cy="80" r=".9"/><circle cx="228" cy="74" r=".8"/><circle cx="212" cy="96" r=".6"/><circle cx="186" cy="108" r=".7"/></g>
-   <path d="M225 84 A11 11 0 1 0 225 106 A8.5 8.5 0 1 1 225 84 Z" fill="#FFE9A8"/><rect x="150" y="60" width="100" height="90" fill="url(#vbLat)" opacity=".55"/></g>
-  <g fill="none" stroke="url(#vbBrass)" stroke-width="2"><path d="M40 150 V72 A45 45 0 0 1 130 72 V150"/><path d="M155 150 V64 A45 45 0 0 1 245 64 V150"/><path d="M270 150 V72 A45 45 0 0 1 360 72 V150"/></g>
-  <g fill="none" stroke="#C08A3E" stroke-width=".8" opacity=".6"><path d="M46 150 V74 A39 39 0 0 1 124 74 V150"/><path d="M161 150 V66 A39 39 0 0 1 239 66 V150"/><path d="M276 150 V74 A39 39 0 0 1 354 74 V150"/></g>
-  <circle cx="200" cy="74" r="80" fill="url(#vbLan)"/>
-  <g stroke="rgba(255,214,120,.16)" stroke-width="1"><path d="M200 60 L120 150 M200 60 L280 150 M200 60 L160 150 M200 60 L240 150"/></g>
-  <path d="M200 0 V28" stroke="#C08A3E" stroke-width="1.6" stroke-dasharray="3 2"/>
-  <path d="M191 30 H209 L211 36 H189 Z" fill="url(#vbBrass)"/><path d="M190 36 H210 L207 62 Q200 68 193 62 Z" fill="#E8B23A" stroke="#7A5410" stroke-width="1"/>
-  <path d="M190 36 H210 L207 62 Q200 68 193 62 Z" fill="url(#vbTile)" opacity=".9"/><circle cx="200" cy="49" r="5.5" fill="#FFF4D0" filter="url(#vbSoft)"/><path d="M196 68 Q200 72 204 68" stroke="#C08A3E" stroke-width="1.4" fill="none"/>
-  <rect x="0" y="150" width="400" height="40" fill="url(#vbRug)"/><rect x="0" y="150" width="400" height="40" fill="url(#vbRugPat)"/>
-  <path d="M0 153 H400 M0 187 H400" stroke="#E8C25A" stroke-width="1.2" opacity=".7"/><path d="M0 156 H400 M0 184 H400" stroke="#3A5A2E" stroke-width="1.4" opacity=".7"/>
-  <ellipse cx="200" cy="170" rx="70" ry="12" fill="none" stroke="#E8C25A" stroke-width="1" opacity=".5"/><ellipse cx="200" cy="170" rx="56" ry="8" fill="rgba(232,194,90,.12)"/>
-  <g stroke="#C9921E" stroke-width="1.2"><rect x="14" y="126" width="72" height="26" rx="11" fill="#7A2A2E"/><path d="M22 132 H78 M22 146 H78" stroke="#E8C25A" opacity=".6"/><rect x="96" y="128" width="66" height="24" rx="10" fill="#3A5A2E"/><path d="M104 134 H154 M104 146 H154" stroke="#E8C25A" opacity=".6"/>
-   <rect x="238" y="128" width="66" height="24" rx="10" fill="#3A5A2E"/><path d="M246 134 H296 M246 146 H296" stroke="#E8C25A" opacity=".6"/><rect x="314" y="126" width="72" height="26" rx="11" fill="#7A2A2E"/><path d="M322 132 H378 M322 146 H378" stroke="#E8C25A" opacity=".6"/></g>
-  <g fill="#E8C25A"><circle cx="14" cy="126" r="2"/><circle cx="86" cy="126" r="2"/><circle cx="314" cy="126" r="2"/><circle cx="386" cy="126" r="2"/><circle cx="96" cy="152" r="1.6"/><circle cx="162" cy="152" r="1.6"/><circle cx="238" cy="152" r="1.6"/><circle cx="304" cy="152" r="1.6"/></g>
-  <ellipse cx="200" cy="140" rx="40" ry="7" fill="url(#vbBrass)"/><ellipse cx="200" cy="139" rx="36" ry="5" fill="#3A2408" opacity=".6"/>
-  <g fill="url(#vbBrass)" stroke="#5A3A08" stroke-width=".7"><path d="M190 136 Q186 122 191 116 L196 104 Q197 100 200 100 Q203 100 204 104 L209 116 Q214 122 210 136 Z"/><path d="M188 114 Q178 108 180 100 L184 102 Q186 108 191 111 Z"/><path d="M210 114 Q220 112 220 122 Q220 128 214 130" fill="none" stroke="url(#vbBrass)" stroke-width="2"/><rect x="197" y="96" width="6" height="4" rx="1.5"/></g>
-  <g fill="#FAF3E0" stroke="#C9921E" stroke-width=".7"><path d="M226 136 Q226 129 231 129 H239 Q244 129 244 136 Q238 138 226 136 Z"/><path d="M158 136 Q158 129 163 129 H171 Q176 129 176 136 Q170 138 158 136 Z"/></g>
-  <g><path d="M120 128 Q118 118 126 116 Q134 118 132 128 Z" fill="url(#vbBrass)" stroke="#5A3A08" stroke-width=".7"/><rect x="118" y="128" width="16" height="3" rx="1" fill="#7A5410"/>
-   <path d="M126 114 Q122 106 128 100 Q124 94 130 88" fill="none" stroke="rgba(255,240,210,.5)" stroke-width="1.6" stroke-linecap="round" filter="url(#vbSoft)"/></g>
-  <rect x="0" y="186" width="400" height="4" fill="#120A05"/></svg>`;
+  <radialGradient id="vbLan" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba(255,200,100,.75)"/><stop offset=".45" stop-color="rgba(255,170,60,.25)"/><stop offset="1" stop-color="rgba(255,170,60,0)"/></radialGradient>
+  <radialGradient id="vbVig2" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="rgba(0,0,0,0)"/><stop offset="1" stop-color="rgba(0,0,0,.6)"/></radialGradient>
+  <linearGradient id="vbSofa" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3E7A3A"/><stop offset="1" stop-color="#235020"/></linearGradient>
+  <clipPath id="vbArcM"><path d="M150 150 V70 A50 50 0 0 1 250 70 V150 Z"/></clipPath>
+  <filter id="vbSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="1.4"/></filter></defs>
+  <rect width="${W}" height="${H}" fill="url(#vbWall)"/><rect width="${W}" height="158" fill="url(#vbArab)"/>
+  <g fill="#120903"><path d="M28 150 V80 A46 46 0 0 1 120 80 V150 Z"/><path d="M280 150 V80 A46 46 0 0 1 372 80 V150 Z"/></g>
+  <g fill="url(#vbLat)"><path d="M28 150 V80 A46 46 0 0 1 120 80 V150 Z"/><path d="M280 150 V80 A46 46 0 0 1 372 80 V150 Z"/></g>
+  <g clip-path="url(#vbArcM)"><rect x="150" y="60" width="100" height="90" fill="url(#vbSkyN)"/><g fill="#fff"><circle cx="170" cy="86" r=".9"/><circle cx="228" cy="80" r=".8"/><circle cx="212" cy="102" r=".6"/><circle cx="186" cy="114" r=".7"/></g><path d="M226 88 A11 11 0 1 0 226 110 A8.5 8.5 0 1 1 226 88 Z" fill="#FFE9A8"/><rect x="150" y="60" width="100" height="90" fill="url(#vbLat)" opacity=".5"/></g>
+  <circle cx="200" cy="76" r="46" fill="url(#vbLan)"/>
+  <g fill="none" stroke="url(#vbBrass)" stroke-width="2.2"><path d="M28 150 V80 A46 46 0 0 1 120 80 V150"/><path d="M150 150 V70 A50 50 0 0 1 250 70 V150"/><path d="M280 150 V80 A46 46 0 0 1 372 80 V150"/></g>
+  <g fill="none" stroke="#C08A3E" stroke-width=".8" opacity=".6"><path d="M34 150 V82 A40 40 0 0 1 114 82 V150"/><path d="M156 150 V72 A44 44 0 0 1 244 72 V150"/><path d="M286 150 V82 A40 40 0 0 1 366 82 V150"/></g>
+  <g fill="#2A170A" stroke="#C08A3E" stroke-width=".6"><rect x="0" y="96" width="24" height="3"/><rect x="0" y="120" width="24" height="3"/><rect x="376" y="96" width="24" height="3"/><rect x="376" y="120" width="24" height="3"/></g>
+  <g fill="#B98A4A"><ellipse cx="8" cy="93" rx="3.5" ry="4"/><ellipse cx="17" cy="92" rx="3" ry="5"/><ellipse cx="9" cy="117" rx="4" ry="3.5"/><ellipse cx="385" cy="92" rx="3.5" ry="4.5"/><ellipse cx="393" cy="93" rx="3" ry="4"/><ellipse cx="388" cy="117" rx="4" ry="3.5"/></g>
+  <path d="M0 150 H${W} M0 153 H${W}" stroke="#C08A3E" stroke-width=".9" opacity=".7"/>
+  <rect x="0" y="154" width="${W}" height="${H-154}" fill="url(#vbRug)"/><rect x="0" y="154" width="${W}" height="${H-154}" fill="url(#vbRugPat)"/>
+  <rect x="8" y="160" width="${W-16}" height="${H-168}" rx="4" fill="none" stroke="rgba(255,220,150,.35)" stroke-width="1.5"/>
+  <rect x="30" y="150" width="340" height="18" rx="6" fill="url(#vbSofa)" stroke="#C9921E" stroke-width="1"/><rect x="30" y="150" width="340" height="18" rx="6" fill="url(#vbSadu)" opacity=".55"/>
+  ${['44','356'].map(x=>`<path d="M${x} 0 V22" stroke="#C08A3E" stroke-width="1.4" stroke-dasharray="3 2"/><path d="M${+x-9} 24 H${+x+9} L${+x+11} 30 H${+x-11} Z" fill="url(#vbBrass)"/><path d="M${+x-10} 30 H${+x+10} L${+x+7} 56 Q${x} 62 ${+x-7} 56 Z" fill="#E8B23A" stroke="#7A5410" stroke-width="1"/><circle cx="${x}" cy="44" r="6" fill="#FFF4D0" filter="url(#vbSoft)"/><circle cx="${x}" cy="46" r="42" fill="url(#vbLan)"/>`).join('')}
+  ${cushions}
+  <ellipse cx="200" cy="148" rx="60" ry="20" fill="#2A1709"/><ellipse cx="200" cy="144" rx="58" ry="18" fill="url(#vbBrass)"/><ellipse cx="200" cy="144" rx="50" ry="14" fill="none" stroke="rgba(255,240,200,.35)" stroke-width="1"/>
+  <g fill="#D9A441" stroke="#7A5410" stroke-width=".8"><path d="M188 122 q-7 0 -7 7 v6 q0 4 7 4 h12 q7 0 7 -4 v-6 q0 -7 -7 -7 z"/><path d="M200 125 q9 -2 9 5 q0 5 -7 4" fill="none" stroke-width="2"/><rect x="191" y="116" width="6" height="7" rx="2"/></g>
+  <g fill="#F4E6C8" stroke="#C9921E" stroke-width=".6"><ellipse cx="164" cy="142" rx="5" ry="3.5"/><ellipse cx="236" cy="142" rx="5" ry="3.5"/><ellipse cx="176" cy="149" rx="5" ry="3.5"/><ellipse cx="224" cy="149" rx="5" ry="3.5"/></g>
+  <ellipse cx="200" cy="151" rx="12" ry="5" fill="#5A2A12"/><g fill="#7A3E1E"><circle cx="195" cy="149" r="2.4"/><circle cx="200" cy="148" r="2.4"/><circle cx="205" cy="149" r="2.4"/><circle cx="198" cy="152" r="2.2"/><circle cx="203" cy="152" r="2.2"/></g>
+  <g transform="translate(200 8)"><path d="M-62 0 H62 L58 20 H-58 Z" fill="#E9D8B4" stroke="#8A6B3A"/><path d="M-62 0 H62" stroke="#C9921E" stroke-width="2"/><text x="0" y="14" font-size="8.5" font-weight="900" fill="#3A2A14" text-anchor="middle" font-family="Cairo,sans-serif">اللي ما يعرف ينكشف!</text></g>
+  <rect width="${W}" height="${H}" fill="url(#vbVig2)"/></svg>`;
 }
-
 /* ═══════════ المسرح المشترك (5.45) — شريط علوي بمرحلة ومؤقّت، رقاقات، مشهد بمقاعد حول الطاولة أو المجلس، لوحة الدور بمؤقّت دائري،
    خطوات الجولة، تفاعلات سريعة، سجلّ بأوقات ووسوم اتهام، ملاحظاتي الخاصة، وشريط سفلي (تعبير، كتابة، صوت، أشكّ فيه، جاهز) ═══════════ */
 const VB_NOTE={unk:{t:'غير متأكد',c:'#E8B23A'},sus:{t:'مشتبه',c:'#E24B4A'},inn:{t:'بريء غالبًا',c:'#2ECC71'},trust:{t:'أثق به',c:'#4C9AF0'}};
@@ -23198,6 +23203,7 @@ function vbStartSheet(btnTxt,fn){
 }
 /** القطعة الوسطى: طاولة بفانوس وخنجر ولافتة «من سيكذب اليوم؟» في المافيا، ولافتة معلّقة في المجلس */
 function vbCenterPiece(kind){
+ return '';   // الطاولة واللافتة والفانوس والصينية تُرسم داخل المشهد نفسه (vbBackdrop)
  if(kind==='mafia')return `<svg viewBox="0 0 120 70" width="136" height="79" aria-hidden="true"><defs><radialGradient id="vbTb" cx=".5" cy=".4"><stop offset="0" stop-color="#7A5230"/><stop offset="1" stop-color="#2E1B0E"/></radialGradient><radialGradient id="vbLg" cx=".5" cy=".5"><stop offset="0" stop-color="rgba(255,214,120,.6)"/><stop offset="1" stop-color="rgba(255,214,120,0)"/></radialGradient></defs>
   <ellipse cx="60" cy="42" rx="58" ry="24" fill="url(#vbTb)" stroke="#5A3A1E" stroke-width="1.5"/><ellipse cx="60" cy="40" rx="50" ry="18" fill="none" stroke="rgba(255,230,180,.15)"/>
   <circle cx="60" cy="30" r="24" fill="url(#vbLg)"/><rect x="55" y="15" width="10" height="17" rx="3" fill="#C9921E"/><rect x="57" y="18" width="6" height="11" rx="2" fill="#FFE6A0"/><rect x="53" y="31" width="14" height="3" rx="1" fill="#7A5410"/><rect x="58" y="12" width="4" height="4" rx="1" fill="#7A5410"/>
@@ -23208,7 +23214,7 @@ function vbCenterPiece(kind){
 /** موضع كل مقعد على حلقة بيضوية: أنت في الأسفل، والباقون بالتساوي حولها */
 function vbSeatPos(i,n){
  const a=Math.PI/2+(i/n)*Math.PI*2,m=VB.g==='mafia';
- const cx=50,cy=m?49:57,rx=m?41:44,ry=m?37:29;
+ const cx=50,cy=m?49:60,rx=m?41:44,ry=m?37:27;
  return {x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry};
 }
 function vbPhase(icon,label,hint){
@@ -23456,7 +23462,7 @@ function mfStart(diff){
  const roles=[];const nMafia=n>=8?2:1;
  for(let i=0;i<nMafia;i++)roles.push('مافيا');
  roles.push('طبيب','محقق');while(roles.length<n)roles.push('شعب');
- roles.sort(()=>Math.random()-.5);
+ vbShuffle(roles);
  VB={g:'mafia',diff:diff||'mid',n,names:vbNames(n),roles,alive:Array.from({length:n},(_,i)=>i),day:1,night:false,
   feed:[],know:{},myKnow:{},heat:{},susp:Array(n).fill(0),detOut:null,myClaim:null,msgs:0,notes:{},ready:new Set(),meReady:false,voting:false,voteLog:[],
   victim:null,saved:null,botVictim:null,botSave:null,lastKilled:null,lastLynched:null,cast:[],dead:false,over:false,tm:null,fast:!!window.__vbFast,
@@ -25053,7 +25059,7 @@ function mafiaStart(){
  for(let i=0;i<nMafia;i++)roles.push('مافيا');
  roles.push('طبيب','محقق');
  while(roles.length<PT.n)roles.push('شعب');
- PT.roles=roles.sort(()=>Math.random()-.5);
+ PT.roles=vbShuffle(roles);
  PT.alive=Array.from({length:PT.n},(_,i)=>i);
  PT.idx=0;PT.shown=false;PT.day=1;
  mafiaDeal();
