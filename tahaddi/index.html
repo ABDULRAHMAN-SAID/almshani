@@ -663,6 +663,8 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbInfo .sp{flex:1}
 .vbChip{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:0 9px;min-height:30px;font-size:11px;font-weight:800;color:var(--tx);font-family:inherit;white-space:nowrap;flex-shrink:0;cursor:pointer}
 .vbChip.ai{border-color:rgba(123,79,224,.7);color:#D7C5FF;background:rgba(123,79,224,.16)}
+.vbChip.ai.on{border-color:rgba(46,204,113,.7);color:#8FF0B8;background:rgba(46,204,113,.12)}
+.vbChip.ai.off{border-color:rgba(232,178,58,.55);color:#FFC96B;background:rgba(232,178,58,.1)}
 .vbPhase:empty{display:none}
 .vbRole{display:flex;align-items:center;gap:8px;background:linear-gradient(160deg,rgba(232,178,58,.16),rgba(232,178,58,.05));border:1px solid rgba(232,178,58,.55);border-radius:12px;padding:7px 10px;margin-bottom:10px;cursor:pointer}
 .vbRole b{font-size:13px;font-weight:900;color:#FFE9A8;white-space:nowrap}
@@ -687,6 +689,32 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbPill{font-size:8.5px;font-weight:800;color:var(--pc,#B8C0D4);background:rgba(6,8,16,.78);border:1px solid var(--pc,#8C93A8);border-radius:8px;padding:1px 6px;margin-top:1px;white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis}
 .vbSeat.talk .vbAv::before,.vbSeat.talk .vbAv::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,214,120,.75);animation:vbWave 1.3s ease-out infinite;pointer-events:none}
 .vbSeat.talk .vbAv::after{animation-delay:.65s}
+/* الاختيار بالضغط على المقعد (اغتيال/حماية/فحص/تصويت): حلقة نابضة بلون الفعل */
+.vbSeat.pick .vbAv{box-shadow:0 0 0 3px var(--pk,#E8B23A),0 0 18px var(--pk,#E8B23A);animation:vbPickP 1.1s ease-in-out infinite}
+.vbSeat.pick .vbAv::before{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px dashed var(--pk,#E8B23A);animation:vbSpin 7s linear infinite;pointer-events:none}
+.vbSeat.pick .vbPill{border-color:var(--pk,#E8B23A);color:var(--pk,#E8B23A)}
+@keyframes vbPickP{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes vbSpin{to{transform:rotate(360deg)}}
+/* بطاقات الأدوار: مقلوبة عند كل آليّ، وتُقلب حين يُكشف دوره */
+.vbAv>span.vbSeatCard{position:absolute;bottom:-5px;right:-9px;width:15px;height:21px;border-radius:3px;background:linear-gradient(135deg,#3A2A6A,#150E2C);border:1px solid #C9921E;box-shadow:0 2px 5px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;line-height:0}
+.vbAv>span.vbSeatCard::before{content:'';position:absolute;inset:2px;border-radius:2px;border:1px solid rgba(232,178,58,.45)}
+.vbAv>span.vbSeatCard.face{background:#F4E6C8;border-color:#7A5410}
+.vbAv>span.vbSeatCard.face::before{border-color:rgba(122,84,16,.3)}
+.vbDeck{position:absolute;left:50%;top:50%;width:30px;height:42px;transform:translate(-50%,-50%);z-index:5}
+.vbDeck i{position:absolute;inset:0;border-radius:4px;background:linear-gradient(135deg,#3A2A6A,#150E2C);border:1px solid #C9921E;box-shadow:0 3px 8px rgba(0,0,0,.6)}
+.vbDeck i:nth-child(2){transform:translate(-2px,-2px)}.vbDeck i:nth-child(3){transform:translate(-4px,-4px)}
+.vbFly{position:absolute;left:50%;top:50%;width:26px;height:36px;border-radius:4px;transform:translate(-50%,-50%);background:linear-gradient(135deg,#3A2A6A,#150E2C);border:1px solid #C9921E;box-shadow:0 4px 10px rgba(0,0,0,.6);z-index:6;transition:left .55s cubic-bezier(.3,.8,.3,1),top .55s cubic-bezier(.3,.8,.3,1),transform .55s ease}
+.vbBigCard{position:absolute;left:50%;top:50%;width:118px;height:164px;transform:translate(-50%,-50%);perspective:900px;z-index:7;cursor:pointer;transition:opacity .4s,transform .4s}
+.vbBigCard.out{opacity:0;transform:translate(-50%,-70%) scale(.8);pointer-events:none}
+.vbBigCard .in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.4,.2,.2,1)}
+.vbBigCard.up .in{transform:rotateY(180deg)}
+.vbBigCard .face{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 14px 30px rgba(0,0,0,.7)}
+.vbBigCard .back{background:linear-gradient(135deg,#3A2A6A,#150E2C);border:2px solid #C9921E}
+.vbBigCard .back::before{content:'';position:absolute;inset:8px;border-radius:8px;border:1.5px solid rgba(232,178,58,.5);background:repeating-linear-gradient(45deg,rgba(232,178,58,.08) 0 6px,transparent 6px 12px)}
+.vbBigCard .frontW{transform:rotateY(180deg);background:linear-gradient(165deg,#1A2237,#0D1424);border:2px solid var(--gold)}
+.vbBigF{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px;text-align:center;border-radius:10px;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--rc) 28%,transparent),transparent 70%)}
+.vbBigF b{font-size:16px;font-weight:900;color:var(--rc)}
+.vbBigF small{font-size:9.5px;color:var(--tx2);line-height:1.5}
 @keyframes vbWave{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.4);opacity:0}}
 .vbTurn{display:flex;align-items:center;gap:10px;background:linear-gradient(165deg,#1A2237,#0D1424);border:1px solid rgba(232,178,58,.45);border-radius:14px;padding:8px 10px;margin:-2px 0 10px;box-shadow:0 6px 16px rgba(0,0,0,.4)}
 .vbTurnI{width:34px;height:34px;border-radius:10px;background:rgba(232,178,58,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -20770,7 +20798,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.50';
+const APP_VER='5.51';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23175,7 +23203,7 @@ function vbExit(){
 /** يوقف الجولة الحالية نهائيًّا: مؤقّتاتها ومهلها وحلقاتها ونداءات الذكاء الاصطناعي المعلّقة — كانت الجولة المهجورة تواصل اللعب في الخلفية */
 function vbKill(){
  if(!VB)return;
- VB.over=true;VB.gone=true;VB.voting=false;VB.tallying=false;VB.replying=false;
+ VB.over=true;VB.gone=true;VB.voting=false;VB.tallying=false;VB.replying=false;VB.pick=null;
  clearTimeout(VB.tm);clearInterval(VB.tm);VB.tm=null;
  if(VB.tmI)clearInterval(VB.tmI);VB.tmI=null;VB.timer=null;
  if(VB.raf)cancelAnimationFrame(VB.raf);VB.raf=null;
@@ -23414,7 +23442,7 @@ function vbScene(kind,title,sub){
  </div>
  <div class="vbInfo">
   <span class="vbChip">${ico('group',13)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></span>
-  <span class="vbChip ai" id="vbAiChip" hidden>${ico('sparkle',13)} ذكاء اصطناعي</span>
+  <button class="vbChip ai" id="vbAiChip" onclick="vbAiSheet()" hidden>${ico('sparkle',13)} ذكاء اصطناعي</button>
   <span class="sp"></span>
   ${kind==='mafia'?`<button class="vbChip" onclick="vbNotesToggle()">${ico('scroll',13)} ملاحظاتي</button>`:''}
   <button class="vbChip" onclick="vbInfoSheet()">${ico('bulb',13)} ${kind==='mafia'?'دوري':'السالفة'}</button>
@@ -23523,7 +23551,7 @@ function vbTimerDraw(left,total){
  if(arc&&total){arc.style.strokeDashoffset=String(RING_C*(1-left/total));const r=arc.closest('.vbRing');if(r){r.classList.remove('off');r.classList.toggle('hot',left<=10)}}
 }
 function vbStep(n){document.querySelectorAll('#vbSteps span').forEach(el=>{const k=+el.dataset.step;el.classList.toggle('on',k===n);el.classList.toggle('done',k<n)})}
-function vbAiChip(){const el=document.getElementById('vbAiChip');if(el)el.hidden=!(window.AI&&AI.enabled())}
+function vbAiChip(){const el=document.getElementById('vbAiChip');if(!el||typeof AI==='undefined')return;const on=AI.enabled();el.hidden=false;el.classList.toggle('on',on);el.classList.toggle('off',!on);el.innerHTML=`${ico(on?'sparkle':'info',13)} ${on?'ذكاء اصطناعي':'عقل محلي'}`}
 function vbSeatState(i){return VB.seat&&VB.seat(i)||{}}
 function vbSeats(){
  const el=document.getElementById('vbSeats');if(!el)return;
@@ -23538,12 +23566,37 @@ function vbSeats(){
   else if(note){pill=note.t;pc=note.c}
   else if(st.pill){pill=st.pill;pc=st.pc||'#8C93A8'}
   else{pill='هادئ';pc='#8C93A8'}
-  return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}" onclick="vbPlayerSheet(${i})">
-   <div class="vbAv">${vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}</div>
+  const pk=!!(VB.pick&&VB.pick.list.includes(i)&&!st.dead);
+  const face=VB.g==='mafia'&&((VB.reveal&&i!==0)||(st.dead&&st.sub&&VB.lastLynched===i))?MAF_ROLE[mfRole(i)]:null;   // بطاقة الآليّ تُقلب حين يُكشف دوره
+  const card=VB.dealt&&i!==0?`<span class="vbSeatCard${face?' face':''}">${face?ico(face.ic,9,face.tint):''}</span>`:'';
+  return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}${pk?' pick':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}${pk?';--pk:'+(VB.pick.c||'#E8B23A'):''}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
+   <div class="vbAv">${vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}${card}</div>
    <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div><div class="vbPill" style="--pc:${pc}">${esc(pill)}</div></div>`}).join('');
  const c=document.getElementById('vbCount');if(c)c.textContent=(VB.alive?VB.alive.length:n)+'/'+n;
 }
 function vbTalk(i){VB.talking=i;vbSeats()}
+/* ═══ توزيع البطاقات (5.51): من الرزمة في وسط المجلس تطير بطاقة مقلوبة إلى كل مقعد، وبطاقتك تنقلب في الوسط لتكشف دورك ═══ */
+function vbDeal(kind){
+ const st=document.getElementById('vbStage');if(!st)return;
+ if(VB.fast){VB.dealt=true;vbSeats();return}
+ const n=VB.names.length,my=VB;
+ const deck=document.createElement('div');deck.className='vbDeck';deck.innerHTML='<i></i><i></i><i></i>';st.appendChild(deck);
+ let k=0;
+ VB.names.map((_,i)=>i).filter(i=>i!==0).concat([0]).forEach(i=>{const p=vbSeatPos(i,n);const c=document.createElement('div');c.className='vbFly';st.appendChild(c);   // الآليون أوّلًا وبطاقتك آخرًا
+  setTimeout(()=>{if(VB!==my){c.remove();return}c.style.left=p.x+'%';c.style.top=p.y+'%';c.style.transform='translate(-50%,-50%) rotate('+((i*37)%30-15)+'deg) scale(.7)';
+   setTimeout(()=>{c.remove();if(VB!==my)return;if(i===0)vbDealReveal(kind);else{const av=st.querySelector(`.vbSeat[data-seat="${i}"] .vbAv`);if(av&&!av.querySelector('.vbSeatCard'))av.insertAdjacentHTML('beforeend','<span class="vbSeatCard"></span>')}},560)},180+k*150);k++});
+ setTimeout(()=>{if(VB!==my)return;deck.remove();VB.dealt=true;vbSeats()},180+k*150+700);
+}
+function vbDealReveal(kind){
+ const st=document.getElementById('vbStage');if(!st||VB.fast)return;
+ const m=kind==='mafia',r=m?mfRole(0):null,sp=m?MAF_ROLE[r]:null,spy=!m&&VB.spy===0;
+ const front=m?`<div class="vbBigF" style="--rc:${sp.ac}">${ico(sp.ic,40,sp.tint)}<b>${r}</b><small>${sp.d}</small></div>`
+  :`<div class="vbBigF" style="--rc:${spy?'#E24B4A':'#E8B23A'}">${spy?ico('door',40,'red'):ico('lock',40)}<b>${spy?'برا السالفة':esc(VB.word)}</b><small>${spy?'لا تعرف الكلمة — لمّح بغموض':'الفئة: '+esc(VB.cat)}</small></div>`;
+ const el=document.createElement('div');el.className='vbBigCard';el.innerHTML=`<div class="in"><div class="face back"></div><div class="face frontW">${front}</div></div>`;
+ el.onclick=()=>el.classList.toggle('up');st.appendChild(el);VB.bigCard=el;
+ setTimeout(()=>{if(VB.bigCard===el)el.classList.add('up')},350);
+}
+function vbDealClear(){const el=VB&&VB.bigCard;if(el){el.classList.add('out');setTimeout(()=>el.remove(),450);VB.bigCard=null}}
 /** رسالة في السجلّ: k = n راوٍ · ph مرحلة · ban لافتة كبيرة بصورة · b آليّ · me أنا · v صوت · card بطاقة — react تفاعل سريع، tg من اتُّهم */
 function vbMsg(m){m.at=m.at||Date.now();VB.feed.push(m);vbRenderMsg(m,false);return m}
 function vbTime(t){const d=new Date(t||Date.now());return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
@@ -23659,7 +23712,7 @@ const AI_TIER='default';   // طبقة النموذج في الأرتيفاكت:
 const AI_TIMEOUT=90000;   // أقصى انتظار لنداء واحد؛ بعده يتولّى العقل المحلي هذه الخطوة
 const AI=(function(){
  const st={probe:null,on:false,src:null,fail:0,sample:null,busy:0,onLost:null,lostFired:false};
- function lost(why){if(st.lostFired)return;st.lostFired=true;try{if(typeof st.onLost==='function')st.onLost(why)}catch(e){}}
+ function lost(why){st.why=why;if(st.lostFired)return;st.lostFired=true;try{if(typeof st.onLost==='function')st.onLost(why)}catch(e){}}
  function enabled(){return !window.__vbFast&&!(S&&S.opt&&S.opt.aiBots===0)&&st.on&&st.fail<3}
  function srvUrl(p){
   const o=(window.NET&&NET.serverOrigin&&NET.serverOrigin())||'';
@@ -23675,10 +23728,15 @@ const AI=(function(){
    try{if(window.claude&&typeof window.claude.use==='function'){const sm=await window.claude.use('sample');if(sm){st.sample=sm;st.src='sample';st.on=true;return true}}}catch(e){}
    const u=srvUrl('/ai/status');
    if(u){try{const r=await fetch(u,{cache:'no-store'});const j=await r.json();if(j&&j.on){st.src='server';st.on=true;return true}}catch(e){}}
-   st.on=false;return false;
+   st.on=false;st.why=st.why||'غير متاح هنا';return false;
   })();
   return st.probe;
  }
+ /** تجربة صغيرة عند بدء الجولة: في الأرتيفاكت تُظهر طلب الموافقة قبل اللعب لا في وسطه */
+ async function warm(){if(!enabled())return false;const r=await json('أعد JSON فقط بلا أي نصّ آخر: {"ok":1}','quick');return !!(r&&typeof r==='object')}
+ /** إعادة المحاولة بطلب من اللاعب */
+ async function retry(){st.probe=null;st.on=false;st.fail=0;st.lostFired=false;st.why=null;const on=await probe();return on?warm():false}
+ function status(){return {on:enabled(),src:st.on?st.src:null,why:st.why||(st.on?null:'غير متاح هنا')}}
  function thinking(on){st.busy=Math.max(0,st.busy+(on?1:-1));const el=document.getElementById('vbPhase');if(el)el.classList.toggle('thinking',st.busy>0)}
  /** يسأل النموذج ويعيد JSON — أو null عند التعطّل أو الرفض فيتولّى العقل المحلي */
  async function json(prompt,tier){
@@ -23687,7 +23745,11 @@ const AI=(function(){
   const ac=typeof AbortController==='function'?new AbortController():null,to=ac?setTimeout(()=>{try{ac.abort()}catch(e){}},AI_TIMEOUT):null;   // نداء معلّق لا يجمّد الجولة
   try{
    const signal=ac?ac.signal:undefined;
-   if(st.src==='sample')return await st.sample.json(prompt,{modelTier:tier||AI_TIER,cache:false,signal});
+   if(st.src==='sample'){
+    try{return await st.sample.json(prompt,{modelTier:tier||AI_TIER,cache:false,signal})}
+    catch(e){if(e&&/not_granted|cancelled|rate_limited/.test(String(e.code)))throw e;   // جواب غير صالح الشكل: نطلب نصًّا ونقتطع JSON منه
+     const r=await st.sample(prompt,{modelTier:tier||AI_TIER,cache:false,signal});const j=vbJsonFrom(r&&r.text);if(j!=null)return j;throw e}
+   }
    const r=await fetch(srvUrl('/ai/chat'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt}),signal});
    if(r.status===503){st.on=false;lost('الخادم بلا مفتاح');return null}
    if(!r.ok)throw new Error('ai '+r.status);
@@ -23699,8 +23761,16 @@ const AI=(function(){
  }
  function reset(){st.fail=0;st.lostFired=false}
  function miss(){st.fail++;if(st.fail>=3)lost('أجوبة غير مفهومة')}   // جواب صالح الشكل لكنه بلا فائدة يُحسب إخفاقًا أيضًا
- return {enabled,probe,json,reset,miss,src:()=>st.on?st.src:null,fails:()=>st.fail,onLost:fn=>{st.onLost=fn}};
+ return {enabled,probe,json,reset,miss,warm,retry,status,src:()=>st.on?st.src:null,fails:()=>st.fail,onLost:fn=>{st.onLost=fn}};
 })();
+/** يقتطع JSON من نصّ قد يحيطه كلام أو سياج ``` */
+function vbJsonFrom(text){
+ let t=String(text||'').trim();if(!t)return null;
+ try{return JSON.parse(t)}catch(e){}
+ const f=t.match(/```(?:json)?\s*([\s\S]*?)```/);if(f){try{return JSON.parse(f[1])}catch(e){}}
+ const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1))}catch(e){}}
+ return null;
+}
 /** السجلّ نصًّا للنموذج: آخر n سطرًا بأرقام اللاعبين وأسمائهم */
 function vbFeedText(n){
  const nm=i=>i+' '+VB.names[i];
@@ -23726,10 +23796,20 @@ const aiTxt=(t,max)=>String(t==null?'':t).replace(/\s+/g,' ').trim().slice(0,max
 /** سطر من الراوي حين يتوفّر الذكاء الاصطناعي — يظهر قبل بدء الجولة */
 function vbAiIntro(){
  const my=VB;AI.reset();
- AI.onLost(why=>{if(VB!==my||!vbAlive())return;vbAiChip();vbMsg({k:'n',icon:'info',t:'توقّف الذكاء الاصطناعي ('+why+') — يكمل الآليون بعقلهم المحلي.'})});
- AI.probe().then(on=>{if(VB!==my||VB.over||!vbAlive())return;vbAiChip();if(!on)return;
-  vbMsg({k:'n',icon:'sparkle',t:'الآليون في هذه الجولة يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم'+(AI.src()==='sample'?' — قد يطلب المتصفح موافقتك عند أول ردّ.':'.')})});
+ AI.onLost(why=>{if(VB!==my||!vbAlive())return;vbAiChip();vbMsg({k:'n',icon:'info',t:'توقّف الذكاء الاصطناعي ('+why+') — يكمل الآليون بعقلهم المحلي. اضغط «عقل محلي» أعلى لإعادة المحاولة.'})});
+ AI.probe().then(async on=>{if(VB!==my||VB.over||!vbAlive())return;vbAiChip();
+  if(!on){vbMsg({k:'n',icon:'info',t:'الذكاء الاصطناعي غير متاح هنا — الآليون يلعبون بعقلهم المحلي: يفهمون الأسماء والاتهامات والأسئلة ويجيبون من وقائع اللعبة. اضغط «عقل محلي» أعلى لتعرف كيف تفعّله.'});return}
+  const ok=await AI.warm();if(VB!==my||VB.over||!vbAlive())return;vbAiChip();   // التجربة تُظهر طلب الموافقة الآن لا في وسط النقاش
+  if(ok)vbMsg({k:'n',icon:'sparkle',t:'الآليون في هذه الجولة يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم.'});
+  else if(AI.enabled())vbMsg({k:'n',icon:'info',t:'الذكاء الاصطناعي لم يردّ على التجربة — سنحاول أثناء اللعب، وإن تعذّر يكمل الآليون بعقلهم المحلي.'})});
 }
+/** ورقة حالة الآليين: أيّ عقل يلعب الآن ولماذا، وزرّ لمحاولة تفعيل الذكاء الاصطناعي */
+function vbAiSheet(){
+ const st=AI.status();
+ vbSheet(`<div class="shh"><div><div class="t">${st.on?'الآليون يفكّرون بذكاء اصطناعي':'الآليون يلعبون بالعقل المحلي'}</div><div class="d">${st.on?'يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم.':'الذكاء الاصطناعي: '+esc(st.why||'غير متاح هنا')+'. العقل المحلي يفهم الأسماء والاتهامات والأسئلة ويجيب من وقائع اللعبة، لكنه أبسط.'}</div></div></div>
+ ${st.on?'':`<div class="note">في نسخة الأرتيفاكت يحتاج تفعيلُه موافقتك حين يُطلب — اضغط الزرّ وسيظهر الطلب. وفي النسخة المنشورة على خادمك يحتاج مفتاح ANTHROPIC_API_KEY على الخادم.</div><button class="rbtn" style="margin-top:10px" onclick="closeSheet();vbAiRetry()"><span>${ico('sparkle',14)} حاول تفعيل الذكاء الاصطناعي</span></button>`}`);
+}
+async function vbAiRetry(){toast('جارٍ المحاولة…');const ok=await AI.retry();vbAiChip();toast(ok?'الذكاء الاصطناعي يعمل الآن':'تعذّر التفعيل — '+(AI.status().why||'غير متاح هنا'))}
 
 /* ── مافيا ضد الكمبيوتر — مدينة ليلية، راوٍ، آليون يتكلّمون ويردّون على ما تكتب ── */
 function mfStart(diff){
@@ -23753,9 +23833,9 @@ function mfStart(diff){
   <div class="mtl" style="font-size:18px;margin-top:8px">أنت ${mfRole(0)}</div><div class="vbCardD">${sp.d}</div>
   ${mfRole(0)==='مافيا'&&mates.length?`<div class="vbCardD" style="color:var(--no)">شريكك في المافيا: <b>${mates.map(mfNm).join('، ')}</b></div>`:''}`});
  vbMsg({k:'n',icon:'group',t:`مدينة من ${VB.n} أشخاص: بينهم ${nMafia===1?'مافيا واحد':'اثنان من المافيا'} وطبيب ومحقق. في الليل تعمل الأدوار، وفي النهار تناقشون وتصوّتون على متهم. تفوز المدينة إن أعدمت كل المافيا، وتفوز المافيا إن ساوت عدد الباقين.`});
- vbTurn('timer','بداية اللعبة','اقرأ دورك ثم ابدأ الليلة الأولى');
+ vbTurn('cards','توزيع البطاقات','بطاقتك تنقلب في وسط المجلس — اقرأ دورك ثم ابدأ الليلة الأولى');
  vbAct(`<button class="rbtn" onclick="mfNight()"><span>${ico('timer',14)} الليلة الأولى — نامت المدينة</span></button>`);
- vbStartSheet('فهمت — ابدأ الليلة الأولى','mfNight');
+ vbDeal('mafia');
 }
 /** إرشاد شريط الدور بحسب المرحلة: ماذا تفعل الآن بدورك */
 function mfRoleHint(phase){
@@ -23785,28 +23865,6 @@ function mfSetNight(on){VB.night=on;const s=document.querySelector('.vbScene');i
    من ادّعى دورًا كاذبًا، ما أعلنه المحقق، الصمت، والتناقض بين القول والتصويت. الآليّ يتكلّم عن أعلى
    مشتبه عنده مستشهدًا بدليل حقيقي من السجلّ، ويصوّت عليه، ويردّ عليك بحسب مصداقيتك (من أصاب مافيا
    يُصدَّق، ومن أعدم بريئًا يُشكّ فيه). المافيا الآليّة تعرف الحقيقة فتستغلّ أدلة الآخرين وتصرف الشكّ عنها. */
-const MF_PERSONA=[
- {k:'calm',acc:['{t} {e}. هذا ما يقلقني.','بهدوء: {t} {e}، وصوتي هناك ما لم أسمع تفسيرًا.'],
-  neu:['لا أستعجل الحكم. أراقب من يغيّر رأيه فجأة.','الدليل أهمّ من الصوت العالي. من عنده شيء فليقله.'],
-  agr:['أوافق: {t} {e}.','هذه ملاحظتي أيضًا عن {t}.'],dbt:['لست مقتنعًا بعد… ليس عندي دليل على {t}.','لا أرى دليلًا كافيًا على {t}.'],
-  def:['أنا {e}. هذا لا يفعله مافيا.','راجعوا السجلّ: أنا {e}.'],ask:['{n}، على من صوتك اليوم ولماذا؟','{n}، ما رأيك فيمن مات ليلة أمس؟']},
- {k:'hot',acc:['{t}! {e}. خلاص، صوتي على {t}.','ما أحتاج أكثر: {t} {e}.'],
-  neu:['أحد يتكلّم! هذا الصمت مريب.','كل يوم نخسر واحدًا ونحن نتفرّج.'],
-  agr:['قلتها من قبل: {t} {e}.','بالضبط! {t} {e}.'],dbt:['لا لا، ما فيه دليل على {t}. ابحثوا في غيره.','غلط. {t} ما عليه شيء.'],
-  def:['أنا؟! أنا {e}!','تتّهمني وأنا {e}؟'],ask:['{n}، قل لنا بصراحة من تشك؟','{n}، ليش ساكت؟']},
- {k:'joker',acc:['أضحكوني… {t} {e} ويقول بريء؟','لو كنت أراهن، لراهنت على {t}: {e}.'],
-  neu:['المدينة كلها بريئة على كلامكم. فمن يقتل إذن؟','خذوا راحتكم، المافيا ما تستعجل.'],
-  agr:['شفتوا؟ {t} {e}.','ما قلت لكم؟ {t} {e}.'],dbt:['{t}؟ اهدؤوا، ما فيه دليل.','تتّهمون {t} وتتركون الباقي؟'],
-  def:['يا جماعة، أنا {e}. ابحثوا عن غيري.','لو كنتُ مافيا لما كنتُ {e}.'],ask:['{n}، احكِ لنا قصّتك.','{n}، من تختار لو كان الصوت عليك؟']},
- {k:'quiet',acc:['…{t} {e}.','لا أحبّ الاتهام، لكن {t} {e}.'],
-  neu:['…أستمع.','ما عندي ما أقوله بعد.'],
-  agr:['نعم. {t} {e}.','هذا ما رأيته.'],dbt:['…لست متأكّدًا من {t}.','{t}… لا أظن.'],
-  def:['أنا {e}. هذا كل شيء.','…أنا {e}.'],ask:['{n}؟','{n}، ماذا رأيت؟']},
- {k:'leader',acc:['اسمعوني جيدًا: {t} {e}. نصوّت معًا على {t}.','ترتيب المشتبهين عندي يبدأ بـ{t}: {e}.'],
-  neu:['نحتاج خطة: نصوّت على من يصمت ونستمع لمن يتكلّم.','لا نخسر يومًا آخر. من عنده دليل يرفعه الآن.'],
-  agr:['هذا صحيح. {t} {e}. من معي؟','{t} {e} — سنصوّت معًا.'],dbt:['تمهّلوا. لا دليل على {t}. لا نُعدم على الظن.','ليس اليوم. {t} بلا دليل كافٍ.'],
-  def:['أنا {e}. اسألوا أي واحد.','لا تضيّعوا اليوم عليّ: أنا {e}.'],ask:['{n}، اشرح تصويتك.','{n}، أنت مع من؟']}
-];
 const MF_EV={
  voteInn:x=>`من صوّت على ${x} البريء`, accInn:x=>`من اتّهم ${x} البريء بلا دليل`, voteMaf:x=>`من صوّت على ${x} المافيا`,
  defMaf:x=>`من دافع عن ${x} المافيا`, fakeDet:()=>`من ادّعى دور المحقق كذبًا`, detMaf:()=>`من فحصه المحقق فوجده مافيا`,
@@ -23814,7 +23872,6 @@ const MF_EV={
  accMaf:x=>`من كشف ${x} المافيا قبل الجميع`
 };
 const mfP=i=>MF_PERSONA[(VB.persona||[])[i]||0];
-const mfFill=(arr,o)=>vbRnd(arr).replace(/\{t\}/g,o.t||'').replace(/\{e\}/g,o.e||'').replace(/\{n\}/g,o.n||'');
 function mfInitBrain(){
  VB.sus=Array.from({length:VB.n},()=>Array.from({length:VB.n},()=>Math.random()*.3));
  VB.persona=Array.from({length:VB.n},(_,i)=>(i*7+VB.n)%MF_PERSONA.length);
@@ -23864,7 +23921,7 @@ function mfBotsNight(){
  }
 }
 async function mfNight(){
- if(VB.over||VB.night||VB.nightDone===VB.day)return;vbTimerStop();
+ if(VB.over||VB.night||VB.nightDone===VB.day)return;vbTimerStop();vbDealClear();
  VB.victim=null;VB.saved=null;VB.talking=null;
  mfSetNight(true);vbSeats();
  vbPhase('timer','الليلة '+VB.day,'المدينة نائمة');
@@ -23878,7 +23935,7 @@ async function mfNight(){
  else if(me==='محقق')mfPick('استيقظ المحقق. من تفحص الليلة؟',VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null),'mfCheck');
  else{vbMsg({k:'n',t:'أنت نائم. المافيا تتحرّك في الظلام، والطبيب والمحقق يعملان…'});
   vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} أذان الفجر — استيقظت المدينة</span></button>`)}
- vbTurn(MAF_ROLE[me].ic,me==='مافيا'?'استيقظت المافيا':me==='طبيب'?'استيقظ الطبيب':me==='محقق'?'استيقظ المحقق':'الليلة '+VB.day,me==='شعب'?'المدينة نائمة — الفجر يحلّ بانتهاء الوقت أو بضغطة الزرّ':'اختر من الأزرار بالأسفل قبل انتهاء الوقت، وإلا اختير عنك',me==='شعب'?25:60);
+ vbTurn(MAF_ROLE[me].ic,me==='مافيا'?'استيقظت المافيا':me==='طبيب'?'استيقظ الطبيب':me==='محقق'?'استيقظ المحقق':'الليلة '+VB.day,me==='شعب'?'المدينة نائمة — الفجر يحلّ بانتهاء الوقت أو بضغطة الزرّ':'اضغط مقعده المضيء في المجلس أو اسمه بالأسفل قبل انتهاء الوقت، وإلا اختير عنك',me==='شعب'?25:60);
  mfRoleHint('night');
  vbTimer(me==='شعب'?25:60,()=>mfNightAuto());
 }
@@ -23895,14 +23952,15 @@ function mfNightAuto(){
 function mfPick(t,list,cb){
  const r=mfRole(0),sp=MAF_ROLE[r];
  vbMsg({k:'n',icon:sp.ic,t});
- vbAct(list.length?`<div class="vbPickH">${ico(sp.ic,20,sp.tint)}<div><b>${r==='مافيا'?'من تغتال الليلة؟':r==='طبيب'?'من تحمي الليلة؟':'من تفحص الليلة؟'}</b><small>${r==='محقق'?'اضغط اسمًا — ستعرف فورًا هل هو مافيا أم بريء':r==='طبيب'?'من تحميه لا يموت الليلة — يمكنك حماية نفسك':'اضغط اسم الضحية — الطبيب قد ينقذها'}</small></div><span class="vbPickT" id="vbPickT"></span></div><div class="vbGrid">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>`
+ VB.pick=list.length?{list,cb,c:sp.ac}:null;vbSeats();   // المقاعد المضيئة في المجلس تُضغط مباشرة
+ vbAct(list.length?`<div class="vbPickH">${ico(sp.ic,20,sp.tint)}<div><b>${r==='مافيا'?'من تغتال الليلة؟':r==='طبيب'?'من تحمي الليلة؟':'من تفحص الليلة؟'}</b><small>${r==='محقق'?'اضغط مقعده المضيء في المجلس أو اسمه هنا — ستعرف فورًا هل هو مافيا':r==='طبيب'?'اضغط مقعده المضيء أو اسمه هنا — من تحميه لا يموت الليلة':'اضغط مقعد الضحية المضيء أو اسمها هنا — الطبيب قد ينقذها'}</small></div><span class="vbPickT" id="vbPickT"></span></div><div class="vbGrid">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>`
   :`<button class="rbtn" onclick="mfResolveNight()"><span>لا أحد لفحصه — أكمل الليل</span></button>`);
 }
-function mfKill(i){VB.victim=i;vbMsg({k:'me',i:0,t:'اخترتُ '+VB.names[i]+'… بصمت.'});mfResolveNight()}
-function mfSave(i){VB.saved=i;vbMsg({k:'me',i:0,t:'سأحمي '+(i===0?'نفسي':VB.names[i])+' الليلة.'});mfResolveNight()}
+function mfKill(i){if(!VB.night||VB.victim!=null)return;VB.victim=i;VB.pick=null;vbSeats();vbMsg({k:'me',i:0,t:'اخترتُ '+VB.names[i]+'… بصمت.'});mfResolveNight()}
+function mfSave(i){if(!VB.night||VB.saved!=null)return;VB.saved=i;VB.pick=null;vbSeats();vbMsg({k:'me',i:0,t:'سأحمي '+(i===0?'نفسي':VB.names[i])+' الليلة.'});mfResolveNight()}
 async function mfCheck(i,auto){
  if(VB.over||!VB.night||VB.myKnow[i]!=null)return;
- VB.myKnow[i]=mfRole(i)==='مافيا';vbSeats();
+ VB.myKnow[i]=mfRole(i)==='مافيا';VB.pick=null;vbSeats();
  vbMsg({k:'ban',icon:'search',i,t:`نتيجة الفحص: ${VB.names[i]} ${VB.myKnow[i]?'مافيا!':'بريء'}`,d:VB.myKnow[i]?'في النهار أعلنها بزرّ «أعلن فحصي» فيصدّقك الناس أكثر — أو احتفظ بالسرّ':'استبعده من شكوكك، وافحص غيره الليلة القادمة'});
  mfRoleHint('day');
  const sec=auto?8:20;
@@ -23911,7 +23969,7 @@ async function mfCheck(i,auto){
  vbTimer(sec,()=>mfResolveNight());
 }
 async function mfResolveNight(){
- if(VB.over||VB.nightDone===VB.day)return;VB.nightDone=VB.day;vbTimerStop();
+ if(VB.over||VB.nightDone===VB.day)return;VB.nightDone=VB.day;vbTimerStop();VB.pick=null;
  if(VB.nightAi){const p=VB.nightAi,my=VB;VB.nightAi=null;vbAct('');vbTurn('timer','تمضي الليلة…','المافيا والطبيب والمحقق يقرّرون في الظلام');await vbRace(p,45000);if(VB!==my||!vbAlive())return}
  VB.nightRes=VB.day;   // ما يصل من النموذج بعد الآن عن هذه الليلة يُهمل
  const victim=mfRole(0)==='مافيا'&&mfAliveI(0)&&VB.victim!=null?VB.victim:VB.botVictim;
@@ -23943,7 +24001,7 @@ const MF_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين �
 المافيا: تذوب في المدينة: تتّهم بريئًا بحجّة متماسكة مبنيّة على شيء قاله فعلًا، تساند شكّ المدينة على غيرها لتبدو نظيفة، تدافع عن نفسها بأدلة مضادّة لا بالإنكار، لا تتّهم شريكها ولا تدفع هي وشريكها الهدف نفسه في اليوم نفسه، وإن قارب شريكها الإعدام ابتعدت عنه، وفي آخر اللعبة تضحّي به لتنجو. تكذب بثقة وتفاصيل، وفي الصعبة قد تدّعي دور المحقق لتشويش المحقق الحقيقي. ليلًا تقتل الأخطر عليها: المحقق المعلن، ثم من يقود المدينة بأدلة صحيحة، ثم البشري إن كان يصيب.
 المحقق: يخفي دوره حتى يجد مافيا أو يوشك على الإعدام، ثم يعلن بدقّة («فحصتُ فلانًا في الليلة الثانية: مافيا») ويفنّد المدّعي الكاذب بالوقائع، ويفحص ليلًا الأكثر إفادة لا الأوضح. الطبيب: يخفي دوره، يحمي المحقق المعلن أو الأثمن، ولا يكشف نفسه إلا لإثبات أن محاولة اغتيال أُنقذت بيده.
 البشري: افهم لهجته وسخريته ومزاحه وأخطاءه الإملائية، وصنّف مقصده: اتهام، دفاع، سؤال، ادّعاء دور، اعتراف، مزاح، خروج عن الموضوع. إن اعترف أنه مافيا فصدّقوه وأعلنوا التصويت عليه (وشريكه يتبرّأ منه بحذر)؛ إن ادّعى المحقق فاطلبوا نتائج فحصه وقارنوها بما تعرفون؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه جوابًا محدّدًا؛ إن اتّهم أحدًا ردّ المتّهم بنقطة مضادّة محدّدة وعلّق آخر بحسب مصلحته؛ إن مزح جاروه بخفّة ثم عادوا إلى اللعبة؛ إن قال شيئًا غامضًا سألوه ماذا يقصد. إن سأل عن لاعب خارج اللعبة (من صوّت عليه، ما دوره، من قتله) فأجيبوه بدقّة من «ما جرى بالترتيب» — لا تقولوا «لم يعد بيننا» وتسكتوا؛ دور قتيل الليل لم يُكشف فقولوا ذلك. التفاعلات السريعة (أوافق، مثير للاشتباه…) مواقف من آخر ما قيل فردّوا عليها بإيجاز.
-الأسلوب: لهجة خليجية طبيعية يفهمها كل العرب، جمل متفاوتة الطول (بعضها كلمتان وبعضها جملتان)، كل آليّ بشخصيته الثابتة، مخاطبة بالأسماء، ردّ على آخر ما قيل لا كلام عام، لا تكرار لجملة قيلت، لا مواعظ ولا عبارات جاهزة ولا شرح للقواعد، لا يذكر أحد أنه آليّ أو نموذج. كل جملة ≤ 30 كلمة. أعد JSON صالحًا فقط بلا أي نصّ خارجه.`;
+الأسلوب: لهجة خليجية طبيعية يفهمها كل العرب، جمل متفاوتة الطول (بعضها كلمتان وبعضها جملتان)، كل آليّ بشخصيته الثابتة، مخاطبة بالأسماء، ردّ على آخر ما قيل لا كلام عام، لا تكرار لجملة قيلت، لا مواعظ ولا عبارات جاهزة ولا شرح للقواعد، لا يذكر أحد أنه آليّ أو نموذج. كل جملة ≤ 30 كلمة. أعد JSON صالحًا فقط بلا أي نصّ خارجه، بلا علامات اقتباس مزدوجة داخل النصوص، وthink في سطر قصير (≤ 25 كلمة).`;
 const mfHist=t=>{(VB.hist||(VB.hist=[])).push(t)};
 const mfVoteHist=byWho=>mfHist(`اليوم ${VB.day} — التصويت: `+Object.entries(byWho).map(([k,v])=>VB.names[k]+' → '+(v==null?'امتنع':VB.names[v])).join('، '));
 /** ذاكرة كل آليّ السرّية التي يعيدها النموذج مع كل جواب — تُغذّى في النداء التالي فتبقى خطّته متّسقة عبر الأيام */
@@ -24050,7 +24108,7 @@ function mfConfess(){if(VB.confessed)return;VB.confessed=true;VB.myClaim='ماف
 function mfApplyHuman(p){
  if(p.confess)mfConfess();else if(p.claim)VB.myClaim=p.claim;
  const target=p.m[0];
- if(p.intent==='accuse'&&target!=null){const w=p.claim==='محقق'?(VB.myKnow[target]===true?3:2):1;mfApply(0,{t:target,w,e:!!mfTopEv(target)||p.claim==='محقق'});VB.mySaid=target}
+ if((p.intent==='accuse'||p.intent==='vote')&&target!=null){const w=p.claim==='محقق'?(VB.myKnow[target]===true?3:2):1;mfApply(0,{t:target,w,e:!!mfTopEv(target)||p.claim==='محقق'});VB.mySaid=target}
  if(p.intent==='defend'&&target!=null){VB.defs.push({day:VB.day,by:0,t:target});VB.susp[target]=Math.max(0,VB.susp[target]-1);for(let j=0;j<VB.n;j++)if(j!==0&&mfRole(j)!=='مافيا')VB.sus[j][target]-=.5*mfCredW(0)}
  if(p.claim==='محقق'){
   const det=VB.alive.find(i=>i!==0&&mfRole(i)==='محقق');
@@ -24061,51 +24119,7 @@ function mfApplyHuman(p){
 /* ── النقاش: كل آليّ يتكلّم عن أعلى مشتبه عنده بدليل، أو يسأل أحدهم، ثم تكتب ما تشاء ويردّون عليك ── */
 function mfTop(list){const s=list.map(x=>[x,VB.susp[x]]).sort((a,b)=>b[1]-a[1]);return s.length&&s[0][1]>0?s[0][0]:null}
 const mfSilentDay=j=>!(VB.accs||[]).some(a=>a.by===j&&a.day===VB.day-1)&&VB.day>1;
-function mfBotLine(i){
- if(!VB.ev)mfInitBrain();
- const d=VB.diff,r=mfRole(i),P=mfP(i),others=mfOthers(i),nm=x=>x===0?VB.names[0]:VB.names[x],k=VB.lastKilled;
- if(r==='محقق'){
-  const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mfAliveI(x));
-  if(known!=null){
-   if(d==='easy')return {t:known,w:1,s:`أشك في ${nm(known)}… شيء فيه غريب.`};
-   VB.detOut=i;mfEvAdd(known,'detMaf',MF_EV.detMaf(),5);
-   return {t:known,w:1,e:true,s:`اسمعوني: أنا المحقق. فحصتُ ${nm(known)} ليلًا: مافيا. صوّتوا على ${nm(known)}.`};
-  }
-  const inn=Object.keys(VB.know).map(Number).filter(x=>!VB.know[x]&&mfAliveI(x)&&VB.susp[x]>=1.5);
-  if(inn.length&&d!=='easy'){VB.detOut=i;mfEvAdd(inn[0],'detInn',MF_EV.detInn(),-4);return {t:null,w:0,s:`${nm(inn[0])} بريء، فحصته بنفسي. ابحثوا في غيره.`}}
- }
- if(r==='مافيا'){
-  const pool=others.filter(x=>mfRole(x)!=='مافيا');
-  if(!pool.length)return {t:null,w:0,s:'…'};
-  const accMe=(VB.accs||[]).filter(a=>a.t===i&&a.day===VB.day).map(a=>a.by).filter(x=>pool.includes(x));
-  if(VB.susp[i]>=1.5&&d!=='easy'){const g=mfGoodEv(i);if(g&&Math.random()<.6)return {t:null,w:0,s:mfFill(P.def,{e:g})}}
-  let t=VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy'?VB.detOut
-   :VB.myClaim==='محقق'&&pool.includes(0)&&d!=='easy'?0
-   :accMe.length&&d!=='easy'&&(VB.cred[accMe[0]]||0)<=0?accMe[0]
-   :mfTownTop(pool);
-  if(t==null)t=vbRnd(pool);
-  const ev=mfTopEv(t);
-  const fake=[`${nm(t)} كان أوّل من وجّه الشكّ لغيره صباح اليوم.`,`${nm(t)} يتكلّم كثيرًا ولا يقول شيئًا.`,k!=null?`لاحظتم أن ${nm(t)} لم يحزن على ${nm(k)}؟`:`${nm(t)} ينظر إلى الأرض كلما ذُكرت المافيا.`,`من يدافع عن نفسه قبل أن يُتّهم؟ ${nm(t)}.`];
-  return {t,w:1,e:!!ev,s:ev?mfFill(P.acc,{t:nm(t),e:ev}):(VB.detOut===t||(t===0&&VB.myClaim==='محقق')?vbRnd([`${nm(t)} يدّعي أنه محقق ليضلّلنا — المافيا الحقيقي هو.`,`لا تصدّقوا ${nm(t)}… من يعلن نفسه محققًا يخفي شيئًا.`]):vbRnd(fake))};
- }
- const th=d==='easy'?1.6:d==='mid'?1.0:.9;
- const t=mfArgmax(i,others,th);
- if(t==null){
-  if(Math.random()<.45){const q=vbRnd(others);return {t:null,w:0,s:mfFill(P.ask,{n:nm(q)}),ask:q}}
-  return {t:null,w:0,s:k!=null&&Math.random()<.4?`رحمة الله على ${nm(k)}… من له مصلحة في موته؟`:vbRnd(P.neu)};
- }
- const ev=mfTopEv(t)||(mfSilentDay(t)?MF_EV.silent():null);
- return {t,w:.8,e:!!ev,s:ev?mfFill(P.acc,{t:nm(t),e:ev}):vbRnd([`أشك في ${nm(t)} ولا أستطيع شرح السبب بعد.`,`${nm(t)}… شيء في كلامه لا يستقيم.`,`صوتي يميل إلى ${nm(t)} حتى أسمع غير ذلك.`])};
-}
 /** جواب آليّ عن سؤال وُجّه إليه */
-function mfAnswer(i,from){
- const r=mfRole(i),P=mfP(i),others=mfOthers(i),nm=x=>VB.names[x];
- if(r==='مافيا'){const t=mfTownTop(others.filter(x=>mfRole(x)!=='مافيا'));return t!=null?`أنا مع المدينة يا ${nm(from)}، وعيني على ${nm(t)}.`:`أنا مع المدينة يا ${nm(from)}. أراقب مثلكم.`}
- if(r==='محقق'&&VB.diff!=='easy')return `أعمل في الليل لصالح المدينة يا ${nm(from)}… ستسمع منّي في وقته.`;
- const t=mfArgmax(i,others,.9);
- if(t==null)return vbRnd([`ما عندي مشتبه بعد يا ${nm(from)}. أستمع.`,`صراحةً لا أعرف. من تشك أنت؟`]);
- const ev=mfTopEv(t);return ev?`صوتي على ${nm(t)}: ${ev}.`:`أميل إلى ${nm(t)}، بلا دليل قاطع.`;
-}
 function mfApply(i,o){
  if(!VB.ev)mfInitBrain();
  if(o.t==null)return;
@@ -24175,18 +24189,6 @@ function mfMyTurn(){
  vbBar({ph:'اكتب هنا… مثل: أشك في سلطان / يا نورة وين كنت؟',fn:'mfSend',ready:true});
 }
 /** يفهم ما كتبتَ: من ذكرت، وهل تتّهم أم تدافع أم تسأل أم تعلن دورًا أم تعترف أنك مافيا */
-function mfParse(text){
- const t=arNorm(text),m=vbMentions(text);
- const has=re=>re.test(t);
- const neg=has(/(مو|مش|ما|لست|ماني|مب|ليس|لا) ?انا (المافيا|مافيا)|انا (مو|مش|ما|لست|ماني|مب|ليس) ?(المافيا|مافيا)/);
- const confess=!neg&&has(/انا (المافيا|مافيا|القاتل)|اعترف اني (المافيا|مافيا)|انا اللي (قتلت|قتل)/);
- const claim=confess?'مافيا':has(/انا (المحقق|محقق)|فحصت/)?'محقق':has(/انا (الطبيب|طبيب)|انقذت|حميت/)?'طبيب':has(/انا (بريء|شعب|مواطن)/)?'شعب':null;
- const intent=confess?'confess':has(/\?|؟|ليش|لماذا|وين|اين|كيف|ماذا|هل |متى/)&&m.length?'ask'
-  :has(/بريء|اثق|ثقه|مو مافيا|ليس مافيا|ما هو مافيا|ادافع|لا تصوتوا|اتركوا/)?'defend'
-  :has(/اشك|مافيا|صوت|اتهم|مريب|غريب|كاذب|يكذب|قتل|اعدم|هو|هي/)&&m.length?'accuse'
-  :m.length?'accuse':'talk';
- return {m,intent,claim,confess};
-}
 async function mfSend(){
  const text=vbRead();if(!text||VB.voting||VB.over||VB.replying||VB.night)return;
  if(VB.msgs>=6){toast('قلت ما يكفي اليوم — اضغط «جاهز»');return}
@@ -24221,17 +24223,161 @@ async function mfDeadTalk(x,text){
   const known=VB.lastLynched===x||(VB.hist||[]).some(h=>h.includes('أُعدم '+nm(x)));
   return say(vbRnd(alive),known?`${nm(x)} أُعدم وكُشف دوره للجميع: كان ${mfRole(x)}.`:`${nm(x)} قُتل ليلًا ولم يُكشف دوره… لا نعرف إن كان بريئًا.`);
  }
- return say(vbRnd(alive),vbRnd([`${nm(x)} خارج اللعبة يا ${me}. ركّز على الأحياء: من تشك فيه الآن؟`,`${nm(x)} ما عاد يقدر يردّ… اسألنا نحن، وقل رأيك فيمن بقي.`]));
+ return say(vbRnd(alive),vbPick([`${nm(x)} خارج اللعبة يا ${me}. ركّز على الأحياء: من تشك فيه الآن؟`,`${nm(x)} ما عاد يقدر يردّ… اسألنا نحن، وقل رأيك فيمن بقي.`,`${nm(x)} راح. من تشك فيه من الباقين يا ${me}؟`]));
 }
 /** ردود الآليين المحلية على كلامك — المذكور يردّ أولًا بدليله، ثم من يوافق أو يعارض بحسب شكّه ومصداقيتك */
+/* ═══════════ العقل المحلي للآليين (5.51) — يعمل حين يغيب الذكاء الاصطناعي: يفهم ما تكتبه (اتهام، دفاع، سؤال، سؤال عن وقائع اللعبة،
+   ادّعاء، اعتراف، تحيّة، مزاح، طلب شرح)، يجيب من وقائع اللعبة نفسها، يقتبس كلماتك، ولا يكرّر جملة قيلت في الجولة ═══════════ */
+/** اختيار بلا تكرار داخل الجولة: كل جملة تُقال مرّة واحدة، وإن نفدت البدائل عاد إلى القائمة */
+function vbPick(list){VB.said=VB.said||new Set();const fresh=list.filter(x=>!VB.said.has(x));const s=vbRnd(fresh.length?fresh:list);VB.said.add(s);return s}
+/** أوّل كلمات ما كتبه البشري — ليقتبسه الآليّ */
+function vbQuote(text,n){const w=String(text||'').trim().split(/\s+/);n=n||6;return w.slice(0,n).join(' ')+(w.length>n?'…':'')}
+const MF_PERSONA=[
+ {k:'calm',
+  acc:['{t} {e}. هذا ما يقلقني.','بهدوء: {t} {e}، وصوتي هناك ما لم أسمع تفسيرًا.','لا أستعجل، لكن {t} {e} — وهذا لا يُتجاهل.','أضع أمامكم واقعة لا رأيًا: {t} {e}.'],
+  neu:['لا أستعجل الحكم. أراقب من يغيّر رأيه فجأة.','الدليل أهمّ من الصوت العالي. من عنده شيء فليقله.','سأصمت قليلًا وأسمع — المافيا تكشف نفسها بالكلام.','ما زلت أوازن. أعطوني سببًا واحدًا محدّدًا.'],
+  agr:['أوافق: {t} {e}.','هذه ملاحظتي أيضًا عن {t}.','نعم، وأزيد: {t} {e}.','لاحظتُ الشيء نفسه في {t}.'],
+  dbt:['لست مقتنعًا بعد… ليس عندي دليل على {t}.','لا أرى دليلًا كافيًا على {t}.','{t}؟ أحتاج أكثر من هذا.','تمهّلوا. الظنّ على {t} ليس واقعة.'],
+  def:['أنا {e}. هذا لا يفعله مافيا.','راجعوا السجلّ: أنا {e}.','بهدوء: أنا {e} — والمافيا لا تفعل ذلك.','لو كنتُ مافيا لما كنتُ {e}.'],
+  ask:['{n}، على من صوتك اليوم ولماذا؟','{n}، ما رأيك فيمن مات ليلة أمس؟','{n}، سؤال واحد: من تستبعد تمامًا؟','{n}، لو أُعدم أحدنا اليوم فمن؟']},
+ {k:'hot',
+  acc:['{t}! {e}. خلاص، صوتي على {t}.','ما أحتاج أكثر: {t} {e}.','{t} {e} وتبون تسكتون؟ لا!','خلونا نحسمها: {t} {e}.'],
+  neu:['أحد يتكلّم! هذا الصمت مريب.','كل يوم نخسر واحدًا ونحن نتفرّج.','لا تدوّرون، المافيا بيننا وتضحك علينا.','أنا زعلان: ما أحد يعطي اسمًا!'],
+  agr:['قلتها من قبل: {t} {e}.','بالضبط! {t} {e}.','هذا هو! {t} {e}.','أخيرًا أحد فهم: {t} {e}.'],
+  dbt:['لا لا، ما فيه دليل على {t}. ابحثوا في غيره.','غلط. {t} ما عليه شيء.','{t}؟ تضيّعون اليوم!','مو {t}. ركّزوا.'],
+  def:['أنا؟! أنا {e}!','تتّهمني وأنا {e}؟','والله عيب: أنا {e}.','أنا {e}، ومن يقول غير هذا يخبّي شيئًا.'],
+  ask:['{n}، قل لنا بصراحة من تشك؟','{n}، ليش ساكت؟','{n}، ردّ! على من صوتك؟','{n}، تكلّم أو نصوّت عليك.']},
+ {k:'joker',
+  acc:['أضحكوني… {t} {e} ويقول بريء؟','لو كنت أراهن، لراهنت على {t}: {e}.','{t} {e}… وبعدين نقول «مين المافيا»!','خذوها منّي بضحكة: {t} {e}.'],
+  neu:['المدينة كلها بريئة على كلامكم. فمن يقتل إذن؟','خذوا راحتكم، المافيا ما تستعجل.','لو كانت المافيا تسمعنا الآن، لضحكت.','أنا بريء، وأنتم أبرياء… ومع ذلك يموت واحد كل ليلة!'],
+  agr:['شفتوا؟ {t} {e}.','ما قلت لكم؟ {t} {e}.','هههه صدق: {t} {e}.','هذي هي: {t} {e}.'],
+  dbt:['{t}؟ اهدؤوا، ما فيه دليل.','تتّهمون {t} وتتركون الباقي؟','{t} مسكين. ابحثوا عن غيره.','لو {t} مافيا فأنا الطبيب!'],
+  def:['يا جماعة، أنا {e}. ابحثوا عن غيري.','لو كنتُ مافيا لما كنتُ {e}.','أنا؟ أنا {e}! ضحّكتوني.','مافيا أنا؟ وأنا {e}؟ لا تخلّوني أضحك.'],
+  ask:['{n}، احكِ لنا قصّتك.','{n}، من تختار لو كان الصوت عليك؟','{n}، وش سالفتك؟','{n}، ابتسامتك مريبة… من تشك؟']},
+ {k:'quiet',
+  acc:['…{t} {e}.','لا أحبّ الاتهام، لكن {t} {e}.','{t}. {e}.','كلمة واحدة: {t} {e}.'],
+  neu:['…أستمع.','ما عندي ما أقوله بعد.','…أراقب.','لا شيء بعد.'],
+  agr:['نعم. {t} {e}.','هذا ما رأيته.','…موافق على {t}.','{t}. نعم.'],
+  dbt:['…لست متأكّدًا من {t}.','{t}… لا أظن.','لا. ليس {t}.','…ما عندي شيء على {t}.'],
+  def:['أنا {e}. هذا كل شيء.','…أنا {e}.','{e}. راجعوا.','…أنا؟ أنا {e}.'],
+  ask:['{n}؟','{n}، ماذا رأيت؟','{n}… من؟','{n}، صوتك؟']},
+ {k:'leader',
+  acc:['اسمعوني جيدًا: {t} {e}. نصوّت معًا على {t}.','ترتيب المشتبهين عندي يبدأ بـ{t}: {e}.','خطة اليوم: {t} — {e}. من معي؟','لا نضيّع يومًا آخر: {t} {e}.'],
+  neu:['نحتاج خطة: نصوّت على من يصمت ونستمع لمن يتكلّم.','لا نخسر يومًا آخر. من عنده دليل يرفعه الآن.','كل واحد يقول اسمًا وسببًا. أبدأ بعدكم.','نظّموا الكلام: اتهام، دليل، ثم تصويت.'],
+  agr:['هذا صحيح. {t} {e}. من معي؟','{t} {e} — سنصوّت معًا.','ممتاز. {t} {e}. نحسمها اليوم.','اتفقنا: {t} {e}.'],
+  dbt:['تمهّلوا. لا دليل على {t}. لا نُعدم على الظن.','ليس اليوم. {t} بلا دليل كافٍ.','{t} ليس هدفنا. ركّزوا على الأدلة.','أرفض: {t} بلا واقعة.'],
+  def:['أنا {e}. اسألوا أي واحد.','لا تضيّعوا اليوم عليّ: أنا {e}.','قائد المافيا لا يكون {e}. راجعوا.','أنا {e}. من يتّهمني يضيّع المدينة.'],
+  ask:['{n}، اشرح تصويتك.','{n}، أنت مع من؟','{n}، أعطنا اسمًا الآن.','{n}، ما هي خطتك؟']}
+];
+const mfFill=(arr,o)=>vbPick(arr).replace(/\{t\}/g,o.t||'').replace(/\{e\}/g,o.e||'').replace(/\{n\}/g,o.n||'');
+/** يفهم ما كتبتَ: من ذكرت، وقصدك (تحيّة، طلب شرح، مزاح، سؤال عن وقائع اللعبة، دعوة للتصويت، سؤال لأحدهم أو للجميع، دفاع، اتهام، ادّعاء دور، اعتراف) وسبب اتهامك إن ذكرته */
+function mfParse(text){
+ const t=arNorm(text),m=vbMentions(text),has=re=>re.test(t);
+ const neg=has(/(مو|مش|ما|لست|ماني|مب|ليس|لا) ?انا (المافيا|مافيا)|انا (مو|مش|ما|لست|ماني|مب|ليس) ?(المافيا|مافيا)/);
+ const confess=!neg&&has(/انا (المافيا|مافيا|القاتل)|اعترف اني (المافيا|مافيا)|انا اللي (قتلت|قتل)/);
+ const claim=confess?'مافيا':has(/انا (المحقق|محقق)|فحصت/)?'محقق':has(/انا (الطبيب|طبيب)|انقذت|حميت/)?'طبيب':has(/انا (بريء|شعب|مواطن)/)?'شعب':null;
+ const q=has(/\?|؟|ليش|لماذا|وين|اين|كيف|ماذا|هل |متى|من هو|مين |من اللي|من الذي|كم /);
+ let intent;
+ if(confess)intent='confess';
+ else if(!m.length&&has(/^(سلام|السلام|هلا|مرحبا|اهلا|صباح|مساء|كيفكم|شلونكم|شخباركم|هاي)/))intent='greet';
+ else if(has(/(وش|ايش|ماذا|كيف) (اسوي|افعل|العب|اكتب)|ما فهمت|مو فاهم|مش فاهم|اشرح|كيف اللعبه|وش اللعبه|وش الطريقه/))intent='help';
+ else if(!m.length&&has(/ههه|هاها|لول|نكته|يضحك|خخخ/))intent='joke';
+ else if(has(/من (مات|انقتل|قتل|راح|طلع|اعدم|انعدم)|مين (مات|انقتل|قتل|راح|اعدم)|وش صار|ايش صار|شنو صار|كم (باقي|بقي|عددنا|الاحياء)|اي يوم|كم يوم|من صوت|مين صوت|من الاحياء|مين الاحياء|من معنا|كم مافيا|من المحقق|من الطبيب|مين المحقق|مين الطبيب|وش دور|ايش دور/))intent='fact';
+ else if(m.length&&has(/نصوت|صوتوا|نعدم|اعدموا|خلونا نصوت|صوتكم على/))intent='vote';
+ else if(q&&m.length)intent='ask';
+ else if(q)intent='askAll';
+ else if(m.length&&has(/بريء|اثق|ثقه|مو مافيا|ليس مافيا|ما هو مافيا|ادافع|لا تصوتوا|اتركوا|ما اظنه|ما اشك/))intent='defend';
+ else if(m.length)intent='accuse';
+ else intent='talk';
+ const reason=has(/ساكت|صامت|ما تكلم|ما يتكلم|ما قال/)?'silent':has(/يكذب|كاذب|كذب|تناقض|غير كلامه|بدل كلامه/)?'lie':has(/دافع|يدافع/)?'defend':has(/صوت على|صوتت على/)?'vote':has(/غريب|مريب|شكله|احس/)?'vibe':null;
+ return {m,intent,claim,confess,reason,q};
+}
+/** جواب من وقائع اللعبة: من مات، من أُعدم، كم الأحياء، أي يوم، من صوّت على من، كم مافيا، دور لاعب خارج */
+function mfFactAnswer(text){
+ const t=arNorm(text),nm=i=>VB.names[i],me=VB.names[0];
+ const dead=VB.names.map((_,i)=>i).filter(i=>!mfAliveI(i));
+ const lynched=i=>(VB.hist||[]).some(h=>h.includes('أُعدم '+nm(i)));
+ if(/من (مات|انقتل|قتل|راح|طلع)|مين (مات|انقتل|قتل|راح)|وش صار|ايش صار|شنو صار/.test(t)){
+  if(VB.lastKilled!=null)return `الليلة الماضية قُتل ${nm(VB.lastKilled)}${VB.lastLynched!=null?`، وقبلها أُعدم ${nm(VB.lastLynched)} وتبيّن أنه ${mfRole(VB.lastLynched)}`:''}.`;
+  if(VB.day>1&&VB.lastSave!=null)return 'الليلة الماضية لم يمت أحد — الطبيب أنقذ الضحية في اللحظة الأخيرة.';
+  return dead.length?`خرج حتى الآن: ${dead.map(i=>nm(i)+(lynched(i)?' (أُعدم — '+mfRole(i)+')':' (قُتل ليلًا)')).join('، ')}.`:'ما مات أحد بعد — هذه بداية اللعبة.';
+ }
+ if(/من (اعدم|انعدم)|مين (اعدم|انعدم)/.test(t)){const l=VB.names.map((_,i)=>i).filter(lynched);return l.length?`أُعدم: ${l.map(i=>nm(i)+' ('+mfRole(i)+')').join('، ')}.`:'ما أعدمنا أحدًا بعد.'}
+ if(/كم (باقي|بقي|عددنا|الاحياء)|من الاحياء|مين الاحياء|من معنا/.test(t))return `الأحياء ${VB.alive.length}: ${VB.alive.map(i=>i===0?'أنت يا '+me:nm(i)).join('، ')}.`;
+ if(/اي يوم|كم يوم/.test(t))return `هذا اليوم ${VB.day}${VB.day===1?' — أوّل نهار':''}.`;
+ if(/كم مافيا/.test(t)){const n=VB.roles.filter(r=>r==='مافيا').length,d=VB.names.map((_,i)=>i).filter(i=>!mfAliveI(i)&&mfRole(i)==='مافيا'&&lynched(i)).length;return `بدأنا بـ${n===1?'مافيا واحد':n+' من المافيا'}${d?`، وأعدمنا ${d}`:''}. الباقي مجهول.`}
+ if(/من المحقق|مين المحقق|من الطبيب|مين الطبيب/.test(t))return vbPick([`لو عرفنا لما احتجنا هذا النقاش يا ${me}. من يعلن دوره يعرّض نفسه للقتل.`,`ما أحد يكشف دوره هكذا يا ${me}… إلا إن كان عنده ما يثبته.`]);
+ if(/من صوت|مين صوت/.test(t)){const day=VB.day-1;const v=(VB.voteLog||[]).filter(x=>x.day===day);if(!v.length)return 'ما صوّتنا بعد.';return `تصويت الأمس: ${v.map(x=>(x.by===0?'أنت':nm(x.by))+' على '+(x.t==null?'لا أحد':x.t===0?'أنت':nm(x.t))).join('، ')}.`}
+ if(/وش دور|ايش دور/.test(t)){const m=vbMentions(text)[0];if(m!=null){if(mfAliveI(m))return `${nm(m)} حيّ ودوره سرّ — اسأله بنفسك.`;return lynched(m)?`${nm(m)} أُعدم وكان ${mfRole(m)}.`:`${nm(m)} قُتل ليلًا ودوره لم يُكشف.`}}
+ return null;
+}
+/** جواب آليّ عن سؤال وُجّه إليه — بحسب دوره وشكّه، وبحسب نصّ السؤال */
+function mfAnswer(i,from,text){
+ const r=mfRole(i),others=mfOthers(i),nm=x=>VB.names[x],who=nm(from),t=arNorm(text||''),k=VB.lastKilled;
+ if(/ليش ساكت|ليه ساكت|ليش ما تتكلم|وين كنت|ليش ما قلت/.test(t))return vbPick([`ساكت لأني أراقب يا ${who}. من يتكلّم كثيرًا هو من يقلقني.`,`كنتُ أسمع. وسمعتُ ما يكفي لأشك في ${nm(mfArgmax(i,others,.6)??vbRnd(others))}.`,`في بيتي يا ${who}، مثل الجميع. وأنت؟`]);
+ if(r==='مافيا'){const tt=mfTownTop(others.filter(x=>mfRole(x)!=='مافيا'));return tt!=null?vbPick([`أنا مع المدينة يا ${who}، وعيني على ${nm(tt)}.`,`صوتي يميل إلى ${nm(tt)} يا ${who} — ${mfTopEv(tt)||'شيء في كلامه لا يستقيم'}.`]):vbPick([`أنا مع المدينة يا ${who}. أراقب مثلكم.`,`ما زلت أجمع يا ${who}.${k!=null?' موت '+nm(k)+' كان غريبًا.':''}`])}
+ if(r==='محقق'&&VB.diff!=='easy')return vbPick([`أعمل في الليل لصالح المدينة يا ${who}… ستسمع منّي في وقته.`,`عندي ما لا أقوله الآن يا ${who}. اصبر.`]);
+ const tt=mfArgmax(i,others,.9);
+ if(tt==null)return vbPick([`ما عندي مشتبه بعد يا ${who}. أستمع.`,`صراحةً لا أعرف. من تشك أنت؟`,`لا أحد بعد.${k!=null?' لكن من كان يعادي '+nm(k)+' يستحق سؤالًا.':' انتظر أوّل تصويت.'}`]);
+ const ev=mfTopEv(tt);return ev?vbPick([`صوتي على ${nm(tt)}: ${ev}.`,`${nm(tt)} — ${ev}. هذا ما عندي يا ${who}.`]):vbPick([`أميل إلى ${nm(tt)}، بلا دليل قاطع.`,`${nm(tt)}… إحساس أكثر من دليل يا ${who}.`]);
+}
+/** كلمة آليّ في نقاش الصباح: المحقق يعلن ما يعرف، المافيا تصرف الشكّ بحجّة مبنيّة على ما قيل، والمدينة تتّهم بدليل أو تسأل أو تتتبّع من دفعها إلى بريء أُعدم */
+function mfBotLine(i){
+ if(!VB.ev)mfInitBrain();
+ const d=VB.diff,r=mfRole(i),P=mfP(i),others=mfOthers(i),nm=x=>VB.names[x],k=VB.lastKilled,ly=VB.lastLynched;
+ if(r==='محقق'){
+  const known=Object.keys(VB.know).map(Number).find(x=>VB.know[x]&&mfAliveI(x));
+  if(known!=null){
+   if(d==='easy')return {t:known,w:1,s:vbPick([`أشك في ${nm(known)}… شيء فيه غريب.`,`${nm(known)}. لا أستطيع الشرح، لكنه هو.`])};
+   VB.detOut=i;mfEvAdd(known,'detMaf',MF_EV.detMaf(),5);
+   return {t:known,w:1,e:true,s:vbPick([`اسمعوني: أنا المحقق. فحصتُ ${nm(known)} ليلًا: مافيا. صوّتوا على ${nm(known)}.`,`أعلنها: أنا المحقق، و${nm(known)} مافيا — فحصته بنفسي. لا تضيّعوا اليوم.`,`المحقق يتكلّم: ${nm(known)} مافيا. من يصوّت معي؟`])};
+  }
+  const inn=Object.keys(VB.know).map(Number).filter(x=>!VB.know[x]&&mfAliveI(x)&&VB.susp[x]>=1.5);
+  if(inn.length&&d!=='easy'){VB.detOut=i;mfEvAdd(inn[0],'detInn',MF_EV.detInn(),-4);return {t:null,w:0,s:vbPick([`${nm(inn[0])} بريء، فحصته بنفسي. ابحثوا في غيره.`,`أنا المحقق: ${nm(inn[0])} نظيف. لا تصوّتوا عليه.`])}}
+ }
+ if(r==='مافيا'){
+  const pool=others.filter(x=>mfRole(x)!=='مافيا');
+  if(!pool.length)return {t:null,w:0,s:'…'};
+  const accMe=(VB.accs||[]).filter(a=>a.t===i&&a.day===VB.day).map(a=>a.by).filter(x=>pool.includes(x));
+  if(VB.susp[i]>=1.5&&d!=='easy'){const g=mfGoodEv(i);if(g&&Math.random()<.6)return {t:null,w:0,s:mfFill(P.def,{e:g})}}
+  let t=VB.detOut!=null&&pool.includes(VB.detOut)&&d!=='easy'?VB.detOut
+   :VB.myClaim==='محقق'&&pool.includes(0)&&d!=='easy'?0
+   :accMe.length&&d!=='easy'&&(VB.cred[accMe[0]]||0)<=0?accMe[0]
+   :mfTownTop(pool);
+  if(t==null)t=vbRnd(pool);
+  const ev=mfTopEv(t);
+  const fake=[`${nm(t)} كان أوّل من وجّه الشكّ لغيره صباح اليوم.`,`${nm(t)} يتكلّم كثيرًا ولا يقول شيئًا.`,k!=null?`لاحظتم أن ${nm(t)} لم يحزن على ${nm(k)}؟`:`${nm(t)} ينظر إلى الأرض كلما ذُكرت المافيا.`,`من يدافع عن نفسه قبل أن يُتّهم؟ ${nm(t)}.`,k!=null?`${nm(k)} مات، ومن كان يجادله أمس؟ ${nm(t)}.`:`${nm(t)} يوافق على كل شيء بسرعة… لماذا؟`,ly!=null&&mfRole(ly)!=='مافيا'?`أمس دفعنا ${nm(t)} نحو ${nm(ly)} البريء. من ينتفع من ذلك؟`:`${nm(t)} يسأل ولا يجيب.`];
+  return {t,w:1,e:!!ev,s:ev?mfFill(P.acc,{t:nm(t),e:ev}):(VB.detOut===t||(t===0&&VB.myClaim==='محقق')?vbPick([`${nm(t)} يدّعي أنه محقق ليضلّلنا — المافيا الحقيقي هو.`,`لا تصدّقوا ${nm(t)}… من يعلن نفسه محققًا يخفي شيئًا.`,`محقق؟ ${nm(t)} أعلنها حين ضاق عليه الخناق. مريب.`]):vbPick(fake))};
+ }
+ const th=d==='easy'?1.6:d==='mid'?1.0:.9;
+ const t=mfArgmax(i,others,th);
+ if(t==null){
+  if(ly!=null&&mfRole(ly)!=='مافيا'&&VB.day>1){const pushers=(VB.accs||[]).filter(a=>a.day===VB.day-1&&a.t===ly&&mfAliveI(a.by)&&a.by!==i).map(a=>a.by);
+   if(pushers.length&&Math.random()<.7){const p=vbRnd(pushers);return {t:p,w:.7,e:true,s:vbPick([`أمس أعدمنا ${nm(ly)} وطلع بريئًا. من دفعنا إليه؟ ${nm(p)}.`,`${nm(p)} كان أوّل من اتّهم ${nm(ly)} البريء أمس. ليس صدفة.`,`سؤال واحد لـ${nm(p)}: لماذا أصررتَ على ${nm(ly)}؟`])}}}
+  if(k!=null&&Math.random()<.5){const last=(VB.accs||[]).filter(a=>a.by===k).slice(-1)[0];const sus=last&&mfAliveI(last.t)&&last.t!==i?last.t:null;
+   if(sus!=null)return {t:sus,w:.6,e:true,s:vbPick([`${nm(k)} قُتل بعد أن اتّهم ${nm(sus)}. المافيا تُسكت من يقترب منها.`,`آخر من اتّهمه ${nm(k)} قبل موته: ${nm(sus)}. فكّروا في هذا.`])};
+   return {t:null,w:0,s:vbPick([`رحمة الله على ${nm(k)}… من له مصلحة في موته؟`,`لماذا ${nm(k)} بالذات؟ من كان يخشى كلامه؟`,`${nm(k)} مات ولم يتّهم أحدًا… إذن المافيا تقتل من يفهم لا من يتكلّم.`])}}
+  if(Math.random()<.5){const q=vbRnd(others);return {t:null,w:0,s:mfFill(P.ask,{n:nm(q)}),ask:q}}
+  return {t:null,w:0,s:vbPick(P.neu)};
+ }
+ const ev=mfTopEv(t)||(mfSilentDay(t)?MF_EV.silent():null);
+ return {t,w:.8,e:!!ev,s:ev?mfFill(P.acc,{t:nm(t),e:ev}):vbPick([`أشك في ${nm(t)} ولا أستطيع شرح السبب بعد.`,`${nm(t)}… شيء في كلامه لا يستقيم.`,`صوتي يميل إلى ${nm(t)} حتى أسمع غير ذلك.`,`${nm(t)} يهرب من الأسئلة. هذا يكفيني اليوم.`])};
+}
+/** ردود الآليين المحلية على كلامك: المذكور يردّ أوّلًا (بدليله أو باقتباس كلمتك)، ثم من يوافق أو يعارض بحسب شكّه ومصداقيتك، والأسئلة تُجاب من الوقائع */
 async function mfReplyLocal(p,text){
- const me=VB.names[0],alive=VB.alive.filter(i=>i!==0),d=VB.diff,nm=x=>VB.names[x];
- const say=async(i,s)=>{vbTalk(i);await vbWait(700);if(!vbAlive())return;vbMsg({k:'b',i,t:s});vbTalk(null)};
+ const me=VB.names[0],alive=VB.alive.filter(i=>i!==0),d=VB.diff,nm=x=>VB.names[x],q=vbQuote(text,7);
+ const say=async(i,s)=>{if(!s)return;vbTalk(i);await vbWait(700);if(!vbAlive())return;vbMsg({k:'b',i,t:s});vbTalk(null)};
  const target=p.m.find(i=>mfAliveI(i));
+ if(!alive.length)return;
  if(p.m.length&&target==null)return mfDeadTalk(p.m[0],text);
+ if(p.intent==='greet')return say(vbRnd(alive),vbPick([`هلا بك يا ${me}. ${VB.day>1?'اليوم نحتاج قرارًا لا سلامًا.':'ابدأ: من تشك فيه؟'}`,`مرحبًا يا ${me}… لا تطوّل السلام، المافيا لا تسلّم.`,`أهلًا. قل ما عندك يا ${me}.`]));
+ if(p.intent==='help')return say(vbRnd(alive),vbPick([`اكتب اسم من تشك فيه وسببك يا ${me}، أو اسأل أحدنا بالاسم. وحين تنتهي اضغط «جاهز» ونصوّت.`,`اللعبة بسيطة يا ${me}: بيننا مافيا. اتّهم بالاسم، أو اسأل، أو دافع — ثم نصوّت على واحد.`]));
+ if(p.intent==='joke')return say(vbRnd(alive),vbPick([`نضحك ونحن نُقتل واحدًا واحدًا يا ${me}؟ ركّز.`,`الضحك بعد ما نعدم المافيا. من تشك؟`,`المافيا تضحك معك الآن… وتخطّط.`]));
+ if(p.intent==='fact'){const a=mfFactAnswer(text);if(a)return say(vbRnd(alive),a)}
+ if(p.intent==='askAll'){const pool=alive.slice().sort(()=>Math.random()-.5).slice(0,2);for(const i of pool){await say(i,mfAnswer(i,0,text));if(!vbAlive())return}return}
  if(p.intent==='confess'){   // اعترفتَ أنك مافيا: المدينة تصدّقك وتعلن أنها ستصوّت عليك، وشريكك يتبرّأ منك
   const town=alive.filter(i=>mfRole(i)!=='مافيا'),mafs=alive.filter(i=>mfRole(i)==='مافيا');
-  if(town.length)await say(vbRnd(town),vbRnd([`اعترفت بنفسك يا ${me}؟ سمعناها كلّنا — صوتي عليك اليوم.`,`إن كان صدقًا فقد وفّرت علينا ليالي، وإن كان مزاحًا فقد أضعت يوم المدينة. صوتي عليك يا ${me}.`]));
+  if(town.length)await say(vbRnd(town),vbPick([`اعترفت بنفسك يا ${me}؟ سمعناها كلّنا — صوتي عليك اليوم.`,`إن كان صدقًا فقد وفّرت علينا ليالي، وإن كان مزاحًا فقد أضعت يوم المدينة. صوتي عليك يا ${me}.`]));
   if(!vbAlive())return;
   if(mafs.length&&mfRole(0)==='مافيا')await say(vbRnd(mafs),`${me}؟ لا أعرف عنه شيئًا… إن كان يقولها بنفسه فما لي به.`);
   else if(mafs.length&&d!=='easy')await say(vbRnd(mafs),`لا تستعجلوا… من يعترف هكذا قد يريد تضييع يومنا. لكن إن أصرّ فليتحمّل.`);
@@ -24247,34 +24393,50 @@ async function mfReplyLocal(p,text){
  if(p.claim==='طبيب'&&mfRole(0)==='طبيب'){const f=alive.filter(i=>mfRole(i)!=='مافيا');if(f.length)await say(vbRnd(f),`إن كنت الطبيب يا ${me} فقد كشفت نفسك للمافيا… احذر الليلة.`)}
  if(target!=null){
   const r=mfRole(target),P=mfP(target),good=mfGoodEv(target),bad=mfTopEv(target),cw=mfCredW(0);
+  const reasonTxt={silent:'الصمت',lie:'التناقض',defend:'الدفاع',vote:'التصويت',vibe:'الإحساس'}[p.reason];
   if(p.intent==='ask'){
-   if(r==='مافيا'){await say(target,vbRnd([`لماذا أنا يا ${me}؟ اسأل من يصمت طوال الوقت.`,`كنتُ في بيتي… ما رأيت شيئًا. تحاول توجيه الشك إليّ؟`,`جوابي واضح: بريء. والأغرب أنك تسألني أنا بالذات.`]));if(d!=='easy'&&cw<1)VB.susp[0]+=.5}
-   else await say(target,mfAnswer(target,0));
-  }else if(p.intent==='accuse'){
+   if(r==='مافيا'){await say(target,vbPick([`سؤالك «${q}» — جوابي: كنتُ أراقب مثلكم${VB.lastKilled!=null?'، وما رأيت إلا أن '+nm(VB.lastKilled)+' كان يتّهم غيره':''}. لماذا أنا يا ${me}؟`,`لماذا تسألني أنا بالذات يا ${me}؟ اسأل من لم يقل شيئًا اليوم.`,`جوابي واضح: بريء. والأغرب أنك تسألني أنا.`]));if(d!=='easy'&&cw<1)VB.susp[0]+=.5}
+   else await say(target,mfAnswer(target,0,text));
+  }else if(p.intent==='accuse'||p.intent==='vote'){
    if(r==='مافيا'){
-    const myBad=mfTopEv(0);
-    await say(target,myBad&&d!=='easy'?`${me} ${myBad} — ويتّهمني أنا؟ انتبهوا له.`:vbRnd([`هذا اتهام بلا دليل… بل أنا أشك فيك أنت يا ${me}.`,`${me} يوجّه الشك إليّ ليحمي نفسه. انتبهوا له.`,`طريف. من يتّهم أوّلًا غالبًا يخفي شيئًا.`]));
+    const myBad=mfTopEv(0);const alt=mfTownTop(mfOthers(target).filter(x=>mfRole(x)!=='مافيا'))??vbRnd(alive.filter(x=>x!==target));
+    await say(target,myBad&&d!=='easy'?vbPick([`${me} ${myBad} — ويتّهمني أنا؟ انتبهوا له.`,`قبل أن تتّهمني يا ${me}: أنت ${myBad}. من الأولى بالشكّ؟`]):reasonTxt?vbPick([`${reasonTxt} صار دليلًا يا ${me}؟ لو كان كذلك لأعدمنا نصف المدينة.`,`تقول «${q}»… هذا ظنّ لا دليل. عندي ما هو أقوى: من يستعجل الاتهام يخفي شيئًا.`]):vbPick([`هذا اتهام بلا دليل… بل أنا أشك فيك أنت يا ${me}.`,`${me} يوجّه الشك إليّ ليحمي نفسه. انتبهوا له.`,`طريف. من يتّهم أوّلًا غالبًا يخفي شيئًا.`,`قلتَ «${q}». طيب، وأنا أقول: ${alt==null?'غيري':nm(alt)} أولى بالسؤال.`]));
     if(d!=='easy'&&cw<1){VB.susp[0]+=.8;VB.accs.push({day:VB.day,by:target,t:0})}
-   }else await say(target,good?mfFill(P.def,{e:good}):vbRnd([`أنا بريء يا ${me}. ما الذي رأيته منّي بالضبط؟`,`اتهام بلا دليل. لو كنتُ مافيا ما تكلّمتُ أصلًا.`,`خطأ. أنا مع المدينة — راقبني في التصويت.`]));
+   }else await say(target,good?mfFill(P.def,{e:good}):reasonTxt?vbPick([`${reasonTxt}؟ يا ${me}، ${p.reason==='silent'?'أنا أستمع لأني ما عندي دليل — والمافيا هي من تتكلّم كثيرًا':p.reason==='lie'?'أين تناقضت؟ اقتبس كلامي':p.reason==='vote'?'صوّتُّ بحسب ما رأيت، وقد أخطئ':'الإحساس لا يُعدم أحدًا'}.`,`تقول «${q}»؟ راجع السجلّ يا ${me}: ما فعلتُ شيئًا يفعله مافيا.`]):vbPick([`أنا بريء يا ${me}. ما الذي رأيته منّي بالضبط؟`,`اتهام بلا دليل. لو كنتُ مافيا ما تكلّمتُ أصلًا.`,`خطأ. أنا مع المدينة — راقبني في التصويت.`,`لو كنت أنا يا ${me}، لماذا لم أُقتل حتى الآن؟ فكّر.`]));
    if(!vbAlive())return;
    const det=alive.find(i=>mfRole(i)==='محقق'&&i!==target);
    if(det!=null&&VB.know[target]===false&&d!=='easy'){VB.detOut=det;mfEvAdd(target,'detInn',MF_EV.detInn(),-4);await say(det,`مهلًا — فحصتُ ${nm(target)} وهو بريء. لا تصوّتوا عليه.`);return}
    const backers=alive.filter(i=>i!==target&&mfRole(i)!=='مافيا'&&VB.sus[i][target]>=1.2);
    const doubters=alive.filter(i=>i!==target&&mfRole(i)!=='مافيا'&&VB.sus[i][0]>=1.2);
    const mafs=alive.filter(i=>i!==target&&mfRole(i)==='مافيا');
-   if(backers.length&&Math.random()<.85){const b=vbRnd(backers);const e2=bad||(VB.day>1?MF_EV.silent():null);await say(b,e2?mfFill(mfP(b).agr,{t:nm(target),e:e2}):`أوافقك يا ${me}… لكن لنسمع ما عند ${nm(target)} أوّلًا.`)}
-   else if(doubters.length&&Math.random()<.7){const b=vbRnd(doubters);await say(b,`${me} ${mfTopEv(0)||'يتّهم بلا دليل'}… وأنت تريدنا أن نصدّقك؟`)}
+   if(backers.length&&Math.random()<.85){const b=vbRnd(backers);const e2=bad||(VB.day>1?MF_EV.silent():null);await say(b,e2?mfFill(mfP(b).agr,{t:nm(target),e:e2}):vbPick([`أوافقك يا ${me}… لكن لنسمع ما عند ${nm(target)} أوّلًا.`,`${me} أصاب. ${nm(target)} عليه أن يشرح.`]))}
+   else if(doubters.length&&Math.random()<.7){const b=vbRnd(doubters);await say(b,vbPick([`${me} ${mfTopEv(0)||'يتّهم بلا دليل'}… وأنت تريدنا أن نصدّقك؟`,`لا يا ${me}. ${nm(target)} ${good||'لم يفعل ما يُدينه'}، وأنت من يتّهم الجميع.`]))}
    else if(mafs.length&&r!=='مافيا'&&d==='hard'&&Math.random()<.5){const b=vbRnd(mafs);await say(b,mfFill(mfP(b).agr,{t:nm(target),e:bad||`من يتكلّم بحذر زائد`}))}
-   else{const o=alive.filter(i=>i!==target);if(o.length){const b=vbRnd(o);await say(b,mfFill(mfP(b).dbt,{t:nm(target)}))}}
+   else{const o=alive.filter(i=>i!==target);if(o.length){const b=vbRnd(o);await say(b,VB.day===1&&!bad?vbPick([`أوّل يوم يا ${me} — «${q}» ما يكفي لإعدام أحد. عندك شيء أقوى؟`,`تمهّل يا ${me}. ${nm(target)} مثل أي واحد اليوم. ما دليلك؟`,`سمعتك. لكن على الظن لا نُعدم يا ${me}.`]):mfFill(mfP(b).dbt,{t:nm(target)}))}}
   }else if(p.intent==='defend'){
-   await say(target,vbRnd([`شكرًا يا ${me}… على الأقل أحدهم يفكّر.`,`أقدّر ثقتك. وأنا أثق فيك أيضًا.`]));
+   const own=mfArgmax(target,mfOthers(target).filter(x=>x!==0),.5);
+   await say(target,vbPick([`شكرًا يا ${me}… على الأقل أحدهم يفكّر.`,`أقدّر ثقتك. وأنا أثق فيك أيضًا.`,`جزاك الله خيرًا يا ${me}.${own!=null?' وأنا أشك في '+nm(own)+'.':''}`]));
    if(r==='مافيا'&&d==='hard'){const f=alive.filter(i=>mfRole(i)==='محقق'&&VB.know[target]===true);if(f.length){await say(f[0],`${me} يدافع عن مافيا فحصته بنفسي. لماذا؟`);mfEvAdd(0,'defMaf',MF_EV.defMaf(nm(target)),2)}}
+   else if(d!=='easy'&&Math.random()<.5){const o=alive.filter(i=>i!==target);if(o.length)await say(vbRnd(o),vbPick([`ما الذي يجعلك واثقًا من ${nm(target)} يا ${me}؟`,`دفاعك عن ${nm(target)} مسجّل… إن طلع مافيا فسنسألك.`]))}
   }
  }else{
-  if(VB.askedMe!=null&&mfAliveI(VB.askedMe)){await say(VB.askedMe,vbRnd([`فهمت. وأنت يا ${me}، على من صوتك؟`,`طيب… أسمعك. ومن تشك؟`]));return}
-  const pool=alive.length?alive:[];
-  if(pool.length)await say(vbRnd(pool),vbRnd(['كلام عام… من تقصد بالضبط؟','نريد أسماء لا مواعظ.',`وأنت يا ${me}، على من صوتك؟`]));
+  if(VB.askedMe!=null&&mfAliveI(VB.askedMe)){await say(VB.askedMe,vbPick([`فهمت. وأنت يا ${me}، على من صوتك؟`,`طيب… أسمعك. ومن تشك؟`,`«${q}»… لم تجب عن سؤالي يا ${me}.`]));return}
+  VB.hq=(VB.hq||0)+1;
+  await say(vbRnd(alive),VB.hq<=2?vbPick([`«${q}»… من تقصد بالضبط يا ${me}؟`,`نريد أسماء لا مواعظ يا ${me}.`,`وأنت يا ${me}، على من صوتك؟`,`كلام عام. اذكر اسمًا وسببًا.`]):vbPick([`سمعناك يا ${me}. الاسم؟`,`طيب. من؟`,`…`]));
  }
+}
+/** برا السالفة: تعليق محلي على تلميحك أو جوابك — يقتبس كلمتك ويقول إن كانت واسعة أو في الصميم */
+function brLocalComment(text,kind,sp){
+ const me=VB.names[0],q=vbQuote(text,6),vague=sp.ov===0||sp.tokens<2;
+ if(kind==='answer')return vague?vbPick([`«${q}»… جواب يصلح لأي شيء يا ${me}.`,`ما أجبتَ فعلًا يا ${me}. لفّيت.`,`جواب عامّ. أحد يسأله سؤالًا أدقّ.`]):vbPick([`جواب في الصميم يا ${me}.`,`هذا جواب من يعرف. ننتقل.`,`مقنع… إلا إذا كان حافظًا كلامنا.`]);
+ return vague?vbPick([`«${q}»؟ هذا ينطبق على نصف الفئة يا ${me}.`,`تلميح واسع يا ${me}… تعرفها فعلًا؟`,`ما فهمت «${q}». وضّح في الجولة الثانية.`,`غامض. سجّلتها عليك يا ${me}.`]):vbPick([`تلميح واضح — أكيد تعرفها.`,`صحيح يا ${me}. أنا كنت سأقول شيئًا قريبًا.`,`مثل ما قال ${me} تمامًا.`,`جيّد. ننتقل.`]);
+}
+/** برا السالفة: من يشكّ فيه الآليّ — بحسب غموض تلميحات الآخرين */
+function brBotSuspect(i){
+ const others=VB.names.map((_,x)=>x).filter(x=>x!==i);
+ const sc=others.map(j=>[j,brVagueOf(j)]).sort((a,b)=>b[1]-a[1]);const j=sc[0][0],v=sc[0][1],nm=VB.names[j];
+ if(i===VB.spy)return vbPick([`أشك في ${nm}… كلامه ما ينطبق على السالفة.`,`${nm} تلميحه بعيد. صوتي هناك غالبًا.`]);
+ return v>0?vbPick([`أشك في ${nm} — تلميحه كان عامًّا يصلح لأي شيء.`,`${nm}. ما قال شيئًا يثبت أنه يعرفها.`]):vbPick(['الكل لمّح صح إلى الآن… ما عندي أحد.','صعب. أنتظر جولة الأسئلة.']);
 }
 /* ── التصويت ── */
 function mfVote(){
@@ -24283,7 +24445,8 @@ function mfVote(){
  vbPhase('scale','التصويت '+VB.day,'');
  vbRoleStrip('التصويت: اختر من تظنّه مافيا قبل انتهاء الوقت');
  vbTurn('scale','التصويت '+VB.day,'الأغلبية تُعدم — والتعادل يُنجي. اختر قبل انتهاء الوقت وإلا امتنعت',30);
- vbMsg({k:'n',t:'على من تصوّت للإعدام؟'});
+ vbMsg({k:'n',t:'على من تصوّت للإعدام؟ اضغط مقعده المضيء في المجلس أو اسمه بالأسفل.'});
+ VB.pick={list:mfOthers(0),cb:'mfTally',c:'#E8B23A'};vbSeats();
  vbAct(`<div class="vbGrid">${mfOthers(0).map(i=>vbChip(i,` onclick="mfTally(${i})"`)).join('')}</div>
  <button class="btn g" style="margin-top:8px;color:var(--tx2)" onclick="mfTally(null)">أمتنع</button>`);
  vbTimer(30,()=>{if(VB.voting&&!VB.tallying)mfTally(null)});
@@ -24330,7 +24493,7 @@ function mfAfterLynch(who,votes){
 }
 function mfCount(votes){let best=null,bn=0,tie=false;Object.entries(votes).forEach(([k,v])=>{if(v>bn){bn=v;best=+k;tie=false}else if(v===bn)tie=true});return tie?null:best}
 async function mfTally(my){
- if(VB.tallying||VB.over)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();
+ if(VB.tallying||VB.over)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();VB.pick=null;
  vbAct('');
  const votes={},byWho={};VB.tallyNow={};
  const add=(who,t)=>{vbMsg({k:'v',i:who,t});byWho[who]=t;(VB.voteLog||(VB.voteLog=[])).push({day:VB.day,by:who,t});if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}};
@@ -24403,7 +24566,7 @@ async function mfSpectate(afterLynch){
  if(!VB.over)mfEnd('city');
 }
 function mfEnd(win){
- VB.over=true;VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();mfSetNight(false);VB.talking=null;vbSeats();
+ VB.over=true;VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();mfSetNight(false);VB.talking=null;VB.pick=null;VB.reveal=true;vbDealClear();vbSeats();   // بطاقات الجميع تُقلب في النهاية
  const mine=(mfRole(0)==='مافيا'?'mafia':'city')===win;
  vbDone();if(mine&&window.FX)FX.win();
  vbPhase('trophy','النهاية','');
@@ -24440,9 +24603,9 @@ function brStart(diff){
   <div class="mtl" style="font-size:19px;margin-top:8px">${spy?'أنت برا السالفة!':esc(VB.word)}</div>
   <div class="vbCardD">${spy?'لا تعرف الكلمة. الفئة: <b>'+esc(VB.cat)+'</b>. استمع لتلميحاتهم، لمّح بغموض يشبه كلامهم، ولا تنكشف.':'الفئة: <b>'+esc(VB.cat)+'</b>. لمّح للكلمة بكلامك دون أن تقولها — التلميح الواضح يُطمئن المجلس، والغامض يجعلهم يشكّون فيك.'}</div>`});
  vbMsg({k:'n',icon:'group',t:`في المجلس ${VB.n}: ${VB.names.map(esc).join(' · ')}. جولتان من التلميحات بالدور، ثم سؤال وجواب، ثم تصويت على من لا يعرف الكلمة.`});
- vbTurn('sound','قبل البداية','اقرأ السالفة ثم ابدأ الجولة الأولى');
+ vbTurn('cards','توزيع البطاقات','بطاقتك تنقلب في وسط المجلس — اقرأ السالفة ثم ابدأ الجولة الأولى');
  vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('sound',14)} ابدأ الجولة الأولى</span></button>`);
- vbStartSheet('فهمت — ابدأ الجولة الأولى','brRound');
+ vbDeal('barra');
 }
 const brSpyMe=()=>VB.spy===0;
 /* ═══ برا السالفة بالذكاء الاصطناعي (5.44): من يعرف الكلمة يلمّح لها بدقّة تثبت معرفته، وبرا السالفة الآليّ يُسأل بنداء منفصل لا يعرف الكلمة ═══ */
@@ -24451,7 +24614,7 @@ const BR_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين �
 من يعرف الكلمة: تلميحه صحيح ودقيق يثبت معرفته لمن يعرف، ولا يكشف الكلمة لمن لا يعرف: في الجولة الأولى صفة ثانوية صحيحة لا أشهر صفة، وفي الثانية أدقّ قليلًا ويبني على تلميح سابق («مثل ما قال فلان، وزيادة…»). يراقب: من تلميحه عامّ يصلح لأي كلمة في الفئة؟ من ناقض الكلمة؟ من كرّر كلام غيره بلا إضافة؟ من تهرّب من التحديد عند السؤال؟ ويسأل سؤالًا لا يجيب عنه إلا من يعرف دون أن يكشف الكلمة. لا يتّهم بحجّة «قليل الكلام».
 برا السالفة: يقرأ التلميحات كلّها، يستنتج المرشّحين من الفئة ويرتّبهم، ويكتب تلميحًا يشبه أسلوب المجلس ويصلح للمرشّحَين الأوّلَين معًا، بثقة وبلا تردّد، ولا يقول «ما أعرف» ولا يعتذر. عند السؤال يجيب جوابًا يبدو محدّدًا لكنه لا يلتزم بتفصيل قد يفضحه. يصوّت على من يبدو مشبوهًا عند الآخرين ليبعد الشكّ عنه، وعند الإمساك به يخمّن المرشّح الأرجح. في الصعوبة السهلة يخطئ أحيانًا ويكشف نفسه بتلميح لا يناسب.
 البشري: افهم لهجته ومزاحه وأخطاءه الإملائية. إن قال إنه لا يعرف الكلمة أو إنه برا السالفة فصدّقوه وصوّتوا عليه؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه؛ إن مزح جاروه ثم عادوا إلى اللعبة.
-الأسلوب: لهجة خليجية طبيعية، جمل قصيرة متفاوتة (≤ 20 كلمة)، شخصية ثابتة لكل واحد، لا تكرار لتلميح قيل، لا يذكر أحد أنه آليّ أو نموذج. أعد JSON صالحًا فقط بلا أي نصّ خارجه.`;
+الأسلوب: لهجة خليجية طبيعية، جمل قصيرة متفاوتة (≤ 20 كلمة)، شخصية ثابتة لكل واحد، لا تكرار لتلميح قيل، لا يذكر أحد أنه آليّ أو نموذج. أعد JSON صالحًا فقط بلا أي نصّ خارجه، بلا علامات اقتباس مزدوجة داخل النصوص، وthink في سطر قصير (≤ 25 كلمة).`;
 const BR_AI_NOTES='"notes":{"<رقم>":"<ما يريد هذا الآليّ تذكّره: من يشكّ فيه ولماذا، ≤ 25 كلمة>"}';
 function brAiState(withWord){
  const diff={easy:'سهلة — المجلس يتساهل ويخطئ أحيانًا وبرا السالفة يكشف نفسه أحيانًا',mid:'متوسطة',hard:'صعبة — المجلس دقيق وبرا السالفة ماكر يقلّد ببراعة'}[VB.diff]||'متوسطة';
@@ -24504,8 +24667,9 @@ async function brHumanSaid(text,kind){
  const confess=(j?j.confess:false)||loc.confess;
  if(confess&&!VB.confessed){VB.confessed=true;VB.vague[0]+=3}
  const others=VB.names.map((_,x)=>x).filter(x=>x!==0&&x!==VB.spy);
- const lines=j&&j.lines.length?j.lines:(confess&&others.length?[{i:vbRnd(others),text:vbRnd([`سمعناها يا ${VB.names[0]}: قلت إنك ما تعرف الكلمة. خلاص — الصوت عليك.`,`اعترفت بنفسك؟ طيب، ما نحتاج تصويتًا طويلًا يا ${VB.names[0]}.`])}]:[]);
- for(const L of lines){const i=vbNameIdx(L.i);if(i==null||i===0)continue;vbTalk(i);await vbWait(600);if(!vbAlive())return;vbMsg({k:'b',i,t:aiTxt(L.text,160)});vbTalk(null)}
+ const lines=j&&j.lines.length?j.lines:(confess&&others.length?[{i:vbRnd(others),text:vbPick([`سمعناها يا ${VB.names[0]}: قلت إنك ما تعرف الكلمة. خلاص — الصوت عليك.`,`اعترفت بنفسك؟ طيب، ما نحتاج تصويتًا طويلًا يا ${VB.names[0]}.`])}]
+  :(!j&&others.length&&Math.random()<.75?[{i:vbRnd(others),text:brLocalComment(text,kind,brSpecificity(text))}]:[]));   // العقل المحلي يعلّق على كلمتك
+ for(const L of lines){const i=vbNameIdx(L.i);if(i==null||i===0)continue;vbTalk(i);await vbWait(600);if(!vbAlive())return;vbMsg({k:'b',i,t:aiTxt(L.text,160),cm:1});vbTalk(null)}   // cm: تعليق لا تلميح
 }
 /** أصوات المجلس من النموذج: من يعرف الكلمة يحكم بما قيل، وبرا السالفة الآليّ يُسأل بلا كلمة */
 async function brAiVotes(){
@@ -24550,14 +24714,14 @@ function brBotClue(i){
 function brSpecificity(text){
  const mine=arTokens(text);
  const bank=arTokens((BARRA_CLUES[VB.word]||[]).join(' ')+' '+VB.word);
- const said=arTokens(VB.feed.filter(m=>m.k==='b').map(m=>m.t).join(' '));
+ const said=arTokens(VB.feed.filter(m=>m.k==='b'&&!m.cm&&!m.q).map(m=>m.t).join(' '));
  const ov=arOverlap(mine,bank)+arOverlap(mine,said);
  return {tokens:mine.length,ov};
 }
 function brSaidWord(text){const t=arNorm(text),w=arNorm(VB.word);return w&&w.split(/\s+/).every(p=>p.length>1&&t.includes(p))}
 async function brRound(){
  if(VB.over||VB.round>=2||(VB.seq&&VB.seqAt<VB.seq.length))return;
- VB.round++;vbStep(1);vbTimerStop();
+ VB.round++;vbStep(1);vbTimerStop();vbDealClear();
  vbPhase('sound','الجولة '+VB.round,'تلميح واحد لكل واحد');
  const order=VB.names.map((_,i)=>i).filter(i=>i!==0);
  const mySlot=VB.round===1?Math.floor(order.length/2):order.length;   // في الأولى تتكلّم في الوسط، وفي الثانية آخر واحد
@@ -24666,8 +24830,10 @@ async function brMyAsk(){
 أعد JSON فقط: {"think":"<سرّي>","a":"<الجواب>"}`);
   if(VB!==my||!vbAlive()){my.replying=false;return}if(r&&r.a&&!(i!==VB.spy&&brSaidWord(String(r.a))))ans=aiTxt(r.a,160);
  }
- if(ans==null&&i===VB.spy)ans=vbRnd(['سؤال صعب… خلّنا نسمع غيري أوّلًا.','اللي أعرفه أنه شيء معروف، ما أحب أحدّد.','مثل ما قال الباقون تقريبًا.']);
- else if(ans==null){const all=BARRA_CLUES[VB.word]||[];const bank=all.filter(c=>!VB.usedClue.has(c));const c=bank.length?vbRnd(bank):vbRnd(all.length?all:['قلت اللي عندي']);VB.usedClue.add(c);ans=vbRnd(['جوابي: ','بكل بساطة: ',''])+c}
+ if(ans==null){const tq=arNorm(text);
+  if(/من تشك|مين تشك|على من|من تظن|مين تظن|من برا/.test(tq))ans=brBotSuspect(i);
+  else if(i===VB.spy)ans=vbPick(['سؤال صعب… خلّنا نسمع غيري أوّلًا.','اللي أعرفه أنه شيء معروف، ما أحب أحدّد.','مثل ما قال الباقون تقريبًا.',`«${vbQuote(text,5)}»؟ الجواب معروف عند الكل… ليش تسألني أنا؟`,'أعرفه من زمان، بس ما أبي أفضح الكلمة.']);
+  else{const all=BARRA_CLUES[VB.word]||[];const bank=all.filter(c=>!VB.usedClue.has(c));const c=bank.length?vbRnd(bank):vbRnd(all.length?all:['قلت اللي عندي']);VB.usedClue.add(c);ans=vbPick(['جوابي: ','بكل بساطة: ','','أقولها بطريقتي: '])+c}}
  vbMsg({k:'b',i,t:ans});vbTalk(null);my.replying=false;
  VB.asked++;
  if(VB.voteWhenDone){VB.voteWhenDone=false;return brVote()}
@@ -24680,14 +24846,15 @@ function brVote(){
  VB.voting=true;vbStep(3);vbTimerStop();
  vbPhase('scale','التصويت','');
  vbTurn('scale','التصويت','من الذي لا يعرف الكلمة؟ اختر قبل انتهاء الوقت وإلا امتنعت',30);
- vbMsg({k:'n',t:'صوّت: من الذي لا يعرف الكلمة؟'});
+ vbMsg({k:'n',t:'صوّت: من الذي لا يعرف الكلمة؟ اضغط مقعده المضيء في المجلس أو اسمه بالأسفل.'});
+ VB.pick={list:VB.names.map((_,i)=>i).filter(i=>i!==0),cb:'brTally',c:'#E8B23A'};vbSeats();
  vbAct(`<div class="vbGrid">${VB.names.map((_,i)=>i===0?'':vbChip(i,` onclick="brTally(${i})"`)).join('')}</div>`);
  vbTimer(30,()=>brTally(null));
 }
 /** غموض كل متكلّم كما يراه المجلس: تلميحاته لا تشبه بنك الكلمة ولا كلام الآخرين */
 function brVagueOf(j){
  if(j===0)return VB.vague[0]||0;
- const mine=VB.feed.filter(m=>m.k==='b'&&m.i===j&&!m.q).map(m=>m.t);
+ const mine=VB.feed.filter(m=>m.k==='b'&&m.i===j&&!m.q&&!m.cm).map(m=>m.t);
  const bank=arTokens((BARRA_CLUES[VB.word]||[]).join(' ')+' '+VB.word);
  let v=0;mine.forEach(t=>{const tk=arTokens(t);if(tk.length<2||arOverlap(tk,bank)===0)v++});
  return v;
@@ -24711,7 +24878,7 @@ function brSpyGuess(){
  return scored[0][0];
 }
 async function brTally(my){
- if(VB.tallying||VB.over)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();
+ if(VB.tallying||VB.over)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();VB.pick=null;
  vbAct('');
  const votes={};const add=(who,t)=>{vbMsg({k:'v',i:who,t});if(t!=null)votes[t]=(votes[t]||0)+1};
  add(0,my);
@@ -24734,7 +24901,7 @@ function brGuess(){
  brFinal(brSaidWord(text)?'guessed':'caught');
 }
 function brFinal(outcome){
- VB.over=true;VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();vbStep(4);VB.talking=null;vbSeats();vbAct('');
+ VB.over=true;VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();vbStep(4);VB.talking=null;VB.pick=null;vbDealClear();vbSeats();vbAct('');
  const spyWon=outcome!=='caught',mine=brSpyMe()?spyWon:!spyWon;
  vbDone();if(mine&&window.FX)FX.win();
  const title=outcome==='caught'?'أُمسك ببرا السالفة!':outcome==='guessed'?'عرف الكلمة — فاز برا السالفة!':'نجا برا السالفة!';
