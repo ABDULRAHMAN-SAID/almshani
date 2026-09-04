@@ -617,6 +617,102 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbIn{display:flex;gap:8px}
 .vbIn input{flex:1;min-width:0;background:var(--card);border:1.5px solid var(--bd);border-radius:12px;padding:0 12px;min-height:44px;color:var(--tx);font-family:inherit;font-size:13px}
 .vbIn input:focus{outline:none;border-color:var(--gold)}
+/* ═══ المسرح 5.45 — تصميم المالك: شريط علوي، رقاقات، مقاعد حول الطاولة، لوحة الدور، الخطوات، التفاعلات، الشريط السفلي ═══ */
+[hidden]{display:none!important}
+.vbTop{display:flex;align-items:center;gap:8px;padding:6px 0 8px}
+.vbTopL{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.vbGi{width:40px;height:40px;border-radius:12px;background:linear-gradient(160deg,#2A2260,#141A2E);border:1px solid rgba(232,178,58,.45);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 10px rgba(0,0,0,.5)}
+.vbTt{min-width:0;display:flex;flex-direction:column}
+.vbTt b{font-size:15px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbTt small{font-size:10px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbTop .vbPhase{position:static;flex:0 1 auto;max-width:44%;padding:5px 9px;min-height:36px}
+.vbTm{font-variant-numeric:tabular-nums;font-weight:900;color:#FFE9A8}
+.vbLeave{background:linear-gradient(160deg,#7A1F24,#4A1216);border:1px solid #C9462F;color:#FFD9D6;border-radius:11px;padding:0 10px;min-height:36px;font-family:inherit;font-weight:800;font-size:11.5px;display:flex;align-items:center;gap:4px;flex-shrink:0}
+.vbInfo{display:flex;align-items:center;gap:6px;margin-bottom:8px;overflow-x:auto;scrollbar-width:none}
+.vbInfo::-webkit-scrollbar{display:none}
+.vbInfo .sp{flex:1}
+.vbChip{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:0 9px;min-height:30px;font-size:11px;font-weight:800;color:var(--tx);font-family:inherit;white-space:nowrap;flex-shrink:0;cursor:pointer}
+.vbChip.ai{border-color:rgba(123,79,224,.7);color:#D7C5FF;background:rgba(123,79,224,.16)}
+.vbStage{height:246px}
+.vbCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
+.vbScene.barra .vbCenter{top:13%}
+.vbSeats{position:absolute;inset:0;display:block;padding:0}
+.vbSeat{position:absolute;transform:translate(-50%,-50%);width:60px;cursor:pointer}
+.vbAv>span.vbNum{position:absolute;top:-4px;left:-5px;width:17px;height:17px;border-radius:50%;background:#0B1020;border:1px solid var(--gold);color:#FFE9A8;font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2}
+.vbAv>span.vbBadge{width:18px;height:18px;display:flex}
+.vbAv>span.vbX{width:auto;height:auto;display:flex}
+.vbPill{font-size:8.5px;font-weight:800;color:var(--pc,#B8C0D4);background:rgba(6,8,16,.78);border:1px solid var(--pc,#8C93A8);border-radius:8px;padding:1px 6px;margin-top:1px;white-space:nowrap;max-width:72px;overflow:hidden;text-overflow:ellipsis}
+.vbSeat.talk .vbAv::before,.vbSeat.talk .vbAv::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,214,120,.75);animation:vbWave 1.3s ease-out infinite;pointer-events:none}
+.vbSeat.talk .vbAv::after{animation-delay:.65s}
+@keyframes vbWave{0%{transform:scale(.85);opacity:.9}100%{transform:scale(1.4);opacity:0}}
+.vbTurn{display:flex;align-items:center;gap:10px;background:linear-gradient(165deg,#1A2237,#0D1424);border:1px solid rgba(232,178,58,.45);border-radius:14px;padding:8px 10px;margin:-2px 0 10px;box-shadow:0 6px 16px rgba(0,0,0,.4)}
+.vbTurnI{width:34px;height:34px;border-radius:10px;background:rgba(232,178,58,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vbTurnB{flex:1;min-width:0}
+.vbTurnT{font-size:14px;font-weight:900;color:#FFE9A8}
+.vbTurnD{font-size:10.5px;color:var(--tx2);line-height:1.5}
+.vbTurnR{font-size:10.5px;color:#9EC9FF;margin-top:3px;display:flex;align-items:center;gap:4px;font-weight:800}
+.vbRing{position:relative;width:52px;height:52px;flex-shrink:0}
+.vbRing svg{width:52px;height:52px;transform:rotate(-90deg)}
+.vbRingBg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:4}
+.vbRingArc{fill:none;stroke:var(--gold);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .25s linear,stroke .3s}
+.vbRing.hot .vbRingArc{stroke:var(--no)}
+.vbRing.off .vbRingArc{stroke:rgba(255,255,255,.25)}
+.vbRing b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;font-variant-numeric:tabular-nums}
+.vbSteps{display:flex;gap:4px;margin-bottom:10px}
+.vbSteps span{flex:1;display:flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:var(--mut);background:var(--card);border:1px solid var(--bd);border-radius:9px;padding:5px 6px;white-space:nowrap;overflow:hidden;min-width:0}
+.vbSteps span i{font-style:normal;width:16px;height:16px;border-radius:50%;background:var(--elev);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0}
+.vbSteps span.on{color:#FFE9A8;border-color:var(--gold)}
+.vbSteps span.on i{background:var(--gold);color:#1A1200}
+.vbSteps span.done{color:var(--ok)}
+.vbSteps span.done i{background:var(--ok);color:#03210F}
+.vbQuick{display:flex;gap:6px;overflow-x:auto;padding-bottom:7px;scrollbar-width:none}
+.vbQuick::-webkit-scrollbar{display:none}
+.vbQ{display:inline-flex;align-items:center;gap:5px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:0 9px;min-height:30px;font-size:10.5px;font-weight:800;color:var(--tx);font-family:inherit;white-space:nowrap;flex-shrink:0}
+.vbQ:active{transform:scale(.96)}
+.vbBar{display:flex;gap:6px;align-items:center}
+.vbBar2{margin-top:6px}
+.vbBar2>button{flex:1;justify-content:center;min-height:42px}
+.vbBar2>span{flex:1}
+.vbIcoB{width:40px;height:44px;border-radius:12px;background:var(--card);border:1px solid var(--bd);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vbIcoB.rec{border-color:var(--no);color:var(--no);animation:vbThink 1s ease-in-out infinite}
+.vbInW{flex:1;min-width:0;display:flex;align-items:center;background:var(--card);border:1.5px solid var(--bd);border-radius:12px;min-height:44px;padding-inline-end:4px}
+.vbInW:focus-within{border-color:var(--gold)}
+.vbInW input{flex:1;min-width:0;background:none;border:0;padding:0 10px;min-height:42px;color:var(--tx);font-family:inherit;font-size:12.5px}
+.vbInW input:focus{outline:none}
+.vbInW input:disabled{color:var(--mut)}
+.vbSend{width:32px;height:32px;border-radius:9px;background:rgba(232,178,58,.16);border:1px solid rgba(232,178,58,.5);color:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.vbSus{background:linear-gradient(160deg,#8A2228,#4A1216);border:1px solid #C9462F;color:#FFE1DE;border-radius:12px;padding:0 9px;min-height:44px;font-family:inherit;font-weight:900;font-size:11px;display:flex;align-items:center;gap:4px;flex-shrink:0;white-space:nowrap}
+.vbGo{background:linear-gradient(160deg,#2F6FE8,#1A3F9E);border:1px solid #5B93FF;color:#fff;border-radius:12px;padding:0 10px;min-height:44px;font-family:inherit;font-weight:900;font-size:11.5px;display:flex;align-items:center;gap:4px;flex-shrink:0;white-space:nowrap}
+.vbGo.on{background:linear-gradient(160deg,#1E8F4E,#0F5A30);border-color:#2ECC71}
+.vbGo.alt{background:var(--card);border-color:var(--bd);color:var(--tx)}
+.vbBubW{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.vbBub b time{float:left;font-weight:400;color:var(--mut);font-size:9px;margin-inline-start:8px;font-variant-numeric:tabular-nums}
+.vbTag{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:#FFD3A0;background:rgba(232,178,58,.1);border:1px solid rgba(232,178,58,.45);border-radius:8px;padding:2px 7px}
+.vbMsg.me .vbTag{align-self:flex-end}
+.vbReact{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--tx2)}
+.vbReact.me{flex-direction:row-reverse}
+.vbReact>svg,.vbReact>span:first-child{border-radius:50%;flex-shrink:0}
+.vbReact .vbRt{display:inline-flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:3px 8px}
+.vbBan{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,rgba(232,178,58,.14),rgba(232,178,58,.04));border:1px solid rgba(232,178,58,.5);border-radius:14px;padding:8px 10px;animation:pop .3s ease}
+.vbBanAv{border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFF2C4,#9A6712);flex-shrink:0;filter:grayscale(.6);display:flex}
+.vbBanAv>svg,.vbBanAv>span{border-radius:50%}
+.vbBanB{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vbBanB b{font-size:14px;font-weight:900;color:#FFE9A8;display:flex;align-items:center;gap:5px}
+.vbBanB span{font-size:11.5px;color:var(--tx2);line-height:1.5}
+.vbNotes{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px 10px;margin-bottom:10px}
+.vbNotesT{font-size:12px;font-weight:900;color:var(--gold);display:flex;align-items:center;gap:5px;margin-bottom:4px}
+.vbNotesT small{margin-inline-start:auto;font-weight:400;color:var(--mut);font-size:9.5px}
+.vbNoteRow{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid rgba(255,255,255,.05);cursor:pointer}
+.vbNoteRow>svg,.vbNoteRow>span:first-child{border-radius:50%;flex-shrink:0}
+.vbNoteRow .vbNn{flex:1;font-size:12px;font-weight:700}
+.vbNoteRow b{font-size:10px;font-weight:800;color:var(--nc);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.vbNoteRow b::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--nc);box-shadow:0 0 6px var(--nc)}
+.vbNoteRow.dead{opacity:.5}
+.vbRulesL{padding-inline-start:18px;font-size:12px;line-height:1.8;color:var(--tx2);margin:12px 0}
+.vbSaid{font-size:11.5px;color:var(--tx2);background:var(--elev);border-radius:9px;padding:6px 9px;margin-bottom:5px}
+.vbShAv{border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFF2C4,#9A6712);display:flex;flex-shrink:0}
+.vbShAv>svg,.vbShAv>span{border-radius:50%}
+.fc.nc.on{border-color:var(--nc);color:var(--nc);background:transparent}
 .bwn{background:rgba(232,178,58,.14);border:1px solid var(--gold);border-radius:13px;
  padding:11px 14px;margin-top:14px;font-weight:800;color:var(--gold);font-size:13px;animation:pop .4s ease}
 
@@ -20426,7 +20522,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.44';
+const APP_VER='5.45';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -22817,7 +22913,7 @@ function vbNames(n){const pool=VB_NAMES.slice().sort(()=>Math.random()-.5);retur
 function vbHead(t){return tb(t)}
 function vbExit(){
  confirmSheet('مغادرة المباراة','ستنتهي هذه الجولة ضد الكمبيوتر ولن تُحتسب.','مغادرة',()=>{
-  if(VB){clearInterval(VB.tm);VB.tm=null;if(VB.raf)cancelAnimationFrame(VB.raf);VB.raf=null}
+  if(VB){clearInterval(VB.tm);VB.tm=null;if(VB.tmI)clearInterval(VB.tmI);VB.tmI=null;if(VB.raf)cancelAnimationFrame(VB.raf);VB.raf=null}
   Router.settle('gameHub',(VB&&VB.g)||'mafia')});
 }
 /** جولة ضد الكمبيوتر تُحتسب جولة ليلة عائلة في الأهداف اليومية والمهام */
@@ -23011,53 +23107,218 @@ function vbBackdrop(kind){
   <rect x="0" y="186" width="400" height="4" fill="#120A05"/></svg>`;
 }
 
-/** رسم المسرح كاملًا (مرّة لكل مرحلة): الخلفية والمقاعد والسجلّ والشريط */
-function vbScene(kind,title){
+/* ═══════════ المسرح المشترك (5.45) — شريط علوي بمرحلة ومؤقّت، رقاقات، مشهد بمقاعد حول الطاولة أو المجلس، لوحة الدور بمؤقّت دائري،
+   خطوات الجولة، تفاعلات سريعة، سجلّ بأوقات ووسوم اتهام، ملاحظاتي الخاصة، وشريط سفلي (تعبير، كتابة، صوت، أشكّ فيه، جاهز) ═══════════ */
+const VB_NOTE={unk:{t:'غير متأكد',c:'#E8B23A'},sus:{t:'مشتبه',c:'#E24B4A'},inn:{t:'بريء غالبًا',c:'#2ECC71'},trust:{t:'أثق به',c:'#4C9AF0'}};
+const VB_NOTE_ORDER=['unk','sus','inn','trust'];
+const VB_QUICK={
+ mafia:[['search','مثير للاشتباه'],['check','أوافق'],['cross','لا أوافق'],['bulb','معلومة مهمة'],['laugh','مضحك'],['broken','مستحيل']],
+ barra:[['star','ممتاز'],['laugh','مضحك'],['bulb','مثير للاهتمام'],['sparkle','مفاجئ'],['heart','أحسنت'],['cross','ما اقتنعت']]
+};
+const VB_RULES={
+ mafia:['ليلًا: المافيا تقتل واحدًا، الطبيب يحمي واحدًا (يجوز نفسه)، المحقق يفحص واحدًا.','نهارًا: نقاش بوقت محدود؛ اكتب بكلماتك (اتّهم، دافع، اسأل، أعلن دورك) والآليون يفهمون ويردّون.','حين تنتهي اضغط «جاهز» — التصويت يبدأ عندما يجهز الجميع أو ينتهي الوقت، لا بقرارك وحدك.','التصويت: الأغلبية تُعدم، والتعادل يُنجي، ويُكشف دور المُعدَم.','تفوز المدينة إن أُعدمت كل المافيا، وتفوز المافيا إن ساوى عددها عدد الباقين.'],
+ barra:['الجميع يعرف كلمة من فئة معلنة إلا واحدًا لا يعرفها: برا السالفة.','جولتان من التلميحات بالدور، 45 ثانية لكل تلميح — لمّح دون أن تقول الكلمة.','ثم سؤال من المجلس لك، وسؤال منك لأحدهم.','التصويت على من لا يعرف الكلمة؛ إن أُمسك ببرا السالفة فله تخمين واحد يفوز به إن أصاب.','من يقول الكلمة نفسها يخسر فورًا.']
+};
+const VB_MIC='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M9 21h6"/></svg>';
+const RING_C=2*Math.PI*19;
+/** رسم المسرح كاملًا (مرّة لكل جولة) */
+function vbScene(kind,title,sub){
  setArena(kind==='mafia'?'mafia':'barra');
- go(`<div class="scr on vbScene ${kind}${VB.night?' night':''}">${tb(title)}
- <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbPhase" id="vbPhase"></div><div class="vbSeats" id="vbSeats"></div></div>
+ const n=VB.names.length;
+ go(`<div class="scr on vbScene ${kind}${VB.night?' night':''}">
+ <div class="vbTop">
+  <div class="vbTopL"><span class="vbGi">${ico(kind==='mafia'?'search':'orb',24)}</span><div class="vbTt"><b>${title}</b><small>${sub||'ضد الكمبيوتر'}</small></div></div>
+  <div class="vbPhase" id="vbPhase"></div>
+  <button class="vbLeave" onclick="vbExit()">${ico('door',13)} مغادرة</button>
+ </div>
+ <div class="vbInfo">
+  <span class="vbChip">${ico('group',13)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></span>
+  <span class="vbChip ai" id="vbAiChip" hidden>${ico('sparkle',13)} ذكاء اصطناعي</span>
+  <span class="sp"></span>
+  ${kind==='mafia'?`<button class="vbChip" onclick="vbNotesToggle()">${ico('scroll',13)} ملاحظاتي</button>`:''}
+  <button class="vbChip" onclick="vbInfoSheet()">${ico('bulb',13)} ${kind==='mafia'?'دوري':'السالفة'}</button>
+  <button class="vbChip" onclick="vbRules()">${ico('info',13)} القوانين</button>
+ </div>
+ <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbCenter">${vbCenterPiece(kind)}</div><div class="vbSeats" id="vbSeats"></div></div>
+ <div class="vbTurn" id="vbTurn" hidden></div>
+ ${kind==='barra'?`<div class="vbSteps" id="vbSteps">${['التلميحات','سؤال وجواب','التصويت','النتيجة'].map((t,i)=>`<span data-step="${i+1}"><i>${i+1}</i>${t}</span>`).join('')}</div>`:''}
+ <div class="vbNotes" id="vbNotes" hidden></div>
  <div class="vbFeed" id="vbFeed"></div>
  <div class="vbAct" id="vbAct"></div></div>`);
- vbSeats();
+ vbSeats();vbAiChip();
  (VB.feed||[]).forEach(m=>vbRenderMsg(m,true));
+}
+/** القطعة الوسطى: طاولة بفانوس وخنجر ولافتة «من سيكذب اليوم؟» في المافيا، ولافتة معلّقة في المجلس */
+function vbCenterPiece(kind){
+ if(kind==='mafia')return `<svg viewBox="0 0 120 70" width="136" height="79" aria-hidden="true"><defs><radialGradient id="vbTb" cx=".5" cy=".4"><stop offset="0" stop-color="#7A5230"/><stop offset="1" stop-color="#2E1B0E"/></radialGradient><radialGradient id="vbLg" cx=".5" cy=".5"><stop offset="0" stop-color="rgba(255,214,120,.6)"/><stop offset="1" stop-color="rgba(255,214,120,0)"/></radialGradient></defs>
+  <ellipse cx="60" cy="42" rx="58" ry="24" fill="url(#vbTb)" stroke="#5A3A1E" stroke-width="1.5"/><ellipse cx="60" cy="40" rx="50" ry="18" fill="none" stroke="rgba(255,230,180,.15)"/>
+  <circle cx="60" cy="30" r="24" fill="url(#vbLg)"/><rect x="55" y="15" width="10" height="17" rx="3" fill="#C9921E"/><rect x="57" y="18" width="6" height="11" rx="2" fill="#FFE6A0"/><rect x="53" y="31" width="14" height="3" rx="1" fill="#7A5410"/><rect x="58" y="12" width="4" height="4" rx="1" fill="#7A5410"/>
+  <g transform="rotate(-6 36 51)"><rect x="12" y="44" width="48" height="14" rx="2" fill="#E9D8B4"/><text x="36" y="54" font-size="6.6" font-weight="900" fill="#3A2A14" text-anchor="middle" font-family="Cairo,sans-serif">من سيكذب اليوم؟</text></g>
+  <path d="M72 51 l22 -7 l2 3 l-21 7 z" fill="#C8CDD6"/><rect x="93" y="41" width="7" height="4" rx="1" fill="#5A3A1E" transform="rotate(-18 96 43)"/></svg>`;
+ return `<svg viewBox="0 0 120 30" width="150" height="38" aria-hidden="true"><path d="M8 3 h104 l-4 24 h-96 z" fill="#E9D8B4" stroke="#8A6B3A"/><path d="M8 3 h104" stroke="#C9921E" stroke-width="2"/><text x="60" y="19" font-size="8.5" font-weight="900" fill="#3A2A14" text-anchor="middle" font-family="Cairo,sans-serif">اللي ما يعرف ينكشف!</text></svg>`;
+}
+/** موضع كل مقعد على حلقة بيضوية: أنت في الأسفل، والباقون بالتساوي حولها */
+function vbSeatPos(i,n){
+ const a=Math.PI/2+(i/n)*Math.PI*2,m=VB.g==='mafia';
+ const cx=50,cy=m?49:57,rx=m?41:44,ry=m?37:29;
+ return {x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry};
 }
 function vbPhase(icon,label,hint){
  VB.phaseLbl={icon,label,hint};
  const el=document.getElementById('vbPhase');
- if(el)el.innerHTML=`<span class="vbPhI">${ico(icon,16)}</span><b>${label}</b>${hint?`<span>${hint}</span>`:''}`;
+ if(el)el.innerHTML=`<span class="vbPhI">${ico(icon,15)}</span><b>${label}</b><span class="vbTm" id="vbTm"></span>`;
  vbMsg({k:'ph',icon,t:label});
+ if(hint)vbTurn(icon,label,hint);
 }
+/** لوحة الدور تحت المشهد: العنوان والوصف والمؤقّت الدائري (sec) وصفّ الجاهزين */
+function vbTurn(icon,title,desc,sec){
+ const el=document.getElementById('vbTurn');if(!el)return;el.hidden=false;
+ el.innerHTML=`<div class="vbTurnI">${ico(icon||'sound',20)}</div><div class="vbTurnB"><div class="vbTurnT">${title}</div>${desc?`<div class="vbTurnD">${desc}</div>`:''}<div class="vbTurnR" id="vbReadyRow" hidden></div></div>
+  <div class="vbRing${sec?'':' off'}"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="vbRingBg"/><circle cx="22" cy="22" r="19" class="vbRingArc" id="vbRingArc" style="stroke-dasharray:${RING_C};stroke-dashoffset:0"/></svg><b id="vbTmBig">${sec?vbFmt(sec):'—'}</b></div>`;
+}
+function vbTurnHide(){const el=document.getElementById('vbTurn');if(el)el.hidden=true}
+function vbFmt(sec){sec=Math.max(0,Math.ceil(sec));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
+/** مؤقّت المرحلة: يرسم في شريط المرحلة ولوحة الدور، وينفّذ onEnd عند الصفر — معطّل في الاختبارات (VB.fast) */
+function vbTimer(sec,onEnd){
+ vbTimerStop();
+ if(!VB||VB.fast||!sec)return;
+ const my=VB;VB.timer={end:Date.now()+sec*1000,total:sec,onEnd};
+ const tick=()=>{if(VB!==my||!VB.timer){clearInterval(my.tmI);my.tmI=null;return}
+  const left=Math.max(0,VB.timer.end-Date.now())/1000;vbTimerDraw(left,VB.timer.total);
+  if(left<=0){const f=VB.timer.onEnd;vbTimerStop();try{if(f)f()}catch(e){}}};
+ VB.tmI=setInterval(tick,250);tick();
+}
+function vbTimerStop(){if(VB&&VB.tmI){clearInterval(VB.tmI);VB.tmI=null}if(VB)VB.timer=null;vbTimerDraw(null)}
+function vbTimerDraw(left,total){
+ const t=document.getElementById('vbTm'),b=document.getElementById('vbTmBig'),arc=document.getElementById('vbRingArc');
+ if(t)t.textContent=left==null?'':vbFmt(left);
+ if(left==null)return;
+ if(b)b.textContent=vbFmt(left);
+ if(arc&&total){arc.style.strokeDashoffset=String(RING_C*(1-left/total));const r=arc.closest('.vbRing');if(r){r.classList.remove('off');r.classList.toggle('hot',left<=10)}}
+}
+function vbStep(n){document.querySelectorAll('#vbSteps span').forEach(el=>{const k=+el.dataset.step;el.classList.toggle('on',k===n);el.classList.toggle('done',k<n)})}
+function vbAiChip(){const el=document.getElementById('vbAiChip');if(el)el.hidden=!(window.AI&&AI.enabled())}
 function vbSeatState(i){return VB.seat&&VB.seat(i)||{}}
 function vbSeats(){
  const el=document.getElementById('vbSeats');if(!el)return;
- el.innerHTML=VB.names.map((nm,i)=>{const st=vbSeatState(i);
-  return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}" data-seat="${i}" style="--sc:${st.c||'#E8B23A'}">
-   <div class="vbAv">${vbFace(i,40)}${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}</div>
-   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div>${st.sub?`<div class="vbSub">${st.sub}</div>`:''}</div>`}).join('');
+ const n=VB.names.length;
+ el.innerHTML=VB.names.map((nm,i)=>{const st=vbSeatState(i),p=vbSeatPos(i,n),note=i!==0&&VB.notes&&VB_NOTE[VB.notes[i]];
+  const ready=(VB.ready&&VB.ready.has(i))||(i===0&&VB.meReady);
+  let pill,pc;
+  if(st.dead){pill=st.sub?'خارج · '+st.sub:'خارج اللعبة';pc='#8C93A8'}
+  else if(st.talk){pill=VB.g==='barra'?'يلمّح الآن':'يتحدث الآن';pc='#2ECC71'}
+  else if(ready){pill='جاهز';pc='#4C9AF0'}
+  else if(i===0){pill=st.me||'أنت';pc='#E8B23A'}
+  else if(note){pill=note.t;pc=note.c}
+  else if(st.pill){pill=st.pill;pc=st.pc||'#8C93A8'}
+  else{pill='هادئ';pc='#8C93A8'}
+  return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}" onclick="vbPlayerSheet(${i})">
+   <div class="vbAv">${vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}</div>
+   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div><div class="vbPill" style="--pc:${pc}">${esc(pill)}</div></div>`}).join('');
+ const c=document.getElementById('vbCount');if(c)c.textContent=(VB.alive?VB.alive.length:n)+'/'+n;
 }
 function vbTalk(i){VB.talking=i;vbSeats()}
-/** رسالة في السجلّ: k = n راوٍ · ph مرحلة · b آليّ · me أنا · v صوت · card بطاقة */
-function vbMsg(m){VB.feed.push(m);vbRenderMsg(m,false);return m}
+/** رسالة في السجلّ: k = n راوٍ · ph مرحلة · ban لافتة كبيرة بصورة · b آليّ · me أنا · v صوت · card بطاقة — react تفاعل سريع، tg من اتُّهم */
+function vbMsg(m){m.at=m.at||Date.now();VB.feed.push(m);vbRenderMsg(m,false);return m}
+function vbTime(t){const d=new Date(t||Date.now());return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function vbQIcon(k){return k==='laugh'&&typeof face==='function'?face('laugh',15):ico(k,13)}
 function vbRenderMsg(m,silent){
  const f=document.getElementById('vbFeed');if(!f)return;
  let h='';
  if(m.k==='ph')h=`<div class="vbPh"><span>${ico(m.icon||'timer',13)} ${esc(m.t)}</span></div>`;
  else if(m.k==='n')h=`<div class="vbN${m.big?' big':''}">${m.icon?ico(m.icon,15):''}<span>${m.raw?m.t:esc(m.t)}</span></div>`;
+ else if(m.k==='ban')h=`<div class="vbBan">${m.i!=null?`<div class="vbBanAv">${vbFace(m.i,44)}</div>`:''}<div class="vbBanB"><b>${m.icon?ico(m.icon,16):''} ${esc(m.t)}</b>${m.d?`<span>${esc(m.d)}</span>`:''}</div></div>`;
  else if(m.k==='v')h=`<div class="vbV">${vbFace(m.i,20)}<span>${esc(VB.names[m.i])} ${m.t==null?'يمتنع':'يصوّت على <b>'+esc(VB.names[m.t])+'</b>'}</span></div>`;
  else if(m.k==='card')h=`<div class="vbCard">${m.t}</div>`;
- else h=`<div class="vbMsg${m.i===0?' me':''}${m.q?' q':''}">${vbFace(m.i,30)}<div class="vbBub"><b>${esc(VB.names[m.i])}</b>${esc(m.t)}</div></div>`;
+ else if(m.react)h=`<div class="vbReact${m.i===0?' me':''}">${vbFace(m.i,22)}<span class="vbRt">${m.emo&&typeof face==='function'?face(m.emo,18):(m.icon?vbQIcon(m.icon):'')} ${esc(m.t)}</span></div>`;
+ else h=`<div class="vbMsg${m.i===0?' me':''}${m.q?' q':''}">${vbFace(m.i,30)}<div class="vbBubW"><div class="vbBub"><b>${esc(VB.names[m.i])}<time>${vbTime(m.at)}</time></b>${esc(m.t)}</div>${m.tg!=null&&VB.names[m.tg]?`<div class="vbTag">${ico('target',11)} اتهام ${esc(VB.names[m.tg])}</div>`:''}</div></div>`;
  f.insertAdjacentHTML('beforeend',h);
  if(!silent){const last=f.lastElementChild;if(last)last.classList.add('vbNew');vbScrollEnd()}
 }
-function vbScrollEnd(){try{const a=document.getElementById('vbAct');const y=document.body.scrollHeight;window.scrollTo({top:y,behavior:VB.fast?'auto':'smooth'})}catch(e){}}
+function vbScrollEnd(){try{const y=document.body.scrollHeight;window.scrollTo({top:y,behavior:VB.fast?'auto':'smooth'})}catch(e){}}
 function vbAct(html){const el=document.getElementById('vbAct');if(el)el.innerHTML=html;vbScrollEnd()}
 /** تسلسل بمهل: يعيد وعدًا — وفي الاختبارات (VB.fast) بلا انتظار */
 function vbWait(ms){return new Promise(r=>{if(VB.fast)return r();VB.tm=setTimeout(r,ms)})}
 function vbAlive(){return !!(VB&&document.getElementById('vbFeed'))}
 /** يقرأ نصّ المدخل ويفرّغه */
 function vbRead(){const el=document.getElementById('vbTxt');const v=el?el.value.trim():'';if(el)el.value='';return v}
-function vbInput(ph,fn,extra){
- return `<div class="vbIn"><input id="vbTxt" maxlength="140" placeholder="${ph}" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();${fn}()}"><button class="btn gd" style="width:auto;padding:0 16px;min-height:44px" onclick="${fn}()">إرسال</button></div>${extra||''}`;
+/** الشريط السفلي: تفاعلات سريعة، زرّ التعبيرات، الكتابة والإرسال، الصوت، «أشكّ فيه»، والزرّ الرئيسي (جاهز / تلميحي / تصفح لاعب / مخصّص) */
+function vbBar(o){
+ o=o||{};
+ const quick=(VB_QUICK[VB.g]||[]).map(([ic,t],k)=>`<button class="vbQ" onclick="vbReact(${k})">${vbQIcon(ic)} ${t}</button>`).join('');
+ const mic=(window.SpeechRecognition||window.webkitSpeechRecognition)?`<button class="vbIcoB" id="vbMic" onclick="vbMic()" title="تحدّث">${VB_MIC}</button>`:'';
+ const fn=o.fn||'vbNoop';
+ const primary=o.primary!=null?o.primary
+  :o.ready?`<button class="vbGo${VB.meReady?' on':''}" id="vbReady" onclick="mfReady()">${ico('check',14)} ${VB.meReady?'بانتظار الباقين':'جاهز'}</button>`
+  :o.clue?`<button class="vbGo" onclick="${fn}()">${ico('sound',14)} تلميحي</button>`
+  :`<button class="vbGo alt" onclick="vbBrowse()">${ico('user',14)} تصفح لاعب</button>`;
+ vbAct(`<div class="vbQuick">${quick}</div>
+ <div class="vbBar"><button class="vbIcoB" onclick="vbEmoteBar()" title="تعبير">${ico('gift',18)}</button>
+  <div class="vbInW"><input id="vbTxt" maxlength="160" placeholder="${o.ph||'اكتب رسالتك…'}" autocomplete="off" data-fn="${fn}"${o.disabled?' disabled':''} onkeydown="if(event.key==='Enter'){event.preventDefault();${fn}()}"><button class="vbSend" onclick="${fn}()" title="إرسال">${ico('next',15)}</button></div>${mic}</div>
+ <div class="vbBar vbBar2"><button class="vbSus" onclick="vbSuspect()">${ico('target',13)} ${VB.g==='barra'?'أشتبه فيه':'أشك فيه'}</button>${primary}</div>`);
+ const el=document.getElementById('vbTxt');if(el&&!VB.fast&&!o.disabled)el.focus();
+}
+function vbNoop(){}
+/** تفاعل سريع: يظهر في السجلّ (ويقرؤه النموذج)؛ في المافيا «أوافق/لا أوافق» على آخر اتهام، و«مثير للاشتباه» يسجّل آخر متكلّم في ملاحظاتي */
+function vbReact(k){
+ const q=(VB_QUICK[VB.g]||[])[k];if(!q||!VB||VB.over)return;
+ vbMsg({k:'me',i:0,t:q[1],icon:q[0],react:1});
+ if(VB.g!=='mafia')return;
+ const last=[...VB.feed].reverse().find(m=>m.k==='b'&&m.tg!=null&&mfAliveI(m.tg));
+ if(q[1]==='أوافق'&&last)mfApplyHuman({m:[last.tg],intent:'accuse',claim:null,confess:false});
+ else if(q[1]==='لا أوافق'&&last)mfApplyHuman({m:[last.tg],intent:'defend',claim:null,confess:false});
+ else if(q[1]==='مثير للاشتباه'){const sp=[...VB.feed].reverse().find(m=>m.k==='b'&&m.i!==0&&mfAliveI(m.i));if(sp){VB.notes=VB.notes||{};if(!VB.notes[sp.i])VB.notes[sp.i]='sus';vbSeats();vbNotesRender()}}
+}
+function vbSheet(html){$('sht').innerHTML='<div class="hnd"></div>'+html;$('sbg').classList.add('on')}
+/** «أشكّ فيه»: يختار لاعبًا فيُسجَّل مشتبهًا في ملاحظاتي؛ في المافيا يُقال للمدينة أثناء النقاش */
+function vbSuspect(){
+ const list=VB.names.map((_,i)=>i).filter(i=>i!==0&&(VB.g!=='mafia'||mfAliveI(i)));
+ vbSheet(`<div class="shh"><div><div class="t">${VB.g==='barra'?'أشتبه فيه':'أشك فيه'}</div><div class="d">اختر لاعبًا — يُسجَّل في ملاحظاتك${VB.g==='mafia'?' ويُقال للمدينة':''}</div></div></div>
+ <div class="vbGrid" style="margin-top:12px">${list.map(i=>vbChip(i,` onclick="vbSuspectPick(${i})"`)).join('')}</div>`);
+}
+function vbSuspectPick(i){
+ closeSheet();VB.notes=VB.notes||{};VB.notes[i]='sus';vbSeats();vbNotesRender();
+ const el=document.getElementById('vbTxt');
+ if(VB.g==='mafia'&&el&&!el.disabled&&!VB.voting&&!VB.night){el.value='أشك في '+VB.names[i];mfSend();return}
+ vbMsg({k:'me',i:0,t:'أشتبه في '+VB.names[i],icon:'target',react:1});
+}
+/** بطاقة لاعب: مقعده وحالته وآخر ما قاله وملاحظتي عنه */
+function vbPlayerSheet(i){
+ const st=vbSeatState(i),note=VB.notes&&VB.notes[i];
+ const said=(VB.feed||[]).filter(m=>(m.k==='b'||m.k==='me')&&m.i===i&&!m.react).slice(-4).map(m=>`<div class="vbSaid">${esc(m.t)}</div>`).join('');
+ const d=st.dead?'خارج اللعبة'+(st.sub?' — كان '+st.sub:''):i===0?(VB.g==='mafia'?'دورك: '+mfRole(0):(VB.spy===0?'أنت برا السالفة':'تعرف الكلمة')):'في اللعبة';
+ vbSheet(`<div class="shh"><div class="vbShAv">${vbFace(i,52)}</div><div><div class="t">${esc(VB.names[i])}${i===0?' (أنت)':''} · مقعد ${i+1}</div><div class="d">${d}</div></div></div>
+ ${i!==0&&!st.dead?`<div class="sl">ملاحظتي</div><div class="cr">${VB_NOTE_ORDER.map(k=>`<div class="fc nc${note===k?' on':''}" style="--nc:${VB_NOTE[k].c}" onclick="vbNoteSet(${i},'${k}')">${VB_NOTE[k].t}</div>`).join('')}</div>`:''}
+ ${said?`<div class="sl">آخر ما قاله</div>${said}`:'<div class="note">لم يقل شيئًا بعد</div>'}`);
+}
+function vbNoteSet(i,k){VB.notes=VB.notes||{};VB.notes[i]=k;vbSeats();vbNotesRender();vbPlayerSheet(i)}
+function vbBrowse(){vbSheet(`<div class="shh"><div><div class="t">تصفح لاعب</div><div class="d">اختر لترى ما قاله وتسجّل ملاحظتك</div></div></div><div class="vbGrid" style="margin-top:12px">${VB.names.map((_,i)=>vbChip(i,` onclick="vbPlayerSheet(${i})"`)).join('')}</div>`)}
+function vbNotesToggle(){const el=document.getElementById('vbNotes');if(!el)return;el.hidden=!el.hidden;if(!el.hidden)vbNotesRender()}
+function vbNoteCycle(i){VB.notes=VB.notes||{};const k=VB.notes[i]||'unk';VB.notes[i]=VB_NOTE_ORDER[(VB_NOTE_ORDER.indexOf(k)+1)%VB_NOTE_ORDER.length];vbSeats();vbNotesRender()}
+/** ملاحظاتي الخاصة (مافيا): حكمي على كل لاعب — والمحقق يرى نتائج فحصه ثابتة */
+function vbNotesRender(){
+ const el=document.getElementById('vbNotes');if(!el||el.hidden)return;
+ el.innerHTML=`<div class="vbNotesT">${ico('scroll',14)} ملاحظاتي الخاصة <small>اضغط لتبديل الحكم</small></div>`+VB.names.map((nm,i)=>{if(i===0)return '';const st=vbSeatState(i);const v=VB_NOTE[(VB.notes||{})[i]||'unk'];
+  const fixed=VB.g==='mafia'&&VB.myKnow&&VB.myKnow[i]!=null?(VB.myKnow[i]?{t:'مافيا — فحصتُه',c:'#E24B4A'}:{t:'بريء — فحصتُه',c:'#2ECC71'}):null;
+  return `<div class="vbNoteRow${st.dead?' dead':''}" onclick="${fixed?'':`vbNoteCycle(${i})`}">${vbFace(i,26)}<span class="vbNn">${esc(nm)}</span><b style="--nc:${(fixed||v).c}">${(fixed||v).t}${st.dead?' · خارج':''}</b></div>`}).join('');
+}
+function vbRules(){vbSheet(`<div class="shh"><div><div class="t">قوانين ${VB.g==='mafia'?'مافيا':'برا السالفة'}</div><div class="d">ضد الكمبيوتر</div></div></div><ol class="vbRulesL">${(VB_RULES[VB.g]||[]).map(r=>`<li>${r}</li>`).join('')}</ol>`)}
+function vbInfoSheet(){
+ if(VB.g==='mafia'){const sp=MAF_ROLE[mfRole(0)],mates=VB.names.map((_,i)=>i).filter(i=>i!==0&&mfRole(i)==='مافيا'&&mfRole(0)==='مافيا');
+  return vbSheet(`<div class="mfDisc" style="--rc:${sp.ac};--rcs:${clRGBA(sp.ac,.3)};margin-top:8px">${ico(sp.ic,46,sp.tint)}</div><div class="mtl" style="font-size:18px;margin-top:8px;text-align:center">أنت ${mfRole(0)}</div><div class="vbCardD" style="text-align:center">${sp.d}${mates.length?`<br>شريكك في المافيا: <b>${mates.map(mfNm).join('، ')}</b>`:''}</div>`)}
+ const spy=VB.spy===0;
+ vbSheet(`<div class="mfDisc" style="--rc:${spy?'#E24B4A':'#E8B23A'};--rcs:${spy?'rgba(226,75,74,.3)':'rgba(232,178,58,.3)'};margin-top:8px">${spy?ico('door',46,'red'):ico('lock',46)}</div><div class="mtl" style="font-size:19px;margin-top:8px;text-align:center">${spy?'أنت برا السالفة!':esc(VB.word)}</div><div class="vbCardD" style="text-align:center">الفئة: <b>${esc(VB.cat)}</b><br>ملاحظة: واحد فقط لا يعرف السالفة!</div>`);
+}
+function vbEmoteBar(){emoteBarDom('vbEmote')}
+function vbEmote(k){const ex=document.querySelector('.ebar.fx');if(ex)ex.remove();if(window.bubbleFx)try{bubbleFx(k,'me')}catch(e){}const e=(window.EMOTES||[]).find(x=>x.k===k);vbMsg({k:'me',i:0,t:(e&&(e.m||e.n))||'تعبير',react:1,emo:k})}
+/** إملاء صوتي بالعربية إن أتاحه المتصفح — يملأ صندوق الكتابة */
+function vbMic(){
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition,el=document.getElementById('vbTxt'),b=document.getElementById('vbMic');
+ if(!R||!el){toast('التعرّف على الصوت غير متاح هنا');return}
+ try{const r=new R();r.lang='ar-SA';r.interimResults=false;r.maxAlternatives=1;if(b)b.classList.add('rec');
+  r.onresult=e=>{const t=e.results[0][0].transcript;el.value=(el.value?el.value+' ':'')+t};
+  r.onend=()=>{if(b)b.classList.remove('rec')};r.onerror=()=>{if(b)b.classList.remove('rec');toast('تعذّر الاستماع — اكتب رسالتك')};r.start()}
+ catch(e){toast('تعذّر تشغيل الميكروفون')}
 }
 
 /* ═══════════ الذكاء الاصطناعي لآليي «ضد الكمبيوتر» (5.43) ═══════════
@@ -23068,7 +23329,8 @@ function vbInput(ph,fn,extra){
    يُتحقّق منه (أرقام اللاعبين، الأحياء، المافيا لا تصوّت على شريكها…) قبل تطبيقه على حالة اللعبة الرقمية. */
 const AI_TIER='default';   // طبقة النموذج في الأرتيفاكت: default يفكّر قبل الجواب (quick أسرع وأضعف، complex أعمق وأبطأ)
 const AI=(function(){
- const st={probe:null,on:false,src:null,fail:0,sample:null,busy:0};
+ const st={probe:null,on:false,src:null,fail:0,sample:null,busy:0,onLost:null,lostFired:false};
+ function lost(why){if(st.lostFired)return;st.lostFired=true;try{if(typeof st.onLost==='function')st.onLost(why)}catch(e){}}
  function enabled(){return !window.__vbFast&&!(S&&S.opt&&S.opt.aiBots===0)&&st.on&&st.fail<3}
  function srvUrl(p){
   const o=(window.NET&&NET.serverOrigin&&NET.serverOrigin())||'';
@@ -23096,17 +23358,17 @@ const AI=(function(){
   try{
    if(st.src==='sample')return await st.sample.json(prompt,{modelTier:tier||AI_TIER,cache:false});
    const r=await fetch(srvUrl('/ai/chat'),{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})});
-   if(r.status===503){st.on=false;return null}
+   if(r.status===503){st.on=false;lost('الخادم بلا مفتاح');return null}
    if(!r.ok)throw new Error('ai '+r.status);
    const j=await r.json();return j&&j.json!=null?j.json:null;   // الإخفاقات (نقلًا أو جوابًا بلا فائدة) تتراكم في الجولة وتُصفَّر عند بدء جولة جديدة
   }catch(e){
-   if(e&&e.code==='not_granted')st.on=false;else st.fail++;
+   if(e&&e.code==='not_granted'){st.on=false;lost('لم يُسمح به')}else{st.fail++;if(st.fail>=3)lost('تعذّر الاتصال')}
    return null;
   }finally{thinking(false)}
  }
- function reset(){st.fail=0}
- function miss(){st.fail++}   // جواب صالح الشكل لكنه بلا فائدة يُحسب إخفاقًا أيضًا
- return {enabled,probe,json,reset,miss,src:()=>st.on?st.src:null,fails:()=>st.fail};
+ function reset(){st.fail=0;st.lostFired=false}
+ function miss(){st.fail++;if(st.fail>=3)lost('أجوبة غير مفهومة')}   // جواب صالح الشكل لكنه بلا فائدة يُحسب إخفاقًا أيضًا
+ return {enabled,probe,json,reset,miss,src:()=>st.on?st.src:null,fails:()=>st.fail,onLost:fn=>{st.onLost=fn}};
 })();
 /** السجلّ نصًّا للنموذج: آخر n سطرًا بأرقام اللاعبين وأسمائهم */
 function vbFeedText(n){
@@ -23115,6 +23377,8 @@ function vbFeedText(n){
   if(m.k==='ph')return '— '+m.t+' —';
   if(m.k==='n')return '[الراوي] '+String(m.t).replace(/<[^>]+>/g,'');
   if(m.k==='v')return nm(m.i)+' صوّت على '+(m.t==null?'لا أحد':nm(m.t));
+  if(m.k==='ban')return '[الراوي] '+m.t+(m.d?' — '+m.d:'');
+  if(m.react)return nm(m.i)+' (تفاعل سريع): '+m.t;
   return nm(m.i)+(m.i===0?' (البشري)':'')+(m.q?' يسأل':'')+': '+m.t;
  }).join('\n');
 }
@@ -23131,7 +23395,8 @@ const aiTxt=(t,max)=>String(t==null?'':t).replace(/\s+/g,' ').trim().slice(0,max
 /** سطر من الراوي حين يتوفّر الذكاء الاصطناعي — يظهر قبل بدء الجولة */
 function vbAiIntro(){
  const my=VB;AI.reset();
- AI.probe().then(on=>{if(!on||VB!==my||VB.over||!vbAlive())return;
+ AI.onLost(why=>{if(VB!==my||!vbAlive())return;vbAiChip();vbMsg({k:'n',icon:'info',t:'توقّف الذكاء الاصطناعي ('+why+') — يكمل الآليون بعقلهم المحلي.'})});
+ AI.probe().then(on=>{if(VB!==my||VB.over||!vbAlive())return;vbAiChip();if(!on)return;
   vbMsg({k:'n',icon:'sparkle',t:'الآليون في هذه الجولة يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم'+(AI.src()==='sample'?' — قد يطلب المتصفح موافقتك عند أول ردّ.':'.')})});
 }
 
@@ -23144,19 +23409,20 @@ function mfStart(diff){
  roles.push('طبيب','محقق');while(roles.length<n)roles.push('شعب');
  roles.sort(()=>Math.random()-.5);
  VB={g:'mafia',diff:diff||'mid',n,names:vbNames(n),roles,alive:Array.from({length:n},(_,i)=>i),day:1,night:false,
-  feed:[],know:{},myKnow:{},heat:{},susp:Array(n).fill(0),detOut:null,myClaim:null,msgs:0,
+  feed:[],know:{},myKnow:{},heat:{},susp:Array(n).fill(0),detOut:null,myClaim:null,msgs:0,notes:{},ready:new Set(),meReady:false,voting:false,voteLog:[],
   victim:null,saved:null,botVictim:null,botSave:null,lastKilled:null,lastLynched:null,cast:[],dead:false,over:false,tm:null,fast:!!window.__vbFast,
   seat:i=>({dead:!VB.alive.includes(i),talk:VB.talking===i,c:mfRole(i)==='مافيا'&&(i===0||mfRole(0)==='مافيا')?'#E24B4A':'#E8B23A',
    badge:i===0?ico(MAF_ROLE[mfRole(0)].ic,12,MAF_ROLE[mfRole(0)].tint):(mfRole(0)==='مافيا'&&mfRole(i)==='مافيا'?ico('swords',12,'red'):(VB.myKnow[i]===true?ico('swords',12,'red'):VB.myKnow[i]===false?ico('check',12):'')),
-   sub:!VB.alive.includes(i)?mfRole(i):''})};
+   sub:!VB.alive.includes(i)?mfRole(i):'',me:mfRole(0)})};
  mfInitBrain();
- vbScene('mafia','مافيا — ضد الكمبيوتر');
+ vbScene('mafia','مافيا','ضد الكمبيوتر — '+n+' لاعبين');
  vbAiIntro();
  const sp=MAF_ROLE[mfRole(0)],mates=VB.alive.filter(i=>i!==0&&mfRole(i)==='مافيا');
  vbMsg({k:'card',t:`<div class="mfDisc" style="--rc:${sp.ac};--rcs:${clRGBA(sp.ac,.3)}">${ico(sp.ic,46,sp.tint)}</div>
   <div class="mtl" style="font-size:18px;margin-top:8px">أنت ${mfRole(0)}</div><div class="vbCardD">${sp.d}</div>
   ${mfRole(0)==='مافيا'&&mates.length?`<div class="vbCardD" style="color:var(--no)">شريكك في المافيا: <b>${mates.map(mfNm).join('، ')}</b></div>`:''}`});
  vbMsg({k:'n',icon:'group',t:`مدينة من ${VB.n} أشخاص: بينهم ${nMafia===1?'مافيا واحد':'اثنان من المافيا'} وطبيب ومحقق. في الليل تعمل الأدوار، وفي النهار تناقشون وتصوّتون على متهم. تفوز المدينة إن أعدمت كل المافيا، وتفوز المافيا إن ساوت عدد الباقين.`});
+ vbTurn('timer','بداية اللعبة','اقرأ دورك ثم ابدأ الليلة الأولى — الأزرار في الأسفل، وملاحظاتك الخاصة في الأعلى');
  vbAct(`<button class="rbtn" onclick="mfNight()"><span>${ico('timer',14)} الليلة الأولى — نامت المدينة</span></button>`);
 }
 const mfRole=i=>VB.roles[i];
@@ -23262,6 +23528,17 @@ async function mfNight(){
  else if(me==='محقق')mfPick('استيقظ المحقق. من تفحص الليلة؟',VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null),'mfCheck');
  else{vbMsg({k:'n',t:'أنت نائم. المافيا تتحرّك في الظلام، والطبيب والمحقق يعملان…'});
   vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} أذان الفجر — استيقظت المدينة</span></button>`)}
+ vbTurn('timer','الليلة '+VB.day,me==='شعب'?'المدينة نائمة — الفجر يحلّ بانتهاء الوقت':'اختر قبل انتهاء الوقت وإلا اختير عنك',me==='شعب'?25:40);
+ vbTimer(me==='شعب'?25:40,()=>mfNightAuto());
+}
+/** انتهى وقت الليل بلا اختيار: المافيا تضرب عشوائيًّا، الطبيب يحمي نفسه، المحقق يفحص أحدًا */
+function mfNightAuto(){
+ if(!VB||VB.over||!VB.night)return;
+ const me=mfRole(0);
+ if(me==='مافيا'){const l=VB.alive.filter(i=>i!==0&&mfRole(i)!=='مافيا');if(l.length)return mfKill(vbRnd(l))}
+ if(me==='طبيب')return mfSave(0);
+ if(me==='محقق'){const l=VB.alive.filter(i=>i!==0&&VB.myKnow[i]==null);if(l.length)return mfCheck(vbRnd(l))}
+ mfResolveNight();
 }
 function mfPick(t,list,cb){
  vbMsg({k:'n',icon:MAF_ROLE[mfRole(0)].ic,t});
@@ -23274,9 +23551,10 @@ async function mfCheck(i){
  VB.myKnow[i]=mfRole(i)==='مافيا';vbSeats();
  vbMsg({k:'n',icon:'search',t:`فحصتَ ${VB.names[i]}: ${VB.myKnow[i]?'مافيا! اتّهمه في النقاش يصدّقك الناس أكثر — أو احتفظ بالسرّ':'بريء. استبعده من شكوكك'}`,big:VB.myKnow[i]});
  vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} استيقظت المدينة</span></button>`);
+ vbTimer(20,()=>mfResolveNight());
 }
 async function mfResolveNight(){
- if(VB.over)return;
+ if(VB.over||VB.nightDone===VB.day)return;VB.nightDone=VB.day;vbTimerStop();
  if(VB.nightAi){const p=VB.nightAi;VB.nightAi=null;vbAct('');await p;if(!vbAlive())return}
  const victim=mfRole(0)==='مافيا'&&mfAliveI(0)&&VB.victim!=null?VB.victim:VB.botVictim;
  const saved=mfRole(0)==='طبيب'&&mfAliveI(0)?VB.saved:VB.botSave;
@@ -23287,8 +23565,8 @@ async function mfResolveNight(){
  mfSetNight(false);vbAct('');
  vbPhase('sparkle','الصباح '+VB.day,'استيقظت المدينة');
  await vbWait(500);
- if(killed!=null){vbMsg({k:'n',icon:'orb',big:true,t:`وُجد ${VB.names[killed]} مقتولًا عند الفجر.`});vbSeats();mfVictimClue(killed)}
- else vbMsg({k:'n',icon:'heart',big:true,t:victim!=null?'محاولة اغتيال فشلت — الطبيب أنقذ الضحية في اللحظة الأخيرة!':'ليلة هادئة… لم يمت أحد.'});
+ if(killed!=null){vbMsg({k:'ban',icon:'sparkle',i:killed,t:'حلّ الصباح',d:`تم العثور على ${VB.names[killed]} خارج اللعبة`});vbSeats();mfVictimClue(killed)}
+ else vbMsg({k:'ban',icon:'heart',t:'حلّ الصباح',d:victim!=null?'محاولة اغتيال فشلت — الطبيب أنقذ الضحية في اللحظة الأخيرة!':'ليلة هادئة… لم يمت أحد.'});
  if(mfWinCheck())return;
  if(killed===0){VB.dead=true;await vbWait(600);vbMsg({k:'n',t:'كنتَ أنت الضحية. تتابع الآن ما يجري في المدينة من بعيد.'});return mfSpectate()}
  await vbWait(500);
@@ -23305,7 +23583,7 @@ const MF_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين �
 المدينة: تتّهم بدليل محدّد من السجلّ مستشهدةً بالكلمة التي قيلت («قلتَ أمس إنك تشك في نورة ثم صوّتَّ على فهد»)، تسأل المتّهم سؤالًا لا يُلتفّ عليه، تصدّق ادّعاء المحقق إن اتّسق مع الوقائع، وتشكّ فيمن يقفز إلى أوّل اتهام وفيمن ينقاد للأغلبية بلا سبب. لا تُعدم على الظن إن كان على غيره دليل أقوى.
 المافيا: تذوب في المدينة: تتّهم بريئًا بحجّة متماسكة مبنيّة على شيء قاله فعلًا، تساند شكّ المدينة على غيرها لتبدو نظيفة، تدافع عن نفسها بأدلة مضادّة لا بالإنكار، لا تتّهم شريكها ولا تدفع هي وشريكها الهدف نفسه في اليوم نفسه، وإن قارب شريكها الإعدام ابتعدت عنه، وفي آخر اللعبة تضحّي به لتنجو. تكذب بثقة وتفاصيل، وفي الصعبة قد تدّعي دور المحقق لتشويش المحقق الحقيقي. ليلًا تقتل الأخطر عليها: المحقق المعلن، ثم من يقود المدينة بأدلة صحيحة، ثم البشري إن كان يصيب.
 المحقق: يخفي دوره حتى يجد مافيا أو يوشك على الإعدام، ثم يعلن بدقّة («فحصتُ فلانًا في الليلة الثانية: مافيا») ويفنّد المدّعي الكاذب بالوقائع، ويفحص ليلًا الأكثر إفادة لا الأوضح. الطبيب: يخفي دوره، يحمي المحقق المعلن أو الأثمن، ولا يكشف نفسه إلا لإثبات أن محاولة اغتيال أُنقذت بيده.
-البشري: افهم لهجته وسخريته ومزاحه وأخطاءه الإملائية، وصنّف مقصده: اتهام، دفاع، سؤال، ادّعاء دور، اعتراف، مزاح، خروج عن الموضوع. إن اعترف أنه مافيا فصدّقوه وأعلنوا التصويت عليه (وشريكه يتبرّأ منه بحذر)؛ إن ادّعى المحقق فاطلبوا نتائج فحصه وقارنوها بما تعرفون؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه جوابًا محدّدًا؛ إن اتّهم أحدًا ردّ المتّهم بنقطة مضادّة محدّدة وعلّق آخر بحسب مصلحته؛ إن مزح جاروه بخفّة ثم عادوا إلى اللعبة؛ إن قال شيئًا غامضًا سألوه ماذا يقصد.
+البشري: افهم لهجته وسخريته ومزاحه وأخطاءه الإملائية، وصنّف مقصده: اتهام، دفاع، سؤال، ادّعاء دور، اعتراف، مزاح، خروج عن الموضوع. إن اعترف أنه مافيا فصدّقوه وأعلنوا التصويت عليه (وشريكه يتبرّأ منه بحذر)؛ إن ادّعى المحقق فاطلبوا نتائج فحصه وقارنوها بما تعرفون؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه جوابًا محدّدًا؛ إن اتّهم أحدًا ردّ المتّهم بنقطة مضادّة محدّدة وعلّق آخر بحسب مصلحته؛ إن مزح جاروه بخفّة ثم عادوا إلى اللعبة؛ إن قال شيئًا غامضًا سألوه ماذا يقصد. إن سأل عن لاعب خارج اللعبة (من صوّت عليه، ما دوره، من قتله) فأجيبوه بدقّة من «ما جرى بالترتيب» — لا تقولوا «لم يعد بيننا» وتسكتوا؛ دور قتيل الليل لم يُكشف فقولوا ذلك. التفاعلات السريعة (أوافق، مثير للاشتباه…) مواقف من آخر ما قيل فردّوا عليها بإيجاز.
 الأسلوب: لهجة خليجية طبيعية يفهمها كل العرب، جمل متفاوتة الطول (بعضها كلمتان وبعضها جملتان)، كل آليّ بشخصيته الثابتة، مخاطبة بالأسماء، ردّ على آخر ما قيل لا كلام عام، لا تكرار لجملة قيلت، لا مواعظ ولا عبارات جاهزة ولا شرح للقواعد، لا يذكر أحد أنه آليّ أو نموذج. كل جملة ≤ 30 كلمة. أعد JSON صالحًا فقط بلا أي نصّ خارجه.`;
 const mfHist=t=>{(VB.hist||(VB.hist=[])).push(t)};
 const mfVoteHist=byWho=>mfHist(`اليوم ${VB.day} — التصويت: `+Object.entries(byWho).map(([k,v])=>VB.names[k]+' → '+(v==null?'امتنع':VB.names[v])).join('، '));
@@ -23348,7 +23626,7 @@ function mfAiLine(i,L,w){
  if(L.claim==='محقق'&&mfRole(i)==='محقق'){VB.detOut=i;Object.keys(VB.know).map(Number).forEach(x=>{if(!mfAliveI(x))return;if(VB.know[x])mfEvAdd(x,'detMaf',MF_EV.detMaf(),5);else if(VB.know[x]===false)mfEvAdd(x,'detInn',MF_EV.detInn(),-4)})}
  else if(L.claim==='محقق'&&mfRole(i)==='مافيا'&&VB.detOut==null)VB.detOut=i;
  mfApply(i,{t:tt,w:w||.8,e:tt!=null&&!!mfTopEv(tt)});
- vbMsg({k:'b',i,t:aiTxt(L.text)});
+ vbMsg({k:'b',i,t:aiTxt(L.text),tg:tt});
  return tt;
 }
 const MF_AI_NOTES='"notes":{"<رقم>":"<ما يريد هذا الآليّ تذكّره لاحقًا: شكوكه وخطّته، ≤ 30 كلمة>"}';
@@ -23496,18 +23774,43 @@ async function mfTalk(){
  for(const i of order){
   if(done.has(i))continue;
   vbTalk(i);await vbWait(650);if(!vbAlive())return;
-  const o=mfBotLine(i);mfApply(i,o);vbMsg({k:'b',i,t:o.s});
+  const o=mfBotLine(i);mfApply(i,o);vbMsg({k:'b',i,t:o.s,tg:o.t});
   if(o.ask!=null&&o.ask!==0&&mfAliveI(o.ask)){vbTalk(o.ask);await vbWait(600);if(!vbAlive())return;vbMsg({k:'b',i:o.ask,t:mfAnswer(o.ask,i)})}
   if(o.ask===0)VB.askedMe=i;
  }
  vbTalk(null);
+ VB.ready=new Set();VB.meReady=false;VB.voting=false;
  mfMyTurn();
+ mfDiscussClock();
+}
+/** ساعة النقاش: وقت محدود، والآليون يجهزون تدريجيًّا؛ التصويت يبدأ حين يجهز الجميع أو ينتهي الوقت */
+function mfDiscussClock(){
+ const sec={easy:120,mid:90,hard:75}[VB.diff]||90,my=VB;
+ vbTurn('sound','النقاش '+VB.day,'اتّهم أو اسأل أو دافع بكلماتك، وإذا انتهيت اضغط «جاهز» — التصويت يبدأ باتفاق الجميع أو بانتهاء الوقت',sec);
+ mfReadyCheck();
+ vbTimer(sec,()=>{if(VB===my&&!VB.over&&!VB.voting)mfVote()});
+ if(!VB.fast)VB.alive.filter(i=>i!==0).forEach(i=>{const at=sec*1000*(.45+Math.random()*.4);
+  setTimeout(()=>{if(VB!==my||VB.voting||VB.over||!mfAliveI(i))return;VB.ready.add(i);vbSeats();mfReadyCheck()},at)});
+}
+/** «جاهز»: تعلن أنك انتهيت؛ من لم يجهز من الآليين يجهز خلال ثوانٍ، وحين يجهز الجميع يبدأ التصويت */
+function mfReady(){
+ if(!VB||VB.over||VB.voting)return;
+ VB.meReady=!VB.meReady;vbSeats();
+ const b=document.getElementById('vbReady');if(b){b.classList.toggle('on',VB.meReady);b.innerHTML=ico('check',14)+' '+(VB.meReady?'بانتظار الباقين':'جاهز')}
+ if(VB.meReady){const my=VB;VB.alive.filter(i=>i!==0&&!VB.ready.has(i)).forEach(i=>{const d=VB.fast?0:1500+Math.random()*5500;
+  const go=()=>{if(VB!==my||VB.voting||VB.over)return;VB.ready.add(i);vbSeats();mfReadyCheck()};if(d)setTimeout(go,d);else go()})}
+ mfReadyCheck();
+}
+function mfReadyCheck(){
+ if(!VB||VB.over||VB.voting)return;
+ const total=VB.alive.length,r=VB.ready.size+(VB.meReady?1:0);
+ const row=document.getElementById('vbReadyRow');if(row){row.hidden=false;row.innerHTML=`${ico('group',12)} جاهزون ${r}/${total}${!VB.meReady&&r>=total-1&&total>1?' — الجميع بانتظارك':''}`}
+ if(r>=total)mfVote();
 }
 function mfMyTurn(){
- vbMsg({k:'n',t:VB.askedMe!=null&&VB.msgs===0?`${VB.names[VB.askedMe]} يسألك. أجب أو اتّهم أو اسأل أنت — بكلماتك.`:'دورك. اكتب ما تريد: اتّهم أحدًا، دافع عن نفسك، اسأل لاعبًا، أو أعلن دورك.'});
- vbAct(vbInput('اكتب هنا… مثل: أشك في سلطان / يا نورة وين كنت؟','mfSend',
-  `<button class="btn g" style="margin-top:8px" onclick="mfVote()">${ico('scale',13)} انتقل إلى التصويت</button>`));
- const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+ if(VB.voting)return;
+ if(VB.msgs===0)vbMsg({k:'n',t:VB.askedMe!=null?`${VB.names[VB.askedMe]} يسألك. أجب أو اتّهم أو اسأل أنت — بكلماتك.`:'دورك. اكتب ما تريد: اتّهم أحدًا، دافع عن نفسك، اسأل لاعبًا، أو أعلن دورك — وإذا انتهيت اضغط «جاهز».'});
+ vbBar({ph:'اكتب هنا… مثل: أشك في سلطان / يا نورة وين كنت؟',fn:'mfSend',ready:true});
 }
 /** يفهم ما كتبتَ: من ذكرت، وهل تتّهم أم تدافع أم تسأل أم تعلن دورًا أم تعترف أنك مافيا */
 function mfParse(text){
@@ -23523,25 +23826,43 @@ function mfParse(text){
  return {m,intent,claim,confess};
 }
 async function mfSend(){
- const text=vbRead();if(!text)return;
- if(VB.msgs>=3){toast('انتقل إلى التصويت — قلت ما يكفي اليوم');return}
+ const text=vbRead();if(!text||VB.voting||VB.over)return;
+ if(VB.msgs>=6){toast('قلت ما يكفي اليوم — اضغط «جاهز»');return}
  VB.msgs++;VB.askedMe=null;
  vbMsg({k:'me',i:0,t:text});
- vbAct('');
+ vbBar({ph:'…',fn:'mfSend',ready:true,disabled:true});
  const p=mfParse(text);
  let handled=false;
  if(AI.enabled()){handled=await mfAiReply(p,text);if(!vbAlive())return}   // النموذج يقرأ المقصد ويردّ؛ وإن تعذّر فالعقل المحلي
  if(!handled){mfApplyHuman(p);await mfReplyLocal(p,text)}
- if(!vbAlive())return;
- if(VB.msgs>=3){vbMsg({k:'n',t:'انتهى وقت الكلام لليوم.'});vbAct(`<button class="rbtn" onclick="mfVote()"><span>${ico('scale',14)} إلى التصويت</span></button>`)}
- else mfMyTurn();
+ if(!vbAlive()||VB.voting)return;
+ mfMyTurn();
+}
+/** سألتَ عن لاعب خارج اللعبة: من صوّت عليه، من قتله، ما دوره — يجيب حيّ من السجلّ، لا «لم يعد بيننا» */
+async function mfDeadTalk(x,text){
+ const t=arNorm(text),nm=i=>VB.names[i],me=VB.names[0],alive=VB.alive.filter(i=>i!==0);if(!alive.length)return;
+ const say=async(i,s)=>{vbTalk(i);await vbWait(700);if(!vbAlive())return;vbMsg({k:'b',i,t:s});vbTalk(null)};
+ const votes=(VB.voteLog||[]).filter(v=>v.t===x),day=votes.length?votes[votes.length-1].day:null,vs=votes.filter(v=>v.day===day).map(v=>v.by);
+ if(/من صوت|مين صوت|من اللي صوت|من الذي صوت|صوتوا عل|صوت عل/.test(t)){
+  const sp=vs.find(i=>alive.includes(i))||vbRnd(alive);
+  return say(sp,vs.length?`صوّت على ${nm(x)} في اليوم ${day}: ${vs.map(i=>i===sp?'أنا':i===0?'أنت يا '+me:nm(i)).join('، ')}.${vs.includes(sp)?' وكان عندي سببي.':' راجع السجلّ إن شئت.'}`:`ما صوّت أحد على ${nm(x)}${x===VB.lastKilled?'… المافيا قتلته ليلًا':''}.`);
+ }
+ if(/من قتل|مين قتل|ليش مات|ليش قتل|ليش انقتل|من اغتال|من ذبح/.test(t)){
+  const last=(VB.accs||[]).filter(a=>a.by===x).slice(-1)[0];
+  return say(vbRnd(alive),`${nm(x)} قتلته المافيا ليلًا، ولا يعرف الفاعل إلا هم.${last&&mfAliveI(last.t)?` لكن آخر من اتّهمه ${nm(x)} قبل موته كان ${last.t===0?'أنت يا '+me:nm(last.t)}… فكّر في هذا.`:''}`);
+ }
+ if(/وش (كان|دور)|ايش (كان|دور)|من كان|شنو (كان|دور)|ما هو دور|كان مافيا|كان بريء|كان شعب|كان محقق|كان طبيب/.test(t)){
+  const known=VB.lastLynched===x||(VB.hist||[]).some(h=>h.includes('أُعدم '+nm(x)));
+  return say(vbRnd(alive),known?`${nm(x)} أُعدم وكُشف دوره للجميع: كان ${mfRole(x)}.`:`${nm(x)} قُتل ليلًا ولم يُكشف دوره… لا نعرف إن كان بريئًا.`);
+ }
+ return say(vbRnd(alive),vbRnd([`${nm(x)} خارج اللعبة يا ${me}. ركّز على الأحياء: من تشك فيه الآن؟`,`${nm(x)} ما عاد يقدر يردّ… اسألنا نحن، وقل رأيك فيمن بقي.`]));
 }
 /** ردود الآليين المحلية على كلامك — المذكور يردّ أولًا بدليله، ثم من يوافق أو يعارض بحسب شكّه ومصداقيتك */
 async function mfReplyLocal(p,text){
  const me=VB.names[0],alive=VB.alive.filter(i=>i!==0),d=VB.diff,nm=x=>VB.names[x];
  const say=async(i,s)=>{vbTalk(i);await vbWait(700);if(!vbAlive())return;vbMsg({k:'b',i,t:s});vbTalk(null)};
  const target=p.m.find(i=>mfAliveI(i));
- if(p.m.length&&target==null){vbMsg({k:'n',t:`${nm(p.m[0])} لم يعد بيننا… لن يجيب أحد عنه.`});return}
+ if(p.m.length&&target==null)return mfDeadTalk(p.m[0],text);
  if(p.intent==='confess'){   // اعترفتَ أنك مافيا: المدينة تصدّقك وتعلن أنها ستصوّت عليك، وشريكك يتبرّأ منك
   const town=alive.filter(i=>mfRole(i)!=='مافيا'),mafs=alive.filter(i=>mfRole(i)==='مافيا');
   if(town.length)await say(vbRnd(town),vbRnd([`اعترفت بنفسك يا ${me}؟ سمعناها كلّنا — صوتي عليك اليوم.`,`إن كان صدقًا فقد وفّرت علينا ليالي، وإن كان مزاحًا فقد أضعت يوم المدينة. صوتي عليك يا ${me}.`]));
@@ -23591,11 +23912,14 @@ async function mfReplyLocal(p,text){
 }
 /* ── التصويت ── */
 function mfVote(){
- if(VB.over)return;
- vbPhase('scale','التصويت '+VB.day,'الأغلبية تُعدم — والتعادل يُنجي');
+ if(VB.over||VB.voting)return;
+ VB.voting=true;vbTimerStop();VB.ready=new Set();VB.meReady=false;vbSeats();
+ vbPhase('scale','التصويت '+VB.day,'');
+ vbTurn('scale','التصويت '+VB.day,'الأغلبية تُعدم — والتعادل يُنجي. اختر قبل انتهاء الوقت وإلا امتنعت',30);
  vbMsg({k:'n',t:'على من تصوّت للإعدام؟'});
  vbAct(`<div class="vbGrid">${mfOthers(0).map(i=>vbChip(i,` onclick="mfTally(${i})"`)).join('')}</div>
  <button class="btn g" style="margin-top:8px;color:var(--tx2)" onclick="mfTally(null)">أمتنع</button>`);
+ vbTimer(30,()=>{if(VB.voting&&!VB.tallying)mfTally(null)});
 }
 function mfBotVote(i){
  if(!VB.ev)mfInitBrain();
@@ -23639,9 +23963,10 @@ function mfAfterLynch(who,votes){
 }
 function mfCount(votes){let best=null,bn=0,tie=false;Object.entries(votes).forEach(([k,v])=>{if(v>bn){bn=v;best=+k;tie=false}else if(v===bn)tie=true});return tie?null:best}
 async function mfTally(my){
+ if(VB.tallying)return;VB.tallying=true;VB.voting=true;vbTimerStop();vbTurnHide();
  vbAct('');
  const votes={},byWho={};VB.tallyNow={};
- const add=(who,t)=>{vbMsg({k:'v',i:who,t});byWho[who]=t;if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}};
+ const add=(who,t)=>{vbMsg({k:'v',i:who,t});byWho[who]=t;(VB.voteLog||(VB.voteLog=[])).push({day:VB.day,by:who,t});if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}};
  add(0,my);
  if(!VB.ev)mfInitBrain();
  if(VB.mySaid!=null&&my!=null&&my!==VB.mySaid&&mfAliveI(VB.mySaid))mfEvAdd(0,'flip',MF_EV.flip(VB.names[VB.mySaid],VB.names[my]),1.2);
@@ -23654,13 +23979,15 @@ async function mfTally(my){
  if(who==null){vbMsg({k:'n',icon:'scale',big:true,t:'لم تتفق الأغلبية على متهم — لا إعدام اليوم.'});VB.lastLynched=null;mfHist(`اليوم ${VB.day}: لا إعدام (لا أغلبية)`)}
  else{
   VB.alive=VB.alive.filter(i=>i!==who);VB.lastLynched=who;vbSeats();mfHist(`اليوم ${VB.day}: أُعدم ${VB.names[who]} وتبيّن أنه ${mfRole(who)}`);
-  vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} بأغلبية ${votes[who]} — وتبيّن أنه كان ${mfRole(who)}.`});
+  vbMsg({k:'ban',icon:MAF_ROLE[mfRole(who)].ic,i:who,t:`أُعدم ${VB.names[who]} بأغلبية ${votes[who]}`,d:`وتبيّن أنه كان ${mfRole(who)}`});
   mfAfterLynch(who,Object.fromEntries(Object.entries(byWho).filter(([k,v])=>v===who)));
   if(mfWinCheck())return;
   if(who===0){VB.dead=true;await vbWait(600);vbMsg({k:'n',t:'أعدمتك المدينة. تتابع الآن ما يجري من بعيد.'});return mfSpectate()}
  }
- VB.day++;
+ VB.day++;VB.voting=false;VB.tallying=false;
+ vbTurn('timer','انتهى اليوم','الليلة تبدأ بانتهاء الوقت أو بضغطة الزرّ',15);
  vbAct(`<button class="rbtn" onclick="mfNight()"><span>${ico('timer',14)} الليلة ${VB.day} — نامت المدينة</span></button>`);
+ vbTimer(15,()=>{if(!VB.over&&!VB.night)mfNight()});
 }
 function mfWinCheck(){
  const m=VB.alive.filter(i=>mfRole(i)==='مافيا').length,o=VB.alive.length-m;
@@ -23670,6 +23997,7 @@ function mfWinCheck(){
 }
 /** بعد خروجك: الليالي والأيام تمضي أمامك خطوة خطوة */
 async function mfSpectate(){
+ VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();
  vbAct(`<button class="btn g" onclick="VB.skip=1">${ico('next',13)} تخطّي إلى النهاية</button>`);
  let guard=0,first=true;const my=VB;   // إن بدأت جولة جديدة أثناء المتابعة تتوقّف هذه الحلقة
  while(guard++<30&&!VB.over&&VB===my){
@@ -23696,7 +24024,7 @@ async function mfSpectate(){
   vbPhase('scale','التصويت '+VB.day,'');
   const votes={},byWho={};VB.tallyNow={};
   const aiV=AI.enabled()&&!VB.skip?await mfAiVotes(VB.alive):null;if(!vbAlive()||VB!==my)return;
-  for(const i of VB.alive){await w(350);if(!vbAlive())return;const t=aiV&&aiV[i]!=null?aiV[i]:mfBotVote(i);vbMsg({k:'v',i,t});byWho[i]=t;if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}}
+  for(const i of VB.alive){await w(350);if(!vbAlive())return;const t=aiV&&aiV[i]!=null?aiV[i]:mfBotVote(i);vbMsg({k:'v',i,t});byWho[i]=t;(VB.voteLog||(VB.voteLog=[])).push({day:VB.day,by:i,t});if(t!=null){votes[t]=(votes[t]||0)+1;VB.tallyNow[t]=votes[t]}}
   const who=mfCount(votes);mfVoteHist(byWho);
   if(who!=null){VB.alive=VB.alive.filter(i=>i!==who);vbSeats();vbMsg({k:'n',icon:MAF_ROLE[mfRole(who)].ic,big:true,t:`أُعدم ${VB.names[who]} — كان ${mfRole(who)}.`});mfHist(`اليوم ${VB.day}: أُعدم ${VB.names[who]} وتبيّن أنه ${mfRole(who)}`);mfAfterLynch(who,Object.fromEntries(Object.entries(byWho).filter(([k,v])=>v===who)))}
   else{vbMsg({k:'n',icon:'scale',t:'لا إعدام اليوم.'});mfHist(`اليوم ${VB.day}: لا إعدام`)}
@@ -23706,7 +24034,7 @@ async function mfSpectate(){
  if(!VB.over)mfEnd('city');
 }
 function mfEnd(win){
- VB.over=true;mfSetNight(false);VB.talking=null;vbSeats();
+ VB.over=true;VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();mfSetNight(false);VB.talking=null;vbSeats();
  const mine=(mfRole(0)==='مافيا'?'mafia':'city')===win;
  vbDone();if(mine&&window.FX)FX.win();
  vbPhase('trophy','النهاية','');
@@ -23732,17 +24060,18 @@ function brStart(diff){
  const ws=PARTY_WORDS[cat],word=ws[Math.floor(Math.random()*ws.length)];
  VB={g:'barra',diff:diff||'mid',n,cat,word,names:vbNames(n),spy:Math.floor(Math.random()*n),feed:[],
   usedClue:new Set(),usedVague:new Set(),round:0,mine:[],vague:Array(n).fill(0),spoke:Array(n).fill(0),
-  asked:0,cast:[],accused:null,over:false,tm:null,fast:!!window.__vbFast,
-  seat:i=>({talk:VB.talking===i,c:i===VB.spy&&(VB.over||i===0)?'#E24B4A':'#E8B23A',
+  asked:0,cast:[],accused:null,over:false,tm:null,fast:!!window.__vbFast,notes:{},voting:false,
+  seat:i=>({talk:VB.talking===i,c:i===VB.spy&&(VB.over||i===0)?'#E24B4A':'#E8B23A',me:VB.spy===0?'برا السالفة':'أعرفها',pill:VB.spoke[i]?'لمّح':null,pc:'#9EC9FF',
    badge:i===0?(VB.spy===0?ico('door',12,'red'):ico('lock',12)):(VB.over&&i===VB.spy?ico('door',12,'red'):''),
    mark:VB.over&&i===VB.spy})};
- vbScene('barra','برا السالفة — ضد الكمبيوتر');
+ vbScene('barra','برا السالفة','تلميح واحد… واكتشف الكذّاب');
  vbAiIntro();
  const spy=VB.spy===0;
  vbMsg({k:'card',t:`<div class="mfDisc" style="--rc:${spy?'#E24B4A':'#E8B23A'};--rcs:${spy?'rgba(226,75,74,.3)':'rgba(232,178,58,.3)'}">${spy?ico('door',46,'red'):ico('lock',46)}</div>
   <div class="mtl" style="font-size:19px;margin-top:8px">${spy?'أنت برا السالفة!':esc(VB.word)}</div>
   <div class="vbCardD">${spy?'لا تعرف الكلمة. الفئة: <b>'+esc(VB.cat)+'</b>. استمع لتلميحاتهم، لمّح بغموض يشبه كلامهم، ولا تنكشف.':'الفئة: <b>'+esc(VB.cat)+'</b>. لمّح للكلمة بكلامك دون أن تقولها — التلميح الواضح يُطمئن المجلس، والغامض يجعلهم يشكّون فيك.'}</div>`});
  vbMsg({k:'n',icon:'group',t:`في المجلس ${VB.n}: ${VB.names.map(esc).join(' · ')}. جولتان من التلميحات بالدور، ثم سؤال وجواب، ثم تصويت على من لا يعرف الكلمة.`});
+ vbTurn('sound','قبل البداية','اقرأ السالفة (أو أنك برا السالفة) ثم ابدأ الجولة الأولى');
  vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('sound',14)} ابدأ الجولة الأولى</span></button>`);
 }
 const brSpyMe=()=>VB.spy===0;
@@ -23858,7 +24187,7 @@ function brSpecificity(text){
 function brSaidWord(text){const t=arNorm(text),w=arNorm(VB.word);return w&&w.split(/\s+/).every(p=>p.length>1&&t.includes(p))}
 async function brRound(){
  if(VB.over)return;
- VB.round++;
+ VB.round++;vbStep(1);vbTimerStop();
  vbPhase('sound','الجولة '+VB.round,'تلميح واحد لكل واحد');
  const order=VB.names.map((_,i)=>i).filter(i=>i!==0);
  const mySlot=VB.round===1?Math.floor(order.length/2):order.length;   // في الأولى تتكلّم في الوسط، وفي الثانية آخر واحد
@@ -23872,10 +24201,12 @@ async function brNext(){
   if(i===0){
    vbTalk(0);
    vbMsg({k:'n',t:brSpyMe()?'دورك. اكتب تلميحًا يبدو كأنك تعرف الكلمة — بلا تحديد.':'دورك. اكتب تلميحًا عن «'+VB.word+'» دون أن تذكرها.'});
-   vbAct(vbInput('اكتب تلميحك بكلماتك…','brSend'));
-   const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+   vbTurn('sound',`دورك — الجولة ${VB.round}`,'أعطِ تلميحك الآن',45);
+   vbBar({ph:'اكتب تلميحك بكلماتك…',fn:'brSend',clue:true});
+   vbTimer(45,()=>brSkipClue());
    return;
   }
+  vbTurn('sound',`دور ${VB.names[i]}`,'يلمّح الآن…');
   if(AI.enabled()&&!(VB.aiClues&&(i in VB.aiClues))){   // دفعة واحدة: كل الآليين المتتالين حتى دور البشري
    const batch=[i];for(let k=VB.seqAt;k<VB.seq.length&&VB.seq[k]!==0;k++)batch.push(VB.seq[k]);
    VB.aiClues=await brAiClues(batch);if(!vbAlive())return;
@@ -23888,8 +24219,14 @@ async function brNext(){
  if(VB.round<2){vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('next',14)} الجولة الثانية</span></button>`);return}
  brAsk();
 }
+/** انتهى وقتك بلا تلميح: يُحسب غموضًا ويكمل الدور */
+function brSkipClue(){
+ if(!VB||VB.over)return;vbTimerStop();
+ vbMsg({k:'n',t:'انتهى وقتك بلا تلميح — المجلس لاحظ.'});VB.vague[0]+=1.5;VB.mine.push('(لم يلمّح)');
+ vbTalk(null);vbAct('');brNext();
+}
 async function brSend(){
- const text=vbRead();if(!text)return;
+ const text=vbRead();if(!text)return;vbTimerStop();
  if(!brSpyMe()&&brSaidWord(text)){
   vbMsg({k:'me',i:0,t:text});vbAct('');
   await vbWait(500);vbMsg({k:'n',icon:'door',big:true,t:'قلتَ الكلمة نفسها! انكشفت أمام برا السالفة.'});
@@ -23903,6 +24240,7 @@ async function brSend(){
 }
 /** سؤال من المجلس لك — وسؤال منك لأحدهم */
 async function brAsk(){
+ vbStep(2);vbTimerStop();
  vbPhase('search','سؤال وجواب','المجلس يستجوب');
  const asker=vbRnd(VB.names.map((_,i)=>i).filter(i=>i!==0));
  let q=null;
@@ -23916,21 +24254,26 @@ async function brAsk(){
  if(!q)q=vbRnd(BARRA_ASK[VB.cat]||['قل لنا أكثر؟']);
  VB.askQ=q;
  vbTalk(asker);vbMsg({k:'b',i:asker,q:1,t:`يا ${VB.names[0]}، ${q}`});
- vbAct(vbInput('جوابك…','brAnswer'));
- const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+ vbTurn('search','سؤال المجلس','أجب قبل انتهاء الوقت',45);
+ vbBar({ph:'جوابك…',fn:'brAnswer'});
+ vbTimer(45,()=>{const el=document.getElementById('vbTxt');if(el)el.value='…';brAnswer()});
 }
 async function brAnswer(){
- const text=vbRead();if(!text)return;
+ const text=vbRead();if(!text)return;vbTimerStop();
  if(!brSpyMe()&&brSaidWord(text)){vbMsg({k:'me',i:0,t:text});vbAct('');await vbWait(500);vbMsg({k:'n',icon:'door',big:true,t:'قلتَ الكلمة نفسها! انكشفت أمام برا السالفة.'});return brFinal('guessed')}
  vbMsg({k:'me',i:0,t:text});VB.mine.push(text);
  vbTalk(null);vbAct('');
  await brHumanSaid(text,'answer');if(!vbAlive())return;
  vbMsg({k:'n',t:'الآن اسأل أنت أحدهم — اكتب اسمه وسؤالك. أو انتقل إلى التصويت.'});
- vbAct(vbInput('مثل: يا سلطان، وين يكون؟','brMyAsk',`<button class="btn g" style="margin-top:8px" onclick="brVote()">${ico('scale',13)} انتقل إلى التصويت</button>`));
- const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();
+ brMyAskBar();
+}
+function brMyAskBar(){
+ vbTurn('search','اسأل أحدهم','اكتب اسمه وسؤالك — أو انتقل إلى التصويت. بانتهاء الوقت يبدأ التصويت',30);
+ vbBar({ph:'مثل: يا سلطان، وين يكون؟',fn:'brMyAsk',primary:`<button class="vbGo" onclick="brVote()">${ico('scale',14)} التصويت</button>`});
+ vbTimer(30,()=>brVote());
 }
 async function brMyAsk(){
- const text=vbRead();if(!text)return;
+ const text=vbRead();if(!text)return;vbTimerStop();
  const m=vbMentions(text);
  vbMsg({k:'me',i:0,q:1,t:text});
  const i=m.length?m[0]:vbRnd(VB.names.map((_,x)=>x).filter(x=>x!==0));
@@ -23949,14 +24292,16 @@ async function brMyAsk(){
  else if(ans==null){const all=BARRA_CLUES[VB.word]||[];const bank=all.filter(c=>!VB.usedClue.has(c));const c=bank.length?vbRnd(bank):vbRnd(all.length?all:['قلت اللي عندي']);VB.usedClue.add(c);ans=vbRnd(['جوابي: ','بكل بساطة: ',''])+c}
  vbMsg({k:'b',i,t:ans});vbTalk(null);
  VB.asked++;
- if(VB.asked<2){vbAct(vbInput('سؤال آخر لأحدهم…','brMyAsk',`<button class="btn g" style="margin-top:8px" onclick="brVote()">${ico('scale',13)} انتقل إلى التصويت</button>`))}
- else{vbAct(`<button class="rbtn" onclick="brVote()"><span>${ico('scale',14)} إلى التصويت</span></button>`)}
+ if(VB.asked<2)brMyAskBar();
+ else{vbTurn('scale','انتهت الأسئلة','التصويت يبدأ الآن',8);vbAct(`<button class="rbtn" onclick="brVote()"><span>${ico('scale',14)} إلى التصويت</span></button>`);vbTimer(8,()=>brVote())}
 }
 function brVote(){
- if(VB.over)return;
- vbPhase('scale','التصويت','من برا السالفة؟');
+ if(VB.over||VB.voting)return;VB.voting=true;vbStep(3);vbTimerStop();
+ vbPhase('scale','التصويت','');
+ vbTurn('scale','التصويت','من الذي لا يعرف الكلمة؟ اختر قبل انتهاء الوقت وإلا امتنعت',30);
  vbMsg({k:'n',t:'صوّت: من الذي لا يعرف الكلمة؟'});
  vbAct(`<div class="vbGrid">${VB.names.map((_,i)=>i===0?'':vbChip(i,` onclick="brTally(${i})"`)).join('')}</div>`);
+ vbTimer(30,()=>brTally(null));
 }
 /** غموض كل متكلّم كما يراه المجلس: تلميحاته لا تشبه بنك الكلمة ولا كلام الآخرين */
 function brVagueOf(j){
@@ -23985,8 +24330,9 @@ function brSpyGuess(){
  return scored[0][0];
 }
 async function brTally(my){
+ if(VB.tallying)return;VB.tallying=true;vbTimerStop();vbTurnHide();
  vbAct('');
- const votes={};const add=(who,t)=>{vbMsg({k:'v',i:who,t});votes[t]=(votes[t]||0)+1};
+ const votes={};const add=(who,t)=>{vbMsg({k:'v',i:who,t});if(t!=null)votes[t]=(votes[t]||0)+1};
  add(0,my);
  const aiV=AI.enabled()&&!VB.confessed?await brAiVotes():null;if(!vbAlive())return;
  for(const i of VB.names.map((_,x)=>x).filter(x=>x!==0)){await vbWait(450);if(!vbAlive())return;add(i,aiV&&aiV[i]!=null?aiV[i]:brBotVote(i))}
@@ -23995,19 +24341,19 @@ async function brTally(my){
  if(VB.accused==null){vbMsg({k:'n',icon:'scale',big:true,t:'تعادل — لم يتفق المجلس على أحد.'});return brFinal('escaped')}
  if(VB.accused!==VB.spy){vbMsg({k:'n',icon:'scale',big:true,t:`اتُّهم ${VB.names[VB.accused]}… وهو يعرف الكلمة!`});return brFinal('escaped')}
  vbMsg({k:'n',icon:'door',big:true,t:`أمسك المجلس بـ${VB.names[VB.spy]}${brSpyMe()?' — أنت!':''}. له تخمين واحد.`});
- if(brSpyMe()){vbAct(vbInput('اكتب الكلمة كما تظنّها…','brGuess'));const el=document.getElementById('vbTxt');if(el&&!VB.fast)el.focus();return}
+ if(brSpyMe()){vbTurn('door','تخمينك الأخير','اكتب الكلمة كما تظنّها قبل انتهاء الوقت',30);vbBar({ph:'اكتب الكلمة كما تظنّها…',fn:'brGuess',primary:''});vbTimer(30,()=>{vbMsg({k:'me',i:0,t:'…'});brFinal('caught')});return}
  await vbWait(700);if(!vbAlive())return;
  const g=(AI.enabled()&&VB.diff!=='easy'?await brAiGuess():null)||brSpyGuess(),ok=g===VB.word;if(!vbAlive())return;
  vbMsg({k:'b',i:VB.spy,t:'تخميني: '+g+'!'});
  brFinal(ok?'guessed':'caught');
 }
 function brGuess(){
- const text=vbRead();if(!text)return;
+ const text=vbRead();if(!text)return;vbTimerStop();
  vbMsg({k:'me',i:0,t:'تخميني: '+text});
  brFinal(brSaidWord(text)?'guessed':'caught');
 }
 function brFinal(outcome){
- VB.over=true;VB.talking=null;vbSeats();vbAct('');
+ VB.over=true;VB.voting=false;VB.tallying=false;vbTimerStop();vbTurnHide();vbStep(4);VB.talking=null;vbSeats();vbAct('');
  const spyWon=outcome!=='caught',mine=brSpyMe()?spyWon:!spyWon;
  vbDone();if(mine&&window.FX)FX.win();
  const title=outcome==='caught'?'أُمسك ببرا السالفة!':outcome==='guessed'?'عرف الكلمة — فاز برا السالفة!':'نجا برا السالفة!';
