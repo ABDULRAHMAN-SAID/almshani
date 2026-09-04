@@ -374,11 +374,11 @@ function vb3dMount(kindOrModel){
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
- const camY=2.85+Math.max(0,n-8)*.14,camZ=Rz+2.85+Math.max(0,n-8)*.3;cam.position.set(0,camY,camZ);cam.lookAt(0,.45,-.45);
+ const camY=2.85+Math.max(0,n-8)*.14,camZ=Rz+2.85+Math.max(0,n-8)*.3;cam.position.set(0,camY,camZ);cam.lookAt(0,.45,-.45);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
   const hits=ray.intersectObjects(VB3.chars.filter(c=>c.hit).map(c=>c.hit),false);if(hits.length){const i=hits[0].object.userData.seat;VB3.tapAt=Date.now();VB3.model.tap(i)}});
- VB3.on=true;Object.assign(VB3,{model,kind,renderer,cv,sc,cam,room,chars,spot,n,camY,last:0,t0:performance.now(),lightK:model.night()?0:1,lobby:!!model.lobby,
+ VB3.on=true;Object.assign(VB3,{model,kind,renderer,cv,sc,cam,room,chars,spot,n,camY,camY0:camY,camZ0:camZ,camZ,hfov:62,last:0,t0:performance.now(),lightK:model.night()?0:1,lobby:!!model.lobby,
   rm:!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)});
  vb3dResize();
  if(window.ResizeObserver){VB3.ro=new ResizeObserver(()=>vb3dResize());VB3.ro.observe(st)}
@@ -409,7 +409,11 @@ function vb3dTap(i){if(!VB)return;const st=vbSeatState(i);if(VB.pick&&VB.pick.li
 function vb3dResize(){
  if(!VB3.on)return;const st=document.getElementById(VB3.model.stage);if(!st)return;
  const w=st.clientWidth||360,h=st.clientHeight||300;VB3.w=w;VB3.h=h;
- VB3.renderer.setSize(w,h,false);if(VB3.comp){const dpr=VB3.renderer.getPixelRatio();VB3.comp.setSize(w,h);VB3.comp.setPixelRatio&&VB3.comp.setPixelRatio(dpr)}VB3.cam.aspect=w/h;VB3.cam.updateProjectionMatrix();
+ VB3.renderer.setSize(w,h,false);if(VB3.comp){const dpr=VB3.renderer.getPixelRatio();VB3.comp.setSize(w,h);VB3.comp.setPixelRatio&&VB3.comp.setPixelRatio(dpr)}
+ const asp=w/h;VB3.cam.aspect=asp;
+ const hf=VB3.hfov||62,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
+ VB3.cam.fov=Math.min(74,vf);VB3.cam.updateProjectionMatrix();
+ const back=asp<1?(1-asp)*3.4:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.25;
  VB3.anch=null;vb3dLayout();
 }
 /** موضع رأس كل مقعد على المسرح بالنسبة المئوية (لمواضع عناصر المقاعد والبطاقات الطائرة) */
@@ -477,7 +481,7 @@ function vb3dLoop(now){
  else{VB3.sc.background.set(R.night.bg).lerp((VB3._c||(VB3._c=new T.Color())).set(R.day.bg),k);if(L.warm)L.warm.intensity=mix(10,2)}
  R.glow.material.opacity=mix(.55,.35)+Math.sin(t*3)*.05*calm;
  const sp=VB3.spot;if(talker&&!night){talker.u.head.getWorldPosition(tmp);sp.target.position.lerp(tmp,Math.min(1,dt*6));sp.intensity=lerp(sp.intensity,22,dt*4)}else sp.intensity=lerp(sp.intensity,0,dt*4);
- if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.lookAt(0,.45,-.45)}
+ if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;VB3.cam.lookAt(0,.45,-.45)}
  if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
 }
 function vb3dDispose(){
