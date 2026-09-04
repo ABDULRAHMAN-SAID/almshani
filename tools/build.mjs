@@ -17,7 +17,7 @@ const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TARGET = path.join(ROOT, 'tahaddi', 'index.html');
 
 /** الوحدات المدمَجة — يُضاف إليها مع كل استخراج جديد */
-const MODULES = ['src/progression/rank.js', 'src/network/net.js', 'src/audio/sfx.js', 'src/ui/icons.js', 'src/economy/catalog.js', 'src/economy/billing.js', 'src/navigation/router.js', 'src/games/carrom/physics.js'];
+const MODULES = ['src/progression/rank.js', 'src/network/net.js', 'src/audio/sfx.js', 'src/ui/icons.js', 'src/economy/catalog.js', 'src/economy/billing.js', 'src/navigation/router.js', 'src/games/carrom/physics.js', 'src/vendor/three-global.js', 'src/games/stage3d/stage3d.js'];
 
 const check = process.argv.includes('--check');
 let html = fs.readFileSync(TARGET, 'utf8');
