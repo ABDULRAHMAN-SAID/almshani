@@ -2,6 +2,7 @@
 # يحوّل طبقات المشهد المصوَّرة (tools/render-scenes.cjs) إلى لوحة مرسومة: عمق ميداني (تمويه البعيد)، توهّج للأضواء،
 # نسيج قماشي خفيف وحبيبات، تدرّج لوني (ظلال باردة وأضواء دافئة)، وتعتيم أطراف — ثم يحفظها في art/scenes/<kind>.png
 #   node tools/render-scenes.cjs art/scenes/layers && python3 tools/paint-scenes.py && python3 tools/build-scenes.py
+#   (وبـ --venues في الخطوة الأولى تُرسم مشاهد أماكن اللعب vn-* بطول الشاشة أيضًا)
 import os, sys
 import numpy as np
 from PIL import Image, ImageFilter
@@ -9,7 +10,11 @@ from PIL import Image, ImageFilter
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LAY = os.path.join(ROOT, 'art', 'scenes', 'layers')
 OUT = os.path.join(ROOT, 'art', 'scenes')
-PARAMS = {'mafia': dict(far=3.2, mid=.7, bloom=.75, bsig=22, cool=.07, vig=.5), 'barra': dict(far=1.4, mid=.5, bloom=.6, bsig=26, cool=.02, vig=.42)}
+PARAMS = {'mafia': dict(far=3.2, mid=.7, bloom=.75, bsig=22, cool=.07, vig=.5), 'barra': dict(far=1.4, mid=.5, bloom=.6, bsig=26, cool=.02, vig=.42),
+          # أماكن اللعب بطول الشاشة (vn-*): الجدار البعيد يُموَّه قليلًا والأضواء تتوهّج
+          'vn-carrom': dict(far=1.6, mid=.5, bloom=.65, bsig=30, cool=.02, vig=.4), 'vn-uno': dict(far=1.8, mid=.4, bloom=.6, bsig=30, cool=.03, vig=.4),
+          'vn-atelier': dict(far=1.6, mid=.5, bloom=.6, bsig=28, cool=.03, vig=.42), 'vn-mafia': dict(far=2.8, mid=.7, bloom=.8, bsig=30, cool=.07, vig=.46),
+          'vn-barra': dict(far=1.4, mid=.5, bloom=.65, bsig=32, cool=.02, vig=.4), 'vn-studio': dict(far=2.2, mid=.6, bloom=.85, bsig=34, cool=.05, vig=.44)}
 
 def blur_np(a, sigma):
     im = Image.fromarray((np.clip(a, 0, 1) * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(sigma))

@@ -9,3 +9,6 @@ www/
 android/
 ios/
 art/scenes/layers/
+
+# مشاهد أماكن اللعب المخبوزة تُحفظ في المستودع بصيغة JPG؛ الـPNG الخام ناتج البناء
+art/scenes/vn-*.png
