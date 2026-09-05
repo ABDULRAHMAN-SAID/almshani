@@ -21096,7 +21096,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.62';
+const APP_VER='5.63';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -28499,7 +28499,7 @@ void main() {
    والضغط على الشخصية نفسها يعمل كالضغط على مقعدها. إن غاب WebGL (أو في الاختبارات السريعة) يبقى المشهد المرسوم ثنائيّ الأبعاد. ═══ */
 const VB3={on:false,tex:{}};
 const VB3_FEMALE=new Set(['نورة','أثير','لين','دانة','جود','ليان']);
-const VB3_COL={thobe:['#F6F2E8','#EDE4D0','#E9EAEE','#DDD6C6'],shayla:['#26365F','#1F5B5B','#4B2A5C','#6E1F2E','#2E4A3B'],cushion:['#1F5B3C','#1E2F63','#7A2230','#5A3A14','#2B4C6E']};
+const VB3_COL={thobe:['#F8F5EE','#EFE6D2','#E7E9ED','#DCD4C2','#D8CDB4','#CFD4DA','#E3D9C6','#C9C3B4'],shayla:['#26365F','#1F5B5B','#4B2A5C','#6E1F2E','#2E4A3B'],cushion:['#1F5B3C','#1E2F63','#7A2230','#5A3A14','#2B4C6E']};
 /** هل يُتاح المشهد المجسّم؟ لا في الاختبارات السريعة إلا بطلب صريح (__vb3d) ولا عند تعطيله (__vbNo3d) */
 function vb3dOk(){return typeof THREE!=='undefined'&&!window.__vbNo3d&&!(window.__vbFast&&!window.__vb3d)}
 /** مخزن الأشكال: الشكل نفسه (نوعه ومقاساته) يُبنى مرّة ويُشارَك — كان بناء المجلس يستغرق ثوانيَ ويحجز الشاشة */
@@ -28592,7 +28592,7 @@ function vb3dLook(i,model){
  const me=i===model.me,nm=model.names[i]||'لاعب',av=vb3dAvatarOf(i,model),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
  const id=(k,v)=>((AV[k][v]||AV[k][0]).id);
  return {f,me,host:i===model.host,skin:AV.skin[av.skin]||AV.skin[0],hair:AV.hair[av.hair]||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
-  beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%4],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5]};
+  beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5]};
 }
 function vb3dTexIris(){return vb3dTex('iris',64,64,(g,w,h)=>{g.clearRect(0,0,w,h);const gr=g.createRadialGradient(32,32,2,32,32,30);gr.addColorStop(0,'#0C0A10');gr.addColorStop(.4,'#0C0A10');gr.addColorStop(.45,'#7A4A22');gr.addColorStop(.72,'#3B2314');gr.addColorStop(.95,'#24140A');gr.addColorStop(1,'rgba(36,20,10,0)');
  g.fillStyle=gr;g.beginPath();g.arc(32,32,31,0,7);g.fill();g.strokeStyle='rgba(140,90,40,.45)';g.lineWidth=1;for(let k=0;k<26;k++){const a=k/26*Math.PI*2;g.beginPath();g.moveTo(32+Math.cos(a)*14,32+Math.sin(a)*14);g.lineTo(32+Math.cos(a)*29,32+Math.sin(a)*29);g.stroke()}
@@ -28808,8 +28808,19 @@ function vb3dRoomSquare(sc){
  for(let k=0;k<6;k++){const a=k/6*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.3,.012),brass,Math.cos(a)*.1,.19,Math.sin(a)*.1,{noCast:1}))}sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.6,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.3,1.3,1);glow.position.set(0,.98,0);sc.add(glow);
  vb3dAo(sc,0,.008,0,1.5);   // ظلّ الطاولة على الحجر
+ const pool=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFC078,transparent:true,opacity:.19,blending:T.AdditiveBlending,depthWrite:false}));
+ pool.scale.set(3.4,3.4,1);pool.position.set(0,.03,.15);pool.material.rotation=0;sc.add(pool);   // بركة ضوء الفانوس على الحجر
  const paper=vb3dMat('#E9D8B4',{rough:.9});for(let k=0;k<4;k++)sc.add(vb3dMesh(vb3dG('Box',.16,.006,.24),paper,-.45+k*.09,.765+k*.006,.3,{rot:[0,-.3+k*.15,0],noCast:1}));
- sc.add(vb3dMesh(vb3dG('Cylinder',.05,.04,.09,10),vb3dMat('#F4E6C8',{rough:.5}),.55,.8,.25));
+ const cupM2=vb3dMat('#F4E6C8',{rough:.45});
+ sc.add(vb3dMesh(vb3dG('Cylinder',.05,.04,.09,10),cupM2,.55,.8,.25));
+ // صينية نحاس بفناجين، وطبق تمر، وشمعة صغيرة — الطاولة تُقرأ جلسة لا لوحًا خشبيًّا
+ sc.add(vb3dMesh(vb3dG('Cylinder',.3,.32,.022,28),brass,-.42,.772,-.12,{noCast:1}),
+  vb3dMesh(vb3dG('Torus',.3,.012,8,28),brass,-.42,.782,-.12,{rot:[Math.PI/2,0,0],noCast:1}));
+ [[-.55,-.2],[-.34,-.05],[-.4,-.26]].forEach(([cx,cz])=>sc.add(vb3dMesh(vb3dG('Cylinder',.042,.034,.075,12),cupM2,cx,.82,cz)));
+ sc.add(vb3dMesh(vb3dG('Cylinder',.19,.2,.02,22),cupM2,.5,.772,-.2,{noCast:1}));
+ const dateM2=vb3dMat('#5A2A12',{rough:.6});for(let k=0;k<7;k++)sc.add(vb3dMesh(vb3dG('Sphere',.032,10,8),dateM2,.5+(k%3-1)*.062,.8,-.2+(Math.floor(k/3)-.5)*.062,{noCast:1}));
+ sc.add(vb3dMesh(vb3dG('Cylinder',.026,.028,.09,10),vb3dMat('#F2E8D2',{rough:.6}),.2,.805,.36),
+  vb3dMesh(vb3dG('Sphere',.022,10,8),vb3dMat('#FFE2A0',{emis:'#FFB84A',ei:2.4}),.2,.862,.36,{noCast:1}));
  // حبال أضواء معلّقة بين المصابيح
  const bulbM=vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:2.2,rough:.4}),wireM=vb3dMat('#2A2F48',{rough:.9});
  [[-3.4,1.4,3.4,1.4],[-3.4,1.4,-4.6,-4.2],[3.4,1.4,4.8,-4]].forEach(([x1,z1,x2,z2])=>{
@@ -28867,7 +28878,9 @@ function vb3dMount(kindOrModel){
   vb3dAo(seat,0,.006,.05,.62);   // ظلّ التماس تحت الجالس
   const ringM=new T.MeshBasicMaterial({color:0xE8B23A,transparent:true,opacity:0,depthWrite:false});const ring=vb3dMesh(vb3dG('Ring',.5,.62,28),ringM,0,.012,0,{rot:[-Math.PI/2,0,0],noCast:1});seat.add(ring);
   let ch=null,hit=null;
-  if(!empty){ch=vb3dChar(vb3dLook(i,model),kind==='mafia'?'chair':'floor');ch.position.y=seatH;seat.add(ch);
+  if(!empty){ch=vb3dChar(vb3dLook(i,model),kind==='mafia'?'chair':'floor');ch.position.y=seatH;
+   const hv=1+(((i*2654435761)>>>0)%100)/100*.09-.045;ch.scale.set(1+(1-hv)*.35,hv,1+(1-hv)*.35);   // 5.63: قامات متفاوتة قليلًا فلا يبدون نسخة واحدة
+   seat.add(ch);
    hit=vb3dMesh(vb3dG('Capsule',.42,.9,2,6),new T.MeshBasicMaterial({visible:false}),0,seatH+.55,.05,{noCast:1});hit.userData.seat=i;seat.add(hit)}
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
  }
