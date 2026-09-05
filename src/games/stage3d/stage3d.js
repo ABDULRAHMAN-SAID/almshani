@@ -280,9 +280,9 @@ function vb3dRoomMajlis(sc){
  Object.assign(L.key.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:.5,far:14});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
  L.rim=new T.DirectionalLight(0xFFCE96,1.5);L.rim.position.set(-2.2,3.4,-4.2);sc.add(L.rim);   // ضوء حافّة من الخلف يرسم حدود الرؤوس والأكتاف
  L.lamp=new T.PointLight(0xFFC98A,26,11,1.7);L.lamp.position.set(0,2.05,0);sc.add(L.lamp);L.sconce=[sc1,sc2];
- L.fill=new T.DirectionalLight(0xFFE2C4,.45);L.fill.position.set(0,3,7);sc.add(L.fill);
+ L.fill=new T.DirectionalLight(0xFFE2C4,.8);L.fill.position.set(0,2.4,4.6);sc.add(L.fill);
  L.warm=new T.PointLight(0xFFB070,10,10,1.8);L.warm.position.set(0,1.6,-3.2);sc.add(L.warm);
- return {L,glow,day:{hemi:.95,key:2.0,lamp:24,rim:1.5,sconce:7,bg:'#3A2A1C'},night:{hemi:.3,key:.5,lamp:14,rim:.55,sconce:3,bg:'#1A1512'}};
+ return {L,glow,day:{hemi:.95,key:2.0,lamp:17,rim:1.5,sconce:6,bg:'#3A2A1C'},night:{hemi:.42,key:.5,lamp:10,rim:.6,sconce:3,bg:'#1A1512'}};
 }
 function vb3dRoomSquare(sc){
  const T=THREE,wood=vb3dTexWood();
@@ -332,8 +332,8 @@ function vb3dRoomSquare(sc){
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
  L.rim=new T.DirectionalLight(0x9FB4FF,1.2);L.rim.position.set(2.4,3.2,-5);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
  L.lamp=new T.PointLight(0xFFB760,34,10,1.7);L.lamp.position.set(0,1.25,0);sc.add(L.lamp);L.posts=[p1,p2];
- L.fill=new T.DirectionalLight(0xFFD2A8,.7);L.fill.position.set(0,2.6,6);sc.add(L.fill);   // تعبئة دافئة من جهة الكاميرا تُظهر الوجوه ليلًا
- return {L,glow,sky,stars,day:{hemi:.75,key:1.4,lamp:46,post:22,rim:1.05,skyc:'#FFFFFF',starO:.7},night:{hemi:.3,key:.8,lamp:22,post:11,rim:.7,skyc:'#5A6090',starO:1}};
+ L.fill=new T.DirectionalLight(0xFFD8B4,1.05);L.fill.position.set(0,2.2,4.4);sc.add(L.fill);   // 5.60: الكاميرا صارت في المقعد — تعبئة أقوى وأقرب تُظهر الوجوه بلا وهج
+ return {L,glow,sky,stars,day:{hemi:.8,key:1.4,lamp:30,post:20,rim:1.05,skyc:'#FFFFFF',starO:.7},night:{hemi:.42,key:.8,lamp:15,post:10,rim:.75,skyc:'#5A6090',starO:1}};
 }
 /* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
 function vb3dStageModel(kind){const my=VB;return {kind,names:VB.names,me:0,empty:new Set(),host:-1,stage:'vbStage',seats:'#vbSeats .vbSeat',scene:'.vbScene',
@@ -376,8 +376,10 @@ function vb3dMount(kindOrModel){
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
  // 5.59: أنت تجلس في مكانك وترى المجلس بعينيك — الكاميرا في مقعدك، وشخصيتك لا تحجب الطاولة
  if(chars[0]&&chars[0].ch){chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false}
- const camY=1.56+Math.max(0,n-8)*.05,camZ=Rz+.92+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,.88,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
- VB3.aim=new T.Vector3(0,.88,-.5);VB3.aimT=new T.Vector3(0,.88,-.5);
+ // ارتفاع النظر يتبع الجلسة: كراسي المدينة أعلى من فرشة المجلس، فتقع الوجوه في مستوى النظر في الحالتين
+ const eye=kind==='mafia'?1.56:1.18,aimY=kind==='mafia'?.88:.66;
+ const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?.92:1.15)+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ VB3.aim=new T.Vector3(0,aimY,-.5);VB3.aimT=new T.Vector3(0,aimY,-.5);VB3.aimY=aimY;
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
   const hits=ray.intersectObjects(VB3.chars.filter(c=>c.hit).map(c=>c.hit),false);if(hits.length){const i=hits[0].object.userData.seat;VB3.tapAt=Date.now();VB3.model.tap(i)}});
@@ -415,11 +417,12 @@ function vb3dResize(){
  VB3.renderer.setSize(w,h,false);if(VB3.comp){const dpr=VB3.renderer.getPixelRatio();VB3.comp.setSize(w,h);VB3.comp.setPixelRatio&&VB3.comp.setPixelRatio(dpr)}
  const asp=w/h;VB3.cam.aspect=asp;
  // الدردشة تحتلّ جانب الشاشة: نُزيح مركز الرؤية إلى الجهة الأخرى فيبقى الجالسون مكشوفين لا خلف اللوحة
- const fw=(()=>{const p=document.querySelector('.vbFeedW');if(!p||!p.offsetWidth)return 0;const r=p.getBoundingClientRect(),s2=st.getBoundingClientRect();return r.bottom>s2.top+s2.height*.35?p.offsetWidth:0})();
- if(fw>24)VB3.cam.setViewOffset(w,h,-Math.round(fw*.16),0,w,h);else VB3.cam.clearViewOffset();   // 5.58: الدردشة في الركن السفلي فقط — إزاحة خفيفة تكفي ولا تُخرج المقاعد الطرفية
+ VB3.cam.clearViewOffset();   // 5.60: الدردشة شريط تحت المشهد لا فوقه — لا حاجة لإزاحة الرؤية
  const hf=VB3.hfov||62,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
  VB3.cam.fov=Math.min(74,vf);VB3.cam.updateProjectionMatrix();
- const back=asp<1?(1-asp)*2.0:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.15;   // 5.58: الشاشة صارت طويلة فلا حاجة للتراجع الكبير — الجالسون يملأون الإطار
+ // إطار المشهد: العمود الطويل يحتاج تراجعًا قليلًا، والشريط العريض القصير يحتاج تراجعًا أكبر كي تدخل الحلقة كاملة
+ const back=asp<1?(1-asp)*2.0:(asp>1.15?(asp-1.15)*2.6:0);
+ VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.22;
  VB3.anch=null;vb3dLayout();
 }
 /** موضع رأس كل مقعد على المسرح بالنسبة المئوية (لمواضع عناصر المقاعد والبطاقات الطائرة) */
@@ -435,7 +438,7 @@ function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
  const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
  // ما يعلو المشهد وحده عائق: لوحة الدردشة، بطاقة الدور المكشوفة، ولوحة الملاحظات — والباقي صار أشرطة فوق المشهد لا عليه
- document.querySelectorAll('.vbFeedW,.vbBigCard,.vbNotes:not([hidden])').forEach(p=>{
+ document.querySelectorAll('.vbBigCard,.vbNotes:not([hidden])').forEach(p=>{
   if(!p.offsetWidth||!p.offsetHeight)return;const r=p.getBoundingClientRect();
   placed.push({x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,w:r.width,h:r.height})});
  const hit=(r,x,y,w,h,pad)=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad;
@@ -444,7 +447,8 @@ function vb3dLayout(){
   .sort((p,q)=>a[p.i].y-a[q.i].y||a[p.i].x-a[q.i].x);   // الأبعد أوّلًا: يُرفع الخلفيّ لا الأماميّ
  els.forEach(({el,i})=>{
   const w=el.offsetWidth||26,h=el.offsetHeight||26,pad=2,step=h+pad;
-  const x=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H;
+  // اللوحة فوق الرأس لا عليه: تُرفع بنصف ارتفاعها وزيادة فلا تحجب الوجه
+  const x=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H-(h/2+9);
   // القرص صغير وموحّد: يبقى فوق رأس صاحبه تمامًا، وإن صادف عائقًا ارتفع خطوة أو خطوتين لا أكثر
   let y=Math.max(h/2+2,Math.min(H-h/2-2,y0));
   for(const dy of [0,-step,-2*step,step]){const t=Math.max(h/2+2,Math.min(H-h/2-2,y0+dy));
@@ -509,7 +513,7 @@ function vb3dLoop(now){
  if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;
   // النظر يميل قليلًا نحو المتكلّم ثم يعود إلى وسط الطاولة — حركة كاميرا حيّة بلا دوار
   const tk=talker&&talker.seat?talker.seat.position:null;
-  VB3.aimT.set(tk?tk.x*.3:0,.88,tk?-.5+tk.z*.1:-.5);
+  const ay=VB3.aimY!=null?VB3.aimY:.88;VB3.aimT.set(tk?tk.x*.3:0,ay,tk?-.5+tk.z*.1:-.5);
   VB3.aim.lerp(VB3.aimT,Math.min(1,dt*1.6));VB3.cam.lookAt(VB3.aim)}
  if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
 }
