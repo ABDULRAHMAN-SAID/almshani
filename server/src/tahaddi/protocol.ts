@@ -43,9 +43,16 @@ export type ClientMsg =
   | { t: 'profile'; rid?: string; id?: string }
   | { t: 'purchase'; rid?: string; claim: PurchaseClaim }
   | { t: 'purchases'; rid?: string }
+  // ── الأصدقاء: بالمعرّف أو بمن قابلته في غرفة ──
+  | { t: 'friends'; rid?: string }
+  | { t: 'friendAdd'; rid?: string; id: string }
+  | { t: 'friendAccept'; rid?: string; id: string }
+  | { t: 'friendRemove'; rid?: string; id: string }
   // ── الغرف: تتابع حضور وبثّ لحظات — نفس واجهة غرفة الأرتيفاكت ──
   | { t: 'presence'; patch: Record<string, unknown> }
   | { t: 'emit'; topic: string; data?: unknown };
+
+export interface FriendView { id: string; name: string; online: boolean }
 
 export interface PeerView {
   peer: string;                 // معرّف الاتصال (يتغيّر بكل اتصال)
@@ -67,6 +74,7 @@ export type ServerMsg =
   | { t: 'profileView'; rid?: string; id: string; name: string; ranks: Record<string, RankProfile> }
   | { t: 'purchased'; rid?: string; productId: string; txId: string; grant: PurchaseGrant; duplicate: boolean }
   | { t: 'purchaseList'; rid?: string; list: PurchaseRec[] }
+  | { t: 'friendList'; rid?: string; friends: FriendView[]; reqIn: FriendView[]; reqOut: FriendView[] }
   | { t: 'peers'; list: PeerView[] }
   | { t: 'msg'; topic: string; data?: unknown; from: { peer: string; by: string } }
   | { t: 'error'; rid?: string; code: string; message?: string };

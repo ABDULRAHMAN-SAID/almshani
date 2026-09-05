@@ -422,6 +422,20 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .btn.gd{background:linear-gradient(145deg,#F0C25A,#C08C18);color:#15100A;box-shadow:0 4px 14px rgba(232,178,58,.3)}
 .sl{font-size:13px;font-weight:800;color:var(--tx2);margin:16px 0 8px}
 .note{font-size:11px;color:var(--mut);line-height:1.6;text-align:center;margin-top:12px}
+/* الأصدقاء (5.59) */
+.frSec{font-size:11.5px;font-weight:900;color:var(--gold);margin:14px 2px 7px;letter-spacing:.2px}
+.frRow{margin-bottom:7px;padding:9px 11px}
+.frAv{flex-shrink:0;width:34px;height:34px;display:block}
+.frAv>svg{width:34px;height:34px;border-radius:50%;border:1px solid rgba(232,178,58,.5);background:#0F1524;display:block}
+.frId{font-size:9.5px;color:var(--mut);font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.frId.big{font-size:13px;color:var(--tx);background:var(--surf);border:1px solid var(--bd);border-radius:11px;padding:11px 12px;font-weight:700}
+.frDot{width:8px;height:8px;border-radius:50%;background:var(--mut);flex-shrink:0}
+.frDot.on{background:var(--ok);box-shadow:0 0 7px rgba(46,204,113,.8)}
+.frTop{display:flex;gap:8px;align-items:center}
+.frTop>.frId.big,.frTop>.fin{flex:1 1 auto;min-width:0;margin:0}
+.frTop>.rbtn,.frRow .rbtn{width:auto;flex:0 0 auto;min-height:42px;padding:0 15px;margin:0}
+.frRow .rbtn{min-height:36px;padding:0 12px;font-size:12px}
+.frTop>.fin{padding:11px 12px;font-size:13px}
 .wb{background:rgba(55,138,221,.1);border:1px solid rgba(55,138,221,.35);border-radius:12px;
  padding:12px;font-size:11.5px;line-height:1.6;margin-bottom:14px}
 
@@ -663,19 +677,25 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.full .vbTop .vbPhase{max-width:38%;min-height:34px;padding:4px 8px}
 .vbMain{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
 .vbScene.full .vbStage{position:absolute;inset:0;height:auto;width:auto;margin:0;border-radius:0;border:none;box-shadow:none}
-.vbScene.full .vbRole{position:absolute;top:70px;right:8px;left:auto;width:auto;max-width:52%;margin:0;z-index:6;padding:6px 9px;background:rgba(10,14,26,.82);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 .vbScene.full .vbRole span{display:none}
-.vbScene.full .vbTurn[hidden]+.vbRole{top:8px}
+/* شريط المرحلة (5.59): شريط الدور وبطاقة دورك وخطوات برا في صفّ واحد داخل التدفّق — لا صناديق عائمة فوق المشهد */
+.vbBand{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;padding:6px 8px;background:linear-gradient(180deg,rgba(10,14,26,.8),rgba(10,14,26,.5));border-bottom:1px solid rgba(255,255,255,.06)}
+.vbBand:empty,.vbBandR:empty{display:none}
+.vbBandR{display:flex;gap:6px;align-items:stretch;min-width:0}
+.vbScene.full .vbBandR>.vbTurn{position:static;flex:1 1 auto;min-width:0;width:auto;max-width:none;margin:0;padding:5px 8px;gap:8px;border-radius:13px;background:rgba(16,22,38,.9)}
+.vbScene.full .vbBandR>.vbTurn[hidden]{display:none}
+.vbScene.full .vbBandR>.vbRole{position:static;flex:0 0 auto;max-width:44%;margin:0;padding:6px 9px;border-radius:13px;background:rgba(16,22,38,.9);align-self:center}
+.vbScene.full .vbSteps{position:static;margin:0;display:flex;flex-direction:row;gap:4px;width:auto}
+.vbScene.full .vbSteps span{flex:1 1 0;min-width:0;justify-content:center;font-size:9.5px;padding:3px 4px}
+.vbSend.cool{background:rgba(120,130,155,.35);color:#C9D2E6;font-size:13px;font-weight:900;cursor:default}
 /* بطاقة الدور المكشوفة تقف يمين المشهد بعيدًا عن الدردشة */
 .vbScene.full .vbBigCard{left:auto;right:10px;top:50%;transform:translateY(-50%)}
 .vbScene.full .vbBigCard.out{transform:translateY(-60%) scale(.8)}
-.vbScene.full .vbTurn{position:absolute;left:8px;right:8px;top:8px;width:auto;max-width:none;margin:0;z-index:6;background:rgba(10,14,26,.88);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);padding:5px 8px;gap:8px;border-radius:13px}
 .vbScene.full .vbTurn .vbTurnT{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vbScene.full .vbTurn .vbTurnD{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:1}
 .vbScene.full .vbTurn .vbTurnI{width:26px;height:26px;flex-shrink:0}
 .vbScene.full .vbTurn .vbRing{width:38px;height:38px;flex-shrink:0}
 .vbScene.full .vbTurn .vbRing b{font-size:10px}
-.vbScene.full .vbSteps{position:absolute;right:8px;bottom:8px;margin:0;z-index:6;flex-direction:column;gap:3px;width:auto}
 .vbScene.full .vbNotes{position:absolute;inset:auto 8px 8px 8px;z-index:8;max-height:60%;overflow-y:auto;background:rgba(10,14,26,.95)}
 .vbFeedW{position:absolute;left:8px;bottom:8px;width:46%;max-width:220px;max-height:50%;display:flex;flex-direction:column;z-index:5;
  background:rgba(8,11,20,.88);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);border:1px solid rgba(232,178,58,.28);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.5);overflow:hidden}
@@ -805,6 +825,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.is3d .vbSeat.mark .vbAv{border-color:#E24B4A;box-shadow:0 0 0 3px rgba(226,75,74,.35),0 2px 8px rgba(0,0,0,.6)}
 .vbScene.is3d .vbSeat.pick .vbAv{border-color:var(--pk,#E8B23A);box-shadow:0 0 0 3px var(--pk,#E8B23A),0 0 14px var(--pk,#E8B23A)}
 .vbScene.is3d .vbSeat.dead{opacity:.5}
+.vbScene.is3d .vbSeat[data-seat="0"]{display:none}   /* أنت خلف الكاميرا: بطاقتك في شريط اللاعبين */
 .vbScene.is3d .vbSeat.dead .vbAv{border-color:#6C7590}
 .vbScene.is3d .vbSeat.talk .vbAv::before,.vbScene.is3d .vbSeat.talk .vbAv::after,
 .vbScene.is3d .vbSeat.pick .vbAv::before{display:none}
@@ -17637,6 +17658,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // وسيط مركّب
  R.register('mmScr',{render:a=>mmScr(a&&a.g,a&&a.mode),leave:()=>mmCancel()});
  R.register('profileView',{render:p=>profileView(p)});
+ R.register('friendsScr',{render:()=>friendsScr()});
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
  R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&GAME_DEFS.find(x=>x.rmKey===g)),fallback:'partyScr'});
@@ -18175,6 +18197,79 @@ function legalScr(k){
  <div class="note">للتواصل: <span dir="ltr">${esc(LEGAL.contact)}</span></div>
  </div>`);
 }
+/* ═══════════ الأصدقاء (5.59): بالمعرّف، أو بمن قابلته في غرفة ═══════════ */
+let FR={f:[],in:[],out:[],err:null,busy:0};
+function frMyId(){try{return (typeof NET!=='undefined'&&NET.state().id)||(S.account&&S.account.id)||null}catch(e){return (S.account&&S.account.id)||null}}
+function frAv(a){return a&&typeof a==='object'?avatarSVG(a,34):personArt('لاعب',34)}
+async function frLoad(){
+ if(!netOnline())return;
+ FR.busy=1;frPaint();
+ try{const r=await NET.friends();FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];FR.err=null}
+ catch(e){FR.err='تعذّر جلب القائمة'}finally{FR.busy=0;frPaint()}
+}
+function frPaint(){if(Router.current()&&Router.current().fn==='friendsScr')friendsScr(1)}
+async function frDo(fn,id,okMsg){
+ if(!netOnline())return toast('يحتاج اتصالًا بالخادم');
+ try{const r=await fn(id);FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];toast(okMsg);frPaint()}
+ catch(e){toast(e&&e.message?e.message:'تعذّر التنفيذ')}
+}
+function frAdd(){
+ const el=document.getElementById('frId');const v=el?el.value.trim().replace(/^#/,''):'';
+ if(!/^p[0-9a-f]{12}$/.test(v))return toast('المعرّف يبدأ بـ p ثم 12 حرفًا');
+ if(el)el.value='';
+ frDo(NET.friendAdd,v,'أُرسل الطلب');
+}
+function frAddMet(id){frDo(NET.friendAdd,id,'أُرسل الطلب')}
+function frAccept(id){frDo(NET.friendAccept,id,'صرتما صديقين')}
+function frRemove(id){frDo(NET.friendRemove,id,'أُزيل')}
+function frCopyId(){
+ const id=frMyId();if(!id)return toast('لا معرّف قبل الاتصال بالخادم');
+ try{if(navigator.clipboard&&navigator.clipboard.writeText)
+  return navigator.clipboard.writeText(id).then(()=>toast('نُسخ معرّفك '+ico('check',14)),()=>toast('معرّفك: '+id))}catch(e){}
+ toast('معرّفك: '+id);
+}
+function frRow(o,acts){
+ return `<div class="li frRow"><div style="display:flex;align-items:center;gap:9px;padding:2px;width:100%">
+  <span class="frAv">${frAv(o.av)}</span>
+  <div style="flex:1;min-width:0"><div class="mtl" style="font-size:13px">${esc(o.name||o.n||'لاعب')}</div>
+   <div class="frId" dir="ltr">${esc(o.id)}</div></div>
+  ${o.online?`<span class="frDot on" title="متصل"></span>`:''}
+  <div style="display:flex;gap:5px;flex-shrink:0">${acts}</div></div></div>`;
+}
+function friendsScr(keep){
+ const id=frMyId(),on=netOnline();
+ const met=(Array.isArray(S.met)?S.met:[]).filter(m=>m&&m.id&&!FR.f.some(f=>f.id===m.id)&&!FR.out.some(f=>f.id===m.id));
+ const body=`
+ <div class="li" style="margin-bottom:10px"><div style="padding:2px">
+  <div class="mtl" style="font-size:13px;margin-bottom:6px">معرّفك</div>
+  <div class="frTop">
+   <div class="frId big" dir="ltr">${id?esc(id):'—'}</div>
+   <button class="rbtn sm" onclick="frCopyId()"><span>${ico('scroll',13)} نسخ</span></button></div>
+  <div class="note" style="margin-top:7px">أعطِ معرّفك لمن تريد أن يضيفك، أو أضفه أنت بمعرّفه.</div>
+ </div></div>
+ <div class="li" style="margin-bottom:10px"><div style="padding:2px">
+  <div class="mtl" style="font-size:13px;margin-bottom:6px">أضف بالمعرّف</div>
+  <div class="frTop">
+   <input id="frId" class="fin" dir="ltr" placeholder="p0123456789ab" maxlength="13" autocomplete="off">
+   <button class="rbtn sm" onclick="frAdd()"><span>${ico('plus',13)} إضافة</span></button></div>
+ </div></div>
+ ${!on?`<div class="note" style="margin-bottom:10px">${ico('info',13)} الأصدقاء يحتاجون اتصالًا بالخادم. اتصل ثم عد.</div>`:''}
+ ${FR.in.length?`<div class="frSec">طلبات وصلتك (${FR.in.length})</div>
+  ${FR.in.map(o=>frRow(o,`<button class="rbtn sm" onclick="frAccept('${esc(o.id)}')"><span>${ico('check',13)} قبول</span></button>
+   <button class="rbtn sm gh" onclick="frRemove('${esc(o.id)}')"><span>${ico('cross',13)}</span></button>`)).join('')}`:''}
+ <div class="frSec">أصدقائي (${FR.f.length})</div>
+ ${FR.f.length?FR.f.map(o=>frRow(o,`<button class="rbtn sm gh" onclick="frRemove('${esc(o.id)}')"><span>${ico('cross',13)}</span></button>`)).join('')
+  :`<div class="note">لا أصدقاء بعد — أضف بالمعرّف، أو من «لاعبون قابلتهم» بالأسفل.</div>`}
+ ${FR.out.length?`<div class="frSec">طلبات أرسلتها (${FR.out.length})</div>
+  ${FR.out.map(o=>frRow(o,`<button class="rbtn sm gh" onclick="frRemove('${esc(o.id)}')"><span>${ico('cross',13)} إلغاء</span></button>`)).join('')}`:''}
+ <div class="frSec">لاعبون قابلتهم</div>
+ ${met.length?met.map(m=>frRow({id:m.id,name:m.n,av:m.av},`<button class="rbtn sm" onclick="frAddMet('${esc(m.id)}')"><span>${ico('plus',13)} أضف</span></button>`)).join('')
+  :`<div class="note">من تلعب معهم في الغرف الأونلاين يظهرون هنا لتضيفهم بلمسة.</div>`}`;
+ const y=keep?window.scrollY:0;
+ go(`<div class="scr on">${tbar('الأصدقاء')}${body}</div>`);
+ if(keep)window.scrollTo(0,y);
+ if(!keep&&on&&!FR.busy)frLoad();
+}
 const SETS=[
  {k:`account`,i:`${ico('user',16)}`,n:`الحساب`,d:'الاسم · الشخصية · تسجيل الخروج'},
  {k:`game`,i:`${ico('robot',16)}`,n:`اللعب`,d:'الاهتزاز · التأكيدات · السرعة'},
@@ -18230,6 +18325,10 @@ function setSection(k){
    <div class="lb"><div class="lt">اسمك في اللعبة</div><div class="ls">${S.name?esc(S.name):'<span style="color:var(--gold)">لم تختر اسمًا بعد — اضغط «اختر»</span>'}</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
     onclick="push('renameAsk')">${S.name?'تغيير':'اختر'}</button></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
+   <div class="lb"><div class="lt">الأصدقاء</div><div class="ls">أضف بالمعرّف، أو من قابلتهم في الغرف</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="push('friendsScr')">افتح</button></div></div>
   <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">المشتريات</div><div class="ls">تذكرة الموسم وجواهرك تعود على أي جهاز بحسابك</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
@@ -20946,7 +21045,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.58';
+const APP_VER='5.59';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -21315,9 +21414,21 @@ function rmMine(){const c=RMcap;if(!c)return null;
 function rmRoster(){
  const c=RMcap;if(!c||!RM.code)return [];
  return (c.peers()||[]).filter(p=>p.presence&&p.presence.pc===RM.code&&p.kind==='viewer')
-  .map(p=>({peer:p.peer,name:String(p.presence.nm||'لاعب').slice(0,18),host:!!p.presence.hs,
-    vote:p.presence.vt||null,me:!!(p.isMe&&p.sameTab),av:p.presence.av&&typeof p.presence.av==='object'?p.presence.av:null}))
+  .map(p=>{const o={peer:p.peer,id:p.by||null,name:String(p.presence.nm||'لاعب').slice(0,18),host:!!p.presence.hs,
+    vote:p.presence.vt||null,me:!!(p.isMe&&p.sameTab),av:p.presence.av&&typeof p.presence.av==='object'?p.presence.av:null};
+   if(!o.me)metSeen(o.id,o.name,o.av);   // قابلته في غرفة: يدخل «لاعبون قابلتهم» فتضيفه صديقًا بلمسة
+   return o})
   .sort((a,b)=>(b.host?1:0)-(a.host?1:0)||a.peer.localeCompare(b.peer));
+}
+/** سجلّ من قابلتهم في الغرف: آخر 40 لاعبًا بأسمائهم وصورهم — محلي، ولا يُرسل لأحد */
+function metSeen(id,name,av){
+ if(!id||!/^p[0-9a-f]{12}$/.test(id))return;
+ if(typeof NET!=='undefined'&&NET.state&&NET.state().id===id)return;
+ S.met=Array.isArray(S.met)?S.met:[];
+ const i=S.met.findIndex(x=>x&&x.id===id),rec={id,n:String(name||'لاعب').slice(0,18),av:av||null,at:Date.now()};
+ if(i>=0)S.met[i]=rec;else S.met.unshift(rec);
+ if(S.met.length>40)S.met.length=40;
+ clearTimeout(metSeen._t);metSeen._t=setTimeout(()=>saveState(),1200);
 }
 function rmLeave(silent){
  if(typeof VB3!=='undefined'&&VB3.lobby&&typeof vb3dDispose==='function')vb3dDispose();
@@ -28708,7 +28819,10 @@ function vb3dMount(kindOrModel){
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
- const camY=2.85+Math.max(0,n-8)*.14,camZ=Rz+2.85+Math.max(0,n-8)*.3;cam.position.set(0,camY,camZ);cam.lookAt(0,.45,-.45);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ // 5.59: أنت تجلس في مكانك وترى المجلس بعينيك — الكاميرا في مقعدك، وشخصيتك لا تحجب الطاولة
+ if(chars[0]&&chars[0].ch){chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false}
+ const camY=1.56+Math.max(0,n-8)*.05,camZ=Rz+.92+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,.88,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ VB3.aim=new T.Vector3(0,.88,-.5);VB3.aimT=new T.Vector3(0,.88,-.5);
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
   const hits=ray.intersectObjects(VB3.chars.filter(c=>c.hit).map(c=>c.hit),false);if(hits.length){const i=hits[0].object.userData.seat;VB3.tapAt=Date.now();VB3.model.tap(i)}});
@@ -28765,8 +28879,8 @@ function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return 
 function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
  const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
- // ألواح الواجهة (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) تحجب ما تحتها: تُعامَل عوائق
- document.querySelectorAll('.vbFeedW,.vbBigCard,.vbScene.full .vbRole,.vbScene.full .vbTurn,.vbScene.full .vbSteps').forEach(p=>{
+ // ما يعلو المشهد وحده عائق: لوحة الدردشة، بطاقة الدور المكشوفة، ولوحة الملاحظات — والباقي صار أشرطة فوق المشهد لا عليه
+ document.querySelectorAll('.vbFeedW,.vbBigCard,.vbNotes:not([hidden])').forEach(p=>{
   if(!p.offsetWidth||!p.offsetHeight)return;const r=p.getBoundingClientRect();
   placed.push({x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,w:r.width,h:r.height})});
  const hit=(r,x,y,w,h,pad)=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad;
@@ -28837,7 +28951,11 @@ function vb3dLoop(now){
  else{VB3.sc.background.set(R.night.bg).lerp((VB3._c||(VB3._c=new T.Color())).set(R.day.bg),k);if(L.warm)L.warm.intensity=mix(10,2)}
  R.glow.material.opacity=mix(.55,.35)+Math.sin(t*3)*.05*calm;
  const sp=VB3.spot;if(talker&&!night){talker.u.head.getWorldPosition(tmp);sp.target.position.lerp(tmp,Math.min(1,dt*6));sp.intensity=lerp(sp.intensity,22,dt*4)}else sp.intensity=lerp(sp.intensity,0,dt*4);
- if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;VB3.cam.lookAt(0,.45,-.45)}
+ if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;
+  // النظر يميل قليلًا نحو المتكلّم ثم يعود إلى وسط الطاولة — حركة كاميرا حيّة بلا دوار
+  const tk=talker&&talker.seat?talker.seat.position:null;
+  VB3.aimT.set(tk?tk.x*.3:0,.88,tk?-.5+tk.z*.1:-.5);
+  VB3.aim.lerp(VB3.aimT,Math.min(1,dt*1.6));VB3.cam.lookAt(VB3.aim)}
  if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
 }
 function vb3dDispose(){
@@ -28878,12 +28996,13 @@ function vbScene(kind,title,sub){
   <button class="vbChip ico" onclick="vbMenuSheet()">${ico('menu',14)}</button>
  </div>
  <div class="vbRoster" id="vbRoster"></div>
+ <div class="vbBand">
+  <div class="vbBandR"><div class="vbTurn" id="vbTurn" hidden></div><div class="vbRole" id="vbRole" onclick="vbRoleGuide()"></div></div>
+  ${kind==='barra'?`<div class="vbSteps" id="vbSteps">${['التلميحات','سؤال وجواب','التصويت','النتيجة'].map((t,i)=>`<span data-step="${i+1}"><i>${i+1}</i>${t}</span>`).join('')}</div>`:''}
+ </div>
  <div class="vbMain">
   <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbCenter">${vbCenterPiece(kind)}</div><div class="vbSeats" id="vbSeats"></div></div>
-  <div class="vbTurn" id="vbTurn" hidden></div>
-  <div class="vbRole" id="vbRole" onclick="vbRoleGuide()"></div>
   <div class="vbFeedW"><div class="vbFeed" id="vbFeed"></div></div>
-  ${kind==='barra'?`<div class="vbSteps" id="vbSteps">${['التلميحات','سؤال وجواب','التصويت','النتيجة'].map((t,i)=>`<span data-step="${i+1}"><i>${i+1}</i>${t}</span>`).join('')}</div>`:''}
   <div class="vbNotes" id="vbNotes" hidden></div>
  </div>
  <div class="vbAct" id="vbAct"></div></div>`);
@@ -29115,8 +29234,24 @@ function vbBar(o){
  <div class="vbBar"><button class="vbIcoB" onclick="vbEmoteBar()" title="تعبير">${typeof face==='function'?face((typeof myEmoteDeck==='function'&&myEmoteDeck()[0])||'laugh',26):ico('sparkle',18)}</button>
   <div class="vbInW"><input id="vbTxt" maxlength="160" placeholder="${o.ph||'اكتب رسالتك…'}" autocomplete="off" data-fn="${fn}"${o.disabled?' disabled':''} onkeydown="if(event.key==='Enter'){event.preventDefault();${fn}()}"><button class="vbSend" onclick="${fn}()" title="إرسال">${ico('next',15)}</button></div>${mic}</div>
  <div class="vbBar vbBar2"><button class="vbSus" onclick="vbSuspect()">${ico('target',13)} ${VB.g==='barra'?'أشتبه فيه':'أشك فيه'}</button>${primary}</div>`);
- const el=document.getElementById('vbTxt');if(el&&!VB.fast&&!o.disabled)el.focus();
+ vbSayCoolPaint();   // 5.59: لا نسرق التركيز — لوحة المفاتيح تفتح حين تضغط مكان الكتابة وحدك
 }
+/** مهلة الخمس ثوانٍ بين رسالتين: زرّ الإرسال وحده يُعطَّل بعدّاد، وصندوق الكتابة يبقى مفتوحًا تكتب فيه متى شئت */
+function vbSayCoolPaint(){
+ const b=document.querySelector('.vbSend');if(!b)return;
+ const left=Math.ceil(((VB&&VB.lastSay?VB.lastSay:0)+vbSayGap()-Date.now())/1000);
+ if(left>0){b.disabled=true;b.classList.add('cool');b.textContent=left}
+ else{b.disabled=false;b.classList.remove('cool');b.innerHTML=ico('next',15)}
+}
+function vbSayCool(){
+ if(!VB)return;VB.lastSay=Date.now();vbSayCoolPaint();
+ clearInterval(VB._coolT);VB._coolT=setInterval(()=>{if(!VB||!document.querySelector('.vbSend')){clearInterval(VB&&VB._coolT);return}
+  vbSayCoolPaint();if(Date.now()-VB.lastSay>=vbSayGap())clearInterval(VB._coolT)},250);
+}
+/** هل تستطيع الكتابة الآن؟ يعيد صفرًا أو الثواني الباقية */
+function vbSayWait(){return Math.max(0,Math.ceil(((VB&&VB.lastSay?VB.lastSay:0)+vbSayGap()-Date.now())/1000))}
+/** النقاش مفتوح للجميع: رسالة كل خمس ثوانٍ، لا أدوار — وتتقلّص مع تسريع الزمن في الاختبارات ووضع السرعة */
+function vbSayGap(){const k=vbScale();return Math.round(5000*(k>0?k:1))}
 function vbNoop(){}
 /** تفاعل سريع: يظهر في السجلّ (ويقرؤه النموذج)؛ في المافيا «أوافق/لا أوافق» على آخر اتهام، و«مثير للاشتباه» يسجّل آخر متكلّم في ملاحظاتي */
 function vbReact(k){
@@ -29660,16 +29795,19 @@ function mfReadyCheck(){
 }
 function mfMyTurn(){
  if(VB.voting)return;
- if(VB.msgs===0)vbMsg({k:'n',t:VB.askedMe!=null?`${VB.names[VB.askedMe]} يسألك. أجب أو اتّهم أو اسأل أنت — بكلماتك.`:'دورك. اكتب ما تريد: اتّهم أحدًا، دافع عن نفسك، اسأل لاعبًا، أو أعلن دورك — وإذا انتهيت اضغط «جاهز».'});
+ if(VB.msgs===0)vbMsg({k:'n',t:VB.askedMe!=null?`${VB.names[VB.askedMe]} يسألك. أجب أو اتّهم أو اسأل أنت — بكلماتك.`:'النقاش مفتوح للجميع — اكتب متى شئت (رسالة كل خمس ثوانٍ): اتّهم، دافع، اسأل، أو أعلن دورك. وإذا انتهيت اضغط «جاهز».'});
  vbBar({ph:'اكتب هنا… مثل: أشك في سلطان / يا نورة وين كنت؟',fn:'mfSend',ready:true});
 }
 /** يفهم ما كتبتَ: من ذكرت، وهل تتّهم أم تدافع أم تسأل أم تعلن دورًا أم تعترف أنك مافيا */
 async function mfSend(){
- const text=vbRead();if(!text||VB.voting||VB.over||VB.replying||VB.night)return;
- if(VB.msgs>=6){toast('قلت ما يكفي اليوم — اضغط «جاهز»');return}
- const my=VB;VB.msgs++;VB.askedMe=null;VB.replying=true;vbTimerExtend(20);   // كتبتَ في آخر النقاش: يبقى وقت للردّ عليك
- vbMsg({k:'me',i:0,t:text});
- vbBar({ph:'…',fn:'mfSend',ready:true,disabled:true});
+ if(!VB||VB.voting||VB.over||VB.night)return;
+ const w=vbSayWait();if(w){toast('النقاش مفتوح — رسالتك التالية بعد '+w+' ث');return}   // 5.59: لا أدوار، بل مهلة قصيرة بين رسالتين
+ const text=vbRead();if(!text)return;
+ if(VB.msgs>=24){toast('أكثرتَ اليوم — اضغط «جاهز»');return}
+ const my=VB;VB.msgs++;VB.askedMe=null;vbTimerExtend(20);   // كتبتَ في آخر النقاش: يبقى وقت للردّ عليك
+ vbMsg({k:'me',i:0,t:text});vbSayCool();
+ if(VB.replying)return;   // الآليون في دورة ردّ الآن: كلامك أمامهم في السجلّ ويردّون عليه
+ VB.replying=true;
  const p=mfParse(text);
  try{
   let handled=false;
@@ -30215,7 +30353,8 @@ async function brNext(){
    vbTimer(45,()=>brSkipClue());
    return;
   }
-  vbTurn('sound',`دور ${VB.names[i]}`,'يلمّح الآن…');
+  vbTurn('sound',`دور ${VB.names[i]}`,'يلمّح الآن… والنقاش مفتوح، اكتب تعليقك متى شئت');
+  brChatBar();   // 5.59: المجلس يتكلّم بحرّية — لا تنتظر دورك لتكتب
   if(AI.enabled()&&!(VB.aiClues&&(i in VB.aiClues))){   // دفعة واحدة: كل الآليين المتتالين حتى دور البشري
    const batch=[i];for(let k=VB.seqAt;k<VB.seq.length&&VB.seq[k]!==0;k++)batch.push(VB.seq[k]);
    VB.aiClues=await brAiClues(batch);if(!vbAlive())return;
@@ -30225,8 +30364,27 @@ async function brNext(){
   vbMsg({k:'b',i,t:c||brBotClue(i)});VB.spoke[i]++;
  }
  vbTalk(null);
- if(VB.round<2){vbTurn('next','انتهت الجولة الأولى','الجولة الثانية تبدأ بانتهاء الوقت أو بضغطة الزرّ',12);vbAct(`<button class="rbtn" onclick="brRound()"><span>${ico('next',14)} الجولة الثانية</span></button>`);vbTimer(12,()=>brRound());return}
+ if(VB.round<2){vbTurn('next','انتهت الجولة الأولى','ناقشوا ما سمعتم — الجولة الثانية تبدأ بانتهاء الوقت أو بالزرّ',12);
+  vbBar({ph:'علّق على التلميحات…',fn:'brChat',primary:`<button class="vbGo" onclick="brRound()">${ico('next',14)} الجولة الثانية</button>`});vbTimer(12,()=>brRound());return}
  brAsk();
+}
+/** شريط النقاش المفتوح في برا السالفة: تكتب تعليقك في أي وقت، رسالة كل خمس ثوانٍ */
+function brChatBar(){if(!VB||VB.over)return;vbBar({ph:'علّق على ما سمعت…',fn:'brChat',primary:`<button class="vbGo alt" onclick="vbBrowse()">${ico('user',14)} تصفح لاعب</button>`})}
+/** تعليق حرّ من البشري خارج دوره: يدخل السجلّ ويعلّق عليه أحد الآليين أحيانًا */
+async function brChat(){
+ if(!VB||VB.over||VB.voting)return;
+ const w=vbSayWait();if(w){toast('النقاش مفتوح — رسالتك التالية بعد '+w+' ث');return}
+ const text=vbRead();if(!text)return;
+ if(!brSpyMe()&&brSaidWord(text)){vbMsg({k:'me',i:0,t:text});vbSayCool();await vbWait(500);
+  vbMsg({k:'n',icon:'door',big:true,t:'قلتَ الكلمة نفسها! انكشفت أمام برا السالفة.'});return brFinal('guessed')}
+ vbMsg({k:'me',i:0,t:text});vbSayCool();
+ if(VB.replying)return;
+ const others=VB.names.map((_,x)=>x).filter(x=>x!==0);
+ if(!others.length||Math.random()>.55)return;
+ const my=VB,i=vbRnd(others);my.replying=true;
+ try{vbTalk(i);await vbWait(700);if(VB!==my||!vbAlive())return;
+  vbMsg({k:'b',i,t:brLocalComment(text,'chat',brSpecificity(text)),cm:1});vbTalk(null)}
+ catch(e){}finally{my.replying=false}
 }
 /** انتهى وقتك بلا تلميح: يُحسب غموضًا ويكمل الدور */
 function brSkipClue(){

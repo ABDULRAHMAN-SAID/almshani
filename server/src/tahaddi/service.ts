@@ -6,12 +6,15 @@ import type { RankProfile } from '../../../src/progression/rank.js';
 import { FileStore } from './tstore';
 import CATALOG from '../../../src/economy/catalog.js';
 import { verify as verifyReceipt, iapStatus } from './iap';
-import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, LeaderRow, GameId, PurchaseClaim, PurchaseRec } from './protocol';
+import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec } from './protocol';
 
 export interface Account {
   token: string; id: string; name: string; createdAt: number; lastSeen: number;
   save: CloudSave | null;
   ranks: Record<string, RankProfile>;
+  friends: string[];      // معرّفات أصدقاء مقبولين من الطرفين
+  reqIn: string[];        // طلبات وصلتك
+  reqOut: string[];       // طلبات أرسلتها
 }
 export interface Session {
   peer: string; account: Account; presence: Record<string, unknown>;
@@ -38,6 +41,10 @@ export function sanitizeName(n: unknown): string | null {
   return s.length >= 2 ? s : null;
 }
 const bytes = (v: unknown) => Buffer.byteLength(JSON.stringify(v ?? null), 'utf8');
+const ID_RE = /^p[0-9a-f]{12}$/;
+const MAX_FRIENDS = 200;
+const idList = (v: unknown): string[] =>
+  Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === 'string' && ID_RE.test(x)))].slice(0, MAX_FRIENDS) : [];
 
 export class TahaddiService {
   private accounts = new Map<string, Account>();      // token → account
@@ -57,7 +64,8 @@ export class TahaddiService {
           token: String(a.token), id: String(a.id), name: sanitizeName(a.name) ?? 'لاعب',
           createdAt: +a.createdAt || Date.now(), lastSeen: +a.lastSeen || 0,
           save: a.save && typeof a.save === 'object' && a.save.blob && typeof a.save.blob === 'object' ? { t: +a.save.t || 0, blob: a.save.blob } : null,
-          ranks: {}
+          ranks: {},
+          friends: idList(a.friends), reqIn: idList(a.reqIn), reqOut: idList(a.reqOut)
         };
         for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
         this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
@@ -83,7 +91,7 @@ export class TahaddiService {
         token: randomBytes(16).toString('hex'),
         id: 'p' + randomBytes(6).toString('hex'),
         name: sanitizeName(name) ?? `لاعب-${this.byId.size + 1}`,
-        createdAt: Date.now(), lastSeen: Date.now(), save: null, ranks: {}
+        createdAt: Date.now(), lastSeen: Date.now(), save: null, ranks: {}, friends: [], reqIn: [], reqOut: []
       };
       for (const g of RankCore.GAMES) account.ranks[g] = RankCore.newRankProfile(g);
       this.accounts.set(account.token, account); this.byId.set(account.id, account);
@@ -132,6 +140,70 @@ export class TahaddiService {
   loadCloud(s: Session, rid?: string): void {
     s.send({ t: 'cloud', rid, save: s.account.save, ranks: s.account.ranks });
   }
+  /* ── الأصدقاء: طلب من طرف وقبول من الآخر؛ الهوية من الجلسة لا من العميل ── */
+  private online(id: string): boolean {
+    for (const ss of this.sessions.values()) if (ss.account.id === id) return true;
+    return false;
+  }
+  private view(ids: string[]): FriendView[] {
+    const out: FriendView[] = [];
+    for (const id of ids) { const a = this.byId.get(id); if (a) out.push({ id: a.id, name: a.name, online: this.online(a.id) }); }
+    return out;
+  }
+  private sendFriends(s: Session, rid?: string): void {
+    const a = s.account;
+    s.send({ t: 'friendList', rid, friends: this.view(a.friends), reqIn: this.view(a.reqIn), reqOut: this.view(a.reqOut) });
+  }
+  private pushFriends(id: string): void {
+    for (const ss of this.sessions.values()) if (ss.account.id === id) this.sendFriends(ss);
+  }
+  friends(s: Session, rid?: string): void { this.sendFriends(s, rid); }
+  friendAdd(s: Session, id: unknown, rid?: string): void {
+    const me = s.account;
+    if (typeof id !== 'string' || !ID_RE.test(id)) return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
+    if (id === me.id) return s.send({ t: 'error', rid, code: 'self', message: 'هذا معرّفك أنت' });
+    const other = this.byId.get(id);
+    if (!other) return s.send({ t: 'error', rid, code: 'not_found', message: 'لا يوجد لاعب بهذا المعرّف' });
+    if (me.friends.includes(id)) return this.sendFriends(s, rid);
+    if (me.friends.length >= MAX_FRIENDS || other.friends.length >= MAX_FRIENDS)
+      return s.send({ t: 'error', rid, code: 'full', message: 'قائمة الأصدقاء ممتلئة' });
+    if (me.reqIn.includes(id)) {                              // طلبه سابق: القبول يتمّ الصداقة
+      me.reqIn = me.reqIn.filter(x => x !== id); other.reqOut = other.reqOut.filter(x => x !== me.id);
+      me.friends.push(id); other.friends.push(me.id);
+    } else if (!me.reqOut.includes(id)) {
+      me.reqOut.push(id);
+      if (!other.reqIn.includes(me.id)) other.reqIn.push(me.id);
+    }
+    this.persist(); this.sendFriends(s, rid); this.pushFriends(id);
+  }
+  friendAccept(s: Session, id: unknown, rid?: string): void {
+    const me = s.account;
+    if (typeof id !== 'string' || !ID_RE.test(id)) return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
+    if (!me.reqIn.includes(id)) return s.send({ t: 'error', rid, code: 'no_req', message: 'لا يوجد طلب من هذا اللاعب' });
+    const other = this.byId.get(id);
+    me.reqIn = me.reqIn.filter(x => x !== id);
+    if (other) {
+      other.reqOut = other.reqOut.filter(x => x !== me.id);
+      if (!me.friends.includes(id)) me.friends.push(id);
+      if (!other.friends.includes(me.id)) other.friends.push(me.id);
+    }
+    this.persist(); this.sendFriends(s, rid); if (other) this.pushFriends(other.id);
+  }
+  friendRemove(s: Session, id: unknown, rid?: string): void {
+    const me = s.account;
+    if (typeof id !== 'string' || !ID_RE.test(id)) return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
+    me.friends = me.friends.filter(x => x !== id);
+    me.reqIn = me.reqIn.filter(x => x !== id);
+    me.reqOut = me.reqOut.filter(x => x !== id);
+    const other = this.byId.get(id);
+    if (other) {
+      other.friends = other.friends.filter(x => x !== me.id);
+      other.reqIn = other.reqIn.filter(x => x !== me.id);
+      other.reqOut = other.reqOut.filter(x => x !== me.id);
+    }
+    this.persist(); this.sendFriends(s, rid); if (other) this.pushFriends(other.id);
+  }
+
   profile(s: Session, id: unknown, rid?: string): void {
     const a = typeof id === 'string' && id ? this.byId.get(id) : s.account;
     if (!a) return s.send({ t: 'error', rid, code: 'no_such_player' });
@@ -307,6 +379,10 @@ export class TahaddiService {
       case 'profile': return this.profile(s, msg.id, msg.rid);
       case 'purchase': { void this.purchase(s, msg.claim, msg.rid); return; }
       case 'purchases': return this.purchaseList(s, msg.rid);
+      case 'friends': return this.friends(s, msg.rid);
+      case 'friendAdd': return this.friendAdd(s, msg.id, msg.rid);
+      case 'friendAccept': return this.friendAccept(s, msg.id, msg.rid);
+      case 'friendRemove': return this.friendRemove(s, msg.id, msg.rid);
       case 'presence': return this.presence(s, msg.patch);
       case 'emit': return this.emit(s, msg.topic, msg.data);
       default: return s.send({ t: 'error', rid: (msg as any).rid, code: 'unknown' });

@@ -374,7 +374,10 @@ function vb3dMount(kindOrModel){
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
- const camY=2.85+Math.max(0,n-8)*.14,camZ=Rz+2.85+Math.max(0,n-8)*.3;cam.position.set(0,camY,camZ);cam.lookAt(0,.45,-.45);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ // 5.59: أنت تجلس في مكانك وترى المجلس بعينيك — الكاميرا في مقعدك، وشخصيتك لا تحجب الطاولة
+ if(chars[0]&&chars[0].ch){chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false}
+ const camY=1.56+Math.max(0,n-8)*.05,camZ=Rz+.92+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,.88,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ VB3.aim=new T.Vector3(0,.88,-.5);VB3.aimT=new T.Vector3(0,.88,-.5);
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
   const hits=ray.intersectObjects(VB3.chars.filter(c=>c.hit).map(c=>c.hit),false);if(hits.length){const i=hits[0].object.userData.seat;VB3.tapAt=Date.now();VB3.model.tap(i)}});
@@ -431,8 +434,8 @@ function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return 
 function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
  const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
- // ألواح الواجهة (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) تحجب ما تحتها: تُعامَل عوائق
- document.querySelectorAll('.vbFeedW,.vbBigCard,.vbScene.full .vbRole,.vbScene.full .vbTurn,.vbScene.full .vbSteps').forEach(p=>{
+ // ما يعلو المشهد وحده عائق: لوحة الدردشة، بطاقة الدور المكشوفة، ولوحة الملاحظات — والباقي صار أشرطة فوق المشهد لا عليه
+ document.querySelectorAll('.vbFeedW,.vbBigCard,.vbNotes:not([hidden])').forEach(p=>{
   if(!p.offsetWidth||!p.offsetHeight)return;const r=p.getBoundingClientRect();
   placed.push({x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,w:r.width,h:r.height})});
  const hit=(r,x,y,w,h,pad)=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad;
@@ -503,7 +506,11 @@ function vb3dLoop(now){
  else{VB3.sc.background.set(R.night.bg).lerp((VB3._c||(VB3._c=new T.Color())).set(R.day.bg),k);if(L.warm)L.warm.intensity=mix(10,2)}
  R.glow.material.opacity=mix(.55,.35)+Math.sin(t*3)*.05*calm;
  const sp=VB3.spot;if(talker&&!night){talker.u.head.getWorldPosition(tmp);sp.target.position.lerp(tmp,Math.min(1,dt*6));sp.intensity=lerp(sp.intensity,22,dt*4)}else sp.intensity=lerp(sp.intensity,0,dt*4);
- if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;VB3.cam.lookAt(0,.45,-.45)}
+ if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;
+  // النظر يميل قليلًا نحو المتكلّم ثم يعود إلى وسط الطاولة — حركة كاميرا حيّة بلا دوار
+  const tk=talker&&talker.seat?talker.seat.position:null;
+  VB3.aimT.set(tk?tk.x*.3:0,.88,tk?-.5+tk.z*.1:-.5);
+  VB3.aim.lerp(VB3.aimT,Math.min(1,dt*1.6));VB3.cam.lookAt(VB3.aim)}
  if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
 }
 function vb3dDispose(){
