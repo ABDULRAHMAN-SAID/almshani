@@ -141,32 +141,32 @@ function vb3dChar(look,posture){
  const irisM=reg(new T.MeshBasicMaterial({map:vb3dTexIris(),transparent:true}));
  const Z=new T.Vector3(0,0,1);
  // الجذع (ثوب/عباءة) بطيّات، والعنق والياقة وفتحة الصدر بأزرارها
- const prof=[[0.03,0],[0.34,0.02],[0.37,0.16],[0.32,0.46],[0.29,0.66],[0.25,0.74],[0.13,0.78],[0.1,0.86]].map(p=>new T.Vector2(p[0],p[1]));
+ const prof=[[0.03,0],[0.295,0.02],[0.325,0.17],[0.262,0.50],[0.232,0.72],[0.202,0.82],[0.115,0.87],[0.088,0.96]].map(p=>new T.Vector2(p[0],p[1]));
  const body=new T.Mesh(vb3dFolds(new T.LatheGeometry(prof,44),.013,9,.62),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
  // 5.67: كتفان يكسران المخروط — الظلّ يقع عليهما فيُقرأ الجسد إنسانًا
- g.add(vb3dMesh(vb3dG('Sphere',.3,28,18),cloth,0,.63,.02,{sc:[1.06,.42,.86]}));
- g.add(vb3dMesh(vb3dG('Cylinder',.075,.088,.13,24),skin,0,.86,0));
- if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.105,.014,10,30),cloth,0,.855,0,{rot:[Math.PI/2,0,0],noCast:1}));
-  g.add(vb3dMesh(vb3dG('Capsule',.007,.2,3,6),M(shade(look.thobe,-22),{rough:.9}),0,.665,.292,{rot:[.2,0,0],noCast:1}));
-  [.75,.69].forEach(y=>g.add(vb3dMesh(vb3dG('Sphere',.011,10,8),M('#E9E2D0',{rough:.4}),0,y,.302-(.75-y)*.4,{noCast:1})))}
+ g.add(vb3dMesh(vb3dG('Sphere',.235,28,18),cloth,0,.725,.015,{sc:[1.1,.4,.82]}));
+ g.add(vb3dMesh(vb3dG('Cylinder',.068,.08,.15,24),skin,0,.955,0));
+ if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.096,.013,10,30),cloth,0,.948,0,{rot:[Math.PI/2,0,0],noCast:1}));
+  g.add(vb3dMesh(vb3dG('Capsule',.006,.19,3,6),M(shade(look.thobe,-22),{rough:.9}),0,.73,.238,{rot:[.2,0,0],noCast:1}));
+  [.83,.77].forEach(y=>g.add(vb3dMesh(vb3dG('Sphere',.0095,10,8),M('#E9E2D0',{rough:.4}),0,y,.246-(.83-y)*.4,{noCast:1})))}
  if(look.me){const bisht=M('#2A1E16',{rough:.8,sheen:.7,sheenR:.4,sheenC:'#E8C88A',bump:weave,bumpS:.4});const bp=prof.map(v=>new T.Vector2(v.x*1.07+.01,v.y));
   g.add(new T.Mesh(vb3dFolds(new T.LatheGeometry(bp.slice(1,7),44,0.45,Math.PI*2-0.9),.01,11,.62),bisht));
-  g.add(vb3dMesh(vb3dG('Torus',.29,.013,10,40),M('#E8B23A',{metal:.95,rough:.18,clear:.4}),0,.66,0,{rot:[Math.PI/2,0,0],noCast:1}))}
+  g.add(vb3dMesh(vb3dG('Torus',.238,.012,10,40),M('#E8B23A',{metal:.95,rough:.18,clear:.4}),0,.72,0,{rot:[Math.PI/2,0,0],noCast:1}))}
  // الحضن على الوسادة، أو فخذان وساقان وحذاءان على الكرسي
- if(posture==='chair'){[-1,1].forEach(s=>{const hip=new T.Vector3(s*.15,.09,.06),knee=new T.Vector3(s*.17,.12,.44),foot=new T.Vector3(s*.17,-.40,.47);
-   g.add(vb3dLimb(hip,knee,.095,cloth),vb3dLimb(knee,foot,.075,cloth),vb3dMesh(vb3dG('Capsule',.045,.1,3,6),dark,s*.17,-.45,.5,{rot:[Math.PI/2,0,0]}))})}
- else g.add(vb3dMesh(vb3dG('Sphere',0.43,32,20),cloth,0,0.09,0.13,{sc:[1,.32,.82]}));
+ if(posture==='chair'){[-1,1].forEach(s=>{const hip=new T.Vector3(s*.125,.10,.06),knee=new T.Vector3(s*.14,.13,.44),foot=new T.Vector3(s*.14,-.42,.47);
+   g.add(vb3dLimb(hip,knee,.078,cloth),vb3dLimb(knee,foot,.062,cloth),vb3dMesh(vb3dG('Capsule',.038,.1,3,6),dark,s*.14,-.47,.5,{rot:[Math.PI/2,0,0]}))})}
+ else g.add(vb3dMesh(vb3dG('Sphere',0.35,32,20),cloth,0,0.10,0.12,{sc:[1,.3,.8]}));
  // الذراعان واليدان (راحة وأصابع وإبهام) على الحضن
- const arms={};[-1,1].forEach(s=>{const sh=new T.Vector3(s*.3,.6,.04),el=new T.Vector3(s*.37,.36,.2),hd=new T.Vector3(s*.14,.22,.37);
-  const up=vb3dLimb(sh,el,.064,cloth),lo=vb3dLimb(el,hd,.056,cloth);
+ const arms={};[-1,1].forEach(s=>{const sh=new T.Vector3(s*.235,.7,.03),el=new T.Vector3(s*.288,.44,.19),hd=new T.Vector3(s*.115,.27,.34);
+  const up=vb3dLimb(sh,el,.052,cloth),lo=vb3dLimb(el,hd,.045,cloth);
   const hand=new T.Group();hand.position.copy(hd);hand.quaternion.setFromUnitVectors(Z,new T.Vector3().subVectors(hd,el).normalize());
-  hand.add(vb3dMesh(vb3dG('Sphere',.05,18,14),skin,0,0,0,{sc:[1,.55,1.2]}));
-  for(let k=0;k<4;k++)hand.add(vb3dMesh(vb3dG('Capsule',.0115,.04,3,10),skin,(k-1.5)*.025,-.004,.068,{rot:[Math.PI/2+.2,0,0]}));
-  hand.add(vb3dMesh(vb3dG('Capsule',.012,.034,3,10),skin,-s*.052,.004,.018,{rot:[Math.PI/2-.4,0,s*.8]}));
-  const cuff=vb3dLimb(hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.03),hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.08),.06,cloth);
+  hand.add(vb3dMesh(vb3dG('Sphere',.042,18,14),skin,0,0,0,{sc:[1,.55,1.2]}));
+  for(let k=0;k<4;k++)hand.add(vb3dMesh(vb3dG('Capsule',.0098,.035,3,10),skin,(k-1.5)*.021,-.004,.058,{rot:[Math.PI/2+.2,0,0]}));
+  hand.add(vb3dMesh(vb3dG('Capsule',.0102,.03,3,10),skin,-s*.044,.004,.016,{rot:[Math.PI/2-.4,0,s*.8]}));
+  const cuff=vb3dLimb(hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.03),hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.08),.05,cloth);
   g.add(up,lo,hand,cuff);arms[s<0?'l':'r']={up,lo,hand,sh,el,hd,rest:{el:el.clone(),hd:hd.clone()}}});
  // الرأس: جمجمة وفكّ وأذنان
- const head=new T.Group();head.position.set(0,1.03,.03);g.add(head);
+ const head=new T.Group();head.position.set(0,1.105,.025);head.scale.setScalar(.8);g.add(head);
  head.add(vb3dMesh(vb3dG('Sphere',.19,44,30),skin,0,0,0,{sc:[1,1.08,1]}));
  head.add(vb3dMesh(vb3dG('Sphere',.15,32,22),skin,0,-.085,0,{sc:[1,.82,1.02]}));
  const onFace=(x,y,off)=>new T.Vector3(x,y,Math.sqrt(Math.max(0,.0361-x*x-(y/1.08)*(y/1.08)))+(off||0));
@@ -438,8 +438,8 @@ function vb3dMount(kindOrModel){
   if(!empty){ch=vb3dChar(vb3dLook(i,model),kind==='mafia'?'chair':'floor');ch.position.y=seatH;
    const hv=1+(((i*2654435761)>>>0)%100)/100*.09-.045;ch.scale.set(1+(1-hv)*.35,hv,1+(1-hv)*.35);   // 5.63: قامات متفاوتة قليلًا فلا يبدون نسخة واحدة
    seat.add(ch);
-   hit=vb3dMesh(vb3dG('Capsule',.42,.9,2,6),new T.MeshBasicMaterial({visible:false}),0,seatH+.55,.05,{noCast:1});hit.userData.seat=i;seat.add(hit)}
-  chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
+   hit=vb3dMesh(vb3dG('Capsule',.36,1.0,2,6),new T.MeshBasicMaterial({visible:false}),0,seatH+.6,.05,{noCast:1});hit.userData.seat=i;seat.add(hit)}
+  chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+1.05});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
  // 5.66: صندوق كل جالس يُقاس من جسمه — الإطار بعدها يتراجع بنفسه حتى يدخل الجميع، فلا يُقصّ أحد
