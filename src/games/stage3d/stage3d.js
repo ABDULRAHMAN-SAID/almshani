@@ -123,9 +123,15 @@ function vb3dLook(i,model){
  return {f,me,host:i===model.host,skin:AV.skin[av.skin]||AV.skin[0],hair:AV.hair[av.hair]||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
   beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5]};
 }
-function vb3dTexIris(){return vb3dTex('iris',64,64,(g,w,h)=>{g.clearRect(0,0,w,h);const gr=g.createRadialGradient(32,32,2,32,32,30);gr.addColorStop(0,'#0C0A10');gr.addColorStop(.4,'#0C0A10');gr.addColorStop(.45,'#7A4A22');gr.addColorStop(.72,'#3B2314');gr.addColorStop(.95,'#24140A');gr.addColorStop(1,'rgba(36,20,10,0)');
- g.fillStyle=gr;g.beginPath();g.arc(32,32,31,0,7);g.fill();g.strokeStyle='rgba(140,90,40,.45)';g.lineWidth=1;for(let k=0;k<26;k++){const a=k/26*Math.PI*2;g.beginPath();g.moveTo(32+Math.cos(a)*14,32+Math.sin(a)*14);g.lineTo(32+Math.cos(a)*29,32+Math.sin(a)*29);g.stroke()}
- g.fillStyle='rgba(255,255,255,.92)';g.beginPath();g.arc(23,23,5.5,0,7);g.fill();g.fillStyle='rgba(255,255,255,.5)';g.beginPath();g.arc(40,42,2.5,0,7);g.fill()})}
+function vb3dTexIris(){return vb3dTex('iris',96,96,(g,w,h)=>{g.clearRect(0,0,w,h);
+ // حلقة طرفية داكنة ثمّ قزحية بألياف ثمّ بؤبؤ أسود — عين لا قرص
+ const gr=g.createRadialGradient(48,48,4,48,48,46);
+ gr.addColorStop(0,'#6B4020');gr.addColorStop(.55,'#8A5527');gr.addColorStop(.82,'#4A2C14');gr.addColorStop(.94,'#241408');gr.addColorStop(1,'rgba(36,20,8,0)');
+ g.fillStyle=gr;g.beginPath();g.arc(48,48,46,0,7);g.fill();
+ g.strokeStyle='rgba(190,140,80,.45)';g.lineWidth=1.6;
+ for(let k=0;k<28;k++){const a=k/28*Math.PI*2;g.beginPath();g.moveTo(48+Math.cos(a)*17,48+Math.sin(a)*17);g.lineTo(48+Math.cos(a)*40,48+Math.sin(a)*40);g.stroke()}
+ g.fillStyle='#0A0810';g.beginPath();g.arc(48,48,17,0,7);g.fill();
+ g.strokeStyle='rgba(20,12,6,.75)';g.lineWidth=3;g.beginPath();g.arc(48,48,44,0,7);g.stroke()})}
 function vb3dTexWeave(){return vb3dTex('weave',128,128,(g,w,h)=>{g.fillStyle='#808080';g.fillRect(0,0,w,h);for(let y=0;y<h;y+=4){g.fillStyle=y%8?'#8c8c8c':'#727272';g.fillRect(0,y,w,2)}for(let x=0;x<w;x+=4){g.fillStyle=x%8?'rgba(150,150,150,.5)':'rgba(100,100,100,.5)';g.fillRect(x,0,2,h)}vb3dNoise(g,w,h,2500,.12)},[7,7],true)}
 /** طيّات قماش: تموّج نصف قطر المخرطة حول المحيط تحت ارتفاع معيّن */
 function vb3dFolds(geo,amp,freq,maxY){const p=geo.attributes.position;for(let k=0;k<p.count;k++){const x=p.getX(k),y=p.getY(k),z=p.getZ(k);if(y>maxY)continue;const r=Math.hypot(x,z);if(r<1e-4)continue;const a=Math.atan2(z,x),f=1+amp*Math.sin(freq*a)*(1-y/maxY);p.setXYZ(k,x*f,y,z*f)}geo.computeVertexNormals();return geo}
@@ -177,13 +183,15 @@ function vb3dChar(look,posture){
  const lashM=M(shade(look.hs==='bald'?'#3A2B1E':look.hair,-40),{rough:.55}),creaseM=M(shade(look.skin,-30),{rough:.7});
  [-1,1].forEach(s=>{const eg=new T.Group();eg.position.set(s*.073,.034,.1515);head.add(eg);
   eg.add(vb3dMesh(vb3dG('Sphere',.0325*big,24,18),eyeM,0,0,0,{noCast:1}));
-  eg.add(vb3dMesh(vb3dG('Circle',.0215*big,24),irisM,0,0,.0315*big,{noCast:1}));
+  const eR=.0325*big;
+  eg.add(vb3dMesh(vb3dG('Circle',.0208*big,28),irisM,0,0,eR+.0009,{noCast:1}));         // أمام الكرة لا داخلها
+  eg.add(vb3dMesh(vb3dG('Circle',.0055*big,14),reg(new T.MeshBasicMaterial({color:0xFFFFFF,transparent:true,opacity:.9,depthWrite:false})),-.007*big,.008*big,eR+.0016,{noCast:1}));   // بريق العين
   const cover=ey==='happy'?2.7:ey==='sharp'?1.28:ey==='wide'?.74:1.1;
   const lid=vb3dMesh(vb3dG('Sphere',.0355*big,24,14,0,Math.PI*2,0,cover),skin,0,0,0,{noCast:1});lid.rotation.x=-.12;if(ey==='sharp')lid.rotation.z=-s*.38;eg.add(lid);
   eg.add(vb3dMesh(vb3dG('Sphere',.0355*big,24,10,0,Math.PI*2,Math.PI-.62,.62),skin,0,0,0,{noCast:1}));
-  if(ey!=='happy'){const lash=vb3dMesh(vb3dG('Torus',.0322*big,.0034,6,20,2.5),lashM,0,0,0,{noCast:1});
+  if(ey!=='happy'){const lash=vb3dMesh(vb3dG('Torus',.0338*big,.0022,6,20,1.9),lashM,0,0,.001,{noCast:1});
    lash.rotation.set(-.12,0,Math.PI/2-1.25+(ey==='sharp'?-s*.3:0));eg.add(lash);
-   const cr=vb3dMesh(vb3dG('Torus',.038*big,.0026,6,18,2.1),creaseM,0,.006,-.004,{noCast:1});cr.rotation.set(-.1,0,Math.PI/2-1.05);eg.add(cr)}
+   const cr=vb3dMesh(vb3dG('Torus',.040*big,.0018,6,18,1.7),creaseM,0,.008,-.004,{noCast:1});cr.rotation.set(-.1,0,Math.PI/2-1.05);eg.add(cr)}
   if(ey==='happy'){const cr=vb3dMesh(vb3dG('Torus',.026,.0055,6,16,2.2),M(shade(look.skin,-58),{rough:.6}),0,.004,.03,{noCast:1});cr.rotation.z=Math.PI/2-1.1;eg.add(cr)}
   eyes.push({lid,closed:ey==='happy'})});
  // الحاجبان أنابيب على منحنٍ، والأنف بفتحتيه، وحمرة الخدّين
@@ -225,8 +233,8 @@ function vb3dChar(look,posture){
  }else if(hs==='short')cap(1.5,-.55);
  else if(hs==='wavy'){cap(1.55,-.5);for(let k=0;k<5;k++){const a=-.9+k*.45;const w=vb3dMesh(vb3dG('Torus',.045,.02,10,18,2.6),hairM,Math.sin(a)*.17,.118-Math.abs(a)*.03,Math.cos(a)*.16,{noCast:1});w.rotation.set(-.6+k*.1,a,Math.PI/2);head.add(w)}}
  else if(hs==='curly'){cap(1.6,-.45);let hh=hashStr(look.hair+'c');const rnd=()=>{hh=Math.imul(hh^(hh>>>15),2246822507)>>>0;return (hh%1000)/1000};
-  for(let k=0;k<20;k++){const th=.15+rnd()*1.35,ph=rnd()*Math.PI*2;if(th>.95&&Math.abs(((ph-Math.PI/2+Math.PI)%(2*Math.PI))-Math.PI)<.8)continue;
-   head.add(vb3dMesh(vb3dG('Sphere',.05,14,10),hairM,-.19*Math.cos(ph)*Math.sin(th),.19*Math.cos(th)*1.06+.02,.19*Math.sin(ph)*Math.sin(th),{noCast:1}))}}
+  for(let k=0;k<46;k++){const th=.12+rnd()*1.42,ph=rnd()*Math.PI*2;if(th>.95&&Math.abs(((ph-Math.PI/2+Math.PI)%(2*Math.PI))-Math.PI)<.8)continue;
+   const R=.198+rnd()*.012;head.add(vb3dMesh(vb3dG('Sphere',.028+rnd()*.012,12,9),hairM,-R*Math.cos(ph)*Math.sin(th),R*Math.cos(th)*1.05+.018,R*Math.sin(ph)*Math.sin(th),{noCast:1}))}}
  else if(hs==='long'){cap(1.5,-.55);const lp=[[.2,.04],[.215,-.08],[.225,-.22],[.235,-.38],[.22,-.5]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(lp,32,Math.PI*.38,Math.PI*1.24),hairM,0,0,0))}
  // الإكسسوارات: نظارة، نظارة عالِم، تاج، وشاح ذهبي، عصابة
  if(ac==='glasses'||ac==='sci'){const gm=ac==='sci'?M('#5DCAA5',{rough:.35,metal:.3}):M('#1F2230',{rough:.4,metal:.4});const R=ac==='sci'?.052:.048,tb=ac==='sci'?.006:.0045;
@@ -315,13 +323,14 @@ function vb3dRoomMajlis(sc){
  // هدب السجّاد عند الحافّتين
  const fr=vb3dMat('#E8C77A',{rough:.9});for(let k=-24;k<=24;k++){sc.add(vb3dMesh(vb3dG('Capsule',.008,.14,2,5),fr,k*.1,.012,3.55,{rot:[Math.PI/2,0,0],noCast:1}))}
  const L={};L.hemi=new T.HemisphereLight(0xFFE7C6,0x4A2A1A,.95);sc.add(L.hemi);
- L.key=new T.DirectionalLight(0xFFF0D8,2.2);L.key.position.set(2.9,5.2,2.4);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
+ L.key=new T.DirectionalLight(0xFFF0D8,2.2);L.key.position.set(4.2,4.1,2.2);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
  Object.assign(L.key.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:.5,far:14});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
  L.rim=new T.DirectionalLight(0xFFCE96,1.5);L.rim.position.set(-2.4,2.9,-4.4);sc.add(L.rim);   // ضوء حافّة من الخلف يرسم حدود الرؤوس والأكتاف
  L.lamp=new T.PointLight(0xFFC98A,26,11,1.7);L.lamp.position.set(0,2.05,0);sc.add(L.lamp);L.sconce=[sc1,sc2];
- L.fill=new T.DirectionalLight(0xFFE2C4,.42);L.fill.position.set(.7,2.4,4.4);sc.add(L.fill);
+ L.fill=new T.DirectionalLight(0xFFE2C4,.3);L.fill.position.set(.6,2.2,4.4);sc.add(L.fill);
+ L.bounce=new T.DirectionalLight(0xC9A88A,.22);L.bounce.position.set(-.6,-1.6,2.4);sc.add(L.bounce);   // ارتداد من السجّاد يملأ تحت الذقن
  L.warm=new T.PointLight(0xFFB070,10,10,1.8);L.warm.position.set(0,1.6,-3.2);sc.add(L.warm);
- return {L,glow,day:{hemi:.4,key:2.7,lamp:15,rim:2.1,sconce:6,bg:'#241A11'},night:{hemi:.2,key:.8,lamp:10,rim:1.15,sconce:3.6,bg:'#120E0C'}};
+ return {L,glow,day:{hemi:.3,key:3.2,lamp:14,rim:2.3,sconce:6,bg:'#241A11'},night:{hemi:.15,key:1.0,lamp:9,rim:1.3,sconce:3.6,bg:'#120E0C'}};
 }
 function vb3dRoomSquare(sc){
  const T=THREE,wood=vb3dTexWood();
@@ -392,12 +401,13 @@ function vb3dRoomSquare(sc){
  for(let k=0;k<3;k++)sc.add(vb3dMesh(vb3dG('Plane',18,1.5),mist,0,.35+k*.3,-4-k*1.5,{noCast:1}));
  sc.fog=new T.FogExp2(0x0B0E22,.062);   // 5.62: عمق أوضح — الخلفية تلين فتبرز الوجوه
  const L={};L.hemi=new T.HemisphereLight(0x8E9AD8,0x241C2A,.8);sc.add(L.hemi);
- L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-4,6.2,1.2);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
+ L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-5.2,4.6,1.6);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
  L.rim=new T.DirectionalLight(0x9FB4FF,1.2);L.rim.position.set(2.6,2.8,-5.2);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
  L.lamp=new T.PointLight(0xFFB760,34,10,1.7);L.lamp.position.set(0,1.25,0);sc.add(L.lamp);L.posts=[p1,p2];
- L.fill=new T.DirectionalLight(0xFFD2A4,.5);L.fill.position.set(.8,2.2,4.2);sc.add(L.fill);   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
- return {L,glow,sky,stars,day:{hemi:.36,key:2.0,lamp:27,post:18,rim:2.0,skyc:'#FFFFFF',starO:.7},night:{hemi:.17,key:1.15,lamp:14,post:9,rim:1.6,skyc:'#5A6090',starO:1}};
+ L.fill=new T.DirectionalLight(0xFFD2A4,.34);L.fill.position.set(.7,2.1,4.2);sc.add(L.fill);
+ L.bounce=new T.DirectionalLight(0x8FA0C8,.2);L.bounce.position.set(-.5,-1.5,2.2);sc.add(L.bounce);   // ارتداد بارد من الحجر   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
+ return {L,glow,sky,stars,day:{hemi:.28,key:2.5,lamp:25,post:17,rim:2.3,skyc:'#FFFFFF',starO:.7},night:{hemi:.13,key:1.45,lamp:13,post:9,rim:1.9,skyc:'#5A6090',starO:1}};
 }
 /* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
 function vb3dStageModel(kind){const my=VB;return {kind,names:VB.names,me:0,empty:new Set(),host:-1,stage:'vbStage',seats:'#vbSeats .vbSeat',scene:'.vbScene',
