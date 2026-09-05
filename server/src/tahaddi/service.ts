@@ -9,7 +9,7 @@ import { verify as verifyReceipt, iapStatus } from './iap';
 import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec } from './protocol';
 
 export interface Account {
-  token: string; id: string; name: string; createdAt: number; lastSeen: number;
+  token: string; id: string; name: string; email?: string; createdAt: number; lastSeen: number;
   save: CloudSave | null;
   ranks: Record<string, RankProfile>;
   friends: string[];      // معرّفات أصدقاء مقبولين من الطرفين
@@ -26,6 +26,7 @@ interface Pending {
 }
 interface Persisted { v: 1; accounts: Account[]; purchases?: PurchaseRec[] }
 const PLATFORMS = new Set(['ios', 'android', 'test']);
+const MAIL_RE = /^[^\s@]{1,64}@[^\s@.]+(\.[^\s@.]+)+$/;
 const MAX_RECEIPT_BYTES = 64 * 1024;
 
 const MAX_SAVE_BYTES = 256 * 1024;
@@ -122,6 +123,14 @@ export class TahaddiService {
     if (!n) return s.send({ t: 'error', rid, code: 'bad_name' });
     s.account.name = n; this.persist();
     s.send({ t: 'nameSet', rid, name: n });
+  }
+
+  /* ── بريد الحساب: يُخزَّن مع الحساب ولا يُرسل لأحد — لا يظهر في الملفّات ولا لوائح المتصدّرين ── */
+  setEmail(s: Session, email: unknown, rid?: string): void {
+    const e = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (e.length < 5 || e.length > 120 || !MAIL_RE.test(e)) return s.send({ t: 'error', rid, code: 'bad_email' });
+    s.account.email = e; this.persist();
+    s.send({ t: 'emailSet', rid, email: e });
   }
 
   /* ── الحفظ السحابي: الخادم يحفظ ما يرسله الهاتف كما هو، لكنّ الرتب لا تُؤخذ منه أبدًا ── */
@@ -372,6 +381,7 @@ export class TahaddiService {
   handle(s: Session, msg: ClientMsg): void {
     switch (msg.t) {
       case 'setName': return this.setName(s, msg.name, msg.rid);
+      case 'setEmail': return this.setEmail(s, msg.email, msg.rid);
       case 'saveCloud': return this.saveCloud(s, msg.save, msg.rid);
       case 'loadCloud': return this.loadCloud(s, msg.rid);
       case 'submitResult': return this.submitResult(s, msg.report, msg.rid);

@@ -14,7 +14,7 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
  const page=await b.newPage({viewport:{width:430,height:900}});
  const errs=[];page.on('pageerror',e=>errs.push(e.message));
  await page.goto('http://localhost:8875/index.html');await page.waitForTimeout(1500);
- await page.evaluate(()=>{S.tutorial_completed=true;S.tutDone=1;S.dev=1;saveState();cur='play';nav();Router.reset('playScr')});
+ await page.evaluate(()=>{S.email='tester@mail.com';S.tutorial_completed=true;S.tutDone=1;S.dev=1;saveState();cur='play';nav();Router.reset('playScr')});
  await page.waitForTimeout(300);
 
  // ── أ) السجلّ يغطّي كل دالة ترسم شاشة ──
@@ -49,7 +49,7 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
   const ARG={cardDetail:+cid||cid,cardLevels:+cid||cid,levelDetail:{id:+cid||cid,lv:1},tryCard:+cid||cid,setSection:'account',chestScr:ck,oddsScr:ck,
    rewardScr:{list:[],title:'اختبار'},mapScr:NETS[0].id,gameHub:'carrom',gameRankScr:'carrom',soloScr:'carrom',roomScr:'carrom',
    mmScr:{g:'uno',mode:'casual'},clMemberScr:uid,profileView:myProfile()};
-  const skip=new Set(['playScr','moreScr','cardsScr','shopScr','home','netsScr','welcomeScr','askTut','skipAsk','clubHome','clSearchScr',
+  const skip=new Set(['playScr','moreScr','cardsScr','shopScr','home','netsScr','authScr','welcomeScr','askTut','skipAsk','clubHome','clSearchScr',
    'match','intro','mResult','tutorial','room','party','vsbot','quiz','clTransferScr']);
   const out=[];
   for(const n of Router.names()){

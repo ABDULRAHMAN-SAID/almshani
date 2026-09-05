@@ -65,7 +65,7 @@ var SFX=(function(){
   pot:   function(t){tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)},
   coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)}
  };
- var HAPT={tap:10,ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],coin:10};
+ var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15]};
 
  function play(k){
   var f=LIB[k];if(!f)return false;
@@ -77,9 +77,10 @@ var SFX=(function(){
   return true;
  }
  function vibe(k){
+  var pat=HAPT[k];if(!pat)return false;   // مفتاح بلا نمط (tap/coin) لا يهتزّ أبدًا
   var on=false;try{on=!!haptic()}catch(e){}
   if(!on||!W||!W.navigator||typeof W.navigator.vibrate!=='function')return false;
-  try{return !!W.navigator.vibrate(HAPT[k]||10)}catch(e){return false}
+  try{return !!W.navigator.vibrate(pat)}catch(e){return false}
  }
  function fx(k){var a=play(k),b=vibe(k);return a||b}
  function available(){return !!AC()}

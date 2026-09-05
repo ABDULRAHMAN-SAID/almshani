@@ -61,7 +61,7 @@ function latin(t){
   await p.goto('http://localhost:'+PORT+'/index.html');
   await p.waitForTimeout(1400);
   await p.evaluate(fn=>{
-   S.tutorial_completed=true;S.dev=1;S.name='لاعب';S.xp=9000;
+   S.email='tester@mail.com';S.tutorial_completed=true;S.dev=1;S.name='لاعب';S.xp=9000;
    eval('('+fn+')()');
    if(!S.clan)try{CLAN.act(S.uid,'create',{n:'صقور الجزيرة',m:'معًا',i:'falcon',col:'#8B5CF0',jt:'req'});
     CLAN.seedBots(S.clan.c.id,6)}catch(e){}

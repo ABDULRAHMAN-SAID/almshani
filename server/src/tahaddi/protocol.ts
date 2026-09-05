@@ -34,7 +34,8 @@ export interface PurchaseGrant { gems: number; coins: number; wild: string | nul
 export interface PurchaseRec { txId: string; platform: Platform; productId: string; accountId: string; at: number; grant: PurchaseGrant }
 
 export type ClientMsg =
-  | { t: 'hello'; rid?: string; token?: string; name?: string; peer?: string }   // peer: معرّف الاتصال السابق لاستئناف الغرفة بعد انقطاع
+  | { t: 'hello'; rid?: string; token?: string; name?: string; peer?: string }
+  | { t: 'setEmail'; rid?: string; email: string }   // بريد الحساب — لا لعب بلا حساب   // peer: معرّف الاتصال السابق لاستئناف الغرفة بعد انقطاع
   | { t: 'setName'; rid?: string; name: string }
   | { t: 'saveCloud'; rid?: string; save: CloudSave }
   | { t: 'loadCloud'; rid?: string }
@@ -64,6 +65,7 @@ export interface PeerView {
 export interface LeaderRow { id: string; name: string; tier: number; div: number; rp: number; wins: number; losses: number; placed: boolean }
 
 export type ServerMsg =
+  | { t: 'emailSet'; rid?: string; email: string }
   | { t: 'welcome'; rid?: string; token: string; id: string; name: string; peer: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
   | { t: 'nameSet'; rid?: string; name: string }
   | { t: 'cloudSaved'; rid?: string; t2: number }

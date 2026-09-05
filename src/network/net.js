@@ -163,6 +163,7 @@ var NET=(function(){
  function saveCloud(blob,t){return request({t:'saveCloud',save:{t:t||Date.now(),blob:blob}})}
  function loadCloud(){return request({t:'loadCloud'})}
  function setName(name){return request({t:'setName',name:name})}
+ function setEmail(email){return request({t:'setEmail',email:email})}
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
@@ -193,7 +194,7 @@ var NET=(function(){
  }
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
-  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
   _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة

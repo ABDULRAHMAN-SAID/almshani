@@ -112,7 +112,7 @@ function vb3dTexFacade(){return vb3dTex('facade',256,512,(g,w,h)=>{
  g.fillStyle='#544733';g.fillRect(0,18,w,4)},[1,1])}
 function vb3dTexAo(){return vb3dTex('ao',128,128,(g,w,h)=>{const gr=g.createRadialGradient(64,64,2,64,64,62);gr.addColorStop(0,'rgba(0,0,0,.72)');gr.addColorStop(.45,'rgba(0,0,0,.42)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)})}
 /** بقعة ظلّ تماس تحت الجالس أو الأثاث */
-function vb3dAo(sc,x,y,z,r){const T=THREE;const m=new T.Mesh(vb3dG('Plane',r*2,r*2),VB3.aoMat||(VB3.aoMat=new T.MeshBasicMaterial({map:vb3dTexAo(),transparent:true,depthWrite:false,opacity:.85})));
+function vb3dAo(sc,x,y,z,r){const T=THREE;const m=new T.Mesh(vb3dG('Plane',r*2,r*2),VB3.aoMat||(VB3.aoMat=new T.MeshBasicMaterial({map:vb3dTexAo(),transparent:true,depthWrite:false,opacity:.95})));
  m.position.set(x,y,z);m.rotation.x=-Math.PI/2;m.renderOrder=-1;sc.add(m);return m}
 function vb3dTexGlow(){return vb3dTex('glow',128,128,(g,w,h)=>{const gr=g.createRadialGradient(64,64,2,64,64,64);gr.addColorStop(0,'rgba(255,240,200,1)');gr.addColorStop(.35,'rgba(255,220,150,.45)');gr.addColorStop(1,'rgba(255,200,120,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)})}
 /* ── مظهر كل لاعب من أفاتار ملفّه الشخصي: بشرة، شعر وقصّته، عينان، فم، لحية، إكسسوار — الشخصية المجسّمة هي صورته نفسها ── */
@@ -135,8 +135,8 @@ function vb3dChar(look,posture){
  const T=THREE,g=new T.Group(),mats=[],weave=vb3dTexWeave();
  const M=(c,o)=>{const m=vb3dMat(c,o);m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
  const reg=m=>{m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
- const skin=M(look.skin,{rough:.52,sheen:.5,sheenR:.5,sheenC:'#FF9E86',spec:.5}),cloth=M(look.thobe,{rough:.94,sheen:.35,sheenC:'#FFF6E6',bump:weave,bumpS:.35});
- const hairM=M(look.hair,{rough:.42,metal:.05,sheen:.6,sheenR:.3,sheenC:'#FFE9C8'}),dark=M('#15141C',{rough:.5}),lipM=M('#8A4A3A',{rough:.55}),white=M('#F7F4EC',{rough:.3});
+ const skin=M(look.skin,{rough:.46,sheen:.62,sheenR:.42,sheenC:'#FF9E86',spec:.62}),cloth=M(look.thobe,{rough:.9,sheen:.5,sheenR:.34,sheenC:'#FFF6E6',bump:weave,bumpS:.42});
+ const hairM=M(look.hair,{rough:.34,metal:.08,sheen:.72,sheenR:.26,sheenC:'#FFE9C8'}),dark=M('#15141C',{rough:.5}),lipM=M('#8A4A3A',{rough:.55}),white=M('#F7F4EC',{rough:.3});
  const eyeM=reg(new T.MeshPhysicalMaterial({color:new T.Color('#F7F4EC'),roughness:.12,clearcoat:1,clearcoatRoughness:.06}));
  const irisM=reg(new T.MeshBasicMaterial({map:vb3dTexIris(),transparent:true}));
  const Z=new T.Vector3(0,0,1);
@@ -413,7 +413,8 @@ function vb3dMount(kindOrModel){
  try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){return false}
  const cv=renderer.domElement;cv.className='vb3d';st.insertBefore(cv,st.firstChild);const vig=document.createElement('div');vig.className='vb3dVig';cv.after(vig);
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
- renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;renderer.outputColorSpace=T.SRGBColorSpace;
+ renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;renderer.outputColorSpace=T.SRGBColorSpace;
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2.5));   // 5.68: حدّة أعلى على شاشات الهاتف الكثيفة
  const sc=new T.Scene();const cam=new T.PerspectiveCamera(48,1.2,.1,80);
  const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.82+Math.max(0,n-6)*.12,Rz=1.66,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
  sc.environmentIntensity=kind==='mafia'?.1:.2;

@@ -108,6 +108,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
  box-shadow:0 16px 40px rgba(0,0,0,.6),inset 0 3px 10px rgba(255,255,255,.14);
  transform:perspective(700px) rotateX(7deg)}
 .gHero.sm{width:104px;height:104px;border-radius:20px}
+.gHero.xs{width:74px;height:74px;margin:4px auto 0;border-radius:16px}
 .gHero svg{width:100%;height:100%}
 .wayCard{display:flex;align-items:center;gap:12px;padding:13px;margin-bottom:10px;border-radius:15px;cursor:pointer;
  background:linear-gradient(168deg,#1C2540,#0E1526);border:1.5px solid var(--bd);
@@ -116,7 +117,17 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .wayCard.pick.on{border-color:var(--gold);background:linear-gradient(160deg,rgba(232,178,58,.18),rgba(232,178,58,.05));box-shadow:0 6px 18px rgba(232,178,58,.18)}
 .wPick{display:flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--bd);color:var(--gold);flex-shrink:0}
 .wayCard.pick.on .wPick{border-color:var(--gold);background:rgba(232,178,58,.16)}
-.soloGo{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));margin-top:14px;padding-top:8px;background:linear-gradient(to top,var(--bg) 72%,transparent);z-index:5}
+.soloGo{position:fixed;left:0;right:0;bottom:calc(70px + env(safe-area-inset-bottom));padding:10px 14px 8px;z-index:30;
+ background:linear-gradient(to top,var(--bg) 58%,rgba(8,11,20,.94) 86%,rgba(8,11,20,0))}
+.soloPad{height:76px}
+.dfRow{display:flex;gap:7px;margin-top:8px}
+.dfC{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 6px 8px;cursor:pointer;
+ border:1px solid var(--bd);border-radius:14px;background:var(--card);text-align:center}
+.dfC.on{border-color:var(--gold);background:linear-gradient(180deg,rgba(232,178,58,.16),rgba(232,178,58,.05))}
+.dfC>i{font-size:17px;line-height:1;font-style:normal}
+.dfC>b{font-size:13px;font-weight:900;color:var(--tx)}
+.dfC.on>b{color:#FFE9A8}
+.dfC>u{font-size:10px;text-decoration:none;color:var(--mut);line-height:1.35}
 .wayCard:active{transform:scale(.985)}
 .wIco{font-size:27px;flex-shrink:0;filter:drop-shadow(0 3px 6px rgba(0,0,0,.5))}
 .wT{font-weight:900;font-size:13px}
@@ -854,7 +865,9 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbAv>span.vbSeatCard{position:absolute;bottom:-5px;right:-9px;width:15px;height:21px;border-radius:3px;background:linear-gradient(135deg,#3A2A6A,#150E2C);border:1px solid #C9921E;box-shadow:0 2px 5px rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;line-height:0}
 /* المجلس المجسّم (5.52): قماش WebGL تحت طبقة المقاعد؛ الأسماء والشارات فوق رؤوس الشخصيات، وفقاعات كلام */
 .vb3d{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;touch-action:manipulation}
-.vb3dVig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,rgba(0,0,0,0) 52%,rgba(0,0,0,.42) 100%)}
+.vb3dVig{position:absolute;inset:0;pointer-events:none;
+ background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 46%,rgba(0,0,0,.2) 74%,rgba(0,0,0,.52) 100%),
+  linear-gradient(180deg,rgba(255,206,150,.05),rgba(0,0,0,0) 26%)}
 .vbScene.is3d .vbStage{height:100%}
 @media (min-width:480px){.vbScene.is3d .vbStage{height:340px}}
 .vbScene.is3d .vbBg,.vbScene.is3d .vbCenter{display:none}
@@ -15250,6 +15263,7 @@ var NET=(function(){
  function saveCloud(blob,t){return request({t:'saveCloud',save:{t:t||Date.now(),blob:blob}})}
  function loadCloud(){return request({t:'loadCloud'})}
  function setName(name){return request({t:'setName',name:name})}
+ function setEmail(email){return request({t:'setEmail',email:email})}
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
@@ -15280,7 +15294,7 @@ var NET=(function(){
  }
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
-  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
   _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة
@@ -15355,7 +15369,7 @@ var SFX=(function(){
   pot:   function(t){tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)},
   coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)}
  };
- var HAPT={tap:10,ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],coin:10};
+ var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15]};
 
  function play(k){
   var f=LIB[k];if(!f)return false;
@@ -15367,9 +15381,10 @@ var SFX=(function(){
   return true;
  }
  function vibe(k){
+  var pat=HAPT[k];if(!pat)return false;   // مفتاح بلا نمط (tap/coin) لا يهتزّ أبدًا
   var on=false;try{on=!!haptic()}catch(e){}
   if(!on||!W||!W.navigator||typeof W.navigator.vibrate!=='function')return false;
-  try{return !!W.navigator.vibrate(HAPT[k]||10)}catch(e){return false}
+  try{return !!W.navigator.vibrate(pat)}catch(e){return false}
  }
  function fx(k){var a=play(k),b=vibe(k);return a||b}
  function available(){return !!AC()}
@@ -17689,7 +17704,7 @@ Router.init({
  scrollY:()=>window.scrollY,
  restore:y=>{_keepY=y},
  bar:(show,fn)=>{const el=$('nav');if(el)el.style.display=show?'flex':'none';if(fn&&!ARENA_FLOWS.test(fn))hideArena()},
- root:()=>{if(!S.tutorial_completed)return;tab(cur||'play')},
+ root:()=>{if(!hasAccount()){Router.reset('authScr');return}if(!S.tutorial_completed)return;tab(cur||'play')},
  confirmLeave:proceed=>confirmSheet('تغييرات لم تُحفظ','لديك تعديلات في هذه الشاشة لم تُحفظ بعد.','تجاهل والرجوع',proceed),   // تغييرات غير محفوظة تُؤكَّد دائمًا
  atRoot:()=>toast('اضغط رجوع مرّة أخرى للخروج'),
  history:window.history,window:window
@@ -17705,7 +17720,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  const R=Router;
  // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
-  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr',
+  'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
@@ -17713,7 +17728,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
   'clEventsScr','clMoreScr'].forEach(n=>R.register(n,{}));
  // شاشة كاملة بلا شريط سفلي
- ['welcomeScr','askTut','skipAsk','clTransferScr','clSupportScr','clRequestSupportScr','clCreateScr']
+ ['authScr','welcomeScr','askTut','skipAsk','clTransferScr','clSupportScr','clRequestSupportScr','clCreateScr']
   .forEach(n=>R.register(n,{bar:false}));
  R.register('askName',{bar:false,render:a=>askName(a),dirty:()=>{const el=document.getElementById('nmFirst');return !!el&&el.value.trim()!==(S.name||'')}});
  // وسيط مركّب
@@ -18331,8 +18346,93 @@ function friendsScr(keep){
  if(keep)window.scrollTo(0,y);
  if(!keep&&on&&!FR.busy)frLoad();
 }
+/* ═══ اللغة: العربية أصل، والإنجليزية طبقة فوقها — ما لم يُترجَم يظهر بالعربية ═══ */
+const EN={
+ 'الإعدادات':'Settings','الحساب':'Account','اللعب':'Play','الصوت':'Sound','الإشعارات':'Notifications',
+ 'الخصوصية':'Privacy','البيانات':'Data','عن اللعبة':'About','اللغة':'Language','العربية':'Arabic',
+ 'البطاقات':'Cards','النادي':'Club','المتجر':'Shop','المزيد':'More',
+ 'رجوع':'Back','إلغاء':'Cancel','تأكيد':'Confirm','متابعة':'Continue','إغلاق':'Close','حفظ':'Save','تغيير':'Change','افتح':'Open',
+ 'الاسم · الشخصية · تسجيل الخروج':'Name · avatar · sign out',
+ 'الاهتزاز · التأكيدات · السرعة':'Vibration · confirmations · speed',
+ 'المؤثرات · الموسيقى':'Effects · music',
+ 'المباريات · المواسم · الأصدقاء':'Matches · seasons · friends',
+ 'من يراك · من يتحداك':'Who sees you · who challenges you',
+ 'حذف الحساب · تصدير':'Delete account · export',
+ 'الإصدار · الشروط':'Version · terms',
+ 'لغة الواجهة · العربية أو الإنجليزية':'Interface language · Arabic or English',
+ 'الاهتزاز عند اللمس':'Vibrate on touch',
+ 'طلب التأكيد':'Ask to confirm',
+ 'آليون بذكاء اصطناعي':'AI-powered bots',
+ 'المؤثرات الصوتية':'Sound effects',
+ 'اسمك في اللعبة':'Your in-game name',
+ 'الأصدقاء':'Friends','المشتريات':'Purchases','استعادة':'Restore','تعديل الشخصية':'Edit avatar',
+ 'بريدك الإلكتروني':'Your email',
+ 'مع الكمبيوتر':'Versus computer','مستوى الخصم':'Opponent level',
+ 'سهل':'Easy','متوسط':'Medium','صعب':'Hard',
+ 'اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار':'Playing the computer always works — no internet, no waiting',
+ 'أهلًا بك في تحدي':'Welcome to Tahaddi',
+ 'عالم من المعرفة والمنافسة ينتظرك.':'A world of knowledge and competition awaits.',
+ 'ابدأ':'Start','تخطي':'Skip',
+ 'سجّل دخولك':'Sign in',
+ 'اكتب بريدك الإلكتروني للدخول — حسابك وتقدّمك يرتبطان به.':'Enter your email to sign in — your account and progress are tied to it.',
+ 'بريد إلكتروني غير صحيح':'Invalid email address',
+ 'الدخول':'Sign in','تسجيل الخروج':'Sign out',
+ 'لغة الواجهة':'Interface language',
+ 'محتوى اللعب (الأسئلة وكلام الآليين) يبقى بالعربية':'Gameplay content (questions and bot dialogue) stays in Arabic'
+};
+/** نصّ الواجهة: يُرجع الإنجليزية إن اختيرت ووُجدت، وإلا يبقى الأصل العربي */
+function T(a){try{return (S&&S.lang==='en'&&EN[a])||a}catch(e){return a}}
+/** تبديل اللغة يُعيد رسم الشاشة الحالية فورًا — لا نصّ يبقى باللغة السابقة */
+function langPick(v){S.lang=v;saveState();applyLang();try{nav()}catch(e){}setSection('lang')}
+function applyLang(){
+ const en=(()=>{try{return S&&S.lang==='en'}catch(e){return false}})();
+ try{document.documentElement.lang=en?'en':'ar';document.documentElement.dir=en?'ltr':'rtl'}catch(e){}
+}
+/* ═══ البريد: لا لعب بلا حساب ═══ */
+const MAIL_RE=/^[^\s@]{1,64}@[^\s@.]+(\.[^\s@.]+)+$/;
+function hasAccount(){try{return MAIL_RE.test(String(S&&S.email||''))}catch(e){return false}}
+function emailSave(id,next){
+ const el=document.getElementById(id),v=(el?el.value:'').trim().toLowerCase();
+ const h=document.getElementById(id+'H');
+ if(!MAIL_RE.test(v)){if(h){h.textContent=T('بريد إلكتروني غير صحيح');h.style.color='var(--no)'}return false}
+ S.email=v;saveState();applyLang();
+ if(typeof netOnline==='function'&&netOnline()&&window.NET&&NET.setEmail)NET.setEmail(v).catch(()=>{});
+ if(typeof next==='function')next();
+ return true;
+}
+/** بوّابة الدخول: أوّل شاشة يراها من لا حساب له */
+function authScr(){
+ go(`<div class="scr on" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:88vh;text-align:center;padding:26px">
+ <div class="flt2" style="width:150px;height:150px;background-image:var(--logo);background-size:contain;background-repeat:no-repeat;background-position:center;
+  filter:drop-shadow(0 8px 24px rgba(232,178,58,.3))"></div>
+ <div style="font-size:20px;font-weight:900;margin-top:18px">${T('سجّل دخولك')}</div>
+ <div style="font-size:13px;color:var(--tx2);margin-top:8px;line-height:1.7;max-width:300px">${T('اكتب بريدك الإلكتروني للدخول — حسابك وتقدّمك يرتبطان به.')}</div>
+ <input class="fin" id="auMail" type="email" inputmode="email" autocomplete="email" maxlength="80" placeholder="name@mail.com"
+  style="margin-top:16px;text-align:center;font-size:16px;font-weight:700;direction:ltr" value="${esc(S.email||'')}"
+  onkeydown="if(event.key==='Enter'){event.preventDefault();emailSave('auMail',authDone)}">
+ <div class="note" id="auMailH">${T('بريدك الإلكتروني')}</div>
+ <div style="width:100%;margin-top:auto;padding-top:30px">
+ <button class="rbtn" onclick="emailSave('auMail',authDone)"><span>${ico('check',15)} ${T('الدخول')}</span></button></div></div>`);
+ setTimeout(()=>{const el=document.getElementById('auMail');if(el)el.focus()},120);
+}
+function authDone(){Router.reset(S.tutorial_completed?'playScr':'welcomeScr');if(S.tutorial_completed){cur='play';nav()}}
+/** تغيير البريد من الإعدادات */
+function emailAsk(){
+ go(`<div class="scr on" style="display:flex;flex-direction:column;min-height:88vh;padding:0 20px 20px">
+ ${tbar(T('بريدك الإلكتروني'))}
+ <div style="margin-top:auto"></div>
+ <div style="font-size:19px;font-weight:900;text-align:center">${T('بريدك الإلكتروني')}</div>
+ <input class="fin" id="stMail" type="email" inputmode="email" autocomplete="email" maxlength="80" placeholder="name@mail.com"
+  style="margin-top:14px;text-align:center;font-size:16px;font-weight:700;direction:ltr" value="${esc(S.email||'')}"
+  onkeydown="if(event.key==='Enter'){event.preventDefault();emailSave('stMail',back)}">
+ <div class="note" id="stMailH">${T('اكتب بريدك الإلكتروني للدخول — حسابك وتقدّمك يرتبطان به.')}</div>
+ <div style="width:100%;margin-top:auto;padding-top:26px">
+ <button class="rbtn" onclick="emailSave('stMail',back)"><span>${ico('check',15)} ${T('حفظ')}</span></button></div></div>`);
+ setTimeout(()=>{const el=document.getElementById('stMail');if(el)el.focus()},120);
+}
 const SETS=[
- {k:`account`,i:`${ico('user',16)}`,n:`الحساب`,d:'الاسم · الشخصية · تسجيل الخروج'},
+ {k:`account`,i:`${ico('user',16)}`,n:`الحساب`,d:'البريد · الاسم · الشخصية'},
+ {k:`lang`,i:`${ico('info',16)}`,n:`اللغة`,d:'لغة الواجهة · العربية أو الإنجليزية'},
  {k:`game`,i:`${ico('robot',16)}`,n:`اللعب`,d:'الاهتزاز · التأكيدات · السرعة'},
  {k:`sound`,i:`${ico('sound',16)}`,n:`الصوت`,d:'المؤثرات · الموسيقى'},
  {k:`notif`,i:`${ico('bell',16)}`,n:`الإشعارات`,d:'المباريات · المواسم · الأصدقاء'},
@@ -18353,15 +18453,15 @@ if(window.SFX){
 
 function setScr(){
  ensureOpt();
- go(`<div class="scr on">${tbar('الإعدادات')}
+ go(`<div class="scr on">${tbar(T('الإعدادات'))}
  ${SETS.map(s=>`<div class="li" style="cursor:pointer" onclick="push('setSection','${s.k}')">
   <div class="lr"><span style="font-size:20px">${ico(s.i,20)}</span>
-  <div class="lb"><div class="lt">${s.n}</div><div class="ls">${s.d}</div></div>
+  <div class="lb"><div class="lt">${T(s.n)}</div><div class="ls">${T(s.d)}</div></div>
   <span style="color:var(--mut)">›</span></div></div>`).join('')}
  <div class="note">الإصدار ${APP_VER}</div></div>`);
 }
 const tgl=(k,n,d)=>`<div class="li" style="cursor:pointer" onclick="S.opt.${k}=S.opt.${k}?0:1;saveState();setSection(SEC)"><div class="lr">
- <div class="lb"><div class="lt">${n}</div>${d?`<div class="ls">${d}</div>`:''}</div>
+ <div class="lb"><div class="lt">${T(n)}</div>${d?`<div class="ls">${T(d)}</div>`:''}</div>
  <div style="width:44px;height:25px;border-radius:14px;
   background:${S.opt[k]?'var(--pur)':'var(--elev)'};position:relative;cursor:pointer;
   border:1px solid ${S.opt[k]?'var(--pur)':'var(--bd)'};transition:background .2s">
@@ -18383,6 +18483,10 @@ function setSection(k){
   <button class="btn g" style="margin-top:11px" onclick="push('avScr')">تعديل الشخصية</button>
   </div></div>
   <div class="li" style="margin-top:11px"><div class="lr">
+   <div class="lb"><div class="lt">${T('بريدك الإلكتروني')}</div><div class="ls" style="direction:ltr;text-align:start">${esc(S.email||'—')}</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="push('emailAsk')">${T('تغيير')}</button></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">اسمك في اللعبة</div><div class="ls">${esc(S.name||'—')} — هذا ما يراه من يلعب معك</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
     onclick="push('renameAsk')">تغيير</button></div></div>
@@ -18394,6 +18498,11 @@ function setSection(k){
    <div class="lb"><div class="lt">المشتريات</div><div class="ls">تذكرة الموسم وجواهرك تعود على أي جهاز بحسابك</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
     onclick="restorePurchases()">استعادة</button></div></div>`;
+ if(SEC==='lang')body=`
+  <div class="sl">${T('لغة الواجهة')}</div>
+  <div class="cr">${[['ar','العربية'],['en','English']].map(([v,n])=>
+   `<div class="fc ${((S.lang||'ar')===v)?'on':''}" onclick="langPick('${v}')">${n}</div>`).join('')}</div>
+  <div class="note">${T('محتوى اللعب (الأسئلة وكلام الآليين) يبقى بالعربية')}</div>`;
  if(SEC==='game')body=tgl('haptic','الاهتزاز عند اللمس',(window.SFX&&SFX.hapticAvailable())?'نقرات وإصابات ونتائج — تنبيه خفيف لا اهتزاز شاشة':'هذا الجهاز أو المتصفح لا يدعم الاهتزاز')+
   tgl('confirm','طلب التأكيد','قبل الانسحاب من مباراة أو مغادرة غرفة — حذف الحساب يُؤكَّد دائمًا')+
   tgl('aiBots','آليون بذكاء اصطناعي','في مافيا وبرا السالفة ضد الكمبيوتر: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي');
@@ -18431,7 +18540,7 @@ function setSection(k){
   ${[['terms','الشروط والأحكام'],['privacy','سياسة الخصوصية'],['licenses','التراخيص']].map(([k,n])=>
   `<div class="li" style="cursor:pointer" onclick="push('legalScr','${k}')"><div class="lr">
    <div class="lb"><div class="lt">${n}</div></div><span style="color:var(--mut)">›</span></div></div>`).join('')}`;
- go(`<div class="scr on">${tbar(s.n)}${body}</div>`);
+ go(`<div class="scr on">${tbar(T(s.n))}${body}</div>`);
 }
 /** تصدير نسخة من بيانات اللاعب: تنزيل ملفّ، ومعه نسخ ونصّ ظاهر لأنّ بعض البيئات تمنع التنزيل */
 function exportData(){
@@ -18496,7 +18605,7 @@ function delAsk(){
 }
 function doDelete(){
  wipeSave();
- S={name:defName(),xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,
+ S={name:defName(),email:'',lang:S.lang||'ar',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,
   tutDone:0,ranked:null,cards:null,unlocked:{journey:1,quick:1},matches:0,wins:0,
   mis:{},claimed:{},ach:{},correct:0,nets:{},tab:'play',opt:S.opt};
  bindLegacyRanked();
@@ -19167,10 +19276,10 @@ function welcomeScr(){
  <div class="flt2" style="width:200px;height:200px;background-image:var(--logo);
   background-size:contain;background-repeat:no-repeat;background-position:center;
   filter:drop-shadow(0 8px 24px rgba(232,178,58,.3))"></div>
-  <div style="font-size:19px;font-weight:800;margin-top:22px">أهلًا بك في تحدي</div>
- <div style="font-size:13.5px;color:var(--tx2);margin-top:7px">عالم من المعرفة والمنافسة ينتظرك.</div>
+  <div style="font-size:19px;font-weight:800;margin-top:22px">${T('أهلًا بك في تحدي')}</div>
+ <div style="font-size:13.5px;color:var(--tx2);margin-top:7px">${T('عالم من المعرفة والمنافسة ينتظرك.')}</div>
  <div style="width:100%;margin-top:auto;padding-top:40px">
- <button class="rbtn" onclick="push('askTut')"><span>ابدأ</span></button></div></div>`);
+ <button class="rbtn" onclick="push('askTut')"><span>${T('ابدأ')}</span></button></div></div>`);
 }
 /** أوّل خطوة: اسمك أنت — يظهر للاعبين معك، والرتبة تُكتب بجانبه ولا تحلّ محلّه */
 function askName(next){
@@ -21114,7 +21223,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.67';
+const APP_VER='5.68';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -21980,12 +22089,11 @@ const BOT_NAMES=['سلطان','نورة','ريان','حكيم','أثير'];
 function soloScr(g){
  const row=PT_GAMES.find(x=>x[3]===g)||[];
  setArena(vnKind(g),1);
- go(`<div class="scr on">${tb('مع الكمبيوتر')}
- <div class="gHero sm">${GAME_ART[g]||''}</div>
- <div class="sl">مستوى الخصم</div>
- ${DIFFS.map(([k,n,e,d])=>`<div class="wayCard pick${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
-  <span class="wIco">${e}</span><div style="flex:1"><div class="wT">${n}</div><div class="wD">${d}</div></div>
-  <span class="wPick">${(RM.diff||'mid')===k?ico('check',15):''}</span></div>`).join('')}
+ go(`<div class="scr on">${tb(T('مع الكمبيوتر'))}
+ <div class="gHero xs">${GAME_ART[g]||''}</div>
+ <div class="sl">${T('مستوى الخصم')}</div>
+ <div class="dfRow">${DIFFS.map(([k,n,e,d])=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
+  <i>${e}</i><b>${T(n)}</b><u>${d}</u></div>`).join('')}</div>
  ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
@@ -22001,7 +22109,8 @@ function soloScr(g){
  <div class="wb" style="text-align:start">جولتان من التلميحات المكتوبة ثم تصويت. إن كنت برا السالفة فلمّح بغموض واستنتج الكلمة — وإن أُمسك بك فلك تخمين واحد.</div>
  <div class="note" id="vbAiNote">…</div>`:''}
  ${g==='draw'?`<div class="wb" style="text-align:start">الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.</div>`:''}
- <div class="note">اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار</div>
+ <div class="note">${T('اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار')}</div>
+ <div class="soloPad"></div>
  <div class="soloGo"><button class="rbtn" onclick="soloBegin('${g}')"><span>${ico('play',15)} ابدأ اللعب — ${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff||'mid']}</span></button></div></div>`);
  if(g==='mafia'||g==='barra')AI.probe().then(on=>{const el=document.getElementById('vbAiNote');if(!el)return;
   el.textContent=on?'الآليون هنا يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم':'الآليون يعملون بعقلهم المحلي الآن — الذكاء الاصطناعي يحتاج اتصالًا بخادم مضبوط أو نسخة الأرتيفاكت'});
@@ -28626,7 +28735,7 @@ function vb3dTexFacade(){return vb3dTex('facade',256,512,(g,w,h)=>{
  g.fillStyle='#544733';g.fillRect(0,18,w,4)},[1,1])}
 function vb3dTexAo(){return vb3dTex('ao',128,128,(g,w,h)=>{const gr=g.createRadialGradient(64,64,2,64,64,62);gr.addColorStop(0,'rgba(0,0,0,.72)');gr.addColorStop(.45,'rgba(0,0,0,.42)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)})}
 /** بقعة ظلّ تماس تحت الجالس أو الأثاث */
-function vb3dAo(sc,x,y,z,r){const T=THREE;const m=new T.Mesh(vb3dG('Plane',r*2,r*2),VB3.aoMat||(VB3.aoMat=new T.MeshBasicMaterial({map:vb3dTexAo(),transparent:true,depthWrite:false,opacity:.85})));
+function vb3dAo(sc,x,y,z,r){const T=THREE;const m=new T.Mesh(vb3dG('Plane',r*2,r*2),VB3.aoMat||(VB3.aoMat=new T.MeshBasicMaterial({map:vb3dTexAo(),transparent:true,depthWrite:false,opacity:.95})));
  m.position.set(x,y,z);m.rotation.x=-Math.PI/2;m.renderOrder=-1;sc.add(m);return m}
 function vb3dTexGlow(){return vb3dTex('glow',128,128,(g,w,h)=>{const gr=g.createRadialGradient(64,64,2,64,64,64);gr.addColorStop(0,'rgba(255,240,200,1)');gr.addColorStop(.35,'rgba(255,220,150,.45)');gr.addColorStop(1,'rgba(255,200,120,0)');g.fillStyle=gr;g.fillRect(0,0,w,h)})}
 /* ── مظهر كل لاعب من أفاتار ملفّه الشخصي: بشرة، شعر وقصّته، عينان، فم، لحية، إكسسوار — الشخصية المجسّمة هي صورته نفسها ── */
@@ -28649,8 +28758,8 @@ function vb3dChar(look,posture){
  const T=THREE,g=new T.Group(),mats=[],weave=vb3dTexWeave();
  const M=(c,o)=>{const m=vb3dMat(c,o);m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
  const reg=m=>{m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
- const skin=M(look.skin,{rough:.52,sheen:.5,sheenR:.5,sheenC:'#FF9E86',spec:.5}),cloth=M(look.thobe,{rough:.94,sheen:.35,sheenC:'#FFF6E6',bump:weave,bumpS:.35});
- const hairM=M(look.hair,{rough:.42,metal:.05,sheen:.6,sheenR:.3,sheenC:'#FFE9C8'}),dark=M('#15141C',{rough:.5}),lipM=M('#8A4A3A',{rough:.55}),white=M('#F7F4EC',{rough:.3});
+ const skin=M(look.skin,{rough:.46,sheen:.62,sheenR:.42,sheenC:'#FF9E86',spec:.62}),cloth=M(look.thobe,{rough:.9,sheen:.5,sheenR:.34,sheenC:'#FFF6E6',bump:weave,bumpS:.42});
+ const hairM=M(look.hair,{rough:.34,metal:.08,sheen:.72,sheenR:.26,sheenC:'#FFE9C8'}),dark=M('#15141C',{rough:.5}),lipM=M('#8A4A3A',{rough:.55}),white=M('#F7F4EC',{rough:.3});
  const eyeM=reg(new T.MeshPhysicalMaterial({color:new T.Color('#F7F4EC'),roughness:.12,clearcoat:1,clearcoatRoughness:.06}));
  const irisM=reg(new T.MeshBasicMaterial({map:vb3dTexIris(),transparent:true}));
  const Z=new T.Vector3(0,0,1);
@@ -28927,7 +29036,8 @@ function vb3dMount(kindOrModel){
  try{renderer=new T.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'})}catch(e){return false}
  const cv=renderer.domElement;cv.className='vb3d';st.insertBefore(cv,st.firstChild);const vig=document.createElement('div');vig.className='vb3dVig';cv.after(vig);
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
- renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;renderer.outputColorSpace=T.SRGBColorSpace;
+ renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.02;renderer.outputColorSpace=T.SRGBColorSpace;
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2.5));   // 5.68: حدّة أعلى على شاشات الهاتف الكثيفة
  const sc=new T.Scene();const cam=new T.PerspectiveCamera(48,1.2,.1,80);
  const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.82+Math.max(0,n-6)*.12,Rz=1.66,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
  sc.environmentIntensity=kind==='mafia'?.1:.2;
@@ -37902,7 +38012,7 @@ const MIS=[{k:'ans20',t:'أجب عن 20 سؤالًا',n:20,co:40,xp:60,gm:0},
 {k:'uno_win',t:'افز بجولة أونو',n:1,co:70,xp:80,gm:1},
 {k:'party_round',t:'أنهِ 3 جولات من ليلة العائلة',n:3,co:60,xp:70,gm:1}];
 
-let S={name:defName(),xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,tutDone:0,account:null,
+let S={name:defName(),email:'',lang:'ar',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,tutDone:0,account:null,
  ranked:null,cards:null,unlocked:{journey:1,quick:1},tutorial_completed:false,
  colXP:0,wild:null,shards:0,emotes:null,emoteDeck:null,favEmotes:null,
  chestInv:null,evolved:[],dealsBought:[],lastGift:null,
@@ -38056,7 +38166,7 @@ const NAVICO={
   <circle cx="5.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/><circle cx="14.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/><circle cx="23.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/></svg>`
 };
 function nav(){
- const items=[['clubs','clubs','النادي'],['cards','cards','البطاقات'],['play','swords','اللعب'],['shop','shop','المتجر'],['more','user','المزيد']];
+ const items=[['clubs','clubs','النادي'],['cards','cards','البطاقات'],['play','swords','اللعب'],['shop','shop','المتجر'],['more','user','المزيد']].map(a=>[a[0],a[1],T(a[2])]);
  // البند 31 — شارة فقط عند فائدة حقيقية: ترقية جاهزة أو هدية جاهزة
  const badge={cards:(S.cards?readyCount():0),shop:(typeof giftReady==='function'&&giftReady())?1:0};
  $('nav').innerHTML=items.map(([k,i,l])=>{
@@ -38077,8 +38187,9 @@ function tab(k){cur=k;nav();hideArena();
 
 // ═══════════ الشاشات ═══════════
 function splash(){
- loadState();
- if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
+ loadState();applyLang();
+ if(!hasAccount())Router.reset('authScr');            // 5.68: لا لعب بلا حساب — البريد أوّلًا
+ else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
  else Router.reset('welcomeScr');
  netBoot();
 }
@@ -38928,6 +39039,8 @@ function loadState(){
   if(!(S.name||'').trim())S.name=defName();
   if(!S.cards)S.cards=defaultCards();
   if(!S.stars)S.stars={};
+  if(!S.lang)S.lang='ar';
+  if(!S.mig68){if(S.opt)S.opt.haptic=0;S.mig68=1}   // 5.68: لا اهتزاز عند اللمس — يُطفأ مرّة للحسابات القديمة
   ensureEcon();
   return true;
  }catch(e){return false}
