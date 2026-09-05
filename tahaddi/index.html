@@ -652,9 +652,9 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbR{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;background:none;border:none;
  cursor:pointer;font:inherit;color:var(--tx);transition:transform .18s}
 .vbR:active{transform:scale(.94)}
-.vbRAv{position:relative;width:40px;height:40px;flex-shrink:0;border-radius:50%;padding:2.5px;
+.vbRAv{position:relative;width:37px;height:37px;flex-shrink:0;border-radius:50%;padding:2.5px;
  background:linear-gradient(160deg,var(--rc,#3A4460),rgba(0,0,0,.35));box-shadow:0 3px 10px rgba(0,0,0,.55)}
-.vbRAv>svg,.vbRAv>span.avEm{display:block;width:35px;height:35px;border-radius:50%;background:#0F1524}
+.vbRAv>svg,.vbRAv>span.avEm{display:block;width:32px;height:32px;border-radius:50%;background:#0F1524}
 .vbRAv>i{position:absolute;top:-4px;inset-inline-start:-4px;width:18px;height:18px;border-radius:50%;background:#0B1020;border:1.5px solid var(--rc,#4A5570);
  color:#FFE9A8;font-size:10px;font-weight:900;font-style:normal;line-height:15px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.7)}
 .vbR>b{max-width:100%;font-size:10px;font-weight:800;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx2)}
@@ -688,27 +688,32 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbP2{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;min-height:32px;padding:0 8px;
  border-radius:12px;background:rgba(18,24,40,.85);border:1px solid rgba(232,178,58,.3);font-size:11.5px;font-weight:800;color:var(--tx2);white-space:nowrap;overflow:hidden}
 .vbP2>b{color:var(--tx);font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis}
-.vbP2.tm{border-color:rgba(232,178,58,.6);background:rgba(30,24,8,.85)}
+.vbP2.wide{flex:1.35 1 0}
+.vbP2.nar{flex:.62 1 0}
+.vbP2.tm{flex:.95 1 0;border-color:rgba(232,178,58,.6);background:rgba(30,24,8,.85)}
 .vbP2.tm>b{color:var(--gold);font-size:15px;letter-spacing:.5px}
-.vbP2.ai{flex:0 0 auto;min-width:40px;border-color:rgba(123,79,224,.55);background:rgba(30,20,60,.85);cursor:pointer}
-.vbP2.ai.thinking{animation:vbPickP 1.2s ease-in-out infinite}
+.vbHb.ai{border-color:rgba(123,79,224,.6);background:rgba(30,20,60,.9)}
+.vbHb.ai.thinking{animation:vbPickP 1.2s ease-in-out infinite}
 .vbMain{position:relative;flex:1 1 auto;min-height:190px;overflow:hidden}
 .vbScene.full .vbStage{position:absolute;inset:0;height:auto;width:auto;margin:0;border-radius:0;border:none;box-shadow:none}
-.vbScene.full .vbRole span{display:none}
 /* شريط المرحلة (5.59): شريط الدور وبطاقة دورك وخطوات برا في صفّ واحد داخل التدفّق — لا صناديق عائمة فوق المشهد */
 .vbBand{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;padding:6px 8px;background:linear-gradient(180deg,rgba(10,14,26,.8),rgba(10,14,26,.5));border-bottom:1px solid rgba(255,255,255,.06)}
 .vbBand:empty,.vbBandR:empty{display:none}
 .vbBandR{display:flex;gap:6px;align-items:stretch;min-width:0}
-.vbScene.full .vbBandR>.vbTurn{position:static;flex:1 1 auto;min-width:0;width:auto;max-width:none;margin:0;padding:5px 8px;gap:8px;border-radius:13px;background:rgba(16,22,38,.9)}
+.vbScene.full .vbBandR>.vbTurn{position:static;flex:1 1 auto;min-width:0;width:auto;max-width:none;margin:0;padding:4px 8px;gap:7px;border-radius:13px;background:rgba(16,22,38,.9)}
+.vbScene.full .vbTurn .vbTurnB{min-width:0;gap:1px}
+.vbScene.full .vbTurn .vbTurnR{font-size:9.5px;margin-top:1px}
+.vbScene.full .vbBand{padding:5px 8px;gap:4px}
 .vbScene.full .vbBandR>.vbTurn[hidden]{display:none}
-.vbScene.full .vbBandR>.vbRole{position:static;flex:0 0 auto;max-width:44%;margin:0;padding:6px 9px;border-radius:13px;background:rgba(16,22,38,.9);align-self:center}
+.vbP2.role{border-color:rgba(232,178,58,.6);background:rgba(30,24,8,.85);cursor:pointer}
+.vbP2.role>b{color:#FFE9A8}
 .vbScene.full .vbSteps{position:static;margin:0;display:flex;flex-direction:row;gap:0;width:auto;padding:2px 4px 0}
 .vbScene.full .vbSteps span{flex:1 1 0;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;
  background:none;border:none;border-radius:0;padding:0;color:var(--mut)}
-.vbScene.full .vbSteps span::before{content:'';position:absolute;top:11px;inset-inline-start:50%;width:100%;height:2px;background:rgba(255,255,255,.12);z-index:0}
+.vbScene.full .vbSteps span::before{content:'';position:absolute;top:9px;inset-inline-start:50%;width:100%;height:2px;background:rgba(255,255,255,.12);z-index:0}
 .vbScene.full .vbSteps span:last-child::before{display:none}
 .vbScene.full .vbSteps span.done::before{background:var(--gold)}
-.vbScene.full .vbSteps span i{position:relative;z-index:1;width:22px;height:22px;font-size:11px;font-weight:900;
+.vbScene.full .vbSteps span i{position:relative;z-index:1;width:19px;height:19px;font-size:11px;font-weight:900;
  background:#0F1524;border:1.5px solid rgba(255,255,255,.18);color:var(--mut)}
 .vbScene.full .vbSteps span em{font-style:normal;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .vbScene.full .vbSteps span.on{color:#FFE9A8}
@@ -722,14 +727,15 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.full .vbBigCard.out{transform:translateX(-50%) translateY(-14px) scale(.82)}
 .vbScene.full .vbBigF b{font-size:14px}
 .vbScene.full .vbBigF small{font-size:8.5px}
-.vbScene.full .vbTurn .vbTurnT{font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vbScene.full .vbTurn .vbTurnD{font-size:9.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:1}
-.vbScene.full .vbTurn .vbTurnI{width:26px;height:26px;flex-shrink:0}
-.vbScene.full .vbTurn .vbRing{width:38px;height:38px;flex-shrink:0}
+.vbScene.full .vbTurn .vbTurnT{font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vbScene.full .vbTurn .vbTurnD{font-size:9px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:1}
+.vbScene.full .vbTurn .vbTurnI{width:23px;height:23px;flex-shrink:0}
+.vbScene.full .vbTurn .vbRing{width:36px;height:36px;flex-shrink:0}
+.vbScene.full .vbTurn .vbRing svg{width:36px;height:36px}   /* كان الـSVG ثابتًا 52 فيخرج الحلقة من الشريط */
 .vbScene.full .vbTurn .vbRing b{font-size:10px}
 .vbScene.full .vbNotes{position:absolute;inset:auto 8px 8px 8px;z-index:8;max-height:60%;overflow-y:auto;background:rgba(10,14,26,.95)}
 /* لوحة النقاش شريط مستقلّ تحت المشهد (5.60): لا تغطّي أحدًا، والمشهد يبقى كاملًا فوقها */
-.vbFeedW{flex:0 0 auto;height:21vh;min-height:118px;max-height:172px;margin:6px 8px 0;display:flex;flex-direction:column;
+.vbFeedW{flex:0 0 auto;height:20vh;min-height:112px;max-height:158px;margin:6px 8px 0;display:flex;flex-direction:column;
  background:rgba(12,17,30,.92);border:1px solid rgba(232,178,58,.28);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.5);overflow:hidden}
 .vbScene.full .vbFeed{background:none;border:none;border-radius:0;padding:8px 9px 10px;margin:0;overflow-y:auto;overscroll-behavior:contain;font-size:11.5px;scrollbar-width:thin;min-height:0}
 .vbScene.full .vbFeed::-webkit-scrollbar{width:4px}
@@ -21096,7 +21102,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.63';
+const APP_VER='5.64';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -28800,6 +28806,9 @@ function vb3dRoomSquare(sc){
   grp.add(vb3dMesh(vb3dG('Cylinder',.06,.09,2.8,8),pm,0,1.4,0),vb3dMesh(vb3dG('Cylinder',.22,.26,.12,8),pm,0,.06,0),vb3dMesh(vb3dG('Box',.3,.38,.3),vb3dMat('#FFE2A0',{emis:'#FFD27A',ei:1.5,tr:1,op:.7}),0,3.0,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.26,.2,4),pm,0,3.28,0,{rot:[0,Math.PI/4,0]}));
   const pl=new T.PointLight(0xFFD08A,18,9,1.8);pl.position.set(0,2.95,0);grp.add(pl);sc.add(grp);return pl};
  const p1=post(-3.4,1.4),p2=post(3.4,1.4);
+ // 5.64: ضباب مضيء عند أقدام المباني — المدينة تُقرأ بعيدة مأهولة لا جدارًا مسطّحًا من النوافذ
+ const hazeM=new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFC98A,transparent:true,opacity:.22,blending:T.AdditiveBlending,depthWrite:false});
+ [[-6,-9,7],[0,-11,9],[6.5,-9,7]].forEach(([hx,hz,hs])=>{const h=new T.Sprite(hazeM.clone());h.scale.set(hs,hs*.5,1);h.position.set(hx,1.6,hz);sc.add(h)});
  // طاولة خشب مستديرة بفانوس وأوراق
  const wm=vb3dMat('#5A3418',{map:wood,rough:.75});
  sc.add(vb3dMesh(vb3dG('Cylinder',1.0,1.0,.08,48),wm,0,.72,0),vb3dMesh(vb3dG('Torus',1.0,.035,10,48),vb3dMat('#3B2412',{rough:.8}),0,.74,0,{rot:[Math.PI/2,0,0],noCast:1}),vb3dMesh(vb3dG('Cylinder',.1,.12,.7,10),wm,0,.35,0),vb3dMesh(vb3dG('Cylinder',.45,.5,.06,20),wm,0,.03,0));
@@ -29068,17 +29077,18 @@ function vbScene(kind,title,sub){
  <div class="vbHdr">
   <button class="vbHb" onclick="vbExit()" aria-label="مغادرة">${ico('back',15)}</button>
   <div class="vbHt"><b>${title}</b><small>${esc(sub||(kind==='mafia'?'المدينة تخفي واحدًا منكم':'لأن السالفة تجمعنا'))}</small></div>
+  <button class="vbHb ai" id="vbAiChip" onclick="vbAiSheet()" hidden aria-label="حالة الذكاء الاصطناعي">${ico('sparkle',15)}</button>
   <button class="vbHb" onclick="vbMenuSheet()" aria-label="الأدوات">${ico('gear',15)}</button>
  </div>
  <div class="vbPills">
-  <span class="vbP2" id="vbPhase">${ico('list',13)} <b>—</b></span>
+  <span class="vbP2 wide" id="vbPhase">${ico('list',13)} <b>—</b></span>
   <span class="vbP2 tm"><span class="vbP2I">${ico('timer',13)}</span><b id="vbTm">—</b></span>
-  <span class="vbP2">${ico('group',13)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></span>
-  <button class="vbP2 ai" id="vbAiChip" onclick="vbAiSheet()" hidden>${ico('sparkle',12)}</button>
+  <span class="vbP2 nar">${ico('group',13)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></span>
+  <button class="vbP2 role wide" id="vbRole" onclick="vbRoleGuide()"></button>
  </div>
  <div class="vbRoster" id="vbRoster"></div>
  <div class="vbBand">
-  <div class="vbBandR"><div class="vbTurn" id="vbTurn" hidden></div><div class="vbRole" id="vbRole" onclick="vbRoleGuide()"></div></div>
+  <div class="vbBandR"><div class="vbTurn" id="vbTurn" hidden></div></div>
   ${kind==='barra'?`<div class="vbSteps" id="vbSteps">${['التلميحات','سؤال وجواب','التصويت','النتيجة'].map((t,i)=>`<span data-step="${i+1}"><i>${i+1}</i><em>${t}</em></span>`).join('')}</div>`:''}
  </div>
  <div class="vbMain">
@@ -29108,9 +29118,10 @@ function vbRoleStrip(hint){
  const el=document.getElementById('vbRole');if(!el)return;
  if(hint!=null)VB.roleHint=hint;
  if(VB.g==='mafia'){const r=mfRole(0),sp=MAF_ROLE[r];
-  el.innerHTML=`${ico(sp.ic,20,sp.tint)}<b>أنت ${r}</b><span>${esc(VB.roleHint||sp.d)}</span><i>${ico('info',13)}</i>`;return}
+  el.innerHTML=`${ico(sp.ic,14,sp.tint)} <b>${r}</b>`;el.title='أنت '+r+' — '+(VB.roleHint||sp.d);return}
  const spy=VB.spy===0;
- el.innerHTML=`${spy?ico('door',20,'red'):ico('lock',20)}<b>${spy?'أنت برا السالفة':'السالفة: '+esc(VB.word)}</b><span>الفئة: ${esc(VB.cat)} · ${esc(VB.roleHint||(spy?'لمّح بغموض ولا تنكشف':'لمّح للكلمة دون أن تقولها'))}</span><i>${ico('info',13)}</i>`;
+ el.innerHTML=`${spy?ico('door',14,'red'):ico('lock',14)} <b>${spy?'برا السالفة':esc(VB.word)}</b>`;
+ el.title=(spy?'أنت برا السالفة':'السالفة: '+VB.word)+' — الفئة: '+VB.cat;
 }
 const MF_GUIDE={
  'مافيا':['ليلًا: يظهر لك سؤال «من تغتال؟» مع أزرار بأسماء اللاعبين — اختر واحدًا.','نهارًا: أنكر، اتّهم بريئًا بحجّة، ولا تكشف شريكك. إن اتُّهمتَ دافع بأدلة.','تفوز إذا ساوى عدد المافيا عدد الباقين.'],
@@ -29197,7 +29208,8 @@ function vbTimerDraw(left,total){
  if(arc&&total){arc.style.strokeDashoffset=String(RING_C*(1-left/total));const r=arc.closest('.vbRing');if(r){r.classList.remove('off');r.classList.toggle('hot',left<=10)}}
 }
 function vbStep(n){document.querySelectorAll('#vbSteps span').forEach(el=>{const k=+el.dataset.step;el.classList.toggle('on',k===n);el.classList.toggle('done',k<n)})}
-function vbAiChip(){const el=document.getElementById('vbAiChip');if(!el||typeof AI==='undefined')return;const on=AI.enabled();el.hidden=false;el.classList.toggle('on',on);el.classList.toggle('off',!on);el.innerHTML=`${ico(on?'sparkle':'info',13)} ${on?'ذكاء اصطناعي':'عقل محلي'}`}
+function vbAiChip(){const el=document.getElementById('vbAiChip');if(!el||typeof AI==='undefined')return;const on=AI.enabled();el.hidden=false;el.classList.toggle('on',on);el.classList.toggle('off',!on);
+ el.innerHTML=ico(on?'sparkle':'info',15);el.title=on?'ذكاء اصطناعي':'عقل محلي'}   // 5.64: رقاقة الذكاء صارت زرًّا في الرأس ليتّسع صفّ الرقاقات
 function vbSeatState(i){return VB.seat&&VB.seat(i)||{}}
 function vbSeats(){
  const el=document.getElementById('vbSeats');if(!el)return;

@@ -304,6 +304,9 @@ function vb3dRoomSquare(sc){
   grp.add(vb3dMesh(vb3dG('Cylinder',.06,.09,2.8,8),pm,0,1.4,0),vb3dMesh(vb3dG('Cylinder',.22,.26,.12,8),pm,0,.06,0),vb3dMesh(vb3dG('Box',.3,.38,.3),vb3dMat('#FFE2A0',{emis:'#FFD27A',ei:1.5,tr:1,op:.7}),0,3.0,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.26,.2,4),pm,0,3.28,0,{rot:[0,Math.PI/4,0]}));
   const pl=new T.PointLight(0xFFD08A,18,9,1.8);pl.position.set(0,2.95,0);grp.add(pl);sc.add(grp);return pl};
  const p1=post(-3.4,1.4),p2=post(3.4,1.4);
+ // 5.64: ضباب مضيء عند أقدام المباني — المدينة تُقرأ بعيدة مأهولة لا جدارًا مسطّحًا من النوافذ
+ const hazeM=new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFC98A,transparent:true,opacity:.22,blending:T.AdditiveBlending,depthWrite:false});
+ [[-6,-9,7],[0,-11,9],[6.5,-9,7]].forEach(([hx,hz,hs])=>{const h=new T.Sprite(hazeM.clone());h.scale.set(hs,hs*.5,1);h.position.set(hx,1.6,hz);sc.add(h)});
  // طاولة خشب مستديرة بفانوس وأوراق
  const wm=vb3dMat('#5A3418',{map:wood,rough:.75});
  sc.add(vb3dMesh(vb3dG('Cylinder',1.0,1.0,.08,48),wm,0,.72,0),vb3dMesh(vb3dG('Torus',1.0,.035,10,48),vb3dMat('#3B2412',{rough:.8}),0,.74,0,{rot:[Math.PI/2,0,0],noCast:1}),vb3dMesh(vb3dG('Cylinder',.1,.12,.7,10),wm,0,.35,0),vb3dMesh(vb3dG('Cylinder',.45,.5,.06,20),wm,0,.03,0));
