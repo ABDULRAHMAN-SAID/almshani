@@ -607,6 +607,14 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .mfRole b{color:var(--rc);margin-inline-start:auto;font-size:11.5px}
 /* ضد الكمبيوتر — رقاقات اللاعبين والحوار والأصوات ولوحة الرسم */
 .vbGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.vbGrid.g3{grid-template-columns:repeat(3,1fr);gap:6px}
+.vbScene.full.picking .vbFeedW{max-height:66px}
+.vbScene.full.picking .vbRoster{padding-top:2px;padding-bottom:3px}
+.vbScene.full.picking .vbPickH{padding:6px 9px}
+.vbScene.full.picking .vbPickH small{display:none}
+.vbGrid.g3 .vbP{flex-direction:column;gap:3px;padding:6px 4px;min-height:0;text-align:center;font-size:11px;line-height:1.15}
+.vbGrid.g3 .vbP>span{width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbGrid.g3 .vbP svg,.vbGrid.g3 .vbP img,.vbGrid.g3 .vbP>div:first-child{width:30px!important;height:30px!important}
 .vbP{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:6px 10px;min-height:46px;cursor:pointer;font-size:12.5px;font-weight:800;min-width:0}
 .vbP:active{transform:scale(.985)}
 .vbP.me{border-color:var(--gold)}
@@ -717,7 +725,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 @keyframes vbClkP{0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0)}50%{box-shadow:0 0 0 3px rgba(226,75,74,.2)}}
 .vbHb.ai{border-color:rgba(123,79,224,.6);background:rgba(30,20,60,.9)}
 .vbHb.ai.thinking{animation:vbPickP 1.2s ease-in-out infinite}
-.vbMain{position:relative;flex:1 1 auto;min-height:190px;overflow:hidden}
+.vbMain{position:relative;flex:1 1 auto;min-height:104px;overflow:hidden}
 .vbScene.full .vbStage{position:absolute;inset:0;height:auto;width:auto;margin:0;border-radius:0;border:none;box-shadow:none}
 /* شريط المرحلة (5.59): شريط الدور وبطاقة دورك وخطوات برا في صفّ واحد داخل التدفّق — لا صناديق عائمة فوق المشهد */
 .vbBand{flex:0 0 auto;display:flex;flex-direction:column;gap:5px;padding:6px 8px;background:linear-gradient(180deg,rgba(10,14,26,.8),rgba(10,14,26,.5));border-bottom:1px solid rgba(255,255,255,.06)}
@@ -758,7 +766,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.full .vbTurn .vbRing b{font-size:10px}
 .vbScene.full .vbNotes{position:absolute;inset:auto 8px 8px 8px;z-index:8;max-height:60%;overflow-y:auto;background:rgba(10,14,26,.95)}
 /* لوحة النقاش شريط مستقلّ تحت المشهد (5.60): لا تغطّي أحدًا، والمشهد يبقى كاملًا فوقها */
-.vbFeedW{flex:0 0 auto;height:18vh;min-height:104px;max-height:136px;margin:5px 8px 0;display:flex;flex-direction:column;
+.vbFeedW{flex:0 1 auto;height:18vh;min-height:0;max-height:136px;margin:5px 8px 0;display:flex;flex-direction:column;
  background:rgba(12,17,30,.92);border:1px solid rgba(232,178,58,.28);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.5);overflow:hidden}
 .vbScene.full .vbFeed{background:none;border:none;border-radius:0;padding:8px 9px 10px;margin:0;overflow-y:auto;overscroll-behavior:contain;font-size:11.5px;scrollbar-width:thin;min-height:0}
 .vbScene.full .vbFeed::-webkit-scrollbar{width:4px}
@@ -22281,7 +22289,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.71';
+const APP_VER='5.72';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -30599,6 +30607,7 @@ function vbScrollEnd(){try{const f=document.getElementById('vbFeed');
  const y=document.body.scrollHeight;window.scrollTo({top:y,behavior:VB.fast?'auto':'smooth'})}catch(e){}}
 function vbAct(html){
  const el=document.getElementById('vbAct');
+ try{const sc=document.querySelector('.vbScene');if(sc)sc.classList.toggle('picking',/vbGrid/.test(String(html||'')))}catch(e){}
  if(el){
   const old=document.getElementById('vbTxt'),keep=old&&!old.disabled?old.value:'';   // ما كتبتَه لا يضيع حين يُعاد رسم الشريط أثناء كتابتك
   const focus=!!(old&&document.activeElement===old),pos=focus?old.selectionStart:null;
@@ -30956,7 +30965,7 @@ function mfPick(t,list,cb){
  const r=mfRole(0),sp=MAF_ROLE[r];
  vbMsg({k:'n',icon:sp.ic,t});
  VB.pick=list.length?{list,cb,c:sp.ac}:null;vbSeats();   // المقاعد المضيئة في المجلس تُضغط مباشرة
- vbAct(list.length?`<div class="vbPickH">${ico(sp.ic,20,sp.tint)}<div><b>${r==='مافيا'?'من تغتال الليلة؟':r==='طبيب'?'من تحمي الليلة؟':'من تفحص الليلة؟'}</b><small>${r==='محقق'?'اضغط مقعده المضيء في المجلس أو اسمه هنا — ستعرف فورًا هل هو مافيا':r==='طبيب'?'اضغط مقعده المضيء أو اسمه هنا — من تحميه لا يموت الليلة':'اضغط مقعد الضحية المضيء أو اسمها هنا — الطبيب قد ينقذها'}</small></div><span class="vbPickT" id="vbPickT"></span></div><div class="vbGrid">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>`
+ vbAct(list.length?`<div class="vbPickH">${ico(sp.ic,20,sp.tint)}<div><b>${r==='مافيا'?'من تغتال الليلة؟':r==='طبيب'?'من تحمي الليلة؟':'من تفحص الليلة؟'}</b><small>${r==='محقق'?'اضغط مقعده المضيء في المجلس أو اسمه هنا — ستعرف فورًا هل هو مافيا':r==='طبيب'?'اضغط مقعده المضيء أو اسمه هنا — من تحميه لا يموت الليلة':'اضغط مقعد الضحية المضيء أو اسمها هنا — الطبيب قد ينقذها'}</small></div><span class="vbPickT" id="vbPickT"></span></div><div class="vbGrid${list.length>3?' g3':''}">${list.map(i=>vbChip(i,` onclick="${cb}(${i})"`)).join('')}</div>`
   :`<button class="rbtn" onclick="mfResolveNight()"><span>لا أحد لفحصه — أكمل الليل</span></button>`);
 }
 function mfKill(i){if(!VB.night||VB.victim!=null)return;VB.victim=i;VB.pick=null;vbSeats();vbMsg({k:'me',i:0,t:'اخترتُ '+VB.names[i]+'… بصمت.'});mfResolveNight()}
