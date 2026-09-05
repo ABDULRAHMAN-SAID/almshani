@@ -18349,6 +18349,114 @@ function friendsScr(keep){
 }
 /* ═══ اللغة: العربية أصل، والإنجليزية طبقة فوقها — ما لم يُترجَم يظهر بالعربية ═══ */
 const EN={
+ '__EN_STYLE__':'en',
+ 'خارج · محقق':'Out · Detective',
+ 'خارج · مافيا':'Out · Mafia',
+ 'خارج · طبيب':'Out · Doctor',
+ 'خارج · مواطن':'Out · Citizen',
+ 'أنت نائم. المافيا تتحرّك في الظلام، والطبيب والمحقق يعملان…':'You’re asleep. The Mafia move in the dark while the Doctor and the Detective work…',
+ 'الذكاء الاصطناعي غير متاح هنا — الآليون يلعبون بعقلهم المحلي: يفهمون الأسماء والاتهامات والأسئلة ويجيبون من وقائع اللعبة. اضغط «عقل محلي» أعلى لتعرف كيف تفعّله.':'AI isn’t available here — the bots play with their local mind: they understand names, accusations and questions and answer from the facts of the game. Tap “Local mind” above to see how to enable it.',
+ 'توقّف الذكاء الاصطناعي (لم يُسمح به) — يكمل الآليون بعقلهم المحلي. اضغط «عقل محلي» أعلى لإعادة المحاولة.':'AI stopped (permission denied) — the bots continue with their local mind. Tap “Local mind” above to try again.',
+ 'عقل محلي':'Local mind',
+ 'الذكاء الاصطناعي':'Artificial intelligence',
+ 'دورك. اكتب تلميحًا عن «مستشفى» دون أن تذكرها.':'Your turn. Write a hint about “Hospital” without saying it.',
+ 'لمّح للكلمة بكلامك دون أن تقولها — التلميح الواضح يُطمئن المجلس، والغامض يجعلهم يشكّون فيك.':'Hint at the word in your own words without saying it — a clear hint reassures the majlis, a vague one makes them suspect you.',
+ 'لاعبين':'players',
+ 'برا السالفة':'Out of the Loop',
+ 'محقق':'Detective',
+ 'طبيب':'Doctor',
+ 'مواطن':'Citizen',
+ 'مافيا':'Mafia',
+ 'أنت محقق':'You are the Detective',
+ 'أنت طبيب':'You are the Doctor',
+ 'أنت مواطن':'You are a Citizen',
+ 'أنت مافيا':'You are Mafia',
+ 'لمّح':'Hint',
+ 'تلميحي':'My hint',
+ 'التلميحات':'Hints',
+ 'التلميحات والنقاش':'Hints and discussion',
+ 'الدردشة':'Chat',
+ 'تحدّث مع الجميع':'Talk to everyone',
+ 'النهاية':'The end',
+ 'التصويت':'Voting',
+ 'النتيجة':'Result',
+ 'الليلة 1':'Night 1',
+ 'الليلة 2':'Night 2',
+ 'الليلة 3':'Night 3',
+ 'الصباح 1':'Morning 1',
+ 'الصباح 2':'Morning 2',
+ 'الصباح 3':'Morning 3',
+ 'النقاش 1':'Discussion 1',
+ 'النقاش 2':'Discussion 2',
+ 'النقاش 3':'Discussion 3',
+ 'الجولة 1':'Round 1',
+ 'الجولة 2':'Round 2',
+ 'جولة أخرى':'Another round',
+ 'سؤال وجواب':'Q & A',
+ 'ما اقتنعت':'Not convinced',
+ 'أشتبه فيه':'I suspect them',
+ 'أعرفها':'I know it',
+ 'مثير للاهتمام':'Interesting',
+ 'مثير للاشتباه':'Suspicious',
+ 'أوافق':'I agree',
+ 'لا أوافق':'I disagree',
+ 'معلومة مهمة':'Important clue',
+ 'حلّ الصباح':'Morning came',
+ 'أدوات الجولة':'Round tools',
+ 'قوانين اللعبة':'Game rules',
+ 'دوري وما أفعله':'My role and what I do',
+ 'ماذا تفعل؟':'What do you do?',
+ 'المجلس':'The majlis',
+ 'يلمّح الآن':'is hinting now',
+ 'مدينة الليل':'Night city',
+ 'خارج · مافيا':'Out · Mafia',
+ 'الوقت المتبقّي':'Time left',
+ 'توزيع البطاقات':'Dealing the cards',
+ 'الأدوار كاملة':'All the roles',
+ 'من تفحص الليلة؟':'Who do you investigate tonight?',
+ 'استيقظ المحقق':'The detective wakes',
+ 'استيقظ المحقق. من تفحص الليلة؟':'The detective wakes. Who do you investigate tonight?',
+ 'استيقظت المدينة':'The city wakes',
+ 'مغادرة المباراة':'Leave the match',
+ 'ملاحظاتي':'My notes',
+ 'ملاحظاتي عن اللاعبين':'My notes on the players',
+ 'كل ما قيل في المجلس':'Everything said in the majlis',
+ 'تفكير اللاعبين الآليين':'How the bot players think',
+ 'كل ما تحتاجه أثناء اللعب':'Everything you need while playing',
+ 'ابدأ الجولة الأولى':'Start round one',
+ 'أعطِ تلميحك الآن':'Give your hint now',
+ 'اكتب تلميحك بكلماتك…':'Write your hint in your own words…',
+ 'دورك — الجولة 1':'Your turn — Round 1',
+ 'دورك — الجولة 2':'Your turn — Round 2',
+ 'تلميح واحد… واكتشف الكذّاب':'One hint… and spot the liar',
+ 'تكشف حقيقة لاعب واحد كل ليلة':'You reveal the truth about one player each night',
+ 'الليلة الأولى — نامت المدينة':'Night one — the city sleeps',
+ 'فاز المواطنون! المدينة نظيفة':'The citizens win! The city is clean',
+ 'فازت المافيا!':'The Mafia wins!',
+ 'جاهز':'Ready',
+ 'جاهزون':'Ready',
+ 'أشك فيه':'I suspect them',
+ 'انتبه وناقش وصوّت بحكمة':'Watch, discuss and vote wisely',
+ 'تنقذ لاعبًا واحدًا كل ليلة':'You save one player each night',
+ 'تقتل لاعبًا واحدًا كل ليلة':'You kill one player each night',
+ 'بطاقتك تنقلب في وسط المجلس — اقرأ دورك ثم ابدأ الليلة الأولى':'Your card flips in the middle of the majlis — read your role, then start night one',
+ 'بطاقتك تنقلب في وسط المجلس — اقرأ السالفة ثم ابدأ الجولة الأولى':'Your card flips in the middle of the majlis — read the topic, then start round one',
+ 'أطفأت المدينة أنوارها… والشوارع فارغة إلا من الظلال.':'The city has turned out its lights… the streets are empty but for shadows.',
+ 'نتائج فحوصك تظهر في «ملاحظاتي» وتحت أسماء اللاعبين.':'Your investigation results appear in “My notes” and under the players’ names.',
+ 'اضغط مقعده المضيء في المجلس أو اسمه هنا — ستعرف فورًا هل هو مافيا':'Tap their lit seat in the majlis or their name here — you’ll know at once whether they’re Mafia',
+ 'اضغط مقعده المضيء في المجلس أو اسمه بالأسفل قبل انتهاء الوقت، وإلا اختير عنك':'Tap their lit seat in the majlis or their name below before time runs out, or it’s chosen for you',
+ 'ليلًا: يظهر لك سؤال «من تفحص؟» — اختر لاعبًا وستعرف فورًا هل هو مافيا أم بريء.':'At night you’re asked “Who do you investigate?” — pick a player and you’ll know at once whether they’re Mafia or innocent.',
+ 'اتّهم أو اسأل أو دافع بكلماتك، وإذا انتهيت اضغط «جاهز» — التصويت يبدأ باتفاق الجميع أو بانتهاء الوقت':'Accuse, ask or defend in your own words, and press “Ready” when you’re done — voting starts when everyone agrees or time runs out',
+ 'النقاش مفتوح للجميع — اكتب متى شئت (رسالة كل خمس ثوانٍ): اتّهم، دافع، اسأل، أو أعلن دورك. وإذا انتهيت اضغط «جاهز».':'The discussion is open to everyone — write whenever you like (one message every five seconds): accuse, defend, ask, or declare your role. Press “Ready” when you’re done.',
+ 'ضد الكمبيوتر':'Versus computer',
+ 'الفئة:':'Category:',
+ 'أماكن':'Places',
+ 'مستشفى':'Hospital',
+ 'هادئ':'Calm',
+ 'مضحك':'Funny',
+ 'ممتاز':'Excellent',
+ 'أحسنت':'Well done',
+ 'مفاجئ':'Surprising',
  'تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.':'You take a secret role among bot players: kill, save or investigate at night, then accuse and vote by day — and the bots do the same.',
  'جولتان من التلميحات المكتوبة ثم تصويت. إن كنت برا السالفة فلمّح بغموض واستنتج الكلمة — وإن أُمسك بك فلك تخمين واحد.':'Two rounds of written clues, then a vote. If you’re the outsider, hint vaguely and deduce the word — and if you’re caught, you get one guess.',
  'الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.':'The computer draws stroke by stroke and you guess the word from the options — the earlier you guess, the more you score. Six drawings per round.',
@@ -19234,6 +19342,20 @@ function T(a){try{return (S&&S.lang==='en'&&EN[a])||a}catch(e){return a}}
 const AR_RE=/[\u0600-\u06FF]/;
 /** ترجمة نصّ واحد: مطابقة كاملة أوّلًا، ثم استبدال المصطلحات داخله (لأمثال «123 عملة») */
 EN_W.sort((a,b)=>b[0].length-a[0].length);
+const EN_P=[
+ [/^جاهزون (\d+)\/(\d+)$/,'Ready $1/$2'],
+ [/^الأحياء (\d+): (.+)$/,'Alive $1: $2'],
+ [/^في المجلس (\d+): (.+)$/,'In the majlis $1: $2'],
+ [/^تم العثور على (.+) خارج اللعبة$/,'$1 was found out of the game'],
+ [/^اتهام (.+)$/,'Accuse $1'],
+ [/^خارج · (.+)$/,'Out · $1'],
+ [/^الفئة: (.+)$/,'Category: $1'],
+ [/^دورك — الجولة (\d+)$/,'Your turn — Round $1'],
+ [/^الليلة (\d+)$/,'Night $1'],[/^الصباح (\d+)$/,'Morning $1'],
+ [/^النقاش (\d+)$/,'Discussion $1'],[/^الجولة (\d+)$/,'Round $1'],
+ [/^مدينة من (\d+) أشخاص: بينهم مافيا واحد وطبيب ومحقق\. في الليل تعمل الأدوار، وفي النهار تناقشون وتصوّتون على متهم\. تفوز المدينة إن أعدمت كل المافيا، وتفوز المافيا إن ساوت عدد الباقين\.$/,'A city of $1 people: among them one Mafia, a Doctor and a Detective. At night the roles act; by day you discuss and vote on a suspect. The city wins if it executes every Mafia; the Mafia wins once they equal the rest.'],
+ [/^مدينة من (\d+) أشخاص: بينهم مافيا اثنان وطبيب ومحقق\. في الليل تعمل الأدوار، وفي النهار تناقشون وتصوّتون على متهم\. تفوز المدينة إن أعدمت كل المافيا، وتفوز المافيا إن ساوت عدد الباقين\.$/,'A city of $1 people: among them two Mafia, a Doctor and a Detective. At night the roles act; by day you discuss and vote on a suspect. The city wins if it executes every Mafia; the Mafia wins once they equal the rest.']
+];
 const EN_RX=[[/(\d+)\s*س(?![\u0600-\u06FF])/g,'$1h'],[/(\d+)\s*د(?![\u0600-\u06FF])/g,'$1m'],[/(\d+)\s*ث(?![\u0600-\u06FF])/g,'$1s']];
 function enText(t){
  const k=t.trim();if(!k||!AR_RE.test(k))return t;
@@ -19241,18 +19363,46 @@ function enText(t){
  // اسم متبوع بفاصل («شرارة —») يُطابَق بعد نزع الفاصل ثم يُعاد
  const m=k.match(/^(.*?)(\s*[—·:،|-]\s*)$/);
  if(m&&EN[m[1]])return t.replace(k,EN[m[1]]+m[2]);
+ for(let i=0;i<EN_P.length;i++)if(EN_P[i][0].test(k))return t.replace(k,k.replace(EN_P[i][0],EN_P[i][1]));
  if(k.length>34)return t;   // جملة طويلة بلا ترجمة كاملة تبقى عربية بدل خليط
  let o=k;for(let i=0;i<EN_W.length;i++)if(o.indexOf(EN_W[i][0])>=0)o=o.split(EN_W[i][0]).join(EN_W[i][1]);
  for(let i=0;i<EN_RX.length;i++)o=o.replace(EN_RX[i][0],EN_RX[i][1]);
- return o===k?t:t.replace(k,o);
+ if(o===k||AR_RE.test(o))return t;   // خليط عربي/إنجليزي أسوأ من عربي كامل
+ return t.replace(k,o);
 }
+let _enBusy=0,_enObs=null;
 /** يمرّ على الشاشة بعد رسمها فيترجم كل نصّ يعرفه — فلا تبقى شاشة نصفها مترجم */
 function enPass(root){
  let en=false;try{en=!!(S&&S.lang==='en')}catch(e){}
- if(!en)return;
- const rs=root?[root]:[document.getElementById('app'),document.getElementById('nav'),document.getElementById('sheet'),document.body];
+ if(!en||_enBusy)return;
+ _enBusy=1;try{enPass_(root)}finally{_enBusy=0}
+}
+/** يراقب كل تغيير في الصفحة فيترجم ما يُضاف لاحقًا — الدردشة والمؤقّتات والأوراق والرسائل */
+function enWatch(){
+ if(_enObs||typeof MutationObserver!=='function')return;
+ _enObs=new MutationObserver(ms=>{
+  let en=false;try{en=!!(S&&S.lang==='en')}catch(e){}
+  if(!en||_enBusy)return;
+  const roots=[];
+  ms.forEach(m=>{
+   if(m.type==='characterData'&&m.target&&m.target.parentNode)roots.push(m.target.parentNode);
+   else m.addedNodes&&m.addedNodes.forEach(n=>{if(n.nodeType===1)roots.push(n);else if(n.nodeType===3&&n.parentNode)roots.push(n.parentNode)});
+  });
+  if(!roots.length)return;
+  _enBusy=1;try{roots.forEach(r=>{try{enPass_(r)}catch(e){}})}finally{_enBusy=0}
+ });
+ try{_enObs.observe(document.body,{childList:true,subtree:true,characterData:true})}catch(e){}
+}
+function enPass_(root){
+ const rs=root?[root]:[document.body];
  rs.forEach(r=>{if(!r)return;
-  const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT,null);const list=[];let n;
+  if(r.nodeType===3){const pn=r.parentNode;if(pn&&/^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|CODE|PRE)$/.test(pn.nodeName))return;
+   const v=enText(r.nodeValue||'');if(v!==r.nodeValue)r.nodeValue=v;return}
+  const SKIP={SCRIPT:1,STYLE:1,NOSCRIPT:1,TEXTAREA:1,CODE:1,PRE:1};
+  const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT,{acceptNode:x=>{
+   for(let p=x.parentNode;p&&p.nodeType===1;p=p.parentNode)if(SKIP[p.nodeName])return NodeFilter.FILTER_REJECT;
+   return NodeFilter.FILTER_ACCEPT}});
+  const list=[];let n;
   while(n=w.nextNode())if(n.nodeValue&&AR_RE.test(n.nodeValue))list.push(n);
   list.forEach(x=>{const v=enText(x.nodeValue);if(v!==x.nodeValue)x.nodeValue=v});
   r.querySelectorAll&&r.querySelectorAll('[placeholder],[title]').forEach(e=>{
@@ -19262,6 +19412,7 @@ function enPass(root){
 /** تبديل اللغة يُعيد رسم الشاشة الحالية فورًا — لا نصّ يبقى باللغة السابقة */
 function langPick(v){S.lang=v;saveState();applyLang();try{nav()}catch(e){}setSection('lang');try{enPass()}catch(e){}}
 function applyLang(){
+ try{enWatch()}catch(e){}
  const en=(()=>{try{return S&&S.lang==='en'}catch(e){return false}})();
  try{document.documentElement.lang=en?'en':'ar';document.documentElement.dir=en?'ltr':'rtl'}catch(e){}
 }
@@ -22112,7 +22263,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.69';
+const APP_VER='5.70';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -22974,7 +23125,9 @@ function rmHostEnd(){
  rmSend({t:'end',sp:RM.secret.spy,w:RM.secret.word,acc:acc||''});
 }
 /* ══ اللعب مع الكمبيوتر: نفس محرك الغرفة بناقل محلي وخصوم آليين ══ */
-const BOT_NAMES=['سلطان','نورة','ريان','حكيم','أثير'];
+const BOT_NAMES_AR=['سلطان','نورة','ريان','حكيم','أثير'],BOT_NAMES_EN=['Sultan','Noura','Rayan','Hakeem','Atheer'];
+/** أسماء الآليين تتبع لغة الواجهة — مجلس إنجليزي بأسماء عربية يبدو نصف مترجم */
+const BOT_NAMES=new Proxy({},{get:(o,k)=>{const L=(()=>{try{return S&&S.lang==='en'}catch(e){return false}})()?BOT_NAMES_EN:BOT_NAMES_AR;return k==='length'?L.length:L[k]}});
 function soloScr(g){
  const row=PT_GAMES.find(x=>x[3]===g)||[];
  setArena(vnKind(g),1);
@@ -24552,7 +24705,11 @@ function ptExit(){
   clearInterval(PT&&PT.tm);if(PT)PT.tm=null;Router.settle('partyScr')});
 }
 /* ═══════════ ضد الكمبيوتر — مافيا وبرا السالفة والرسم: أنت وحدك بين لاعبين آليين ═══════════ */
-const VB_NAMES=['سلطان','نورة','ريان','حكيم','أثير','لين','فهد','دانة','طلال','جود','ليان'];
+const VB_NAMES_AR=['سلطان','نورة','ريان','حكيم','أثير','لين','فهد','دانة','طلال','جود','ليان'];
+const VB_NAMES_EN=['Sultan','Noura','Rayan','Hakeem','Atheer','Leen','Fahad','Dana','Talal','Jood','Layan'];
+/** أسماء المجلس بلغة الواجهة — مجلس إنجليزي بأسماء عربية يبدو نصف مترجم */
+const VB_NAMES=new Proxy([],{get:(o,k)=>{const L=(()=>{try{return S&&S.lang==='en'}catch(e){return false}})()?VB_NAMES_EN:VB_NAMES_AR;
+ return typeof L[k]==='function'?L[k].bind(L):L[k]}});
 let VB=null;
 function vbNames(n){const pool=VB_NAMES.slice().sort(()=>Math.random()-.5);return [S.name||'أنت'].concat(pool.slice(0,n-1))}
 function vbHead(t){return tb(t)}
@@ -29653,14 +29810,14 @@ function vb3dChar(look,posture){
  const irisM=reg(new T.MeshBasicMaterial({map:vb3dTexIris(),transparent:true}));
  const Z=new T.Vector3(0,0,1);
  // الجذع (ثوب/عباءة) بطيّات، والعنق والياقة وفتحة الصدر بأزرارها
- const prof=[[0.03,0],[0.295,0.02],[0.325,0.17],[0.262,0.50],[0.232,0.72],[0.202,0.82],[0.115,0.87],[0.088,0.96]].map(p=>new T.Vector2(p[0],p[1]));
+ const prof=[[0.03,0],[0.27,0.02],[0.285,0.16],[0.245,0.44],[0.258,0.60],[0.275,0.72],[0.235,0.81],[0.118,0.875],[0.088,0.965]].map(p=>new T.Vector2(p[0],p[1]));
  const body=new T.Mesh(vb3dFolds(new T.LatheGeometry(prof,44),.013,9,.62),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
  // 5.67: كتفان يكسران المخروط — الظلّ يقع عليهما فيُقرأ الجسد إنسانًا
- g.add(vb3dMesh(vb3dG('Sphere',.235,28,18),cloth,0,.725,.015,{sc:[1.1,.4,.82]}));
- g.add(vb3dMesh(vb3dG('Cylinder',.068,.08,.15,24),skin,0,.955,0));
- if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.096,.013,10,30),cloth,0,.948,0,{rot:[Math.PI/2,0,0],noCast:1}));
+ g.add(vb3dMesh(vb3dG('Sphere',.29,30,20),cloth,0,.735,.01,{sc:[1.14,.4,.8]}));
+ g.add(vb3dMesh(vb3dG('Cylinder',.062,.075,.17,24),skin,0,.965,0));
+ if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.1,.014,10,30),cloth,0,.955,0,{rot:[Math.PI/2,0,0],noCast:1}));
   g.add(vb3dMesh(vb3dG('Capsule',.006,.19,3,6),M(shade(look.thobe,-22),{rough:.9}),0,.73,.238,{rot:[.2,0,0],noCast:1}));
-  [.83,.77].forEach(y=>g.add(vb3dMesh(vb3dG('Sphere',.0095,10,8),M('#E9E2D0',{rough:.4}),0,y,.246-(.83-y)*.4,{noCast:1})))}
+  [.84,.78].forEach(y=>g.add(vb3dMesh(vb3dG('Sphere',.0095,10,8),M('#E9E2D0',{rough:.4}),0,y,.252-(.84-y)*.4,{noCast:1})))}
  if(look.me){const bisht=M('#2A1E16',{rough:.8,sheen:.7,sheenR:.4,sheenC:'#E8C88A',bump:weave,bumpS:.4});const bp=prof.map(v=>new T.Vector2(v.x*1.07+.01,v.y));
   g.add(new T.Mesh(vb3dFolds(new T.LatheGeometry(bp.slice(1,7),44,0.45,Math.PI*2-0.9),.01,11,.62),bisht));
   g.add(vb3dMesh(vb3dG('Torus',.238,.012,10,40),M('#E8B23A',{metal:.95,rough:.18,clear:.4}),0,.72,0,{rot:[Math.PI/2,0,0],noCast:1}))}
@@ -29669,8 +29826,8 @@ function vb3dChar(look,posture){
    g.add(vb3dLimb(hip,knee,.078,cloth),vb3dLimb(knee,foot,.062,cloth),vb3dMesh(vb3dG('Capsule',.038,.1,3,6),dark,s*.14,-.47,.5,{rot:[Math.PI/2,0,0]}))})}
  else g.add(vb3dMesh(vb3dG('Sphere',0.35,32,20),cloth,0,0.10,0.12,{sc:[1,.3,.8]}));
  // الذراعان واليدان (راحة وأصابع وإبهام) على الحضن
- const arms={};[-1,1].forEach(s=>{const sh=new T.Vector3(s*.235,.7,.03),el=new T.Vector3(s*.288,.44,.19),hd=new T.Vector3(s*.115,.27,.34);
-  const up=vb3dLimb(sh,el,.052,cloth),lo=vb3dLimb(el,hd,.045,cloth);
+ const arms={};[-1,1].forEach(s=>{const sh=new T.Vector3(s*.255,.715,.02),el=new T.Vector3(s*.33,.45,.16),hd=new T.Vector3(s*.155,.285,.40);
+  const up=vb3dLimb(sh,el,.058,cloth),lo=vb3dLimb(el,hd,.049,cloth);
   const hand=new T.Group();hand.position.copy(hd);hand.quaternion.setFromUnitVectors(Z,new T.Vector3().subVectors(hd,el).normalize());
   hand.add(vb3dMesh(vb3dG('Sphere',.042,18,14),skin,0,0,0,{sc:[1,.55,1.2]}));
   for(let k=0;k<4;k++)hand.add(vb3dMesh(vb3dG('Capsule',.0098,.035,3,10),skin,(k-1.5)*.021,-.004,.058,{rot:[Math.PI/2+.2,0,0]}));
@@ -29678,7 +29835,7 @@ function vb3dChar(look,posture){
   const cuff=vb3dLimb(hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.03),hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.08),.05,cloth);
   g.add(up,lo,hand,cuff);arms[s<0?'l':'r']={up,lo,hand,sh,el,hd,rest:{el:el.clone(),hd:hd.clone()}}});
  // الرأس: جمجمة وفكّ وأذنان
- const head=new T.Group();head.position.set(0,1.105,.025);head.scale.setScalar(.8);g.add(head);
+ const head=new T.Group();head.position.set(0,1.135,.02);head.scale.setScalar(.86);g.add(head);
  head.add(vb3dMesh(vb3dG('Sphere',.19,44,30),skin,0,0,0,{sc:[1,1.08,1]}));
  head.add(vb3dMesh(vb3dG('Sphere',.15,32,22),skin,0,-.085,0,{sc:[1,.82,1.02]}));
  const onFace=(x,y,off)=>new T.Vector3(x,y,Math.sqrt(Math.max(0,.0361-x*x-(y/1.08)*(y/1.08)))+(off||0));
@@ -29951,7 +30108,7 @@ function vb3dMount(kindOrModel){
    const hv=1+(((i*2654435761)>>>0)%100)/100*.09-.045;ch.scale.set(1+(1-hv)*.35,hv,1+(1-hv)*.35);   // 5.63: قامات متفاوتة قليلًا فلا يبدون نسخة واحدة
    seat.add(ch);
    hit=vb3dMesh(vb3dG('Capsule',.36,1.0,2,6),new T.MeshBasicMaterial({visible:false}),0,seatH+.6,.05,{noCast:1});hit.userData.seat=i;seat.add(hit)}
-  chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+1.05});
+  chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+1.09});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
  // 5.66: صندوق كل جالس يُقاس من جسمه — الإطار بعدها يتراجع بنفسه حتى يدخل الجميع، فلا يُقصّ أحد
@@ -30620,7 +30777,7 @@ function mfStart(diff){
    badge:i===0?ico(MAF_ROLE[mfRole(0)].ic,12,MAF_ROLE[mfRole(0)].tint):(mfRole(0)==='مافيا'&&mfRole(i)==='مافيا'?ico('swords',12,'red'):(VB.myKnow[i]===true?ico('swords',12,'red'):VB.myKnow[i]===false?ico('check',12):'')),
    sub:!VB.alive.includes(i)?mfRole(i):'',me:mfRole(0)})};
  mfInitBrain();
- vbScene('mafia','مافيا','ضد الكمبيوتر — '+n+' لاعبين');
+ vbScene('mafia','مافيا',T('ضد الكمبيوتر')+' — '+n+' '+T('لاعبين'));
  vbAiIntro();
  const sp=MAF_ROLE[mfRole(0)],mates=VB.alive.filter(i=>i!==0&&mfRole(i)==='مافيا');
  vbMsg({k:'card',t:`<div class="mfDisc" style="--rc:${sp.ac};--rcs:${clRGBA(sp.ac,.3)}">${ico(sp.ic,46,sp.tint)}</div>
@@ -30797,7 +30954,7 @@ const MF_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين �
 المافيا: تذوب في المدينة: تتّهم بريئًا بحجّة متماسكة مبنيّة على شيء قاله فعلًا، تساند شكّ المدينة على غيرها لتبدو نظيفة، تدافع عن نفسها بأدلة مضادّة لا بالإنكار، لا تتّهم شريكها ولا تدفع هي وشريكها الهدف نفسه في اليوم نفسه، وإن قارب شريكها الإعدام ابتعدت عنه، وفي آخر اللعبة تضحّي به لتنجو. تكذب بثقة وتفاصيل، وفي الصعبة قد تدّعي دور المحقق لتشويش المحقق الحقيقي. ليلًا تقتل الأخطر عليها: المحقق المعلن، ثم من يقود المدينة بأدلة صحيحة، ثم البشري إن كان يصيب.
 المحقق: يخفي دوره حتى يجد مافيا أو يوشك على الإعدام، ثم يعلن بدقّة («فحصتُ فلانًا في الليلة الثانية: مافيا») ويفنّد المدّعي الكاذب بالوقائع، ويفحص ليلًا الأكثر إفادة لا الأوضح. الطبيب: يخفي دوره، يحمي المحقق المعلن أو الأثمن، ولا يكشف نفسه إلا لإثبات أن محاولة اغتيال أُنقذت بيده.
 البشري: افهم لهجته وسخريته ومزاحه وأخطاءه الإملائية، وصنّف مقصده: اتهام، دفاع، سؤال، ادّعاء دور، اعتراف، مزاح، خروج عن الموضوع. إن اعترف أنه مافيا فصدّقوه وأعلنوا التصويت عليه (وشريكه يتبرّأ منه بحذر)؛ إن ادّعى المحقق فاطلبوا نتائج فحصه وقارنوها بما تعرفون؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه جوابًا محدّدًا؛ إن اتّهم أحدًا ردّ المتّهم بنقطة مضادّة محدّدة وعلّق آخر بحسب مصلحته؛ إن مزح جاروه بخفّة ثم عادوا إلى اللعبة؛ إن قال شيئًا غامضًا سألوه ماذا يقصد. إن سأل عن لاعب خارج اللعبة (من صوّت عليه، ما دوره، من قتله) فأجيبوه بدقّة من «ما جرى بالترتيب» — لا تقولوا «لم يعد بيننا» وتسكتوا؛ دور قتيل الليل لم يُكشف فقولوا ذلك. التفاعلات السريعة (أوافق، مثير للاشتباه…) مواقف من آخر ما قيل فردّوا عليها بإيجاز.
-الأسلوب: لهجة خليجية طبيعية يفهمها كل العرب، جمل متفاوتة الطول (بعضها كلمتان وبعضها جملتان)، كل آليّ بشخصيته الثابتة، مخاطبة بالأسماء، ردّ على آخر ما قيل لا كلام عام، لا تكرار لجملة قيلت، لا مواعظ ولا عبارات جاهزة ولا شرح للقواعد، لا يذكر أحد أنه آليّ أو نموذج. كل جملة ≤ 30 كلمة. أعد JSON صالحًا فقط بلا أي نصّ خارجه، بلا علامات اقتباس مزدوجة داخل النصوص، وthink في سطر قصير (≤ 25 كلمة).`;
+${T('__EN_STYLE__')==='__EN_STYLE__'?'':'Write every line in natural spoken English. '}الأسلوب: لهجة خليجية طبيعية يفهمها كل العرب، جمل متفاوتة الطول (بعضها كلمتان وبعضها جملتان)، كل آليّ بشخصيته الثابتة، مخاطبة بالأسماء، ردّ على آخر ما قيل لا كلام عام، لا تكرار لجملة قيلت، لا مواعظ ولا عبارات جاهزة ولا شرح للقواعد، لا يذكر أحد أنه آليّ أو نموذج. كل جملة ≤ 30 كلمة. أعد JSON صالحًا فقط بلا أي نصّ خارجه، بلا علامات اقتباس مزدوجة داخل النصوص، وthink في سطر قصير (≤ 25 كلمة).`;
 const mfHist=t=>{(VB.hist||(VB.hist=[])).push(t)};
 const mfVoteHist=byWho=>mfHist(`اليوم ${VB.day} — التصويت: `+Object.entries(byWho).map(([k,v])=>VB.names[k]+' → '+(v==null?'امتنع':VB.names[v])).join('، '));
 /** ذاكرة كل آليّ السرّية التي يعيدها النموذج مع كل جواب — تُغذّى في النداء التالي فتبقى خطّته متّسقة عبر الأيام */
@@ -31413,7 +31570,7 @@ const BR_AI_RULES=`أنت مدير لعبة محترف يحرّك لاعبين �
 من يعرف الكلمة: تلميحه صحيح ودقيق يثبت معرفته لمن يعرف، ولا يكشف الكلمة لمن لا يعرف: في الجولة الأولى صفة ثانوية صحيحة لا أشهر صفة، وفي الثانية أدقّ قليلًا ويبني على تلميح سابق («مثل ما قال فلان، وزيادة…»). يراقب: من تلميحه عامّ يصلح لأي كلمة في الفئة؟ من ناقض الكلمة؟ من كرّر كلام غيره بلا إضافة؟ من تهرّب من التحديد عند السؤال؟ ويسأل سؤالًا لا يجيب عنه إلا من يعرف دون أن يكشف الكلمة. لا يتّهم بحجّة «قليل الكلام».
 برا السالفة: يقرأ التلميحات كلّها، يستنتج المرشّحين من الفئة ويرتّبهم، ويكتب تلميحًا يشبه أسلوب المجلس ويصلح للمرشّحَين الأوّلَين معًا، بثقة وبلا تردّد، ولا يقول «ما أعرف» ولا يعتذر. عند السؤال يجيب جوابًا يبدو محدّدًا لكنه لا يلتزم بتفصيل قد يفضحه. يصوّت على من يبدو مشبوهًا عند الآخرين ليبعد الشكّ عنه، وعند الإمساك به يخمّن المرشّح الأرجح. في الصعوبة السهلة يخطئ أحيانًا ويكشف نفسه بتلميح لا يناسب.
 البشري: افهم لهجته ومزاحه وأخطاءه الإملائية. إن قال إنه لا يعرف الكلمة أو إنه برا السالفة فصدّقوه وصوّتوا عليه؛ إن سأل أحدًا أجابه المسؤول عن سؤاله نفسه؛ إن مزح جاروه ثم عادوا إلى اللعبة.
-الأسلوب: لهجة خليجية طبيعية، جمل قصيرة متفاوتة (≤ 20 كلمة)، شخصية ثابتة لكل واحد، لا تكرار لتلميح قيل، لا يذكر أحد أنه آليّ أو نموذج. أعد JSON صالحًا فقط بلا أي نصّ خارجه، بلا علامات اقتباس مزدوجة داخل النصوص، وthink في سطر قصير (≤ 25 كلمة).`;
+${T('__EN_STYLE__')==='__EN_STYLE__'?'':'Write every line in natural spoken English. '}الأسلوب: لهجة خليجية طبيعية، جمل قصيرة متفاوتة (≤ 20 كلمة)، شخصية ثابتة لكل واحد، لا تكرار لتلميح قيل، لا يذكر أحد أنه آليّ أو نموذج. أعد JSON صالحًا فقط بلا أي نصّ خارجه، بلا علامات اقتباس مزدوجة داخل النصوص، وthink في سطر قصير (≤ 25 كلمة).`;
 const BR_AI_NOTES='"notes":{"<رقم>":"<ما يريد هذا الآليّ تذكّره: من يشكّ فيه ولماذا، ≤ 25 كلمة>"}';
 function brAiState(withWord){
  const diff={easy:'سهلة — المجلس يتساهل ويخطئ أحيانًا وبرا السالفة يكشف نفسه أحيانًا',mid:'متوسطة',hard:'صعبة — المجلس دقيق وبرا السالفة ماكر يقلّد ببراعة'}[VB.diff]||'متوسطة';
