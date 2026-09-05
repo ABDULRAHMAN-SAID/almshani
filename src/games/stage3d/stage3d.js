@@ -214,6 +214,7 @@ function vb3dChar(look,posture){
 /* ── الغرفتان ── */
 function vb3dRoomMajlis(sc){
  const T=THREE,wood=vb3dTexWood();
+ sc.fog=new T.FogExp2(0x2A1E12,.05);   // 5.62: عمق للمجلس أيضًا — الجدار البعيد يلين فتبرز الجلسة
  const floor=vb3dMesh(vb3dG('Plane',10,10),vb3dMat('#fff',{map:vb3dTexCarpet(),rough:.95}),0,0,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1});sc.add(floor);
  sc.add(vb3dMesh(vb3dG('Plane',30,30),vb3dMat('#3A2A1C',{rough:1}),0,-.01,0,{rot:[-Math.PI/2,0,0],recv:1,noCast:1}));
  const plaster=vb3dMat('#fff',{map:vb3dTexPlaster(),rough:.95}),wainM=vb3dMat('#5A3418',{map:wood,rough:.8}),brass=vb3dMat('#C9921E',{metal:.95,rough:.2,clear:.35});
@@ -243,12 +244,12 @@ function vb3dRoomMajlis(sc){
  sc.add(vb3dMesh(vb3dG('Cylinder',.22,.24,.03,20),cupM,-.35,.375,.2));const dateM=vb3dMat('#5A2A12',{rough:.6});for(let k=0;k<9;k++)sc.add(vb3dMesh(vb3dG('Sphere',.035,8,6),dateM,-.35+(k%3-1)*.07,.42,.2+(Math.floor(k/3)-1)*.07,{noCast:1}));
  // الفانوس المعلّق فوق الطاولة
  const lan=new T.Group();lan.position.set(0,2.15,0);lan.add(vb3dLimb(new T.Vector3(0,1.7,0),new T.Vector3(0,.3,0),.012,brass));
- lan.add(vb3dMesh(vb3dG('Cone',.2,.16,8),brass,0,.3,0),vb3dMesh(vb3dG('Cylinder',.14,.14,.34,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.6,tr:1,op:.55,side:T.DoubleSide}),0,.05,0,{noCast:1}),vb3dMesh(vb3dG('Cylinder',.17,.15,.05,8),brass,0,-.14,0));
+ lan.add(vb3dMesh(vb3dG('Cone',.2,.16,8),brass,0,.3,0),vb3dMesh(vb3dG('Cylinder',.14,.14,.34,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.0,tr:1,op:.5,side:T.DoubleSide}),0,.05,0,{noCast:1}),vb3dMesh(vb3dG('Cylinder',.17,.15,.05,8),brass,0,-.14,0));
  for(let k=0;k<8;k++){const a=k/8*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.34,.012),brass,Math.cos(a)*.14,.05,Math.sin(a)*.14,{noCast:1}))}
  sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.6,1.6,1);glow.position.set(0,2.2,0);sc.add(glow);
  // سقف بعوارض خشب وقبّة جصّ
- const ceil=vb3dMat('#E8DCC2',{rough:1,emis:'#8A7550',ei:1.0});ceil.side=T.DoubleSide;   // السقف لا يُقرأ فراغًا أسود حين ترتفع الكاميرا
+ const ceil=vb3dMat('#E8DCC2',{rough:1,emis:'#7A6544',ei:.55});ceil.side=T.DoubleSide;   // 5.62: السقف مضيء بلا وهج — كان يبيّض أعلى الإطار
  sc.add(vb3dMesh(vb3dG('Plane',12,9),ceil,0,3.9,-.5,{rot:[Math.PI/2,0,0],noCast:1}));
  for(let k=-3;k<=3;k++)sc.add(vb3dMesh(vb3dG('Box',9.4,.16,.2),vb3dMat('#6A4426',{map:wood,rough:.8}),0,3.82,-3.2+k*.95,{rot:[0,Math.PI/2,0],noCast:1}));
  sc.add(vb3dMesh(vb3dG('Box',9.4,.2,.26),vb3dMat('#5A3418',{map:wood,rough:.8}),0,3.76,-.5,{rot:[0,Math.PI/2,0],noCast:1}));
@@ -326,7 +327,7 @@ function vb3dRoomSquare(sc){
  // ضباب أرضي خفيف
  const mist=vb3dMat('#8FA0D8',{rough:1});mist.transparent=true;mist.opacity=.05;mist.depthWrite=false;mist.blending=T.AdditiveBlending;mist.side=T.DoubleSide;
  for(let k=0;k<3;k++)sc.add(vb3dMesh(vb3dG('Plane',18,1.5),mist,0,.35+k*.3,-4-k*1.5,{noCast:1}));
- sc.fog=new T.FogExp2(0x0B0E22,.05);
+ sc.fog=new T.FogExp2(0x0B0E22,.062);   // 5.62: عمق أوضح — الخلفية تلين فتبرز الوجوه
  const L={};L.hemi=new T.HemisphereLight(0x8E9AD8,0x241C2A,.8);sc.add(L.hemi);
  L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-4,7,-2);L.key.castShadow=true;L.key.shadow.mapSize.set(1536,1536);L.key.shadow.radius=3;
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
@@ -351,13 +352,14 @@ function vb3dMount(kindOrModel){
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.outputColorSpace=T.SRGBColorSpace;
  const sc=new T.Scene();const cam=new T.PerspectiveCamera(48,1.2,.1,80);
- const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.72+Math.max(0,n-6)*.1,Rz=1.45,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
+ const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.9+Math.max(0,n-6)*.13,Rz=1.5,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
  sc.environmentIntensity=kind==='mafia'?.1:.2;
  const envIn=()=>{try{if(!VB3.on||!VB3.sc)return;if(!VB3.envTex){const pm=new T.PMREMGenerator(VB3.renderer);VB3.envTex=pm.fromScene(new T.RoomEnvironment(),.04).texture;pm.dispose()}VB3.sc.environment=VB3.envTex;VB3.dirty=true}catch(e){}};
  if(VB3.envTex)sc.environment=VB3.envTex;else (window.requestIdleCallback||(f=>setTimeout(f,600)))(envIn,{timeout:1500});   // الانعكاسات الناعمة تُحسب بعد أول رسم كي لا تتأخّر الغرفة في الظهور
  sc.background=new T.Color(kind==='mafia'?'#0B0E22':room.day.bg);
  const chars=[];const seatH=kind==='mafia'?.5:.15;
- for(let i=0;i<n;i++){const a=i===0?Math.PI/2:Math.PI+((i-1)/Math.max(1,n-2))*Math.PI,x=i===0?0:Math.cos(a)*Rx,z=i===0?Rz+.55:Math.sin(a)*Rz,empty=model.empty.has(i);
+ // 5.62: قوس الجلوس مُزاح للداخل — لا أحد يجلس بمحاذاة العدسة فيُقصّ نصفه، والحلقة كلّها داخل الإطار
+ for(let i=0;i<n;i++){const a=i===0?Math.PI/2:Math.PI*1.13+((i-1)/Math.max(1,n-2))*Math.PI*.74,x=i===0?0:Math.cos(a)*Rx,z=i===0?Rz+.55:Math.sin(a)*Rz,empty=model.empty.has(i);
   const seat=new T.Group();seat.position.set(x,0,z);seat.rotation.y=Math.atan2(-x,-z);sc.add(seat);
   if(kind==='mafia'){const cm=vb3dMat('#4A2C16',{map:vb3dTexWood(),rough:.75});
    seat.add(vb3dMesh(vb3dG('Cylinder',.3,.3,.06,36),cm,0,.47,0),vb3dMesh(vb3dG('Torus',.3,.02,10,36),cm,0,.47,0,{rot:[Math.PI/2,0,0],noCast:1}));
@@ -377,8 +379,8 @@ function vb3dMount(kindOrModel){
  // 5.59: أنت تجلس في مكانك وترى المجلس بعينيك — الكاميرا في مقعدك، وشخصيتك لا تحجب الطاولة
  if(chars[0]&&chars[0].ch){chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false}
  // ارتفاع النظر يتبع الجلسة: كراسي المدينة أعلى من فرشة المجلس، فتقع الوجوه في مستوى النظر في الحالتين
- const eye=kind==='mafia'?1.56:1.18,aimY=kind==='mafia'?.88:.66;
- const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?.92:1.15)+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ const eye=kind==='mafia'?1.72:1.34,aimY=kind==='mafia'?.9:.7;
+ const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?1.35:1.55)+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
  VB3.aim=new T.Vector3(0,aimY,-.5);VB3.aimT=new T.Vector3(0,aimY,-.5);VB3.aimY=aimY;
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
@@ -465,8 +467,12 @@ function vb3dBubble(i,text){
  const el=document.createElement('div');el.className='vb3dBub'+(i===0?' me':'');el.dataset.seat=String(i);
  const nm=document.createElement('b');nm.textContent=i===0?'أنت':String(VB3.model.names[i]||'');el.appendChild(nm);   // الاسم في الفقاعة: العلامة الوحيدة في المشهد
  el.appendChild(document.createTextNode(String(text).length>80?String(text).slice(0,78)+'…':String(text)));
- const w=VB3.w||st.clientWidth,hh=VB3.h||st.clientHeight;el.style.left=Math.min(w-82,Math.max(82,a.x/100*w)).toFixed(0)+'px';st.appendChild(el);
- const bh=el.offsetHeight||40;el.style.top=Math.max(4,Math.min(hh-bh-4,a.y/100*hh-(i===0?22:30)-bh)).toFixed(0)+'px';
+ const w=VB3.w||st.clientWidth,hh=VB3.h||st.clientHeight;
+ // عرض الفقاعة يُحسب أوّلًا ثم تُحصر داخل المسرح: لا تنضغط في عمود ضيّق عند الحافّة
+ el.style.maxWidth=Math.min(190,Math.max(120,w-24))+'px';el.style.visibility='hidden';st.appendChild(el);
+ const bw=el.offsetWidth||140,bh=el.offsetHeight||40,half=bw/2+6;
+ el.style.left=Math.min(w-half,Math.max(half,a.x/100*w)).toFixed(0)+'px';
+ el.style.top=Math.max(4,Math.min(hh-bh-4,a.y/100*hh-(i===0?22:34)-bh)).toFixed(0)+'px';el.style.visibility='';
  clearTimeout(el._t);el._t=setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),350)},3600);
 }
 /** إشارة باليد نحو لاعب (اتهام أو تصويت) */
