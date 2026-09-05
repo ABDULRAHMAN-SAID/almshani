@@ -646,7 +646,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 /* المحادثة جنب المشهد (5.55): عمودان — المسرح والسجلّ — فتقصر الشاشة بدل أن يمتدّ السجلّ تحتها */
 /* شريط اللاعبين (5.60): دوائر متساوية بالترتيب 1..N — رقم على الكتف، اسم تحتها، وحلقة تقول الحالة */
 .vbScene:not(.is3d) .vbRoster{display:none}
-.vbRoster{flex:0 0 auto;display:flex;gap:5px;align-items:flex-start;padding:6px 9px 7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+.vbRoster{flex:0 0 auto;display:flex;gap:5px;align-items:flex-start;padding:4px 9px 5px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
  background:linear-gradient(180deg,rgba(12,17,30,.95),rgba(12,17,30,.62));border-bottom:1px solid rgba(255,255,255,.06)}
 .vbRoster::-webkit-scrollbar{display:none}
 .vbR{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:5px;padding:0;background:none;border:none;
@@ -684,19 +684,26 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbHt>b{display:block;font-size:17px;font-weight:900;line-height:1.15;
  background:linear-gradient(175deg,#FFF4D0 8%,#E8B23A 45%,#A87518 65%,#F5D98A 95%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .vbHt>small{display:block;font-size:9.5px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vbPills{flex:0 0 auto;display:flex;gap:6px;padding:5px 10px;background:rgba(8,11,20,.6)}
+.vbPills{flex:0 0 auto;display:flex;gap:6px;padding:4px 10px 5px;background:rgba(8,11,20,.6)}
 .vbP2{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:5px;min-height:32px;padding:0 8px;
  border-radius:12px;background:rgba(18,24,40,.85);border:1px solid rgba(232,178,58,.3);font-size:11.5px;font-weight:800;color:var(--tx2);white-space:nowrap;overflow:hidden}
 .vbP2>b{color:var(--tx);font-size:13px;font-weight:900;font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis}
 .vbP2.wide{flex:1.35 1 0}
 .vbP2.nar{flex:.62 1 0}
-.vbP2.tm{position:relative;flex:.95 1 0;border-color:rgba(232,178,58,.65);background:linear-gradient(180deg,rgba(44,34,10,.95),rgba(26,20,6,.9));overflow:hidden}
-.vbP2.tm>b{color:var(--gold);font-size:16px;font-weight:900;letter-spacing:.6px}
-.vbTmBar{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(255,255,255,.09);display:block}
+.vbClock{position:relative;flex:0 0 auto;margin:5px 10px 0;display:flex;align-items:center;gap:8px;min-height:34px;padding:0 12px 4px;
+ border:1px solid rgba(232,178,58,.55);border-radius:13px;background:linear-gradient(180deg,rgba(48,36,11,.96),rgba(24,18,6,.94));overflow:hidden}
+.vbClkL{display:flex;align-items:center;gap:6px;color:#E7D6A6;font-size:12px;font-weight:800;white-space:nowrap}
+.vbClock>b{margin-inline-start:auto;color:var(--gold);font-size:21px;line-height:1;font-weight:900;letter-spacing:1.2px;
+ font-variant-numeric:tabular-nums;text-shadow:0 0 14px rgba(232,178,58,.45)}
+.vbTmBar{position:absolute;left:0;right:0;bottom:0;height:4px;background:rgba(255,255,255,.1);display:block}
 .vbTmBar>u{display:block;height:100%;width:100%;background:linear-gradient(90deg,#E8B23A,#FFE9A8);transition:width .3s linear}
-.vbP2.tm.low{border-color:rgba(226,75,74,.8)}
-.vbP2.tm.low>b{color:#FF9A98}
-.vbP2.tm.low .vbTmBar>u{background:linear-gradient(90deg,#E24B4A,#FF9A98)}
+.vbClock.off{opacity:.55}
+.vbClock.off>b{color:#9C8C63;text-shadow:none}
+.vbClock.low{border-color:rgba(226,75,74,.85);background:linear-gradient(180deg,rgba(60,17,17,.96),rgba(28,8,8,.94));animation:vbClkP 1s ease-in-out infinite}
+.vbClock.low>b{color:#FF9A98;text-shadow:0 0 14px rgba(226,75,74,.5)}
+.vbClock.low .vbClkL{color:#FFC2C0}
+.vbClock.low .vbTmBar>u{background:linear-gradient(90deg,#E24B4A,#FF9A98)}
+@keyframes vbClkP{0%,100%{box-shadow:0 0 0 0 rgba(226,75,74,0)}50%{box-shadow:0 0 0 3px rgba(226,75,74,.2)}}
 .vbHb.ai{border-color:rgba(123,79,224,.6);background:rgba(30,20,60,.9)}
 .vbHb.ai.thinking{animation:vbPickP 1.2s ease-in-out infinite}
 .vbMain{position:relative;flex:1 1 auto;min-height:190px;overflow:hidden}
@@ -740,7 +747,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.full .vbTurn .vbRing b{font-size:10px}
 .vbScene.full .vbNotes{position:absolute;inset:auto 8px 8px 8px;z-index:8;max-height:60%;overflow-y:auto;background:rgba(10,14,26,.95)}
 /* لوحة النقاش شريط مستقلّ تحت المشهد (5.60): لا تغطّي أحدًا، والمشهد يبقى كاملًا فوقها */
-.vbFeedW{flex:0 0 auto;height:20vh;min-height:112px;max-height:158px;margin:6px 8px 0;display:flex;flex-direction:column;
+.vbFeedW{flex:0 0 auto;height:18vh;min-height:104px;max-height:136px;margin:5px 8px 0;display:flex;flex-direction:column;
  background:rgba(12,17,30,.92);border:1px solid rgba(232,178,58,.28);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.5);overflow:hidden}
 .vbScene.full .vbFeed{background:none;border:none;border-radius:0;padding:8px 9px 10px;margin:0;overflow-y:auto;overscroll-behavior:contain;font-size:11.5px;scrollbar-width:thin;min-height:0}
 .vbScene.full .vbFeed::-webkit-scrollbar{width:4px}
@@ -21107,7 +21114,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.66';
+const APP_VER='5.67';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -28650,6 +28657,8 @@ function vb3dChar(look,posture){
  // الجذع (ثوب/عباءة) بطيّات، والعنق والياقة وفتحة الصدر بأزرارها
  const prof=[[0.03,0],[0.34,0.02],[0.37,0.16],[0.32,0.46],[0.29,0.66],[0.25,0.74],[0.13,0.78],[0.1,0.86]].map(p=>new T.Vector2(p[0],p[1]));
  const body=new T.Mesh(vb3dFolds(new T.LatheGeometry(prof,44),.013,9,.62),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
+ // 5.67: كتفان يكسران المخروط — الظلّ يقع عليهما فيُقرأ الجسد إنسانًا
+ g.add(vb3dMesh(vb3dG('Sphere',.3,28,18),cloth,0,.63,.02,{sc:[1.06,.42,.86]}));
  g.add(vb3dMesh(vb3dG('Cylinder',.075,.088,.13,24),skin,0,.86,0));
  if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.105,.014,10,30),cloth,0,.855,0,{rot:[Math.PI/2,0,0],noCast:1}));
   g.add(vb3dMesh(vb3dG('Capsule',.007,.2,3,6),M(shade(look.thobe,-22),{rough:.9}),0,.665,.292,{rot:[.2,0,0],noCast:1}));
@@ -28820,13 +28829,13 @@ function vb3dRoomMajlis(sc){
  // هدب السجّاد عند الحافّتين
  const fr=vb3dMat('#E8C77A',{rough:.9});for(let k=-24;k<=24;k++){sc.add(vb3dMesh(vb3dG('Capsule',.008,.14,2,5),fr,k*.1,.012,3.55,{rot:[Math.PI/2,0,0],noCast:1}))}
  const L={};L.hemi=new T.HemisphereLight(0xFFE7C6,0x4A2A1A,.95);sc.add(L.hemi);
- L.key=new T.DirectionalLight(0xFFF0D8,2.2);L.key.position.set(2.6,5.5,3.2);L.key.castShadow=true;L.key.shadow.mapSize.set(1536,1536);L.key.shadow.radius=3;
+ L.key=new T.DirectionalLight(0xFFF0D8,2.2);L.key.position.set(2.9,5.2,2.4);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
  Object.assign(L.key.shadow.camera,{left:-4,right:4,top:4,bottom:-4,near:.5,far:14});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
- L.rim=new T.DirectionalLight(0xFFCE96,1.5);L.rim.position.set(-2.2,3.4,-4.2);sc.add(L.rim);   // ضوء حافّة من الخلف يرسم حدود الرؤوس والأكتاف
+ L.rim=new T.DirectionalLight(0xFFCE96,1.5);L.rim.position.set(-2.4,2.9,-4.4);sc.add(L.rim);   // ضوء حافّة من الخلف يرسم حدود الرؤوس والأكتاف
  L.lamp=new T.PointLight(0xFFC98A,26,11,1.7);L.lamp.position.set(0,2.05,0);sc.add(L.lamp);L.sconce=[sc1,sc2];
  L.fill=new T.DirectionalLight(0xFFE2C4,.42);L.fill.position.set(.7,2.4,4.4);sc.add(L.fill);
  L.warm=new T.PointLight(0xFFB070,10,10,1.8);L.warm.position.set(0,1.6,-3.2);sc.add(L.warm);
- return {L,glow,day:{hemi:.7,key:2.0,lamp:13,rim:1.6,sconce:5,bg:'#3A2A1C'},night:{hemi:.32,key:.55,lamp:8,rim:.75,sconce:3,bg:'#1A1512'}};
+ return {L,glow,day:{hemi:.4,key:2.7,lamp:15,rim:2.1,sconce:6,bg:'#241A11'},night:{hemi:.2,key:.8,lamp:10,rim:1.15,sconce:3.6,bg:'#120E0C'}};
 }
 function vb3dRoomSquare(sc){
  const T=THREE,wood=vb3dTexWood();
@@ -28865,7 +28874,7 @@ function vb3dRoomSquare(sc){
  const wm=vb3dMat('#5A3418',{map:wood,rough:.75});
  sc.add(vb3dMesh(vb3dG('Cylinder',1.0,1.0,.08,48),wm,0,.72,0),vb3dMesh(vb3dG('Torus',1.0,.035,10,48),vb3dMat('#3B2412',{rough:.8}),0,.74,0,{rot:[Math.PI/2,0,0],noCast:1}),vb3dMesh(vb3dG('Cylinder',.1,.12,.7,10),wm,0,.35,0),vb3dMesh(vb3dG('Cylinder',.45,.5,.06,20),wm,0,.03,0));
  const brass=vb3dMat('#C9921E',{metal:.95,rough:.2,clear:.35});const lan=new T.Group();lan.position.set(0,.76,0);
- lan.add(vb3dMesh(vb3dG('Cylinder',.13,.15,.04,8),brass,0,.02,0),vb3dMesh(vb3dG('Cylinder',.1,.1,.3,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.05,tr:1,op:.55,side:T.DoubleSide}),0,.19,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.14,.12,8),brass,0,.4,0),vb3dMesh(vb3dG('Torus',.06,.012,6,16),brass,0,.5,0,{noCast:1}));
+ lan.add(vb3dMesh(vb3dG('Cylinder',.13,.15,.04,8),brass,0,.02,0),vb3dMesh(vb3dG('Cylinder',.1,.1,.3,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:.7,tr:1,op:.5,side:T.DoubleSide}),0,.19,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.14,.12,8),brass,0,.4,0),vb3dMesh(vb3dG('Torus',.06,.012,6,16),brass,0,.5,0,{noCast:1}));
  for(let k=0;k<6;k++){const a=k/6*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.3,.012),brass,Math.cos(a)*.1,.19,Math.sin(a)*.1,{noCast:1}))}sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.6,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.3,1.3,1);glow.position.set(0,.98,0);sc.add(glow);
  vb3dAo(sc,0,.008,0,1.5);   // ظلّ الطاولة على الحجر
@@ -28897,12 +28906,12 @@ function vb3dRoomSquare(sc){
  for(let k=0;k<3;k++)sc.add(vb3dMesh(vb3dG('Plane',18,1.5),mist,0,.35+k*.3,-4-k*1.5,{noCast:1}));
  sc.fog=new T.FogExp2(0x0B0E22,.062);   // 5.62: عمق أوضح — الخلفية تلين فتبرز الوجوه
  const L={};L.hemi=new T.HemisphereLight(0x8E9AD8,0x241C2A,.8);sc.add(L.hemi);
- L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-4,7,-2);L.key.castShadow=true;L.key.shadow.mapSize.set(1536,1536);L.key.shadow.radius=3;
+ L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-4,6.2,1.2);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
- L.rim=new T.DirectionalLight(0x9FB4FF,1.2);L.rim.position.set(2.4,3.2,-5);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
+ L.rim=new T.DirectionalLight(0x9FB4FF,1.2);L.rim.position.set(2.6,2.8,-5.2);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
  L.lamp=new T.PointLight(0xFFB760,34,10,1.7);L.lamp.position.set(0,1.25,0);sc.add(L.lamp);L.posts=[p1,p2];
  L.fill=new T.DirectionalLight(0xFFD2A4,.5);L.fill.position.set(.8,2.2,4.2);sc.add(L.fill);   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
- return {L,glow,sky,stars,day:{hemi:.62,key:1.5,lamp:24,post:16,rim:1.25,skyc:'#FFFFFF',starO:.7},night:{hemi:.3,key:.85,lamp:12,post:8,rim:.95,skyc:'#5A6090',starO:1}};
+ return {L,glow,sky,stars,day:{hemi:.36,key:2.0,lamp:27,post:18,rim:2.0,skyc:'#FFFFFF',starO:.7},night:{hemi:.17,key:1.15,lamp:14,post:9,rim:1.6,skyc:'#5A6090',starO:1}};
 }
 /* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
 function vb3dStageModel(kind){const my=VB;return {kind,names:VB.names,me:0,empty:new Set(),host:-1,stage:'vbStage',seats:'#vbSeats .vbSeat',scene:'.vbScene',
@@ -28953,7 +28962,7 @@ function vb3dMount(kindOrModel){
  if(chars[0]){if(chars[0].ch)chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false;chars[0].seat.visible=false}
  // ارتفاع النظر يتبع الجلسة: كراسي المدينة أعلى من فرشة المجلس، فتقع الوجوه في مستوى النظر في الحالتين
  const eye=kind==='mafia'?1.58:1.16,aimY=kind==='mafia'?1.12:.86;   // 5.66: نظر بمستوى الوجوه — لا نصف إطار أرضًا
- const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?1.2:1.4)+Math.max(0,n-8)*.14;cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=68;
+ const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?.85:.95);cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=68;
  VB3.aim=new T.Vector3(0,aimY,-.5);VB3.aimT=new T.Vector3(0,aimY,-.5);VB3.aimY=aimY;
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
@@ -28968,7 +28977,7 @@ function vb3dMount(kindOrModel){
  if(!window.__vbNoFx&&!(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=3)){
   try{const comp=new T.EffectComposer(renderer);comp.addPass(new T.RenderPass(sc,cam));
    comp.addPass(new T.OutputPass());
-   const bl=new T.UnrealBloomPass(new T.Vector2(VB3.w||360,VB3.h||300),kind==='mafia'?.3:.22,.4,.97);   // التوهّج بعد التدرّج اللوني وعلى أشدّ المواضع سطوعًا فقط (الفوانيس والمصابيح)
+   const bl=new T.UnrealBloomPass(new T.Vector2(VB3.w||360,VB3.h||300),kind==='mafia'?.22:.18,.4,.985);   // التوهّج بعد التدرّج اللوني وعلى أشدّ المواضع سطوعًا فقط (الفوانيس والمصابيح)
    comp.addPass(bl);
    const sm=new T.SMAAPass();comp.addPass(sm);VB3.comp=comp;VB3.bloom=bl;vb3dResize()}catch(e){VB3.comp=null}
  }
@@ -29163,9 +29172,9 @@ function vbScene(kind,title,sub){
   <button class="vbHb ai" id="vbAiChip" onclick="vbAiSheet()" hidden aria-label="حالة الذكاء الاصطناعي">${ico('sparkle',15)}</button>
   <button class="vbHb" onclick="vbMenuSheet()" aria-label="الأدوات">${ico('gear',15)}</button>
  </div>
+ <div class="vbClock off" id="vbTmW"><span class="vbClkL">${ico('timer',15)} الوقت المتبقّي</span><b id="vbTm">—</b><i class="vbTmBar"><u id="vbTmFill"></u></i></div>
  <div class="vbPills">
   <span class="vbP2 wide" id="vbPhase">${ico('list',13)} <b>—</b></span>
-  <span class="vbP2 tm" id="vbTmW">${ico('timer',13)} <b id="vbTm">—</b><i class="vbTmBar"><u id="vbTmFill"></u></i></span>
   <span class="vbP2 nar">${ico('group',13)} <b id="vbCount">${(VB.alive?VB.alive.length:n)}/${n}</b></span>
   <button class="vbP2 role wide" id="vbRole" onclick="vbRoleGuide()"></button>
  </div>
@@ -29286,7 +29295,7 @@ function vbTimerDraw(left,total){
  if(t)t.textContent=left==null?'—':vbFmt(left);   // رقاقة المؤقّت لا تبقى فارغة بين المراحل
  const fill=document.getElementById('vbTmFill'),tw=document.getElementById('vbTmW');
  if(fill)fill.style.width=(left==null||!total?100:Math.max(0,Math.min(100,left/total*100)))+'%';
- if(tw)tw.classList.toggle('low',left!=null&&left<=10);
+ if(tw){tw.classList.toggle('low',left!=null&&left<=10);tw.classList.toggle('off',left==null)}
  const pk=document.getElementById('vbPickT');if(pk)pk.textContent=left==null?'':vbFmt(left);
  if(left==null)return;
  if(b)b.textContent=vbFmt(left);
