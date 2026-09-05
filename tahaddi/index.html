@@ -21107,7 +21107,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.65';
+const APP_VER='5.66';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -28580,11 +28580,21 @@ function vb3dTexShemagh(){return vb3dTex('shemagh',128,128,(g,w,h)=>{
  for(let k=0;k<w;k+=16){g.beginPath();g.moveTo(k,0);g.lineTo(k,h);g.stroke();g.beginPath();g.moveTo(0,k);g.lineTo(w,k);g.stroke()}
  g.fillStyle='#B7262C';for(let y=8;y<h;y+=16)for(let x=8;x<w;x+=16){g.fillRect(x-3,y-3,6,6)}},[3,3])}
 function vb3dTexCobble(){return vb3dTex('cobble',512,512,(g,w,h)=>{
- g.fillStyle='#1E2133';g.fillRect(0,0,w,h);
- for(let row=0,y=0;y<h;y+=30,row++)for(let x=(row%2)*22-22;x<w+22;x+=44){const rx=x+Math.random()*4,ry=y+Math.random()*3,rw=38+Math.random()*4,rh=24+Math.random()*3;
-  const gr=g.createRadialGradient(rx+rw*.4,ry+rh*.35,2,rx+rw/2,ry+rh/2,rw*.7);gr.addColorStop(0,'#4A5070');gr.addColorStop(1,'#2A2F46');g.fillStyle=gr;
-  g.beginPath();g.roundRect?g.roundRect(rx,ry,rw,rh,8):g.rect(rx,ry,rw,rh);g.fill()}
- vb3dNoise(g,w,h,7000,.08)},[6,6])}
+ // 5.66: حجر ساحة مبلَّل: مفاصل داكنة، لكل حجر لونه وحافّته المضيئة، وبقع رطوبة
+ g.fillStyle='#12141F';g.fillRect(0,0,w,h);
+ const tint=['#454B6B','#3E4462','#4C5274','#39405C','#4A4F6A'];
+ for(let row=0,y=0;y<h;y+=30,row++)for(let x=(row%2)*22-22;x<w+22;x+=44){
+  const rx=x+Math.random()*3,ry=y+Math.random()*2,rw=39+Math.random()*3,rh=25+Math.random()*2,c=tint[(row*7+Math.round(x/44))%5];
+  const gr=g.createRadialGradient(rx+rw*.36,ry+rh*.3,2,rx+rw/2,ry+rh/2,rw*.72);
+  gr.addColorStop(0,c);gr.addColorStop(.7,shade(c,-16));gr.addColorStop(1,shade(c,-34));g.fillStyle=gr;
+  g.beginPath();g.roundRect?g.roundRect(rx,ry,rw,rh,7):g.rect(rx,ry,rw,rh);g.fill();
+  g.strokeStyle='rgba(190,205,255,.13)';g.lineWidth=1.4;                        // حافّة عليا لامعة
+  g.beginPath();g.moveTo(rx+3,ry+1.2);g.lineTo(rx+rw-3,ry+1.2);g.stroke();
+  g.strokeStyle='rgba(0,0,0,.42)';g.lineWidth=1.2;
+  g.beginPath();g.moveTo(rx+3,ry+rh-1);g.lineTo(rx+rw-3,ry+rh-1);g.stroke()}
+ for(let k=0;k<9;k++){const px=Math.random()*w,py=Math.random()*h,pr=26+Math.random()*44;   // بقع رطوبة تعكس الضوء
+  const pg=g.createRadialGradient(px,py,2,px,py,pr);pg.addColorStop(0,'rgba(150,175,235,.16)');pg.addColorStop(1,'rgba(150,175,235,0)');g.fillStyle=pg;g.fillRect(px-pr,py-pr,pr*2,pr*2)}
+ vb3dNoise(g,w,h,9000,.07)},[6,6])}
 function vb3dTexFacade(){return vb3dTex('facade',256,512,(g,w,h)=>{
  // 5.65: واجهة بيت خليجي لا شبكة مربّعات — جصّ دافئ، نوافذ مقوّسة بإطار، شرفات، وحزام مشربية
  const wall=g.createLinearGradient(0,0,0,h);wall.addColorStop(0,'#4A4066');wall.addColorStop(.55,'#3A3252');wall.addColorStop(1,'#2A2440');
@@ -28667,14 +28677,19 @@ function vb3dChar(look,posture){
  const onFace=(x,y,off)=>new T.Vector3(x,y,Math.sqrt(Math.max(0,.0361-x*x-(y/1.08)*(y/1.08)))+(off||0));
  [-1,1].forEach(s=>head.add(vb3dMesh(vb3dG('Sphere',.036,16,12),skin,s*.19,-.005,-.01,{sc:[.55,1,.85],noCast:1})));
  // العينان: مقلة لامعة وقزحية وجفن علوي وسفلي بحسب شكل العينين في الأفاتار
- const ey=look.eyes,eyes=[],big=ey==='wide'?1.22:1;
- [-1,1].forEach(s=>{const eg=new T.Group();eg.position.set(s*.072,.035,.16);head.add(eg);
-  eg.add(vb3dMesh(vb3dG('Sphere',.036*big,24,18),eyeM,0,0,0,{noCast:1}));
-  eg.add(vb3dMesh(vb3dG('Circle',.021*big,24),irisM,0,0,.0348*big,{noCast:1}));
-  const cover=ey==='happy'?2.7:ey==='sharp'?1.15:ey==='wide'?.6:.95;
-  const lid=vb3dMesh(vb3dG('Sphere',.0392*big,24,14,0,Math.PI*2,0,cover),skin,0,0,0,{noCast:1});lid.rotation.x=-.12;if(ey==='sharp')lid.rotation.z=-s*.38;eg.add(lid);
-  eg.add(vb3dMesh(vb3dG('Sphere',.0392*big,24,10,0,Math.PI*2,Math.PI-.6,.6),skin,0,0,0,{noCast:1}));
-  if(ey==='happy'){const cr=vb3dMesh(vb3dG('Torus',.028,.0055,6,16,2.2),M(shade(look.skin,-58),{rough:.6}),0,.004,.034,{noCast:1});cr.rotation.z=Math.PI/2-1.1;eg.add(cr)}
+ // 5.66: عين أصغر وأغور بقزحية أوسع وخطّ رموش وثنية جفن — لا كرة بيضاء بارزة
+ const ey=look.eyes,eyes=[],big=ey==='wide'?1.18:1;
+ const lashM=M(shade(look.hs==='bald'?'#3A2B1E':look.hair,-40),{rough:.55}),creaseM=M(shade(look.skin,-30),{rough:.7});
+ [-1,1].forEach(s=>{const eg=new T.Group();eg.position.set(s*.073,.034,.1515);head.add(eg);
+  eg.add(vb3dMesh(vb3dG('Sphere',.0325*big,24,18),eyeM,0,0,0,{noCast:1}));
+  eg.add(vb3dMesh(vb3dG('Circle',.0215*big,24),irisM,0,0,.0315*big,{noCast:1}));
+  const cover=ey==='happy'?2.7:ey==='sharp'?1.28:ey==='wide'?.74:1.1;
+  const lid=vb3dMesh(vb3dG('Sphere',.0355*big,24,14,0,Math.PI*2,0,cover),skin,0,0,0,{noCast:1});lid.rotation.x=-.12;if(ey==='sharp')lid.rotation.z=-s*.38;eg.add(lid);
+  eg.add(vb3dMesh(vb3dG('Sphere',.0355*big,24,10,0,Math.PI*2,Math.PI-.62,.62),skin,0,0,0,{noCast:1}));
+  if(ey!=='happy'){const lash=vb3dMesh(vb3dG('Torus',.0322*big,.0034,6,20,2.5),lashM,0,0,0,{noCast:1});
+   lash.rotation.set(-.12,0,Math.PI/2-1.25+(ey==='sharp'?-s*.3:0));eg.add(lash);
+   const cr=vb3dMesh(vb3dG('Torus',.038*big,.0026,6,18,2.1),creaseM,0,.006,-.004,{noCast:1});cr.rotation.set(-.1,0,Math.PI/2-1.05);eg.add(cr)}
+  if(ey==='happy'){const cr=vb3dMesh(vb3dG('Torus',.026,.0055,6,16,2.2),M(shade(look.skin,-58),{rough:.6}),0,.004,.03,{noCast:1});cr.rotation.z=Math.PI/2-1.1;eg.add(cr)}
   eyes.push({lid,closed:ey==='happy'})});
  // الحاجبان أنابيب على منحنٍ، والأنف بفتحتيه، وحمرة الخدّين
  const browM=M(look.hs==='bald'?'#3A2B1E':shade(look.hair,-16),{rough:.6});
@@ -28770,6 +28785,12 @@ function vb3dRoomMajlis(sc){
  for(let k=0;k<8;k++){const a=k/8*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.34,.012),brass,Math.cos(a)*.14,.05,Math.sin(a)*.14,{noCast:1}))}
  sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.55,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.6,1.6,1);glow.position.set(0,2.2,0);sc.add(glow);
+ // 5.66: إفريز مشربية وكورنيش خشب أعلى الجدران — الشريط الذي كان جصًّا فارغًا
+ const friezeM=vb3dMat('#C9A24A',{map:vb3dTexLattice(),tr:1,at:.45,side:T.DoubleSide,rough:.75});
+ [[0,-3.62,0],[-4.52,0,Math.PI/2],[4.52,0,-Math.PI/2]].forEach(([fx,fz,fry])=>{
+  sc.add(vb3dMesh(vb3dG('Plane',11.6,.46),friezeM,fx,3.5,fz,{rot:[0,fry,0],noCast:1}));
+  sc.add(vb3dMesh(vb3dG('Box',11.8,.14,.16),vb3dMat('#4A2C14',{map:wood,rough:.8}),fx,3.26,fz,{rot:[0,fry,0],noCast:1}));
+  sc.add(vb3dMesh(vb3dG('Box',11.8,.1,.2),vb3dMat('#5A3418',{map:wood,rough:.8}),fx,3.76,fz,{rot:[0,fry,0],noCast:1}))});
  // سقف بعوارض خشب وقبّة جصّ
  const ceil=vb3dMat('#E8DCC2',{rough:1,emis:'#7A6544',ei:.55});ceil.side=T.DoubleSide;   // 5.62: السقف مضيء بلا وهج — كان يبيّض أعلى الإطار
  sc.add(vb3dMesh(vb3dG('Plane',12,9),ceil,0,3.9,-.5,{rot:[Math.PI/2,0,0],noCast:1}));
@@ -28815,10 +28836,11 @@ function vb3dRoomSquare(sc){
  const stars=new T.Points(new T.BufferGeometry().setAttribute('position',new T.Float32BufferAttribute(pts,3)),new T.PointsMaterial({color:0xFFFFFF,size:.22,transparent:true,opacity:.7,fog:false}));sc.add(stars);
  const moon=vb3dMesh(vb3dG('Sphere',1.3,20,14),new T.MeshBasicMaterial({color:0xFFF4D6,fog:false}),-15,13,-27,{noCast:1});sc.add(moon);
  const mg=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFF0C8,transparent:true,opacity:.7,blending:T.AdditiveBlending,depthWrite:false,fog:false}));mg.scale.set(9,9,1);mg.position.copy(moon.position);sc.add(mg);
- const fac=vb3dMat('#fff',{map:vb3dTexFacade(),rough:.95}),par=vb3dMat('#3A3558',{rough:.95});
+ const facT=vb3dTexFacade(),par=vb3dMat('#3A3558',{rough:.95});
+ const facC=['#FFFFFF','#D9CCEA','#F0DCC6','#C7C6E8','#E8D3D0'],facs=facC.map(c=>vb3dMat(c,{map:facT,rough:.95}));   // 5.66: صبغة مختلفة لكل مبنى
  // 5.65: لكل مبنى نكسة علوية وشرفات وقبّة أو برج أحيانًا — لا صفّ صناديق متطابقة
  let bn=0;
- const bld=(x,z,w,h,d,ry)=>{const k=bn++;const b=vb3dMesh(vb3dG('Box',w,h,d),fac,x,h/2,z,{rot:[0,ry||0,0],noCast:1});b.receiveShadow=true;sc.add(b);
+ const bld=(x,z,w,h,d,ry)=>{const k=bn++,fac=facs[(k*3)%5];const b=vb3dMesh(vb3dG('Box',w,h,d),fac,x,h/2,z,{rot:[0,ry||0,0],noCast:1});b.receiveShadow=true;sc.add(b);
   sc.add(vb3dMesh(vb3dG('Box',w+.22,.28,d+.22),par,x,h+.1,z,{rot:[0,ry||0,0],noCast:1}));
   for(let m=0;m<Math.max(3,Math.round(w/.55));m++)sc.add(vb3dMesh(vb3dG('Box',.14,.3,.14),par,x+(m-(Math.max(3,Math.round(w/.55))-1)/2)*.5,h+.36,z+(ry?0:d/2+.06),{rot:[0,ry||0,0],noCast:1}));   // شرفات السطح
   const sw=w*.62,sh=.8+((k*7)%5)*.28;sc.add(vb3dMesh(vb3dG('Box',sw,sh,d*.62),fac,x,h+.25+sh/2,z,{rot:[0,ry||0,0],noCast:1}),
@@ -28827,23 +28849,23 @@ function vb3dRoomSquare(sc){
    vb3dMesh(vb3dG('Cone',.05,.24,8),par,x,h+.33+sh+sw*.36+.1,z,{noCast:1}));
   else if(k%3===1)sc.add(vb3dMesh(vb3dG('Cylinder',.16,.2,.9,10),par,x+w*.3,h+.25+sh+.45,z,{noCast:1}),
    vb3dMesh(vb3dG('Cone',.24,.3,8),par,x+w*.3,h+.25+sh+1.05,z,{noCast:1}))};
- [[-6.5,-6.5,3.2,5,3],[-3.2,-7.5,2.6,4,3],[0,-8,3.4,6,3],[3.2,-7.5,2.6,4.4,3],[6.5,-6.5,3.2,5.4,3],[-8.5,-2,3,4.2,3,Math.PI/2],[8.5,-2,3,4.6,3,-Math.PI/2],[-8.5,3,3,3.6,3,Math.PI/2],[8.5,3,3,3.8,3,-Math.PI/2]].forEach(a=>bld(...a));
+ [[-9.4,-10,4.4,7,3.6],[-4.6,-11.4,3.6,5.6,3.6],[0,-12.2,4.7,8.4,3.6],[4.6,-11.4,3.6,6.2,3.6],[9.4,-10,4.4,7.6,3.6],[-12.2,-3.2,4.2,5.9,3.6,Math.PI/2],[12.2,-3.2,4.2,6.4,3.6,-Math.PI/2],[-12.2,3.6,4.2,5,3.6,Math.PI/2],[12.2,3.6,4.2,5.3,3.6,-Math.PI/2]].forEach(a=>bld(...a));
  sc.add(vb3dMesh(vb3dG('Cylinder',.5,.6,9,10),par,-1.2,4.5,-14,{noCast:1}),vb3dMesh(vb3dG('Sphere',.7,12,8),par,-1.2,9.3,-14,{noCast:1}),vb3dMesh(vb3dG('Sphere',2.2,16,10,0,Math.PI*2,0,Math.PI/2),par,4,5.5,-14,{noCast:1}),vb3dMesh(vb3dG('Box',6,5.5,4),par,4,2.75,-14,{noCast:1}));
  const palm=(x,z)=>{const grp=new T.Group();grp.position.set(x,0,z);grp.add(vb3dMesh(vb3dG('Cylinder',.09,.14,3.4,8),vb3dMat('#4A3524',{rough:1}),0,1.7,0));
-  const fm=vb3dMat('#1F5B3C',{rough:.9,side:T.DoubleSide});for(let k=0;k<7;k++){const a=k/7*Math.PI*2;const f=vb3dMesh(vb3dG('Plane',1.6,.34),fm,Math.cos(a)*.7,3.35,Math.sin(a)*.7,{noCast:1});f.rotation.set(0,-a,-.45);grp.add(f)}sc.add(grp)};
- palm(-4.6,-4.2);palm(4.8,-4);palm(-5.4,2.4);
+  const fm=vb3dMat('#1F5B3C',{rough:.9,side:T.DoubleSide});for(let k=0;k<9;k++){const a=k/9*Math.PI*2,L=1.5+(k%3)*.22;const f=vb3dMesh(vb3dG('Plane',L,.3),fm,Math.cos(a)*L*.42,3.34-(k%3)*.06,Math.sin(a)*L*.42,{noCast:1});f.rotation.set(0,-a,-.72);grp.add(f)}sc.add(grp)};
+ palm(-7,-6.2);palm(7.2,-6);palm(-8.2,-.6);palm(8.4,-.4);
  const post=(x,z)=>{const grp=new T.Group();grp.position.set(x,0,z);const pm=vb3dMat('#3A3E58',{metal:.4,rough:.6});
   grp.add(vb3dMesh(vb3dG('Cylinder',.06,.09,2.8,8),pm,0,1.4,0),vb3dMesh(vb3dG('Cylinder',.22,.26,.12,8),pm,0,.06,0),vb3dMesh(vb3dG('Box',.3,.38,.3),vb3dMat('#FFE2A0',{emis:'#FFD27A',ei:1.5,tr:1,op:.7}),0,3.0,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.26,.2,4),pm,0,3.28,0,{rot:[0,Math.PI/4,0]}));
   const pl=new T.PointLight(0xFFD08A,18,9,1.8);pl.position.set(0,2.95,0);grp.add(pl);sc.add(grp);return pl};
  const p1=post(-3.4,1.4),p2=post(3.4,1.4);
  // 5.64: ضباب مضيء عند أقدام المباني — المدينة تُقرأ بعيدة مأهولة لا جدارًا مسطّحًا من النوافذ
  const hazeM=new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFC98A,transparent:true,opacity:.22,blending:T.AdditiveBlending,depthWrite:false});
- [[-6,-9,7],[0,-11,9],[6.5,-9,7]].forEach(([hx,hz,hs])=>{const h=new T.Sprite(hazeM.clone());h.scale.set(hs,hs*.5,1);h.position.set(hx,1.6,hz);sc.add(h)});
+ [[-8.5,-12,9],[0,-14,12],[9,-12,9]].forEach(([hx,hz,hs])=>{const h=new T.Sprite(hazeM.clone());h.scale.set(hs,hs*.5,1);h.position.set(hx,1.6,hz);sc.add(h)});
  // طاولة خشب مستديرة بفانوس وأوراق
  const wm=vb3dMat('#5A3418',{map:wood,rough:.75});
  sc.add(vb3dMesh(vb3dG('Cylinder',1.0,1.0,.08,48),wm,0,.72,0),vb3dMesh(vb3dG('Torus',1.0,.035,10,48),vb3dMat('#3B2412',{rough:.8}),0,.74,0,{rot:[Math.PI/2,0,0],noCast:1}),vb3dMesh(vb3dG('Cylinder',.1,.12,.7,10),wm,0,.35,0),vb3dMesh(vb3dG('Cylinder',.45,.5,.06,20),wm,0,.03,0));
  const brass=vb3dMat('#C9921E',{metal:.95,rough:.2,clear:.35});const lan=new T.Group();lan.position.set(0,.76,0);
- lan.add(vb3dMesh(vb3dG('Cylinder',.13,.15,.04,8),brass,0,.02,0),vb3dMesh(vb3dG('Cylinder',.1,.1,.3,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.8,tr:1,op:.6,side:T.DoubleSide}),0,.19,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.14,.12,8),brass,0,.4,0),vb3dMesh(vb3dG('Torus',.06,.012,6,16),brass,0,.5,0,{noCast:1}));
+ lan.add(vb3dMesh(vb3dG('Cylinder',.13,.15,.04,8),brass,0,.02,0),vb3dMesh(vb3dG('Cylinder',.1,.1,.3,8,1,true),vb3dMat('#FFE2A0',{emis:'#FFC46A',ei:1.05,tr:1,op:.55,side:T.DoubleSide}),0,.19,0,{noCast:1}),vb3dMesh(vb3dG('Cone',.14,.12,8),brass,0,.4,0),vb3dMesh(vb3dG('Torus',.06,.012,6,16),brass,0,.5,0,{noCast:1}));
  for(let k=0;k<6;k++){const a=k/6*Math.PI*2;lan.add(vb3dMesh(vb3dG('Box',.012,.3,.012),brass,Math.cos(a)*.1,.19,Math.sin(a)*.1,{noCast:1}))}sc.add(lan);
  const glow=new T.Sprite(new T.SpriteMaterial({map:vb3dTexGlow(),color:0xFFD9A0,transparent:true,opacity:.6,blending:T.AdditiveBlending,depthWrite:false}));glow.scale.set(1.3,1.3,1);glow.position.set(0,.98,0);sc.add(glow);
  vb3dAo(sc,0,.008,0,1.5);   // ظلّ الطاولة على الحجر
@@ -28898,14 +28920,14 @@ function vb3dMount(kindOrModel){
  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;
  renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=.98;renderer.outputColorSpace=T.SRGBColorSpace;
  const sc=new T.Scene();const cam=new T.PerspectiveCamera(48,1.2,.1,80);
- const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.9+Math.max(0,n-6)*.13,Rz=1.5,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
+ const kind=model.kind==='mafia'?'mafia':'majlis',n=model.names.length,Rx=1.82+Math.max(0,n-6)*.12,Rz=1.66,room=kind==='mafia'?vb3dRoomSquare(sc):vb3dRoomMajlis(sc);
  sc.environmentIntensity=kind==='mafia'?.1:.2;
  const envIn=()=>{try{if(!VB3.on||!VB3.sc)return;if(!VB3.envTex){const pm=new T.PMREMGenerator(VB3.renderer);VB3.envTex=pm.fromScene(new T.RoomEnvironment(),.04).texture;pm.dispose()}VB3.sc.environment=VB3.envTex;VB3.dirty=true}catch(e){}};
  if(VB3.envTex)sc.environment=VB3.envTex;else (window.requestIdleCallback||(f=>setTimeout(f,600)))(envIn,{timeout:1500});   // الانعكاسات الناعمة تُحسب بعد أول رسم كي لا تتأخّر الغرفة في الظهور
  sc.background=new T.Color(kind==='mafia'?'#0B0E22':room.day.bg);
  const chars=[];const seatH=kind==='mafia'?.5:.15;
  // 5.62: قوس الجلوس مُزاح للداخل — لا أحد يجلس بمحاذاة العدسة فيُقصّ نصفه، والحلقة كلّها داخل الإطار
- for(let i=0;i<n;i++){const a=i===0?Math.PI/2:Math.PI*1.13+((i-1)/Math.max(1,n-2))*Math.PI*.74,x=i===0?0:Math.cos(a)*Rx,z=i===0?Rz+.55:Math.sin(a)*Rz,empty=model.empty.has(i);
+ for(let i=0;i<n;i++){const a=i===0?Math.PI/2:Math.PI*1.155+((i-1)/Math.max(1,n-2))*Math.PI*.69,x=i===0?0:Math.cos(a)*Rx,z=i===0?Rz+.55:Math.sin(a)*Rz,empty=model.empty.has(i);
   const seat=new T.Group();seat.position.set(x,0,z);seat.rotation.y=Math.atan2(-x,-z);sc.add(seat);
   if(kind==='mafia'){const cm=vb3dMat('#4A2C16',{map:vb3dTexWood(),rough:.75});
    seat.add(vb3dMesh(vb3dG('Cylinder',.3,.3,.06,36),cm,0,.47,0),vb3dMesh(vb3dG('Torus',.3,.02,10,36),cm,0,.47,0,{rot:[Math.PI/2,0,0],noCast:1}));
@@ -28924,16 +28946,19 @@ function vb3dMount(kindOrModel){
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+.99});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
+ // 5.66: صندوق كل جالس يُقاس من جسمه — الإطار بعدها يتراجع بنفسه حتى يدخل الجميع، فلا يُقصّ أحد
+ sc.updateMatrixWorld(true);
+ VB3.boxes=chars.filter(c=>c.ch&&c.ch.visible).map(c=>vb3dBox(c.ch));
  // 5.59: أنت تجلس في مكانك وترى المجلس بعينيك — الكاميرا في مقعدك، وشخصيتك لا تحجب الطاولة
- if(chars[0]&&chars[0].ch){chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false}
+ if(chars[0]){if(chars[0].ch)chars[0].ch.visible=false;if(chars[0].hit)chars[0].hit.visible=false;chars[0].seat.visible=false}
  // ارتفاع النظر يتبع الجلسة: كراسي المدينة أعلى من فرشة المجلس، فتقع الوجوه في مستوى النظر في الحالتين
- const eye=kind==='mafia'?1.72:1.34,aimY=kind==='mafia'?.9:.7;
- const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?1.35:1.55)+Math.max(0,n-8)*.16;cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=62;
+ const eye=kind==='mafia'?1.58:1.16,aimY=kind==='mafia'?1.12:.86;   // 5.66: نظر بمستوى الوجوه — لا نصف إطار أرضًا
+ const camY=eye+Math.max(0,n-8)*.05,camZ=Rz+(kind==='mafia'?1.2:1.4)+Math.max(0,n-8)*.14;cam.position.set(0,camY,camZ);cam.lookAt(0,aimY,-.5);VB3.camZ0=camZ;VB3.camZ=camZ;VB3.camY0=camY;VB3.hfov=68;
  VB3.aim=new T.Vector3(0,aimY,-.5);VB3.aimT=new T.Vector3(0,aimY,-.5);VB3.aimY=aimY;
  const ray=new T.Raycaster(),ptr=new T.Vector2();
  cv.addEventListener('pointerdown',e=>{if(!VB3.on)return;const r=cv.getBoundingClientRect();ptr.set(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1);ray.setFromCamera(ptr,cam);
   const hits=ray.intersectObjects(VB3.chars.filter(c=>c.hit).map(c=>c.hit),false);if(hits.length){const i=hits[0].object.userData.seat;VB3.tapAt=Date.now();VB3.model.tap(i)}});
- VB3.on=true;Object.assign(VB3,{model,kind,renderer,cv,sc,cam,room,chars,spot,n,camY,camY0:camY,camZ0:camZ,camZ,hfov:62,last:0,t0:performance.now(),lightK:model.night()?0:1,lobby:!!model.lobby,
+ VB3.on=true;Object.assign(VB3,{model,kind,renderer,cv,sc,cam,room,chars,spot,n,camY,camY0:camY,camZ0:camZ,camZ,hfov:68,last:0,t0:performance.now(),lightK:model.night()?0:1,lobby:!!model.lobby,
   rm:!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches)});
  vb3dResize();
  if(window.ResizeObserver){VB3.ro=new ResizeObserver(()=>vb3dResize());VB3.ro.observe(st)}
@@ -28968,12 +28993,39 @@ function vb3dResize(){
  const asp=w/h;VB3.cam.aspect=asp;
  // الدردشة تحتلّ جانب الشاشة: نُزيح مركز الرؤية إلى الجهة الأخرى فيبقى الجالسون مكشوفين لا خلف اللوحة
  VB3.cam.clearViewOffset();   // 5.60: الدردشة شريط تحت المشهد لا فوقه — لا حاجة لإزاحة الرؤية
- const hf=VB3.hfov||62,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
+ const hf=VB3.hfov||68,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
  VB3.cam.fov=Math.min(74,vf);VB3.cam.updateProjectionMatrix();
  // إطار المشهد: العمود الطويل يحتاج تراجعًا قليلًا، والشريط العريض القصير يحتاج تراجعًا أكبر كي تدخل الحلقة كاملة
- const back=asp<1?(1-asp)*2.0:(asp>1.15?(asp-1.15)*2.6:0);
- VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.22;
+ const back=asp<1?(1-asp)*1.4:(asp>1.15?(asp-1.15)*1.6:0);
+ VB3.camZ=(VB3.camZ0||0)+back;VB3.camY=(VB3.camY0||VB3.camY)+back*.22;
+ vb3dFit();                                   // 5.66: ثم يتراجع الإطار بالقياس حتى يدخل كل جالس كاملًا
+ VB3.cam.position.z=VB3.camZ;VB3.cam.position.y=VB3.camY;VB3.cam.lookAt(0,VB3.aimY,-.5);VB3.cam.updateMatrixWorld();
  VB3.anch=null;vb3dLayout();
+}
+/** صندوق عالميّ لمجسّم: من صناديق أشكاله محوّلةً بمصفوفاته — بأرقام مجرّدة */
+function vb3dBox(o){
+ const T=THREE,v=new T.Vector3(),mn={x:1e9,y:1e9,z:1e9},mx={x:-1e9,y:-1e9,z:-1e9};
+ o.updateWorldMatrix(true,true);
+ o.traverse(m=>{const g=m.geometry;if(!g||!g.attributes||!g.attributes.position)return;
+  if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;if(!b)return;
+  for(let c=0;c<8;c++){v.set(c&1?b.min.x:b.max.x,c&2?b.min.y:b.max.y,c&4?b.min.z:b.max.z).applyMatrix4(m.matrixWorld);
+   mn.x=Math.min(mn.x,v.x);mx.x=Math.max(mx.x,v.x);mn.y=Math.min(mn.y,v.y);mx.y=Math.max(mx.y,v.y);mn.z=Math.min(mn.z,v.z);mx.z=Math.max(mx.z,v.z)}});
+ return {min:mn,max:mx};
+}
+/** 5.66: يتراجع الإطار حتى يقع كل جالس داخله — يُسقط صناديق الأجسام ويقيس أبعدها عن المركز بدل التقدير */
+function vb3dFit(){
+ const b=VB3.boxes;if(!b||!b.length)return;const T=THREE,cam=VB3.cam,v=new T.Vector3();
+ for(let k=0;k<4;k++){
+  cam.position.set(0,VB3.camY,VB3.camZ);cam.lookAt(0,VB3.aimY,-.5);cam.updateMatrixWorld();cam.updateProjectionMatrix();
+  let m=0,zf=0;
+  for(const box of b)for(let c=0;c<8;c++){
+   v.set(c&1?box.min.x:box.max.x,c&2?box.min.y:box.max.y,c&4?box.min.z:box.max.z);
+   const wz=v.z;v.project(cam);const e=Math.max(Math.abs(v.x),v.y);if(e>m){m=e;zf=wz}}
+  VB3.panMax=Math.max(0,(.985-m))*Math.max(1.5,VB3.camZ-zf)*Math.tan(cam.fov*Math.PI/360)*(cam.aspect||1);
+  if(m<=.96)break;
+  const d=Math.max(.6,VB3.camZ-zf);                                   // بُعد أبعد نقطة: التراجع يصغّرها بنسبته
+  VB3.camZ+=Math.min(.9,d*(m/.96-1));VB3.camY+=Math.min(.18,d*(m/.96-1)*.16);
+ }
 }
 /** موضع رأس كل مقعد على المسرح بالنسبة المئوية (لمواضع عناصر المقاعد والبطاقات الطائرة) */
 function vb3dAnchors(){
@@ -29070,7 +29122,8 @@ function vb3dLoop(now){
  if(!VB3.camLock){VB3.cam.position.x=Math.sin(t*.23)*.035*calm;VB3.cam.position.y=VB3.camY+Math.sin(t*.31)*.02*calm;VB3.cam.position.z=VB3.camZ;
   // النظر يميل قليلًا نحو المتكلّم ثم يعود إلى وسط الطاولة — حركة كاميرا حيّة بلا دوار
   const tk=talker&&talker.seat?talker.seat.position:null;
-  const ay=VB3.aimY!=null?VB3.aimY:.88;VB3.aimT.set(tk?tk.x*.3:0,ay,tk?-.5+tk.z*.1:-.5);
+  const ay=VB3.aimY!=null?VB3.aimY:.88,pm=VB3.panMax!=null?VB3.panMax:.12;
+  VB3.aimT.set(tk?Math.max(-pm,Math.min(pm,tk.x*.3)):0,ay,tk?-.5+tk.z*.06:-.5);
   VB3.aim.lerp(VB3.aimT,Math.min(1,dt*1.6));VB3.cam.lookAt(VB3.aim)}
  if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
 }
