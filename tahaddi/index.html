@@ -630,6 +630,27 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbSub{font-size:8.5px;color:#F0A0A0;text-shadow:0 1px 2px #000}
 .vbFeed{display:flex;flex-direction:column;gap:7px;padding-bottom:14px;min-height:40px}
 /* المحادثة جنب المشهد (5.55): عمودان — المسرح والسجلّ — فتقصر الشاشة بدل أن يمتدّ السجلّ تحتها */
+/* شريط اللاعبين المرتّب (5.58): صفّ واحد، بطاقات متساوية العرض بالترتيب 1..N — نظام ثابت لا يتغيّر موضعه */
+.vbScene:not(.is3d) .vbRoster{display:none}
+.vbRoster{flex:0 0 auto;display:flex;gap:4px;align-items:stretch;padding:6px 8px 7px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,rgba(10,14,26,.94),rgba(10,14,26,.72));border-bottom:1px solid rgba(232,178,58,.18)}
+.vbRoster::-webkit-scrollbar{display:none}
+.vbR{flex:1 1 0;min-width:46px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px 2px 5px;
+ background:rgba(18,24,40,.7);border:1px solid rgba(255,255,255,.08);border-bottom:2px solid var(--rc,#3A4460);border-radius:11px;cursor:pointer;
+ font:inherit;color:var(--tx);transition:border-color .25s,background .25s,transform .18s}
+.vbR:active{transform:scale(.96)}
+.vbRAv{position:relative;width:34px;height:34px;flex-shrink:0}
+.vbRAv>svg,.vbRAv>span.avEm{display:block;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--rc,#4A5570);background:#0F1524}
+.vbRAv>i{position:absolute;top:-3px;inset-inline-start:-3px;width:16px;height:16px;border-radius:50%;background:var(--rc,#4A5570);color:#0B1020;
+ font-size:10px;font-weight:900;font-style:normal;line-height:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.6)}
+.vbR>b{width:100%;font-size:9.5px;font-weight:800;line-height:1.2;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--tx)}
+.vbR.me{background:rgba(40,30,8,.78)}
+.vbR.talk{background:rgba(12,38,24,.82)}
+.vbR.dead{opacity:.45}
+.vbR.dead>b{text-decoration:line-through}
+.vbR.pick{animation:vbPickP 1.1s ease-in-out infinite}
+.vbRX{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(6,8,16,.55)}
+@media (max-width:359px){.vbR>b{font-size:8.5px}.vbRAv,.vbRAv>svg,.vbRAv>span.avEm{width:30px;height:30px}}
+@media (min-width:520px){.vbR>b{font-size:11px}.vbRAv,.vbRAv>svg,.vbRAv>span.avEm{width:40px;height:40px}}
 /* شاشة اللعب ملء الجهاز (5.57): لا تنزيل — رأس مضغوط، مشهد كبير، دردشة واضحة على جانبه، وشريط أوامر أسفل */
 .vbScene.full{position:fixed;inset:0;padding:0;margin:0;max-width:none;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);animation:none}
 .vbScene.full .vbTop{flex:0 0 auto;display:flex;align-items:center;gap:6px;padding:calc(6px + env(safe-area-inset-top)) 10px 6px;background:linear-gradient(180deg,rgba(8,11,20,.92),rgba(8,11,20,.6));border-bottom:1px solid rgba(255,255,255,.07)}
@@ -767,27 +788,28 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 @media (min-width:480px){.vbScene.is3d .vbStage{height:340px}}
 .vbScene.is3d .vbBg,.vbScene.is3d .vbCenter{display:none}
 .vbScene.is3d .vbSeats{pointer-events:none}
-/* لوحة اللاعب فوق رأسه (5.56): صفّ واحد مرتّب — رقم، صورة، اسم، وبطاقة الدور — بمحاذاة واحدة للجميع */
-.vbScene.is3d .vbSeat{pointer-events:auto;width:auto;flex-direction:row;align-items:center;gap:4px;
- background:rgba(8,11,20,.72);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:2px 8px 2px 3px;
- -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);box-shadow:0 3px 10px rgba(0,0,0,.5);white-space:nowrap}
-.vbScene.is3d .vbSeat.me{border-color:rgba(232,178,58,.75);background:rgba(26,18,6,.8)}
-.vbScene.is3d .vbSeat.talk{border-color:rgba(46,204,113,.85);box-shadow:0 0 0 2px rgba(46,204,113,.3),0 3px 10px rgba(0,0,0,.5)}
-.vbScene.is3d .vbSeat.pick{border-color:var(--pk,#E8B23A);box-shadow:0 0 0 2px var(--pk,#E8B23A),0 0 14px var(--pk,#E8B23A)}
-.vbScene.is3d .vbSeat.dead{opacity:.55;filter:grayscale(1)}
-.vbScene.is3d .vbAv{width:22px;height:22px;padding:0;background:none;box-shadow:none;border-radius:50%;flex-shrink:0;order:2}
-.vbScene.is3d .vbAv>svg,.vbScene.is3d .vbAv>span.avEm{display:block;position:static;width:22px;height:22px;border-radius:50%;border:1px solid rgba(232,178,58,.65);background:#0F1524;box-shadow:none}
-.vbScene.is3d .vbSeat.talk .vbAv{box-shadow:none}
-.vbScene.is3d .vbNum{position:static;order:1;width:17px;height:17px;min-width:17px;font-size:9.5px;line-height:17px;padding:0;border-radius:50%;
- background:rgba(232,178,58,.9);color:#1A1206;font-weight:900;text-align:center;box-shadow:none;border:none;flex-shrink:0;display:block}
-.vbScene.is3d .vbSeat.me .vbNum{background:#FFE9A8}
-.vbScene.is3d .vbNm{order:3;font-size:11px;font-weight:800;background:none;border:none;padding:0;max-width:66px;text-shadow:none}
-.vbScene.is3d .vbNm i{font-size:8.5px;color:var(--gold);font-style:normal;margin-inline-start:2px}
-.vbScene.is3d .vbPill.dim{display:none}
-.vbScene.is3d .vbPill{order:4;font-size:8px;padding:0 5px;margin:0;border-radius:7px;max-width:52px;overflow:hidden;text-overflow:ellipsis}
-.vbScene.is3d .vbAv>span.vbSeatCard{display:none}   /* البطاقة في يد الشخصية المجسّمة نفسها — واللوحة تبقى صفًّا نظيفًا */
-.vbScene.is3d .vbBadge,.vbScene.is3d .vbX{width:14px;height:14px;top:auto;bottom:-3px;right:-3px}
-.vbScene.is3d .vbSeat>.vbAv{display:flex;align-items:center;justify-content:center}
+/* علامة اللاعب فوق رأسه (5.58): قرص رقم واحد بالحجم نفسه للجميع — لا أسماء ولا رقاقات تتناثر فوق المشهد.
+   الأسماء والحالات كلّها في شريط اللاعبين المرتّب أعلى الشاشة. */
+.vbScene.is3d .vbSeat{pointer-events:auto;width:auto;padding:0;background:none;border:none;box-shadow:none;
+ -webkit-backdrop-filter:none;backdrop-filter:none;flex-direction:row;align-items:center;gap:0}
+.vbScene.is3d .vbNm,.vbScene.is3d .vbPill{display:none}
+.vbScene.is3d .vbAv>svg,.vbScene.is3d .vbAv>span.avEm{display:none}
+.vbScene.is3d .vbAv{position:relative;width:26px;height:26px;min-width:26px;padding:0;border-radius:50%;
+ background:rgba(8,11,20,.86);border:1.5px solid rgba(232,178,58,.85);box-shadow:0 2px 8px rgba(0,0,0,.6);
+ display:flex;align-items:center;justify-content:center}
+.vbScene.is3d .vbNum{position:static;width:auto;height:auto;min-width:0;padding:0;border:none;background:none;
+ color:#FFE9A8;font-size:12px;font-weight:900;line-height:1;box-shadow:none;display:block}
+.vbScene.is3d .vbSeat.me .vbAv{background:linear-gradient(145deg,#FFF2C4,#E8B23A 60%,#C9921E);border-color:#FFF6DC}
+.vbScene.is3d .vbSeat.me .vbNum{color:#1A1206}
+.vbScene.is3d .vbSeat.talk .vbAv{border-color:#2ECC71;box-shadow:0 0 0 3px rgba(46,204,113,.35),0 2px 8px rgba(0,0,0,.6)}
+.vbScene.is3d .vbSeat.mark .vbAv{border-color:#E24B4A;box-shadow:0 0 0 3px rgba(226,75,74,.35),0 2px 8px rgba(0,0,0,.6)}
+.vbScene.is3d .vbSeat.pick .vbAv{border-color:var(--pk,#E8B23A);box-shadow:0 0 0 3px var(--pk,#E8B23A),0 0 14px var(--pk,#E8B23A)}
+.vbScene.is3d .vbSeat.dead{opacity:.5}
+.vbScene.is3d .vbSeat.dead .vbAv{border-color:#6C7590}
+.vbScene.is3d .vbSeat.talk .vbAv::before,.vbScene.is3d .vbSeat.talk .vbAv::after,
+.vbScene.is3d .vbSeat.pick .vbAv::before{display:none}
+.vbScene.is3d .vbAv>span.vbSeatCard{display:none}   /* البطاقة في يد الشخصية المجسّمة نفسها */
+.vbScene.is3d .vbBadge,.vbScene.is3d .vbX{position:absolute;width:14px;height:14px;top:auto;bottom:-4px;inset-inline-end:-4px;left:auto}
 .vb3dBub{position:absolute;transform:translateX(-50%);max-width:150px;background:rgba(250,246,236,.96);color:#1B1408;font-size:10.5px;font-weight:700;line-height:1.4;padding:5px 8px;border-radius:11px;border:1px solid rgba(232,178,58,.6);box-shadow:0 4px 12px rgba(0,0,0,.45);pointer-events:none;z-index:6;animation:pop .22s ease;text-align:center}
 .vb3dBub::after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:inherit;border-inline-end:1px solid rgba(232,178,58,.6);border-bottom:1px solid rgba(232,178,58,.6);transform:translateX(-50%) rotate(45deg)}
 .vb3dBub.me{background:#2A2260;color:#F2F4F8;border-color:#5B2FB8}
@@ -20924,7 +20946,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.57';
+const APP_VER='5.58';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -28725,10 +28747,10 @@ function vb3dResize(){
  const asp=w/h;VB3.cam.aspect=asp;
  // الدردشة تحتلّ جانب الشاشة: نُزيح مركز الرؤية إلى الجهة الأخرى فيبقى الجالسون مكشوفين لا خلف اللوحة
  const fw=(()=>{const p=document.querySelector('.vbFeedW');if(!p||!p.offsetWidth)return 0;const r=p.getBoundingClientRect(),s2=st.getBoundingClientRect();return r.bottom>s2.top+s2.height*.35?p.offsetWidth:0})();
- if(fw>24)VB3.cam.setViewOffset(w,h,-Math.round(fw*.42),0,w,h);else VB3.cam.clearViewOffset();
+ if(fw>24)VB3.cam.setViewOffset(w,h,-Math.round(fw*.16),0,w,h);else VB3.cam.clearViewOffset();   // 5.58: الدردشة في الركن السفلي فقط — إزاحة خفيفة تكفي ولا تُخرج المقاعد الطرفية
  const hf=VB3.hfov||62,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
  VB3.cam.fov=Math.min(74,vf);VB3.cam.updateProjectionMatrix();
- const back=asp<1?(1-asp)*3.4:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.25;
+ const back=asp<1?(1-asp)*2.0:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.15;   // 5.58: الشاشة صارت طويلة فلا حاجة للتراجع الكبير — الجالسون يملأون الإطار
  VB3.anch=null;vb3dLayout();
 }
 /** موضع رأس كل مقعد على المسرح بالنسبة المئوية (لمواضع عناصر المقاعد والبطاقات الطائرة) */
@@ -28743,28 +28765,23 @@ function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return 
 function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
  const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
- // ألواح الواجهة فوق المشهد (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) عوائق تُزاح عنها لوحات اللاعبين
+ // ألواح الواجهة (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) تحجب ما تحتها: تُعامَل عوائق
  document.querySelectorAll('.vbFeedW,.vbBigCard,.vbScene.full .vbRole,.vbScene.full .vbTurn,.vbScene.full .vbSteps').forEach(p=>{
   if(!p.offsetWidth||!p.offsetHeight)return;const r=p.getBoundingClientRect();
   placed.push({x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,w:r.width,h:r.height})});
- const hit=(r,x,y,w,h,pad)=>{const ox=(r.w+w)/2+pad-Math.abs(r.x-x),oy=(r.h+h)/2+pad-Math.abs(r.y-y);return ox>0&&oy>0?ox*oy:0};
+ const hit=(r,x,y,w,h,pad)=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad;
  const els=[...document.querySelectorAll(VB3.model.seats)]
   .map(el=>({el,i:+el.dataset.seat})).filter(o=>a[o.i])
   .sort((p,q)=>a[p.i].y-a[q.i].y||a[p.i].x-a[q.i].x);   // الأبعد أوّلًا: يُرفع الخلفيّ لا الأماميّ
  els.forEach(({el,i})=>{
-  const w=el.offsetWidth||70,h=el.offsetHeight||20,pad=3,step=h+pad;
-  const x0=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H;
-  let best=null;
-  // مرشّحون قرب الرأس أوّلًا (فوقه ثم جانبيه) — يُختار أقلّهم تداخلًا وأقربهم للرأس، فلا تهيم اللوحة بعيدًا
-  cand: for(const my of [0,-.6,-1,-1.6,-2,-2.6,-3,-4,.6,1])for(const mx of [0,.5,-.5,1,-1,1.5,-1.5,2,-2]){const dy=my*step,dx=mx*w;
-   const x=Math.max(w/2+2,Math.min(W-w/2-2,x0+dx)),y=Math.max(h/2+2,Math.min(H-h/2-2,y0+dy));
-   let ov=0;placed.forEach(r=>ov+=hit(r,x,y,w,h,pad));
-   const sc=ov*200+Math.abs(dx)*.5+Math.abs(dy);
-   if(!best||sc<best.sc)best={x,y,sc,ov};
-   if(!ov)break cand;
-  }
-  placed.push({x:best.x,y:best.y,w,h});
-  el.style.left=(best.x/W*100).toFixed(2)+'%';el.style.top=(best.y/H*100).toFixed(2)+'%';
+  const w=el.offsetWidth||26,h=el.offsetHeight||26,pad=2,step=h+pad;
+  const x=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H;
+  // القرص صغير وموحّد: يبقى فوق رأس صاحبه تمامًا، وإن صادف عائقًا ارتفع خطوة أو خطوتين لا أكثر
+  let y=Math.max(h/2+2,Math.min(H-h/2-2,y0));
+  for(const dy of [0,-step,-2*step,step]){const t=Math.max(h/2+2,Math.min(H-h/2-2,y0+dy));
+   if(!placed.some(r=>hit(r,x,t,w,h,pad))){y=t;break}}   // لم يخلُ موضع: يبقى فوق رأسه كما هو
+  placed.push({x,y,w,h});
+  el.style.left=(x/W*100).toFixed(2)+'%';el.style.top=(y/H*100).toFixed(2)+'%';
  });
 }
 /** فقاعة كلام فوق رأس المتكلّم لثوانٍ — فقاعة آليّ واحدة في كل مرّة (فقاعتك تبقى) */
@@ -28860,6 +28877,7 @@ function vbScene(kind,title,sub){
   <button class="vbChip ai" id="vbAiChip" onclick="vbAiSheet()" hidden>${ico('sparkle',12)}</button>
   <button class="vbChip ico" onclick="vbMenuSheet()">${ico('menu',14)}</button>
  </div>
+ <div class="vbRoster" id="vbRoster"></div>
  <div class="vbMain">
   <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbCenter">${vbCenterPiece(kind)}</div><div class="vbSeats" id="vbSeats"></div></div>
   <div class="vbTurn" id="vbTurn" hidden></div>
@@ -28983,7 +29001,7 @@ function vbAiChip(){const el=document.getElementById('vbAiChip');if(!el||typeof 
 function vbSeatState(i){return VB.seat&&VB.seat(i)||{}}
 function vbSeats(){
  const el=document.getElementById('vbSeats');if(!el)return;
- const n=VB.names.length;
+ const n=VB.names.length,d3=typeof VB3!=='undefined'&&VB3.on;   // في المشهد المجسّم العلامة قرص رقم فقط: الصورة في شريط اللاعبين
  el.innerHTML=VB.names.map((nm,i)=>{const st=vbSeatState(i),p=vbSeatPos(i,n),note=i!==0&&VB.notes&&VB_NOTE[VB.notes[i]];
   const ready=(VB.ready&&VB.ready.has(i))||(i===0&&VB.meReady);
   let pill,pc,dim=0;
@@ -28998,10 +29016,25 @@ function vbSeats(){
   const face=VB.g==='mafia'&&((VB.reveal&&i!==0)||(st.dead&&st.sub&&VB.lastLynched===i))?MAF_ROLE[mfRole(i)]:null;   // بطاقة الآليّ تُقلب حين يُكشف دوره
   const card=VB.dealt&&i!==0?`<span class="vbSeatCard${face?' face':''}">${face?ico(face.ic,9,face.tint):''}</span>`:'';
   return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}${pk?' pick':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}${pk?';--pk:'+(VB.pick.c||'#E8B23A'):''}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
-   <div class="vbAv">${vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}${card}</div>
+   <div class="vbAv">${d3?'':vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}${card}</div>
    <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div><div class="vbPill${dim?' dim':''}" style="--pc:${pc}">${esc(pill)}</div></div>`}).join('');
+ vbRoster();
  const c=document.getElementById('vbCount');if(c)c.textContent=(VB.alive?VB.alive.length:n)+'/'+n;
  if(typeof VB3!=='undefined'&&VB3.on){vb3dSync();vb3dLayout()}
+}
+/** شريط اللاعبين المرتّب (5.58): بطاقة لكل لاعب بالترتيب 1..N، متساوية العرض وثابتة الموضع —
+    هنا الاسم والصورة والحالة، والمشهد يحمل قرص الرقم فقط. */
+function vbRoster(){
+ const el=document.getElementById('vbRoster');if(!el)return;
+ el.innerHTML=VB.names.map((nm,i)=>{const st=vbSeatState(i),note=i!==0&&VB.notes&&VB_NOTE[VB.notes[i]];
+  const ready=(VB.ready&&VB.ready.has(i))||(i===0&&VB.meReady);
+  const pk=!!(VB.pick&&VB.pick.list.includes(i)&&!st.dead);
+  let rc='#4A5570';
+  if(st.dead)rc='#6C7590';else if(st.talk)rc='#2ECC71';else if(pk)rc=VB.pick.c||'#E8B23A';
+  else if(i===0)rc='#E8B23A';else if(ready)rc='#4C9AF0';else if(note)rc=note.c;else if(st.mark)rc='#E24B4A';
+  return `<button class="vbR${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${pk?' pick':''}" data-seat="${i}" style="--rc:${rc}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
+   <span class="vbRAv">${vbFace(i,34)}<i>${i+1}</i>${st.dead?`<span class="vbRX">${ico('cross',16)}</span>`:''}</span>
+   <b>${esc(nm)}</b></button>`}).join('');
 }
 function vbTalk(i){VB.talking=i;vbSeats()}
 /* ═══ توزيع البطاقات (5.51): من الرزمة في وسط المجلس تطير بطاقة مقلوبة إلى كل مقعد، وبطاقتك تنقلب في الوسط لتكشف دورك ═══ */
@@ -29022,8 +29055,9 @@ function vbDealReveal(kind){
  const front=m?`<div class="vbBigF" style="--rc:${sp.ac}">${ico(sp.ic,40,sp.tint)}<b>${r}</b><small>${sp.d}</small></div>`
   :`<div class="vbBigF" style="--rc:${spy?'#E24B4A':'#E8B23A'}">${spy?ico('door',40,'red'):ico('lock',40)}<b>${spy?'برا السالفة':esc(VB.word)}</b><small>${spy?'لا تعرف الكلمة — لمّح بغموض':'الفئة: '+esc(VB.cat)}</small></div>`;
  const el=document.createElement('div');el.className='vbBigCard';el.innerHTML=`<div class="in"><div class="face back"></div><div class="face frontW">${front}</div></div>`;
- el.onclick=()=>el.classList.toggle('up');st.appendChild(el);VB.bigCard=el;if(typeof vb3dLayout==='function')vb3dLayout();   // اللوحات تبتعد عن البطاقة
+ el.onclick=()=>el.classList.toggle('up');st.appendChild(el);VB.bigCard=el;if(typeof vb3dLayout==='function')vb3dLayout();   // العلامات تبتعد عن البطاقة
  setTimeout(()=>{if(VB.bigCard===el)el.classList.add('up')},350);
+ setTimeout(()=>{if(VB.bigCard===el)vbDealClear()},6500);   // لحظة كشف لا لوحة دائمة: دورك يبقى مكتوبًا في شريط «أنت …»
 }
 function vbDealClear(){const el=VB&&VB.bigCard;if(el){el.classList.add('out');setTimeout(()=>{el.remove();if(typeof vb3dLayout==='function')vb3dLayout()},450);VB.bigCard=null}}
 /** رسالة في السجلّ: k = n راوٍ · ph مرحلة · ban لافتة كبيرة بصورة · b آليّ · me أنا · v صوت · card بطاقة — react تفاعل سريع، tg من اتُّهم */

@@ -413,10 +413,10 @@ function vb3dResize(){
  const asp=w/h;VB3.cam.aspect=asp;
  // الدردشة تحتلّ جانب الشاشة: نُزيح مركز الرؤية إلى الجهة الأخرى فيبقى الجالسون مكشوفين لا خلف اللوحة
  const fw=(()=>{const p=document.querySelector('.vbFeedW');if(!p||!p.offsetWidth)return 0;const r=p.getBoundingClientRect(),s2=st.getBoundingClientRect();return r.bottom>s2.top+s2.height*.35?p.offsetWidth:0})();
- if(fw>24)VB3.cam.setViewOffset(w,h,-Math.round(fw*.42),0,w,h);else VB3.cam.clearViewOffset();
+ if(fw>24)VB3.cam.setViewOffset(w,h,-Math.round(fw*.16),0,w,h);else VB3.cam.clearViewOffset();   // 5.58: الدردشة في الركن السفلي فقط — إزاحة خفيفة تكفي ولا تُخرج المقاعد الطرفية
  const hf=VB3.hfov||62,vf=2*Math.atan(Math.tan(hf*Math.PI/360)/Math.max(.55,asp))*180/Math.PI;   // زاوية أفقية ثابتة: العمود الضيّق لا يقصّ المقاعد الجانبية
  VB3.cam.fov=Math.min(74,vf);VB3.cam.updateProjectionMatrix();
- const back=asp<1?(1-asp)*3.4:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.25;
+ const back=asp<1?(1-asp)*2.0:0;VB3.camZ=(VB3.camZ0||0)+back;VB3.cam.position.z=VB3.camZ;VB3.camY=(VB3.camY0||VB3.camY)+back*.15;   // 5.58: الشاشة صارت طويلة فلا حاجة للتراجع الكبير — الجالسون يملأون الإطار
  VB3.anch=null;vb3dLayout();
 }
 /** موضع رأس كل مقعد على المسرح بالنسبة المئوية (لمواضع عناصر المقاعد والبطاقات الطائرة) */
@@ -431,28 +431,23 @@ function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return 
 function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
  const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
- // ألواح الواجهة فوق المشهد (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) عوائق تُزاح عنها لوحات اللاعبين
+ // ألواح الواجهة (الدردشة، بطاقة الدور، شريط الدور، شريط دورك، خطوات برا) تحجب ما تحتها: تُعامَل عوائق
  document.querySelectorAll('.vbFeedW,.vbBigCard,.vbScene.full .vbRole,.vbScene.full .vbTurn,.vbScene.full .vbSteps').forEach(p=>{
   if(!p.offsetWidth||!p.offsetHeight)return;const r=p.getBoundingClientRect();
   placed.push({x:r.left-b.left+r.width/2,y:r.top-b.top+r.height/2,w:r.width,h:r.height})});
- const hit=(r,x,y,w,h,pad)=>{const ox=(r.w+w)/2+pad-Math.abs(r.x-x),oy=(r.h+h)/2+pad-Math.abs(r.y-y);return ox>0&&oy>0?ox*oy:0};
+ const hit=(r,x,y,w,h,pad)=>Math.abs(r.x-x)<(r.w+w)/2+pad&&Math.abs(r.y-y)<(r.h+h)/2+pad;
  const els=[...document.querySelectorAll(VB3.model.seats)]
   .map(el=>({el,i:+el.dataset.seat})).filter(o=>a[o.i])
   .sort((p,q)=>a[p.i].y-a[q.i].y||a[p.i].x-a[q.i].x);   // الأبعد أوّلًا: يُرفع الخلفيّ لا الأماميّ
  els.forEach(({el,i})=>{
-  const w=el.offsetWidth||70,h=el.offsetHeight||20,pad=3,step=h+pad;
-  const x0=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H;
-  let best=null;
-  // مرشّحون قرب الرأس أوّلًا (فوقه ثم جانبيه) — يُختار أقلّهم تداخلًا وأقربهم للرأس، فلا تهيم اللوحة بعيدًا
-  cand: for(const my of [0,-.6,-1,-1.6,-2,-2.6,-3,-4,.6,1])for(const mx of [0,.5,-.5,1,-1,1.5,-1.5,2,-2]){const dy=my*step,dx=mx*w;
-   const x=Math.max(w/2+2,Math.min(W-w/2-2,x0+dx)),y=Math.max(h/2+2,Math.min(H-h/2-2,y0+dy));
-   let ov=0;placed.forEach(r=>ov+=hit(r,x,y,w,h,pad));
-   const sc=ov*200+Math.abs(dx)*.5+Math.abs(dy);
-   if(!best||sc<best.sc)best={x,y,sc,ov};
-   if(!ov)break cand;
-  }
-  placed.push({x:best.x,y:best.y,w,h});
-  el.style.left=(best.x/W*100).toFixed(2)+'%';el.style.top=(best.y/H*100).toFixed(2)+'%';
+  const w=el.offsetWidth||26,h=el.offsetHeight||26,pad=2,step=h+pad;
+  const x=Math.max(w/2+2,Math.min(W-w/2-2,a[i].x/100*W)),y0=a[i].y/100*H;
+  // القرص صغير وموحّد: يبقى فوق رأس صاحبه تمامًا، وإن صادف عائقًا ارتفع خطوة أو خطوتين لا أكثر
+  let y=Math.max(h/2+2,Math.min(H-h/2-2,y0));
+  for(const dy of [0,-step,-2*step,step]){const t=Math.max(h/2+2,Math.min(H-h/2-2,y0+dy));
+   if(!placed.some(r=>hit(r,x,t,w,h,pad))){y=t;break}}   // لم يخلُ موضع: يبقى فوق رأسه كما هو
+  placed.push({x,y,w,h});
+  el.style.left=(x/W*100).toFixed(2)+'%';el.style.top=(y/H*100).toFixed(2)+'%';
  });
 }
 /** فقاعة كلام فوق رأس المتكلّم لثوانٍ — فقاعة آليّ واحدة في كل مرّة (فقاعتك تبقى) */
