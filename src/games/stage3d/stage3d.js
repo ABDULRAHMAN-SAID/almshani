@@ -436,6 +436,7 @@ function vb3dSeatPct(i){if(!VB3.on||VB3.lobby||!VB3.chars[i])return null;return 
 /** يضع لوحات اللاعبين فوق الرؤوس ثم يرفع المتداخلة منها صفًّا صفًّا فلا تتراكب الأسماء */
 function vb3dLayout(){
  if(!VB3.on)return;const a=vb3dAnchors(),st=document.getElementById(VB3.model.stage);if(!st)return;
+ const box=st.querySelector('.vbSeats');if(box&&getComputedStyle(box).display==='none')return;   // 5.61: لا لوحات فوق المشهد
  const W=st.clientWidth||1,H=st.clientHeight||1,placed=[],b=st.getBoundingClientRect();
  // ما يعلو المشهد وحده عائق: لوحة الدردشة، بطاقة الدور المكشوفة، ولوحة الملاحظات — والباقي صار أشرطة فوق المشهد لا عليه
  document.querySelectorAll('.vbBigCard,.vbNotes:not([hidden])').forEach(p=>{
@@ -461,7 +462,9 @@ function vb3dLayout(){
 function vb3dBubble(i,text){
  if(!VB3.on||VB3.lobby||text==null)return;const st=document.getElementById(VB3.model.stage),a=vb3dAnchors()[i];if(!st||!a)return;
  st.querySelectorAll('.vb3dBub').forEach(o=>{if(i!==0||+o.dataset.seat===0)o.remove()});
- const el=document.createElement('div');el.className='vb3dBub'+(i===0?' me':'');el.dataset.seat=String(i);el.textContent=String(text).length>70?String(text).slice(0,68)+'…':String(text);
+ const el=document.createElement('div');el.className='vb3dBub'+(i===0?' me':'');el.dataset.seat=String(i);
+ const nm=document.createElement('b');nm.textContent=i===0?'أنت':String(VB3.model.names[i]||'');el.appendChild(nm);   // الاسم في الفقاعة: العلامة الوحيدة في المشهد
+ el.appendChild(document.createTextNode(String(text).length>80?String(text).slice(0,78)+'…':String(text)));
  const w=VB3.w||st.clientWidth,hh=VB3.h||st.clientHeight;el.style.left=Math.min(w-82,Math.max(82,a.x/100*w)).toFixed(0)+'px';st.appendChild(el);
  const bh=el.offsetHeight||40;el.style.top=Math.max(4,Math.min(hh-bh-4,a.y/100*hh-(i===0?22:30)-bh)).toFixed(0)+'px';
  clearTimeout(el._t);el._t=setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),350)},3600);
