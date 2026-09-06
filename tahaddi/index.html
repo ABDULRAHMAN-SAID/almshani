@@ -17754,7 +17754,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
-  'clEventsScr','clMoreScr'].forEach(n=>R.register(n,{}));
+  'clEventsScr','clMoreScr','errLogScr'].forEach(n=>R.register(n,{}));
  // شاشة كاملة بلا شريط سفلي
  ['authScr','welcomeScr','askTut','skipAsk','clTransferScr','clSupportScr','clRequestSupportScr','clCreateScr']
   .forEach(n=>R.register(n,{bar:false}));
@@ -17762,6 +17762,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // وسيط مركّب
  R.register('mmScr',{render:a=>mmScr(a&&a.g,a&&a.mode),leave:()=>mmCancel()});
  R.register('profileView',{render:p=>profileView(p)});
+ R.register('errLogScr',{render:()=>errScrLog()});
  R.register('friendsScr',{render:()=>friendsScr()});
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
@@ -22292,7 +22293,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.75';
+const APP_VER='5.76';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -22517,7 +22518,9 @@ function moreScr(){
     [`${ico('user',16)}`,'التعبيرات',"push('emoteScr')"],
     [`${ico('ticket',16)}`,'الموسم',"push('seasonScr')"],
     [`${ico('gear',16)}`,'الإعدادات',"push('setScr')"],
-    [`${ico('cap',16)}`,`إعادة تجربة التدريب`,`tutStart()`],[`${ico('reset',16)}`,`إعادة الضبط`,`splash()`]].map(([i,n,f])=>
+    [`${ico('cap',16)}`,`إعادة تجربة التدريب`,`tutStart()`],
+    [`${ico('info',16)}`,`سجلّ الأخطاء${ERR_LOG.length?' ('+ERR_LOG.length+')':''}`,"push('errLogScr')"],
+    [`${ico('reset',16)}`,`إعادة الضبط`,`splash()`]].map(([i,n,f])=>
  `<div class="li" style="cursor:pointer" onclick="${f}"><div class="lr">
   <span style="font-size:19px">${i}</span><div class="lb"><div class="lt">${n}</div></div>
   <span style="color:var(--mut)">›</span></div></div>`).join('')}
@@ -39266,6 +39269,88 @@ const nrm=s=>String(s||'').trim().toLowerCase().replace(/[أإآ]/g,'ا').replac
  .replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ');
 const totStars=()=>Object.values(S.stars).reduce((a,b)=>a+b,0);
 const netStars=t=>nOf(t).reduce((a,n)=>a+(S.stars[n.id]||0),0);
+/* ═══ 5.76: شبكة أمان الأخطاء ═══
+   قبل هذا لم يكن في اللعبة أي window.onerror: خطأ واحد في أثناء الرسم يترك اللاعب
+   أمام نصف شاشة ميتة بلا رسالة ولا مخرج. الآن يُلتقط كل خطأ:
+   يُحفظ التقدّم فورًا، ويُسجَّل في سجلّ يفتحه اللاعب من «المزيد» وينسخه ويرسله،
+   وتظهر ورقة تُخرجه للرئيسية بدل أن يعلق. */
+const ERR_KEY='tahaddi_err';
+let ERR_LOG=[],_errBusy=0,_errShown=0;
+function errLoad(){try{ERR_LOG=JSON.parse(localStorage.getItem(ERR_KEY)||'[]')||[]}catch(e){ERR_LOG=[]}}
+function errSave(){try{localStorage.setItem(ERR_KEY,JSON.stringify(ERR_LOG.slice(-40)))}catch(e){}}
+function errWhere(){
+ try{
+  const r=(typeof Router!=='undefined'&&Router.current&&Router.current())||null;
+  const g=(typeof VB!=='undefined'&&VB)?VB.g+'/'+(VB.day||VB.round||'')+(VB.night?'/ليل':'')+(VB.over?'/انتهت':''):'';
+  const rm=(typeof RM!=='undefined'&&RM&&RM.code)?('غرفة '+RM.code+'/'+(RM.game||'')+'/'+(RM.phase||'')):'';
+  return [r&&r.name||'',g,rm].filter(Boolean).join(' · ')||'—';
+ }catch(e){return '—'}
+}
+function errNote(msg,src,fatal){
+ if(_errBusy)return;_errBusy=1;
+ try{
+  ERR_LOG.push({t:Date.now(),m:String(msg||'').slice(0,300),s:String(src||'').slice(0,160),
+   w:errWhere(),v:(typeof APP_VER!=='undefined'?APP_VER:''),d:(navigator.userAgent||'').slice(0,110)});
+  errSave();
+  try{if(typeof saveState==='function')saveState()}catch(e){}      // التقدّم أوّلًا مهما حدث
+  if(fatal&&!_errShown){_errShown=1;setTimeout(()=>{_errShown=0;errSheet()},60)}
+ }catch(e){}
+ _errBusy=0;
+}
+function errSheet(){
+ try{
+  if(document.getElementById('errSheet'))return;
+  const ov=document.createElement('div');ov.className='qvov';ov.id='errSheet';
+  ov.innerHTML='<div class="qvbox" style="max-width:330px;text-align:center">'
+   +'<div style="font-size:15px;font-weight:900;margin-bottom:8px">حدث خطأ</div>'
+   +'<div style="font-size:12.5px;color:var(--tx2);line-height:1.7;margin-bottom:14px">'
+   +'تقدّمك محفوظ. سُجّل الخطأ في «المزيد ← سجلّ الأخطاء» — انسخه وأرسله لنصلحه.</div>'
+   +'<button class="rbtn" id="errGo"><span>العودة للرئيسية</span></button>'
+   +'<button class="btn g" id="errStay" style="margin-top:8px">أكمل هنا</button></div>';
+  document.body.appendChild(ov);
+  const kill=()=>{try{ov.remove()}catch(e){}};
+  ov.querySelector('#errStay').onclick=kill;
+  ov.querySelector('#errGo').onclick=()=>{kill();try{if(typeof vbExit==='function'&&typeof VB!=='undefined'&&VB)VB.over=true}catch(e){}
+   try{Router.reset('home')}catch(e){try{location.reload()}catch(e2){}}};
+  ov.addEventListener('click',e=>{if(e.target===ov)kill()});
+ }catch(e){}
+}
+errLoad();
+try{
+ window.addEventListener('error',e=>{
+  const m=(e&&e.message)||'خطأ غير معروف';
+  if(/ResizeObserver loop/.test(m))return;                          // ضجيج متصفّح لا خطأ
+  errNote(m,((e&&e.filename)||'')+':'+((e&&e.lineno)||''),true);
+ });
+ window.addEventListener('unhandledrejection',e=>{
+  const r=e&&e.reason;errNote((r&&r.message)||String(r||'وعد مرفوض'),'promise',false);
+ });
+}catch(e){}
+/** شاشة سجلّ الأخطاء: يفتحها اللاعب وينسخ ما فيها */
+function errScrLog(){
+ const list=ERR_LOG.slice().reverse();
+ const rows=list.length?list.map(x=>{
+  const d=new Date(x.t);
+  return '<div class="note" style="text-align:start;margin-bottom:8px;font-size:11.5px;line-height:1.7">'
+   +'<b style="color:var(--no)">'+esc(x.m)+'</b><br>'
+   +'<span style="color:var(--tx2)">'+esc(x.w)+'</span><br>'
+   +'<span style="color:var(--mut);font-size:10.5px" dir="ltr">'+esc(x.s)+' · v'+esc(x.v)+' · '
+   +d.getHours()+':'+String(d.getMinutes()).padStart(2,'0')+'</span></div>';
+ }).join(''):'<div class="note">لا أخطاء مسجّلة — الحمد لله.</div>';
+ go('<div class="scr on" id="errLogScr">'+tb('سجلّ الأخطاء')
+  +'<div class="note" style="margin-bottom:12px">إن واجهتك مشكلة أثناء اللعب، افتح هذه الشاشة وانسخ ما فيها وأرسله — فيها ما يكفي لتحديد الخطأ بدقّة.</div>'
+  +rows
+  +(list.length?'<button class="btn g" style="margin-top:12px" onclick="errCopy()">نسخ الكل</button>'
+   +'<button class="btn g" style="margin-top:8px;color:var(--no)" onclick="errClear()">مسح السجلّ</button>':'')
+  +'</div>');
+}
+function errCopy(){
+ const t=ERR_LOG.slice().reverse().map(x=>{const d=new Date(x.t);
+  return d.toISOString()+' | v'+x.v+' | '+x.w+' | '+x.m+' | '+x.s}).join('\n');
+ try{navigator.clipboard.writeText(t);toast('نُسخ السجلّ')}catch(e){toast('تعذّر النسخ')}
+}
+function errClear(){ERR_LOG=[];errSave();refresh(errScrLog);toast('مُسح السجلّ')}
+
 function toast(m){const t=$('tst');
  t.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;justify-content:center">'+m+'</span>';
  try{enPass(t)}catch(e){}
