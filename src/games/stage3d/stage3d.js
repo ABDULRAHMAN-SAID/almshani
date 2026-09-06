@@ -582,16 +582,39 @@ function vb3dBox(o){
 /** 5.66: يتراجع الإطار حتى يقع كل جالس داخله — يُسقط صناديق الأجسام ويقيس أبعدها عن المركز بدل التقدير */
 function vb3dFit(){
  const b=VB3.boxes;if(!b||!b.length)return;const T=THREE,cam=VB3.cam,v=new T.Vector3();
- for(let k=0;k<4;k++){
+ // 5.75: التأطير كان يتراجع فقط ولا يقترب أبدًا، فإن بقي فراغ رأسيّ سقط كلّه أرضًا فارغة
+ // تحت الجالسين. الآن يقترب أيضًا حتى تملأ الجلسة الإطار، ثم يوسّطها عموديًّا.
+ const LO=.93,HI=.985,AIM=.958;   // أشدّ ما يمكن دون قصّ أحد
+ let lo=1,hi=-1,m=0,zf=0;
+ const meas=()=>{
   cam.position.set(0,VB3.camY,VB3.camZ);cam.lookAt(0,VB3.aimY,-.5);cam.updateMatrixWorld();cam.updateProjectionMatrix();
-  let m=0,zf=0;
+  m=0;zf=0;lo=1;hi=-1;
   for(const box of b)for(let c=0;c<8;c++){
    v.set(c&1?box.min.x:box.max.x,c&2?box.min.y:box.max.y,c&4?box.min.z:box.max.z);
-   const wz=v.z;v.project(cam);const e=Math.max(Math.abs(v.x),v.y);if(e>m){m=e;zf=wz}}
-  VB3.panMax=Math.max(0,(.985-m))*Math.max(1.5,VB3.camZ-zf)*Math.tan(cam.fov*Math.PI/360)*(cam.aspect||1);
-  if(m<=.96)break;
-  const d=Math.max(.6,VB3.camZ-zf);                                   // بُعد أبعد نقطة: التراجع يصغّرها بنسبته
-  VB3.camZ+=Math.min(.9,d*(m/.96-1));VB3.camY+=Math.min(.18,d*(m/.96-1)*.16);
+   const wz=v.z;v.project(cam);const e=Math.max(Math.abs(v.x),Math.abs(v.y));if(e>m){m=e;zf=wz}
+   if(v.y<lo)lo=v.y;if(v.y>hi)hi=v.y;}
+ };
+ for(let k=0;k<6;k++){
+  meas();
+  if(m>LO&&m<HI)break;
+  const d=Math.max(.6,VB3.camZ-zf), f=AIM/Math.max(.05,m);
+  // f>1 يعني أنّ الجلسة أصغر من الإطار فنقترب؛ f<1 يعني أنّها تفيض فنتراجع
+  const step=Math.max(-1.1,Math.min(.9,d*(1/f-1)));
+  VB3.camZ=Math.max(.9,VB3.camZ+step);
+  VB3.camY=Math.max(.5,VB3.camY+step*.16);
+ }
+ meas();
+ VB3.panMax=Math.max(0,(.985-m))*Math.max(1.5,VB3.camZ-zf)*Math.tan(cam.fov*Math.PI/360)*(cam.aspect||1);
+ // توسيط رأسيّ خفيف: الفراغ الباقي يُقسم سماءً وأرضًا بدل أن يكون أرضًا كلّه
+ if(hi>lo){
+  // الهدف تحت منتصف الإطار: الأرض الفارغة تخرج من الأسفل وتدخل المدينة من الأعلى
+  const WANT=-.20;
+  const dy=(lo+hi)/2-WANT;
+  if(Math.abs(dy)>.03){
+   VB3.aimY+=Math.max(-.5,Math.min(.5,dy*Math.tan(cam.fov*Math.PI/360)*Math.max(1.2,VB3.camZ)*.8));
+   cam.position.set(0,VB3.camY,VB3.camZ);cam.lookAt(0,VB3.aimY,-.5);cam.updateMatrixWorld();
+   if(VB3.aim)VB3.aim.y=VB3.aimY;if(VB3.aimT)VB3.aimT.y=VB3.aimY;
+  }
  }
 }
 /** موضع رأس كل مقعد على المسرح بالنسبة المئوية (لمواضع عناصر المقاعد والبطاقات الطائرة) */
