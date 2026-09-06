@@ -121,7 +121,7 @@ function vb3dLook(i,model){
  const me=i===model.me,nm=model.names[i]||'لاعب',av=vb3dAvatarOf(i,model),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
  const id=(k,v)=>((AV[k][v]||AV[k][0]).id);
  return {f,me,host:i===model.host,skin:AV.skin[av.skin]||AV.skin[0],hair:AV.hair[av.hair]||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
-  beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5]};
+  beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5],h:h};
 }
 function vb3dTexIris(){return vb3dTex('iris',96,96,(g,w,h)=>{g.clearRect(0,0,w,h);
  // حلقة طرفية داكنة ثمّ قزحية بألياف ثمّ بؤبؤ أسود — عين لا قرص
@@ -142,15 +142,22 @@ function vb3dChar(look,posture){
  const M=(c,o)=>{const m=vb3dMat(c,o);m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
  const reg=m=>{m.transparent=true;m.userData.base=m.color.clone();mats.push(m);return m};
  const skin=M(look.skin,{rough:.46,sheen:.62,sheenR:.42,sheenC:'#FF9E86',spec:.62}),cloth=M(look.thobe,{rough:.9,sheen:.5,sheenR:.34,sheenC:'#FFF6E6',bump:weave,bumpS:.42});
+ // 5.73: الكمّ والكتف أغمق درجةً من الجذع، والأساور أغمق منهما — بلا ذلك تذوب الذراع في الثوب
+ // فيبدو الجالس كتلة بلا أطراف، وهي أوّل ما يجعل الشكل «غير طبيعي».
+ const sleeve=M(shade(look.thobe,-15),{rough:.9,sheen:.5,sheenR:.34,sheenC:'#FFF6E6',bump:weave,bumpS:.42});
+ const cuffM=M(shade(look.thobe,-30),{rough:.92,bump:weave,bumpS:.5});
+ const shoulderM=M(shade(look.thobe,-8),{rough:.9,sheen:.5,sheenR:.34,sheenC:'#FFF6E6',bump:weave,bumpS:.42});
+ // جِلسة كلّ شخص من بذرة اسمه — ثابتة بين الجلسات، ومختلفة بين الجالسين
+ const H=(look.h>>>0)||1, rr=k=>(((H>>(k*4))&15)+.5)/16;
  const hairM=M(look.hair,{rough:.34,metal:.08,sheen:.72,sheenR:.26,sheenC:'#FFE9C8'}),dark=M('#15141C',{rough:.5}),lipM=M('#8A4A3A',{rough:.55}),white=M('#F7F4EC',{rough:.3});
  const eyeM=reg(new T.MeshPhysicalMaterial({color:new T.Color('#F7F4EC'),roughness:.12,clearcoat:1,clearcoatRoughness:.06}));
  const irisM=reg(new T.MeshBasicMaterial({map:vb3dTexIris(),transparent:true}));
  const Z=new T.Vector3(0,0,1);
  // الجذع (ثوب/عباءة) بطيّات، والعنق والياقة وفتحة الصدر بأزرارها
  const prof=[[0.03,0],[0.27,0.02],[0.285,0.16],[0.245,0.44],[0.258,0.60],[0.275,0.72],[0.235,0.81],[0.118,0.875],[0.088,0.965]].map(p=>new T.Vector2(p[0],p[1]));
- const body=new T.Mesh(vb3dFolds(new T.LatheGeometry(prof,44),.013,9,.62),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
+ const body=new T.Mesh(vb3dFolds(new T.LatheGeometry(prof,52),.024,11,.58),cloth);body.castShadow=true;body.receiveShadow=true;g.add(body);
  // 5.67: كتفان يكسران المخروط — الظلّ يقع عليهما فيُقرأ الجسد إنسانًا
- g.add(vb3dMesh(vb3dG('Sphere',.29,30,20),cloth,0,.735,.01,{sc:[1.14,.4,.8]}));
+ g.add(vb3dMesh(vb3dG('Sphere',.29,30,20),shoulderM,0,.735,.01,{sc:[1.14,.4,.8]}));
  g.add(vb3dMesh(vb3dG('Cylinder',.062,.075,.17,24),skin,0,.965,0));
  if(!look.f){g.add(vb3dMesh(vb3dG('Torus',.1,.014,10,30),cloth,0,.955,0,{rot:[Math.PI/2,0,0],noCast:1}));
   g.add(vb3dMesh(vb3dG('Capsule',.006,.19,3,6),M(shade(look.thobe,-22),{rough:.9}),0,.73,.238,{rot:[.2,0,0],noCast:1}));
@@ -163,13 +170,18 @@ function vb3dChar(look,posture){
    g.add(vb3dLimb(hip,knee,.078,cloth),vb3dLimb(knee,foot,.062,cloth),vb3dMesh(vb3dG('Capsule',.038,.1,3,6),dark,s*.14,-.47,.5,{rot:[Math.PI/2,0,0]}))})}
  else g.add(vb3dMesh(vb3dG('Sphere',0.35,32,20),cloth,0,0.10,0.12,{sc:[1,.3,.8]}));
  // الذراعان واليدان (راحة وأصابع وإبهام) على الحضن
- const arms={};[-1,1].forEach(s=>{const sh=new T.Vector3(s*.255,.715,.02),el=new T.Vector3(s*.33,.45,.16),hd=new T.Vector3(s*.155,.285,.40);
-  const up=vb3dLimb(sh,el,.058,cloth),lo=vb3dLimb(el,hd,.049,cloth);
+ const armV=[rr(4)-.5,rr(5)-.5,rr(6)-.5];
+ const arms={};[-1,1].forEach((s,si)=>{
+  const sh=new T.Vector3(s*.255,.715,.02);
+  // مرفق ويد بإزاحة صغيرة لكل جانب ولكل شخص: لا يدين متطابقتين ولا جالسَين بالوضعية نفسها
+  const el=new T.Vector3(s*(.33+armV[si]*.05),.45+armV[si]*.05,.16+armV[2]*.05);
+  const hd=new T.Vector3(s*(.155+armV[si]*.06),.285+armV[1-si]*.07,.40+armV[si]*.06);
+  const up=vb3dLimb(sh,el,.058,sleeve),lo=vb3dLimb(el,hd,.049,sleeve);
   const hand=new T.Group();hand.position.copy(hd);hand.quaternion.setFromUnitVectors(Z,new T.Vector3().subVectors(hd,el).normalize());
   hand.add(vb3dMesh(vb3dG('Sphere',.042,18,14),skin,0,0,0,{sc:[1,.55,1.2]}));
   for(let k=0;k<4;k++)hand.add(vb3dMesh(vb3dG('Capsule',.0098,.035,3,10),skin,(k-1.5)*.021,-.004,.058,{rot:[Math.PI/2+.2,0,0]}));
   hand.add(vb3dMesh(vb3dG('Capsule',.0102,.03,3,10),skin,-s*.044,.004,.016,{rot:[Math.PI/2-.4,0,s*.8]}));
-  const cuff=vb3dLimb(hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.03),hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.08),.05,cloth);
+  const cuff=vb3dLimb(hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.03),hd.clone().addScaledVector(new T.Vector3().subVectors(el,hd).normalize(),.09),.052,cuffM);
   g.add(up,lo,hand,cuff);arms[s<0?'l':'r']={up,lo,hand,sh,el,hd,rest:{el:el.clone(),hd:hd.clone()}}});
  // الرأس: جمجمة وفكّ وأذنان
  const head=new T.Group();head.position.set(0,1.135,.02);head.scale.setScalar(.86);g.add(head);
@@ -214,8 +226,8 @@ function vb3dChar(look,posture){
  const open=vb3dMesh(vb3dG('Sphere',.03,16,12),M('#4A1E1E',{rough:.7}),0,-.02,-.004,{sc:[1.3,.05,.5],noCast:1});mouth.add(open);
  // اللحية: خدّان وذقن (والفم مكشوف)، خفيفة نصف شفّافة، أو شارب
  const bd=look.beard;
- if(bd==='full'||bd==='short'){const bm=bd==='short'?M(look.hair,{rough:.7,tr:1,op:.7}):hairM;
-  head.add(vb3dMesh(vb3dG('Sphere',.2,40,14,Math.PI/2+.5,Math.PI*2-1,Math.PI*.58,Math.PI*.18),bm,0,-.01,.012,{sc:[1.02,1.1,1.02]}));
+ if(bd==='full'||bd==='short'){const bm=bd==='short'?M(shade(look.hair,-8),{rough:.78,tr:1,op:.5}):hairM;
+  head.add(vb3dMesh(vb3dG('Sphere',.2,40,14,Math.PI/2+.62,Math.PI*2-1.24,Math.PI*.60,Math.PI*.15),bm,0,-.012,.012,{sc:[1.015,1.09,1.015],noCast:1}));
   head.add(vb3dMesh(vb3dG('Sphere',.2,40,14,0,Math.PI*2,Math.PI*.72,Math.PI*.28),bm,0,-.01,.012,{sc:[1.02,1.16,1.02]}));
   if(bd==='full')head.add(vb3dMesh(vb3dG('Sphere',.11,24,18),bm,0,-.205,.03,{sc:[1.1,.85,1]}))}
  if(bd==='mustache'||bd==='full'){const m=arc(.04,.011,2.3,Math.PI/2-1.15,0,.042,.03,hairM);m.scale.y=.7;mouth.add(m)}
@@ -228,7 +240,13 @@ function vb3dChar(look,posture){
   const np=[[.13,-.17],[.2,-.3],[.3,-.45],[.32,-.58]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(np,36),sh,0,0,0));
  }else if(ac==='shemagh'){const gh=M('#F6F1E8',{map:vb3dTexShemagh(),rough:.9,sheen:.4,sheenC:'#FFFFFF',bump:weave,bumpS:.25});hat=true;
   const dome=vb3dMesh(vb3dG('Sphere',.215,40,26,0,Math.PI*2,0,1.5),gh,0,.02,-.01,{sc:[1.02,1.05,1.05]});dome.rotation.x=-.45;head.add(dome);
-  const dp=[[.215,-.02],[.235,-.14],[.255,-.28],[.27,-.42],[.26,-.5]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(dp,36,Math.PI*.3,Math.PI*1.4),gh,0,0,-.01));
+  // ذيل الغترة يميل للخلف وينفرج على الكتفين بدل أن يسقط عموديًّا كالخمار
+  const dp=[[.215,-.02],[.246,-.15],[.286,-.30],[.322,-.45],[.336,-.58],[.318,-.66]].map(p=>new T.Vector2(p[0],p[1]));
+  const tail=vb3dMesh(new T.LatheGeometry(dp,40,Math.PI*.34,Math.PI*1.32),gh,0,0,-.035);
+  tail.rotation.x=.12;head.add(tail);
+  // الطرفان الأماميّان يقصران فوق الصدر — لا يغطّيان الوجه
+  [-1,1].forEach(sd=>{const fp=[[.055,0],[.085,-.10],[.10,-.21],[.085,-.28]].map(q=>new T.Vector2(q[0],q[1]));
+   const fr=vb3dMesh(new T.LatheGeometry(fp,18),gh,sd*.175,-.03,.075,{noCast:1});fr.rotation.set(.16,0,sd*.18);head.add(fr)});
   const ag=vb3dG('Torus',.2,.02,12,40);head.add(vb3dMesh(ag,dark,0,.13,0,{rot:[Math.PI/2-.1,0,0]}),vb3dMesh(ag,dark,0,.095,.012,{rot:[Math.PI/2-.02,0,0]}));
  }else if(hs==='short')cap(1.5,-.55);
  else if(hs==='wavy'){cap(1.55,-.5);for(let k=0;k<5;k++){const a=-.9+k*.45;const w=vb3dMesh(vb3dG('Torus',.045,.02,10,18,2.6),hairM,Math.sin(a)*.17,.118-Math.abs(a)*.03,Math.cos(a)*.16,{noCast:1});w.rotation.set(-.6+k*.1,a,Math.PI/2);head.add(w)}}
@@ -248,7 +266,11 @@ function vb3dChar(look,posture){
   g.add(vb3dMesh(new T.TubeGeometry(new T.CatmullRomCurve3(pts,true),64,.024,8,true),gold,0,0,0,{noCast:1}));g.add(vb3dMesh(vb3dG('Sphere',.026,8,6),M('#E24B4A',{rough:.25}),.05,.56,.32,{noCast:1}))}
  if(ac==='headband'){const hb=M('#C93A34',{rough:.7});const R=hs==='bald'?.196:.212;head.add(vb3dMesh(vb3dG('Torus',R,.02,10,40),hb,0,.078,0,{rot:[Math.PI/2-.12,0,0],noCast:1}));
   [-1,1].forEach(s=>head.add(vb3dMesh(vb3dG('Capsule',.012,.16,2,5),hb,s*.05,-.04,-.2,{rot:[.35,0,s*.3],noCast:1})))}
- g.userData={mats,head,mouth,open,eyes,arms,body,base:g.position.clone(),blinkAt:performance.now()+1500+Math.random()*3000};
+ // دوران الجذع وميل الرأس الأساسيّان — المحرّك يضيف حركته فوقهما فتبقى الجِلسة شخصية
+ g.rotation.y=(rr(0)-.5)*.34;
+ const pose={hy:(rr(1)-.5)*.40,hx:(rr(2)-.5)*.15,hz:(rr(3)-.5)*.12};
+ head.rotation.set(pose.hx,pose.hy,pose.hz);
+ g.userData={mats,head,mouth,open,eyes,arms,body,pose,base:g.position.clone(),blinkAt:performance.now()+1500+Math.random()*3000};
  return g;
 }
 /* ── الغرفتان ── */
@@ -405,7 +427,8 @@ function vb3dRoomSquare(sc){
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
  L.rim=new T.DirectionalLight(0x9FB4FF,1.2);L.rim.position.set(2.6,2.8,-5.2);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
  L.lamp=new T.PointLight(0xFFB760,34,10,1.7);L.lamp.position.set(0,1.25,0);sc.add(L.lamp);L.posts=[p1,p2];
- L.fill=new T.DirectionalLight(0xFFD2A4,.34);L.fill.position.set(.7,2.1,4.2);sc.add(L.fill);
+ L.fill=new T.DirectionalLight(0xFFD2A4,.56);L.fill.position.set(.7,2.35,4.2);sc.add(L.fill);   // 5.73: الوجوه كانت تغرق في ظلّ الميدان — تعبئة أمامية أدفأ ترفعها دون أن تُذهب ليل المكان
+ L.face=new T.PointLight(0xFFC98A,2.6,4.6,2);L.face.position.set(0,1.55,.15);sc.add(L.face);   // وهج الفانوس على الوجوه من مستواها لا من سطح الطاولة
  L.bounce=new T.DirectionalLight(0x8FA0C8,.2);L.bounce.position.set(-.5,-1.5,2.2);sc.add(L.bounce);   // ارتداد بارد من الحجر   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
  return {L,glow,sky,stars,day:{hemi:.28,key:2.5,lamp:25,post:17,rim:2.3,skyc:'#FFFFFF',starO:.7},night:{hemi:.13,key:1.45,lamp:13,post:9,rim:1.9,skyc:'#5A6090',starO:1}};
 }
@@ -603,9 +626,9 @@ function vb3dLoop(now){
   c.ch.rotation.x=v.dead*.32;c.ch.position.y=(VB3.kind==='mafia'?.5:.15)-v.dead*.05;
   let yaw=0;if(talker&&talker!==c&&!s.dead&&!s.sleep){talker.u.head.getWorldPosition(tmp);c.seat.worldToLocal(tmp);yaw=Math.max(-.7,Math.min(.7,Math.atan2(tmp.x,tmp.z)))}
   if(c.pt!=null&&now<c.ptT&&VB3.chars[c.pt]){VB3.chars[c.pt].seat.getWorldPosition(tmp);c.seat.worldToLocal(tmp);yaw=Math.max(-.9,Math.min(.9,Math.atan2(tmp.x,tmp.z)))}
-  v.yaw=lerp(v.yaw,yaw,dt*5);u.head.rotation.y=v.yaw;
-  u.head.rotation.x=v.sleep*.38+v.dead*.55+Math.sin(t*6.5)*.045*v.talk+Math.sin(t*.9+c.i*2)*.015*(1-v.sleep-v.dead)*calm;
-  u.head.rotation.z=Math.sin(t*.7+c.i)*.02*(1-v.sleep)*calm;
+  v.yaw=lerp(v.yaw,yaw,dt*5);const P=u.pose||{hy:0,hx:0,hz:0};u.head.rotation.y=v.yaw+P.hy;
+  u.head.rotation.x=P.hx+v.sleep*.38+v.dead*.55+Math.sin(t*6.5)*.045*v.talk+Math.sin(t*.9+c.i*2)*.015*(1-v.sleep-v.dead)*calm;
+  u.head.rotation.z=P.hz+Math.sin(t*.7+c.i)*.02*(1-v.sleep)*calm;
   u.open.scale.y=.05+Math.max(0,Math.sin(t*15+c.i))*.9*v.talk;u.mouth.position.y=-.1-.012*v.talk;
   let blink=0;if(now>u.blinkAt){const k=(now-u.blinkAt)/170;if(k<1)blink=Math.sin(k*Math.PI);else u.blinkAt=now+2200+Math.random()*4200}
   const shut=Math.min(1,Math.max(v.sleep,v.dead)*1+blink);u.eyes.forEach(e=>{if(!e.closed)e.lid.scale.y=1+1.5*shut});
