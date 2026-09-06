@@ -1638,6 +1638,42 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 :where(button,.btn,.rbtn,.fc,.dfC,.op,.li,.nvi,.gTile,.wayCard,.qop2,.vbP,.vbP2,.vbQ,.vbR,.vbHb,
  .ebi,.efab,.ncd,.pu,.szchip,.gpk,.plChip,.plBtn,.plCard,.plRow,.gRow,.ghWay,.clRow,.clHdrB,
  .clPil,.clSecB,.clPan,.clAct,.clAnimT,.mtab,.rmGame,.rmGames>div,.emItem,.avOpt,.setRow):active{transform:none!important}
+
+/* ═══ 5.78: مسرح مسطّح مصنوع، لا بديل ═══
+   كانت الدوائر تُلصق على الخلفية بلا إطار ولا ظلّ فتبدو رخيصة.
+   الآن: الخلفية تتراجع، والوجه في إطار ذهبيّ له ظلّ تلامس، والاسم على لوحة. */
+.vbScene.full:not(.is3d) .vbBg{filter:blur(2px) brightness(.66) saturate(.88);transform:scale(1.05)}
+.vbScene.full:not(.is3d) .vbStage::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
+ background:radial-gradient(122% 80% at 50% 46%,transparent 36%,rgba(4,6,12,.46) 78%,rgba(3,4,9,.8) 100%)}
+.vbScene.full:not(.is3d) .vbCenter,.vbScene.full:not(.is3d) .vbSeats{z-index:2}
+
+.vbScene.full:not(.is3d) .vbSeat{width:84px}
+/* الإطار الذهبيّ وظلّ التلامس — بلا لمس بنية الصورة نفسها */
+.vbScene.full:not(.is3d) .vbAv{width:52px;height:52px;padding:2px;
+ background:linear-gradient(160deg,#FFF2C4,#D8A93C 42%,#8A6A1E);
+ box-shadow:0 5px 14px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.5)}
+/* الصورة وحدها — لا قرص الرقم ولا بطاقة الدور، وإلا كبرا وغطّيا الوجه */
+.vbScene.full:not(.is3d) .vbAv>svg.avx,.vbScene.full:not(.is3d) .vbAv>span.avEm{width:48px;height:48px}
+.vbScene.full:not(.is3d) .vbSeat::after{content:'';position:absolute;left:50%;top:52px;width:44px;height:10px;
+ transform:translateX(-50%);border-radius:50%;pointer-events:none;
+ background:radial-gradient(50% 50%,rgba(0,0,0,.55),transparent 72%)}
+.vbScene.full:not(.is3d) .vbSeat{position:absolute}
+/* رقم مضروب على الكتف */
+.vbScene.full:not(.is3d) .vbNum{width:20px;height:20px;font-size:10px;font-weight:900;color:#1A1206;
+ background:linear-gradient(160deg,#FFF2C4,#E8B23A 55%,#A2761C);
+ border:1px solid rgba(20,14,4,.55);box-shadow:0 2px 5px rgba(0,0,0,.6),0 1px 0 rgba(255,255,255,.45) inset}
+/* لوحة الاسم المحفورة */
+.vbScene.full:not(.is3d) .vbNm{margin-top:9px;max-width:84px;padding:2.5px 9px;border-radius:9px;font-size:10.5px;
+ background:linear-gradient(180deg,rgba(14,19,32,.94),rgba(7,10,18,.94));
+ border:1px solid rgba(232,178,58,.3);box-shadow:0 3px 8px rgba(0,0,0,.6),0 1px 0 rgba(255,240,200,.1) inset}
+.vbScene.full:not(.is3d) .vbSeat.me .vbNm{max-width:124px;font-size:10px;border-color:rgba(232,178,58,.7);
+ background:linear-gradient(180deg,rgba(44,32,10,.96),rgba(22,16,5,.96))}
+.vbScene.full:not(.is3d) .vbPill{margin-top:4px;padding:1.5px 8px;font-size:9px;
+ background:linear-gradient(180deg,rgba(8,11,20,.9),rgba(5,7,13,.9));box-shadow:0 2px 6px rgba(0,0,0,.5)}
+/* الحالات */
+.vbScene.full:not(.is3d) .vbSeat.talk .vbAv{box-shadow:0 0 0 3px rgba(46,204,113,.55),0 0 20px rgba(46,204,113,.45),0 5px 14px rgba(0,0,0,.7)}
+.vbScene.full:not(.is3d) .vbSeat.me .vbAv{box-shadow:0 0 0 2px rgba(255,242,196,.45),0 5px 16px rgba(0,0,0,.72),0 0 20px rgba(232,178,58,.26)}
+.vbScene.full:not(.is3d) .vbSeat.dead{opacity:.42;filter:grayscale(1)}
 </style>
 </head>
 <body>
@@ -22296,7 +22332,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.77';
+const APP_VER='5.78';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -30581,7 +30617,7 @@ function vbSeatPos(i,n){
  const a=Math.PI/2+(i/n)*Math.PI*2,m=VB.g==='mafia';
  // 5.77: المسرح المسطّح صار يملأ المساحة، فالقوس يتّسع رأسيًّا ويبتعد عن الحافّتين
  // (كان نصف القطر الأفقي ٤١٪ فيلامس مقعدا الطرفين إطار المسرح ويُقصّان)
- const cx=50,cy=m?50:56,rx=m?36:38,ry=m?40:34;
+ const cx=50,cy=m?47:52,rx=m?36:38,ry=m?38:32;   // أعلى قليلًا فتظهر لوحة الاسم وشارة الدور تحت المقعد السفليّ كاملتين
  return {x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry};
 }
 function vbPhase(icon,label,hint){
