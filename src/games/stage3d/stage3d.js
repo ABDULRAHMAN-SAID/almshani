@@ -5,7 +5,12 @@ const VB3={on:false,tex:{}};
 const VB3_FEMALE=new Set(['نورة','أثير','لين','دانة','جود','ليان']);
 const VB3_COL={thobe:['#F8F5EE','#EFE6D2','#E7E9ED','#DCD4C2','#D8CDB4','#CFD4DA','#E3D9C6','#C9C3B4'],shayla:['#26365F','#1F5B5B','#4B2A5C','#6E1F2E','#2E4A3B'],cushion:['#1F5B3C','#1E2F63','#7A2230','#5A3A14','#2B4C6E']};
 /** هل يُتاح المشهد المجسّم؟ لا في الاختبارات السريعة إلا بطلب صريح (__vb3d) ولا عند تعطيله (__vbNo3d) */
-function vb3dOk(){return typeof THREE!=='undefined'&&!window.__vbNo3d&&!(window.__vbFast&&!window.__vb3d)}
+function vb3dOk(){
+ // 5.77: الأصل مسرح ثنائيّ الأبعاد — أوضح على الهاتف وأخفّ ولا يعلّق.
+ // المجسّم يبقى كاملًا ويُشغَّل من الإعدادات ← اللعب ← «مسرح مجسّم».
+ try{if(!(typeof S!=='undefined'&&S&&S.opt&&S.opt.stage3d)&&!window.__vb3d)return false}catch(e){return false}
+ return typeof THREE!=='undefined'&&!window.__vbNo3d&&!(window.__vbFast&&!window.__vb3d);
+}
 /** مخزن الأشكال: الشكل نفسه (نوعه ومقاساته) يُبنى مرّة ويُشارَك — كان بناء المجلس يستغرق ثوانيَ ويحجز الشاشة */
 const VB3_GEO={};
 function vb3dG(kind,...a){const k=kind+'|'+a.join(',');let g=VB3_GEO[k];if(!g){g=new THREE[kind+'Geometry'](...a);g.userData.shared=1;VB3_GEO[k]=g}return g}
