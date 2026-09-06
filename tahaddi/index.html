@@ -658,7 +658,8 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbSeat.mark .vbAv{background:#E24B4A}
 .vbBadge{position:absolute;bottom:-3px;right:-3px;width:18px;height:18px;border-radius:50%;background:#0B1020;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center}
 .vbX{position:absolute;inset:2px;display:flex;align-items:center;justify-content:center;background:rgba(226,75,74,.4);border-radius:50%}
-.vbNm{font-size:9.5px;font-weight:800;color:#F2F4F8;text-shadow:0 1px 3px #000;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbNm{font-size:10px;font-weight:800;color:#F2F4F8;text-shadow:0 1px 3px #000;max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbSeat.me .vbNm{max-width:92px}   /* اسمك ومعه «أنت» أطول من غيره */
 .vbNm i{font-style:normal;color:var(--gold);margin-inline-start:3px;font-size:8.5px}
 .vbSub{font-size:8.5px;color:#F0A0A0;text-shadow:0 1px 2px #000}
 .vbFeed{display:flex;flex-direction:column;gap:7px;padding-bottom:14px;min-height:40px}
@@ -859,7 +860,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
 .vbScene.barra .vbCenter{top:13%}
 .vbSeats{position:absolute;inset:0;display:block;padding:0}
-.vbSeat{position:absolute;transform:translate(-50%,-50%);width:60px;cursor:pointer}
+.vbSeat{position:absolute;transform:translate(-50%,-50%);width:76px;cursor:pointer}
 .vbAv>span.vbNum{position:absolute;top:-4px;left:-5px;width:17px;height:17px;border-radius:50%;background:#0B1020;border:1px solid var(--gold);color:#FFE9A8;font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2}
 .vbAv>span.vbBadge{width:18px;height:18px;display:flex}
 .vbAv>span.vbX{width:auto;height:auto;display:flex}
@@ -891,6 +892,8 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 46%,rgba(0,0,0,.2) 74%,rgba(0,0,0,.52) 100%),
   linear-gradient(180deg,rgba(255,206,150,.05),rgba(0,0,0,0) 26%)}
 .vbScene.is3d .vbStage{height:100%}
+/* 5.77: المسطّح يملأ المساحة أيضًا — كان ٢٤٦ بكسل فتتزاحم المقاعد وتتراكب */
+.vbScene.full .vbStage{height:100%;margin-bottom:0;border-radius:0;border-inline:0}
 @media (min-width:480px){.vbScene.is3d .vbStage{height:340px}}
 .vbScene.is3d .vbBg,.vbScene.is3d .vbCenter{display:none}
 .vbScene.is3d .vbSeats{pointer-events:none}
@@ -19573,7 +19576,7 @@ function setSection(k){
   <div class="cr">${[['ar','العربية'],['en','English']].map(([v,n])=>
    `<div class="fc ${((S.lang||'ar')===v)?'on':''}" onclick="langPick('${v}')">${n}</div>`).join('')}</div>
   <div class="note">${T('محتوى اللعب (الأسئلة وكلام الآليين) يبقى بالعربية')}</div>`;
- if(SEC==='game')body=tgl('haptic','الاهتزاز عند اللمس',(window.SFX&&SFX.hapticAvailable())?'نقرات وإصابات ونتائج — تنبيه خفيف لا اهتزاز شاشة':'هذا الجهاز أو المتصفح لا يدعم الاهتزاز')+
+ if(SEC==='game')body=tgl('stage3d','مسرح مجسّم في المافيا وبرا السالفة','مشهد ثلاثيّ الأبعاد بدل التصميم المسطّح — أثقل على الأجهزة الأقدم')+tgl('haptic','الاهتزاز عند اللمس',(window.SFX&&SFX.hapticAvailable())?'نقرات وإصابات ونتائج — تنبيه خفيف لا اهتزاز شاشة':'هذا الجهاز أو المتصفح لا يدعم الاهتزاز')+
   tgl('confirm','طلب التأكيد','قبل الانسحاب من مباراة أو مغادرة غرفة — حذف الحساب يُؤكَّد دائمًا')+
   tgl('aiBots','آليون بذكاء اصطناعي','في مافيا وبرا السالفة ضد الكمبيوتر: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي');
  if(SEC==='sound')body=tgl('sfx','المؤثرات الصوتية','نقرات وإصابات ونتائج وضربات الكيرم — مركّبة داخل اللعبة')+
@@ -22293,7 +22296,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.76';
+const APP_VER='5.77';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -30571,7 +30574,9 @@ function vbCenterPiece(kind){
 function vbSeatPos(i,n){
  if(typeof VB3!=='undefined'&&VB3.on){const p=vb3dSeatPct(i);if(p)return p}
  const a=Math.PI/2+(i/n)*Math.PI*2,m=VB.g==='mafia';
- const cx=50,cy=m?49:60,rx=m?41:44,ry=m?37:27;
+ // 5.77: المسرح المسطّح صار يملأ المساحة، فالقوس يتّسع رأسيًّا ويبتعد عن الحافّتين
+ // (كان نصف القطر الأفقي ٤١٪ فيلامس مقعدا الطرفين إطار المسرح ويُقصّان)
+ const cx=50,cy=m?50:56,rx=m?36:38,ry=m?40:34;
  return {x:cx+Math.cos(a)*rx,y:cy+Math.sin(a)*ry};
 }
 function vbPhase(icon,label,hint){
@@ -30635,13 +30640,13 @@ function vbSeats(){
   else if(i===0){pill=st.me||'أنت';pc='#E8B23A'}
   else if(note){pill=note.t;pc=note.c}
   else if(st.pill){pill=st.pill;pc=st.pc||'#8C93A8'}
-  else{pill='هادئ';pc='#8C93A8';dim=1}
+  else{pill='';pc='#8C93A8';dim=1}   // 5.77: لا شارة لمن لا حالة له — الشارة تعني شيئًا أو لا تظهر
   const pk=!!(VB.pick&&VB.pick.list.includes(i)&&!st.dead);
   const face=VB.g==='mafia'&&((VB.reveal&&i!==0)||(st.dead&&st.sub&&VB.lastLynched===i))?MAF_ROLE[mfRole(i)]:null;   // بطاقة الآليّ تُقلب حين يُكشف دوره
   const card=VB.dealt&&i!==0?`<span class="vbSeatCard${face?' face':''}">${face?ico(face.ic,9,face.tint):''}</span>`:'';
   return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}${pk?' pick':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}${pk?';--pk:'+(VB.pick.c||'#E8B23A'):''}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
    <div class="vbAv">${d3?'':vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}${card}</div>
-   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div><div class="vbPill${dim?' dim':''}" style="--pc:${pc}">${esc(pill)}</div></div>`}).join('');
+   <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div>${pill?`<div class="vbPill${dim?' dim':''}" style="--pc:${pc}">${esc(pill)}</div>`:''}</div>`}).join('');
  vbRoster();
  const c=document.getElementById('vbCount');if(c)c.textContent=(VB.alive?VB.alive.length:n)+'/'+n;
  if(typeof VB3!=='undefined'&&VB3.on){vb3dSync();vb3dLayout()}
