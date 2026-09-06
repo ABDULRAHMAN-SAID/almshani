@@ -37,7 +37,8 @@ fly open                                      # https://<app>.fly.dev — الل
 |---|---|---|
 | `PORT` / `HOST` | `8090` / `0.0.0.0` | المنفذ والواجهة |
 | `TAHADDI_DIR` | `./tahaddi` | مجلّد اللعبة الذي يقدّمه HTTP |
-| `TAHADDI_DATA_FILE` | `.data/tahaddi.json` | ملفّ الحالة (ضعه على قرص دائم) |
+| `TAHADDI_DATA_FILE` | `.data/tahaddi.json` | سجلّ الحالة الإلحاقيّ (ضعه على قرص دائم) |
+| `NODE_ENV` | — | اضبطه `production` في الإنتاج: يُبطل محقّق المشتريات الاختباريّ ولو ضُبط سرّه بالخطأ |
 | `TAHADDI_ORIGINS` | فارغ = الكل | أصول مسموح لها بفتح WebSocket، مثل `https://<user>.github.io,capacitor://localhost,https://localhost` |
 | `TAHADDI_RESULT_WAIT_MS` | `90000` | مهلة انتظار تقارير كل المشاركين قبل اعتماد النتيجة |
 | `IOS_BUNDLE_ID` | `com.almshani.tahaddi` | معرّف حزمة iOS — إيصال من تطبيق آخر يُرفض |

@@ -10,7 +10,15 @@ import { existsSync, readFileSync } from 'node:fs';
 export type Platform = 'ios' | 'android' | 'test';
 export type Verified = { ok: true; txId: string } | { ok: false; code: string; detail?: string };
 
-const TEST_SECRET = process.env.TAHADDI_IAP_TEST_SECRET ?? '';
+// حارس صريح: التعليق نيّة، والشرط ضمانة. لا محقّق اختباريّ في الإنتاج مهما ضُبطت البيئة.
+const TEST_SECRET = (() => {
+  const v = process.env.TAHADDI_IAP_TEST_SECRET ?? '';
+  if (v && process.env.NODE_ENV === 'production') {
+    console.error('tahaddi/iap: TAHADDI_IAP_TEST_SECRET مضبوط في الإنتاج — تجاهُله. احذفه من بيئة الخادم.');
+    return '';
+  }
+  return v;
+})();
 const APPLE_SECRET = process.env.APPLE_SHARED_SECRET ?? '';
 const ANDROID_PACKAGE = process.env.ANDROID_PACKAGE ?? 'com.almshani.tahaddi';
 const IOS_BUNDLE = process.env.IOS_BUNDLE_ID ?? 'com.almshani.tahaddi';

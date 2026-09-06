@@ -3,7 +3,7 @@
 import { randomBytes } from 'node:crypto';
 import RankCore from '../../../src/progression/rank.js';
 import type { RankProfile } from '../../../src/progression/rank.js';
-import { FileStore } from './tstore';
+import { RecordStore, type Row } from './tstore';
 import CATALOG from '../../../src/economy/catalog.js';
 import { verify as verifyReceipt, iapStatus } from './iap';
 import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec } from './protocol';
@@ -19,6 +19,7 @@ export interface Account {
 export interface Session {
   peer: string; account: Account; presence: Record<string, unknown>;
   send: (m: ServerMsg) => void;
+  rl?: Record<string, { n: number; t: number }>;   // دلاء المعدّل لكل نوع رسالة
 }
 interface Pending {
   gameId: GameId; mode: string; participants: string[]; createdAt: number;
@@ -44,6 +45,17 @@ export function sanitizeName(n: unknown): string | null {
 const bytes = (v: unknown) => Buffer.byteLength(JSON.stringify(v ?? null), 'utf8');
 const ID_RE = /^p[0-9a-f]{12}$/;
 const MAX_FRIENDS = 200;
+/* حدّ المعدّل لكل جلسة ولكل نوع رسالة: [الرشقة المسموحة, المتجدّد في الثانية].
+   الحدود السابقة كانت حدود حجم فقط — لا شيء كان يمنع ألف رسالة في الثانية من جلسة واحدة. */
+const RATE: Record<string, [number, number]> = {
+  emit: [60, 30], presence: [40, 15], saveCloud: [6, 1], loadCloud: [6, 1],
+  submitResult: [8, 2], leaderboard: [8, 2], profile: [24, 6],
+  friendAdd: [12, 1], friendAccept: [12, 1], friendRemove: [12, 1], friends: [12, 3],
+  setName: [6, 1], setEmail: [6, 1], purchase: [8, 1], purchases: [8, 1]
+};
+const RATE_ANY: [number, number] = [30, 10];
+const MAX_PEER_LIST = 60;      // صفّ البحث عن مباراة قد يكون ضخمًا — تكفي عيّنة للاختيار منها
+const IDLE = '\u0000idle';     // من ليس في غرفة ولا يبحث عن مباراة: لا قائمة أقران له
 const idList = (v: unknown): string[] =>
   Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === 'string' && ID_RE.test(x)))].slice(0, MAX_FRIENDS) : [];
 
@@ -51,16 +63,19 @@ export class TahaddiService {
   private accounts = new Map<string, Account>();      // token → account
   private byId = new Map<string, Account>();          // id → account
   private sessions = new Map<string, Session>();      // peer → session
+  private groups = new Map<string, Set<Session>>();   // مفتاح المجموعة → جلساتها (فهرس البثّ)
+  private byAcc = new Map<string, Set<Session>>();    // معرّف الحساب → جلساته
   private pending = new Map<string, Pending>();       // matchId → reports
   private purchases = new Map<string, PurchaseRec>();  // txId → شراء ممنوح (منع إعادة الاستخدام)
-  private store: FileStore<Persisted>;
+  private store: RecordStore;
   private sweeper: ReturnType<typeof setInterval>;
 
-  constructor(store?: FileStore<Persisted>) {
-    this.store = store ?? new FileStore<Persisted>();
+  constructor(store?: RecordStore) {
+    this.store = store ?? new RecordStore();
+    this.store.onCompact(() => this.allRows());
     const saved = this.store.load();
     if (saved?.accounts) {
-      for (const a of saved.accounts) {
+      for (const a of saved.accounts as any[]) {
         const acc: Account = {
           token: String(a.token), id: String(a.id), name: sanitizeName(a.name) ?? 'لاعب',
           createdAt: +a.createdAt || Date.now(), lastSeen: +a.lastSeen || 0,
@@ -71,17 +86,62 @@ export class TahaddiService {
         for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
         this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
       }
-      for (const r of saved.purchases ?? []) if (r && typeof r.txId === 'string') this.purchases.set(r.txId, r);
+      for (const r of (saved.purchases ?? []) as PurchaseRec[]) if (r && typeof r.txId === 'string') this.purchases.set(r.txId, r);
       console.log(`tahaddi/store: حُمّل ${this.accounts.size} حسابًا و${this.purchases.size} شراءً`);
     }
     this.sweeper = setInterval(() => this.sweepPending(), SWEEP_MS);
     (this.sweeper as any).unref?.();
   }
 
-  private snapshot(): Persisted { return { v: 1, accounts: [...this.accounts.values()], purchases: [...this.purchases.values()] }; }
-  private persist(): void { this.store.saveSoon(() => this.snapshot()); }
-  flush(): void { this.store.saveNow(this.snapshot()); }
-  close(): void { clearInterval(this.sweeper); this.flush(); }
+  /** كل السجلات الحيّة — للكبس الدوريّ وحده، لا لكل حفظ */
+  private allRows(): Row[] {
+    const out: Row[] = [];
+    for (const a of this.accounts.values()) out.push({ k: 'a', i: a.token, v: a });
+    for (const r of this.purchases.values()) out.push({ k: 'p', i: r.txId, v: r });
+    return out;
+  }
+  /** حساب واحد تغيّر — سطر واحد في السجلّ، بلا تسلسل بقيّة الحسابات */
+  private persist(a?: Account): void {
+    if (a) this.store.put('a', a.token, a); else this.store.compact();
+  }
+  private persistBuy(r: PurchaseRec): void { this.store.put('p', r.txId, r); }
+  flush(): void { this.store.flush(); }
+  close(): void { clearInterval(this.sweeper); this.store.close(); }
+
+  /* ── فهرس البثّ ──
+     كلفة أي رسالة يجب أن تكون بحجم الغرفة لا بعدد المتصلين بالخادم.
+     مفتاح المجموعة: رمز الغرفة (r…)، أو صفّ البحث عن مباراة (q…)، أو الخمول.
+     الخامل لا تُبنى له قائمة بكل من على الخادم — يُرسَل له نفسه فقط. */
+  private key(s: Session): string {
+    const pc = s.presence.pc, lf = s.presence.lf;
+    if (typeof pc === 'string' && pc) return 'r' + pc;
+    if (typeof lf === 'string' && lf) return 'q' + lf;
+    return IDLE;
+  }
+  private gJoin(s: Session, k: string): void {
+    let set = this.groups.get(k); if (!set) this.groups.set(k, set = new Set()); set.add(s);
+  }
+  private gLeave(s: Session, k: string): void {
+    const set = this.groups.get(k); if (!set) return;
+    set.delete(s); if (!set.size) this.groups.delete(k);
+  }
+  private accJoin(s: Session): void {
+    let set = this.byAcc.get(s.account.id); if (!set) this.byAcc.set(s.account.id, set = new Set()); set.add(s);
+  }
+  private accLeave(s: Session): void {
+    const set = this.byAcc.get(s.account.id); if (!set) return;
+    set.delete(s); if (!set.size) this.byAcc.delete(s.account.id);
+  }
+  private pv(x: Session): PeerView { return { peer: x.peer, by: x.account.id, kind: 'viewer' as const, presence: x.presence }; }
+  private sendSelf(s: Session): void { s.send({ t: 'peers', list: [this.pv(s)] }); }
+  /** قائمة الأقران لمجموعة واحدة — تُبنى مرّة وتُرسل لأهلها وحدهم */
+  private bcast(k: string): void {
+    if (k === IDLE) return;
+    const set = this.groups.get(k); if (!set) return;
+    const list: PeerView[] = [];
+    for (const x of set) { if (list.length >= MAX_PEER_LIST) break; list.push(this.pv(x)); }
+    for (const x of set) x.send({ t: 'peers', list });
+  }
 
   /* ── الحساب ── */
   hello(send: (m: ServerMsg) => void, token?: string, name?: string, rid?: string, peerWant?: string): Session {
@@ -104,24 +164,30 @@ export class TahaddiService {
     let peer = 'k' + randomBytes(8).toString('hex');
     if (found && typeof peerWant === 'string' && /^k[0-9a-f]{16}$/.test(peerWant)) {
       const held = this.sessions.get(peerWant);
-      if (!held || held.account === account) { if (held) this.sessions.delete(peerWant); peer = peerWant; }
+      if (!held || held.account === account) {
+        if (held) { this.sessions.delete(peerWant); this.gLeave(held, this.key(held)); this.accLeave(held); }
+        peer = peerWant;
+      }
     }
     const session: Session = { peer, account, presence: {}, send };
     this.sessions.set(peer, session);
+    this.gJoin(session, IDLE); this.accJoin(session);
     send({ t: 'welcome', rid, token: account.token, id: account.id, name: account.name, peer,
       ranks: account.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!account.save });
-    this.broadcastPeers();
-    this.persist();
+    this.sendSelf(session);
+    this.persist(account);
     return session;
   }
   drop(s: Session): void {
     if (!this.sessions.delete(s.peer)) return;
-    this.broadcastPeers();
+    const k = this.key(s);
+    this.gLeave(s, k); this.accLeave(s);
+    this.bcast(k);
   }
   setName(s: Session, name: unknown, rid?: string): void {
     const n = sanitizeName(name);
     if (!n) return s.send({ t: 'error', rid, code: 'bad_name' });
-    s.account.name = n; this.persist();
+    s.account.name = n; this.persist(s.account);
     s.send({ t: 'nameSet', rid, name: n });
   }
 
@@ -129,7 +195,7 @@ export class TahaddiService {
   setEmail(s: Session, email: unknown, rid?: string): void {
     const e = typeof email === 'string' ? email.trim().toLowerCase() : '';
     if (e.length < 5 || e.length > 120 || !MAIL_RE.test(e)) return s.send({ t: 'error', rid, code: 'bad_email' });
-    s.account.email = e; this.persist();
+    s.account.email = e; this.persist(s.account);
     s.send({ t: 'emailSet', rid, email: e });
   }
 
@@ -143,17 +209,14 @@ export class TahaddiService {
     delete blob.gameRanks; delete blob.ranked; delete blob.account;   // ملك الخادم — لا يُخزَّن ادّعاء عنها
     const t2 = Date.now();
     s.account.save = { t: typeof sv.t === 'number' ? sv.t : t2, blob };
-    this.persist();
+    this.persist(s.account);
     s.send({ t: 'cloudSaved', rid, t2 });
   }
   loadCloud(s: Session, rid?: string): void {
     s.send({ t: 'cloud', rid, save: s.account.save, ranks: s.account.ranks });
   }
   /* ── الأصدقاء: طلب من طرف وقبول من الآخر؛ الهوية من الجلسة لا من العميل ── */
-  private online(id: string): boolean {
-    for (const ss of this.sessions.values()) if (ss.account.id === id) return true;
-    return false;
-  }
+  private online(id: string): boolean { return this.byAcc.has(id); }
   private view(ids: string[]): FriendView[] {
     const out: FriendView[] = [];
     for (const id of ids) { const a = this.byId.get(id); if (a) out.push({ id: a.id, name: a.name, online: this.online(a.id) }); }
@@ -164,7 +227,8 @@ export class TahaddiService {
     s.send({ t: 'friendList', rid, friends: this.view(a.friends), reqIn: this.view(a.reqIn), reqOut: this.view(a.reqOut) });
   }
   private pushFriends(id: string): void {
-    for (const ss of this.sessions.values()) if (ss.account.id === id) this.sendFriends(ss);
+    const set = this.byAcc.get(id); if (!set) return;
+    for (const ss of set) this.sendFriends(ss);
   }
   friends(s: Session, rid?: string): void { this.sendFriends(s, rid); }
   friendAdd(s: Session, id: unknown, rid?: string): void {
@@ -183,7 +247,8 @@ export class TahaddiService {
       me.reqOut.push(id);
       if (!other.reqIn.includes(me.id)) other.reqIn.push(me.id);
     }
-    this.persist(); this.sendFriends(s, rid); this.pushFriends(id);
+    this.persist(me); this.persist(other);
+    this.sendFriends(s, rid); this.pushFriends(id);
   }
   friendAccept(s: Session, id: unknown, rid?: string): void {
     const me = s.account;
@@ -196,7 +261,8 @@ export class TahaddiService {
       if (!me.friends.includes(id)) me.friends.push(id);
       if (!other.friends.includes(me.id)) other.friends.push(me.id);
     }
-    this.persist(); this.sendFriends(s, rid); if (other) this.pushFriends(other.id);
+    this.persist(me); if (other) this.persist(other);
+    this.sendFriends(s, rid); if (other) this.pushFriends(other.id);
   }
   friendRemove(s: Session, id: unknown, rid?: string): void {
     const me = s.account;
@@ -210,7 +276,8 @@ export class TahaddiService {
       other.reqIn = other.reqIn.filter(x => x !== me.id);
       other.reqOut = other.reqOut.filter(x => x !== me.id);
     }
-    this.persist(); this.sendFriends(s, rid); if (other) this.pushFriends(other.id);
+    this.persist(me); if (other) this.persist(other);
+    this.sendFriends(s, rid); if (other) this.pushFriends(other.id);
   }
 
   profile(s: Session, id: unknown, rid?: string): void {
@@ -234,7 +301,7 @@ export class TahaddiService {
     if (!RankCore.grantsRP(mode)) {
       // إتقان فقط — الهاتف موثوق هنا لأنه لا نقاط ولا رتبة على المحكّ
       const out = RankCore.resolve(prof, { gameId: def.id, mode, matchId, result, opponents: [] });
-      this.persist();
+      this.persist(me);
       return s.send({ t: 'result', rid, status: out.applied ? 'applied' : 'ignored', reason: out.reason, profile: prof, delta: out as any });
     }
 
@@ -306,8 +373,8 @@ export class TahaddiService {
       const opponents = pend.participants.filter(x => x !== id).map(x => ({ mmr: this.byId.get(x)!.ranks[pend.gameId].mmr }));
       const delta = RankCore.resolve(prof, { gameId: pend.gameId, mode: pend.mode, matchId, result: rep.result, opponents });
       out.set(id, delta as any);
+      this.persist(acc);
     }
-    this.persist();
     return out;
   }
   private sweepPending(): void {
@@ -322,8 +389,8 @@ export class TahaddiService {
         if (!prof.seen) prof.seen = [];
         if (!prof.seen.includes(matchId)) prof.seen.push(matchId);
         if (pend.reports.has(id)) this.toAccount(id, { t: 'resultFinal', matchId, status: 'incomplete', profile: prof, delta: null });
+        this.persist(acc);
       }
-      this.persist();
     }
   }
   pendingCount(): number { return this.pending.size; }
@@ -351,34 +418,52 @@ export class TahaddiService {
       if (v === null || v === undefined) delete next[k]; else next[k] = v;
     }
     if (bytes(next) > MAX_PRESENCE_BYTES) return s.send({ t: 'error', code: 'presence_too_big' });
+    const before = this.key(s);
     s.presence = next;
-    this.broadcastPeers();
+    const after = this.key(s);
+    if (before !== after) { this.gLeave(s, before); this.gJoin(s, after); this.bcast(before); }
+    if (after === IDLE) this.sendSelf(s); else this.bcast(after);
   }
   emit(s: Session, topic: unknown, data: unknown): void {
     if (typeof topic !== 'string' || !TOPIC_RE.test(topic)) return s.send({ t: 'error', code: 'bad_topic' });
     if (bytes(data) > MAX_EMIT_BYTES) return s.send({ t: 'error', code: 'msg_too_big' });
     const m: ServerMsg = { t: 'msg', topic, data, from: { peer: s.peer, by: s.account.id } };
-    // البثّ لا يغادر الغرفة: من يحمل رمز غرفة (pc) يسمعه أهل غرفته فقط، ومن بلا رمز يسمعه من بلا رمز
-    const pc = s.presence.pc ?? null;
-    for (const x of this.sessions.values()) if ((x.presence.pc ?? null) === pc) x.send(m);
+    // البثّ لا يغادر الغرفة، وكلفته بحجم الغرفة لا بعدد المتصلين.
+    // الخامل لا يبثّ لأحد: لا معنى لأن يسمع كلُّ من ليس في غرفة كلَّ من ليس في غرفة.
+    const k = this.key(s);
+    if (k === IDLE) return s.send(m);
+    const set = this.groups.get(k); if (!set) return s.send(m);
+    for (const x of set) x.send(m);
   }
-  peers(): PeerView[] {
-    return [...this.sessions.values()].map(x => ({ peer: x.peer, by: x.account.id, kind: 'viewer' as const, presence: x.presence }));
-  }
-  private broadcastPeers(): void {
-    // كلٌّ يرى أهل غرفته فقط — لا قائمة عالمية بكل المتصلين
-    const all = this.peers();
-    for (const x of this.sessions.values()) {
-      const pc = x.presence.pc ?? null;
-      x.send({ t: 'peers', list: all.filter(p => ((p.presence as any).pc ?? null) === pc) });
-    }
+  /** أقران جلسة واحدة: أهل مجموعتها وحدهم */
+  peersOf(s: Session): PeerView[] {
+    const set = this.groups.get(this.key(s));
+    if (!set) return [this.pv(s)];
+    const out: PeerView[] = [];
+    for (const x of set) { if (out.length >= MAX_PEER_LIST) break; out.push(this.pv(x)); }
+    return out;
   }
   private toAccount(id: string, m: ServerMsg): void {
-    for (const x of this.sessions.values()) if (x.account.id === id) x.send(m);
+    const set = this.byAcc.get(id); if (!set) return;
+    for (const x of set) x.send(m);
+  }
+
+  /** دلو رموز لكل جلسة ونوع: الرشقة مسموحة، والإغراق ممنوع */
+  private allow(s: Session, t: string): boolean {
+    const [burst, per] = RATE[t] ?? RATE_ANY;
+    const now = Date.now();
+    const b = (s.rl ??= {});
+    const e = b[t] ?? (b[t] = { n: burst, t: now });
+    e.n = Math.min(burst, e.n + ((now - e.t) / 1000) * per);
+    e.t = now;
+    if (e.n < 1) return false;
+    e.n -= 1;
+    return true;
   }
 
   /* ── توجيه الرسائل ── */
   handle(s: Session, msg: ClientMsg): void {
+    if (!this.allow(s, msg.t)) return s.send({ t: 'error', rid: (msg as any).rid, code: 'rate_limited' });
     switch (msg.t) {
       case 'setName': return this.setName(s, msg.name, msg.rid);
       case 'setEmail': return this.setEmail(s, msg.email, msg.rid);
@@ -417,7 +502,7 @@ export class TahaddiService {
     }
     const grant = CATALOG.grantOf(product)!;
     const rec: PurchaseRec = { txId: v.txId, platform: c.platform, productId: c.productId, accountId: s.account.id, at: Date.now(), grant };
-    this.purchases.set(v.txId, rec); this.persist();
+    this.purchases.set(v.txId, rec); this.persistBuy(rec);
     s.send({ t: 'purchased', rid, productId: rec.productId, txId: rec.txId, grant, duplicate: false });
   }
   purchaseList(s: Session, rid?: string): void {

@@ -9,7 +9,7 @@ const {chromium}=require('playwright');
 const {spawn}=require('child_process');
 const path=require('path'),os=require('os'),fs=require('fs');
 const ROOT=path.join(__dirname,'..');
-const PORT=8800+Math.floor(Math.random()*150);
+const PORT=8900+Math.floor(Math.random()*90);   // منفصل عن سويت الخادم (8700–8899) — التداخل كان يفشل الربط
 const DATA=path.join(os.tmpdir(),'tahaddi-online-'+Date.now()+'.json');
 let pass=0,fail=0;
 const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;console.log('  ✗ '+n+(info?'  → '+String(info).slice(0,300):''))}};
@@ -19,7 +19,13 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 (async()=>{
  const server=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA,TAHADDI_IAP_TEST_SECRET:'t3st-online'},stdio:['ignore','pipe','pipe']});
  const logs=[];server.stdout.on('data',d=>logs.push(String(d)));server.stderr.on('data',d=>logs.push('ERR '+String(d)));
- await sleep(800);
+ // الخادم بدأ فعلًا؟ الانتظار الأعمى كان يخفي فشل الربط ويظهر لاحقًا كفحص غامض
+ let up=false;
+ for(let i=0;i<80;i++){
+  try{const r=await fetch(`http://localhost:${PORT}/health`);if(r.ok){up=true;break}}catch(e){}
+  await sleep(100);
+ }
+ if(!up){console.error('الخادم لم يبدأ على المنفذ '+PORT+'\n'+logs.join(''));process.exit(1)}
  const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader']});
  const mk=async label=>{
   const ctx=await browser.newContext({viewport:{width:430,height:900}});
@@ -28,7 +34,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await page.goto(`http://localhost:${PORT}/`);
   await page.waitForFunction(()=>typeof NET==='object'&&typeof Router==='object'&&document.getElementById('app').innerHTML.length>500,null,{timeout:20000});
   await page.evaluate(()=>{S.email='tester@mail.com';S.tutorial_completed=true;S.tutDone=1;S.dev=1;saveState()});
-  await page.waitForFunction(()=>NET.state().connected,null,{timeout:8000}).catch(()=>{});
+  await page.waitForFunction(()=>NET.state().connected,null,{timeout:15000});
   await page.evaluate(()=>{cur='play';nav();Router.reset('playScr')});
   return page;
  };
@@ -38,7 +44,6 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await B.evaluate(()=>{S.name='سلطان';saveState()});   // كل لاعب يختار اسمه بنفسه منذ 5.56
   const sa=await A.evaluate(()=>NET.state()),sb=await B.evaluate(()=>NET.state());
   check('كلا المتصفحين في وضع الخادم ومتصلان بحسابين مختلفين',sa.mode==='server'&&sa.connected&&sb.connected&&sa.id!==sb.id,JSON.stringify([sa,sb]));
-  await A.evaluate(()=>{S.name='عبدالرحمن';doRename;});
   await A.evaluate(async()=>{await NET.setName('عبدالرحمن');S.name='عبدالرحمن';S.coins=777;saveState()});
   await sleep(3500);   // الحفظ المحلي ٤٠٠ مللي ثم السحابي بعد ٢٫٥ ث
   const acc=await A.evaluate(()=>S.account);
@@ -50,8 +55,10 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   const C=await ctxC.newPage();C._errs=[];C.on('pageerror',e=>C._errs.push('C: '+e.message));
   await C.goto(`http://localhost:${PORT}/`);
   await C.waitForFunction(()=>typeof NET==='object'&&document.getElementById('app').innerHTML.length>500,null,{timeout:20000});
+  // الاتصال المؤقّت الأول يجب أن يكتمل قبل استبدال الرمز، وإلا صار عدد الحسابات ٢ أو ٣ بحسب السباق
+  await C.waitForFunction(()=>NET.state().connected,null,{timeout:15000});
   await C.evaluate(tok=>{S.email='tester@mail.com';S.tutorial_completed=true;S.account={token:tok};S._savedAt=0;saveState();netBoot()},acc.token);
-  await C.waitForFunction(()=>NET.state().connected&&S.coins===777,null,{timeout:8000}).catch(()=>{});
+  await C.waitForFunction(()=>NET.state().connected&&S.coins===777,null,{timeout:15000});
   const cState=await C.evaluate(()=>({id:NET.state().id,coins:S.coins,name:S.name}));
   check('جهاز آخر بالرمز نفسه يستعيد الاسم والعملات من السحابة',cState.id===sa.id&&cState.coins===777&&cState.name==='عبدالرحمن',JSON.stringify(cState));
   await ctxC.close();
