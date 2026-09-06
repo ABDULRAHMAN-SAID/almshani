@@ -1,0 +1,174 @@
+<script src="./support.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+.ph{width:390px;height:844px;direction:rtl;overflow:hidden;position:relative;display:flex;flex-direction:column;
+ background:radial-gradient(130% 55% at 50% -6%,#141F3B 0%,#0A0F1D 55%,#080B14 100%);
+ color:#F2F4F8;font-family:'Cairo','Noto Kufi Arabic','Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.ph:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 -110px 90px -70px rgba(0,0,0,.85)}
+.top{flex:0 0 58px;display:flex;align-items:center;gap:10px;padding:0 14px}
+.ico{width:36px;height:36px;border-radius:12px;background:#141B2D;border:1px solid #28324E;display:grid;place-items:center;flex:0 0 auto}
+.ttl{font-size:15.5px;font-weight:900;line-height:1.15}
+.tsub{font-size:10px;font-weight:700;color:#8390AD;letter-spacing:.3px}
+.code{margin-inline-start:auto;height:32px;padding:0 11px;border-radius:11px;background:#0E1424;border:1px solid #28324E;
+ display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:#C3CBDD;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.phase{margin:2px 14px 0;flex:0 0 64px;border-radius:17px;position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;padding:0 15px;
+ background:linear-gradient(180deg,#141C33,#0D1322);border:1px solid #253055;box-shadow:0 14px 30px -22px #000}
+.phase:before{content:"";position:absolute;inset:0;background:radial-gradient(80% 150% at 6% 50%,rgba(123,79,224,.32),transparent 68%)}
+.phn{position:relative;font-size:16px;font-weight:900;letter-spacing:.2px}
+.phs{position:relative;font-size:10.5px;font-weight:700;color:#9AA5C0;margin-top:2px}
+.tmr{position:relative;margin-inline-start:auto;display:flex;align-items:baseline;gap:3px;font-variant-numeric:tabular-nums}
+.tmr b{font-size:22px;font-weight:900;color:#E8B23A;letter-spacing:.5px}
+.tmr i{font-style:normal;font-size:9.5px;font-weight:800;color:#8390AD}
+.role{margin:10px 14px 0;flex:0 0 70px;border-radius:17px;display:flex;align-items:center;gap:12px;padding:0 14px;position:relative;overflow:hidden;
+ background:linear-gradient(180deg,#1B1536,#111629);border:1px solid #3B2C70}
+.role:before{content:"";position:absolute;inset-inline-start:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:linear-gradient(180deg,#F6D98A,#B07F16)}
+.emb{width:42px;height:42px;border-radius:13px;background:linear-gradient(180deg,#241B45,#171233);border:1px solid #4B3A85;display:grid;place-items:center;flex:0 0 auto}
+.rn{font-size:15px;font-weight:900}.rn span{color:#8390AD;font-weight:800;font-size:11px;margin-inline-end:4px}
+.rh{font-size:10.5px;font-weight:700;color:#A79BD0;margin-top:2px}
+.eye{margin-inline-start:auto;width:34px;height:34px;border-radius:11px;background:#171B31;border:1px solid #33305C;display:grid;place-items:center}
+.list{margin:12px 14px 0;display:flex;flex-direction:column;gap:8px}
+.row{height:64px;border-radius:15px;display:flex;align-items:center;gap:11px;padding:0 12px;position:relative;
+ background:linear-gradient(180deg,#141C2F,#101728);border:1px solid #202B47}
+.row.me{background:linear-gradient(180deg,#1A2237,#131A2C);border-color:#3E4A78}
+.row.tgt{border-color:#7B4FE0;background:linear-gradient(180deg,#1A1638,#111428);box-shadow:0 10px 26px -18px rgba(123,79,224,.95)}
+.row.out{opacity:.46}
+.avw{position:relative;flex:0 0 auto}
+.av{width:46px;height:46px;border-radius:50%;overflow:hidden;background:#0B0F1C;border:1.5px solid #7A5C1E;position:relative}
+.row.tgt .av{border-color:#B48BFF}.row.me .av{border-color:#E8B23A}
+.av svg{width:100%;height:100%;display:block}
+.row.out .av svg{filter:grayscale(1)}
+.num{position:absolute;inset-inline-start:-3px;bottom:-3px;width:20px;height:20px;border-radius:50%;
+ background:linear-gradient(180deg,#F6D98A,#B0801A);color:#1A1204;font-size:10.5px;font-weight:900;
+ display:grid;place-items:center;border:2px solid #0B0F1C;font-variant-numeric:tabular-nums}
+.nb{min-width:0;flex:1}
+.nm{font-size:13.5px;font-weight:900;display:flex;align-items:center;gap:6px}
+.you{font-size:9px;font-weight:900;color:#1A1204;background:linear-gradient(180deg,#F6D98A,#D6A22A);border-radius:6px;padding:1px 5px}
+.mt{font-size:10.5px;font-weight:700;color:#7E8AA6;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{height:27px;padding:0 10px;border-radius:9px;font-size:10.5px;font-weight:900;display:inline-flex;align-items:center;gap:6px;flex:0 0 auto}
+.chip:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.c-ok{background:rgba(46,204,113,.1);color:#68D79C;border:1px solid rgba(46,204,113,.26)}
+.c-out{background:rgba(226,75,74,.1);color:#E08D8C;border:1px solid rgba(226,75,74,.26)}
+.c-pur{background:rgba(123,79,224,.16);color:#C3AAFF;border:1px solid rgba(123,79,224,.42)}
+.c-mut{background:#131A2B;color:#7E8AA6;border:1px solid #232E49}
+.bar{margin-top:auto;flex:0 0 84px;display:flex;align-items:center;gap:10px;padding:0 14px;
+ border-top:1px solid #1A2338;background:linear-gradient(180deg,rgba(10,14,27,0),#080B14 55%)}
+.btn{flex:1;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;
+ background:linear-gradient(180deg,#F5D488,#CE9520);color:#1B1305;font-size:14.5px;font-weight:900;
+ box-shadow:0 14px 26px -16px rgba(232,178,58,.85),inset 0 1px 0 rgba(255,255,255,.5)}
+.sq{width:52px;height:52px;border-radius:15px;background:#141B2D;border:1px solid #28324E;display:grid;place-items:center;position:relative;flex:0 0 auto}
+.dot{position:absolute;top:9px;inset-inline-end:9px;width:9px;height:9px;border-radius:50%;background:#E24B4A;border:2px solid #0C1120}
+</style>
+<div class="ph">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2CDA1"/><stop offset="1" stop-color="#C4914F"/></linearGradient>
+<linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBE6A8"/><stop offset=".48" stop-color="#E8B23A"/><stop offset="1" stop-color="#8F6414"/></linearGradient>
+<linearGradient id="ring" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6D98A"/><stop offset="1" stop-color="#8A6017"/></linearGradient>
+<symbol id="b1" viewBox="0 0 64 64">
+ <path d="M13 32C13 13 51 13 51 32L53 54H11Z" fill="#E7E1D3"/>
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#232F50"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.4 22.5C20 12 44 12 44.6 22.5 40 17.4 24 17.4 19.4 22.5Z" fill="#E7E1D3"/>
+ <rect x="18.6" y="14" width="26.8" height="3.8" rx="1.9" fill="#141A2C"/>
+ <circle cx="27.4" cy="25.6" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.6" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 31.4q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b2" viewBox="0 0 64 64">
+ <path d="M14 30C14 13 50 13 50 30l3 24H11Z" fill="#6B45C4"/>
+ <path d="M7 64C11 48 21 43 32 43s21 5 25 21Z" fill="#3B2A6E"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.2" fill="url(#sk)"/>
+ <path d="M20 23C20 12.6 44 12.6 44 23c-3-6-21-6-24 0Z" fill="#7B4FE0"/>
+ <path d="M19.8 23c0 12 4 15 4 15h-6c-1-6-1-11-1-15Zm24.4 0c0 12-4 15-4 15h6c1-6 1-11 1-15Z" fill="#7B4FE0"/>
+ <circle cx="27.6" cy="25.8" r="1.5" fill="#1A2036"/><circle cx="36.4" cy="25.8" r="1.5" fill="#1A2036"/>
+ <path d="M28.8 31.4q3.2 2.3 6.4 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b3" viewBox="0 0 64 64">
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#2C3A5E"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.6 24C19 12.4 45 12.4 44.4 24c-1.6-5.6-4-7.4-6.6-7.6-4 2.6-12 2.6-15.6 0-1.4.6-2 3-2.6 7.6Z" fill="#1D2338"/>
+ <circle cx="27.4" cy="25.6" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.6" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 31.4q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b4" viewBox="0 0 64 64">
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#4A2530"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M20 21c1-9 23-9 24 0Z" fill="#C0452F"/>
+ <rect x="19" y="20" width="26" height="3.4" rx="1.7" fill="#8E2E1F"/>
+ <circle cx="27.4" cy="26.4" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="26.4" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 32q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b5" viewBox="0 0 64 64">
+ <path d="M14 30C14 13 50 13 50 30l3 24H11Z" fill="#2E5F70"/>
+ <path d="M7 64C11 48 21 43 32 43s21 5 25 21Z" fill="#1E3F4E"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.2" fill="url(#sk)"/>
+ <path d="M20 23C20 12.6 44 12.6 44 23c-3-6-21-6-24 0Z" fill="#3C7A8E"/>
+ <path d="M19.8 23c0 12 4 15 4 15h-6c-1-6-1-11-1-15Zm24.4 0c0 12-4 15-4 15h6c1-6 1-11 1-15Z" fill="#3C7A8E"/>
+ <circle cx="27.6" cy="25.8" r="1.5" fill="#1A2036"/><circle cx="36.4" cy="25.8" r="1.5" fill="#1A2036"/>
+ <path d="M28.8 31.4q3.2 2.3 6.4 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b6" viewBox="0 0 64 64">
+ <path d="M13 32C13 13 51 13 51 32l2 22H11Z" fill="#C9CEDA"/>
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#1F2A46"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.4 22.5C20 12 44 12 44.6 22.5 40 17.4 24 17.4 19.4 22.5Z" fill="#C9CEDA"/>
+ <rect x="18.6" y="14" width="26.8" height="3.8" rx="1.9" fill="#141A2C"/>
+ <circle cx="27.4" cy="25.6" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.6" r="1.5" fill="#1A2036"/>
+ <path d="M27 32.6q5 2 10 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b7" viewBox="0 0 64 64">
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#3A2F55"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.4 26C18 13 46 13 44.6 26c-1-6-3-8-5-9-4 3-13 3-17 0-1.6 1-2.2 3-3.2 9Z" fill="#3B2A1C"/>
+ <circle cx="27.4" cy="25.8" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.8" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 31.6q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+</defs></svg>
+ <div class="top">
+  <div class="ico"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C3CBDD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="M18 15l3-3-3-3"/><path d="M21 12h-9"/></svg></div>
+  <div><div class="ttl">المافيا</div><div class="tsub">٧ لاعبين · الجولة ١</div></div>
+  <div class="code"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8390AD" stroke-width="2.4"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>K7 · 42Q</div>
+ </div>
+ <div class="phase">
+  <div><div class="phn">الليلة الأولى</div><div class="phs">المدينة نائمة — لا أحد يتكلّم</div></div>
+  <div class="tmr"><b>00:42</b><i>ثانية</i></div>
+ </div>
+ <div class="role">
+  <div class="emb"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="url(#gd)" stroke-width="2.1" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2 21 21"/><path d="M8.4 10.5h4.2"/></svg></div>
+  <div><div class="rn"><span>دورك</span>محقّق</div><div class="rh">اختر لاعبًا الليلة لتكشف هويّته</div></div>
+  <div class="eye"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9C8FD4" stroke-width="2.1" stroke-linecap="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg></div>
+ </div>
+ <div class="list">
+  <div class="row me"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b1"/></svg></div><div class="num">١</div></div>
+   <div class="nb"><div class="nm">عبدالرحمن<span class="you">أنت</span></div><div class="mt">محقّق · لك تحقيق واحد الليلة</div></div>
+   <div class="chip c-ok">حيّ</div></div>
+  <div class="row tgt"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b2"/></svg></div><div class="num">٢</div></div>
+   <div class="nb"><div class="nm">نورة</div><div class="mt">اخترتها للتحقيق — اضغط للتأكيد</div></div>
+   <div class="chip c-pur">هدفك</div></div>
+  <div class="row"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b3"/></svg></div><div class="num">٣</div></div>
+   <div class="nb"><div class="nm">مشاري</div><div class="mt">لم يتكلّم بعد</div></div>
+   <div class="chip c-ok">حيّ</div></div>
+  <div class="row"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b5"/></svg></div><div class="num">٤</div></div>
+   <div class="nb"><div class="nm">لطيفة</div><div class="mt">اتُّهمت في الجولة الماضية</div></div>
+   <div class="chip c-mut">مشبوهة</div></div>
+  <div class="row"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b4"/></svg></div><div class="num">٥</div></div>
+   <div class="nb"><div class="nm">سعود</div><div class="mt">لم يتكلّم بعد</div></div>
+   <div class="chip c-ok">حيّ</div></div>
+  <div class="row"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b7"/></svg></div><div class="num">٦</div></div>
+   <div class="nb"><div class="nm">فهد</div><div class="mt">لم يتكلّم بعد</div></div>
+   <div class="chip c-ok">حيّ</div></div>
+  <div class="row out"><div class="avw"><div class="av"><svg viewBox="0 0 64 64"><use href="#b6"/></svg></div><div class="num">٧</div></div>
+   <div class="nb"><div class="nm">ريم</div><div class="mt">خرجت ليلة أمس</div></div>
+   <div class="chip c-out">خارج</div></div>
+ </div>
+ <div class="bar">
+  <div class="btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B1305" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2 21 21"/></svg>حقّق في نورة</div>
+  <div class="sq"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C3CBDD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8 8 0 0 1-11.6 7.1L3 20.5l1.9-6.3A8 8 0 1 1 21 11.5Z"/></svg><div class="dot"></div></div>
+ </div>
+</div>

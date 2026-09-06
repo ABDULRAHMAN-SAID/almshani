@@ -1,0 +1,187 @@
+<script src="./support.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+.ph{width:390px;height:844px;direction:rtl;overflow:hidden;position:relative;display:flex;flex-direction:column;padding:0 13px 13px;
+ background:linear-gradient(180deg,#0C1223 0%,#080B14 46%,#070A12 100%);
+ color:#F2F4F8;font-family:'Cairo','Noto Kufi Arabic','Segoe UI',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.top{flex:0 0 52px;display:flex;align-items:center;gap:9px}
+.ico{width:34px;height:34px;border-radius:11px;background:#131A2C;border:1px solid #28324E;display:grid;place-items:center;flex:0 0 auto}
+.ttl{font-size:14.5px;font-weight:900}.tsub{font-size:9.5px;font-weight:700;color:#8390AD}
+.pill{margin-inline-start:auto;height:34px;padding:0 11px;border-radius:12px;display:flex;align-items:center;gap:8px;
+ background:linear-gradient(180deg,#171F3C,#101728);border:1px solid #2C3861;font-size:11.5px;font-weight:900}
+.pill b{color:#E8B23A;font-variant-numeric:tabular-nums;font-size:12.5px}
+/* المسرح — لاعب واحد في البؤرة */
+.stage{flex:0 0 300px;margin-top:4px;border-radius:24px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;
+ background:linear-gradient(180deg,#121A33 0%,#0C1222 62%,#0A0E1C 100%);border:1px solid #232E52;
+ box-shadow:0 26px 50px -34px #000,inset 0 1px 0 rgba(255,255,255,.05)}
+.cone{position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:340px;height:260px;pointer-events:none;
+ background:radial-gradient(52% 62% at 50% 0%,rgba(123,79,224,.42),rgba(123,79,224,.09) 58%,transparent 72%)}
+.floor{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);width:210px;height:22px;border-radius:50%;
+ background:radial-gradient(50% 50% at 50% 50%,rgba(123,79,224,.32),transparent 72%);filter:blur(3px)}
+.arch{position:relative;margin-top:26px;width:128px;height:150px;border-radius:64px 64px 22px 22px;overflow:hidden;
+ background:#0B0F1C;border:2px solid transparent;
+ background-image:linear-gradient(#0B0F1C,#0B0F1C),linear-gradient(180deg,#F6D98A,#8A6017);
+ background-origin:border-box;background-clip:padding-box,border-box;
+ box-shadow:0 20px 40px -22px rgba(232,178,58,.55)}
+.arch svg{width:100%;height:100%;display:block;transform:scale(1.16) translateY(6px)}
+.acoin{position:absolute;top:8px;inset-inline-start:8px;width:24px;height:24px;border-radius:50%;z-index:2;
+ background:linear-gradient(180deg,#F6D98A,#AE7E19);color:#1A1204;font-size:11.5px;font-weight:900;display:grid;place-items:center;
+ border:2px solid #0B0F1C;font-variant-numeric:tabular-nums}
+.who{position:relative;margin-top:14px;text-align:center}
+.who h1{font-size:23px;font-weight:900;letter-spacing:.2px}
+.who p{font-size:11px;font-weight:700;color:#9AA5C0;margin-top:4px}
+.acts{position:relative;margin-top:16px;display:flex;align-items:center;gap:10px;padding:0 16px;width:100%}
+.go{flex:1;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;
+ background:linear-gradient(180deg,#F5D488,#CE9520);color:#1B1305;font-size:14px;font-weight:900;
+ box-shadow:0 14px 26px -16px rgba(232,178,58,.9),inset 0 1px 0 rgba(255,255,255,.5)}
+.skip{height:50px;padding:0 16px;border-radius:15px;background:#141B2D;border:1px solid #2B3654;color:#B0B9CE;font-size:12.5px;font-weight:900;display:grid;place-items:center}
+.nav{position:absolute;top:104px;width:32px;height:32px;border-radius:50%;background:rgba(16,22,38,.9);border:1px solid #2B3654;display:grid;place-items:center}
+.nav.r{inset-inline-end:10px}.nav.l{inset-inline-start:10px}
+/* الشريط — بقيّة اللاعبين */
+.strip{flex:0 0 92px;margin-top:12px;display:flex;gap:12px;align-items:flex-start;overflow:hidden;padding-top:4px}
+.sp{flex:0 0 auto;width:58px;text-align:center;position:relative}
+.sav{width:56px;height:56px;border-radius:50%;overflow:hidden;background:#0B0F1C;border:1.5px solid #2B3654}
+.sp.on .sav{border-color:#E8B23A;box-shadow:0 0 0 3px rgba(232,178,58,.16),0 10px 22px -12px rgba(232,178,58,.9)}
+.sp.me .sav{border-color:#6E5218}
+.sp.out{opacity:.4}.sp.out .sav svg{filter:grayscale(1)}
+.sav svg{width:100%;height:100%;display:block}
+.sn{font-size:10.5px;font-weight:800;color:#8390AD;margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp.on .sn{color:#F0C351}
+.caret{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;
+ border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:6px solid #E8B23A}
+/* السجل */
+.log{flex:1;min-height:0;margin-top:12px;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;
+ background:linear-gradient(180deg,#0F1626,#0B1020);border:1px solid #1E2842}
+.lh{flex:0 0 40px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid #1A2338;
+ font-size:11.5px;font-weight:900;color:#B0B9CE}
+.lh span{margin-inline-start:auto;font-size:10px;font-weight:800;color:#6E7A96}
+.lb{flex:1;padding:10px 14px;display:flex;flex-direction:column;gap:9px;overflow:hidden}
+.li{display:flex;gap:9px;align-items:flex-start;font-size:11.5px;font-weight:700;line-height:1.55;color:#9AA5C0}
+.li time{flex:0 0 auto;font-size:9.5px;font-weight:800;color:#5F6B87;font-variant-numeric:tabular-nums;padding-top:2px}
+.li.sys{color:#C9B2FF}.li.gold{color:#E7C36B}
+.msg{display:flex;gap:8px;align-items:flex-start}
+.mav{width:24px;height:24px;border-radius:50%;overflow:hidden;flex:0 0 auto;border:1px solid #2B3654;background:#0B0F1C}
+.mav svg{width:100%;height:100%;display:block}
+.mtx{background:#151D31;border:1px solid #222D49;border-radius:12px;border-start-end-radius:4px;padding:7px 10px;font-size:11.5px;font-weight:700;color:#D6DCEA}
+.mtx b{display:block;font-size:9.5px;font-weight:900;color:#8390AD;margin-bottom:2px}
+/* شريط الدور */
+.rb{flex:0 0 62px;margin-top:12px;border-radius:17px;display:flex;align-items:center;gap:11px;padding:0 13px;position:relative;overflow:hidden;
+ background:linear-gradient(180deg,#1A1536,#111629);border:1px solid #3B2C70}
+.remb{width:38px;height:38px;border-radius:12px;background:linear-gradient(180deg,#241B45,#171233);border:1px solid #4B3A85;display:grid;place-items:center;flex:0 0 auto}
+.rn{font-size:14px;font-weight:900}.rn span{font-size:10.5px;font-weight:800;color:#8390AD;margin-inline-end:5px}
+.rh{font-size:10.5px;font-weight:700;color:#A79BD0;margin-top:2px}
+.eye{margin-inline-start:auto;width:34px;height:34px;border-radius:11px;background:#171B31;border:1px solid #33305C;display:grid;place-items:center}
+</style>
+<div class="ph">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2CDA1"/><stop offset="1" stop-color="#C4914F"/></linearGradient>
+<linearGradient id="gd" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FBE6A8"/><stop offset=".48" stop-color="#E8B23A"/><stop offset="1" stop-color="#8F6414"/></linearGradient>
+<linearGradient id="ring" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6D98A"/><stop offset="1" stop-color="#8A6017"/></linearGradient>
+<symbol id="b1" viewBox="0 0 64 64">
+ <path d="M13 32C13 13 51 13 51 32L53 54H11Z" fill="#E7E1D3"/>
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#232F50"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.4 22.5C20 12 44 12 44.6 22.5 40 17.4 24 17.4 19.4 22.5Z" fill="#E7E1D3"/>
+ <rect x="18.6" y="14" width="26.8" height="3.8" rx="1.9" fill="#141A2C"/>
+ <circle cx="27.4" cy="25.6" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.6" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 31.4q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b2" viewBox="0 0 64 64">
+ <path d="M14 30C14 13 50 13 50 30l3 24H11Z" fill="#6B45C4"/>
+ <path d="M7 64C11 48 21 43 32 43s21 5 25 21Z" fill="#3B2A6E"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.2" fill="url(#sk)"/>
+ <path d="M20 23C20 12.6 44 12.6 44 23c-3-6-21-6-24 0Z" fill="#7B4FE0"/>
+ <path d="M19.8 23c0 12 4 15 4 15h-6c-1-6-1-11-1-15Zm24.4 0c0 12-4 15-4 15h6c1-6 1-11 1-15Z" fill="#7B4FE0"/>
+ <circle cx="27.6" cy="25.8" r="1.5" fill="#1A2036"/><circle cx="36.4" cy="25.8" r="1.5" fill="#1A2036"/>
+ <path d="M28.8 31.4q3.2 2.3 6.4 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b3" viewBox="0 0 64 64">
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#2C3A5E"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.6 24C19 12.4 45 12.4 44.4 24c-1.6-5.6-4-7.4-6.6-7.6-4 2.6-12 2.6-15.6 0-1.4.6-2 3-2.6 7.6Z" fill="#1D2338"/>
+ <circle cx="27.4" cy="25.6" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.6" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 31.4q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b4" viewBox="0 0 64 64">
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#4A2530"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M20 21c1-9 23-9 24 0Z" fill="#C0452F"/>
+ <rect x="19" y="20" width="26" height="3.4" rx="1.7" fill="#8E2E1F"/>
+ <circle cx="27.4" cy="26.4" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="26.4" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 32q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b5" viewBox="0 0 64 64">
+ <path d="M14 30C14 13 50 13 50 30l3 24H11Z" fill="#2E5F70"/>
+ <path d="M7 64C11 48 21 43 32 43s21 5 25 21Z" fill="#1E3F4E"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.2" fill="url(#sk)"/>
+ <path d="M20 23C20 12.6 44 12.6 44 23c-3-6-21-6-24 0Z" fill="#3C7A8E"/>
+ <path d="M19.8 23c0 12 4 15 4 15h-6c-1-6-1-11-1-15Zm24.4 0c0 12-4 15-4 15h6c1-6 1-11 1-15Z" fill="#3C7A8E"/>
+ <circle cx="27.6" cy="25.8" r="1.5" fill="#1A2036"/><circle cx="36.4" cy="25.8" r="1.5" fill="#1A2036"/>
+ <path d="M28.8 31.4q3.2 2.3 6.4 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b6" viewBox="0 0 64 64">
+ <path d="M13 32C13 13 51 13 51 32l2 22H11Z" fill="#C9CEDA"/>
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#1F2A46"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.4 22.5C20 12 44 12 44.6 22.5 40 17.4 24 17.4 19.4 22.5Z" fill="#C9CEDA"/>
+ <rect x="18.6" y="14" width="26.8" height="3.8" rx="1.9" fill="#141A2C"/>
+ <circle cx="27.4" cy="25.6" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.6" r="1.5" fill="#1A2036"/>
+ <path d="M27 32.6q5 2 10 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+<symbol id="b7" viewBox="0 0 64 64">
+ <path d="M7 64C11 47 21 42 32 42s21 5 25 22Z" fill="#3A2F55"/>
+ <rect x="27" y="34" width="10" height="10" rx="4" fill="#C4914F"/>
+ <circle cx="32" cy="25" r="12.6" fill="url(#sk)"/>
+ <path d="M19.4 26C18 13 46 13 44.6 26c-1-6-3-8-5-9-4 3-13 3-17 0-1.6 1-2.2 3-3.2 9Z" fill="#3B2A1C"/>
+ <circle cx="27.4" cy="25.8" r="1.5" fill="#1A2036"/><circle cx="36.6" cy="25.8" r="1.5" fill="#1A2036"/>
+ <path d="M28.6 31.6q3.4 2.3 6.8 0" stroke="#9A6A3C" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+</symbol>
+</defs></svg>
+ <div class="top">
+  <div class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C3CBDD" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5H7a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="M18 15l3-3-3-3"/><path d="M21 12h-9"/></svg></div>
+  <div><div class="ttl">المافيا</div><div class="tsub">٧ لاعبين · الجولة ١</div></div>
+  <div class="pill"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8FA0C8" stroke-width="2"><path d="M20 14.5A8.2 8.2 0 0 1 9.6 4.2a8.5 8.5 0 1 0 10.4 10.3Z"/></svg>الليلة الأولى <b>00:42</b></div>
+ </div>
+ <div class="stage">
+  <div class="cone"></div><div class="floor"></div>
+  <div class="nav r"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA5C0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg></div>
+  <div class="nav l"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9AA5C0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+  <div class="arch"><div class="acoin">٢</div><svg viewBox="0 0 64 64"><use href="#b2"/></svg></div>
+  <div class="who"><h1>نورة</h1><p>لم تُتَّهم بعد · صوّتت أمس على فهد</p></div>
+  <div class="acts">
+   <div class="go"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1B1305" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2 21 21"/></svg>حقّق فيها</div>
+   <div class="skip">تخطّي</div>
+  </div>
+ </div>
+ <div class="strip">
+  <div class="sp on"><div class="caret"></div><div class="sav"><svg viewBox="0 0 64 64"><use href="#b2"/></svg></div><div class="sn">نورة</div></div>
+  <div class="sp me"><div class="sav"><svg viewBox="0 0 64 64"><use href="#b1"/></svg></div><div class="sn">أنت</div></div>
+  <div class="sp"><div class="sav"><svg viewBox="0 0 64 64"><use href="#b3"/></svg></div><div class="sn">مشاري</div></div>
+  <div class="sp"><div class="sav"><svg viewBox="0 0 64 64"><use href="#b5"/></svg></div><div class="sn">لطيفة</div></div>
+  <div class="sp"><div class="sav"><svg viewBox="0 0 64 64"><use href="#b4"/></svg></div><div class="sn">سعود</div></div>
+  <div class="sp"><div class="sav"><svg viewBox="0 0 64 64"><use href="#b7"/></svg></div><div class="sn">فهد</div></div>
+  <div class="sp out"><div class="sav"><svg viewBox="0 0 64 64"><use href="#b6"/></svg></div><div class="sn">ريم</div></div>
+ </div>
+ <div class="log">
+  <div class="lh"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8390AD" stroke-width="2.2" stroke-linecap="round"><path d="M5 4h14v16l-7-3.5L5 20Z"/></svg>سجلّ الليلة<span>٤ أحداث</span></div>
+  <div class="lb">
+   <div class="li sys"><time>00:00</time><div>بدأت الليلة الأولى — المدينة نائمة.</div></div>
+   <div class="li"><time>00:06</time><div>خرجت <b style="color:#E08D8C">ريم</b> ليلة أمس. كانت مواطنة.</div></div>
+   <div class="li gold"><time>00:18</time><div>دورك: اختر لاعبًا لتكشف هويّته قبل انتهاء الوقت.</div></div>
+   <div class="msg"><div class="mav"><svg viewBox="0 0 64 64"><use href="#b4"/></svg></div>
+    <div class="mtx"><b>سعود</b>ما أحد شاف شي أمس؟ لطيفة كانت ساكتة كثير.</div></div>
+  </div>
+ </div>
+ <div class="rb">
+  <div class="remb"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="url(#gd)" stroke-width="2.1" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2 21 21"/><path d="M8.4 10.5h4.2"/></svg></div>
+  <div><div class="rn"><span>دورك</span>محقّق</div><div class="rh">تبقّى لك: تحقيق واحد</div></div>
+  <div class="eye"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9C8FD4" stroke-width="2.1" stroke-linecap="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.6"/></svg></div>
+ </div>
+</div>
