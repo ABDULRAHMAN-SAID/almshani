@@ -74,8 +74,8 @@ function vb3dTexShemagh(){return vb3dTex('shemagh',128,128,(g,w,h)=>{
  g.fillStyle='#B7262C';for(let y=8;y<h;y+=16)for(let x=8;x<w;x+=16){g.fillRect(x-3,y-3,6,6)}},[3,3])}
 function vb3dTexCobble(){return vb3dTex('cobble',512,512,(g,w,h)=>{
  // 5.66: حجر ساحة مبلَّل: مفاصل داكنة، لكل حجر لونه وحافّته المضيئة، وبقع رطوبة
- g.fillStyle='#12141F';g.fillRect(0,0,w,h);
- const tint=['#454B6B','#3E4462','#4C5274','#39405C','#4A4F6A'];
+ g.fillStyle='#1A1620';g.fillRect(0,0,w,h);
+ const tint=['#5A5260','#514A58','#635A66','#4A4450','#5D5462'];   // 5.74: حجر دافئ محايد يقبل ضوء الفوانيس
  for(let row=0,y=0;y<h;y+=30,row++)for(let x=(row%2)*22-22;x<w+22;x+=44){
   const rx=x+Math.random()*3,ry=y+Math.random()*2,rw=39+Math.random()*3,rh=25+Math.random()*2,c=tint[(row*7+Math.round(x/44))%5];
   const gr=g.createRadialGradient(rx+rw*.36,ry+rh*.3,2,rx+rw/2,ry+rh/2,rw*.72);
@@ -233,7 +233,8 @@ function vb3dChar(look,posture){
  if(bd==='mustache'||bd==='full'){const m=arc(.04,.011,2.3,Math.PI/2-1.15,0,.042,.03,hairM);m.scale.y=.7;mouth.add(m)}
  // الشعر بقصّته (قصير، مموّج، مجعّد، طويل، حليق) — أو الغترة والعقال إن كانت في الأفاتار — أو الشيلة
  const hs=look.hs,ac=look.acc;let hat=false;
- const cap=(th,rx)=>{const c=vb3dMesh(vb3dG('Sphere',.2,40,26,0,Math.PI*2,0,th),hairM,0,.012,-.005,{sc:[1.02,1.06,1.03]});c.rotation.x=rx;head.add(c);return c};
+ // 5.74: كتلة الشعر أكبر من الجمجمة بقدر يُرى — قبل ذلك كانت طاقيّة ملتصقة تُقرأ صلعة
+ const cap=(th,rx)=>{const c=vb3dMesh(vb3dG('Sphere',.205,40,26,0,Math.PI*2,0,th),hairM,0,.018,-.008,{sc:[1.07,1.12,1.08]});c.rotation.x=rx;head.add(c);return c};
  if(look.f){const sh=M(look.shayla,{rough:.9,sheen:.45,sheenC:'#FFFFFF',bump:weave,bumpS:.25});hat=true;
   const dome=vb3dMesh(vb3dG('Sphere',.212,40,26,0,Math.PI*2,0,1.45),sh,0,.02,-.005,{sc:[1.02,1.05,1.04]});dome.rotation.x=-.5;head.add(dome);
   const dp=[[.212,.02],[.24,-.14],[.29,-.32],[.33,-.5],[.3,-.6]].map(p=>new T.Vector2(p[0],p[1]));head.add(vb3dMesh(new T.LatheGeometry(dp,36,Math.PI*.36,Math.PI*1.28),sh,0,0,-.005));
@@ -273,6 +274,26 @@ function vb3dChar(look,posture){
  g.userData={mats,head,mouth,open,eyes,arms,body,pose,base:g.position.clone(),blinkAt:performance.now()+1500+Math.random()*3000};
  return g;
 }
+/* ── عمق الميدان: الخلفية تلين والجلسة وحدها حادّة ──
+   لا نملك DepthTexture في هذه الحزمة، فنفصل بالطبقات بدل العمق:
+   كل ما وراء الطاولة (سماء، مدينة، قمر، نخل، جدران) على الطبقة 1،
+   تُرسم في هدف بسدس الدقّة ثم تُكبَّر بترشيح خطّي فتصير ضبابية ناعمة،
+   ثمّ تُستعمل خلفيةً للمشهد الحادّ. الكلفة أقلّ من رسمها حادّة أصلًا. */
+const VB3_FAR=1;
+function vb3dFar(o){if(!o)return o;o.traverse(x=>{if(x.isLight)x.layers.enableAll();else x.layers.set(VB3_FAR)});return o}
+/** ما يبعد عن مركز الجلسة يلين، وما قربها يبقى حادًّا — والمصابيح تضيء الطبقتين */
+function vb3dSplitDepth(sc,T,keep){
+ sc.updateMatrixWorld(true);
+ const v=new T.Vector3();
+ sc.children.forEach(o=>{
+  if(o.isLight||o===keep)return;
+  if(o.userData&&o.userData.near)return;
+  o.getWorldPosition(v);
+  if(Math.hypot(v.x,v.z)>4.2||v.y>4.2)vb3dFar(o);
+ });
+ sc.traverse(x=>{if(x.isLight)x.layers.enableAll()});
+}
+
 /* ── الغرفتان ── */
 function vb3dRoomMajlis(sc){
  const T=THREE,wood=vb3dTexWood();
@@ -421,15 +442,15 @@ function vb3dRoomSquare(sc){
  // ضباب أرضي خفيف
  const mist=vb3dMat('#8FA0D8',{rough:1});mist.transparent=true;mist.opacity=.05;mist.depthWrite=false;mist.blending=T.AdditiveBlending;mist.side=T.DoubleSide;
  for(let k=0;k<3;k++)sc.add(vb3dMesh(vb3dG('Plane',18,1.5),mist,0,.35+k*.3,-4-k*1.5,{noCast:1}));
- sc.fog=new T.FogExp2(0x0B0E22,.062);   // 5.62: عمق أوضح — الخلفية تلين فتبرز الوجوه
- const L={};L.hemi=new T.HemisphereLight(0x8E9AD8,0x241C2A,.8);sc.add(L.hemi);
- L.key=new T.DirectionalLight(0xB9C8FF,1.3);L.key.position.set(-5.2,4.6,1.6);L.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
+ sc.fog=new T.FogExp2(0x241A26,.058);   // 5.74: ضباب دافئ لا أزرق — المدينة تذوب في دفء الفوانيس
+ const L={};L.hemi=new T.HemisphereLight(0xD6C8D2,0x2E2620,.9);sc.add(L.hemi);   // 5.74: سماء مائلة للدفء وأرض ترتدّ دفئًا هادئًا
+ L.key=new T.DirectionalLight(0xFFF0DC,1.55);L.key.position.set(-5.2,4.6,1.6);   // 5.74: دفء بلا اصفرار — الثوب يبقى أبيضL.key.castShadow=true;L.key.shadow.mapSize.set(2048,2048);L.key.shadow.radius=2.2;
  Object.assign(L.key.shadow.camera,{left:-4.5,right:4.5,top:4.5,bottom:-4.5,near:.5,far:16});L.key.shadow.bias=-.0004;L.key.shadow.normalBias=.022;sc.add(L.key);
- L.rim=new T.DirectionalLight(0x9FB4FF,1.2);L.rim.position.set(2.6,2.8,-5.2);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
+ L.rim=new T.DirectionalLight(0xBFC8F0,1.25);L.rim.position.set(2.6,2.8,-5.2);sc.add(L.rim);   // ضوء قمريّ من الخلف يفصل الجالسين عن الليل
  L.lamp=new T.PointLight(0xFFB760,34,10,1.7);L.lamp.position.set(0,1.25,0);sc.add(L.lamp);L.posts=[p1,p2];
  L.fill=new T.DirectionalLight(0xFFD2A4,.56);L.fill.position.set(.7,2.35,4.2);sc.add(L.fill);   // 5.73: الوجوه كانت تغرق في ظلّ الميدان — تعبئة أمامية أدفأ ترفعها دون أن تُذهب ليل المكان
  L.face=new T.PointLight(0xFFC98A,2.6,4.6,2);L.face.position.set(0,1.55,.15);sc.add(L.face);   // وهج الفانوس على الوجوه من مستواها لا من سطح الطاولة
- L.bounce=new T.DirectionalLight(0x8FA0C8,.2);L.bounce.position.set(-.5,-1.5,2.2);sc.add(L.bounce);   // ارتداد بارد من الحجر   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
+ L.bounce=new T.DirectionalLight(0xC0A184,.24);L.bounce.position.set(-.5,-1.5,2.2);sc.add(L.bounce);   // ارتداد بارد من الحجر   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
  return {L,glow,sky,stars,day:{hemi:.28,key:2.5,lamp:25,post:17,rim:2.3,skyc:'#FFFFFF',starO:.7},night:{hemi:.13,key:1.45,lamp:13,post:9,rim:1.9,skyc:'#5A6090',starO:1}};
 }
 /* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
@@ -475,6 +496,16 @@ function vb3dMount(kindOrModel){
   chars.push({i,seat,ch,ring,ringM,hit,empty,u:ch?ch.userData:null,st:{},v:{talk:0,dead:0,sleep:0,pick:0,mark:0,point:0,ready:0,yaw:0},pt:null,ptT:0,headY:seatH+1.09});
  }
  const spot=new T.SpotLight(0xFFE0A8,0,9,.55,.6,1.5);spot.position.set(0,3.4,.4);spot.target.position.set(0,.8,0);sc.add(spot,spot.target);
+ // فصل العمق: السماء والمدينة والنخل والجدران تلين، والطاولة والجالسون يبقون حادّين
+ // الميدان وحده: خلفيته مدينة بعيدة فتحتمل التمويه وتزداد به.
+ // المجلس غرفة صغيرة جدرانها قريبة ومزخرفة — تمويهها يمحو الزخرفة ويقلب العمق، فيبقى حادًّا.
+ try{
+  if(kind==='mafia'){
+   if(room.sky)vb3dFar(room.sky);
+   if(room.stars)vb3dFar(room.stars);
+   vb3dSplitDepth(sc,T);
+  }else{VB3.noFar=1}
+ }catch(e){}
  // 5.66: صندوق كل جالس يُقاس من جسمه — الإطار بعدها يتراجع بنفسه حتى يدخل الجميع، فلا يُقصّ أحد
  sc.updateMatrixWorld(true);
  VB3.boxes=chars.filter(c=>c.ch&&c.ch.visible).map(c=>vb3dBox(c.ch));
@@ -494,6 +525,12 @@ function vb3dMount(kindOrModel){
  const s=document.querySelector(model.scene);if(s)s.classList.add('is3d');
  vb3dSync();
  VB3.comp=null;
+ // هدف الخلفية اللينة — يُعطَّل على الأجهزة الضعيفة مع بقيّة المؤثّرات
+ VB3.rtFar=null;
+ if(kind==='mafia'&&!window.__vbNoFx&&!(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=3)){
+  try{VB3.rtFar=new T.WebGLRenderTarget(64,64,{minFilter:T.LinearFilter,magFilter:T.LinearFilter,depthBuffer:true});
+   VB3.rtFar.texture.generateMipmaps=false;vb3dResize()}catch(e){VB3.rtFar=null}
+ }
  if(!window.__vbNoFx&&!(navigator.hardwareConcurrency&&navigator.hardwareConcurrency<=3)){
   try{const comp=new T.EffectComposer(renderer);comp.addPass(new T.RenderPass(sc,cam));
    comp.addPass(new T.OutputPass());
@@ -519,6 +556,7 @@ function vb3dResize(){
  if(!VB3.on)return;const st=document.getElementById(VB3.model.stage);if(!st)return;
  const w=st.clientWidth||360,h=st.clientHeight||300;VB3.w=w;VB3.h=h;
  VB3.renderer.setSize(w,h,false);if(VB3.comp){const dpr=VB3.renderer.getPixelRatio();VB3.comp.setSize(w,h);VB3.comp.setPixelRatio&&VB3.comp.setPixelRatio(dpr)}
+ if(VB3.rtFar)VB3.rtFar.setSize(Math.max(24,Math.round(w/6)),Math.max(24,Math.round(h/6)));   // سدس الدقّة = ضبابية ناعمة بلا تكلفة
  const asp=w/h;VB3.cam.aspect=asp;
  // الدردشة تحتلّ جانب الشاشة: نُزيح مركز الرؤية إلى الجهة الأخرى فيبقى الجالسون مكشوفين لا خلف اللوحة
  VB3.cam.clearViewOffset();   // 5.60: الدردشة شريط تحت المشهد لا فوقه — لا حاجة لإزاحة الرؤية
@@ -654,7 +692,19 @@ function vb3dLoop(now){
   const ay=VB3.aimY!=null?VB3.aimY:.88,pm=VB3.panMax!=null?VB3.panMax:.12;
   VB3.aimT.set(tk?Math.max(-pm,Math.min(pm,tk.x*.3)):0,ay,tk?-.5+tk.z*.06:-.5);
   VB3.aim.lerp(VB3.aimT,Math.min(1,dt*1.6));VB3.cam.lookAt(VB3.aim)}
- if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
+ // الخلفية اللينة أولًا، ثم الجلسة الحادّة فوقها
+ if(VB3.rtFar){
+  const bg=VB3.sc.background;VB3.sc.background=VB3.bgCol||null;
+  VB3.cam.layers.set(VB3_FAR);
+  VB3.renderer.setRenderTarget(VB3.rtFar);VB3.renderer.clear();
+  VB3.renderer.render(VB3.sc,VB3.cam);
+  VB3.renderer.setRenderTarget(null);
+  VB3.sc.background=VB3.rtFar.texture;
+  VB3.cam.layers.set(0);
+  if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
+  VB3.sc.background=bg;
+ }
+ else if(VB3.comp)VB3.comp.render();else VB3.renderer.render(VB3.sc,VB3.cam);
 }
 function vb3dDispose(){
  if(!VB3.on)return;VB3.on=false;VB3.lobby=false;VB3.sig=null;
