@@ -14615,7 +14615,7 @@ function tierEmblem(tierIdx,size){
 const AV={
  skin:['#F5D0A9','#E8B88A','#D19C6A','#B57C4E','#8D5A34','#6B4226'],
  hair:['#1C1410','#3B2416','#6B4226','#A0642C','#D4A03C','#8A8A8A','#2B2B3A'],
- bg:['#7B4FE0','#378ADD','#2ECC71','#E8B23A','#E24B4A','#B76CF0','#14514A','#6B4415'],
+ bg:['#3E2F63','#22405F','#1E4A44','#4A3821','#4E2A2E','#33294A','#1C3341','#38343E'],
  // أشكال الشعر
  hairStyle:[
   {id:'short',n:'قصير'},
@@ -14666,7 +14666,7 @@ function avUnlocked(a){
  return (S.ach[a.req]||0)>=(need?need.n:1);
 }
 
-/** يرسم الأفاتار بحجم معيّن */
+/** يرسم الأفاتار بحجم معيّن — بورتريه مرسوم، لا ملصق */
 function avatarSVG(cfg,size){
  const c=cfg||S.av||AV_DEFAULT;
  const sk=AV.skin[c.skin]||AV.skin[0];
@@ -14677,123 +14677,149 @@ function avatarSVG(cfg,size){
  const mo=AV.mouth[c.mouth]?.id||'smile';
  const ac=AV.acc[c.acc]?.id||'none';
  const bd=AV.beard[c.beard]?.id||'none';
- const dark=shade(sk,-30),deep=shade(sk,-58),lip='#8A4A3A';
+ const mid=shade(sk,-22),dark=shade(sk,-46),deep=shade(sk,-72),lip=shade(sk,-76);
+ const rim=shade(sk,30);
  const uid='a'+c.skin+c.hair+c.bg+(hs[0]||'')+(ey[0]||'')+(mo[0]||'')+(ac[0]||'')+(bd[0]||'');
- const hrHi=shade(hr,42),hrLo=shade(hr,-22);
- const HEAD='M27 47 Q27 21 50 21 Q73 21 73 47 Q73 66 62.5 75.5 Q50 81 37.5 75.5 Q27 66 27 47 Z';
+ const hrHi=shade(hr,62),hrLo=shade(hr,-18),hrDp=shade(hr,-34),hrRim=shade(hr,86);
 
- // الشعر خلف الرأس
+ // الرأس: بيضويّ بفكّ وذقن، لا دائرة
+ const HEAD='M32 44C32 27.4 39 20 50 20s18 7.4 18 24c0 11.2-3.1 19.4-9.6 25.8C55 73 52.4 74.2 50 74.2s-5-1.2-8.4-4.4C35.1 63.4 32 55.2 32 44Z';
+
+ // ── الشعر خلف الرأس
  let hairBack='';
- if(hs==='long')hairBack=`<path d="M23 50 Q21 82 31 92 L69 92 Q79 82 77 50 Q75 25 50 23.5 Q25 25 23 50 Z" fill="url(#hr${uid})"/>
-  <path d="M28 56 Q27 78 33 88" stroke="${hrHi}" stroke-width="1.6" fill="none" opacity=".35" stroke-linecap="round"/>`;
+ if(hs==='long')hairBack=`<path d="M26 50c-1.6 22 1.4 34 6 42h36c4.6-8 7.6-20 6-42-1.6-22-9.6-31-24-31S27.6 28 26 50Z" fill="url(#hr${uid})"/>
+  <path d="M30.4 56c-.8 16 .4 24 3 30" stroke="${hrHi}" stroke-width="1.5" fill="none" opacity=".3" stroke-linecap="round"/>`;
+ if(hs==='curly')hairBack=`<g fill="${hrDp}"><circle cx="30" cy="34" r="7.4"/><circle cx="70" cy="34" r="7.4"/></g>`;
 
- // الشعر أمام الرأس — كل قصّة بلمعة واحدة
+ // ── الشعر أمام الرأس: خطّ شعر حقيقيّ وكتلة وضوء واحد
  let hairFront='';
- if(hs==='short')hairFront=`<path d="M26.5 44 Q26.5 19 50 18.5 Q73.5 19 73.5 44 Q70 33 60 31 Q50 28.5 40 31 Q30 33 26.5 44 Z" fill="url(#hr${uid})"/>`;
- if(hs==='wavy')hairFront=`<path d="M25.5 45 Q25.5 18.5 50 17.5 Q74.5 18.5 74.5 45 Q71.5 36 65.5 38 Q59.5 30 50 34 Q40.5 30 34.5 38 Q28.5 36 25.5 45 Z" fill="url(#hr${uid})"/>`;
- if(hs==='curly')hairFront=`<g fill="url(#hr${uid})"><circle cx="31" cy="27" r="9.5"/><circle cx="43" cy="20.5" r="10.5"/>
-  <circle cx="57" cy="20.5" r="10.5"/><circle cx="69" cy="27" r="9.5"/><circle cx="26.5" cy="36.5" r="7.5"/><circle cx="73.5" cy="36.5" r="7.5"/></g>
-  <g fill="${hrHi}" opacity=".35"><circle cx="41" cy="17.5" r="3.4"/><circle cx="55" cy="17" r="3"/><circle cx="29" cy="24" r="2.6"/></g>`;
- if(hs==='long')hairFront=`<path d="M24.5 46 Q24.5 19 50 18 Q75.5 19 75.5 46 Q71.5 33.5 50 32.5 Q28.5 33.5 24.5 46 Z" fill="url(#hr${uid})"/>`;
- if(hs!=='curly'&&hs!=='bald')hairFront+=`<path d="M36 28.5 Q45 23.5 57 25.5" stroke="${hrHi}" stroke-width="2.2" fill="none" opacity=".45" stroke-linecap="round"/>`;
- if(hs==='bald')hairFront=`<ellipse cx="44" cy="30" rx="9" ry="4" fill="#fff" opacity=".16" transform="rotate(-18 44 30)"/>`;
+ if(hs==='short')hairFront=`<path d="M31.4 43.5C31.4 26 38.8 18.6 50 18.6S68.6 26 68.6 43.5c-1.8-8.4-5.6-12.4-11.4-13.8-4.6-1.1-9.7-1-14.4.4-4.6 1.4-8.2 4.8-11.4 13.3Z" fill="url(#hr${uid})"/>`;
+ if(hs==='wavy')hairFront=`<path d="M31 44.5C31 25.6 38.6 18 50 18s19 7.6 19 26.5c-1.4-6.6-3.8-9.2-6.9-8.2-2.4-4.6-6.4-6.4-11-5-3.4-3.6-8.4-3-11.6.6-3-1.6-5.7.4-8.5 12.6Z" fill="url(#hr${uid})"/>`;
+ if(hs==='curly')hairFront=`<g fill="url(#hr${uid})"><circle cx="35" cy="27.5" r="8"/><circle cx="46" cy="22.6" r="8.6"/>
+  <circle cx="56" cy="23.4" r="8.2"/><circle cx="66" cy="29" r="7.6"/><circle cx="31.4" cy="36" r="6.4"/><circle cx="68.6" cy="36.4" r="6.2"/></g>
+  <g fill="${hrHi}" opacity=".3"><circle cx="44.6" cy="20.4" r="2.8"/><circle cx="55" cy="21" r="2.4"/></g>`;
+ if(hs==='long')hairFront=`<path d="M30.6 45C30.6 25 39 17.8 50 17.8S69.4 25 69.4 45c-2.6-9.4-8.6-13-19.4-13s-16.8 3.6-19.4 13Z" fill="url(#hr${uid})"/>`;
+ if(hs==='bald')hairFront=`<path d="M38 27.5q6.6-5 15.4-4" stroke="${rim}" stroke-width="2.6" fill="none" opacity=".26" stroke-linecap="round"/>`;
+ if(hs!=='bald')hairFront=`<path d="M31.6 42.6C31.6 24.6 39.4 17.4 50 17.4" fill="none" stroke="${hrRim}" stroke-width="1.8" opacity=".5" stroke-linecap="round"/>`+hairFront+`<path d="M37.4 27.6q7-4.6 15.6-3.2" stroke="${hrHi}" stroke-width="2.1" fill="none" opacity=".4" stroke-linecap="round"/>`;
 
- // العيون — بياض وقزحية وبؤبؤ ولمعة
- const iris='#3B2314',irisHi='#7A4A22';
- const eye=(x)=>`<path d="M${x-6.2} 52 Q${x} 46.6 ${x+6.2} 52 Q${x} 57.2 ${x-6.2} 52 Z" fill="#F7F4EC"/>
-  <circle cx="${x}" cy="52.3" r="3.4" fill="${iris}"/><circle cx="${x}" cy="52.3" r="3.4" fill="none" stroke="${irisHi}" stroke-width=".7" opacity=".8"/>
-  <circle cx="${x}" cy="52.3" r="1.7" fill="#0C0A10"/><circle cx="${x-1.1}" cy="51" r=".95" fill="#fff" opacity=".95"/>
-  <path d="M${x-6.2} 52 Q${x} 46.6 ${x+6.2} 52" fill="none" stroke="${deep}" stroke-width="1.1" stroke-linecap="round"/>`;
- let eyes='';
- if(ey==='normal')eyes=eye(39)+eye(61);
- if(ey==='happy')eyes=`<path d="M33.5 53 Q39 47.2 44.5 53" stroke="${deep}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-  <path d="M55.5 53 Q61 47.2 66.5 53" stroke="${deep}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-  <path d="M35 55.5 Q39 57.5 43 55.5 M57 55.5 Q61 57.5 65 55.5" stroke="${deep}" stroke-width="1" fill="none" opacity=".5" stroke-linecap="round"/>`;
- if(ey==='sharp')eyes=`<path d="M33 51 Q39 48.5 45.5 52.5 Q39 55.5 33 51 Z" fill="#F7F4EC"/><path d="M67 51 Q61 48.5 54.5 52.5 Q61 55.5 67 51 Z" fill="#F7F4EC"/>
-  <circle cx="40" cy="52.2" r="2.7" fill="${iris}"/><circle cx="60" cy="52.2" r="2.7" fill="${iris}"/>
-  <circle cx="40" cy="52.2" r="1.3" fill="#0C0A10"/><circle cx="60" cy="52.2" r="1.3" fill="#0C0A10"/>
-  <circle cx="39.2" cy="51.3" r=".7" fill="#fff"/><circle cx="59.2" cy="51.3" r=".7" fill="#fff"/>
-  <path d="M33 51 Q39 48.5 45.5 52.5 M67 51 Q61 48.5 54.5 52.5" stroke="${deep}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
- if(ey==='wide')eyes=`<circle cx="39" cy="52" r="6.2" fill="#F7F4EC" stroke="${deep}" stroke-width="1.1"/><circle cx="61" cy="52" r="6.2" fill="#F7F4EC" stroke="${deep}" stroke-width="1.1"/>
-  <circle cx="39" cy="52.4" r="3.8" fill="${iris}"/><circle cx="61" cy="52.4" r="3.8" fill="${iris}"/>
-  <circle cx="39" cy="52.4" r="2" fill="#0C0A10"/><circle cx="61" cy="52.4" r="2" fill="#0C0A10"/>
-  <circle cx="37.8" cy="51" r="1.1" fill="#fff"/><circle cx="59.8" cy="51" r="1.1" fill="#fff"/>`;
-
- // الفم — شفة بظلّ
- let mouth='';
- if(mo==='smile')mouth=`<path d="M42 66 Q50 72.5 58 66" stroke="${lip}" stroke-width="2.6" fill="none" stroke-linecap="round"/>
-  <path d="M43.5 67.5 Q50 71 56.5 67.5" stroke="#fff" stroke-width=".8" fill="none" opacity=".25" stroke-linecap="round"/>`;
- if(mo==='grin')mouth=`<path d="M40.5 64 Q50 74 59.5 64 Q50 66.2 40.5 64 Z" fill="#6E2828"/>
-  <path d="M42.2 64.7 Q50 66.4 57.8 64.7 L57.2 63.4 Q50 64.8 42.8 63.4 Z" fill="#FFF8F0"/>
-  <path d="M43 69.5 Q50 72.5 57 69.5" stroke="#B85A5A" stroke-width="1.2" fill="none" opacity=".6"/>`;
- if(mo==='calm')mouth=`<path d="M44.5 67 Q50 68.4 55.5 67" stroke="${lip}" stroke-width="2.1" fill="none" stroke-linecap="round"/>`;
- if(mo==='smirk')mouth=`<path d="M42 67 Q50 70.5 59 64" stroke="${lip}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M59 64 Q60.5 65.5 59.5 66.8" stroke="${lip}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".7"/>`;
-
- // اللحية
+ // ── اللحية: تتبع الفكّ
  let beard='';
- if(bd==='short')beard=`<path d="M31 59 Q31 78 50 80.5 Q69 78 69 59 Q65 72 50 73.5 Q35 72 31 59 Z" fill="url(#hr${uid})" opacity=".8"/>`;
- if(bd==='full')beard=`<path d="M29.5 54 Q28.5 83 50 86.5 Q71.5 83 70.5 54 Q68.5 74 50 76.5 Q31.5 74 29.5 54 Z" fill="url(#hr${uid})"/>
-  <path d="M36 70 Q42 80 50 81" stroke="${hrHi}" stroke-width="1.4" fill="none" opacity=".3" stroke-linecap="round"/>`;
- if(bd==='mustache')beard=`<path d="M40.5 62.2 Q50 58.6 59.5 62.2 Q55 64.8 50 63.4 Q45 64.8 40.5 62.2 Z" fill="url(#hr${uid})"/>`;
+ if(bd==='short')beard=`<path d="M33.6 51c-.4 8.6 2.4 15.6 8 20.4 3 2.6 5.6 3.6 8.4 3.6s5.4-1 8.4-3.6c5.6-4.8 8.4-11.8 8-20.4-1.4 9.4-4.4 15-8.6 18.2-2.6 2-5.2 2.8-7.8 2.8s-5.2-.8-7.8-2.8c-4.2-3.2-7.2-8.8-8.6-18.2Z" fill="url(#hr${uid})" opacity=".72"/>`;
+ if(bd==='full')beard=`<path d="M32.6 46c-1.2 12.6.6 21.8 5.4 28.6 3.4 4.8 7.4 7.2 12 7.2s8.6-2.4 12-7.2c4.8-6.8 6.6-16 5.4-28.6-.6 12.4-3.2 19.6-7.4 23.4-3.2 2.9-6.5 4.2-10 4.2s-6.8-1.3-10-4.2c-4.2-3.8-6.8-11-7.4-23.4Z" fill="url(#hr${uid})"/>
+  <path d="M40 63.4q4.4 7.6 10 8.6" stroke="${hrHi}" stroke-width="1.3" fill="none" opacity=".24" stroke-linecap="round"/>`;
+ if(bd==='mustache')beard=`<path d="M43.6 62.6q6.4-2.6 12.8 0-2.8 2.2-6.4 1.2-3.6 1-6.4-1.2Z" fill="url(#hr${uid})"/>`;
 
- // الإكسسوارات
+ // ── العيون: لوز صغير، الجفن الأعلى هو العلامة الغامقة
+ const irisC=shade(hr,26),irisD=shade(hr,-6);
+ const eyeMk=(x,f)=>{
+  const s=f?-1:1;
+  return `<path d="M${x-4.6} 46.7q4.6-3.4 9.2 0-4.6 3.1-9.2 0Z" fill="#EFE9DD"/>
+  <circle cx="${x+s*.2}" cy="46.9" r="2.25" fill="${irisD}"/><circle cx="${x+s*.2}" cy="46.9" r="2.25" fill="none" stroke="${irisC}" stroke-width=".55" opacity=".85"/>
+  <circle cx="${x+s*.2}" cy="46.9" r="1.05" fill="#0B0910"/><circle cx="${x+s*.2-.85}" cy="45.95" r=".68" fill="#fff" opacity=".92"/>
+  <path d="M${x-4.6} 46.7q4.6-3.6 9.2 0" fill="none" stroke="${deep}" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M${x-3.8} 49.1q3.8 1.5 7.6 0" fill="none" stroke="${deep}" stroke-width=".6" opacity=".34" stroke-linecap="round"/>`};
+ let eyes='';
+ if(ey==='normal')eyes=eyeMk(41.4,0)+eyeMk(58.6,1);
+ if(ey==='happy')eyes=`<path d="M37 46.9q4.4-3.2 8.8 0-4.4 2.6-8.8 0Z" fill="#EFE9DD"/><path d="M54.2 46.9q4.4-3.2 8.8 0-4.4 2.6-8.8 0Z" fill="#EFE9DD"/>
+  <circle cx="41.5" cy="46.9" r="2.1" fill="${irisD}"/><circle cx="58.5" cy="46.9" r="2.1" fill="${irisD}"/>
+  <circle cx="41.5" cy="46.9" r="1" fill="#0B0910"/><circle cx="58.5" cy="46.9" r="1" fill="#0B0910"/>
+  <circle cx="40.7" cy="46" r=".64" fill="#fff" opacity=".92"/><circle cx="57.7" cy="46" r=".64" fill="#fff" opacity=".92"/>
+  <path d="M37 46.9q4.4-3.4 8.8 0M54.2 46.9q4.4-3.4 8.8 0" fill="none" stroke="${deep}" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M37.4 48.6q4-2.2 8 0M54.6 48.6q4-2.2 8 0" fill="none" stroke="${deep}" stroke-width="1.15" stroke-linecap="round"/>
+  <path d="M36.6 51.4q4.6 1.6 9.2-.4M53.8 51q4.6 2 9.2.4" fill="none" stroke="${dark}" stroke-width=".8" opacity=".3" stroke-linecap="round"/>`;
+ if(ey==='sharp')eyes=`<path d="M36.9 46.2q4.5-2.4 9.1 1.1-4.6 2.2-9.1-1.1Z" fill="#EFE9DD"/><path d="M63.1 46.2q-4.5-2.4-9.1 1.1 4.6 2.2 9.1-1.1Z" fill="#EFE9DD"/>
+  <circle cx="41.8" cy="46.9" r="1.9" fill="${irisD}"/><circle cx="58.2" cy="46.9" r="1.9" fill="${irisD}"/>
+  <circle cx="41.8" cy="46.9" r=".95" fill="#0B0910"/><circle cx="58.2" cy="46.9" r=".95" fill="#0B0910"/>
+  <circle cx="41.1" cy="46.1" r=".55" fill="#fff" opacity=".9"/><circle cx="57.5" cy="46.1" r=".55" fill="#fff" opacity=".9"/>
+  <path d="M36.9 46.2q4.5-2.6 9.1 1.1M63.1 46.2q-4.5-2.6-9.1 1.1" stroke="${deep}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+ if(ey==='wide')eyes=`<path d="M36.2 46.9q5.2-4.6 10.4 0-5.2 4.3-10.4 0Z" fill="#EFE9DD"/><path d="M53.4 46.9q5.2-4.6 10.4 0-5.2 4.3-10.4 0Z" fill="#EFE9DD"/>
+  <circle cx="41.4" cy="47" r="2.75" fill="${irisD}"/><circle cx="58.6" cy="47" r="2.75" fill="${irisD}"/>
+  <circle cx="41.4" cy="47" r="1.3" fill="#0B0910"/><circle cx="58.6" cy="47" r="1.3" fill="#0B0910"/>
+  <circle cx="40.4" cy="45.9" r=".8" fill="#fff" opacity=".92"/><circle cx="57.6" cy="45.9" r=".8" fill="#fff" opacity=".92"/>
+  <path d="M36.2 46.9q5.2-4.8 10.4 0M53.4 46.9q5.2-4.8 10.4 0" stroke="${deep}" stroke-width="1.5" fill="none" stroke-linecap="round"/>`;
+
+ // ── الفم: صغير ومغلق في الأصل
+ let mouth='';
+ if(mo==='smile')mouth=`<path d="M44.9 64q5.1 3.4 10.2 0" stroke="${lip}" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  <path d="M46.4 65.7q3.6 1.5 7.2 0" stroke="${rim}" stroke-width=".8" fill="none" opacity=".3" stroke-linecap="round"/>`;
+ if(mo==='grin')mouth=`<path d="M44.8 63.6q5.2 5.2 10.4 0-5.2 1.5-10.4 0Z" fill="#5B2126"/>
+  <path d="M46.1 64.2q3.9 1.1 7.8 0l-.3-.9q-3.6.8-7.2 0Z" fill="#F6EFE4"/>
+  <path d="M46.6 67.5q3.4 1.6 6.8 0" stroke="#A24E4E" stroke-width=".9" fill="none" opacity=".5"/>`;
+ if(mo==='calm')mouth=`<path d="M45.8 64.6q4.2 1.3 8.4 0" stroke="${lip}" stroke-width="2.1" fill="none" stroke-linecap="round"/>`;
+ if(mo==='smirk')mouth=`<path d="M45.2 64.9q4.6 2.2 9.6-2.1" stroke="${lip}" stroke-width="2.1" fill="none" stroke-linecap="round"/>
+  <path d="M54.8 62.8q1.1 1.1.6 2.2" stroke="${lip}" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".65"/>`;
+
+ // ── الإكسسوارات
  let acc='';
- if(ac==='glasses')acc=`<g fill="none" stroke="#1F2230" stroke-width="2.2">
-  <circle cx="39" cy="52" r="8.2"/><circle cx="61" cy="52" r="8.2"/><path d="M47.2 51.5 Q50 50 52.8 51.5"/>
-  <path d="M30.8 51 L25 48.5 M69.2 51 L75 48.5"/></g>
-  <path d="M33 47.5 Q39 45 45 47.5 M55 47.5 Q61 45 67 47.5" stroke="#fff" stroke-width="1" fill="none" opacity=".35"/>`;
- if(ac==='sci')acc=`<g fill="none" stroke="#5DCAA5" stroke-width="2.4">
-  <circle cx="39" cy="52" r="9.2"/><circle cx="61" cy="52" r="9.2"/><path d="M48.2 52 L51.8 52"/></g>
-  <circle cx="39" cy="52" r="9.2" fill="#5DCAA5" opacity=".18"/><circle cx="61" cy="52" r="9.2" fill="#5DCAA5" opacity=".18"/>
-  <path d="M33 47 Q39 44 45 47 M55 47 Q61 44 67 47" stroke="#fff" stroke-width="1.1" fill="none" opacity=".4"/>`;
- if(ac==='shemagh')acc=`<path d="M17 46 Q17 14 50 13.5 Q83 14 83 46 L83 66 Q76 40 50 39 Q24 40 17 66 Z" fill="url(#gh${uid})"/>
-  <g clip-path="url(#shm${uid})"><g fill="none" stroke="#C0392B" stroke-width="1.6" opacity=".7"><path d="M19 44 Q50 32 81 44"/><path d="M20 52 Q50 40 80 52"/><path d="M22 60 Q50 48 78 60"/></g>
-  <g fill="none" stroke="#C0392B" stroke-width=".9" opacity=".5"><path d="M30 33 L27 62 M40 27 L37 50 M60 27 L63 50 M70 33 L73 62"/></g></g>
-  <ellipse cx="50" cy="19.5" rx="30" ry="7" fill="#15141C"/><ellipse cx="50" cy="19.5" rx="30" ry="7" fill="none" stroke="#2A2836" stroke-width="1.2"/>
-  <path d="M22 19.5 Q50 14 78 19.5" stroke="#3C3A48" stroke-width="1" fill="none" opacity=".8"/>`;
- if(ac==='crown')acc=`<path d="M28 26 L34 11 L42 21.5 L50 6.5 L58 21.5 L66 11 L72 26 Z" fill="url(#avGold)" stroke="#7A5410" stroke-width=".9" stroke-linejoin="round"/>
-  <rect x="28" y="25" width="44" height="5.5" rx="2" fill="url(#avGold)" stroke="#7A5410" stroke-width=".9"/>
-  <circle cx="50" cy="13.5" r="2.6" fill="#E24B4A"/><circle cx="34.5" cy="17" r="1.7" fill="#5AC8F5"/><circle cx="65.5" cy="17" r="1.7" fill="#5AC8F5"/>`;
- if(ac==='gold')acc=`<path d="M22 74 Q50 86 78 74 L78 84 Q50 94 22 84 Z" fill="url(#avGold)" stroke="#7A5410" stroke-width=".9"/>
-  <path d="M26 78 Q50 88 74 78" stroke="#7A5410" stroke-width=".8" fill="none" opacity=".6"/><circle cx="50" cy="81" r="4" fill="#7A5410"/><circle cx="50" cy="81" r="2.2" fill="#E24B4A"/>`;
- if(ac==='headband')acc=`<path d="M20 35.5 H80 V43 H20 Z" fill="#C93A34"/><path d="M20 36.5 H80" stroke="#FFD1CC" stroke-width="1" opacity=".35"/>
-  <path d="M78 39 L92 33 M78 41 L92 46" stroke="#C93A34" stroke-width="3.2" stroke-linecap="round"/>`;
+ if(ac==='glasses')acc=`<g fill="none" stroke="#1A1D28" stroke-width="1.6"><rect x="34.4" y="42.4" width="14.4" height="9.4" rx="4.2"/><rect x="51.2" y="42.4" width="14.4" height="9.4" rx="4.2"/>
+  <path d="M48.8 46.4h2.4M34.4 46.2l-4.6-1.6M65.6 46.2l4.6-1.6"/></g>
+  <rect x="34.4" y="42.4" width="14.4" height="9.4" rx="4.2" fill="#9FC7E8" opacity=".1"/><rect x="51.2" y="42.4" width="14.4" height="9.4" rx="4.2" fill="#9FC7E8" opacity=".1"/>
+  <path d="M36 50.6 46.8 43.4M52.8 50.6 63.6 43.4" stroke="#fff" stroke-width="1" opacity=".22"/>`;
+ if(ac==='sci')acc=`<g fill="none" stroke="#4FB79A" stroke-width="1.7"><rect x="33.6" y="41.4" width="15.2" height="11" rx="5"/><rect x="51.2" y="41.4" width="15.2" height="11" rx="5"/><path d="M48.8 46.6h2.4"/></g>
+  <rect x="33.6" y="41.4" width="15.2" height="11" rx="5" fill="#4FB79A" opacity=".16"/><rect x="51.2" y="41.4" width="15.2" height="11" rx="5" fill="#4FB79A" opacity=".16"/>
+  <path d="M35.6 51 47 42.6M53.2 51 64.6 42.6" stroke="#CFFBEC" stroke-width="1" opacity=".32"/>`;
+ if(ac==='shemagh'){
+  const CAP='M29.6 44.6C29.6 25.6 38.6 16.8 50 16.8s20.4 8.8 20.4 27.8c-2.2-9.6-6.4-14.8-11.6-17.4-2.9-1.4-5.8-2-8.8-2s-5.9.6-8.8 2c-5.2 2.6-9.4 7.8-11.6 17.4Z';
+  const LP='M31.4 37.4c-1.1 8.4-1.4 14.8-.3 21.8L27.7 100H16.2l4.8-40.8c1.7-7 2.8-13.4 2.6-21.8Z';
+  const RP='M68.6 37.4c1.1 8.4 1.4 14.8.3 21.8L72.3 100h11.5l-4.8-40.8c-1.7-7-2.8-13.4-2.6-21.8Z';
+  acc=`<path d="${LP}" fill="url(#gh${uid})"/><path d="${RP}" fill="url(#gh${uid})"/><path d="${CAP}" fill="url(#gh${uid})"/>
+  <g clip-path="url(#shm${uid})"><g fill="none" stroke="#B23A2C" stroke-width=".95" opacity=".5"><path d="M14 34q36-11 72 0M13 45q37-11 74 0M13 56q37-11 74 0M13 67q37-11 74 0M13 78q37-11 74 0M13 89q37-11 74 0"/></g>
+  <g fill="none" stroke="#B23A2C" stroke-width=".7" opacity=".36"><path d="M24 30 18 98M34 22 28 74M42 18.4 39 46M58 18.4 61 46M66 22 72 74M76 30 82 98"/></g></g>
+  <path d="${CAP}" fill="none" stroke="#ADA795" stroke-width=".85" opacity=".7"/>
+  <path d="${LP}" fill="none" stroke="#ADA795" stroke-width=".8" opacity=".5"/><path d="${RP}" fill="none" stroke="#ADA795" stroke-width=".8" opacity=".5"/>
+  <ellipse cx="50" cy="25.4" rx="20.6" ry="5.2" fill="#14131A"/><ellipse cx="50" cy="23.6" rx="20.8" ry="5" fill="#201E28"/>
+  <path d="M30 24.2q20-5 40 0" stroke="#3E3A4A" stroke-width=".9" fill="none" opacity=".85"/>`;
+ }
+ if(ac==='crown')acc=`<path d="M35 26.4 39 14.6l6.2 7.6L50 11.6l4.8 10.6 6.2-7.6 4 11.8Z" fill="url(#avGold)" stroke="#7A5410" stroke-width=".8" stroke-linejoin="round"/>
+  <rect x="34.6" y="25.6" width="30.8" height="4.4" rx="1.8" fill="url(#avGold)" stroke="#7A5410" stroke-width=".8"/>
+  <circle cx="50" cy="16.6" r="2" fill="#C0392B"/><circle cx="39.6" cy="18.6" r="1.3" fill="#4FA8DC"/><circle cx="60.4" cy="18.6" r="1.3" fill="#4FA8DC"/>
+  <ellipse cx="50" cy="31.6" rx="15" ry="2.4" fill="#000" opacity=".26"/>`;
+ if(ac==='gold')acc=`<path d="M28 78q22 9 44 0v8q-22 9-44 0Z" fill="url(#avGold)" stroke="#7A5410" stroke-width=".8"/>
+  <path d="M31 81.4q19 7.6 38 0" stroke="#7A5410" stroke-width=".7" fill="none" opacity=".55"/>
+  <circle cx="50" cy="84" r="3.2" fill="#7A5410"/><circle cx="50" cy="84" r="1.8" fill="#C0392B"/>`;
+ if(ac==='headband')acc=`<path d="M32.4 33.2q17.6-4.4 35.2 0v5.4q-17.6-4.4-35.2 0Z" fill="#B8352F"/>
+  <path d="M32.6 34.4q17.4-4.2 34.8 0" stroke="#FFD4CF" stroke-width=".8" fill="none" opacity=".32"/>
+  <path d="M67.6 35.4 80 30.6M67.6 37.4 80 42.4" stroke="#B8352F" stroke-width="2.8" stroke-linecap="round"/>`;
 
- const hrB=hs==='bald'?'#3A2B1E':shade(hr,-16);
- const brows=`<path d="M32.5 44.5 Q39 40.8 45.5 44" stroke="${hrB}" stroke-width="2.9" fill="none" stroke-linecap="round"/>
-  <path d="M54.5 44 Q61 40.8 67.5 44.5" stroke="${hrB}" stroke-width="2.9" fill="none" stroke-linecap="round"/>`;
- const nose=`<path d="M50 54.5 Q53.2 60 50.4 63 Q48.2 62 48.6 59.8" fill="none" stroke="${dark}" stroke-width="1.5" stroke-linecap="round" opacity=".8"/>
-  <ellipse cx="50.8" cy="62.6" rx="3.4" ry="1.3" fill="${dark}" opacity=".22"/>`;
- const blush=`<ellipse cx="33.5" cy="60.5" rx="4.8" ry="2.8" fill="#E86A6A" opacity=".22"/>
-  <ellipse cx="66.5" cy="60.5" rx="4.8" ry="2.8" fill="#E86A6A" opacity=".22"/>`;
- const bgHi=shade(bg,34),bgLo=shade(bg,-40);
+ const bgHi=shade(bg,26),bgLo=shade(bg,-30);
  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="avx">
  <defs><linearGradient id="avGold" x1="0" y1="0" x2="0" y2="1">
  <stop offset="0" stop-color="#FFF0C0"/><stop offset=".5" stop-color="#E8B23A"/><stop offset="1" stop-color="#A87518"/></linearGradient>
- <radialGradient id="bg${uid}" cx=".5" cy=".25" r=".9"><stop offset="0" stop-color="${bgHi}"/><stop offset=".55" stop-color="${bg}"/><stop offset="1" stop-color="${bgLo}"/></radialGradient>
- <radialGradient id="sk${uid}" cx=".4" cy=".3" r="1"><stop offset="0" stop-color="${shade(sk,22)}"/><stop offset=".55" stop-color="${sk}"/><stop offset="1" stop-color="${shade(sk,-24)}"/></radialGradient>
- <linearGradient id="hr${uid}" x1="0" y1="0" x2=".3" y2="1"><stop offset="0" stop-color="${hrHi}"/><stop offset=".35" stop-color="${hr}"/><stop offset="1" stop-color="${hrLo}"/></linearGradient>
- <linearGradient id="gm${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A3354"/><stop offset="1" stop-color="#0F1526"/></linearGradient>
- <linearGradient id="gh${uid}" x1="0" y1="0" x2=".2" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D9D9E2"/></linearGradient>
+ <linearGradient id="bg${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bgHi}"/><stop offset=".62" stop-color="${bg}"/><stop offset="1" stop-color="${bgLo}"/></linearGradient>
+ <radialGradient id="sk${uid}" cx=".38" cy=".3" r=".92"><stop offset="0" stop-color="${shade(sk,16)}"/><stop offset=".5" stop-color="${sk}"/><stop offset="1" stop-color="${shade(sk,-26)}"/></radialGradient>
+ <linearGradient id="hr${uid}" x1=".15" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="${hrHi}"/><stop offset=".38" stop-color="${hr}"/><stop offset="1" stop-color="${hrLo}"/></linearGradient>
+ <linearGradient id="gm${uid}" x1="0" y1="0" x2=".25" y2="1"><stop offset="0" stop-color="#2A3352"/><stop offset="1" stop-color="#111726"/></linearGradient>
+ <linearGradient id="gh${uid}" x1=".1" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="#FBFAF6"/><stop offset="1" stop-color="#CFCBBE"/></linearGradient>
+ <radialGradient id="lt${uid}" cx=".3" cy=".18" r=".78"><stop offset="0" stop-color="#FFE6B4" stop-opacity=".16"/><stop offset="1" stop-color="#FFE6B4" stop-opacity="0"/></radialGradient>
+ <linearGradient id="vg${uid}" x1="0" y1=".45" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".46"/></linearGradient>
  <clipPath id="cl${uid}"><circle cx="50" cy="50" r="48"/></clipPath>
- <clipPath id="shm${uid}"><path d="M17 46 Q17 14 50 13.5 Q83 14 83 46 L83 66 Q76 40 50 39 Q24 40 17 66 Z"/></clipPath></defs>
+ <clipPath id="shm${uid}"><path d="M29.6 44.6C29.6 25.6 38.6 16.8 50 16.8s20.4 8.8 20.4 27.8c-2.2-9.6-6.4-14.8-11.6-17.4-2.9-1.4-5.8-2-8.8-2s-5.9.6-8.8 2c-5.2 2.6-9.4 7.8-11.6 17.4Z"/><path d="M31.4 37.4c-1.1 8.4-1.4 14.8-.3 21.8L27.7 100H16.2l4.8-40.8c1.7-7 2.8-13.4 2.6-21.8Z"/><path d="M68.6 37.4c1.1 8.4 1.4 14.8.3 21.8L72.3 100h11.5l-4.8-40.8c-1.7-7-2.8-13.4-2.6-21.8Z"/></clipPath></defs>
  <g clip-path="url(#cl${uid})">
  <rect width="100" height="100" fill="url(#bg${uid})"/>
- <g fill="#fff" opacity=".07"><path d="M8 20 L26 6 L22 34 Z"/><path d="M92 62 L80 92 L70 72 Z"/></g>
- <path d="M0 62 L100 62 L100 100 L0 100 Z" fill="${bgLo}" opacity=".35"/>
+ <rect width="100" height="100" fill="url(#lt${uid})"/>
  ${hairBack}
- <path d="M21 100 Q21 78 36.5 74 L50 79.5 L63.5 74 Q79 78 79 100 Z" fill="url(#gm${uid})"/>
- <path d="M36.5 74 L50 79.5 L63.5 74" stroke="#E8B23A" stroke-width="1.2" fill="none" opacity=".75"/>
- <path d="M42.5 66 H57.5 V76.5 Q50 81 42.5 76.5 Z" fill="${dark}"/>
- <ellipse cx="27.2" cy="53" rx="4" ry="5.8" fill="${sk}" stroke="${dark}" stroke-width=".7"/><ellipse cx="72.8" cy="53" rx="4" ry="5.8" fill="${sk}" stroke="${dark}" stroke-width=".7"/>
- <ellipse cx="27.6" cy="53.4" rx="1.6" ry="2.6" fill="${dark}" opacity=".6"/><ellipse cx="72.4" cy="53.4" rx="1.6" ry="2.6" fill="${dark}" opacity=".6"/>
+ <path d="M13 100q2.6-19 18.6-25L50 81.6l18.4-6.6Q84.4 81 87 100Z" fill="url(#gm${uid})"/>
+ <path d="M31.6 75q7 8 18.4 8t18.4-8" fill="none" stroke="#E8B23A" stroke-width="1" opacity=".5"/>
+ <path d="M24 100q3-14 10-19M76 100q-3-14-10-19" fill="none" stroke="#0A0E1A" stroke-width="1.2" opacity=".3"/>
+ <path d="M42.4 59H57.6v17q-7.6 5-15.2 0Z" fill="${mid}"/>
+ <path d="M42.4 59H57.6v6q-7.6 5-15.2 0Z" fill="${dark}" opacity=".8"/>
+ <ellipse cx="31.7" cy="49" rx="2.8" ry="4.3" fill="${mid}"/><ellipse cx="68.3" cy="49" rx="2.8" ry="4.3" fill="${mid}"/>
+ <path d="M31.5 47.3q1.3 1.7.3 3.7M68.5 47.3q-1.3 1.7-.3 3.7" fill="none" stroke="${dark}" stroke-width=".75" opacity=".65" stroke-linecap="round"/>
  <path d="${HEAD}" fill="url(#sk${uid})"/>
- <path d="M31 62 Q37 77 50 79 Q63 77 69 62 Q62 75 50 76.5 Q38 75 31 62 Z" fill="${dark}" opacity=".28"/>
- <path d="${HEAD}" fill="none" stroke="${deep}" stroke-width=".9" opacity=".55"/>
- ${beard}${hairFront}${brows}${eyes}${nose}${blush}${mouth}${acc}
- <ellipse cx="37" cy="29" rx="13" ry="5.5" fill="#fff" opacity=".13" transform="rotate(-18 37 29)"/>
- <circle cx="50" cy="50" r="47.3" fill="none" stroke="rgba(0,0,0,.42)" stroke-width="1.4"/>
+ <path d="${HEAD}" fill="none" stroke="${deep}" stroke-width=".85" opacity=".42"/>
+ <path d="M56 22.4c7 3.4 10.4 10.4 10.4 21.6 0 11-3 19-9.2 25.2-2.6 2.6-5 4-7.2 4.6 4.4-.2 8-2.6 11.4-6.6C67 60.4 68 52.4 68 44c0-13-4-20-12-21.6Z" fill="${dark}" opacity=".3"/>
+ <path d="M40.4 24.6C35.6 29 33.8 35.6 33.8 44" fill="none" stroke="${rim}" stroke-width="1.5" opacity=".34" stroke-linecap="round"/>
+ <path d="M36 40.4q5.5-3 11 .1l-.4 1.9q-5.1-2.3-10.2.4Z" fill="${hrDp}" opacity=".9"/>
+ <path d="M64 40.4q-5.5-3-11 .1l.4 1.9q5.1-2.3 10.2.4Z" fill="${hrDp}" opacity=".9"/>
+ ${eyes}
+ <path d="M50 48.4q2 5.4.8 8.6-.6 1.4-2.2 1.2" fill="none" stroke="${dark}" stroke-width="1.2" opacity=".5" stroke-linecap="round"/>
+ <ellipse cx="50" cy="59.2" rx="3.4" ry="1.2" fill="${dark}" opacity=".2"/>
+ <circle cx="47.8" cy="58.8" r=".62" fill="${deep}" opacity=".42"/><circle cx="52.2" cy="58.8" r=".62" fill="${deep}" opacity=".42"/>
+ ${mouth}
+ <path d="M46 68.4q4 2.2 8 0" fill="none" stroke="${dark}" stroke-width="1" opacity=".22" stroke-linecap="round"/>
+ ${beard}${hairFront}${acc}
+ <rect width="100" height="100" fill="url(#vg${uid})"/>
+ <circle cx="50" cy="50" r="47.2" fill="none" stroke="rgba(0,0,0,.5)" stroke-width="1.6"/>
  </g></svg>`;
 }
 
@@ -22332,7 +22358,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.78';
+const APP_VER='5.79';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
