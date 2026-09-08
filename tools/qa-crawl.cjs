@@ -25,6 +25,7 @@ const CAPTURES=[
  ['skipAsk',R("Router.reset('welcomeScr');tutStart();push('skipAsk')")],
  // ── العب ──
  ['playScr',R("tab('play')")],
+ ['gamesScr',R("tab('play');push('gamesScr')")],
  ['playModesScr',R("push('playModesScr')")],
  ['partyScr',R("push('partyScr')")],
  ...['carrom','uno','mafia','draw','barra'].map(g=>[`gameHub-${g}`,R(`push('gameHub','${g}')`)]),

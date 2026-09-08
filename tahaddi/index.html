@@ -1738,6 +1738,26 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .clTap{display:inline-flex;align-items:center;min-height:36px;min-width:38px;padding:2px 4px;margin:-2px -4px;border-radius:8px}
 .lb[onclick]{min-height:40px;display:flex;flex-direction:column;justify-content:center}
 .btn{min-width:36px}
+
+/* ═══ 5.81: زرّ اللعب الكبير — باب واحد لكل الألعاب ═══ */
+.plPlay{width:100%;min-height:94px;border-radius:22px;position:relative;overflow:hidden;
+ display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;font-family:inherit;text-align:start;
+ background:linear-gradient(135deg,#F8DE9C 0%,#E8B23A 40%,#BE8A1B 72%,#F2D078 100%);
+ border:1px solid #FFF3CC;color:#1B1305;
+ box-shadow:0 22px 42px -24px rgba(232,178,58,.95),0 5px 0 -1px #8A6212,inset 0 1px 0 rgba(255,255,255,.62);
+ transition:transform .12s ease,box-shadow .12s ease}
+.plPlay:active{transform:translateY(3px);
+ box-shadow:0 12px 26px -20px rgba(232,178,58,.9),0 2px 0 -1px #8A6212,inset 0 1px 0 rgba(255,255,255,.5)}
+.plPlay::after{content:'';position:absolute;top:-60%;inset-inline-start:-24%;width:44%;height:220%;
+ transform:rotate(18deg);pointer-events:none;
+ background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.34),rgba(255,255,255,0))}
+.plPlayIc{width:56px;height:56px;border-radius:18px;flex:0 0 auto;display:grid;place-items:center;position:relative;
+ background:linear-gradient(160deg,rgba(28,18,4,.94),rgba(12,8,2,.9));
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 4px 10px rgba(0,0,0,.35)}
+.plPlayT{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;position:relative}
+.plPlayT b{font-size:24px;font-weight:900;letter-spacing:.4px;line-height:1}
+.plPlayT i{font-style:normal;font-size:11px;font-weight:800;opacity:.72;line-height:1.45}
+.plPlayGo{flex:0 0 auto;opacity:.6;position:relative}
 </style>
 </head>
 <body>
@@ -17882,7 +17902,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
-  'playScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
+  'playScr','gamesScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
@@ -22239,23 +22259,45 @@ function plHero(){
  </div>`;
 }
 
-/** شبكة ألعابك — كل لعبة برتبتها المستقلّة */
-function plGames(){
- const rows=GAME_DEFS.filter(g=>g.id!=='knowledge');
- return `<div class="plSec">
-  <div class="plSecT">${ico('cards',14)} ألعابك</div>
-  <div class="plGrid">${rows.map(g=>{
+/** شبكة الألعاب — كل لعبة برتبتها المستقلّة. all=صحيح تضمّ الأسئلة */
+function plGames(all){
+ const rows=all?GAME_DEFS.slice():GAME_DEFS.filter(g=>g.id!=='knowledge');
+ return `<div class="plGrid">${rows.map(g=>{
    const p=rankOf(g.id),col=plTierCol(p);
    const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
-   return `<button class="plCard" onclick="push('gameHub','${g.rmKey}')">
+   const goTo=g.rmKey?`push('gameHub','${g.rmKey}')`:`push('rankedScr')`;   // الأسئلة لا غرفة لها: بابها شاشة عالم المعرفة
+   return `<button class="plCard" onclick="${goTo}">
     <span class="em${p.placed?'':' un'}">${p.placed?tierEmblem(p.tier,36):'؟'}</span>
-    <span class="hd"><span class="art">${GAME_ART[g.rmKey]||''}</span></span>
+    <span class="hd"><span class="art">${GAME_ART[g.rmKey]||ico(g.icon,46)}</span></span>
     <div class="nm" style="margin-top:9px">${esc(g.ar)}</div>
     <div class="rk" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</div>
     <div class="plBarTrk" style="height:6px;margin-top:6px"><i style="width:${pct}%;background:${p.placed?col:'#3A4470'}"></i></div>
     <div class="pts">${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV)+' نقطة':'العب لتحديد رتبتك'}</div>
-   </button>`}).join('')}</div>
+   </button>`}).join('')}</div>`;
+}
+
+/** زرّ اللعب الكبير: باب واحد للألعاب كلّها بدل شبكة على الشاشة الرئيسية */
+function plPlay(){
+ return `<div class="plSec">
+  <button class="plPlay" onclick="push('gamesScr')">
+   <span class="plPlayIc">${ico('swords',30)}</span>
+   <span class="plPlayT"><b>العب</b><i>ستّ ألعاب — اختر لعبتك</i></span>
+   <span class="plPlayGo">${ico('back',18)}</span>
+  </button>
  </div>`;
+}
+
+/** قائمة الألعاب: كل ألعاب تحدّي في مكان واحد، والأسئلة منها */
+function gamesScr(){
+ rankAll();playCss();hubRegister();
+ if(!S.cards)S.cards=defaultCards();
+ go(`<div class="scr on">${tbar('اختر لعبتك')}
+ <div class="plWrap" style="padding-top:2px">
+  <div class="plSec">
+   <div class="plSecT">${ico('cards',14)} ألعابك</div>
+   ${plGames(true)}
+  </div>
+ </div></div>`);
 }
 
 function plRow(icon,t,s,call,acc,extra){
@@ -22288,7 +22330,7 @@ function playScr(){
  go(`<div class="scr on"><div class="plWrap">
  ${plStrip()}
  ${plHero()}
- ${plGames()}
+ ${plPlay()}
  <div class="plSec">
   ${plRow(ico('flame',20),'مباراة سريعة','ادخل مباراة غير مصنّفة مباشرة',"push('quickScr')",'#4C9AF0')}
  </div>
@@ -22425,7 +22467,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.80';
+const APP_VER='5.81';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
