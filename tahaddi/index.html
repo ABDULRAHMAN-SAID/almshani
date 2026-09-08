@@ -1808,6 +1808,32 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .vbFeedX em{font-style:normal;font-size:10.5px;font-weight:900}
 .vbFeedX svg{transform:rotate(-90deg);transition:transform .22s}
 .vbScene.full.feedBig .vbFeedX svg{transform:rotate(90deg)}
+
+/* تلميح برا السالفة: كلمة واحدة */
+.vbInW.bad{border-color:rgba(226,75,74,.85);box-shadow:0 0 0 1px rgba(226,75,74,.35)}
+.vbClueH{margin:5px 8px 0;font-size:10.5px;font-weight:800;color:#F09A98;display:flex;align-items:center;gap:5px}
+.vbClueH::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex:0 0 auto}
+
+/* اليد التي توزّع البطاقات: تدخل من أسفل يمين المجلس، أطراف أصابعها عند الرزمة، والذراع خارج الإطار */
+.vbHand{position:absolute;left:50%;top:50%;width:96px;height:120px;z-index:6;pointer-events:none;
+ transform:translate(-8%,72%) rotate(-16deg);opacity:0;transform-origin:30% 100%;
+ transition:transform .55s cubic-bezier(.2,.9,.3,1.15),opacity .4s ease;
+ filter:drop-shadow(0 12px 18px rgba(0,0,0,.7))}
+.vbHand.in{transform:translate(-8%,8%) rotate(-16deg);opacity:1}
+.vbHand svg{width:100%;height:100%;display:block}
+.vbHand.flick{animation:vbFlick .32s ease}
+@keyframes vbFlick{
+ 0%{transform:translate(-8%,8%) rotate(-16deg)}
+ 45%{transform:translate(-2%,0%) rotate(-28deg)}
+ 100%{transform:translate(-8%,8%) rotate(-16deg)}}
+@media (prefers-reduced-motion:reduce){.vbHand{transition:none}.vbHand.flick{animation:none}}
+/* 5.85: «جاهز» بجانب العدّاد — ينهي المرحلة الموقوتة في الحال */
+.vbSkip{flex:0 0 auto;margin-inline-start:8px;height:34px;min-width:74px;padding:0 11px;border-radius:10px;
+ border:1px solid rgba(232,178,58,.6);background:linear-gradient(180deg,rgba(232,178,58,.22),rgba(232,178,58,.1));
+ color:#FFE9A8;font-family:inherit;font-size:12px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+.vbSkip:active{transform:scale(.96)}
+.vbClock.hasSkip{min-height:42px}
+.vbScene.full .vbClock.hasSkip{min-height:42px}
 </style>
 </head>
 <body>
@@ -22633,7 +22659,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.84';
+const APP_VER='5.85';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -30974,13 +31000,14 @@ function vbTurn(icon,title,desc,sec){
 function vbTurnHide(){const el=document.getElementById('vbTurn');if(el)el.hidden=true}
 function vbFmt(sec){sec=Math.max(0,Math.ceil(sec));return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0')}
 /** مؤقّت المرحلة: يرسم في شريط المرحلة ولوحة الدور، وينفّذ onEnd عند الصفر — معطّل في الاختبارات (VB.fast) */
-function vbTimer(sec,onEnd){
+function vbTimer(sec,onEnd,skip){
  vbTimerStop();
  if(!VB||!sec||VB.over)return;
  const sc=vbScale();if(VB.fast&&!sc)return;   // في الاختبارات السريعة بلا مقياس: لا مؤقّتات
- const k=sc||1,my=VB;VB.timer={end:Date.now()+sec*1000*k,total:sec,onEnd,k};
+ const k=sc||1,my=VB;VB.timer={end:Date.now()+sec*1000*k,total:sec,onEnd,k,skip:!!skip};
+ vbSkipPaint();
  const tick=()=>{if(VB!==my||!VB.timer){clearInterval(my.tmI);my.tmI=null;return}
-  const left=Math.max(0,VB.timer.end-Date.now())/1000/VB.timer.k;vbTimerDraw(left,VB.timer.total);
+  const left=Math.max(0,VB.timer.end-Date.now())/1000/VB.timer.k;vbTimerDraw(left,VB.timer.total);vbSkipPaint();   // يعود بعد إعادة رسم المسرح
   if(left<=0){const f=VB.timer.onEnd;vbTimerStop();try{if(f)f()}catch(e){}}};
  VB.tmI=setInterval(tick,Math.max(20,Math.min(250,250*k)));tick();
 }
@@ -30992,7 +31019,18 @@ function vbTimerExtend(min){
  const t=VB.timer,left=(t.end-Date.now())/1000/t.k;
  if(left<min)t.end=Date.now()+min*1000*t.k;
 }
-function vbTimerStop(){if(VB&&VB.tmI){clearInterval(VB.tmI);VB.tmI=null}if(VB)VB.timer=null;vbTimerDraw(null)}
+function vbTimerStop(){if(VB&&VB.tmI){clearInterval(VB.tmI);VB.tmI=null}if(VB)VB.timer=null;vbTimerDraw(null);vbSkipPaint()}
+/* ═══ 5.85: «جاهز» ملتصق بالعدّاد ═══
+   كل مرحلة موقوتة لا تنتظر كتابتك ولا اختيارك تعرض «جاهز» بجانب الوقت المتبقّي:
+   من ضغطها انتهت المرحلة في الحال بدل انتظار العدّاد. */
+function vbSkipPaint(){
+ const w=document.getElementById('vbTmW');if(!w)return;
+ const on=!!(VB&&!VB.over&&VB.timer&&VB.timer.skip);
+ let b=w.querySelector('.vbSkip');
+ w.classList.toggle('hasSkip',on);
+ if(!on){if(b)b.remove();return}
+ if(!b)w.insertAdjacentHTML('beforeend',`<button class="vbSkip" onclick="vbReadyNow()">${ico('check',12)} جاهز</button>`);
+}
 function vbTimerDraw(left,total){
  const t=document.getElementById('vbTm'),b=document.getElementById('vbTmBig'),arc=document.getElementById('vbRingArc');
  if(t)t.textContent=left==null?'—':vbFmt(left);   // رقاقة المؤقّت لا تبقى فارغة بين المراحل
@@ -31063,11 +31101,16 @@ function vbDeal(kind){
  if(VB.fast){VB.dealt=true;vbSeats();return}
  const n=VB.names.length,my=VB;
  const deck=document.createElement('div');deck.className='vbDeck';deck.innerHTML='<i></i><i></i><i></i>';st.appendChild(deck);
+ // 5.85: يد تدخل من أسفل المجلس وتُطاير البطاقات واحدة واحدة
+ const hand=document.createElement('div');hand.className='vbHand';hand.innerHTML=(typeof HAND_SVG!=='undefined'?HAND_SVG:'');st.appendChild(hand);
+ requestAnimationFrame(()=>hand.classList.add('in'));
+ const flick=()=>{hand.classList.remove('flick');void hand.offsetWidth;hand.classList.add('flick')};
  let k=0;
  VB.names.map((_,i)=>i).filter(i=>i!==0).concat([0]).forEach(i=>{const p=vbSeatPos(i,n);const c=document.createElement('div');c.className='vbFly';st.appendChild(c);   // الآليون أوّلًا وبطاقتك آخرًا
-  setTimeout(()=>{if(VB!==my){c.remove();return}c.style.left=p.x+'%';c.style.top=p.y+'%';c.style.transform='translate(-50%,-50%) rotate('+((i*37)%30-15)+'deg) scale(.7)';
+  setTimeout(()=>{if(VB!==my){c.remove();return}flick();c.style.left=p.x+'%';c.style.top=p.y+'%';c.style.transform='translate(-50%,-50%) rotate('+((i*37)%30-15)+'deg) scale(.7)';
    setTimeout(()=>{c.remove();if(VB!==my)return;if(i===0)vbDealReveal(kind);else{const av=st.querySelector(`.vbSeat[data-seat="${i}"] .vbAv`);if(av&&!av.querySelector('.vbSeatCard'))av.insertAdjacentHTML('beforeend','<span class="vbSeatCard"></span>')}},560)},180+k*150);k++});
- setTimeout(()=>{if(VB!==my)return;deck.remove();VB.dealt=true;vbSeats()},180+k*150+700);
+ setTimeout(()=>{if(VB!==my)return;hand.classList.remove('in')},180+(k-1)*150+300);   // تنسحب مع آخر رمية قبل أن تنقلب بطاقتك
+ setTimeout(()=>{if(VB!==my)return;deck.remove();hand.remove();VB.dealt=true;vbSeats()},180+k*150+700);
 }
 function vbDealReveal(kind){
  const st=document.getElementById('vbStage');if(!st||VB.fast)return;
@@ -31146,6 +31189,35 @@ function vbRace(p,ms){if(!VB||VB.fast)return p;return Promise.race([p,new Promis
 function vbWait(ms){return new Promise(r=>{if(VB.fast)return r();VB.tm=setTimeout(r,ms)})}
 function vbAlive(){return !!(VB&&document.getElementById('vbFeed'))}
 /** يقرأ نصّ المدخل ويفرّغه */
+/* ═══ 5.85: تلميح برا السالفة كلمة واحدة ═══
+   من كتب أكثر من كلمة، أو كتب الكلمة السرّية نفسها، لا يستطيع الإرسال أصلًا. */
+function vbClueBad(t){
+ if(!VB||!VB.oneWord)return '';
+ const v=String(t||'').trim();
+ if(!v)return '';
+ if(typeof brSaidWord==='function'&&brSaidWord(v))return 'لا تقل الكلمة نفسها';   // الكلمة السرّية أوّلًا ولو كانت كلمتين
+ if(/\s/.test(v))return 'التلميح كلمة واحدة فقط';
+ return '';
+}
+function vbClueCheck(){
+ const el=document.getElementById('vbTxt');if(!el)return;
+ const w=el.closest('.vbInW'),bad=vbClueBad(el.value);
+ if(w)w.classList.toggle('bad',!!bad);
+ let h=document.getElementById('vbClueH');
+ if(bad){
+  if(!h&&w){w.insertAdjacentHTML('afterend','<div class="vbClueH" id="vbClueH"></div>');h=document.getElementById('vbClueH')}
+  if(h)h.textContent=bad;
+ }else if(h)h.remove();
+ const b=document.querySelector('.vbSend');
+ if(b&&!b.classList.contains('cool'))b.disabled=!!bad;
+}
+/** «جاهز»: لا تنتظر المؤقّت — أنهِ المرحلة الآن */
+function vbReadyNow(){
+ if(!VB||VB.over)return;
+ const t=VB.timer;
+ if(t&&t.skip){const f=t.onEnd;vbTimerStop();if(f)try{f()}catch(e){}return}
+ if(VB.g==='mafia'&&typeof mfReady==='function')mfReady();
+}
 function vbRead(){const el=document.getElementById('vbTxt');const v=el?el.value.trim():'';if(el)el.value='';return v}
 /** الشريط السفلي: تفاعلات سريعة، زرّ التعبيرات، الكتابة والإرسال، الصوت، «أشكّ فيه»، والزرّ الرئيسي (جاهز / تلميحي / تصفح لاعب / مخصّص) */
 function vbBar(o){
@@ -31153,23 +31225,24 @@ function vbBar(o){
  const quick=(VB_QUICK[VB.g]||[]).map(([ic,t],k)=>`<button class="vbQ" onclick="vbReact(${k})">${vbQIcon(ic)} ${t}</button>`).join('');
  const mic=(window.SpeechRecognition||window.webkitSpeechRecognition)?`<button class="vbIcoB" id="vbMic" onclick="vbMic()" title="تحدّث">${VB_MIC}</button>`:'';
  const fn=o.fn||'vbNoop';
+ VB.oneWord=VB.g==='barra'&&!!o.clue;   // 5.85: التلميح كلمة واحدة
  const primary=o.primary!=null?o.primary
-  :o.ready?`<button class="vbGo${VB.meReady?' on':''}" id="vbReady" onclick="mfReady()">${ico('check',14)} ${VB.meReady?'بانتظار الباقين':'جاهز'}</button>`
+  :o.ready?`<button class="vbGo${VB.meReady?' on':''}" id="vbReady" onclick="mfReady()">${ico('check',14)} ${VB.meReady?'بانتظار الباقين':'جاهز — إلى التصويت'}</button>`
   :o.clue?`<button class="vbGo" onclick="${fn}()">${ico('sound',14)} تلميحي</button>`
   :`<button class="vbGo alt" onclick="vbBrowse()">${ico('user',14)} تصفح لاعب</button>`;
  const roleQ=VB.g==='mafia'&&mfRole(0)==='محقق'&&Object.keys(VB.myKnow||{}).length&&!VB.voting&&!VB.night?`<button class="vbQ gold" onclick="mfAnnounce()">${ico('search',13)} أعلن فحصي</button>`:'';
  vbAct(`<div class="vbQuick">${roleQ}${quick}</div>
  <div class="vbBar"><button class="vbIcoB" onclick="vbEmoteBar()" title="تعبير">${typeof face==='function'?face((typeof myEmoteDeck==='function'&&myEmoteDeck()[0])||'laugh',26):ico('sparkle',18)}</button>
-  <div class="vbInW"><input id="vbTxt" maxlength="160" placeholder="${o.ph||'اكتب رسالتك…'}" autocomplete="off" data-fn="${fn}"${o.disabled?' disabled':''} onkeydown="if(event.key==='Enter'){event.preventDefault();${fn}()}"><button class="vbSend" onclick="${fn}()" title="إرسال">${ico('next',15)}</button></div>${mic}</div>
+  <div class="vbInW"><input id="vbTxt" maxlength="160" placeholder="${o.clue&&VB.g==='barra'?'كلمة واحدة تلمّح…':(o.ph||'اكتب رسالتك…')}" autocomplete="off" oninput="vbClueCheck()" data-fn="${fn}"${o.disabled?' disabled':''} onkeydown="if(event.key==='Enter'){event.preventDefault();${fn}()}"><button class="vbSend" onclick="${fn}()" title="إرسال">${ico('next',15)}</button></div>${mic}</div>
  <div class="vbBar vbBar2"><button class="vbSus" onclick="vbSuspect()">${ico('target',13)} ${VB.g==='barra'?'أشتبه فيه':'أشك فيه'}</button>${primary}</div>`);
- vbSayCoolPaint();   // 5.59: لا نسرق التركيز — لوحة المفاتيح تفتح حين تضغط مكان الكتابة وحدك
+ vbSayCoolPaint();vbClueCheck();   // 5.59: لا نسرق التركيز — لوحة المفاتيح تفتح حين تضغط مكان الكتابة وحدك
 }
 /** مهلة الخمس ثوانٍ بين رسالتين: زرّ الإرسال وحده يُعطَّل بعدّاد، وصندوق الكتابة يبقى مفتوحًا تكتب فيه متى شئت */
 function vbSayCoolPaint(){
  const b=document.querySelector('.vbSend');if(!b)return;
  const left=Math.ceil(((VB&&VB.lastSay?VB.lastSay:0)+vbSayGap()-Date.now())/1000);
  if(left>0){b.disabled=true;b.classList.add('cool');b.textContent=left}
- else{b.disabled=false;b.classList.remove('cool');b.innerHTML=ico('next',15)}
+ else{b.disabled=false;b.classList.remove('cool');b.innerHTML=ico('next',15);if(typeof vbClueCheck==='function')vbClueCheck()}
 }
 function vbSayCool(){
  if(!VB)return;VB.lastSay=Date.now();vbSayCoolPaint();
@@ -31504,7 +31577,7 @@ async function mfCheck(i,auto){
  const sec=auto?8:20;
  vbTurn('search','نتيجة الفحص','الفجر يحلّ بانتهاء الوقت أو بضغطة الزرّ',sec);
  vbAct(`<button class="rbtn" onclick="mfResolveNight()"><span>${ico('sound',14)} استيقظت المدينة</span></button>`);
- vbTimer(sec,()=>mfResolveNight());
+ vbTimer(sec,()=>mfResolveNight(),true);
 }
 async function mfResolveNight(){
  if(VB.over||VB.nightDone===VB.day)return;VB.nightDone=VB.day;vbTimerStop();VB.pick=null;
@@ -32058,7 +32131,7 @@ async function mfTally(my){
  VB.day++;VB.voting=false;VB.tallying=false;
  vbTurn('timer','انتهى اليوم','الليلة تبدأ بانتهاء الوقت أو بضغطة الزرّ',15);
  vbAct(`<button class="rbtn" onclick="mfNight()"><span>${ico('timer',14)} الليلة ${VB.day} — نامت المدينة</span></button>`);
- vbTimer(15,()=>{if(!VB.over&&!VB.night)mfNight()});
+ vbTimer(15,()=>{if(!VB.over&&!VB.night)mfNight()},true);
 }
 function mfWinCheck(){
  const m=VB.alive.filter(i=>mfRole(i)==='مافيا').length,o=VB.alive.length-m;
@@ -32293,7 +32366,7 @@ async function brNext(){
  }
  vbTalk(null);
  if(VB.round<2){vbTurn('next','انتهت الجولة الأولى','ناقشوا ما سمعتم — الجولة الثانية تبدأ بانتهاء الوقت أو بالزرّ',12);
-  vbBar({ph:'علّق على التلميحات…',fn:'brChat',primary:`<button class="vbGo" onclick="brRound()">${ico('next',14)} الجولة الثانية</button>`});vbTimer(12,()=>brRound());return}
+  vbBar({ph:'علّق على التلميحات…',fn:'brChat',primary:`<button class="vbGo" onclick="brRound()">${ico('next',14)} الجولة الثانية</button>`});vbTimer(12,()=>brRound(),true);return}
  brAsk();
 }
 /** شريط النقاش المفتوح في برا السالفة: تكتب تعليقك في أي وقت، رسالة كل خمس ثوانٍ */
@@ -32322,6 +32395,9 @@ function brSkipClue(){
 }
 async function brSend(){
  if(VB.over||VB.replying)return;
+ const el0=document.getElementById('vbTxt'),raw=el0?el0.value.trim():'';
+ const bad=vbClueBad(raw);
+ if(bad){toast(bad);vbClueCheck();return}   // 5.85: لا يُرسل تلميح بأكثر من كلمة ولا الكلمة نفسها
  const text=vbRead();if(!text)return;vbTimerStop();
  if(!brSpyMe()&&brSaidWord(text)){
   vbMsg({k:'me',i:0,t:text});vbAct('');
@@ -32371,8 +32447,8 @@ async function brAnswer(auto){
 }
 function brMyAskBar(){
  vbTurn('search','اسأل أحدهم','اكتب اسمه وسؤالك — أو انتقل إلى التصويت. بانتهاء الوقت يبدأ التصويت',30);
- vbBar({ph:'مثل: يا سلطان، وين يكون؟',fn:'brMyAsk',primary:`<button class="vbGo" onclick="brVote()">${ico('scale',14)} التصويت</button>`});
- vbTimer(30,()=>brVote());
+ vbBar({ph:'مثل: يا سلطان، وين يكون؟',fn:'brMyAsk',primary:`<button class="vbGo" onclick="brVote()">${ico('scale',14)} جاهز — إلى التصويت</button>`});
+ vbTimer(30,()=>brVote(),true);
 }
 async function brMyAsk(){
  if(VB.over||VB.voting||VB.replying)return;
