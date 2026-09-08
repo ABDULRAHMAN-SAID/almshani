@@ -63,7 +63,11 @@ var SFX=(function(){
   lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
   strike:function(t){noise(t,0.06,0.28,2400);tone(170,t,0.05,'square',0.05)},
   pot:   function(t){tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)},
-  coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)}
+  coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)},
+  /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
+  tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},
+  tickHot:function(t){noise(t,0.022,0.115,7000);tone(2050,t,0.034,'square',0.062,1500)},
+  timeUp:function(t){tone(300,t,0.34,'triangle',0.16,120);noise(t,0.09,0.10,1200)}
  };
  var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15]};
 
