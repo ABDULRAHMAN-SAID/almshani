@@ -213,6 +213,29 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
    check('معرّف غير صالح يُرفض',badId.t==='error'&&badId.code==='bad_id');
    await D1.close();await D2.close();
   }
+  /* ═══ رمز الصداقة القصير: يُقرأ ويُملى، ويضيف كما يضيف المعرّف الطويل ═══ */
+  {
+   const A=client(),B=client();
+   const wa2=await hello(A,undefined,'خالد'),wb2=await hello(B,undefined,'دانة');
+   const CODE=/^[2-9A-HJ-NP-Z]{6}$/;
+   check('الترحيب يحمل رمز صداقة من ستّة محارف',CODE.test(String(wa2.code||'')),String(wa2.code));
+   check('رمز كل حساب مختلف',wa2.code!==wb2.code,wa2.code+' / '+wb2.code);
+   const byCode=await A.req({t:'friendAdd',id:wb2.code});
+   check('الإضافة بالرمز تُرسل الطلب',(byCode.reqOut||[]).some(f=>f.id===wb2.id),JSON.stringify(byCode).slice(0,140));
+   check('قائمة الأصدقاء تحمل رمز الطرف الآخر',(byCode.reqOut||[]).some(f=>f.code===wb2.code),JSON.stringify(byCode).slice(0,140));
+   const lower=await B.req({t:'friendAdd',id:' '+String(wa2.code).toLowerCase()+' '});
+   check('الرمز يُقبل بأحرف صغيرة وبمسافات — والطلب المقابل يتمّ الصداقة',
+    (lower.friends||[]).some(f=>f.id===wa2.id),JSON.stringify(lower).slice(0,140));
+   const mine=await A.req({t:'friendAdd',id:wa2.code});
+   check('رمزك أنت يُرفض',mine.t==='error'&&mine.code==='self',JSON.stringify(mine));
+   const ghost=await A.req({t:'friendAdd',id:'ZZZZZZ'});
+   check('رمز لا صاحب له يُرفض',ghost.t==='error'&&ghost.code==='not_found',JSON.stringify(ghost));
+   const bad=await A.req({t:'friendAdd',id:'ABC'});
+   check('رمز قصير يُرفض',bad.t==='error'&&bad.code==='not_found',JSON.stringify(bad));
+   const back=await hello(client(),wa2.token);
+   check('الرمز يبقى نفسه للحساب نفسه',back.code===wa2.code,back.code+' / '+wa2.code);
+   await A.close();await B.close();
+  }
   await P.close();await Q.close();
   server.kill('SIGTERM');await sleep(400);server=startServer();await sleep(700);
   const P2=client();await hello(P2,wa.token);

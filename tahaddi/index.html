@@ -1834,6 +1834,30 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .vbSkip:active{transform:scale(.96)}
 .vbClock.hasSkip{min-height:42px}
 .vbScene.full .vbClock.hasSkip{min-height:42px}
+/* 5.86: بطاقة رمز الصداقة والدعوة — الرمز هو البطل، والمعرّف الطويل سطر صغير تحته */
+.frCard{border:1px solid rgba(232,178,58,.45);border-radius:17px;padding:14px 14px 12px;margin-bottom:12px;
+ background:linear-gradient(180deg,rgba(46,35,12,.92),rgba(18,14,6,.9));text-align:center}
+.frCardT{font-size:10.5px;font-weight:900;color:#E7D6A6;display:flex;align-items:center;justify-content:center;gap:5px}
+.frCode{font-size:32px;font-weight:900;letter-spacing:7px;color:var(--gold);margin:9px 0 12px;cursor:pointer;
+ font-family:ui-monospace,Menlo,Consolas,monospace;text-shadow:0 3px 14px rgba(232,178,58,.4);min-height:40px;
+ display:flex;align-items:center;justify-content:center;padding-inline-start:7px}
+.frCardA{display:flex;gap:8px}
+.frCardA>*{flex:1 1 0;min-height:42px;margin:0;font-size:12.5px;white-space:nowrap;padding-inline:8px}
+.frIdSm{margin-top:9px;font-size:9.5px;color:var(--mut);font-family:ui-monospace,Menlo,Consolas,monospace;
+ letter-spacing:.4px;cursor:pointer;min-height:20px;padding:3px 0}
+.fin.frCin{text-align:center;letter-spacing:5px;font-size:19px;font-weight:900;text-transform:uppercase}
+/* دعوة إلى الغرفة: شريط أزرار تحت تذكرة الكود */
+.rmTkA{display:flex;gap:7px;margin-top:11px}
+.rmTkA>*{flex:1 1 0;min-height:40px;margin:0;font-size:11.5px;white-space:nowrap;padding-inline:6px}
+.frPick{display:flex;align-items:center;gap:9px;width:100%;padding:9px 11px;margin-bottom:7px;
+ border-radius:13px;border:1px solid var(--bd);background:var(--surf);cursor:pointer;text-align:start;color:var(--tx)}
+.frPick .n{flex:1;min-width:0;font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frPick .s{font-size:10px;color:var(--mut);flex-shrink:0}
+/* 5.86: شارة الطلبات الواصلة على صفّ الأصدقاء */
+.plNew{position:absolute;inset-inline-end:38px;top:50%;transform:translateY(-50%);min-width:20px;height:20px;
+ border-radius:10px;background:var(--no);color:#fff;font-size:11px;font-weight:900;
+ display:flex;align-items:center;justify-content:center;padding:0 6px}
+.plRow{position:relative}
 </style>
 </head>
 <body>
@@ -15401,7 +15425,7 @@ var NET=(function(){
  }
  function fire(k,v){(listeners[k]||[]).forEach(function(f){try{f(v)}catch(e){}})}
  function setState(patch){Object.assign(st,patch);fire('state',state())}
- function state(){return {mode:st.mode,connected:st.connected,id:st.id,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
+ function state(){return {mode:st.mode,connected:st.connected,id:st.id,code:st.code,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
  function on(k,f){if(!listeners[k])listeners[k]=[];listeners[k].push(f);return function(){listeners[k]=listeners[k].filter(function(x){return x!==f})}}
 
  function send(m){if(ws&&ws.readyState===1){try{ws.send(JSON.stringify(m))}catch(e){}return true}return false}
@@ -15421,7 +15445,7 @@ var NET=(function(){
  function onMsg(m){
   if(m.t==='welcome'){
    var resumed=dropped&&st.peer&&m.peer===st.peer;
-   setState({connected:true,id:m.id,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
+   setState({connected:true,id:m.id,code:m.code||null,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
    backoff=1000;
    if(Object.keys(myPresence).length)send({t:'presence',patch:myPresence});   // بعد إعادة الاتصال يعود حضوري
    settle(m);fire('welcome',m);
@@ -16018,7 +16042,7 @@ function netBoot(){
  });
  NET.boot({token:acc.token,name:S.name}).then(st=>{
   if(st.mode!=='server'||!st.connected)return;
-  S.account={token:st.token,id:st.id,name:st.name};
+  S.account={token:st.token,id:st.id,code:st.code||(S.account&&S.account.code)||null,name:st.name};
   if(st.name)S.name=st.name;                      // الاسم ملك الحساب على الخادم
   return NET.loadCloud().then(c=>{netMergeCloud(c);saveState()}).then(()=>iapSync(true));
  }).catch(()=>{});
@@ -18546,6 +18570,44 @@ function legalScr(k){
 /* ═══════════ الأصدقاء (5.59): بالمعرّف، أو بمن قابلته في غرفة ═══════════ */
 let FR={f:[],in:[],out:[],err:null,busy:0};
 function frMyId(){try{return (typeof NET!=='undefined'&&NET.state().id)||(S.account&&S.account.id)||null}catch(e){return (S.account&&S.account.id)||null}}
+/* ═══ رمز الصديق والمشاركة (5.86) ═══
+   المعرّف الطويل لا يُملى على أحد؛ الرمز ستّة محارف تُقال في المجلس وتُكتب بلا خطأ.
+   يأتي من الخادم مع الترحيب ويُحفظ مع الحساب، فيبقى ظاهرًا حتى بلا اتصال. */
+function frMyCode(){try{return (typeof NET!=='undefined'&&NET.state().code)||(S.account&&S.account.code)||null}catch(e){return (S.account&&S.account.code)||null}}
+const FR_CODE_RE=/^[2-9A-HJ-NP-Z]{6}$/;
+function frCodeNorm(v){return String(v||'').toUpperCase().replace(/[^0-9A-Z]/g,'')}
+/** رابط اللعبة كما فُتحت — هو ما يشاركه اللاعب مع من يدعوه */
+function shareUrl(){try{return location.origin+location.pathname}catch(e){return ''}}
+/** المشاركة: ورقة النظام إن وُجدت، وإلّا النسخ، وإلّا عرض النصّ ليُنسخ يدويًّا */
+function shareOut(text,title){
+ const t=String(text||'');
+ try{if(navigator.share)return navigator.share({title:title||'تحدّي',text:t}).then(()=>{},()=>{})}catch(e){}
+ return copyOut(t,'نُسخ — الصقه لمن تدعوه');
+}
+/** النسخ إلى الحافظة مع بديل قديم للمتصفّحات التي تمنعها */
+function copyOut(text,okMsg){
+ const t=String(text||'');
+ const fall=()=>{try{const a=document.createElement('textarea');a.value=t;a.setAttribute('readonly','');
+   a.style.cssText='position:fixed;top:-1000px';document.body.appendChild(a);a.select();
+   const ok=document.execCommand('copy');a.remove();if(ok){toast(okMsg||'نُسخ');return}}catch(e){}
+  toast(t)};
+ try{if(navigator.clipboard&&navigator.clipboard.writeText)
+  return navigator.clipboard.writeText(t).then(()=>toast(okMsg||'نُسخ'),fall)}catch(e){}
+ fall();
+}
+/** نصّ الدعوة: الرمز أوّلًا لأنه ما سيكتبه المدعوّ، ثم الرابط */
+function frInviteText(){
+ const c=frMyCode(),u=shareUrl();
+ return `العب معي في تحدّي.${c?`\nرمز صداقتي: ${c}`:''}${u?`\n${u}`:''}`;
+}
+function frShareMe(){
+ if(!frMyCode())return toast('يظهر رمزك بعد الاتصال بالخادم');
+ shareOut(frInviteText(),'دعوة إلى تحدّي');
+}
+function frCopyCode(){
+ const c=frMyCode();if(!c)return toast('يظهر رمزك بعد الاتصال بالخادم');
+ copyOut(c,'نُسخ رمزك '+c);
+}
 function frAv(a){return a&&typeof a==='object'?avatarSVG(a,34):personArt('لاعب',34)}
 async function frLoad(){
  if(!netOnline())return;
@@ -18648,10 +18710,20 @@ function dmSend(){
   .catch(e=>{toast(e&&e.message?e.message:'تعذّر الإرسال');if(el)el.value=v});
 }
 function frAdd(){
- const el=document.getElementById('frId');const v=el?el.value.trim().replace(/^#/,''):'';
- if(!/^p[0-9a-f]{12}$/.test(v))return toast('المعرّف يبدأ بـ p ثم 12 حرفًا');
+ const el=document.getElementById('frId');const raw=el?el.value.trim().replace(/^#/,''):'';
+ if(!raw)return toast('اكتب رمز صديقك');
+ const code=frCodeNorm(raw);
+ const want=/^p[0-9a-f]{12}$/.test(raw)?raw:(FR_CODE_RE.test(code)?code:null);
+ if(!want)return toast('الرمز ستّة محارف — بلا صفر ولا حرف O أو I');
+ if(want===frMyCode()||want===frMyId())return toast('هذا رمزك أنت');
  if(el)el.value='';
- frDo(NET.friendAdd,v,'أُرسل الطلب');
+ frDo(NET.friendAdd,want,'أُرسل الطلب — يظهر في «طلبات أرسلتها»');
+}
+/** حقل الرمز: أحرف كبيرة وستّة محارف فقط أثناء الكتابة */
+function frCodeInput(el){
+ if(!el)return;
+ const v=frCodeNorm(el.value).slice(0,6);
+ if(el.value!==v)el.value=v;
 }
 function frAddMet(id){frDo(NET.friendAdd,id,'أُرسل الطلب')}
 function frAccept(id){frDo(NET.friendAccept,id,'صرتما صديقين')}
@@ -18673,19 +18745,24 @@ function frRow(o,acts){
 function friendsScr(keep){
  const id=frMyId(),on=netOnline();
  const met=(Array.isArray(S.met)?S.met:[]).filter(m=>m&&m.id&&!FR.f.some(f=>f.id===m.id)&&!FR.out.some(f=>f.id===m.id));
+ const code=frMyCode();
  const body=`
+ <div class="frCard"><div class="frCardT">${ico('shield',13)} رمز صداقتك</div>
+  <div class="frCode" dir="ltr" onclick="frCopyCode()">${code?esc(code):'——————'}</div>
+  <div class="frCardA">
+   <button class="rbtn sm" onclick="frShareMe()"><span>${ico('web',13)} شارك رمزك</span></button>
+   <button class="btn g sm" onclick="frCopyCode()">${ico('scroll',13)} نسخ</button></div>
+  <div class="note" style="margin-top:9px">${code?'قل هذا الرمز لمن تريد أن يضيفك — ستّة محارف لا أكثر.'
+   :'يظهر رمزك بعد الاتصال بالخادم.'}</div>
+  <div class="frIdSm" dir="ltr" onclick="frCopyId()">${id?esc(id):'—'}</div>
+ </div>
  <div class="li" style="margin-bottom:10px"><div style="padding:2px">
-  <div class="mtl" style="font-size:13px;margin-bottom:6px">معرّفك</div>
+  <div class="mtl" style="font-size:13px;margin-bottom:6px">أضف صديقًا برمزه</div>
   <div class="frTop">
-   <div class="frId big" dir="ltr">${id?esc(id):'—'}</div>
-   <button class="rbtn sm" onclick="frCopyId()"><span>${ico('scroll',13)} نسخ</span></button></div>
-  <div class="note" style="margin-top:7px">أعطِ معرّفك لمن تريد أن يضيفك، أو أضفه أنت بمعرّفه.</div>
- </div></div>
- <div class="li" style="margin-bottom:10px"><div style="padding:2px">
-  <div class="mtl" style="font-size:13px;margin-bottom:6px">أضف بالمعرّف</div>
-  <div class="frTop">
-   <input id="frId" class="fin" dir="ltr" placeholder="p0123456789ab" maxlength="13" autocomplete="off">
+   <input id="frId" class="fin frCin" dir="ltr" placeholder="AB3K9Z" maxlength="13" autocomplete="off"
+    oninput="frCodeInput(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();frAdd()}">
    <button class="rbtn sm" onclick="frAdd()"><span>${ico('plus',13)} إضافة</span></button></div>
+  <div class="note" style="margin-top:7px">الرمز ستّة محارف. ويقبل الحقل المعرّف الطويل أيضًا.</div>
  </div></div>
  ${!on?`<div class="note" style="margin-bottom:10px">${ico('info',13)} الأصدقاء يحتاجون اتصالًا بالخادم. اتصل ثم عد.</div>`:''}
  ${FR.in.length?`<div class="frSec">طلبات وصلتك (${FR.in.length})</div>
@@ -18700,7 +18777,7 @@ function friendsScr(keep){
  ${met.length?met.map(m=>frRow({id:m.id,name:m.n,av:m.av},`<button class="rbtn sm" onclick="frAddMet('${esc(m.id)}')"><span>${ico('plus',13)} أضف</span></button>`)).join('')
   :`<div class="note">من تلعب معهم في الغرف الأونلاين يظهرون هنا لتضيفهم بلمسة.</div>`}`;
  const y=keep?window.scrollY:0;
- go(`<div class="scr on">${tbar('الأصدقاء')}${body}</div>`);
+ go(`<div class="scr on">${tbar('الأصدقاء والدعوة')}${body}</div>`);
  if(keep)window.scrollTo(0,y);
  if(!keep&&on&&!FR.busy)frLoad();
 }
@@ -22529,6 +22606,8 @@ function playScr(){
  <div class="plSec">
   ${plRow(ico('group',20),'ليلة العائلة','ألعاب جماعية للأصدقاء والعائلة',"push('partyScr')",'#8B5CF0',
    `<span class="plMini">${fam.map(k=>`<span>${GAME_ART[k]||''}</span>`).join('')}</span>`)}
+  ${plRow(ico('user',20),'الأصدقاء والدعوة',frMyCode()?'رمزك '+frMyCode()+' — شاركه ليضيفك':'أضف برمز صديقك وشارك رمزك',
+   "push('friendsScr')",'#3AAE6E',(FR&&FR.in&&FR.in.length)?`<span class="plNew">${FR.in.length}</span>`:'')}
  </div>
  <div class="plSec">
   <div class="plSecT">${ico('chest',14)} صناديق المعارك
@@ -22659,7 +22738,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.85';
+const APP_VER='5.86';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23354,8 +23433,12 @@ function roomDraw(){
   ?`<div class="rmTopMini"><span>${ico('group',11)} ${R.length}</span>
     <span style="color:var(--gold)">${RM.solo?'مع الكمبيوتر':'كود '+RM.code}</span>
     ${RM.solo?`<span>${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''}</span>`:''}</div>`
-  :`<div class="rmTicket"><div class="rmTkL">كود الغرفة</div><div class="rmTkC">${RM.code}</div>
+  :`<div class="rmTicket"><div class="rmTkL">كود الغرفة</div><div class="rmTkC" onclick="rmCopyCode()">${RM.code}</div>
   <div class="rmTkD">${RM.host?'أعطِ الكود لمن معك — يفتحون رابط اللعبة نفسه ويدخلون به':'دخلتَ الغرفة — يبدأ المضيف اللعبة حين يكتمل المجلس'}</div>
+  ${RM.solo?'':`<div class="rmTkA">
+   <button class="rbtn sm" onclick="rmShareCode()"><span>${ico('web',13)} شارك</span></button>
+   <button class="btn g sm" onclick="rmCopyCode()">${ico('scroll',13)} نسخ</button>
+   <button class="btn g sm" onclick="rmInvite()">${ico('group',13)} ادعُ صديقًا</button></div>`}
   ${RM.host?`<span class="rmTkH">${ico('crown',12)} أنت المضيف</span>`:''}</div>`;
  let body='';
  if(RM.phase==='lobby'){
@@ -23530,6 +23613,39 @@ function rmBarra(R){
   ${RM.host?`<button class="rbtn" style="margin-top:14px" onclick="rmStart()"><span>جولة جديدة — نفس اللاعبين</span></button>`:''}`;
  }
  return '<div class="note">…</div>';
+}
+/* ═══ دعوة إلى غرفتك (5.86) ═══
+   الكود وحده لا يكفي: من يستقبله يحتاج رابط اللعبة نفسه. زرّ المشاركة يرسل
+   الاثنين معًا، وزرّ «ادعُ صديقًا» يرسلهما في الدردشة الخاصّة لمن اخترته. */
+function rmInviteText(){
+ const u=shareUrl(),g=({barra:'برا السالفة',mafia:'مافيا',draw:'الرسم',uno:'أونو',carrom:'كيرم'})[RM.game]||'تحدّي';
+ return `ادخل غرفتي في ${g} — كود الغرفة: ${RM.code}${u?`\n${u}`:''}`;
+}
+function rmCopyCode(){if(!RM.code||RM.code==='SOLO')return;copyOut(RM.code,'نُسخ كود الغرفة '+RM.code)}
+function rmShareCode(){if(!RM.code||RM.code==='SOLO')return;shareOut(rmInviteText(),'دعوة إلى غرفة تحدّي')}
+/** ورقة الأصدقاء: من تختاره تصله الدعوة رسالةً خاصّة — يقرأ الكود ويدخل من رابطه */
+function rmInvite(){
+ if(!RM.code||RM.code==='SOLO')return;
+ if(!netOnline())return toast('الدعوة بالدردشة تحتاج اتصالًا بالخادم');
+ const paint=()=>{
+  const list=(FR&&FR.f)||[];
+  vbSheet(`<div class="shh"><div class="c" style="background:rgba(232,178,58,.16);border-color:var(--gold);color:var(--gold)">${ico('group',16)}</div>
+   <div><div class="t">ادعُ صديقًا</div><div class="d">تصله رسالة خاصّة بكود ${RM.code}</div></div></div>
+  <div style="margin-top:12px">${list.length?list.map(o=>`<button class="frPick" onclick="rmInviteTo('${esc(o.id)}')">
+    <span class="frAv">${frAv(o.av)}</span><span class="n">${esc(o.name||'لاعب')}</span>
+    <span class="s">${o.online?'متصل':'غير متصل'}</span>${ico('next',13)}</button>`).join('')
+   :`<div class="note">لا أصدقاء بعد — أضف برمز الصداقة أوّلًا.</div>`}</div>
+  <button class="btn g" style="margin-top:10px" onclick="closeSheet();push('friendsScr')">${ico('plus',13)} الأصدقاء والدعوة</button>
+  <button class="rbtn" style="margin-top:9px" onclick="closeSheet();rmShareCode()"><span>${ico('web',14)} شارك الدعوة خارج اللعبة</span></button>`);
+ };
+ paint();
+ NET.friends().then(r=>{FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];
+  if(document.getElementById('sbg').classList.contains('on'))paint()}).catch(()=>{});
+}
+function rmInviteTo(id){
+ closeSheet();
+ NET.dm(id,rmInviteText()).then(()=>toast('أُرسلت الدعوة'))
+  .catch(e=>toast(e&&e.message?e.message:'تعذّر إرسال الدعوة'));
 }
 function rmVote(peer){
  const c=RMcap;if(!c)return;

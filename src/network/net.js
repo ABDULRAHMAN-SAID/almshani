@@ -45,7 +45,7 @@ var NET=(function(){
  }
  function fire(k,v){(listeners[k]||[]).forEach(function(f){try{f(v)}catch(e){}})}
  function setState(patch){Object.assign(st,patch);fire('state',state())}
- function state(){return {mode:st.mode,connected:st.connected,id:st.id,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
+ function state(){return {mode:st.mode,connected:st.connected,id:st.id,code:st.code,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
  function on(k,f){if(!listeners[k])listeners[k]=[];listeners[k].push(f);return function(){listeners[k]=listeners[k].filter(function(x){return x!==f})}}
 
  function send(m){if(ws&&ws.readyState===1){try{ws.send(JSON.stringify(m))}catch(e){}return true}return false}
@@ -65,7 +65,7 @@ var NET=(function(){
  function onMsg(m){
   if(m.t==='welcome'){
    var resumed=dropped&&st.peer&&m.peer===st.peer;
-   setState({connected:true,id:m.id,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
+   setState({connected:true,id:m.id,code:m.code||null,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
    backoff=1000;
    if(Object.keys(myPresence).length)send({t:'presence',patch:myPresence});   // بعد إعادة الاتصال يعود حضوري
    settle(m);fire('welcome',m);

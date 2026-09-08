@@ -16,6 +16,7 @@ export interface Account {
   reqIn: string[];        // طلبات وصلتك
   reqOut: string[];       // طلبات أرسلتها
   dm?: Record<string, DmMsg[]>;   // محادثات خاصّة: معرّف الصديق → أحدث رسائلها
+  code?: string;          // رمز صديق قصير يُقرأ ويُملى — بديل المعرّف الطويل عند الإضافة
 }
 export interface Session {
   peer: string; account: Account; presence: Record<string, unknown>;
@@ -45,6 +46,13 @@ export function sanitizeName(n: unknown): string | null {
 }
 const bytes = (v: unknown) => Buffer.byteLength(JSON.stringify(v ?? null), 'utf8');
 const ID_RE = /^p[0-9a-f]{12}$/;
+/* ═══ رمز الصديق (5.86) ═══
+   المعرّف الطويل p3f8a91c40e2b لا يُملى على أحد. الرمز ستّة محارف من أبجدية
+   بلا 0/1/I/O ولا حروف تُخلط ببعضها — يُقرأ في المجلس ويُكتب بلا خطأ.
+   ٣٢⁶ ≈ ١٫٠٧ مليار احتمال، والإضافة محدودة المعدّل، فالتخمين لا يجدي. */
+const CODE_ABC = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+const CODE_RE = /^[2-9A-HJ-NP-Z]{6}$/;
+const codeNorm = (v: string): string => v.toUpperCase().replace(/[^0-9A-Z]/g, '');
 const MAX_FRIENDS = 200;
 const MAX_DM_LEN = 300;      // رسالة خاصّة واحدة
 const MAX_DM_THREAD = 80;    // أحدث ما يُحفظ من محادثة واحدة
@@ -61,12 +69,27 @@ const RATE: Record<string, [number, number]> = {
 const RATE_ANY: [number, number] = [30, 10];
 const MAX_PEER_LIST = 60;      // صفّ البحث عن مباراة قد يكون ضخمًا — تكفي عيّنة للاختيار منها
 const IDLE = '\u0000idle';     // من ليس في غرفة ولا يبحث عن مباراة: لا قائمة أقران له
+/** يستعيد صناديق الدردشة من القرص بعد تنقيتها — لا يُوثق بما في الملفّ */
+const dmBoxes = (v: unknown): Record<string, DmMsg[]> | null => {
+  if (!v || typeof v !== 'object') return null;
+  const out: Record<string, DmMsg[]> = {};
+  for (const [k, th] of Object.entries(v as Record<string, unknown>).slice(0, MAX_DM_BOXES)) {
+    if (!ID_RE.test(k) || !Array.isArray(th)) continue;
+    const msgs = th.filter((m): m is DmMsg => !!m && typeof m === 'object'
+        && typeof (m as DmMsg).m === 'string' && ((m as DmMsg).o === 0 || (m as DmMsg).o === 1))
+      .map(m => ({ m: String(m.m).slice(0, MAX_DM_LEN), o: m.o, at: +m.at || 0 }))
+      .slice(-MAX_DM_THREAD);
+    if (msgs.length) out[k] = msgs;
+  }
+  return Object.keys(out).length ? out : null;
+};
 const idList = (v: unknown): string[] =>
   Array.isArray(v) ? [...new Set(v.filter((x): x is string => typeof x === 'string' && ID_RE.test(x)))].slice(0, MAX_FRIENDS) : [];
 
 export class TahaddiService {
   private accounts = new Map<string, Account>();      // token → account
   private byId = new Map<string, Account>();          // id → account
+  private byCode = new Map<string, Account>();        // رمز الصديق → الحساب
   private sessions = new Map<string, Session>();      // peer → session
   private groups = new Map<string, Set<Session>>();   // مفتاح المجموعة → جلساتها (فهرس البثّ)
   private byAcc = new Map<string, Set<Session>>();    // معرّف الحساب → جلساته
@@ -88,9 +111,14 @@ export class TahaddiService {
           ranks: {},
           friends: idList(a.friends), reqIn: idList(a.reqIn), reqOut: idList(a.reqOut)
         };
+        if (typeof a.code === 'string' && CODE_RE.test(a.code) && !this.byCode.has(a.code)) acc.code = a.code;
+        const dm = dmBoxes(a.dm); if (dm) acc.dm = dm;   // كانت المحادثات تُحفظ ولا تُستعاد — تضيع مع كل إعادة تشغيل
         for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
         this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
+        if (acc.code) this.byCode.set(acc.code, acc);
       }
+      // الحسابات القديمة بلا رمز تأخذ واحدًا الآن — الرمز جزء من الحساب لا من الجلسة
+      for (const acc of this.accounts.values()) if (!acc.code) { acc.code = this.mkCode(); this.byCode.set(acc.code, acc); this.persist(acc); }
       for (const r of (saved.purchases ?? []) as PurchaseRec[]) if (r && typeof r.txId === 'string') this.purchases.set(r.txId, r);
       console.log(`tahaddi/store: حُمّل ${this.accounts.size} حسابًا و${this.purchases.size} شراءً`);
     }
@@ -148,6 +176,25 @@ export class TahaddiService {
     for (const x of set) x.send({ t: 'peers', list });
   }
 
+  /** رمز صديق فريد — يعيد المحاولة عند التصادم، وبعد حدّ معقول يطيل الرمز بدل أن يدور بلا نهاية */
+  private mkCode(): string {
+    for (let len = 6; len <= 9; len++) {
+      for (let k = 0; k < 40; k++) {
+        const b = randomBytes(len);
+        let c = '';
+        for (let i = 0; i < len; i++) c += CODE_ABC[b[i] % CODE_ABC.length];
+        if (!this.byCode.has(c)) return c;
+      }
+    }
+    return 'X' + randomBytes(5).toString('hex').toUpperCase();
+  }
+  /** الحساب من رمز أو من معرّف كامل — الرمز يُنظَّف قبل البحث */
+  private findAcc(q: string): Account | undefined {
+    if (ID_RE.test(q)) return this.byId.get(q);
+    const c = codeNorm(q);
+    return CODE_RE.test(c) ? this.byCode.get(c) : undefined;
+  }
+
   /* ── الحساب ── */
   hello(send: (m: ServerMsg) => void, token?: string, name?: string, rid?: string, peerWant?: string): Session {
     const found = typeof token === 'string' ? this.accounts.get(token) : undefined;
@@ -157,8 +204,10 @@ export class TahaddiService {
         token: randomBytes(16).toString('hex'),
         id: 'p' + randomBytes(6).toString('hex'),
         name: sanitizeName(name) ?? `لاعب-${this.byId.size + 1}`,
-        createdAt: Date.now(), lastSeen: Date.now(), save: null, ranks: {}, friends: [], reqIn: [], reqOut: []
+        createdAt: Date.now(), lastSeen: Date.now(), save: null, ranks: {}, friends: [], reqIn: [], reqOut: [],
+        code: this.mkCode()
       };
+      this.byCode.set(account.code!, account);
       for (const g of RankCore.GAMES) account.ranks[g] = RankCore.newRankProfile(g);
       this.accounts.set(account.token, account); this.byId.set(account.id, account);
     }
@@ -177,7 +226,8 @@ export class TahaddiService {
     const session: Session = { peer, account, presence: {}, send };
     this.sessions.set(peer, session);
     this.gJoin(session, IDLE); this.accJoin(session);
-    send({ t: 'welcome', rid, token: account.token, id: account.id, name: account.name, peer,
+    if (!account.code) { account.code = this.mkCode(); this.byCode.set(account.code, account); }
+    send({ t: 'welcome', rid, token: account.token, id: account.id, code: account.code, name: account.name, peer,
       ranks: account.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!account.save });
     this.sendSelf(session);
     this.persist(account);
@@ -224,7 +274,7 @@ export class TahaddiService {
   private online(id: string): boolean { return this.byAcc.has(id); }
   private view(ids: string[]): FriendView[] {
     const out: FriendView[] = [];
-    for (const id of ids) { const a = this.byId.get(id); if (a) out.push({ id: a.id, name: a.name, online: this.online(a.id) }); }
+    for (const id of ids) { const a = this.byId.get(id); if (a) out.push({ id: a.id, name: a.name, online: this.online(a.id), code: a.code }); }
     return out;
   }
   private sendFriends(s: Session, rid?: string): void {
@@ -275,12 +325,15 @@ export class TahaddiService {
     s.send({ t: 'dmThread', rid, with: to, msgs: this.dmBox(me)[to] });
     for (const x of this.byAcc.get(to) || []) x.send({ t: 'dmPush', from: me.id, name: me.name, msg: { m: body, o: 0, at } });
   }
-  friendAdd(s: Session, id: unknown, rid?: string): void {
+  /** الإضافة برمز الصديق القصير أو بالمعرّف الكامل — كلاهما يصل إلى الحساب نفسه */
+  friendAdd(s: Session, want: unknown, rid?: string): void {
     const me = s.account;
-    if (typeof id !== 'string' || !ID_RE.test(id)) return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
-    if (id === me.id) return s.send({ t: 'error', rid, code: 'self', message: 'هذا معرّفك أنت' });
-    const other = this.byId.get(id);
-    if (!other) return s.send({ t: 'error', rid, code: 'not_found', message: 'لا يوجد لاعب بهذا المعرّف' });
+    if (typeof want !== 'string' || !want.trim())
+      return s.send({ t: 'error', rid, code: 'bad_id', message: 'اكتب رمز الصديق أو معرّفه' });
+    const other = this.findAcc(want.trim());
+    if (!other) return s.send({ t: 'error', rid, code: 'not_found', message: 'لا يوجد لاعب بهذا الرمز' });
+    const id = other.id;
+    if (id === me.id) return s.send({ t: 'error', rid, code: 'self', message: 'هذا رمزك أنت' });
     if (me.friends.includes(id)) return this.sendFriends(s, rid);
     if (me.friends.length >= MAX_FRIENDS || other.friends.length >= MAX_FRIENDS)
       return s.send({ t: 'error', rid, code: 'full', message: 'قائمة الأصدقاء ممتلئة' });

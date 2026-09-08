@@ -48,14 +48,14 @@ export type ClientMsg =
   | { t: 'friends'; rid?: string }
   | { t: 'dm'; rid?: string; to: string; text: string }
   | { t: 'dmThread'; rid?: string; with: string }
-  | { t: 'friendAdd'; rid?: string; id: string }
+  | { t: 'friendAdd'; rid?: string; id: string }   // معرّف كامل أو رمز صديق من ستّة محارف
   | { t: 'friendAccept'; rid?: string; id: string }
   | { t: 'friendRemove'; rid?: string; id: string }
   // ── الغرف: تتابع حضور وبثّ لحظات — نفس واجهة غرفة الأرتيفاكت ──
   | { t: 'presence'; patch: Record<string, unknown> }
   | { t: 'emit'; topic: string; data?: unknown };
 
-export interface FriendView { id: string; name: string; online: boolean }
+export interface FriendView { id: string; name: string; online: boolean; code?: string }
 
 /** رسالة خاصّة واحدة: o=1 أنا أرسلتها، o=0 وصلتني */
 export interface DmMsg { m: string; o: 0 | 1; at: number }
@@ -71,7 +71,7 @@ export interface LeaderRow { id: string; name: string; tier: number; div: number
 
 export type ServerMsg =
   | { t: 'emailSet'; rid?: string; email: string }
-  | { t: 'welcome'; rid?: string; token: string; id: string; name: string; peer: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
+  | { t: 'welcome'; rid?: string; token: string; id: string; code: string; name: string; peer: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
   | { t: 'nameSet'; rid?: string; name: string }
   | { t: 'cloudSaved'; rid?: string; t2: number }
   | { t: 'cloud'; rid?: string; save: CloudSave | null; ranks: Record<string, RankProfile> }
