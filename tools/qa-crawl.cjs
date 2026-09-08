@@ -122,7 +122,7 @@ const CAPTURES=[
  ['mafia-pick',R("push('partyScr');ptWay='pass';ptOpen('mafia');mafiaStart();mafPick('من تغتالون الليلة؟','mafKill')")],
  ['mafia-check',R("push('partyScr');ptWay='pass';ptOpen('mafia');mafiaStart();mafCheck(0)")],
  ['mafia-morning',R("push('partyScr');ptWay='pass';ptOpen('mafia');mafiaStart();PT.victim=1;PT.saved=2;mafiaMorning()")],
- ['mafia-lynch',R("push('partyScr');ptWay='pass';ptOpen('mafia');mafiaStart();PT.roles=['شعب','شعب','مافيا','طبيب','محقق','شعب'];mafLynch(0)")],
+ ['mafia-lynch',R("push('partyScr');ptWay='pass';ptOpen('mafia');mafiaStart();PT.roles=['مواطن','مواطن','مافيا','طبيب','محقق','مواطن'];mafLynch(0)")],
  ['mafia-end',R("push('partyScr');ptWay='pass';ptOpen('mafia');mafiaStart();PT.alive=PT.alive.filter(i=>PT.roles[i]!=='مافيا');mafWinCheck()")],
  // ── مسابقة الرسم ──
  ['drawSetup',R("push('partyScr');ptWay='pass';ptOpen('draw')")],
@@ -133,10 +133,10 @@ const CAPTURES=[
  // ── ضد الكمبيوتر: مافيا وبرا السالفة والرسم ──
  ...['mafia','barra','draw'].map(g=>[`soloScr-${g}`,R(`push('gameHub','${g}');push('soloScr','${g}')`)]),
  ['mf-intro',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid')")],
- ['mf-night',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مافيا';VB.roles[1]='شعب';mfNight()")],
- ['mf-talk',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles=['شعب','محقق','مافيا','شعب','طبيب','شعب'];VB.know[2]=true;mfTalk()")],
- ['mf-vote',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';mfVote()")],
- ['mf-end',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='شعب';mfEnd('city')")],
+ ['mf-night',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مافيا';VB.roles[1]='مواطن';mfNight()")],
+ ['mf-talk',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles=['مواطن','محقق','مافيا','مواطن','طبيب','مواطن'];VB.know[2]=true;mfTalk()")],
+ ['mf-vote',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مواطن';mfVote()")],
+ ['mf-end',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid');VB.roles[0]='مواطن';mfEnd('city')")],
  ['br-round',R("window.__vbFast=1;RM.bbN=5;RM.bbCat='أماكن';soloStart('barra','mid');VB.spy=1;brRound()")],
  ['br-ask',R("window.__vbFast=1;RM.bbN=5;RM.bbCat='مهن';soloStart('barra','mid');VB.spy=2;VB.round=2;brAsk()")],
  ['br-final',R("window.__vbFast=1;RM.bbN=5;RM.bbCat='حيوانات';soloStart('barra','mid');VB.spy=1;VB.cast=[{who:0,t:1},{who:1,t:3},{who:2,t:1},{who:3,t:1},{who:4,t:2}];VB.accused=1;brFinal('caught')")],
@@ -177,12 +177,13 @@ const CAPTURES=[
     const t=(el.textContent||'').trim();if(!t)return false;
     const r=document.createRange();r.selectNodeContents(el);const tr=r.getBoundingClientRect();const er=el.getBoundingClientRect();
     return tr.width>er.width+2||tr.height>er.height+2}).map(el=>(el.textContent||'').trim().slice(0,18));   const off=all.filter(el=>{if(!vis(el))return false;const r=el.getBoundingClientRect();return (r.right>vw+3||r.left<-3)&&r.width<vw*1.5}).map(el=>(el.className||el.tagName).toString().slice(0,24));
+   const controls=app.querySelectorAll('button,input,textarea,canvas,select,[onclick]').length;
    const tiny=[...app.querySelectorAll('button,[onclick],a,.fc,.nvi')].filter(el=>vis(el)&&!el.closest('[onclick] [onclick]')).filter(el=>{const r=el.getBoundingClientRect();return r.width<34||r.height<34}).map(el=>{const r=el.getBoundingClientRect();return `${(el.innerText||el.className||el.tagName).toString().trim().slice(0,16)}(${Math.round(r.width)}×${Math.round(r.height)})`});
    const ALLOW=new Set(['Google','Play','App','Store','I','II','III','iOS','Android','MMR','SOLO']);
    const latin=[...new Set((document.body.innerText.match(/[A-Za-z][A-Za-z']{2,}/g)||[]).filter(w=>!ALLOW.has(w)))].slice(0,8);
    const imgs=[...app.querySelectorAll('img')].filter(i=>i.complete&&i.naturalWidth===0).length;
    const txt=app.innerText.replace(/\s+/g,' ').trim();
-   return {textLen:txt.length,overflowX:document.documentElement.scrollWidth>vw+1,pageH:document.documentElement.scrollHeight,
+   return {controls,textLen:txt.length,overflowX:document.documentElement.scrollWidth>vw+1,pageH:document.documentElement.scrollHeight,
     clipped:clipped.slice(0,5),off:off.slice(0,5),tiny:[...new Set(tiny)].slice(0,6),latin,brokenImgs:imgs,
     back:!!app.querySelector('.tbar .bk, .bk'),bar:getComputedStyle(document.getElementById('nav')).display,
     errorBox:/لم نتمكّن من فتح|تعذّر/.test(txt),nodes:app.querySelectorAll('*').length,sample:txt.slice(0,90)};
@@ -220,7 +221,9 @@ const CAPTURES=[
  perf.loadMs=loadMs;perf.htmlBytes=fs.statSync(path.join(ROOT,'index.html')).size;
  fs.writeFileSync(path.join(OUT,'report.json'),JSON.stringify({rows,perf},null,1));
  await b.close();srv.close();
- const bad=rows.filter(r=>r.fail||r.errs.length||r.errorBox||r.textLen<40||r.overflowX);
+ // شاشة تأكيد قصيرة ليست فارغة: الفراغ = لا نصّ ولا أداة تحكّم
+ const blank=r=>r.textLen<40&&!(r.controls>0);
+ const bad=rows.filter(r=>r.fail||r.errs.length||r.errorBox||blank(r)||r.overflowX);
  console.log(`\nتمّ: ${rows.length} حالة · مشاكل صريحة: ${bad.length} · أداء: ${JSON.stringify(perf)}`);
- bad.forEach(r=>console.log(`  ✗ ${r.name}: ${r.fail||''} ${r.errs.join(' | ')} ${r.errorBox?'errorBox':''} ${r.textLen<40?'blank':''} ${r.overflowX?'overflowX':''}`));
+ bad.forEach(r=>console.log(`  ✗ ${r.name}: ${r.fail||''} ${r.errs.join(' | ')} ${r.errorBox?'errorBox':''} ${blank(r)?'blank':''} ${r.overflowX?'overflowX':''}`));
 })().catch(e=>{console.error(e);process.exit(1)});
