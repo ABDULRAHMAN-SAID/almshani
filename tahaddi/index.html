@@ -1684,11 +1684,11 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  background:linear-gradient(180deg,rgba(5,8,15,.74),rgba(5,8,15,.3) 28%,rgba(5,8,15,.32) 62%,rgba(4,6,12,.88)),
   radial-gradient(124% 78% at 50% 42%,transparent 32%,rgba(4,6,12,.5) 82%,rgba(3,4,9,.86) 100%)}
 .vbScene.full:not(.is3d) .vbSeats.grid{position:absolute;inset:0;z-index:2;
- display:grid;grid-template-columns:repeat(var(--vbc,3),minmax(0,1fr));grid-auto-rows:minmax(0,auto);
+ display:grid;grid-template-columns:repeat(var(--vbc,3),minmax(0,1fr));grid-auto-rows:min-content;
  gap:var(--vbgap,8px);padding:9px 9px 10px;align-content:center;justify-content:stretch}
 .vbScene.full:not(.is3d) .vbSeats.grid .vbSeat{position:relative;
  left:auto!important;top:auto!important;transform:none;order:1;   /* الموضع السطريّ للقوس يغلب أيّ محدِّد، وتوسيط القوس يزيح البلاطة نصف عرضها */
- width:auto;min-width:0;min-height:0;gap:0;padding:7px 5px 7px;border-radius:16px;overflow:hidden;justify-content:center;
+ width:auto;min-width:0;min-height:0;gap:0;padding:7px 5px 7px;border-radius:16px;justify-content:center;
  background:linear-gradient(177deg,rgba(32,42,68,.9),rgba(12,18,31,.95));
  border:1px solid rgba(48,62,97,.95);
  box-shadow:0 14px 26px -20px #000,inset 0 1px 0 rgba(255,255,255,.07);
@@ -1791,8 +1791,23 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 
 /* الدردشة الموسّعة داخل المسرح */
 .vbScene.full .vbFeedH{cursor:pointer;user-select:none;min-height:36px;align-items:center}
-.vbScene.full.feedBig .vbFeedW{height:52vh;max-height:none;min-height:0}
+.vbScene.full.feedBig .vbFeedW{height:62vh;max-height:none;min-height:0}
 .vbScene.full.feedBig .vbSeats.grid{padding:6px 9px}
+
+/* عدّاد المتابعة على الزرّ */
+.vbAutoN{font-style:normal;min-width:26px;height:26px;padding:0 7px;border-radius:9px;
+ display:inline-flex;align-items:center;justify-content:center;margin-inline-start:10px;
+ font-size:12px;font-weight:900;font-variant-numeric:tabular-nums;
+ background:rgba(20,14,4,.34);color:#1B1305;box-shadow:inset 0 0 0 1px rgba(20,14,4,.28)}
+.vbAutoN.hot{background:#8E2B22;color:#FFE4E0;box-shadow:inset 0 0 0 1px rgba(255,120,110,.5)}
+
+/* زرّ توسيع الدردشة — ظاهر لا مخفيّ */
+.vbFeedX{margin-inline-start:auto;display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;
+ min-height:30px;padding:0 10px;border-radius:10px;background:rgba(232,178,58,.12);
+ border:1px solid rgba(232,178,58,.4);color:var(--gold)}
+.vbFeedX em{font-style:normal;font-size:10.5px;font-weight:900}
+.vbFeedX svg{transform:rotate(-90deg);transition:transform .22s}
+.vbScene.full.feedBig .vbFeedX svg{transform:rotate(90deg)}
 </style>
 </head>
 <body>
@@ -22618,7 +22633,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.83';
+const APP_VER='5.84';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -30836,7 +30851,7 @@ function vbScene(kind,title,sub){
   <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbCenter">${vbCenterPiece(kind)}</div><div class="vbSeats" id="vbSeats"></div></div>
   <div class="vbNotes" id="vbNotes" hidden></div>
  </div>
- <div class="vbFeedW"><div class="vbFeedH" onclick="vbFeedBig()">${ico('list',13)}<b>${kind==='barra'?'التلميحات والنقاش':'الدردشة'}</b><i>${kind==='barra'?'كل ما قيل في المجلس':'تحدّث مع الجميع'}</i></div><div class="vbFeed" id="vbFeed"></div></div>
+ <div class="vbFeedW"><div class="vbFeedH" onclick="vbFeedBig()">${ico('list',13)}<b>${kind==='barra'?'التلميحات والنقاش':'الدردشة'}</b><i>${kind==='barra'?'كل ما قيل في المجلس':'تحدّث مع الجميع'}</i><span class="vbFeedX">${ico('back',13)}<em>توسيع</em></span></div><div class="vbFeed" id="vbFeed"></div></div>
  <div class="vbAct" id="vbAct"></div></div>`);
  if(typeof vb3dMount==='function')vb3dMount(kind);
  vbSeats();vbAiChip();vbRoleStrip();
@@ -30916,13 +30931,15 @@ function vbGridFit(){
  const used=()=>{let t=1/0,b=-1/0;for(const k of kids){const r=k.getBoundingClientRect();if(!r.height)continue;
    if(r.top<t)t=r.top;if(r.bottom>b)b=r.bottom}return b>t?b-t+19:0};
  // ابدأ من أوسع ما يسمح به العرض، ثم انزل حتى تدخل الطاولة كاملةً في الارتفاع
- let av=Math.max(26,Math.min(86,(w-8*(cols-1)-18)/cols-16));
- for(let k=0;k<9;k++){
+ // 5.84: بلاطة تقصّ اسمها أو رقمها عيبٌ صامت — فالقياس يشمله لا الارتفاع وحده
+ const clipped=()=>kids.some(k=>k.scrollHeight>k.clientHeight+1);
+ let av=Math.max(22,Math.min(86,(w-8*(cols-1)-18)/cols-16));
+ for(let k=0;k<14;k++){
   box.style.setProperty('--av',av.toFixed(0)+'px');
-  box.style.setProperty("--avme",Math.max(28,Math.min(62,av*0.8)).toFixed(0)+"px");
-  const need=used();
-  if(!need||need<=h||av<=26)break;
-  av=Math.max(26,av-Math.max(2,(need-h)/(Math.ceil(o/cols)+1)));
+  box.style.setProperty('--avme',Math.max(26,Math.min(62,av*0.8)).toFixed(0)+'px');
+  const need=used(),over=!!need&&need>h;
+  if((!over&&!clipped())||av<=22)break;
+  av=Math.max(22,av-Math.max(3,over?(need-h)/(Math.ceil(o/cols)+1):4));
  }
 }
 function vbSeatPos(i,n){
@@ -31035,6 +31052,7 @@ function vbRoster(){
 function vbFeedBig(){
  const sc=document.querySelector('.vbScene');if(!sc)return;
  sc.classList.toggle('feedBig');
+ const lb=sc.querySelector('.vbFeedX em');if(lb)lb.textContent=sc.classList.contains('feedBig')?'تصغير':'توسيع';
  try{if(typeof vbGridFit==='function')vbGridFit()}catch(e){}
  const f=document.getElementById('vbFeed');if(f)f.scrollTop=f.scrollHeight;
 }
@@ -31085,6 +31103,31 @@ function vbRenderMsg(m,silent){
 function vbScrollEnd(){try{const f=document.getElementById('vbFeed');
  if(f&&f.closest('.vbFeedW')){f.scrollTo({top:f.scrollHeight,behavior:VB.fast?'auto':'smooth'});return}
  const y=document.body.scrollHeight;window.scrollTo({top:y,behavior:VB.fast?'auto':'smooth'})}catch(e){}}
+/* ═══ 5.84: لا انتظار لضغطة ═══
+   كانت كل خطوة سرد تقف حتى يضغط اللاعب، بلا أي عدّاد ظاهر — فتبدو اللعبة واقفة.
+   الآن زرّ المتابعة الوحيد في الشريط يعدّ ثلاثين ثانية ظاهرة ثم ينفّذ نفسه.
+   أزرار الاختيار والكتابة لا تُمسّ: قرارك وحدك. */
+const VB_AUTO_SEC=30;
+function vbAutoStop(){if(typeof VB!=='undefined'&&VB&&VB._autoI){clearInterval(VB._autoI);VB._autoI=null;VB._autoEnd=0}}
+function vbAutoBind(bar,html){
+ vbAutoStop();
+ if(typeof VB==='undefined'||!VB||VB.over||VB.fast||window.__vbFast)return;
+ if(!bar)return;
+ if(/vbGrid|vbInW|vbTxt|vbPickH|vbReady/.test(String(html||'')))return;   // اختيار أو كتابة أو «جاهز»: لا يُنفَّذ عنك
+ const btns=bar.querySelectorAll('.rbtn');
+ if(btns.length!==1)return;
+ const b=btns[0],my=VB,k=vbScale()||1;
+ VB._autoEnd=Date.now()+VB_AUTO_SEC*1000*k;
+ const tick=()=>{
+  if(typeof VB==='undefined'||VB!==my||VB.over||!document.body.contains(b)){vbAutoStop();return}
+  const left=Math.max(0,Math.ceil((VB._autoEnd-Date.now())/1000/k));
+  let s=b.querySelector('.vbAutoN');
+  if(!s){b.insertAdjacentHTML('beforeend','<i class="vbAutoN"></i>');s=b.querySelector('.vbAutoN')}
+  s.textContent=left;s.classList.toggle('hot',left<=5);
+  if(left<=0){vbAutoStop();try{b.click()}catch(e){}}
+ };
+ VB._autoI=setInterval(tick,250);tick();
+}
 function vbAct(html){
  const el=document.getElementById('vbAct');
  try{const sc=document.querySelector('.vbScene');if(sc)sc.classList.toggle('picking',/vbGrid/.test(String(html||'')))}catch(e){}
@@ -31093,7 +31136,8 @@ function vbAct(html){
   const focus=!!(old&&document.activeElement===old),pos=focus?old.selectionStart:null;
   el.innerHTML=html;
   if(keep){const nu=document.getElementById('vbTxt');if(nu&&!nu.disabled){nu.value=keep;if(focus){try{nu.focus();nu.setSelectionRange(pos,pos)}catch(e){}}}}
-  const sc=document.querySelector('.vbScene:not(.full)');if(sc)sc.style.paddingBottom=(html?el.offsetHeight+14:24)+'px'}   // الشريط ثابت أسفل الشاشة، والمحتوى يترك له مكانه
+  const sc=document.querySelector('.vbScene:not(.full)');if(sc)sc.style.paddingBottom=(html?el.offsetHeight+14:24)+'px';
+  vbAutoBind(el,html)}   // الشريط ثابت أسفل الشاشة، والمحتوى يترك له مكانه
  vbScrollEnd();
 }
 /** ينتظر الوعد بحدّ أقصى ms (في الاختبارات بلا حدّ) — قرار متأخّر من النموذج لا يجمّد الجولة */
