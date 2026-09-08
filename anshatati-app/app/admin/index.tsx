@@ -490,7 +490,7 @@ function SettingsTab() {
         <ActionRow
           icon="options-outline"
           label="إعدادات اللوحة"
-          hint="رمز الإدارة، مفاتيح التشغيل، وقيمة النقاط"
+          hint="قفل الجهاز، مفاتيح التشغيل، وقيمة النقاط"
           onPress={() => router.push("/admin/settings")}
         />
         <ActionRow
@@ -504,6 +504,12 @@ function SettingsTab() {
           label="الإشعارات المرسلة"
           hint="مراجعة وحذف وإعادة إرسال"
           onPress={() => router.push("/admin/notifications")}
+        />
+        <ActionRow
+          icon="pulse-outline"
+          label="فحص الربط"
+          hint="هل يقرأ التطبيق من الخادم فعلًا؟ الجلسة والصلاحية والمرفقات"
+          onPress={() => router.push("/admin/connection")}
         />
         <ActionRow
           icon="call-outline"
