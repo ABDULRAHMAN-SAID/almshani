@@ -770,7 +770,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.full .vbTurn .vbRing b{font-size:10px}
 .vbScene.full .vbNotes{position:absolute;inset:auto 8px 8px 8px;z-index:8;max-height:60%;overflow-y:auto;background:rgba(10,14,26,.95)}
 /* لوحة النقاش شريط مستقلّ تحت المشهد (5.60): لا تغطّي أحدًا، والمشهد يبقى كاملًا فوقها */
-.vbFeedW{flex:0 1 auto;height:14vh;min-height:0;max-height:112px;margin:4px 8px 0;display:flex;flex-direction:column;
+.vbFeedW{flex:0 1 auto;height:30vh;min-height:150px;max-height:290px;margin:4px 8px 0;display:flex;flex-direction:column;
  background:rgba(12,17,30,.92);border:1px solid rgba(232,178,58,.28);border-radius:16px;box-shadow:0 6px 20px rgba(0,0,0,.5);overflow:hidden}
 .vbScene.full .vbFeed{background:none;border:none;border-radius:0;padding:8px 9px 10px;margin:0;overflow-y:auto;overscroll-behavior:contain;font-size:11.5px;scrollbar-width:thin;min-height:0}
 .vbScene.full .vbFeed::-webkit-scrollbar{width:4px}
@@ -791,7 +791,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbScene.full .vbQuick>.vbQ{flex-shrink:0}
 .vbScene.full .vbBar{gap:6px}
 .vbScene.full .vbBar2{margin-top:5px}
-@media (max-height:730px){.vbFeedW{height:19vh;min-height:104px}.vbScene.full .vbQuick{display:none}}
+@media (max-height:730px){.vbFeedW{height:28vh;min-height:132px}.vbScene.full .vbQuick{display:none}}
 @media (min-width:520px){.vbScene.full .vbFeed{font-size:12.5px}}
 .vbNew{animation:pop .25s ease}
 .vbPh{display:flex;align-items:center;gap:8px;margin:8px 0 2px;color:var(--gold);font-size:11px;font-weight:900}
@@ -1788,6 +1788,11 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  padding:0 13px;min-height:46px;color:var(--tx);font-family:inherit;font-size:13px;font-weight:700}
 .dmGo{width:46px;height:46px;flex:0 0 auto;border-radius:14px;display:grid;place-items:center;
  background:linear-gradient(180deg,#F5D488,#CE9520);border:0;transform:scaleX(-1)}
+
+/* الدردشة الموسّعة داخل المسرح */
+.vbScene.full .vbFeedH{cursor:pointer;user-select:none;min-height:36px;align-items:center}
+.vbScene.full.feedBig .vbFeedW{height:52vh;max-height:none;min-height:0}
+.vbScene.full.feedBig .vbSeats.grid{padding:6px 9px}
 </style>
 </head>
 <body>
@@ -17073,7 +17078,8 @@ function startRanked(intro){
  Router.enter('match',null,{replace:!!(Router.current()&&Router.current().fn==='intro')});
  M={mid:'kn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999),
   rounds:(intro&&intro.seq)||buildRounds(r),i:0,me:0,opp:0,streak:0,menu:false,quitAsk:false,playedThisRound:false,
-    oppMmr,oppSkill:.55+Math.min(.2,r.tier*.02),
+    oppMmr,oppSkill:(intro&&intro.skill)||(.55+Math.min(.2,r.tier*.02)),
+    casual:!!(intro&&intro.casual),   // 5.83: ضدّ الكمبيوتر — لعب حرّ لا يمسّ التصنيف
     rival,oppHand:oppDeckFor(rival),oppKnown:[],oppLastPlayed:null,oppBlocked:null,
     vault:null,pick:null,knownNext:null,netOverrideNext:null,neutralNext:0,royalNext:0,
     energy:ENERGY_START,cycle:newCycle(deck),
@@ -17561,8 +17567,9 @@ function mEnd(){
  M.ended=true;
  clearInterval(M.tm);
  const won=M.me>M.opp;   // Best of 7
- const res=resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
-  result:{won:won},opponents:[{mmr:M.oppMmr}]});
+ const res=M.casual?{applied:false,reason:'ضدّ الكمبيوتر — بلا نقاط تصنيف'}
+  :resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
+   result:{won:won},opponents:[{mmr:M.oppMmr}]});
  // مكافآت
  const coins=(won?120:45)+(M.chaseBonus?80:0),xp=Math.round((M.correct||0)*12+(won?60:20));
  S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;dropBattleChest()} saveState();
@@ -20862,7 +20869,13 @@ function rankedScr(){
   <div style="font-size:11.5px;color:var(--mut);margin-top:9px">${r.placementDone}/5 مباراة</div>
   </div></div></div>
   <div style="margin-top:16px"><button class="rbtn" onclick="preMatch()"><span>ابدأ مباراة التحديد</span></button></div>
-  <div class="note">البطاقات تعمل · لا مساعدات تكشف الإجابة · لا وقت إضافي</div></div>`);
+  <div class="note">البطاقات تعمل · لا مساعدات تكشف الإجابة · لا وقت إضافي</div>
+ <div class="sl" style="margin-top:18px">${ico('bulb',14)} ضدّ الكمبيوتر</div>
+ <div class="note" style="margin-top:0">نفس المباراة بسبع جولات — بلا انتظار خصم وبلا أثر على تصنيفك.</div>
+ <div class="cr" style="margin-top:9px">${[['سهل',40],['عادي',58],['صعب',78]].map(([n,k])=>
+  `<div class="fc" onclick="knBot(${k})">${n}</div>`).join('')}</div>
+ <div style="margin-top:10px">${plRow(ico('flame',20),'تحدٍ سريع','ست أسئلة بلا مباراة كاملة',"push('quickScr')",'#4C9AF0')}</div>
+  </div>`);
   return;
  }
  go(`<div class="scr on">${tb('التصنيف')}
@@ -20891,7 +20904,19 @@ function rankedScr(){
  <div class="ls">8 بطاقات · سقف المستوى في رتبتك: ${cardCap(r)}</div></div>
  <span style="color:var(--mut)">‹</span></div></div>
  <div style="margin-top:14px"><button class="rbtn" onclick="preMatch()"><span>ابحث عن مباراة</span></button></div>
- <div class="note">كلما ارتفعت رتبتك: قلّ الوقت · زادت الخيارات · دخلت أنماط أكثر</div></div>`);
+ <div class="note">كلما ارتفعت رتبتك: قلّ الوقت · زادت الخيارات · دخلت أنماط أكثر</div>
+ <div class="sl" style="margin-top:18px">${ico('bulb',14)} ضدّ الكمبيوتر</div>
+ <div class="note" style="margin-top:0">نفس المباراة بسبع جولات — بلا انتظار خصم وبلا أثر على تصنيفك.</div>
+ <div class="cr" style="margin-top:9px">${[['سهل',40],['عادي',58],['صعب',78]].map(([n,k])=>
+  `<div class="fc" onclick="knBot(${k})">${n}</div>`).join('')}</div>
+ <div style="margin-top:10px">${plRow(ico('flame',20),'تحدٍ سريع','ست أسئلة بلا مباراة كاملة',"push('quickScr')",'#4C9AF0')}</div>
+ </div>`);
+}
+/** 5.83: عالم المعرفة ضدّ الكمبيوتر — نفس المباراة بخصم آليّ بمستوى تختاره، وبلا تصنيف */
+function knBot(pct){
+ if(!S.ranked)S.ranked=defaultRanked();
+ startRanked({rv:RIVALS[Math.floor(Math.random()*RIVALS.length)],seq:buildRounds(S.ranked),
+  skill:Math.max(.25,Math.min(.92,(+pct||58)/100)),casual:true});
 }
 
 // ── ما قبل المباراة ──
@@ -22461,9 +22486,6 @@ function playScr(){
  ${plHero()}
  ${plPlay()}
  <div class="plSec">
-  ${plRow(ico('flame',20),'مباراة سريعة','ادخل مباراة غير مصنّفة مباشرة',"push('quickScr')",'#4C9AF0')}
- </div>
- <div class="plSec">
   ${plRow(ico('group',20),'ليلة العائلة','ألعاب جماعية للأصدقاء والعائلة',"push('partyScr')",'#8B5CF0',
    `<span class="plMini">${fam.map(k=>`<span>${GAME_ART[k]||''}</span>`).join('')}</span>`)}
  </div>
@@ -22596,7 +22618,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.82';
+const APP_VER='5.83';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23322,7 +23344,7 @@ function roomDraw(){
  rmAutoStart(R);
 }
 /* ═══ 5.71: بدء تلقائيّ — لا أحد ينتظر مضيفًا نائمًا ═══ */
-const RM_AUTO_SEC=20;
+const RM_AUTO_SEC=30;   // 5.83: المالك — ثلاثون ثانية ثم تبدأ وحدها
 function rmAutoClear(){if(RM.autoI){clearInterval(RM.autoI);RM.autoI=null}RM.autoAt=0}
 /** حين يكتمل الحدّ الأدنى يبدأ عدّ تنازليّ ظاهر للجميع، وعند الصفر تبدأ اللعبة وحدها */
 function rmAutoStart(R){
@@ -30814,7 +30836,7 @@ function vbScene(kind,title,sub){
   <div class="vbStage" id="vbStage">${vbBackdrop(kind)}<div class="vbCenter">${vbCenterPiece(kind)}</div><div class="vbSeats" id="vbSeats"></div></div>
   <div class="vbNotes" id="vbNotes" hidden></div>
  </div>
- <div class="vbFeedW"><div class="vbFeedH">${ico('list',13)}<b>${kind==='barra'?'التلميحات والنقاش':'الدردشة'}</b><i>${kind==='barra'?'كل ما قيل في المجلس':'تحدّث مع الجميع'}</i></div><div class="vbFeed" id="vbFeed"></div></div>
+ <div class="vbFeedW"><div class="vbFeedH" onclick="vbFeedBig()">${ico('list',13)}<b>${kind==='barra'?'التلميحات والنقاش':'الدردشة'}</b><i>${kind==='barra'?'كل ما قيل في المجلس':'تحدّث مع الجميع'}</i></div><div class="vbFeed" id="vbFeed"></div></div>
  <div class="vbAct" id="vbAct"></div></div>`);
  if(typeof vb3dMount==='function')vb3dMount(kind);
  vbSeats();vbAiChip();vbRoleStrip();
@@ -31008,6 +31030,13 @@ function vbRoster(){
   return `<button class="vbR${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${pk?' pick':''}" data-seat="${i}" style="--rc:${rc}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
    <span class="vbRAv">${vbFace(i,41)}${st.badge&&!st.dead?`<span class="vbRB">${st.badge}</span>`:note&&!st.dead?`<span class="vbRB" style="background:${note.c}">${ico(VB.notes[i]==='sus'?'target':'check',10)}</span>`:''}${st.dead?`<span class="vbRX">${ico('cross',18)}</span>`:''}</span>
    <b>${i===0?'أنت':esc(nm)}</b></button>`}).join('');
+}
+/** 5.83: الدردشة كانت شريطًا لا يُقرأ — صارت لوحة كبيرة، ولمسة على عنوانها توسّعها لنصف الشاشة */
+function vbFeedBig(){
+ const sc=document.querySelector('.vbScene');if(!sc)return;
+ sc.classList.toggle('feedBig');
+ try{if(typeof vbGridFit==='function')vbGridFit()}catch(e){}
+ const f=document.getElementById('vbFeed');if(f)f.scrollTop=f.scrollHeight;
 }
 function vbTalk(i){VB.talking=i;vbSeats()}
 /* ═══ توزيع البطاقات (5.51): من الرزمة في وسط المجلس تطير بطاقة مقلوبة إلى كل مقعد، وبطاقتك تنقلب في الوسط لتكشف دورك ═══ */

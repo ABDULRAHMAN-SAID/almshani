@@ -28,6 +28,7 @@ const CAPTURES=[
  ['gamesScr',R("tab('play');push('gamesScr')")],
  ['playerCard',R("tab('play');pcOpen('p0123456789ab','نورة',{skin:2,hair:3,hairStyle:1,eyes:0,mouth:2,acc:0,beard:0,bg:1})")],
  ['dmScr',R("tab('play');dmOpen('p0123456789ab','نورة')")],
+ ['knBot',R("push('rankedScr');knBot(58)")],
  ['playModesScr',R("push('playModesScr')")],
  ['partyScr',R("push('partyScr')")],
  ...['carrom','uno','mafia','draw','barra'].map(g=>[`gameHub-${g}`,R(`push('gameHub','${g}')`)]),
