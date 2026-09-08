@@ -6,7 +6,7 @@ import type { RankProfile } from '../../../src/progression/rank.js';
 import { RecordStore, type Row } from './tstore';
 import CATALOG from '../../../src/economy/catalog.js';
 import { verify as verifyReceipt, iapStatus } from './iap';
-import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec } from './protocol';
+import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec, DmMsg } from './protocol';
 
 export interface Account {
   token: string; id: string; name: string; email?: string; createdAt: number; lastSeen: number;
@@ -15,6 +15,7 @@ export interface Account {
   friends: string[];      // معرّفات أصدقاء مقبولين من الطرفين
   reqIn: string[];        // طلبات وصلتك
   reqOut: string[];       // طلبات أرسلتها
+  dm?: Record<string, DmMsg[]>;   // محادثات خاصّة: معرّف الصديق → أحدث رسائلها
 }
 export interface Session {
   peer: string; account: Account; presence: Record<string, unknown>;
@@ -45,12 +46,16 @@ export function sanitizeName(n: unknown): string | null {
 const bytes = (v: unknown) => Buffer.byteLength(JSON.stringify(v ?? null), 'utf8');
 const ID_RE = /^p[0-9a-f]{12}$/;
 const MAX_FRIENDS = 200;
+const MAX_DM_LEN = 300;      // رسالة خاصّة واحدة
+const MAX_DM_THREAD = 80;    // أحدث ما يُحفظ من محادثة واحدة
+const MAX_DM_BOXES = 40;     // عدد المحادثات المحفوظة لكل حساب
 /* حدّ المعدّل لكل جلسة ولكل نوع رسالة: [الرشقة المسموحة, المتجدّد في الثانية].
    الحدود السابقة كانت حدود حجم فقط — لا شيء كان يمنع ألف رسالة في الثانية من جلسة واحدة. */
 const RATE: Record<string, [number, number]> = {
   emit: [60, 30], presence: [40, 15], saveCloud: [6, 1], loadCloud: [6, 1],
   submitResult: [8, 2], leaderboard: [8, 2], profile: [24, 6],
   friendAdd: [12, 1], friendAccept: [12, 1], friendRemove: [12, 1], friends: [12, 3],
+  dm: [12, 2], dmThread: [16, 4],
   setName: [6, 1], setEmail: [6, 1], purchase: [8, 1], purchases: [8, 1]
 };
 const RATE_ANY: [number, number] = [30, 10];
@@ -231,6 +236,45 @@ export class TahaddiService {
     for (const ss of set) this.sendFriends(ss);
   }
   friends(s: Session, rid?: string): void { this.sendFriends(s, rid); }
+  /* ═══ الدردشة الخاصّة: للأصدقاء وحدهم، وتُحفظ في الحسابين ═══ */
+  private dmBox(a: Account): Record<string, DmMsg[]> { return (a.dm ??= {}); }
+  /** يضيف رسالة لمحادثة داخل حساب، ويقصّ الأقدم كي لا ينمو الحساب بلا حدّ */
+  private dmStore(a: Account, key: string, m: DmMsg): void {
+    const box = this.dmBox(a);
+    const th = (box[key] ??= []);
+    th.push(m);
+    if (th.length > MAX_DM_THREAD) th.splice(0, th.length - MAX_DM_THREAD);
+    const keys = Object.keys(box);
+    if (keys.length > MAX_DM_BOXES) {
+      const last = (k: string) => { const t = box[k]; return t.length ? t[t.length - 1].at : 0; };
+      keys.sort((x, y) => last(x) - last(y));
+      for (const k of keys.slice(0, keys.length - MAX_DM_BOXES)) delete box[k];
+    }
+  }
+  dmThread(s: Session, withId: unknown, rid?: string): void {
+    if (typeof withId !== 'string' || !ID_RE.test(withId))
+      return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
+    s.send({ t: 'dmThread', rid, with: withId, msgs: this.dmBox(s.account)[withId] || [] });
+  }
+  dm(s: Session, to: unknown, text: unknown, rid?: string): void {
+    const me = s.account;
+    if (typeof to !== 'string' || !ID_RE.test(to))
+      return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
+    if (to === me.id) return s.send({ t: 'error', rid, code: 'self', message: 'هذا معرّفك أنت' });
+    const body = typeof text === 'string' ? text.trim().slice(0, MAX_DM_LEN) : '';
+    if (!body) return s.send({ t: 'error', rid, code: 'empty', message: 'الرسالة فارغة' });
+    // الخصوصية أوّلًا: لا تصل رسالة إلا بين صديقين قَبِل كلٌّ منهما الآخر
+    if (!me.friends.includes(to))
+      return s.send({ t: 'error', rid, code: 'not_friend', message: 'الدردشة الخاصّة بين الأصدقاء فقط' });
+    const other = this.byId.get(to);
+    if (!other) return s.send({ t: 'error', rid, code: 'not_found', message: 'لا يوجد لاعب بهذا المعرّف' });
+    const at = Date.now();
+    this.dmStore(me, to, { m: body, o: 1, at });
+    this.dmStore(other, me.id, { m: body, o: 0, at });
+    this.persist(me); this.persist(other);
+    s.send({ t: 'dmThread', rid, with: to, msgs: this.dmBox(me)[to] });
+    for (const x of this.byAcc.get(to) || []) x.send({ t: 'dmPush', from: me.id, name: me.name, msg: { m: body, o: 0, at } });
+  }
   friendAdd(s: Session, id: unknown, rid?: string): void {
     const me = s.account;
     if (typeof id !== 'string' || !ID_RE.test(id)) return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
@@ -475,6 +519,8 @@ export class TahaddiService {
       case 'purchase': { void this.purchase(s, msg.claim, msg.rid); return; }
       case 'purchases': return this.purchaseList(s, msg.rid);
       case 'friends': return this.friends(s, msg.rid);
+      case 'dm': return this.dm(s, msg.to, msg.text, msg.rid);
+      case 'dmThread': return this.dmThread(s, msg.with, msg.rid);
       case 'friendAdd': return this.friendAdd(s, msg.id, msg.rid);
       case 'friendAccept': return this.friendAccept(s, msg.id, msg.rid);
       case 'friendRemove': return this.friendRemove(s, msg.id, msg.rid);

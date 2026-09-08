@@ -187,6 +187,32 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
   check('/ai/chat OPTIONS → 204 (CORS من مضيف آخر)',opt.code===204,String(opt.code));
   const get=await post('GET');
   check('/ai/chat GET → 405',get.code===405,String(get.code));
+  /* ═══ الدردشة الخاصّة: للأصدقاء وحدهم، وتُحفظ للطرفين ═══ */
+  {
+   const D1=client(),D2=client();
+   const w1=await hello(D1,undefined,'سعود'),w2=await hello(D2,undefined,'نورة');
+   const noFr=await D1.req({t:'dm',to:w2.id,text:'مرحبا'});
+   check('رسالة خاصّة لغير صديق تُرفض',noFr.t==='error'&&noFr.code==='not_friend',JSON.stringify(noFr));
+   await D1.req({t:'friendAdd',id:w2.id});
+   const fr=await D2.req({t:'friendAdd',id:w1.id});          // الطلب المقابل يتمّ الصداقة
+   check('الصداقة تتمّ بطلبين متقابلين',(fr.friends||[]).some(f=>f.id===w1.id),JSON.stringify(fr).slice(0,120));
+   const sent=await D1.req({t:'dm',to:w2.id,text:'  السلام عليكم  '});
+   check('الرسالة تُرسل بعد الصداقة وتُقصّ مسافاتها',
+    sent.t==='dmThread'&&sent.msgs.length===1&&sent.msgs[0].m==='السلام عليكم'&&sent.msgs[0].o===1,JSON.stringify(sent).slice(0,140));
+   const got=await D2.req({t:'dmThread',with:w1.id});
+   check('المستقبِل يرى الرسالة نفسها بعلامة «واردة»',
+    got.msgs.length===1&&got.msgs[0].m==='السلام عليكم'&&got.msgs[0].o===0,JSON.stringify(got).slice(0,140));
+   const empty=await D1.req({t:'dm',to:w2.id,text:'   '});
+   check('رسالة فارغة تُرفض',empty.t==='error'&&empty.code==='empty');
+   const selfDm=await D1.req({t:'dm',to:w1.id,text:'أنا'});
+   check('لا يُرسل المرء لنفسه',selfDm.t==='error'&&selfDm.code==='self');
+   const longTxt='ا'.repeat(500);
+   const cut=await D1.req({t:'dm',to:w2.id,text:longTxt});
+   check('الرسالة الطويلة تُقصّ عند 300 حرف',cut.msgs[cut.msgs.length-1].m.length===300,String(cut.msgs[cut.msgs.length-1].m.length));
+   const badId=await D1.req({t:'dm',to:'zzz',text:'x'});
+   check('معرّف غير صالح يُرفض',badId.t==='error'&&badId.code==='bad_id');
+   await D1.close();await D2.close();
+  }
   await P.close();await Q.close();
   server.kill('SIGTERM');await sleep(400);server=startServer();await sleep(700);
   const P2=client();await hello(P2,wa.token);

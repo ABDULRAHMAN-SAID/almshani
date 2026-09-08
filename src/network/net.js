@@ -80,6 +80,8 @@ var NET=(function(){
    hs.forEach(function(f){try{f(msg)}catch(e){}});return;
   }
   if(m.t==='resultFinal'){fire('resultFinal',m);return}
+ if(m.t==='dmPush'){fire('dm',m);return}   // رسالة خاصّة وصلت الآن
+ if(m.t==='friends'&&!m.rid){fire('friends',m);return}
   if(m.t==='error'&&!m.rid){st.lastError=m.code}
  }
 
@@ -167,6 +169,14 @@ var NET=(function(){
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
+ /* ── الأصدقاء والدردشة الخاصّة ──
+    كانت هذه الدوالّ ناقصة تمامًا رغم أن الخادم ينفّذها، فكان زرّ «إضافة صديق» ميّتًا. */
+ function friends(){return request({t:'friends'})}
+ function friendAdd(id){return request({t:'friendAdd',id:id})}
+ function friendAccept(id){return request({t:'friendAccept',id:id})}
+ function friendRemove(id){return request({t:'friendRemove',id:id})}
+ function dm(to,text){return request({t:'dm',to:to,text:text})}
+ function dmThread(withId){return request({t:'dmThread',with:withId})}
  /* ── الشراء: الإيصال إلى الخادم، والخادم يسأل المتجر ويمنح ── */
  function purchase(claim){return request({t:'purchase',claim:claim},25000)}
  function purchases(){return request({t:'purchases'})}
@@ -195,6 +205,7 @@ var NET=(function(){
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
   _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة

@@ -46,6 +46,8 @@ export type ClientMsg =
   | { t: 'purchases'; rid?: string }
   // ── الأصدقاء: بالمعرّف أو بمن قابلته في غرفة ──
   | { t: 'friends'; rid?: string }
+  | { t: 'dm'; rid?: string; to: string; text: string }
+  | { t: 'dmThread'; rid?: string; with: string }
   | { t: 'friendAdd'; rid?: string; id: string }
   | { t: 'friendAccept'; rid?: string; id: string }
   | { t: 'friendRemove'; rid?: string; id: string }
@@ -54,6 +56,9 @@ export type ClientMsg =
   | { t: 'emit'; topic: string; data?: unknown };
 
 export interface FriendView { id: string; name: string; online: boolean }
+
+/** رسالة خاصّة واحدة: o=1 أنا أرسلتها، o=0 وصلتني */
+export interface DmMsg { m: string; o: 0 | 1; at: number }
 
 export interface PeerView {
   peer: string;                 // معرّف الاتصال (يتغيّر بكل اتصال)
@@ -77,6 +82,8 @@ export type ServerMsg =
   | { t: 'purchased'; rid?: string; productId: string; txId: string; grant: PurchaseGrant; duplicate: boolean }
   | { t: 'purchaseList'; rid?: string; list: PurchaseRec[] }
   | { t: 'friendList'; rid?: string; friends: FriendView[]; reqIn: FriendView[]; reqOut: FriendView[] }
+  | { t: 'dmThread'; rid?: string; with: string; msgs: DmMsg[] }
+  | { t: 'dmPush'; from: string; name: string; msg: DmMsg }
   | { t: 'peers'; list: PeerView[] }
   | { t: 'msg'; topic: string; data?: unknown; from: { peer: string; by: string } }
   | { t: 'error'; rid?: string; code: string; message?: string };

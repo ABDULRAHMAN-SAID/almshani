@@ -1758,6 +1758,36 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .plPlayT b{font-size:24px;font-weight:900;letter-spacing:.4px;line-height:1}
 .plPlayT i{font-style:normal;font-size:11px;font-weight:800;opacity:.72;line-height:1.45}
 .plPlayGo{flex:0 0 auto;opacity:.6;position:relative}
+
+/* أسماء لاعبي وضع التمرير */
+.ptHint{font-weight:800;font-size:9.5px;color:var(--mut);margin-inline-start:6px}
+.ptNames{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ptNm{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--bd);
+ border-radius:11px;padding:0 9px;min-height:42px}
+.ptNm b{flex:0 0 auto;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;
+ background:linear-gradient(160deg,#F6D98A,#B0801A);color:#1A1204;font-size:10.5px;font-weight:900}
+.ptNm input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--tx);
+ font-family:inherit;font-size:12.5px;font-weight:800;padding:0}
+.ptNm input::placeholder{color:var(--mut);font-weight:700}
+
+/* الدردشة الخاصّة وبطاقة اللاعب */
+.pcStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pcS{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:9px 6px;text-align:center}
+.pcS b{display:block;font-size:16px;font-weight:900;color:var(--gold)}
+.pcS span{display:block;font-size:9.5px;font-weight:800;color:var(--mut);margin-top:3px}
+.dmBox{margin:10px 0 0;min-height:52vh;max-height:62vh;overflow-y:auto;display:flex;flex-direction:column;gap:8px;
+ padding:12px;border-radius:16px;background:linear-gradient(180deg,#0F1626,#0B1020);border:1px solid #1E2842}
+.dmM{align-self:flex-start;max-width:82%;background:#151D31;border:1px solid #222D49;border-radius:14px;
+ border-start-start-radius:5px;padding:8px 11px;display:flex;align-items:flex-end;gap:8px}
+.dmM.me{align-self:flex-end;border-start-start-radius:14px;border-start-end-radius:5px;
+ background:linear-gradient(160deg,#2A2350,#16183A);border-color:#3B3270}
+.dmM span{font-size:12.5px;font-weight:700;color:#E6EAF4;line-height:1.6;word-break:break-word}
+.dmM i{font-style:normal;flex:0 0 auto;font-size:9px;font-weight:800;color:var(--mut);font-variant-numeric:tabular-nums}
+.dmIn{display:flex;gap:8px;margin-top:10px}
+.dmIn input{flex:1;min-width:0;background:var(--card);border:1.5px solid var(--bd);border-radius:14px;
+ padding:0 13px;min-height:46px;color:var(--tx);font-family:inherit;font-size:13px;font-weight:700}
+.dmGo{width:46px;height:46px;flex:0 0 auto;border-radius:14px;display:grid;place-items:center;
+ background:linear-gradient(180deg,#F5D488,#CE9520);border:0;transform:scaleX(-1)}
 </style>
 </head>
 <body>
@@ -15360,6 +15390,8 @@ var NET=(function(){
    hs.forEach(function(f){try{f(msg)}catch(e){}});return;
   }
   if(m.t==='resultFinal'){fire('resultFinal',m);return}
+ if(m.t==='dmPush'){fire('dm',m);return}   // رسالة خاصّة وصلت الآن
+ if(m.t==='friends'&&!m.rid){fire('friends',m);return}
   if(m.t==='error'&&!m.rid){st.lastError=m.code}
  }
 
@@ -15447,6 +15479,14 @@ var NET=(function(){
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
+ /* ── الأصدقاء والدردشة الخاصّة ──
+    كانت هذه الدوالّ ناقصة تمامًا رغم أن الخادم ينفّذها، فكان زرّ «إضافة صديق» ميّتًا. */
+ function friends(){return request({t:'friends'})}
+ function friendAdd(id){return request({t:'friendAdd',id:id})}
+ function friendAccept(id){return request({t:'friendAccept',id:id})}
+ function friendRemove(id){return request({t:'friendRemove',id:id})}
+ function dm(to,text){return request({t:'dm',to:to,text:text})}
+ function dmThread(withId){return request({t:'dmThread',with:withId})}
  /* ── الشراء: الإيصال إلى الخادم، والخادم يسأل المتجر ويمنح ── */
  function purchase(claim){return request({t:'purchase',claim:claim},25000)}
  function purchases(){return request({t:'purchases'})}
@@ -15475,6 +15515,7 @@ var NET=(function(){
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
   _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة
@@ -17902,7 +17943,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
-  'playScr','gamesScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
+  'playScr','gamesScr','dmScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
@@ -18469,6 +18510,94 @@ async function frDo(fn,id,okMsg){
  if(!netOnline())return toast('يحتاج اتصالًا بالخادم');
  try{const r=await fn(id);FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];toast(okMsg);frPaint()}
  catch(e){toast(e&&e.message?e.message:'تعذّر التنفيذ')}
+}
+/* ═══ 5.82: بطاقة اللاعب ═══
+   الضغط على أي لاعب في غرفة يفتح صورته الحقيقية وإحصاءاته، ومنها يُضاف صديقًا،
+   وبعد قبول الصداقة تُفتح محادثة خاصّة بينهما. */
+var PCARD={id:null,name:'',av:null,prof:null,load:0};
+function pcOpen(id,name,av){
+ PCARD={id:(typeof id==='string'&&/^p[0-9a-f]{12}$/.test(id))?id:null,name:String(name||'لاعب').slice(0,18),
+  av:(av&&typeof av==='object')?av:null,prof:null,load:0};
+ pcDraw();
+ if(!PCARD.id||!netOnline())return;
+ const want=PCARD.id;PCARD.load=1;
+ NET.profile(want).then(r=>{if(PCARD.id!==want)return;PCARD.prof=(r&&r.profile)||r||null;PCARD.load=0;pcDraw()})
+  .catch(()=>{if(PCARD.id===want){PCARD.load=0;pcDraw()}});
+ NET.friends().then(r=>{FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];if(PCARD.id===want)pcDraw()}).catch(()=>{});
+}
+function pcHas(list){return !!(PCARD.id&&(list||[]).some(x=>(x&&x.id||x)===PCARD.id))}
+function pcStat(l,v){return `<div class="pcS"><b>${esc(String(v))}</b><span>${esc(l)}</span></div>`}
+function pcDraw(){
+ const p=PCARD.prof,friend=pcHas(FR&&FR.f),sent=pcHas(FR&&FR.out),got=pcHas(FR&&FR.in);
+ const rk=p&&p.ranks?Object.keys(p.ranks).length:0;
+ const stats=p?`<div class="pcStats">
+   ${pcStat('مباريات',p.matches!=null?p.matches:(p.played!=null?p.played:'—'))}
+   ${pcStat('انتصارات',p.wins!=null?p.wins:'—')}
+   ${pcStat('ألعاب مصنّفة',rk||'—')}</div>`
+  :`<div class="note" style="margin-top:10px">${PCARD.load?'يُحمّل السجلّ…':(PCARD.id&&netOnline()?'لا سجلّ ظاهر لهذا اللاعب':'السجلّ يحتاج اتصالًا بالخادم')}</div>`;
+ let act='';
+ if(!PCARD.id)act='<div class="note" style="margin-top:10px">هذا أنت</div>';
+ else if(friend)act=`<button class="rbtn" onclick="closeSheet();dmOpen('${PCARD.id}',${JSON.stringify(PCARD.name)})"><span>${ico('chat',14)} محادثة خاصّة</span></button>
+   <button class="btn g" style="margin-top:8px" onclick="pcUnfriend()">إزالة من الأصدقاء</button>`;
+ else if(got)act=`<button class="rbtn" onclick="pcAccept()"><span>${ico('check',14)} قبول طلب الصداقة</span></button>`;
+ else if(sent)act=`<button class="btn g" disabled>${ico('timer',14)} طلب الصداقة مُرسَل</button>`;
+ else act=`<button class="rbtn" onclick="pcAdd()"><span>${ico('plus',14)} إضافة صديق</span></button>
+   <div class="note" style="margin-top:8px">الدردشة الخاصّة تُفتح بعد قبوله الطلب</div>`;
+ vbSheet(`<div class="shh"><div class="vbShAv">${PCARD.av?avatarSVG(PCARD.av,54):(PCARD.id?personArt(PCARD.name,54):avatarArt(54))}</div>
+  <div><div class="t">${esc(PCARD.name)}</div><div class="d">${PCARD.id?'#'+esc(PCARD.id):'أنت'}</div></div></div>
+  ${stats}
+  <div style="margin-top:12px">${act}</div>`);
+}
+function pcAfter(msg){return r=>{FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];toast(msg);pcDraw();if(typeof frPaint==='function')frPaint()}}
+function pcErr(e){toast(e&&e.message?e.message:'تعذّر التنفيذ')}
+function pcAdd(){if(!netOnline())return toast('يحتاج اتصالًا بالخادم');NET.friendAdd(PCARD.id).then(pcAfter('أُرسل الطلب')).catch(pcErr)}
+function pcAccept(){if(!netOnline())return toast('يحتاج اتصالًا بالخادم');NET.friendAccept(PCARD.id).then(pcAfter('صرتما صديقين')).catch(pcErr)}
+function pcUnfriend(){if(!netOnline())return toast('يحتاج اتصالًا بالخادم');NET.friendRemove(PCARD.id).then(pcAfter('أُزيل من الأصدقاء')).catch(pcErr)}
+
+/* ═══ الدردشة الخاصّة — بين الأصدقاء وحدهم ═══ */
+var DM={id:null,name:'',msgs:[],load:0};
+// رسالة خاصّة وصلت الآن: تدخل المحادثة المفتوحة، أو تُعلن كإشعار
+try{if(typeof NET!=='undefined'&&NET.on)NET.on('dm',m=>{
+ if(!m||!m.msg)return;
+ if(DM.id===m.from){DM.msgs.push(m.msg);dmPaint();return}
+ toast(ico('chat',13)+' رسالة من '+esc(String(m.name||'صديق').slice(0,14)));
+})}catch(e){}
+function dmOpen(id,name){DM={id:id,name:String(name||'صديق').slice(0,18),msgs:[],load:1};push('dmScr')}
+function dmScr(){
+ if(!DM.id){   // فُتحت بلا صديق مختار: حالة صادقة لا شاشة بيضاء
+  return go(`<div class="scr on">${tb('محادثة خاصّة')}
+  <div class="note" style="margin-top:14px">اختر صديقًا لتبدأ محادثة — الدردشة الخاصّة بين الأصدقاء وحدهم.</div>
+  <button class="rbtn" style="margin-top:12px" onclick="push('friendsScr')"><span>${ico('group',14)} أصدقائي</span></button></div>`);
+ }
+ go(`<div class="scr on">${tb('محادثة — '+esc(DM.name))}
+ <div class="dmBox" id="dmBox"><div class="note">يُحمّل…</div></div>
+ <div class="dmIn"><input id="dmTx" maxlength="300" placeholder="اكتب رسالتك…" autocomplete="off"
+   onkeydown="if(event.key==='Enter')dmSend()">
+  <button class="dmGo" onclick="dmSend()" aria-label="أرسل">${ico('back',17)}</button></div></div>`);
+ dmLoad();
+}
+function dmLoad(){
+ if(!netOnline()){DM.load=0;return dmPaint('الدردشة الخاصّة تحتاج اتصالًا بالخادم')}
+ const want=DM.id;
+ NET.dmThread(want).then(r=>{if(DM.id!==want)return;DM.msgs=r.msgs||[];DM.load=0;dmPaint()})
+  .catch(e=>{DM.load=0;dmPaint(e&&e.message?e.message:'تعذّر جلب المحادثة')});
+}
+function dmPaint(err){
+ const el=document.getElementById('dmBox');if(!el)return;
+ if(err)return el.innerHTML='<div class="note">'+esc(err)+'</div>';
+ if(!DM.msgs.length)return el.innerHTML='<div class="note">لا رسائل بعد — ابدأ أنت</div>';
+ el.innerHTML=DM.msgs.map(m=>`<div class="dmM${m.o?' me':''}"><span>${esc(m.m)}</span><i>${esc(dmHm(m.at))}</i></div>`).join('');
+ el.scrollTop=el.scrollHeight;
+}
+function dmHm(t){const d=new Date(t||Date.now());return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function dmSend(){
+ const el=document.getElementById('dmTx');const v=el?el.value.trim():'';
+ if(!v)return;
+ if(!netOnline())return toast('يحتاج اتصالًا بالخادم');
+ if(el)el.value='';
+ const want=DM.id;
+ NET.dm(want,v).then(r=>{if(DM.id!==want)return;DM.msgs=r.msgs||[];dmPaint()})
+  .catch(e=>{toast(e&&e.message?e.message:'تعذّر الإرسال');if(el)el.value=v});
 }
 function frAdd(){
  const el=document.getElementById('frId');const v=el?el.value.trim().replace(/^#/,''):'';
@@ -22467,7 +22596,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.81';
+const APP_VER='5.82';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23227,7 +23356,7 @@ function rmLobbyRing(R){
  const n=seats.length,row=PT_GAMES.find(x=>x[3]===RM.game)||[];
  return `<div class="rmRing" id="rmStage">${seats.map((p,i)=>{const pos=rmSeatPos(i,n),st=`data-seat="${i}" style="left:${pos.x.toFixed(1)}%;top:${pos.y.toFixed(1)}%"`;
    if(!p)return `<div class="rmSeat empty" ${st}><div class="rmAv">${ico('plus',16)}</div><span>بانتظار…</span></div>`;
-   return `<div class="rmSeat${p.me?' me':''}" ${st}><div class="rmAv">${p.me?avatarArt(44):(p.av?avatarSVG(p.av,44):personArt(p.name,44))}${p.host?`<i>${ico('crown',11)}</i>`:''}</div><span>${esc(p.name)}${p.me?' <b>أنت</b>':''}</span></div>`}).join('')}
+   return `<div class="rmSeat${p.me?' me':''}" ${st} onclick="pcOpen('${p.me?'':(p.id||'')}',${JSON.stringify(p.name)},${p.av?JSON.stringify(p.av):'null'})"><div class="rmAv">${p.me?avatarArt(44):(p.av?avatarSVG(p.av,44):personArt(p.name,44))}${p.host?`<i>${ico('crown',11)}</i>`:''}</div><span>${esc(p.name)}${p.me?' <b>أنت</b>':''}</span></div>`}).join('')}
   <div class="rmTable"><span class="art">${GAME_ART[RM.game]||''}</span><b>${R.length}/${lim[1]}</b></div></div>
   <div class="note" style="margin-top:4px">${R.length<lim[0]?`نحتاج ${lim[0]} لاعبين على الأقل لـ${row[1]||'هذه اللعبة'}`:R.length<lim[1]?`يمكن البدء الآن — وما زال في المجلس متّسع حتى ${lim[1]}`:`المجلس مكتمل — ${RM.host?'ابدأ حين تشاء':'بانتظار المضيف'}`}</div>`;
 }
@@ -23265,7 +23394,7 @@ function rmStart(){
  const lim=RM_MIN[RM.game]||[2,12];
  if(R.length<lim[0]){toast(`تحتاج ${lim[0]} لاعبين على الأقل`);return}
  if(R.length>lim[1]){toast(`الحد الأقصى ${lim[1]} لاعبين لهذه اللعبة`);return}
- const ps=R.map(p=>({peer:p.peer,name:p.name}));
+ const ps=R.map(p=>({peer:p.peer,name:p.name,id:p.id||null,av:p.av||null}));   // 5.82: الصورة والمعرّف يرافقان اللاعب داخل اللعبة
  if(RM.game==='draw'){
   const ws=PARTY_WORDS[RM.cat||'أماكن'];
   RM.art={};
@@ -32777,6 +32906,27 @@ function ptOpen(g){
 const ptCount=(min,max)=>`<div class="sl">عدد اللاعبين</div>
  <div class="cr">${Array.from({length:max-min+1},(_,i)=>min+i).map(n=>
   `<div class="fc ${PT.n===n?'on':''}" onclick="PT.n=${n};${PT.g==='barra'?'barraSetup':PT.g==='mafia'?'mafiaSetup':'drawSetup'}(1)">${n}</div>`).join('')}</div>`;
+/* ═══ 5.82: أسماء لاعبي وضع التمرير ═══
+   كانت الشاشات كلّها تقول «اللاعب 1» — لا أحد يعرف من هو. الآن يكتب المضيف
+   الأسماء مرّة في الإعداد، فتظهر في التوزيع والتصويت والنتيجة. */
+function ptNames(){
+ if(!PT.names)PT.names=[];
+ PT.names.length=PT.n;
+ for(let i=0;i<PT.n;i++)if(typeof PT.names[i]!=='string')PT.names[i]='';
+ return PT.names;
+}
+function ptName(i){
+ const n=(PT.names&&PT.names[i]||'').trim();
+ return n||('اللاعب '+(i+1));
+}
+function ptNameSet(i,v){ptNames();PT.names[i]=String(v||'').replace(/\s+/g,' ').slice(0,14)}
+function ptNameFields(){
+ ptNames();
+ return `<div class="sl">أسماء اللاعبين <small class="ptHint">اختياري — تظهر بدل «اللاعب 1»</small></div>
+ <div class="ptNames">${Array.from({length:PT.n},(_,i)=>
+  `<label class="ptNm"><b>${i+1}</b><input type="text" maxlength="14" autocomplete="off"
+    value="${esc(PT.names[i]||'')}" placeholder="اللاعب ${i+1}" oninput="ptNameSet(${i},this.value)"></label>`).join('')}</div>`;
+}
 const ptCats=f=>`<div class="sl">الفئة</div>
  <div class="cr">${Object.keys(PARTY_WORDS).map(c=>
   `<div class="fc ${PT.cat===c?'on':''}" onclick="PT.cat='${c}';${f}(1)">${c}</div>`).join('')}</div>`;
@@ -32786,7 +32936,7 @@ function barraSetup(keep){
  if(!keep||!PT||PT.g!=='barra')PT={g:'barra',n:5,cat:'أماكن'};
  go(`<div class="scr on">${tb('برا السالفة')}
  <div class="wb" style="text-align:start">الكل يرى الكلمة السرية إلا لاعبًا واحدًا. اسألوا بعضكم بالدور ثم صوّتوا: من برا السالفة؟</div>
- ${ptCount(3,8)}${ptCats('barraSetup')}
+ ${ptCount(3,8)}${ptNameFields()}${ptCats('barraSetup')}
  <button class="rbtn" style="margin-top:18px" onclick="barraStart()"><span>ابدأ — مرروا الجوال</span></button></div>`);
 }
 function barraStart(){
@@ -32803,8 +32953,8 @@ function barraDeal(){setArena('barra');
  const card=spy?{game:'برا السالفة',title:'أنت برا السالفة!',desc:'لا تعرف الكلمة — جاوب بذكاء ولا تنكشف.',icon:ico('door',58,'red'),ac:'#E24B4A'}
   :{game:'برا السالفة',tag:'الكلمة السرية',title:PT.word,desc:'لا تخبر أحدًا — واسأل بذكاء لتكشف الغريب.',icon:ico('lock',58),ac:'#E8B23A'};
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
- ${roleCard(Object.assign(card,{shown:PT.shown,foot:'الفئة: '+PT.cat,hint:'اللاعب '+n+' — اضغط للكشف',reveal:'ptReveal()'}))}
- <button class="rbtn" id="rcRev" style="margin-top:4px${PT.shown?';display:none':''}" onclick="ptReveal()"><span>أنا اللاعب ${n} — اكشف</span></button>
+ ${roleCard(Object.assign(card,{shown:PT.shown,foot:'الفئة: '+PT.cat,hint:ptName(PT.idx)+' — اضغط للكشف',reveal:'ptReveal()'}))}
+ <button class="rbtn" id="rcRev" style="margin-top:4px${PT.shown?';display:none':''}" onclick="ptReveal()"><span>أنا ${esc(ptName(PT.idx))} — اكشف</span></button>
  <button class="rbtn" id="rcNext" style="margin-top:4px${PT.shown?'':';display:none'}" onclick="PT.idx++;PT.shown=false;barraDeal()"><span>أخفيت — مرر للتالي</span></button>
  <div style="font-size:10.5px;color:var(--tx2);text-align:center;margin-top:10px;line-height:1.7">تأكد أن غيرك لا يرى الشاشة قبل الكشف.</div>
  </div>`);
@@ -32829,7 +32979,7 @@ function barraVote(){setArena('barra');
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
  <div class="sl" style="text-align:center">اتفقوا: من برا السالفة؟</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
- ${Array.from({length:PT.n},(_,i)=>`<button class="btn g" onclick="barraEnd(${i})">اللاعب ${i+1}</button>`).join('')}
+ ${Array.from({length:PT.n},(_,i)=>`<button class="btn g" onclick="barraEnd(${i})">${esc(ptName(i))}</button>`).join('')}
  </div></div>`);
 }
 function barraEnd(acc){
@@ -32844,7 +32994,7 @@ function barraGuess(){
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:14px 0 6px">
  <div style="font-size:40px">${ico('door',36,'red')}</div>
- <div class="mtl" style="font-size:17px;margin-top:8px">أُمسك باللاعب ${PT.spy+1}!</div>
+ <div class="mtl" style="font-size:17px;margin-top:8px">أُمسك بـ${esc(ptName(PT.spy))}!</div>
  <div style="font-size:12px;color:var(--tx2);margin-top:7px;line-height:1.7">مرّروا له الجوال: إن خمّن الكلمة من أوّل مرّة فاز هو، وإلا فازت المجموعة.</div>
  </div></div></div>
  <div class="sl" style="text-align:center">ما الكلمة يا برا السالفة؟</div>
@@ -32863,7 +33013,7 @@ function barraFinal(outcome,acc){
  <div style="text-align:center;padding:14px 0">
  <div style="font-size:44px">${groupWon?ico('trophy',22):ico('door',22,'red')}</div>
  <div class="mtl" style="font-size:18px;margin-top:9px">${title}</div>
- <div style="font-size:13px;color:var(--tx2);margin-top:9px">برا السالفة كان: <b class="mtl">اللاعب ${PT.spy+1}</b><br>
+ <div style="font-size:13px;color:var(--tx2);margin-top:9px">برا السالفة كان: <b class="mtl">${esc(ptName(PT.spy))}</b><br>
  الكلمة: <b>${PT.word}</b><br>${why}</div>
  </div></div></div>
  <button class="rbtn" style="margin-top:14px" onclick="barraStart()"><span>جولة جديدة — نفس اللاعبين</span></button>
@@ -32876,7 +33026,7 @@ function mafiaSetup(keep){
  go(`<div class="scr on">${tb('مافيا')}
  <div class="wb" style="text-align:start">أدوار سرية: مافيا ${ico('swords',13)} وطبيب ${ico('heart',13)} ومحقق ${ico('search',13)} ومواطن ${ico('group',13)}.
  التطبيق يوزع الأدوار ويروي الليل والنهار — بلا حاجة لراوٍ بشري.</div>
- ${ptCount(5,12)}
+ ${ptCount(5,12)}${ptNameFields()}
  <button class="rbtn" style="margin-top:18px" onclick="mafiaStart()"><span>وزّع الأدوار</span></button></div>`);
 }
 function mafiaStart(){
@@ -32937,7 +33087,7 @@ function mafiaDeal(){setArena('mafia');
  if(PT.idx>=PT.n){mafiaNight('mafia');return}
  const n=PT.idx+1;
  go(`<div class="scr on">${ptHead('مافيا',1)}
- ${mafRoleCard(PT.roles[PT.idx],{shown:PT.shown,foot:'اللاعب '+n+' — لا تُرِ دورك أحدًا',hint:'اللاعب '+n+' — اضغط لكشف دورك',reveal:'ptReveal()'})}
+ ${mafRoleCard(PT.roles[PT.idx],{shown:PT.shown,foot:ptName(PT.idx)+' — لا تُرِ دورك أحدًا',hint:'اللاعب '+n+' — اضغط لكشف دورك',reveal:'ptReveal()'})}
  <button class="rbtn" id="rcRev" style="margin-top:4px${PT.shown?';display:none':''}" onclick="ptReveal()"><span>اكشف دوري</span></button>
  <button class="rbtn" id="rcNext" style="margin-top:4px${PT.shown?'':';display:none'}" onclick="PT.idx++;PT.shown=false;mafiaDeal()"><span>أخفيت — مرر للتالي</span></button>
  <div style="font-size:10.5px;color:var(--tx2);text-align:center;margin-top:10px;line-height:1.7">تأكد أن غيرك لا يرى الشاشة قبل الكشف.</div>
@@ -32958,7 +33108,7 @@ function mafPick(title,cb,exclude,day){
  <div class="sl" style="text-align:center">${title}</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
  ${PT.alive.filter(i=>!(exclude||[]).includes(i)).map(i=>
-  `<button class="btn g" onclick="${cb}(${i})">اللاعب ${i+1}</button>`).join('')}
+  `<button class="btn g" onclick="${cb}(${i})">${esc(ptName(i))}</button>`).join('')}
  </div>
  ${day?`<button class="btn g" style="margin-top:12px;color:var(--tx2)" onclick="mafNoLynch()">لا إعدام اليوم — لم تتفق الأغلبية</button>`:''}
  </div>`);
@@ -32997,7 +33147,7 @@ function mafCheck(i){
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:16px 0">
  <div style="font-size:44px">${isMafia?ico('swords',20):''}</div>
- <div class="mtl" style="font-size:17px;margin-top:9px">اللاعب ${i+1}: ${isMafia?'مافيا!':'بريء'}</div>
+ <div class="mtl" style="font-size:17px;margin-top:9px">${esc(ptName(i))}: ${isMafia?'مافيا!':'بريء'}</div>
  <div style="font-size:11px;color:var(--tx2);margin-top:6px">احتفظ بالسر واستخدمه في النقاش</div>
  <button class="rbtn" style="margin-top:16px" onclick="mafiaMorning()"><span>أخفيت — أيقظوا المدينة</span></button>
  </div></div></div></div>`);
@@ -33010,7 +33160,7 @@ function mafiaMorning(){setArena('mafia');
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:14px 0">
  <div style="font-size:44px">${killed!=null?ico('orb',20):ico('energy',20)}</div>
- <div class="mtl" style="font-size:17px;margin-top:9px">${killed!=null?`قُتل اللاعب ${killed+1} ليلًا`:'نجا الجميع — الطبيب أنقذ الضحية!'}</div>
+ <div class="mtl" style="font-size:17px;margin-top:9px">${killed!=null?`قُتل ${esc(ptName(killed))} ليلًا`:'نجا الجميع — الطبيب أنقذ الضحية!'}</div>
  <div style="font-size:12px;color:var(--tx2);margin-top:8px">الأحياء: ${PT.alive.map(i=>i+1).join(' · ')}<br>ناقشوا ثم صوّتوا على متهم</div>
  <button class="rbtn" style="margin-top:16px" onclick="mafPick('على من تصوتون للإعدام؟','mafLynch',null,1)"><span>إلى التصويت</span></button>
  </div></div></div></div>`);
@@ -33018,14 +33168,14 @@ function mafiaMorning(){setArena('mafia');
 function mafLynch(i){
  PT.alive=PT.alive.filter(x=>x!==i);
  const role=PT.roles[i];
- const end=mafWinCheck(`أُعدم اللاعب ${i+1} — كان ${role} ${MAF_ICON[role]}`);
+ const end=mafWinCheck(`أُعدم ${ptName(i)} — كان ${role} ${MAF_ICON[role]}`);
  if(end)return;
  PT.day++;PT.victim=null;PT.saved=null;
  go(`<div class="scr on">${ptHead('مافيا',1)}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:14px 0">
  ${mafDisc(role)}
- <div class="mtl" style="font-size:17px;margin-top:9px">أُعدم اللاعب ${i+1}</div>
+ <div class="mtl" style="font-size:17px;margin-top:9px">أُعدم ${esc(ptName(i))}</div>
  <div style="font-size:13px;color:var(--tx2);margin-top:6px">كان: <b>${role}</b></div>
  <button class="rbtn" style="margin-top:16px" onclick="mafiaNight('mafia')"><span>الليلة ${PT.day} — نامت المدينة</span></button>
  </div></div></div></div>`);
@@ -33046,7 +33196,7 @@ function mafWinCheck(note){
  ${note?`<div style="font-size:12px;color:var(--tx2);margin-top:8px">${note}</div>`:''}
  <div class="mtl" style="font-size:19px;margin-top:9px">${msg}</div>
  <div style="font-size:11px;color:var(--tx2);margin-top:12px">الأدوار كاملة</div>
- ${mafRoleList(PT.roles.map((r,i)=>({n:'اللاعب '+(i+1),r})))}
+ ${mafRoleList(PT.roles.map((r,i)=>({n:ptName(i),r})))}
  </div></div></div>
  <button class="rbtn" style="margin-top:14px" onclick="mafiaStart()"><span>جولة جديدة</span></button>
  <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
@@ -33058,7 +33208,7 @@ function drawSetup(keep){
  if(!keep||!PT||PT.g!=='draw')PT={g:'draw',n:3,cat:'حيوانات'};
  go(`<div class="scr on">${tb('مسابقة الرسم')}
  <div class="wb" style="text-align:start">كلمة واحدة للجميع — كلٌّ يرسمها في 60 ثانية بالتناوب، ثم صوّتوا لأفضل لوحة. الترتيب النهائي بالميداليات!</div>
- ${ptCount(2,6)}${ptCats('drawSetup')}
+ ${ptCount(2,6)}${ptNameFields()}${ptCats('drawSetup')}
  <button class="rbtn" style="margin-top:18px" onclick="drawStart()"><span>ابدأ المسابقة</span></button></div>`);
 }
 function drawStart(){
@@ -33074,7 +33224,7 @@ function drawPass(){
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:16px 0">
  <div style="font-size:44px">${ico('palette',40)}</div>
- <div class="mtl" style="font-size:18px;margin-top:9px">دور اللاعب ${PT.idx+1}</div>
+ <div class="mtl" style="font-size:18px;margin-top:9px">دور ${esc(ptName(PT.idx))}</div>
  <div style="font-size:12px;color:var(--tx2);margin-top:6px">معك 60 ثانية للرسم</div>
  <button class="rbtn" style="margin-top:16px" onclick="drawBoard()"><span>أنا جاهز — أرني الكلمة</span></button>
  </div></div></div></div>`);
@@ -33129,12 +33279,12 @@ function pdDone(){
 function drawVote(){
  if(PT.vi>=PT.n){drawEnd();return}
  go(`<div class="scr on">${ptHead('التصويت',1)}
- <div class="sl" style="text-align:center">اللاعب ${PT.vi+1}: صوّت لأفضل رسمة «${PT.word}» (غير رسمتك)</div>
+ <div class="sl" style="text-align:center">${esc(ptName(PT.vi))}: صوّت لأفضل رسمة «${PT.word}» (غير رسمتك)</div>
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
  ${PT.imgs.map((im,i)=>i===PT.vi?'':`<div onclick="PT.votes[${i}]++;PT.vi++;drawVote()"
   style="cursor:pointer;border:2px solid #3B2F5C;border-radius:14px;overflow:hidden;background:#fff">
   <img src="${im}" style="width:100%;display:block">
-  <div style="text-align:center;font-size:10.5px;font-weight:800;padding:5px;background:var(--surf)">لوحة اللاعب ${i+1}</div></div>`).join('')}
+  <div style="text-align:center;font-size:10.5px;font-weight:800;padding:5px;background:var(--surf)">لوحة ${esc(ptName(i))}</div></div>`).join('')}
  </div></div>`);
 }
 function drawEnd(){
@@ -33149,7 +33299,7 @@ function drawEnd(){
   <span style="font-size:24px;flex-shrink:0">${r.v===top?ico('medal',20,'#E8B23A'):pos===1?ico('medal',20,'#C0C7D6'):pos===2?ico('medal',20,'#B87333'):(pos+1)+'.'}</span>
   <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #3B2F5C;background:#fff">
    <img src="${r.im}" style="width:100%;height:100%;object-fit:cover"></div>
-  <div class="lb"><div class="lt">اللاعب ${r.i+1}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
+  <div class="lb"><div class="lt">${esc(ptName(r.i))}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
   </div></div>`).join('')}
  <button class="rbtn" style="margin-top:10px" onclick="drawStart()"><span>كلمة جديدة — نفس اللاعبين</span></button>
  <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
