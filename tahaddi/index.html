@@ -1863,6 +1863,15 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  border-radius:9px;font-size:10px;font-weight:800;line-height:1.5}
 .rmSeal.on{color:#8FE0B0;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)}
 .rmSeal.off{color:#F0B36A;background:rgba(232,140,58,.12);border:1px solid rgba(232,140,58,.35)}
+/* 5.91: استعادة الحساب بالبريد */
+.recTo{background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3);color:#8FE0B0;
+ border-radius:11px;padding:9px 11px;font-size:12px;font-weight:800;text-align:center;margin-bottom:4px}
+.fin.recCode{text-align:center;letter-spacing:10px;font-size:24px;font-weight:900;direction:ltr;padding-inline-start:10px}
+/* 5.91: حالة تثبيت البريد */
+.okTag{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;padding:1px 6px;border-radius:7px;
+ font-size:9.5px;font-weight:900;color:#8FE0B0;background:rgba(46,204,113,.13);border:1px solid rgba(46,204,113,.32)}
+.warnTag{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;padding:1px 6px;border-radius:7px;
+ font-size:9.5px;font-weight:900;color:#F0B36A;background:rgba(232,140,58,.13);border:1px solid rgba(232,140,58,.35)}
 </style>
 </head>
 <body>
@@ -15556,6 +15565,15 @@ var NET=(function(){
  function loadCloud(){return request({t:'loadCloud'})}
  function setName(name){return request({t:'setName',name:name})}
  function setEmail(email){return request({t:'setEmail',email:email})}
+ /* هويّة الحساب: رمز إلى البريد ثم تحقّق — وعند النجاح قد يتبنّى هذا الجهاز حسابًا آخر */
+ function authStart(email){return request({t:'authStart',email:email})}
+ function authVerify(email,code){
+  return request({t:'authVerify',email:email,code:code}).then(function(m){
+   // الرمز الجديد يصير رمز هذا الجهاز: الاتصال القادم يفتح الحساب المُستعاد
+   setState({token:m.token,id:m.id,code:m.code||null,name:m.name,hasCloud:!!m.hasCloud});
+   return m;
+  });
+ }
  function submitResult(report){return request({t:'submitResult',report:report},12000)}
  function leaderboard(gameId,limit){return request({t:'leaderboard',gameId:gameId,limit:limit||50})}
  function profile(id){return request({t:'profile',id:id})}
@@ -15594,7 +15612,7 @@ var NET=(function(){
  }
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
-  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
@@ -18520,6 +18538,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  R.register('profileView',{render:p=>profileView(p)});
  R.register('errLogScr',{render:()=>errScrLog()});
  R.register('friendsScr',{render:()=>friendsScr()});
+ R.register('recScr',{render:()=>recScr()});
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
  R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&GAME_DEFS.find(x=>x.rmKey===g)),fallback:'partyScr'});
@@ -20372,8 +20391,74 @@ function authScr(){
   onkeydown="if(event.key==='Enter'){event.preventDefault();authCreate()}">
  <div class="note" id="auMailH">${T('حرفان على الأقل')} · ${T('بريدك الإلكتروني')}</div>
  <div style="width:100%;margin-top:auto;padding-top:24px">
- <button class="rbtn" onclick="authCreate()"><span>${ico('check',15)} ${T('إنشاء الحساب')}</span></button></div></div>`);
+ <button class="rbtn" onclick="authCreate()"><span>${ico('check',15)} ${T('إنشاء الحساب')}</span></button>
+ <button class="btn g" style="margin-top:10px" onclick="recOpen()">${ico('reset',14)} ${T('لي حساب — استعِده ببريدي')}</button></div></div>`);
  setTimeout(()=>{const el=document.getElementById('auName');if(el&&!(S.name||'').trim())el.focus()},120);
+}
+/* ═══════════ 5.91 · الحساب يتبع بريدك لا جهازك ═══════════
+   كان الحساب مفتاحه رمزًا مخزّنًا في المتصفّح: من مسح بياناته — أو بدّل جهازه —
+   فقد رتبته وبطاقاته ومشترياته بلا طريق للعودة. الآن البريد **المُثبَت برمز**
+   هو الهويّة: تكتب بريدك، يصلك رمز من ستّة أرقام، وبه يعود حسابك كما هو على
+   أيّ جهاز. الرمز لا يُعاد إلى الجهاز أبدًا — يمرّ بالبريد وحده. */
+let REC={email:'',sent:0,busy:0,msg:'',mask:''};
+function recOpen(){REC={email:String(S.email||''),sent:0,busy:0,msg:'',mask:''};push('recScr')}
+function recScr(){
+ const step=REC.sent?2:1;
+ go(`<div class="scr on">${tbar('استعادة حسابك')}
+ <div class="wb" style="text-align:start">${ico('info',13)}
+  حسابك مربوط ببريدك. اكتبه ليصلك رمز، وبالرمز يعود تقدّمك كاملًا على هذا الجهاز.</div>
+ ${step===1?`
+  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:6px 0 5px">بريدك الإلكتروني</div>
+  <input class="fin" id="recMail" type="email" inputmode="email" autocomplete="email" maxlength="80"
+   placeholder="name@mail.com" style="text-align:center;direction:ltr;font-size:16px;font-weight:700"
+   value="${esc(REC.email)}" onkeydown="if(event.key==='Enter'){event.preventDefault();recSend()}">
+  <button class="rbtn" style="margin-top:13px" ${REC.busy?'disabled':''} onclick="recSend()">
+   <span>${ico('next',14)} ${REC.busy?'…':'أرسل الرمز'}</span></button>`
+ :`
+  <div class="recTo">${ico('check',13)} أُرسل الرمز إلى <b dir="ltr">${esc(REC.mask)}</b></div>
+  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:6px 0 5px">رمز الدخول</div>
+  <input class="fin recCode" id="recCode" inputmode="numeric" maxlength="6" placeholder="——————"
+   oninput="recDigits(this)" onkeydown="if(event.key==='Enter'){event.preventDefault();recCheck()}">
+  <button class="rbtn" style="margin-top:13px" ${REC.busy?'disabled':''} onclick="recCheck()">
+   <span>${ico('check',14)} ${REC.busy?'…':'تأكيد'}</span></button>
+  <button class="btn g" style="margin-top:9px" onclick="REC.sent=0;REC.msg='';recScr()">${ico('back',13)} بريد آخر</button>`}
+ ${REC.msg?`<div class="note" style="color:var(--no);margin-top:10px">${esc(REC.msg)}</div>`:''}
+ <div class="note" style="margin-top:12px">الرمز صالح عشر دقائق ولمرّة واحدة. لا نرسل بريدًا غير هذا.</div>
+ </div>`);
+ setTimeout(()=>{const el=document.getElementById(step===1?'recMail':'recCode');if(el)el.focus()},140);
+}
+function recDigits(el){if(!el)return;const v=String(el.value||'').replace(/\D/g,'').slice(0,6);if(el.value!==v)el.value=v}
+function recBusy(on){REC.busy=on?1:0;recScr()}
+function recSend(){
+ const el=document.getElementById('recMail');
+ const v=(el?el.value:'').trim().toLowerCase();
+ if(!MAIL_RE.test(v)){REC.msg='بريد إلكتروني غير صحيح';return recScr()}
+ if(!netOnline()){REC.msg='تحتاج اتصالًا بالخادم';return recScr()}
+ REC.email=v;REC.msg='';recBusy(1);
+ NET.authStart(v).then(m=>{REC.mask=m.to||v;REC.sent=1;REC.msg='';recBusy(0)})
+  .catch(e=>{REC.msg=(e&&e.message)||'تعذّر إرسال الرمز';recBusy(0)});
+}
+function recCheck(){
+ const el=document.getElementById('recCode');
+ const c=(el?el.value:'').replace(/\D/g,'');
+ if(c.length!==6){REC.msg='الرمز ستّة أرقام';return recScr()}
+ REC.msg='';recBusy(1);
+ NET.authVerify(REC.email,c).then(m=>{
+  S.email=m.email;S.emailOk=1;
+  S.account={token:m.token,id:m.id,code:m.code||null,name:m.name};
+  if(m.name)S.name=m.name;
+  saveState();
+  if(m.restored){
+   // الحساب المُستعاد يحمل حفظه السحابي — نجلبه قبل أن نُظهر شيئًا
+   NET.loadCloud().then(c2=>{netMergeCloud(c2);saveState();
+    toast('عاد حسابك — أهلًا '+esc(S.name));
+    Router.reset('playScr');
+   }).catch(()=>{toast('عاد حسابك');Router.reset('playScr')});
+  }else{
+   toast('تأكّد بريدك — حسابك صار يتبعه');
+   back();
+  }
+ }).catch(e=>{REC.msg=(e&&e.message)||'الرمز غير صحيح';recBusy(0)});
 }
 /** إنشاء الحساب: الاسم ثم البريد — كلاهما مطلوب */
 function authCreate(){
@@ -20465,9 +20550,17 @@ function setSection(k){
   <button class="btn g" style="margin-top:11px" onclick="push('avScr')">تعديل الشخصية</button>
   </div></div>
   <div class="li" style="margin-top:11px"><div class="lr">
-   <div class="lb"><div class="lt">${T('بريدك الإلكتروني')}</div><div class="ls" style="direction:ltr;text-align:start">${esc(S.email||'—')}</div></div>
+   <div class="lb"><div class="lt">${T('بريدك الإلكتروني')}
+    ${S.emailOk?`<span class="okTag">${ico('check',10)} مُثبَت</span>`:`<span class="warnTag">${ico('info',10)} غير مُثبَت</span>`}</div>
+    <div class="ls" style="direction:ltr;text-align:start">${esc(S.email||'—')}</div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
     onclick="push('emailAsk')">${T('تغيير')}</button></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
+   <div class="lb"><div class="lt">${S.emailOk?'حسابك يتبع بريدك':'ثبّت بريدك'}</div>
+    <div class="ls">${S.emailOk?'يعود كاملًا على أي جهاز برمز يصل بريدك'
+     :'بلا تثبيت يضيع حسابك إن مسحتَ بيانات المتصفّح أو بدّلتَ جهازك'}</div></div>
+   <button class="${S.emailOk?'btn g':'rbtn'}" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="recOpen()">${S.emailOk?'استعادة':'ثبّت الآن'}</button></div></div>
   <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">اسمك في اللعبة</div><div class="ls">${esc(S.name||'—')} — <span>${T('هذا ما يراه من يلعب معك')}</span></div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
@@ -23246,7 +23339,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.90';
+const APP_VER='5.91';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,

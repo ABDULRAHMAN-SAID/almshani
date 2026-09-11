@@ -29,6 +29,8 @@ const CAPTURES=[
  ['playerCard',R("tab('play');pcOpen('p0123456789ab','نورة',{skin:2,hair:3,hairStyle:1,eyes:0,mouth:2,acc:0,beard:0,bg:1})")],
  ['dmScr',R("tab('play');dmOpen('p0123456789ab','نورة')")],
  ['friendsScr',R("tab('play');push('friendsScr')")],
+ ['recScr',R("tab('more');recOpen()")],
+ ['recCode',R("tab('more');recOpen();setTimeout(()=>{REC.sent=1;REC.mask='s****d@mail.com';recScr()},200)")],
  ['rmInvite',R("tab('play');RM.code='ABCD';RM.game='barra';RM.host=1;RM.solo=0;push('roomScr','barra');setTimeout(()=>{try{rmInvite()}catch(e){}},300)")],
  ['knBot',R("push('rankedScr');knBot(58)")],
  ['playModesScr',R("push('playModesScr')")],

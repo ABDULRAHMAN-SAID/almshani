@@ -6,6 +6,7 @@ import type { RankProfile } from '../../../src/progression/rank.js';
 import { RecordStore, type Row } from './tstore';
 import CATALOG from '../../../src/economy/catalog.js';
 import { verify as verifyReceipt, iapStatus } from './iap';
+import { sendCode, mailMode } from './mail';
 import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec, DmMsg } from './protocol';
 
 export interface Account {
@@ -17,6 +18,7 @@ export interface Account {
   reqOut: string[];       // طلبات أرسلتها
   dm?: Record<string, DmMsg[]>;   // محادثات خاصّة: معرّف الصديق → أحدث رسائلها
   code?: string;          // رمز صديق قصير يُقرأ ويُملى — بديل المعرّف الطويل عند الإضافة
+  emailOk?: boolean;      // بريد مُثبَت برمز — به وحده يُستعاد الحساب على جهاز آخر
 }
 export interface Session {
   peer: string; account: Account; presence: Record<string, unknown>;
@@ -53,6 +55,19 @@ const ID_RE = /^p[0-9a-f]{12}$/;
 const CODE_ABC = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
 const CODE_RE = /^[2-9A-HJ-NP-Z]{6}$/;
 const codeNorm = (v: string): string => v.toUpperCase().replace(/[^0-9A-Z]/g, '');
+/** يُخفي البريد في الردّ: ع****ن@gmail.com — يطمئن صاحبه ولا يكشفه لغيره */
+const maskMail = (e: string): string => {
+  const i = e.indexOf('@'); if (i < 1) return '***';
+  const u = e.slice(0, i), d = e.slice(i);
+  return (u.length <= 2 ? u[0] + '*' : u[0] + '*'.repeat(Math.min(6, u.length - 2)) + u[u.length - 1]) + d;
+};
+/* ═══ رمز الدخول لمرّة واحدة (5.91) ═══
+   الحساب كان مفتاحه رمزًا في الجهاز: من مسح بيانات المتصفّح فقد كل شيء. الآن
+   البريد المُثبَت هو الهويّة، والرمز طريق إثباته: ستّة أرقام، عشر دقائق، خمس
+   محاولات، ويُبطَل بعد أوّل نجاح. ولا يُعاد الرمز إلى العميل أبدًا في أي حال. */
+const OTP_TTL = 10 * 60 * 1000;
+const OTP_TRIES = 5;
+const OTP_GAP = 45 * 1000;        // لا رمز جديد قبل مرور هذه المدّة
 const MAX_FRIENDS = 200;
 const MAX_DM_LEN = 300;      // رسالة خاصّة واحدة
 const MAX_DM_THREAD = 80;    // أحدث ما يُحفظ من محادثة واحدة
@@ -64,7 +79,8 @@ const RATE: Record<string, [number, number]> = {
   submitResult: [8, 2], leaderboard: [8, 2], profile: [24, 6],
   friendAdd: [12, 1], friendAccept: [12, 1], friendRemove: [12, 1], friends: [12, 3],
   dm: [12, 2], dmThread: [16, 4],
-  setName: [6, 1], setEmail: [6, 1], purchase: [8, 1], purchases: [8, 1]
+  setName: [6, 1], setEmail: [6, 1], purchase: [8, 1], purchases: [8, 1],
+  authStart: [4, 0.05], authVerify: [10, 0.2]
 };
 const RATE_ANY: [number, number] = [30, 10];
 const MAX_PEER_LIST = 60;      // صفّ البحث عن مباراة قد يكون ضخمًا — تكفي عيّنة للاختيار منها
@@ -90,6 +106,8 @@ export class TahaddiService {
   private accounts = new Map<string, Account>();      // token → account
   private byId = new Map<string, Account>();          // id → account
   private byCode = new Map<string, Account>();        // رمز الصديق → الحساب
+  private byEmail = new Map<string, Account>();       // بريد مُثبَت → الحساب (الهويّة الحقيقية)
+  private otp = new Map<string, { code: string; exp: number; tries: number; at: number }>();
   private sessions = new Map<string, Session>();      // peer → session
   private groups = new Map<string, Set<Session>>();   // مفتاح المجموعة → جلساتها (فهرس البثّ)
   private byAcc = new Map<string, Set<Session>>();    // معرّف الحساب → جلساته
@@ -112,10 +130,13 @@ export class TahaddiService {
           friends: idList(a.friends), reqIn: idList(a.reqIn), reqOut: idList(a.reqOut)
         };
         if (typeof a.code === 'string' && CODE_RE.test(a.code) && !this.byCode.has(a.code)) acc.code = a.code;
+        if (typeof a.email === 'string' && MAIL_RE.test(a.email)) acc.email = a.email.toLowerCase();
+        if (acc.email && a.emailOk === true && !this.byEmail.has(acc.email)) acc.emailOk = true;
         const dm = dmBoxes(a.dm); if (dm) acc.dm = dm;   // كانت المحادثات تُحفظ ولا تُستعاد — تضيع مع كل إعادة تشغيل
         for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
         this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
         if (acc.code) this.byCode.set(acc.code, acc);
+        if (acc.emailOk && acc.email) this.byEmail.set(acc.email, acc);
       }
       // الحسابات القديمة بلا رمز تأخذ واحدًا الآن — الرمز جزء من الحساب لا من الجلسة
       for (const acc of this.accounts.values()) if (!acc.code) { acc.code = this.mkCode(); this.byCode.set(acc.code, acc); this.persist(acc); }
@@ -252,6 +273,55 @@ export class TahaddiService {
     if (e.length < 5 || e.length > 120 || !MAIL_RE.test(e)) return s.send({ t: 'error', rid, code: 'bad_email' });
     s.account.email = e; this.persist(s.account);
     s.send({ t: 'emailSet', rid, email: e });
+  }
+
+  /* ═══ هويّة الحساب: بريد مُثبَت برمز، يستعيد الحساب على أيّ جهاز ═══
+     الردّ واحد سواء وُجد الحساب أو لم يوجد — كي لا يكون هذا الطريق كشّافًا
+     لمن سجّل في اللعبة ومن لم يسجّل. */
+  async authStart(s: Session, email: unknown, rid?: string): Promise<void> {
+    const e = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (e.length < 5 || e.length > 120 || !MAIL_RE.test(e))
+      return s.send({ t: 'error', rid, code: 'bad_email', message: 'بريد غير صالح' });
+    if (mailMode() === 'off')
+      return s.send({ t: 'error', rid, code: 'mail_off', message: 'إرسال البريد غير مفعّل على هذا الخادم' });
+    const prev = this.otp.get(e);
+    if (prev && Date.now() - prev.at < OTP_GAP)
+      return s.send({ t: 'error', rid, code: 'too_soon', message: 'انتظر قليلًا قبل طلب رمز جديد' });
+    const code = String(100000 + (randomBytes(4).readUInt32BE(0) % 900000));
+    this.otp.set(e, { code, exp: Date.now() + OTP_TTL, tries: 0, at: Date.now() });
+    const sent = await sendCode(e, code);
+    if (!sent) {
+      this.otp.delete(e);
+      return s.send({ t: 'error', rid, code: 'mail_fail', message: 'تعذّر إرسال الرمز الآن' });
+    }
+    s.send({ t: 'authSent', rid, to: maskMail(e), mode: mailMode() === 'dev' ? 'dev' : 'live' });
+  }
+  authVerify(s: Session, email: unknown, code: unknown, rid?: string): void {
+    const e = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    const c = typeof code === 'string' ? code.trim() : '';
+    const rec = this.otp.get(e);
+    if (!rec || rec.exp < Date.now()) { this.otp.delete(e); return s.send({ t: 'error', rid, code: 'code_expired', message: 'انتهت صلاحية الرمز — اطلب رمزًا جديدًا' }); }
+    if (rec.tries >= OTP_TRIES) { this.otp.delete(e); return s.send({ t: 'error', rid, code: 'code_burned', message: 'حاولت كثيرًا — اطلب رمزًا جديدًا' }); }
+    rec.tries++;
+    if (c !== rec.code) return s.send({ t: 'error', rid, code: 'code_bad', message: 'الرمز غير صحيح' });
+    this.otp.delete(e);                                  // لمرّة واحدة مهما جرى
+    const owner = this.byEmail.get(e);
+    let acc = s.account;
+    let restored = false;
+    if (owner && owner !== acc) {                        // للبريد حسابه: هذا الجهاز يتبنّاه
+      acc = owner; restored = true;
+      this.accLeave(s); s.account = acc; this.accJoin(s);
+    } else {
+      if (acc.email && acc.email !== e) this.byEmail.delete(acc.email);
+      acc.email = e; acc.emailOk = true;
+      this.byEmail.set(e, acc);
+    }
+    acc.lastSeen = Date.now();
+    if (!acc.code) { acc.code = this.mkCode(); this.byCode.set(acc.code, acc); }
+    this.persist(acc);
+    s.send({ t: 'authOk', rid, email: e, restored, token: acc.token, id: acc.id, code: acc.code,
+      name: acc.name, ranks: acc.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!acc.save });
+    this.sendSelf(s);
   }
 
   /* ── الحفظ السحابي: الخادم يحفظ ما يرسله الهاتف كما هو، لكنّ الرتب لا تُؤخذ منه أبدًا ── */
@@ -564,6 +634,8 @@ export class TahaddiService {
     switch (msg.t) {
       case 'setName': return this.setName(s, msg.name, msg.rid);
       case 'setEmail': return this.setEmail(s, msg.email, msg.rid);
+      case 'authStart': { void this.authStart(s, msg.email, msg.rid); return; }
+      case 'authVerify': return this.authVerify(s, msg.email, msg.code, msg.rid);
       case 'saveCloud': return this.saveCloud(s, msg.save, msg.rid);
       case 'loadCloud': return this.loadCloud(s, msg.rid);
       case 'submitResult': return this.submitResult(s, msg.report, msg.rid);

@@ -35,7 +35,10 @@ export interface PurchaseRec { txId: string; platform: Platform; productId: stri
 
 export type ClientMsg =
   | { t: 'hello'; rid?: string; token?: string; name?: string; peer?: string }
-  | { t: 'setEmail'; rid?: string; email: string }   // بريد الحساب — لا لعب بلا حساب   // peer: معرّف الاتصال السابق لاستئناف الغرفة بعد انقطاع
+  | { t: 'setEmail'; rid?: string; email: string }
+  // ── هويّة الحساب: بريد مُثبَت برمز لمرّة واحدة، يستعيد الحساب على أيّ جهاز ──
+  | { t: 'authStart'; rid?: string; email: string }
+  | { t: 'authVerify'; rid?: string; email: string; code: string }
   | { t: 'setName'; rid?: string; name: string }
   | { t: 'saveCloud'; rid?: string; save: CloudSave }
   | { t: 'loadCloud'; rid?: string }
@@ -71,6 +74,9 @@ export interface LeaderRow { id: string; name: string; tier: number; div: number
 
 export type ServerMsg =
   | { t: 'emailSet'; rid?: string; email: string }
+  | { t: 'authSent'; rid?: string; to: string; mode: 'live' | 'dev' }
+  /** نجح التحقّق: إن حمل token فهو حساب آخر يتبنّاه هذا الجهاز (استعادة) */
+  | { t: 'authOk'; rid?: string; email: string; restored: boolean; token: string; id: string; code: string; name: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
   | { t: 'welcome'; rid?: string; token: string; id: string; code: string; name: string; peer: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
   | { t: 'nameSet'; rid?: string; name: string }
   | { t: 'cloudSaved'; rid?: string; t2: number }

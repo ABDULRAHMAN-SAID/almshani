@@ -16,7 +16,7 @@ const sec=t=>console.log('\n── '+t+' ──');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 function startServer(){
- const p=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA,TAHADDI_RESULT_WAIT_MS:'1200',TAHADDI_SWEEP_MS:'300',TAHADDI_IAP_TEST_SECRET:'t3st-secret'},stdio:['ignore','pipe','pipe']});
+ const p=spawn('node',['server/dist/tahaddi.js'],{cwd:ROOT,env:{...process.env,PORT:String(PORT),TAHADDI_DATA_FILE:DATA,TAHADDI_RESULT_WAIT_MS:'1200',TAHADDI_SWEEP_MS:'300',TAHADDI_IAP_TEST_SECRET:'t3st-secret',TAHADDI_MAIL_DEV:'1'},stdio:['ignore','pipe','pipe']});
  p.logs=[];p.stdout.on('data',d=>p.logs.push(String(d)));p.stderr.on('data',d=>p.logs.push('ERR '+String(d)));
  return p;
 }
@@ -212,6 +212,48 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
    const badId=await D1.req({t:'dm',to:'zzz',text:'x'});
    check('معرّف غير صالح يُرفض',badId.t==='error'&&badId.code==='bad_id');
    await D1.close();await D2.close();
+  }
+  /* ═══ هويّة الحساب: بريد مُثبَت برمز يستعيد الحساب على جهاز آخر ═══ */
+  {
+   const codeOf=m=>{const all=[...server.logs.join('').matchAll(/رمز (\S+) هو (\d{6})/g)].filter(x=>x[1]===m);
+    return all.length?all[all.length-1][2]:null};
+   const M='saud@mail.com';
+   const D1=client();const w1=await hello(D1,undefined,'سعود');
+   const bad=await D1.req({t:'authStart',email:'ليس بريدًا'});
+   check('بريد غير صالح يُرفض',bad.t==='error'&&bad.code==='bad_email',JSON.stringify(bad));
+   const sent=await D1.req({t:'authStart',email:M});
+   check('يُرسل الرمز ويُخفى البريد في الردّ',sent.t==='authSent'&&/\*/.test(sent.to)&&sent.to.endsWith('@mail.com'),JSON.stringify(sent));
+   check('الرمز لا يُعاد إلى العميل أبدًا',!/\d{6}/.test(JSON.stringify(sent)),JSON.stringify(sent));
+   const soon=await D1.req({t:'authStart',email:M});
+   check('طلب رمز ثانٍ فورًا يُرفض',soon.t==='error'&&soon.code==='too_soon',JSON.stringify(soon));
+   const c1=codeOf(M);
+   check('الرمز ستّة أرقام في سجلّ الخادم وحده',/^\d{6}$/.test(String(c1)),String(c1));
+   const wrong=await D1.req({t:'authVerify',email:M,code:'000000'});
+   check('رمز خاطئ يُرفض',wrong.t==='error'&&wrong.code==='code_bad',JSON.stringify(wrong));
+   const ok=await D1.req({t:'authVerify',email:M,code:c1});
+   check('الرمز الصحيح يثبّت البريد على الحساب نفسه',
+    ok.t==='authOk'&&ok.restored===false&&ok.id===w1.id&&ok.email===M,JSON.stringify(ok).slice(0,140));
+   const reuse=await D1.req({t:'authVerify',email:M,code:c1});
+   check('الرمز لمرّة واحدة',reuse.t==='error'&&reuse.code==='code_expired',JSON.stringify(reuse));
+   await D1.req({t:'saveCloud',save:{t:Date.now(),blob:{coins:7777}}});
+   // جهاز جديد تمامًا يستعيد الحساب
+   const D2=client();const w2=await hello(D2,undefined,'جهاز جديد');
+   check('الجهاز الجديد بدأ بحساب آخر',w2.id!==w1.id,w2.id+' / '+w1.id);
+   await D2.req({t:'authStart',email:M});
+   const c2=codeOf(M);
+   check('رمز جديد مختلف عن الأوّل',c2&&c2!==c1,c1+' / '+c2);
+   const rec=await D2.req({t:'authVerify',email:M,code:c2});
+   check('الجهاز الجديد يتبنّى الحساب الأصلي بالكامل',
+    rec.t==='authOk'&&rec.restored===true&&rec.id===w1.id&&rec.token===w1.token,JSON.stringify(rec).slice(0,140));
+   const cl=await D2.req({t:'loadCloud'});
+   check('الحفظ السحابي يعود مع الحساب',cl.save&&cl.save.blob&&cl.save.blob.coins===7777,JSON.stringify(cl).slice(0,120));
+   // خمس محاولات خاطئة تحرق الرمز
+   const D3=client();await hello(D3,undefined,'مهاجم');
+   await D3.req({t:'authStart',email:'other@mail.com'});
+   let burned=null;
+   for(let i=0;i<6;i++)burned=await D3.req({t:'authVerify',email:'other@mail.com',code:'111111'});
+   check('التخمين المتكرّر يحرق الرمز',burned.t==='error'&&burned.code==='code_burned',JSON.stringify(burned));
+   await D1.close();await D2.close();await D3.close();
   }
   /* ═══ رمز الصداقة القصير: يُقرأ ويُملى، ويضيف كما يضيف المعرّف الطويل ═══ */
   {
