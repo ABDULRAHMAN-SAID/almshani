@@ -18229,6 +18229,30 @@ const CARD_SCENES={
   <rect width="100" height="100" fill="url(#scEn)"/>
   <circle cx="50" cy="50" r="40" fill="none" stroke="#9ADDFF" stroke-opacity=".25" stroke-width=".8"/><circle cx="50" cy="50" r="30" fill="none" stroke="#B76CF0" stroke-opacity=".35" stroke-width=".8" stroke-dasharray="4 3"/><circle cx="50" cy="50" r="19" fill="none" stroke="#DFF4FF" stroke-opacity=".3" stroke-width=".6"/>${sparks}`}
 };
+/* ═══ 5.90: تعريفات التدرّج مرّة واحدة للمستند كلّه ═══
+   كان كل رسم بطاقة يحمل معه كتلة <defs> بثمانية تدرّجات — وفي شاشة البطاقات
+   ثمانٍ وأربعون بطاقة، أي نحو أربعمئة عقدة تدرّج مكرّرة بالمعرّفات نفسها.
+   الطلاء كان يصحّ بالمصادفة (التعريفات متطابقة) و«url(#id)» يتعلّق بأوّل نسخة؛
+   ولو اختلف تدرّج بين بطاقة وأخرى يومًا لطُليت كلّها بلون الأولى صامتةً — وهو
+   العيب نفسه الذي أفسد الصور الرمزية من قبل. الآن تُرفع مرّة إلى مستودع واحد. */
+let _cgDefs='',_cgSeen=null;
+function cgDefsAdd(block){
+ if(!block)return;
+ if(!_cgSeen)_cgSeen=new Set();
+ if(_cgSeen.has(block))return;
+ _cgSeen.add(block);_cgDefs+=block;
+ let host=document.getElementById('cgDefsHost');
+ if(!host){
+  host=document.createElement('div');host.id='cgDefsHost';host.setAttribute('aria-hidden','true');
+  host.style.cssText='position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+  document.body.appendChild(host);
+ }
+ host.innerHTML='<svg width="0" height="0" style="position:absolute">'+_cgDefs+'</svg>';
+}
+/** ينزع كتل <defs> من رسم مولَّد ويرفعها إلى المستودع — الناتج يشير إليها كما كان */
+function cgHoist(svg){
+ return String(svg||'').replace(/<defs>[\s\S]*?<\/defs>/g,m=>{cgDefsAdd(m);return ''});
+}
 const SC_DEFS='<defs><radialGradient id="scVig" cx=".5" cy=".45" r=".72"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".62"/></radialGradient>'+
  '<linearGradient id="scRim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>';
 /** لوحة البطاقة الكاملة 100×100: مشهد النوع + قاعدة متوهّجة بلون الندرة + الشعار + إطار داخلي وزخارف الزوايا */
@@ -18238,9 +18262,10 @@ function cardArt(id){
  const R=RCOL[c.r]||RCOL.common, sc=(CARD_SCENES[c.t]||CARD_SCENES.tactic)(vnRnd(id*31+7));
  const hi=c.r==='epic'||c.r==='legendary';
  const corner=(x,y,sx,sy)=>`<path d="M${x} ${y+9} V${y} H${x+9*sx} M${x} ${y} l${3*sx} ${3*sy}" transform="scale(1 1)" fill="none" stroke="#FFE9A8" stroke-width="1.2" stroke-linecap="round"/>`;
- return '<svg viewBox="0 0 100 100" class="csvg">'+SC_DEFS+sc+
+ cgDefsAdd(SC_DEFS);cgDefsAdd(CG_DEFS);
+ return '<svg viewBox="0 0 100 100" class="csvg">'+cgHoist(sc)+
   `<ellipse cx="50" cy="83" rx="32" ry="6.5" fill="${R.g}" opacity=".32"/><ellipse cx="50" cy="83" rx="19" ry="3.6" fill="${R.g}" opacity=".55"/>`+
-  `<svg x="13" y="11" width="74" height="74" viewBox="0 0 64 64">${CG_DEFS}${a}</svg>`+
+  `<svg x="13" y="11" width="74" height="74" viewBox="0 0 64 64">${a}</svg>`+
   '<rect width="100" height="100" fill="url(#scVig)"/><rect width="100" height="100" fill="url(#scRim)"/>'+
   `<rect x="1.2" y="1.2" width="97.6" height="97.6" rx="6.5" fill="none" stroke="${R.g}" stroke-opacity="${hi?'.75':'.45'}" stroke-width="1.2"/>`+
   (hi?`<path d="M4 13 V4 H13 M87 4 H96 V13 M96 87 V96 H87 M13 96 H4 V87" fill="none" stroke="#FFE9A8" stroke-width="1.4" stroke-linecap="round"/>`:'')+
@@ -21153,13 +21178,14 @@ function curBar(){
  </div>`;
 }
 /** لافتة قسم — شريط ذهبي بأطراف مشطوفة، شكل خاص بتحدي */
+const BN_DEFS='<defs><linearGradient id="bnG" x1="0" y1="0" x2="0" y2="1">'+
+ '<stop offset="0" stop-color="#F0C25A"/><stop offset=".5" stop-color="#E8B23A"/>'+
+ '<stop offset="1" stop-color="#A87518"/></linearGradient></defs>';
 function banner(t){
+ cgDefsAdd(BN_DEFS);   // 5.90: كان المعرّف مفتاحه عدد حروف العنوان — لافتتان بالطول نفسه تتصادمان
  return `<div style="margin:20px 0 12px;position:relative;height:34px">
  <svg viewBox="0 0 300 34" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
-  <defs><linearGradient id="bn${t.length}" x1="0" y1="0" x2="0" y2="1">
-   <stop offset="0" stop-color="#F0C25A"/><stop offset=".5" stop-color="#E8B23A"/>
-   <stop offset="1" stop-color="#A87518"/></linearGradient></defs>
-  <path d="M14 4 L286 4 L296 17 L286 30 L14 30 L4 17 Z" fill="url(#bn${t.length})"/>
+  <path d="M14 4 L286 4 L296 17 L286 30 L14 30 L4 17 Z" fill="url(#bnG)"/>
   <path d="M14 4 L286 4 L296 17 L286 30 L14 30 L4 17 Z" fill="none" stroke="#FFE9A8" stroke-width="1" opacity=".55"/>
  </svg>
  <div style="position:relative;text-align:center;line-height:34px;font-size:14.5px;
@@ -23220,8 +23246,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.89';
-function dayKey(){return new Date().toISOString().slice(0,10)}
+const APP_VER='5.90';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24108,6 +24133,11 @@ function rmStart(){
   setTimeout(()=>rmSend({t:'ph',p:'paint',secs:75}),140);
   return;
  }
+ // 5.90: لعبة مجهولة كانت تسقط في فرع المافيا صامتةً — الآن تُرفض بوضوح
+ if(!/^(draw|uno|carrom|barra|mafia)$/.test(RM.game)){
+  toast('هذه اللعبة لا تُلعب في غرفة');
+  return;
+ }
  // 5.89: ما كان فيه سرّ لا يبدأ بلا تعمية — الأدوار المكشوفة أسوأ من لعبة لا تبدأ
  if(/^(uno|barra|mafia)$/.test(RM.game)&&!rmCrypto()){
   toast('هذا الاتصال لا يدعم التعمية — افتح اللعبة من رابطها الآمن (https)');
@@ -24276,6 +24306,7 @@ function soloBegin(g){
  soloStart(g,RM.diff||'mid');
 }
 function soloStart(g,diff){
+ if(!/^(mafia|barra|draw|uno|carrom)$/.test(g)){toast('لا لعب ضد الكمبيوتر في هذه اللعبة');return}
  if(g==='mafia')return mfStart(diff);
  if(g==='barra')return brStart(diff);
  if(g==='draw')return dbStart(diff);
@@ -40699,7 +40730,7 @@ function tab(k){cur=k;nav();hideArena();
 
 // ═══════════ الشاشات ═══════════
 function splash(){
- loadState();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
+ loadState();ecoNorm();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
  if(!hasAccount())Router.reset('authScr');            // 5.68: لا لعب بلا حساب — البريد أوّلًا
  else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
  else Router.reset('welcomeScr');
@@ -41523,10 +41554,28 @@ function rivalProf(name){const rv=RIVALS.find(v=>v.n===name);
 // يعمل في التطبيق الفعلي عبر Firestore — وهنا محليًا للمعاينة
 const SAVE_KEY='tahaddi_v1';
 let _saveTimer=null;
+/* ═══ 5.90: الرصيد يُقوَّم عند المصبّ لا عند ثلاثة وثلاثين موضعًا ═══
+   ثلاثة وثلاثون موضعًا في اللعبة تزيد الرصيد أو تنقصه، أكثرها بلا تقييد. بدل
+   تدقيق كل موضع على حدة (ويُنسى الموضع الرابع والثلاثون غدًا) يمرّ كل شيء من
+   هنا: عدد صحيح غير سالب ومنتهٍ، وسقف يقطع أي تسمّم بـ Infinity أو NaN — سواء
+   جاء من حساب خاطئ أو من حفظ معبوث به. */
+const ECO_CAP=1e12;
+function ecoNum(v,cap){
+ const n=Math.floor(Number(v));
+ if(!isFinite(n)||n<0)return 0;
+ return Math.min(n,cap||ECO_CAP);
+}
+function ecoNorm(){
+ if(typeof S!=='object'||!S)return;
+ S.coins=ecoNum(S.coins);S.gems=ecoNum(S.gems);S.xp=ecoNum(S.xp);
+ S.hearts=ecoNum(S.hearts,99);
+ S.matches=ecoNum(S.matches,1e9);S.wins=ecoNum(S.wins,1e9);
+}
 function saveState(){
  clearTimeout(_saveTimer);
  _saveTimer=setTimeout(()=>{
   try{
+   ecoNorm();
    const d={v:1,t:Date.now(),s:{}};
    S._savedAt=d.t;
    // لا نحفظ حالة المباراة الجارية — تُستأنف من الصفر
