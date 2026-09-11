@@ -1858,6 +1858,11 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  border-radius:10px;background:var(--no);color:#fff;font-size:11px;font-weight:900;
  display:flex;align-items:center;justify-content:center;padding:0 6px}
 .plRow{position:relative}
+/* 5.89: حالة التعمية في ردهة الغرفة — يراها اللاعب لا يصدّقها على كلامنا */
+.rmSeal{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:9px;padding:5px 9px;
+ border-radius:9px;font-size:10px;font-weight:800;line-height:1.5}
+.rmSeal.on{color:#8FE0B0;background:rgba(46,204,113,.1);border:1px solid rgba(46,204,113,.3)}
+.rmSeal.off{color:#F0B36A;background:rgba(232,140,58,.12);border:1px solid rgba(232,140,58,.35)}
 </style>
 </head>
 <body>
@@ -23215,7 +23220,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.88';
+const APP_VER='5.89';
 function dayKey(){return new Date().toISOString().slice(0,10)}
 function EV(){
  const d=dayKey();
@@ -23607,7 +23612,7 @@ function rmLeave(silent){
  if(typeof VB3!=='undefined'&&VB3.lobby&&typeof vb3dDispose==='function')vb3dDispose();
  const c=RMcap;
  RM.unsub.forEach(u=>{try{u()}catch(e){}});RM.unsub=[];
- if(c&&RM.code){try{c.presence({pc:null,nm:null,hs:null,vt:null,st:null})}catch(e){}}
+ if(c&&RM.code){try{c.presence({pc:null,nm:null,hs:null,vt:null,st:null,pk:null})}catch(e){}}
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  RM.U=null;RM.C=null;RM.uno=null;RM.ca=null;RM.hand=[];
  if(RM.solo){RM.solo=0;RMcap=undefined;_ca.sim=null}   // يُعاد حلّ الناقل الحقيقي في الغرفة التالية
@@ -23642,6 +23647,79 @@ function rmResync(){
 }
 function rmSend(o){const c=RMcap;if(!c||!RM.code)return;
  try{c.emit(RM_TOPIC,Object.assign({c:RM.code},o))}catch(e){}}
+
+/* ═══════════ 5.89 · ما يخصّ لاعبًا واحدًا لا يصل إلى بقيّة الأجهزة ═══════════
+   مجرى الغرفة بثّ: كل ما يُرسَل يصل إلى كل جهاز. وكانت الأدوار وأوراق أونو
+   ونتيجة المحقّق تُرسَل بعنوان «to» ثم **يُصفّيها كل جهاز عند نفسه** — فمن فتح
+   أدوات المطوّر قرأ أدوار الجميع وأوراقهم. أي مافيا أونلاين كانت مكشوفة.
+
+   الآن كل رسالة خاصّة **مُغلَّفة**: لكل جهاز زوج مفاتيح ECDH (P-256) يُولَّد مرّة
+   لكل جلسة، ويُنشر العامّ منه في الحضور. المرسِل يشتقّ سرًّا مشتركًا مع المرسَل
+   إليه وحده ويعمّي به (AES-GCM 256)، فما يصل إلى الباقين حروف لا معنى لها.
+   لا يعتمد هذا على الخادم: يعمل فوق مجرى البثّ نفسه، وفوق أي مجرى آخر. */
+let RMK=null,_rmSec=Object.create(null);
+const rmCrypto=()=>{try{return (window.crypto&&window.crypto.subtle)?window.crypto.subtle:null}catch(e){return null}};
+const b64=u=>{let s='';const a=new Uint8Array(u);for(let i=0;i<a.length;i+=8192)s+=String.fromCharCode.apply(null,a.subarray(i,i+8192));return btoa(s)};
+const unb64=t=>{const s=atob(t),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+/** زوج مفاتيح الجلسة — يُولَّد مرّة، وعامّه يُنشر في الحضور */
+async function rmKeys(){
+ if(RMK)return RMK;
+ const sub=rmCrypto();if(!sub)return null;
+ try{
+  const kp=await sub.generateKey({name:'ECDH',namedCurve:'P-256'},false,['deriveKey']);
+  RMK={kp,pub:b64(await sub.exportKey('raw',kp.publicKey))};
+  return RMK;
+ }catch(e){return null}
+}
+/** السرّ المشترك مع جهاز بعينه — يُشتقّ مرّة ويُحفظ */
+async function rmSecret(pub){
+ if(!pub)return null;
+ if(_rmSec[pub])return _rmSec[pub];
+ const sub=rmCrypto(),k=await rmKeys();if(!sub||!k)return null;
+ try{
+  const theirs=await sub.importKey('raw',unb64(pub),{name:'ECDH',namedCurve:'P-256'},false,[]);
+  _rmSec[pub]=await sub.deriveKey({name:'ECDH',public:theirs},k.kp.privateKey,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+  return _rmSec[pub];
+ }catch(e){return null}
+}
+/** المفتاح العامّ لجهاز من حضور الغرفة */
+function rmPubOf(peer){
+ const c=RMcap;if(!c)return null;
+ const p=(c.peers()||[]).find(x=>x.peer===peer);
+ return (p&&p.presence&&typeof p.presence.pk==='string')?p.presence.pk:null;
+}
+/** يرسل إلى جهاز واحد: يُعمّى فلا يقرؤه سواه — وإن تعذّر التعمية لا يُرسل سرًّا بلا غلاف */
+async function rmSendTo(peer,obj){
+ if(!peer)return false;
+ const sec=await rmSecret(rmPubOf(peer));
+ const sub=rmCrypto();
+ if(!sec||!sub){rmSealFail();return false}
+ try{
+  const iv=window.crypto.getRandomValues(new Uint8Array(12));
+  const ct=await sub.encrypt({name:'AES-GCM',iv},sec,new TextEncoder().encode(JSON.stringify(obj)));
+  rmSend({t:'seal',to:peer,by:RM.me,n:b64(iv),d:b64(ct)});
+  return true;
+ }catch(e){rmSealFail();return false}
+}
+/** يفكّ ما وصلني ثم يمرّره على المعالج نفسه كأنّه وصل صريحًا */
+function rmSealOpen(d,m){
+ const from=d.by||(m&&m.peer)||'';
+ rmSecret(rmPubOf(from)).then(sec=>{
+  const sub=rmCrypto();if(!sec||!sub)return;
+  return sub.decrypt({name:'AES-GCM',iv:unb64(d.n)},sec,unb64(d.d))
+   .then(buf=>{
+    const inner=JSON.parse(new TextDecoder().decode(buf));
+    inner.c=RM.code;inner.to=RM.me;      // الغلاف كان العنوان — والمحتوى يصل لصاحبه وحده
+    rmOn(inner,m);
+    if(document.getElementById('rmScr'))roomDraw();
+   });
+ }).catch(()=>{});
+}
+/** تعذّرت التعمية (اتّصال غير آمن): يُقال صراحةً بدل تسريب صامت */
+function rmSealFail(){
+ if(RM._sealWarn)return;RM._sealWarn=1;
+ toast('هذا الاتصال لا يدعم التعمية — لا تُرسَل الأدوار');
+}
 function rmBind(){
  const c=RMcap;if(!c)return;
  RM.unsub.forEach(u=>{try{u()}catch(e){}});
@@ -23716,6 +23794,7 @@ function rmOn(d,m){
   RM.mid=d.mid||rmNewMid();RM.rank=null;
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
+ else if(d.t==='seal'){if(d.to===me)rmSealOpen(d,m)}   // غلاف مُعمّى: لا يفكّه إلا صاحبه
  else if(d.t==='role'&&d.to===me){RM.role=d.r;RM.word=d.w||'';RM.cat=d.cat||RM.cat}
  else if(d.t==='sync'){if(RM.host&&d.by!==me)rmResync()}
  else if(d.t==='ph'){RM.phase=d.p;RM.msg=d.m||'';if(d.p==='vote')RM.votes={};
@@ -23811,7 +23890,7 @@ function mmTick(){
  const code=(grp[0].peer.replace(/[^A-Za-z0-9]/g,'').slice(0,4).toUpperCase()+'XXXX').slice(0,4);
  RM.mm=0;clearInterval(_mmTm);
  RM.code=code;RM.host=!!(grp[0].isMe&&grp[0].sameTab);RM.phase='lobby';
- try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby',av:S.av||null})}catch(e){}
+ rmKeys().then(k=>{try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby',av:S.av||null,pk:k?k.pub:null})}catch(e){}});
  rmBind();
  toast('وُجد لاعبون!');if(window.FX)FX.correct(3);
  setTimeout(roomDraw,120);
@@ -23882,7 +23961,8 @@ async function rmCreate(){
  if(!nameReady(()=>rmCreate()))return;   // الاسم قبل إنشاء الغرفة
  RM.code=rmCode();RM.host=1;RM.phase='lobby';RM.players=[];RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
- try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null})}catch(e){}
+ const kC=await rmKeys();   // المفتاح العامّ يُنشر مع الحضور — به وحده تُعمّى الأدوار إليّ
+ try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null,pk:kC?kC.pub:null})}catch(e){}
  rmBind();roomDraw();
 }
 async function rmJoin(){
@@ -23894,7 +23974,8 @@ async function rmJoin(){
  if(!nameReady(()=>rmJoin()))return;   // الاسم قبل دخول الغرفة
  RM.code=code;RM.host=0;RM.phase='lobby';RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
- try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null})}catch(e){}
+ const kJ=await rmKeys();
+ try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null,pk:kJ?kJ.pub:null})}catch(e){}
  rmBind();roomDraw();
  setTimeout(()=>{if(RM.code&&rmRoster().length<2)toast('بانتظار بقية اللاعبين… تأكد من الكود')},2500);
 }
@@ -23912,7 +23993,9 @@ function roomDraw(){
     ${RM.solo?`<span>${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''}</span>`:''}</div>`
   :`<div class="rmTicket"><div class="rmTkL">كود الغرفة</div><div class="rmTkC" onclick="rmCopyCode()">${RM.code}</div>
   <div class="rmTkD">${RM.host?'أعطِ الكود لمن معك — يفتحون رابط اللعبة نفسه ويدخلون به':'دخلتَ الغرفة — يبدأ المضيف اللعبة حين يكتمل المجلس'}</div>
-  ${RM.solo?'':`<div class="rmTkA">
+  ${RM.solo?'':`<div class="rmSeal ${rmCrypto()?'on':'off'}">${ico(rmCrypto()?'lock':'info',11)}
+   ${rmCrypto()?'الأدوار والأوراق مُعمّاة — لا يقرؤها إلا صاحبها':'هذا الاتصال بلا تعمية — الألعاب السرّية معطّلة'}</div>
+  <div class="rmTkA">
    <button class="rbtn sm" onclick="rmShareCode()"><span>${ico('web',13)} شارك</span></button>
    <button class="btn g sm" onclick="rmCopyCode()">${ico('scroll',13)} نسخ</button>
    <button class="btn g sm" onclick="rmInvite()">${ico('group',13)} ادعُ صديقًا</button></div>`}
@@ -24025,6 +24108,11 @@ function rmStart(){
   setTimeout(()=>rmSend({t:'ph',p:'paint',secs:75}),140);
   return;
  }
+ // 5.89: ما كان فيه سرّ لا يبدأ بلا تعمية — الأدوار المكشوفة أسوأ من لعبة لا تبدأ
+ if(/^(uno|barra|mafia)$/.test(RM.game)&&!rmCrypto()){
+  toast('هذا الاتصال لا يدعم التعمية — افتح اللعبة من رابطها الآمن (https)');
+  return;
+ }
  if(RM.game==='uno'){rmSend({t:'start',g:'uno',ps,mid:rmNewMid()});setTimeout(unoDeal,160);return}
  if(RM.game==='carrom'){rmSend({t:'start',g:'carrom',ps,mid:rmNewMid()});setTimeout(caDeal,160);return}
  // (الفرق تُشتق من الترتيب: الزوجي أبيض والفردي أسود)
@@ -24034,7 +24122,7 @@ function rmStart(){
   const spy=ps[Math.floor(Math.random()*ps.length)].peer;
   RM.secret={word,spy};
   rmSend({t:'start',g:'barra',ps,mid:rmNewMid(),cat:RM.cat});
-  ps.forEach(p=>rmSend({t:'role',to:p.peer,r:p.peer===spy?'spy':'in',w:p.peer===spy?'':word,cat:RM.cat}));
+  ps.forEach(p=>rmSendTo(p.peer,{t:'role',r:p.peer===spy?'spy':'in',w:p.peer===spy?'':word,cat:RM.cat}));
   setTimeout(()=>rmSend({t:'ph',p:'deal2',m:'انظر لدورك ثم اضغط جاهز'}),120);
  }else{
   const roles=[];
@@ -24046,7 +24134,7 @@ function rmStart(){
   RM.secret={roles:{}};
   ps.forEach((p,i)=>RM.secret.roles[p.peer]=roles[i]);
   rmSend({t:'start',g:'mafia',ps,mid:rmNewMid()});
-  ps.forEach((p,i)=>rmSend({t:'role',to:p.peer,r:roles[i]}));
+  ps.forEach((p,i)=>rmSendTo(p.peer,{t:'role',r:roles[i]}));
   setTimeout(()=>rmSend({t:'ph',p:'deal2',m:'انظر لدورك ثم اضغط جاهز'}),120);
  }
 }
@@ -24424,7 +24512,7 @@ function unoDeal(){
  if(top[1]==='D')RM.U.draw=2;
  else if(top[1]==='S')RM.U.turn=(RM.U.turn+1)%ps.length;
  else if(top[1]==='R'){RM.U.dir=-1;RM.U.turn=(RM.U.turn-1+ps.length)%ps.length}
- ps.forEach(p=>rmSend({t:'hand',to:p.peer,h:RM.U.hands[p.peer]}));
+ ps.forEach(p=>rmSendTo(p.peer,{t:'hand',h:RM.U.hands[p.peer]}));
  rmSend({t:'unoIntro',order:ps.map(p=>p.peer),n:7,lot,starter:lot.winner,first:top,turn:ps[RM.U.turn].peer});
  unoPub();
 }
@@ -24549,7 +24637,7 @@ function unoAct(d){
   const pen=U.draw||0, n=pen||1;
   for(let i=0;i<n;i++)hand.push(take());
   U.draw=0;U.lastBy=null;
-  rmSend({t:'hand',to:cur,h:hand});
+  rmSendTo(cur,{t:'hand',h:hand});
   const got=hand[hand.length-1];
   // سحب اختياري وبطاقته تصلح: لك أن تلعبها الآن أو تمرّر
   if(!pen&&unoOk(got,U.top,U.col)&&unoW4Ok(got,hand,U.col)){
@@ -24575,7 +24663,7 @@ function unoAct(d){
  if(card[1]==='R'){if(RM.players.length===2)skip=1;else U.dir*=-1}
  if(card[1]==='D')U.draw+=2;
  if(card[1]==='F')U.draw+=4;
- rmSend({t:'hand',to:cur,h:hand});
+ rmSendTo(cur,{t:'hand',h:hand});
  if(!hand.length){rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}!`,win:'uno',by:cur,
    rank:RM.players.map(p=>({p:p.peer,c:(U.hands[p.peer]||[]).length})).sort((a,b)=>a.c-b.c),
    all:RM.players.map(p=>({n:p.name,r:U.hands[p.peer].length+' بطاقة'}))});return}
@@ -24598,7 +24686,7 @@ function unoCallAct(d){
   if(!call||call.said||call.p===d.by)return;
   const hand=U.hands[call.p];
   for(let i=0;i<2;i++){if(!U.deck.length){U.deck=(U.disc||[]).splice(0).sort(()=>Math.random()-.5);if(!U.deck.length)U.deck=unoDeck()}hand.push(U.deck.shift())}
-  rmSend({t:'hand',to:call.p,h:hand});
+  rmSendTo(call.p,{t:'hand',h:hand});
   U.call=null;
   unoPub({msg:`${nm(d.by)} أمسك بـ${nm(call.p)}: لم يقل أونو — سحب بطاقتين`});
  }
@@ -25670,7 +25758,7 @@ function rmHostStep(){
  }else if(RM.hostStep==='det'&&RM.acts['محقق']!=null){
   const t=RM.acts['محقق'];
   const det=aliveRoles('محقق')[0];
-  rmSend({t:'det',to:det?det.peer:'',target:t,isM:S2[t]==='مافيا'});
+  if(det)rmSendTo(det.peer,{t:'det',target:t,isM:S2[t]==='مافيا'});
   rmMorning();
  }
 }

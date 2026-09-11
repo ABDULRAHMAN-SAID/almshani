@@ -134,8 +134,36 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   await A.evaluate(async()=>{try{rmLeave(1)}catch(e){}push('gameHub','uno');push('roomScr','uno');await new Promise(r=>setTimeout(r,200));await rmCreate()});
   await sleep(300);const code2=await A.evaluate(()=>RM.code);
   await B.evaluate(async c=>{try{rmLeave(1)}catch(e){}push('gameHub','uno');push('roomScr','uno');await new Promise(r=>setTimeout(r,200));document.getElementById('rmCd').value=c;await rmJoin()},code2);
-  await sleep(500);await A.evaluate(()=>rmStart());await sleep(900);
+  await sleep(500);
+  for(const P of [A,B])await P.evaluate(()=>{window.__raw=[];RMcap.on(RM_TOPIC,m=>{window.__raw.push(m.data)},()=>{})});
+  await A.evaluate(()=>rmStart());await sleep(900);
   await B.evaluate(()=>{try{unoIntroSkip()}catch(e){}});await A.evaluate(()=>{try{unoIntroSkip()}catch(e){}});await sleep(300);
+
+  sec('السرّ لا يمرّ على الشبكة: الأوراق والأدوار مُغلَّفة');
+  const wire=[];
+  for(const P of [A,B])wire.push(await P.evaluate(()=>({
+   hand:(RM.hand||[]).length,
+   plain:(window.__raw||[]).filter(d=>d&&(d.t==='hand'||d.t==='role'||d.t==='det')).length,
+   seals:(window.__raw||[]).filter(d=>d&&d.t==='seal').length,
+   mine:(window.__raw||[]).filter(d=>d&&d.t==='seal'&&d.to===RM.me).length})));
+  check('كل لاعب يستلم سبع أوراق',wire.every(w=>w.hand===7),JSON.stringify(wire));
+  check('لا ورقة ولا دور يمرّ صريحًا على مجرى الغرفة',wire.every(w=>w.plain===0),JSON.stringify(wire));
+  check('يصل الغلاف إلى الجميع ولكلٍّ واحدٌ يخصّه',wire.every(w=>w.seals>=2&&w.mine===1),JSON.stringify(wire));
+  const crack=await B.evaluate(async()=>{
+   const mine=RM.me,out={tried:0,opened:0};
+   for(const d of (window.__raw||[]).filter(x=>x&&x.t==='seal'&&x.to!==mine)){
+    for(const p of (RMcap.peers()||[])){
+     const pk=p.presence&&p.presence.pk;if(!pk)continue;
+     out.tried++;
+     try{const sec=await rmSecret(pk);if(!sec)continue;
+      await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(d.n)},sec,unb64(d.d));out.opened++}catch(e){}
+    }
+   }
+   return out;
+  });
+  check('غلاف غيرك لا يُفتح بأيّ مفتاح تملكه',crack.tried>0&&crack.opened===0,JSON.stringify(crack));
+  check('كل جهاز ينشر مفتاحه العامّ في الحضور',
+   (await A.evaluate(()=>(RMcap.peers()||[]).filter(p=>p.presence&&typeof p.presence.pk==='string').length))===2);
   const peerB0=await B.evaluate(()=>NET.state().peer),handB0=await B.evaluate(()=>(RM.hand||[]).length);
   await B.evaluate(()=>NET._drop());await sleep(600);
   const cut=await B.evaluate(()=>({c:NET.state().connected,msg:RM.msg}));
