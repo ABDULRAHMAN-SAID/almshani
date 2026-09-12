@@ -140,6 +140,15 @@ const CAPTURES=[
  ['draw-board',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();drawBoard()")],
  ['draw-vote',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();PT.imgs=[qaImg('#E24B4A'),qaImg('#2ECC71'),qaImg('#378ADD')];PT.idx=PT.n;drawVote()")],
  ['draw-end',R("push('partyScr');ptWay='pass';ptOpen('draw');drawStart();PT.imgs=[qaImg('#E24B4A'),qaImg('#2ECC71'),qaImg('#378ADD')];PT.votes=[2,1,0];drawEnd()")],
+ // ── ألعاب الجلسة: لو خيروك وصراحة ──
+ ['lkSetup',R("push('partyScr');push('lkSetup')")],
+ ['lk-ask',R("push('partyScr');push('lkSetup');PT.n=4;lkStart()")],
+ ['lk-reveal',R("push('partyScr');push('lkSetup');PT.n=4;lkStart();PT.ans=[0,0,0,1];PT.idx=4;lkReveal()")],
+ ['lk-end',R("push('partyScr');push('lkSetup');PT.n=4;lkStart();PT.pts=[3,5,2,5];lkEnd()")],
+ ['srSetup',R("push('partyScr');push('srSetup')")],
+ ['sr-ask',R("push('partyScr');push('srSetup');PT.n=4;srStart()")],
+ ['sr-used',R("push('partyScr');push('srSetup');PT.n=4;srStart();PT.swap[PT.idx]=0;srAsk()")],
+ ['sr-end',R("push('partyScr');push('srSetup');PT.n=4;srStart();PT.pts=[6,2,4,0];srEnd()")],
  // ── ضد الكمبيوتر: مافيا وبرا السالفة والرسم ──
  ...['mafia','barra','draw'].map(g=>[`soloScr-${g}`,R(`push('gameHub','${g}');push('soloScr','${g}')`)]),
  ['mf-intro',R("window.__vbFast=1;RM.mbN=6;soloStart('mafia','mid')")],

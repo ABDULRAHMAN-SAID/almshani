@@ -175,8 +175,78 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    back.peer===peerB0&&back.me===peerB0&&back.ph==='uno'&&back.hand===handB0&&rosterA2===2&&back.roster===2&&back.msg==='',JSON.stringify({peerB0,handB0,back,rosterA2}));
   check('اللاعب يُعلَم بعودة الاتصال',back.toast);
   check('صفر أخطاء JS في المتصفحين',A._errs.length===0&&B._errs.length===0,(A._errs.concat(B._errs)).slice(0,3).join(' | '));
+  sec('لو خيروك وصراحة في غرفة: الأصوات مُعمّاة والكشف دفعة واحدة');
+  // اللعبتان حديثٌ بين أناس، وسرّها كلّه أن لا يُرى صوتك قبل الكشف — فمجرى الغرفة بثّ
+  const ctxD=await browser.newContext({viewport:{width:430,height:900}});
+  const D=await ctxD.newPage();D._errs=[];D.on('pageerror',e=>D._errs.push('D: '+e.message));
+  await D.goto(`http://localhost:${PORT}/`);
+  await D.waitForFunction(()=>typeof NET==='object'&&document.getElementById('app').innerHTML.length>500,null,{timeout:20000});
+  await D.evaluate(()=>{S.name='فهد';S.email='tester@mail.com';S.tutorial_completed=true;S.tutDone=1;saveState()});
+  await D.waitForFunction(()=>NET.state().connected,null,{timeout:15000});
+  const sgWire=p=>p.evaluate(()=>{window.__wire=[];const o=rmOn;window.rmOn=function(d){try{window.__wire.push(JSON.stringify(d))}catch(e){}return o.apply(this,arguments)}});
+  const room=async g=>{
+   for(const p of [A,B,D])await p.evaluate(()=>{try{rmLeave(1)}catch(e){}});
+   await sleep(600);
+   await A.evaluate(async gg=>{push('roomScr',gg);await new Promise(r=>setTimeout(r,250));await rmCreate()},g);
+   await sleep(1400);
+   const c=await A.evaluate(()=>RM.code);
+   for(const p of [B,D])await p.evaluate(async o=>{push('roomScr',o.g);await new Promise(r=>setTimeout(r,250));
+     document.getElementById('rmCd').value=o.c;await rmJoin()},{g,c});
+   await sleep(2200);
+   for(const p of [A,B,D])await sgWire(p);
+   return c;
+  };
+
+  await room('lk');
+  await A.evaluate(()=>{RM.sgR=3;rmStart()});
+  await sleep(1600);
+  const lkQ=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({ph:RM.phase,q:RM.sg&&RM.sg.q&&RM.sg.q.join('|')}))));
+  check('الجولة تبدأ عند الثلاثة بالسؤال نفسه',
+   lkQ.every(x=>x.ph==='sgAsk')&&lkQ[0].q&&lkQ[0].q===lkQ[1].q&&lkQ[1].q===lkQ[2].q,JSON.stringify(lkQ));
+  await A.evaluate(()=>sgVote(0));await sleep(450);
+  await B.evaluate(()=>sgVote(0));await sleep(650);
+  const leak=await D.evaluate(()=>({plain:(window.__wire||[]).filter(x=>/"sgV"/.test(x)).length,
+    seals:(window.__wire||[]).filter(x=>/"seal"/.test(x)).length,mine:RM.sg.mine,res:RM.sg.res}));
+  check('صوتا غيري لم يصلا صريحَين — غلافان مُعمّيان ولا نتيجة قبل الكشف',
+   leak.plain===0&&leak.seals>=2&&leak.mine===null&&leak.res===null,JSON.stringify(leak));
+  await D.evaluate(()=>sgVote(1));
+  await sleep(1800);
+  const me3=await Promise.all([A,B,D].map(p=>p.evaluate(()=>RM.me)));
+  const lkR=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({ph:RM.phase,res:RM.sg&&RM.sg.res,pts:RM.sgPts}))));
+  check('آخر صوت يكشف الجولة عند الجميع: اثنان مع «أ» وواحد مع «ب»',
+   lkR.every(r=>r.ph==='sgRes')&&lkR[0].res.votes===3&&lkR[0].res.win===0,JSON.stringify(lkR.map(r=>[r.ph,r.res&&r.res.votes,r.res&&r.res.win])));
+  check('الأغلبية نالت نقطة والوحيد لا شيء — والنتيجة نفسها على الأجهزة الثلاثة',
+   lkR.every(r=>r.pts[me3[0]]===1&&r.pts[me3[1]]===1&&!r.pts[me3[2]]),JSON.stringify([lkR[2].pts,me3]));
+  const sgNames=await A.evaluate(()=>(RM.players||[]).map(p=>p.name));
+  check('كل جهاز يقرأ أسماء المصوّتين بعد الكشف',
+   await D.evaluate(ns=>ns.every(n=>document.body.innerText.includes(n)),sgNames),JSON.stringify(sgNames));
+
+  await room('sr');
+  await A.evaluate(()=>{RM.sgR=3;rmStart()});
+  await sleep(1700);
+  const srQ=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({who:RM.sg&&RM.sg.who,me:RM.me,q:RM.sg&&RM.sg.q}))));
+  check('صراحة توجّه السؤال إلى لاعب واحد يعرفه الجميع',
+   srQ[0].who&&srQ.every(x=>x.who===srQ[0].who)&&srQ[0].who===srQ[0].me&&typeof srQ[0].q==='string',JSON.stringify(srQ.map(x=>x.who)));
+  const noSelf=await A.evaluate(()=>!/حكمك أنت/.test(document.body.innerText)&&/دورك/.test(document.body.innerText));
+  check('صاحب السؤال لا يحكم على نفسه',noSelf);
+  await B.evaluate(()=>sgVote(1));await sleep(400);
+  await D.evaluate(()=>sgVote(1));
+  await sleep(1800);
+  const srR=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({ph:RM.phase,ok:RM.sg&&RM.sg.res&&RM.sg.res.ok,pts:RM.sgPts}))));
+  check('أغلبية «صدق» تعطيه نقطتين، ولا تُحسب على غيره',
+   srR.every(r=>r.ph==='sgRes'&&r.ok===true&&r.pts[srQ[0].who]===2&&Object.keys(r.pts).length===1),JSON.stringify(srR));
+  await A.evaluate(()=>rmSgNext());await sleep(1000);
+  await A.evaluate(()=>sgVote(0));await D.evaluate(()=>sgVote(0));await sleep(1300);
+  await A.evaluate(()=>rmSgNext());await sleep(900);
+  await A.evaluate(()=>sgVote(0));await B.evaluate(()=>sgVote(0));await sleep(1300);
+  await A.evaluate(()=>rmSgNext());await sleep(1300);
+  const srEndP=await Promise.all([A,B,D].map(p=>p.evaluate(()=>RM.phase)));
+  check('الجلسة تنتهي عند الثلاثة بلوح نتائج',srEndP.every(x=>x==='sgEnd'),JSON.stringify(srEndP));
+  check('صفر أخطاء JS في الجهاز الثالث',D._errs.length===0,D._errs.slice(0,3).join(' | '));
+  await ctxD.close();
+
   const health=await A.evaluate(async p=>{const r=await fetch(`http://localhost:${p}/health`);return r.json()},PORT);
-  check('/health: ثلاثة حسابات (الجهاز C أخذ حسابًا مؤقتًا قبل دخوله برمز A) ومتّصلان',health.ok&&health.accounts===3&&health.online>=2&&health.pending===0,JSON.stringify(health));
+  check('/health: أربعة حسابات (C مؤقّت قبل دخوله برمز A، وD ثالثُ الغرفة) ومتّصلان',health.ok&&health.accounts===4&&health.online>=2&&health.pending===0,JSON.stringify(health));
  }catch(e){fail++;console.log('  ✗ استثناء: '+(e&&e.stack||e));console.log(logs.slice(-5).join(''))}
  await browser.close();server.kill('SIGTERM');try{fs.unlinkSync(DATA)}catch(e){}
  console.log('\n'+(fail?`✗ ${fail} فشل / ${pass} نجح`:`أونلاين حقيقي ✔ (${pass} فحصًا)`));
