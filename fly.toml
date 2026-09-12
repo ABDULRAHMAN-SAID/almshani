@@ -22,6 +22,12 @@ primary_region = "fra"
   auto_start_machines = true
   min_machines_running = 1
 
+# حجم الآلة صريح: بلا هذا يُترك للافتراضيّ فتتغيّر الكلفة بلا أن يُقصد.
+# اللعبة ٩٫٦ م.ب في الذاكرة ومعها نسختاها المضغوطتان — ٥١٢ م.ب واسعة لها وللغرف.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+
 [[mounts]]
   source = "tahaddi_data"
   destination = "/data"

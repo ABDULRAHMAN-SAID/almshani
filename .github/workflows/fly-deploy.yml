@@ -8,7 +8,7 @@ name: نشر الخادم (Fly.io)
 on:
   push:
     branches: [main, claude/3d-game-design-c59zac]
-    paths: [server/**, src/**, tahaddi/**, fly.toml, .github/workflows/fly-deploy.yml]
+    paths: [server/**, src/**, tahaddi/**, tools/test-deploy.cjs, fly.toml, .github/workflows/fly-deploy.yml]
   workflow_dispatch:
 
 concurrency:
@@ -17,16 +17,46 @@ concurrency:
 
 jobs:
   deploy:
-    if: ${{ secrets.FLY_API_TOKEN != '' }}
     runs-on: ubuntu-latest
+    # سياق secrets غير متاح في if على مستوى الوظيفة (خطأ تحليل يُسقط الملفّ كلّه بلا وظيفة
+    # واحدة — وهو ما جعل كل محاولات النشر تفشل صامتة). يُقرأ هنا ثم تُبوَّب الخطوات عليه.
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - name: نشر
-        run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-      - name: فحص الصحّة
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # الصورة تُفحص قبل أن تُنشر: تخطيط المرحلة الأخيرة يُقلَع فعلًا بدلالات node:20
+      # ويقدّم اللعبة والصفحات القانونية والغرف، وإلّا لا نشر.
+      - name: فحص الصورة قبل النشر
         run: |
-          APP=$(grep '^app = ' fly.toml | sed 's/app = "\(.*\)"/\1/')
+          npm install --no-save --no-package-lock --ignore-scripts esbuild@^0.28 ws@^8
+          node_modules/.bin/esbuild server/src/tahaddi/index.ts --bundle --platform=node --format=esm --external:ws --outfile=server/dist/tahaddi.js --log-level=warning
+          node tools/test-deploy.cjs
+      - name: هل ضُبط رمز Fly؟
+        id: gate
+        run: |
+          if [ -n "$FLY_API_TOKEN" ]; then echo "go=yes" >> "$GITHUB_OUTPUT"
+          else echo "go=no" >> "$GITHUB_OUTPUT"; echo "::notice::لا يوجد FLY_API_TOKEN — الفحص تمّ والنشر متروك"; fi
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: steps.gate.outputs.go == 'yes'
+      # اسم التطبيق من fly.toml، ويُغلَب بمتغيّر المستودع FLY_APP إن كان الاسم محجوزًا عالميًّا.
+      # الإنشاء متسامح مع التكرار: إن وُجد التطبيق والقرص لم يُعَد إنشاؤهما.
+      - name: التطبيق والقرص
+        if: steps.gate.outputs.go == 'yes'
+        run: |
+          APP="${{ vars.FLY_APP }}"; [ -n "$APP" ] || APP=$(grep '^app = ' fly.toml | sed 's/app = "\(.*\)"/\1/')
+          REGION=$(grep '^primary_region = ' fly.toml | sed 's/.*"\(.*\)"/\1/')
+          echo "APP=$APP" >> "$GITHUB_ENV"
+          flyctl status -a "$APP" >/dev/null 2>&1 || flyctl apps create "$APP" --org personal
+          flyctl volumes list -a "$APP" 2>/dev/null | grep -q tahaddi_data \
+            || flyctl volumes create tahaddi_data -a "$APP" -r "$REGION" -s 1 -y
+      - name: نشر
+        if: steps.gate.outputs.go == 'yes'
+        run: flyctl deploy --remote-only -a "$APP"
+      - name: فحص الصحّة
+        if: steps.gate.outputs.go == 'yes'
+        run: |
           curl -fsS "https://$APP.fly.dev/health"
+          echo "::notice::اللعبة حيّة على https://$APP.fly.dev"

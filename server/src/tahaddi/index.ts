@@ -4,6 +4,8 @@
 //   capacitor://localhost (iOS) و https://localhost (Android)؛ أضفها إن قيّدت الأصول.
 import { createServer } from 'node:http';
 import { readFileSync, existsSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { gzip, brotliCompress, constants as zc } from 'node:zlib';
 import { extname, join, normalize } from 'node:path';
 import { WebSocketServer, type WebSocket } from 'ws';
 import { TahaddiService, type Session } from './service';
@@ -23,8 +25,38 @@ const svc = new TahaddiService();
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.woff2': 'font/woff2'
+  '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.woff2': 'font/woff2',
+  '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+  '.txt': 'text/plain; charset=utf-8', '.mp3': 'audio/mpeg'
 };
+
+// اللعبة ملفّ واحد قرابة ١٠ م.ب. بلا هذه الطبقة كان كلّ طلب يقرأ القرص كاملًا ويحجب حلقة
+// الأحداث عن غرف WebSocket الحيّة، ويُرسل غير مضغوط: صفحة كاملة على بيانات الجوّال في كلّ زيارة.
+// الآن: قراءة واحدة في الذاكرة + ETag (زيارة معادة = 304 بلا بايت) + ضغط يُحسب مرّة خارج الطلب.
+type Cached = { mime: string; raw: Buffer; etag: string; mtime: number; br?: Buffer; gz?: Buffer; zipping?: boolean };
+const FILES = new Map<string, Cached>();
+const ZIPPABLE = /^(text\/|application\/(json|javascript|manifest\+json)|image\/svg)/;
+
+function warm(file: string, e: Cached): void {
+  if (e.zipping || e.raw.length < 1400 || !ZIPPABLE.test(e.mime)) return;
+  e.zipping = true;
+  brotliCompress(e.raw, { params: { [zc.BROTLI_PARAM_QUALITY]: 5, [zc.BROTLI_PARAM_SIZE_HINT]: e.raw.length } },
+    (err, out) => { if (!err && out.length < e.raw.length && FILES.get(file) === e) e.br = out; });
+  gzip(e.raw, { level: 6 }, (err, out) => { if (!err && out.length < e.raw.length && FILES.get(file) === e) e.gz = out; });
+}
+
+function entry(file: string, mtime: number): Cached {
+  const hit = FILES.get(file);
+  if (hit && hit.mtime === mtime) return hit;
+  const raw = readFileSync(file);
+  const e: Cached = {
+    mime: MIME[extname(file)] ?? 'application/octet-stream', raw, mtime,
+    etag: '"' + createHash('sha1').update(raw).digest('base64url').slice(0, 22) + '"'
+  };
+  FILES.set(file, e);
+  warm(file, e);
+  return e;
+}
 
 const http = createServer((req, res) => {
   let path = (req.url ?? '/').split('?')[0];
@@ -61,10 +93,19 @@ const http = createServer((req, res) => {
     return;
   }
   if (path === '/') path = '/index.html';
-  const file = normalize(join(DIR, path));
+  const file = normalize(join(DIR, decodeURIComponent(path)));
   if (!file.startsWith(DIR) || !existsSync(file) || !statSync(file).isFile()) { res.writeHead(404); res.end('not found'); return; }
-  res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream', 'cache-control': 'no-cache' });
-  res.end(readFileSync(file));
+  const e = entry(file, statSync(file).mtimeMs);
+  const head: Record<string, string> = { 'content-type': e.mime, 'cache-control': 'no-cache', etag: e.etag, vary: 'accept-encoding' };
+  if (String(req.headers['if-none-match'] ?? '').split(',').some(t => t.trim() === e.etag)) { res.writeHead(304, head); res.end(); return; }
+  const accept = String(req.headers['accept-encoding'] ?? '');
+  let body = e.raw;
+  if (e.br && /\bbr\b/.test(accept)) { body = e.br; head['content-encoding'] = 'br'; }
+  else if (e.gz && /\bgzip\b/.test(accept)) { body = e.gz; head['content-encoding'] = 'gzip'; }
+  head['content-length'] = String(body.length);
+  res.writeHead(200, head);
+  if (req.method === 'HEAD') { res.end(); return; }
+  res.end(body);
 });
 
 const wss = new WebSocketServer({

@@ -22,12 +22,16 @@ ENV NODE_ENV=production \
     HOST=0.0.0.0 \
     TAHADDI_DIR=/app/tahaddi \
     TAHADDI_DATA_FILE=/data/tahaddi.json
-RUN mkdir -p /data && npm install --no-save --no-package-lock --ignore-scripts ws@^8 && echo '{"type":"module"}' > server/package.json 2>/dev/null || true
-COPY --from=build /app/server/dist/tahaddi.js ./server/dist/tahaddi.js
+# الحزمة المبنيّة صيغتها ESM. node:20 لا يستنتج الصيغة من محتوى الملفّ، فنضع ضمانتين
+# مستقلّتين: الامتداد ‎.mjs‏ (صيغة وحدات مهما كان الجوار) و‎package.json‏ يعلنها.
+RUN mkdir -p /data /app/server/dist \
+ && printf '{"name":"tahaddi-server","private":true,"type":"module"}\n' > /app/package.json \
+ && npm install --no-save --no-package-lock --ignore-scripts ws@^8
+COPY --from=build /app/server/dist/tahaddi.js ./server/dist/tahaddi.mjs
 COPY tahaddi/index.html tahaddi/sw.js tahaddi/manifest.webmanifest ./tahaddi/
 COPY tahaddi/icons ./tahaddi/icons
 COPY --from=build /app/wwwgen/privacy.html /app/wwwgen/terms.html /app/wwwgen/licenses.html ./tahaddi/
 VOLUME ["/data"]
 EXPOSE 8090
 HEALTHCHECK --interval=30s --timeout=3s CMD wget -qO- http://127.0.0.1:8090/health || exit 1
-CMD ["node", "server/dist/tahaddi.js"]
+CMD ["node", "server/dist/tahaddi.mjs"]
