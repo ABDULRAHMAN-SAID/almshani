@@ -10,7 +10,7 @@ var NET=(function(){
  'use strict';
  var st={mode:'local',connected:false,id:null,name:null,peer:null,token:null,url:null,seasonId:null,hasCloud:false,lastError:null};
  var ws=null, ridN=0, waiting={}, topicSubs={}, peerSubs=[], peers=[], myPresence={};
- var listeners={welcome:[],state:[],resultFinal:[],reconnect:[]};
+ var listeners={welcome:[],state:[],resultFinal:[],reconnect:[],dm:[],chal:[],chalList:[]};
  var backoff=1000, wantOpen=false, helloOpts={}, W=(typeof window!=='undefined')?window:null;
  var connecting=null, dropped=false, hooked=false;
 
@@ -185,6 +185,9 @@ var NET=(function(){
  function friendAccept(id){return request({t:'friendAccept',id:id})}
  function friendRemove(id){return request({t:'friendRemove',id:id})}
  function dm(to,text){return request({t:'dm',to:to,text:text})}
+ function chalSend(to,qs,sc,ms){return request({t:'chalSend',to:to,qs:qs,sc:sc,ms:ms})}
+ function chalList(){return request({t:'chalList'})}
+ function chalPlay(id,sc,ms){return request({t:'chalPlay',id:id,sc:sc,ms:ms})}
  function dmThread(withId){return request({t:'dmThread',with:withId})}
  /* ── الشراء: الإيصال إلى الخادم، والخادم يسأل المتجر ويمنح ── */
  function purchase(claim){return request({t:'purchase',claim:claim},25000)}
@@ -215,6 +218,7 @@ var NET=(function(){
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
+ chalSend:chalSend,chalList:chalList,chalPlay:chalPlay,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
   _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة

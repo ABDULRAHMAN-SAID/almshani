@@ -1872,6 +1872,14 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  font-size:9.5px;font-weight:900;color:#8FE0B0;background:rgba(46,204,113,.13);border:1px solid rgba(46,204,113,.32)}
 .warnTag{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;padding:1px 6px;border-radius:7px;
  font-size:9.5px;font-weight:900;color:#F0B36A;background:rgba(232,140,58,.13);border:1px solid rgba(232,140,58,.35)}
+/* 5.92: تحدِّ صديقًا */
+.chRow{margin-bottom:7px}
+.chRow .frAv{flex-shrink:0}
+.chRow .rbtn{width:auto;flex:0 0 auto;min-height:36px;padding:0 13px;margin:0;font-size:12px}
+.chTag{flex:0 0 auto;padding:3px 9px;border-radius:8px;font-size:10.5px;font-weight:900}
+.chTag.w{color:#8FE0B0;background:rgba(46,204,113,.13);border:1px solid rgba(46,204,113,.32)}
+.chTag.l{color:#F09A98;background:rgba(226,75,74,.12);border:1px solid rgba(226,75,74,.3)}
+.chTag.t{color:#C9D2E4;background:rgba(160,170,190,.12);border:1px solid rgba(160,170,190,.3)}
 </style>
 </head>
 <body>
@@ -15409,7 +15417,7 @@ var NET=(function(){
  'use strict';
  var st={mode:'local',connected:false,id:null,name:null,peer:null,token:null,url:null,seasonId:null,hasCloud:false,lastError:null};
  var ws=null, ridN=0, waiting={}, topicSubs={}, peerSubs=[], peers=[], myPresence={};
- var listeners={welcome:[],state:[],resultFinal:[],reconnect:[]};
+ var listeners={welcome:[],state:[],resultFinal:[],reconnect:[],dm:[],chal:[],chalList:[]};
  var backoff=1000, wantOpen=false, helloOpts={}, W=(typeof window!=='undefined')?window:null;
  var connecting=null, dropped=false, hooked=false;
 
@@ -15584,6 +15592,9 @@ var NET=(function(){
  function friendAccept(id){return request({t:'friendAccept',id:id})}
  function friendRemove(id){return request({t:'friendRemove',id:id})}
  function dm(to,text){return request({t:'dm',to:to,text:text})}
+ function chalSend(to,qs,sc,ms){return request({t:'chalSend',to:to,qs:qs,sc:sc,ms:ms})}
+ function chalList(){return request({t:'chalList'})}
+ function chalPlay(id,sc,ms){return request({t:'chalPlay',id:id,sc:sc,ms:ms})}
  function dmThread(withId){return request({t:'dmThread',with:withId})}
  /* ── الشراء: الإيصال إلى الخادم، والخادم يسأل المتجر ويمنح ── */
  function purchase(claim){return request({t:'purchase',claim:claim},25000)}
@@ -15614,6 +15625,7 @@ var NET=(function(){
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
   saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
+ chalSend:chalSend,chalList:chalList,chalPlay:chalPlay,
   purchase:purchase,purchases:purchases,
   roomCap:roomCap,serverOrigin:serverOrigin,_onMsg:onMsg,_setMode:function(m){st.mode=m},_setUrl:function(u){st.url=u},
   _drop:function(){if(ws){try{ws.close()}catch(e){}}}};   // للاختبار: يقطع الاتصال كما لو سقطت الشبكة
@@ -18539,6 +18551,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  R.register('errLogScr',{render:()=>errScrLog()});
  R.register('friendsScr',{render:()=>friendsScr()});
  R.register('recScr',{render:()=>recScr()});
+ R.register('chalScr',{render:()=>chalScr()});
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
  R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&GAME_DEFS.find(x=>x.rmKey===g)),fallback:'partyScr'});
@@ -19274,6 +19287,7 @@ function friendsScr(keep){
    <button class="rbtn sm" onclick="frAdd()"><span>${ico('plus',13)} إضافة</span></button></div>
   <div class="note" style="margin-top:7px">الرمز ستّة محارف. ويقبل الحقل المعرّف الطويل أيضًا.</div>
  </div></div>
+ <button class="rbtn" style="margin-bottom:10px" onclick="push('chalScr')"><span>${ico('swords',14)} تحدِّ صديقًا في الأسئلة</span></button>
  ${!on?`<div class="note" style="margin-bottom:10px">${ico('info',13)} الأصدقاء يحتاجون اتصالًا بالخادم. اتصل ثم عد.</div>`:''}
  ${FR.in.length?`<div class="frSec">طلبات وصلتك (${FR.in.length})</div>
   ${FR.in.map(o=>frRow(o,`<button class="rbtn sm" onclick="frAccept('${esc(o.id)}')"><span>${ico('check',13)} قبول</span></button>
@@ -23209,6 +23223,8 @@ function playScr(){
    `<span class="plMini">${fam.map(k=>`<span>${GAME_ART[k]||''}</span>`).join('')}</span>`)}
   ${plRow(ico('user',20),'الأصدقاء والدعوة',frMyCode()?'رمزك '+frMyCode()+' — شاركه ليضيفك':'أضف برمز صديقك وشارك رمزك',
    "push('friendsScr')",'#3AAE6E',(FR&&FR.in&&FR.in.length)?`<span class="plNew">${FR.in.length}</span>`:'')}
+  ${plRow(ico('swords',20),'تحدِّ صديقًا','ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
+   "push('chalScr')",'#E8B23A',chDue()?`<span class="plNew">${chDue()}</span>`:'')}
  </div>
  <div class="plSec">
   <div class="plSecT">${ico('chest',14)} صناديق المعارك
@@ -23339,7 +23355,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.91';
+const APP_VER='5.92';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -40606,6 +40622,131 @@ const rat=x=>{const i=rki(x);if(i>=RK.length-1)return 1;return Math.min(1,(x-RK[
 const nS=n=>S.stars[n.id]!==undefined?'cl':(!n.r?'av':(S.stars[n.r]!==undefined?'av':'lk'));
 const nOf=t=>NODES.filter(n=>n.net===t);
 const qOf=i=>Q.filter(q=>q.n===i);
+/* ═══════════ 5.92 · تحدِّ صديقًا — كلٌّ يلعب متى شاء ═══════════
+   لا أحد ينتظر أحدًا: تلعب ثمانية أسئلة فتُحفظ نتيجتك، ويلعب صديقك **نفسها**
+   متى فتح اللعبة، والخادم يحسم. والتحدّي يحمل **معرّفات** الأسئلة لا نصوصها:
+   كل جهاز يحلّها من بنكه هو، فلا يستطيع المتحدِّي أن يرسل سؤالًا بإجابة مزوّرة.
+   المعرّف من النصّ **مع الإجابة الصحيحة**: فالمكرّر المخلوط الخيارات يتطابق،
+   والأسئلة القالبية («أي السور أكثر آيات؟») تفترق لأن إجابتها تختلف. */
+function qid(q){
+ const src=String(q.t)+'|'+String((q.o||[])[q.c]);
+ let h1=0x811c9dc5,h2=0x01000193;
+ for(let i=0;i<src.length;i++){
+  const c=src.charCodeAt(i);
+  h1=((h1^c)*16777619)>>>0;
+  h2=((h2+c)*2654435761)>>>0;
+ }
+ return (h1.toString(36)+h2.toString(36)).slice(0,12);
+}
+let _qidMap=null;
+function qById(id){
+ if(!_qidMap){_qidMap=Object.create(null);for(const q of Q){const k=qid(q);if(!_qidMap[k])_qidMap[k]=q}}
+ return _qidMap[id]||null;
+}
+let CH={list:[],busy:0,err:null};
+function chLoad(){
+ if(!netOnline())return Promise.resolve();
+ CH.busy=1;chPaint();
+ return NET.chalList().then(r=>{CH.list=r.list||[];CH.err=null})
+  .catch(()=>{CH.err='تعذّر جلب التحدّيات'}).then(()=>{CH.busy=0;chPaint()});
+}
+function chPaint(){const c=Router.current();if(c&&c.fn==='chalScr')chalScr(1)}
+/** عدد ما ينتظر ردّك — يظهر شارةً في شاشة اللعب */
+function chDue(){return (CH.list||[]).filter(x=>!x.mine&&!x.done).length}
+function chalScr(keep){
+ const L=CH.list||[];
+ const due=L.filter(x=>!x.mine&&!x.done);
+ const wait=L.filter(x=>x.mine&&!x.done);
+ const over=L.filter(x=>x.done).slice(0,12);
+ const row=(c,acts)=>`<div class="li chRow"><div class="lr">
+  <span class="frAv">${frAv(null)}</span>
+  <div class="lb"><div class="lt">${esc(c.withName||'لاعب')}</div>
+   <div class="ls">${c.done
+    ? (c.won==='me'?'فزت':c.won==='them'?'خسرت':'تعادل')+` — ${c.myScore} مقابل ${c.theirScore}`
+    : (c.mine?'نتيجتك '+c.myScore+' — بانتظار ردّه':'تحدّاك بـ'+c.theirScore+' نقطة')}</div></div>
+  ${acts||''}</div></div>`;
+ const body=`
+ <div class="wb" style="text-align:start">${ico('info',13)}
+  العب ثمانية أسئلة وأرسلها، ويلعب صديقك **نفسها** متى شاء. لا أحد ينتظر أحدًا.</div>
+ ${!netOnline()?`<div class="note" style="margin-bottom:10px">${ico('info',13)} التحدّي يحتاج اتصالًا بالخادم.</div>`:''}
+ <button class="rbtn" onclick="chPick()"><span>${ico('swords',14)} تحدَّ صديقًا</span></button>
+ ${due.length?`<div class="frSec">بانتظار ردّك (${due.length})</div>
+  ${due.map(c=>row(c,`<button class="rbtn sm" onclick="chAccept('${esc(c.id)}')"><span>${ico('play',13)} العب</span></button>`)).join('')}`:''}
+ ${wait.length?`<div class="frSec">بانتظار ردّهم (${wait.length})</div>${wait.map(c=>row(c,'')).join('')}`:''}
+ <div class="frSec">انتهت</div>
+ ${over.length?over.map(c=>row(c,`<span class="chTag ${c.won==='me'?'w':c.won==='them'?'l':'t'}">${c.won==='me'?'فوز':c.won==='them'?'خسارة':'تعادل'}</span>`)).join('')
+  :`<div class="note">لا تحدّيات بعد — ابدأ واحدًا.</div>`}
+ ${CH.err?`<div class="note" style="color:var(--no);margin-top:10px">${esc(CH.err)}</div>`:''}`;
+ const y=keep?window.scrollY:0;
+ go(`<div class="scr on">${tbar('تحدِّ صديقًا')}${body}</div>`);
+ if(keep)window.scrollTo(0,y);
+ if(!keep&&netOnline()&&!CH.busy)chLoad();
+}
+/** اختيار الصديق: من قائمتك وحدها — التحدّي بين الأصدقاء */
+function chPick(){
+ if(!netOnline())return toast('التحدّي يحتاج اتصالًا بالخادم');
+ const paint=()=>{
+  const fr=(FR&&FR.f)||[];
+  vbSheet(`<div class="shh"><div class="c" style="background:rgba(232,178,58,.16);border-color:var(--gold);color:var(--gold)">${ico('swords',16)}</div>
+   <div><div class="t">تحدَّ صديقًا</div><div class="d">تلعب ثمانية أسئلة ثم يلعبها هو</div></div></div>
+  <div style="margin-top:12px">${fr.length?fr.map(o=>`<button class="frPick" onclick="chStart('${esc(o.id)}','${esc(o.name||'لاعب')}')">
+    <span class="frAv">${frAv(o.av)}</span><span class="n">${esc(o.name||'لاعب')}</span>
+    <span class="s">${o.online?'متصل':'غير متصل'}</span>${ico('next',13)}</button>`).join('')
+   :`<div class="note">لا أصدقاء بعد — أضف برمز الصداقة أوّلًا.</div>`}</div>
+  <button class="btn g" style="margin-top:10px" onclick="closeSheet();push('friendsScr')">${ico('plus',13)} الأصدقاء والدعوة</button>`);
+ };
+ paint();
+ NET.friends().then(r=>{FR.f=r.friends||[];if(document.getElementById('sbg').classList.contains('on'))paint()}).catch(()=>{});
+}
+/** أنا المتحدِّي: ألعب أوّلًا ثم تُرسل نتيجتي مع معرّفات الأسئلة */
+function chStart(id,name){
+ closeSheet();
+ const qs=chalPick();
+ if(qs.length<8)return toast('تعذّر تجهيز الأسئلة');
+ run(qs,{chal:{to:id,name:name}});
+}
+/** أنا المتحدَّى: أحلّ معرّفات أسئلته من بنكي أنا — لا أثق بما يرسله */
+function chGo(c){
+ const qs=(c.qs||[]).map(qById).filter(Boolean);
+ if(qs.length<8)return toast('نسخة اللعبة عندك لا تحوي أسئلة هذا التحدّي');
+ run(qs,{vs:{score:c.theirScore,name:c.withName},chal:{play:c.id,name:c.withName}});
+}
+function chAccept(id){
+ const c=(CH.list||[]).find(x=>x.id===id);
+ if(c)return chGo(c);
+ // فُتح من إشعار قبل أن تُجلب القائمة — نجلبها ثم نكمل بدل أن نقول «لا يوجد»
+ if(!netOnline())return toast('التحدّي يحتاج اتصالًا بالخادم');
+ NET.chalList().then(r=>{
+  CH.list=r.list||[];
+  const f=CH.list.find(x=>x.id===id);
+  if(!f)return toast('لا يوجد هذا التحدّي');
+  chGo(f);
+ }).catch(()=>toast('تعذّر جلب التحدّي'));
+}
+/** نهاية جولة التحدّي: إرسال أو حسم */
+function chDone(){
+ const ch=G&&G.chal;if(!ch)return;
+ const ms=Math.max(0,Date.now()-(G.t0chal||Date.now()));
+ if(ch.play){
+  NET.chalPlay(ch.play,G.pts,ms).then(r=>{CH.list=r.list||[];toast('وصلت نتيجتك — الخادم حسم التحدّي')})
+   .catch(e=>toast((e&&e.message)||'تعذّر إرسال النتيجة'));
+ }else if(ch.to){
+  NET.chalSend(ch.to,G.qs.map(qid),G.pts,ms)
+   .then(r=>{CH.list=r.list||[];toast('أُرسل التحدّي إلى '+esc(ch.name))})
+   .catch(e=>toast((e&&e.message)||'تعذّر إرسال التحدّي'));
+ }
+}
+/** ثمانية أسئلة متنوّعة الصعوبة لتحدٍّ عادل */
+function chalPick(){
+ const pool=Q.filter(q=>q.o&&q.o.length>=3&&!q.fill);
+ const out=[],seen=new Set();
+ for(let guard=0;out.length<8&&guard<400;guard++){
+  const q=pool[Math.floor(Math.random()*pool.length)];
+  const k=qid(q);if(seen.has(k))continue;
+  seen.add(k);out.push(q);
+ }
+ return out;
+}
 const shf=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const nrm=s=>String(s||'').trim().toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه')
  .replace(/ى/g,'ي').replace(/[\u064B-\u0652]/g,'').replace(/\s+/g,' ');
@@ -41038,6 +41179,7 @@ function vsScr(){
 // ═══════════ محرك الجولة ═══════════
 function run(qs,o){
  G={qs,i:0,pts:0,ok:0,mis:0,st:0,bst:0,node:o.node||null,mm:o.mm||null,vs:o.vs||null,
+  chal:o.chal||null,t0chal:Date.now(),
   ans:false,a:null,lp:0,lo:false,used:new Set(),hid:new Set(),x2:false,
   anyP:false,emoteBar:false,tm:null,ms:0,t0:0,hist:[]};
  Router.enter('quiz');
@@ -41219,6 +41361,7 @@ function done(){
   if(G.mis===0&&G.ok===G.qs.length)_e.perfect=1;if(G.anyP)_e.helper=1}
  S.xp+=xp;S.coins+=co;S.gems+=gm;S.matches++;saveState();
  if(ps){S.wins++;trk('first_win');trk('wins_10');if(!G.anyP)trk('no_help')}
+ try{chDone()}catch(e){}   // 5.92: نهاية جولة تحدٍّ — إرسال النتيجة أو حسمها
  const vsWin=G.vs?G.pts>G.vs.score:null;
  const c=ps||vsWin?'#2ECC71':'#E24B4A';
  go(`<div class="scr on">

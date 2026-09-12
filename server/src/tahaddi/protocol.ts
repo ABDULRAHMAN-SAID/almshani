@@ -54,11 +54,22 @@ export type ClientMsg =
   | { t: 'friendAdd'; rid?: string; id: string }   // معرّف كامل أو رمز صديق من ستّة محارف
   | { t: 'friendAccept'; rid?: string; id: string }
   | { t: 'friendRemove'; rid?: string; id: string }
+  // ── تحدٍّ غير متزامن: يلعب الأوّل ثمانية أسئلة ويلعب الثاني نفسها متى شاء ──
+  | { t: 'chalSend'; rid?: string; to: string; qs: string[]; sc: number; ms: number }
+  | { t: 'chalList'; rid?: string }
+  | { t: 'chalPlay'; rid?: string; id: string; sc: number; ms: number }
   // ── الغرف: تتابع حضور وبثّ لحظات — نفس واجهة غرفة الأرتيفاكت ──
   | { t: 'presence'; patch: Record<string, unknown> }
   | { t: 'emit'; topic: string; data?: unknown };
 
 export interface FriendView { id: string; name: string; online: boolean; code?: string }
+
+/** تحدٍّ واحد كما يراه الطرفان: mine=أنا المتحدِّي · qs معرّفات الأسئلة لا نصوصها */
+export interface ChalView {
+  id: string; mine: boolean; withId: string; withName: string;
+  qs: string[]; myScore: number | null; theirScore: number | null;
+  at: number; done: boolean; won: 'me' | 'them' | 'tie' | null; seen: boolean;
+}
 
 /** رسالة خاصّة واحدة: o=1 أنا أرسلتها، o=0 وصلتني */
 export interface DmMsg { m: string; o: 0 | 1; at: number }
@@ -90,6 +101,8 @@ export type ServerMsg =
   | { t: 'friendList'; rid?: string; friends: FriendView[]; reqIn: FriendView[]; reqOut: FriendView[] }
   | { t: 'dmThread'; rid?: string; with: string; msgs: DmMsg[] }
   | { t: 'dmPush'; from: string; name: string; msg: DmMsg }
+  | { t: 'chalList'; rid?: string; list: ChalView[] }
+  | { t: 'chalPush'; kind: 'new' | 'done'; from: string; name: string }
   | { t: 'peers'; list: PeerView[] }
   | { t: 'msg'; topic: string; data?: unknown; from: { peer: string; by: string } }
   | { t: 'error'; rid?: string; code: string; message?: string };

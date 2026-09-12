@@ -7,7 +7,7 @@ import { RecordStore, type Row } from './tstore';
 import CATALOG from '../../../src/economy/catalog.js';
 import { verify as verifyReceipt, iapStatus } from './iap';
 import { sendCode, mailMode } from './mail';
-import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec, DmMsg } from './protocol';
+import type { ClientMsg, ServerMsg, CloudSave, ResultReport, PeerView, FriendView, LeaderRow, GameId, PurchaseClaim, PurchaseRec, DmMsg, ChalView } from './protocol';
 
 export interface Account {
   token: string; id: string; name: string; email?: string; createdAt: number; lastSeen: number;
@@ -19,6 +19,13 @@ export interface Account {
   dm?: Record<string, DmMsg[]>;   // محادثات خاصّة: معرّف الصديق → أحدث رسائلها
   code?: string;          // رمز صديق قصير يُقرأ ويُملى — بديل المعرّف الطويل عند الإضافة
   emailOk?: boolean;      // بريد مُثبَت برمز — به وحده يُستعاد الحساب على جهاز آخر
+  chal?: Chal[];          // تحدّيات غير متزامنة (نسخة عند كل طرف)
+}
+/** تحدٍّ واحد: الأسئلة معرّفات لا نصوص، فلا يستطيع المتحدِّي تزوير الإجابات */
+export interface Chal {
+  id: string; a: string; b: string; an: string; bn: string;
+  qs: string[]; as: number; am: number;
+  bs?: number; bm?: number; at: number; done?: boolean; win?: string | null; seen?: string[];
 }
 export interface Session {
   peer: string; account: Account; presence: Record<string, unknown>;
@@ -72,6 +79,9 @@ const MAX_FRIENDS = 200;
 const MAX_DM_LEN = 300;      // رسالة خاصّة واحدة
 const MAX_DM_THREAD = 80;    // أحدث ما يُحفظ من محادثة واحدة
 const MAX_DM_BOXES = 40;     // عدد المحادثات المحفوظة لكل حساب
+const MAX_CHAL = 30;         // تحدّيات محفوظة لكل حساب — الأقدم يسقط
+const CHAL_QS = 8;           // أسئلة التحدّي
+const CHAL_TTL = 14 * 24 * 3600 * 1000;
 /* حدّ المعدّل لكل جلسة ولكل نوع رسالة: [الرشقة المسموحة, المتجدّد في الثانية].
    الحدود السابقة كانت حدود حجم فقط — لا شيء كان يمنع ألف رسالة في الثانية من جلسة واحدة. */
 const RATE: Record<string, [number, number]> = {
@@ -79,6 +89,7 @@ const RATE: Record<string, [number, number]> = {
   submitResult: [8, 2], leaderboard: [8, 2], profile: [24, 6],
   friendAdd: [12, 1], friendAccept: [12, 1], friendRemove: [12, 1], friends: [12, 3],
   dm: [12, 2], dmThread: [16, 4],
+  chalSend: [6, 0.5], chalList: [12, 2], chalPlay: [8, 0.5],
   setName: [6, 1], setEmail: [6, 1], purchase: [8, 1], purchases: [8, 1],
   authStart: [4, 0.05], authVerify: [10, 0.2]
 };
@@ -133,6 +144,9 @@ export class TahaddiService {
         if (typeof a.email === 'string' && MAIL_RE.test(a.email)) acc.email = a.email.toLowerCase();
         if (acc.email && a.emailOk === true && !this.byEmail.has(acc.email)) acc.emailOk = true;
         const dm = dmBoxes(a.dm); if (dm) acc.dm = dm;   // كانت المحادثات تُحفظ ولا تُستعاد — تضيع مع كل إعادة تشغيل
+        if (Array.isArray(a.chal)) acc.chal = (a.chal as Chal[]).filter(c =>
+          c && typeof c.id === 'string' && ID_RE.test(String(c.a)) && ID_RE.test(String(c.b))
+          && Array.isArray(c.qs)).slice(-MAX_CHAL);
         for (const g of RankCore.GAMES) acc.ranks[g] = RankCore.sanitizeProfile((a.ranks || {})[g], g);
         this.accounts.set(acc.token, acc); this.byId.set(acc.id, acc);
         if (acc.code) this.byCode.set(acc.code, acc);
@@ -396,6 +410,84 @@ export class TahaddiService {
     for (const x of this.byAcc.get(to) || []) x.send({ t: 'dmPush', from: me.id, name: me.name, msg: { m: body, o: 0, at } });
   }
   /** الإضافة برمز الصديق القصير أو بالمعرّف الكامل — كلاهما يصل إلى الحساب نفسه */
+  /* ═══ تحدٍّ غير متزامن (5.92) ═══
+     يلعب الأوّل ثمانية أسئلة فتُحفظ نتيجته ومعرّفات أسئلته، ويلعب الثاني
+     **نفسها** متى شاء. الأسئلة معرّفات لا نصوص: كل جهاز يحلّها من بنكه، فلا
+     يستطيع المتحدِّي أن يرسل سؤالًا بإجابة مزوّرة. والنتيجة يحسمها الخادم. */
+  private chalBox(a: Account): Chal[] { return (a.chal ??= []); }
+  private chalTrim(a: Account): void {
+    const box = this.chalBox(a), now = Date.now();
+    const live = box.filter(c => now - c.at < CHAL_TTL);
+    if (live.length > MAX_CHAL) live.splice(0, live.length - MAX_CHAL);
+    a.chal = live;
+  }
+  private chalView(c: Chal, me: string): ChalView {
+    const mine = c.a === me;
+    const myScore = mine ? c.as : (c.bs ?? null);
+    const theirScore = mine ? (c.bs ?? null) : c.as;
+    let won: ChalView['won'] = null;
+    if (c.done) won = c.win === null ? 'tie' : (c.win === me ? 'me' : 'them');
+    return { id: c.id, mine, withId: mine ? c.b : c.a, withName: mine ? c.bn : c.an,
+      qs: c.qs, myScore, theirScore, at: c.at, done: !!c.done, won,
+      seen: !!(c.seen && c.seen.includes(me)) };
+  }
+  private sendChal(s: Session, rid?: string): void {
+    const a = s.account; this.chalTrim(a);
+    s.send({ t: 'chalList', rid, list: this.chalBox(a).map(c => this.chalView(c, a.id)).reverse() });
+  }
+  private pushChal(id: string, kind: 'new' | 'done', from: Account): void {
+    for (const ss of this.byAcc.get(id) || []) {
+      ss.send({ t: 'chalPush', kind, from: from.id, name: from.name });
+      this.sendChal(ss);
+    }
+  }
+  chalList(s: Session, rid?: string): void { this.sendChal(s, rid); }
+  chalSend(s: Session, to: unknown, qs: unknown, sc: unknown, ms: unknown, rid?: string): void {
+    const me = s.account;
+    if (typeof to !== 'string' || !ID_RE.test(to)) return s.send({ t: 'error', rid, code: 'bad_id', message: 'معرّف غير صالح' });
+    if (to === me.id) return s.send({ t: 'error', rid, code: 'self', message: 'لا تتحدَّ نفسك' });
+    if (!me.friends.includes(to)) return s.send({ t: 'error', rid, code: 'not_friend', message: 'التحدّي بين الأصدقاء فقط' });
+    const other = this.byId.get(to);
+    if (!other) return s.send({ t: 'error', rid, code: 'not_found', message: 'لا يوجد لاعب بهذا المعرّف' });
+    const list = Array.isArray(qs) ? qs.filter((q): q is string => typeof q === 'string' && /^[a-z0-9]{1,16}$/.test(q)) : [];
+    if (list.length !== CHAL_QS) return s.send({ t: 'error', rid, code: 'bad_qs', message: 'أسئلة التحدّي غير صالحة' });
+    if (new Set(list).size !== list.length) return s.send({ t: 'error', rid, code: 'bad_qs', message: 'أسئلة مكرّرة' });
+    const score = Math.max(0, Math.min(99999, Math.floor(Number(sc) || 0)));
+    const time = Math.max(0, Math.min(3600000, Math.floor(Number(ms) || 0)));
+    // تحدٍّ معلّق واحد لكل صديق — لا يُغرق أحدٌ صديقه
+    if (this.chalBox(me).some(c => !c.done && c.a === me.id && c.b === to))
+      return s.send({ t: 'error', rid, code: 'pending', message: 'لك تحدٍّ معلّق عنده — انتظر ردّه' });
+    const c: Chal = { id: 'c' + randomBytes(8).toString('hex'), a: me.id, b: to,
+      an: me.name, bn: other.name, qs: list, as: score, am: time, at: Date.now(), seen: [me.id] };
+    this.chalBox(me).push(c);
+    this.chalBox(other).push({ ...c });
+    this.chalTrim(me); this.chalTrim(other);
+    this.persist(me); this.persist(other);
+    this.sendChal(s, rid);
+    this.pushChal(to, 'new', me);
+  }
+  chalPlay(s: Session, id: unknown, sc: unknown, ms: unknown, rid?: string): void {
+    const me = s.account;
+    const cid = typeof id === 'string' ? id : '';
+    const mine = this.chalBox(me).find(c => c.id === cid);
+    if (!mine) return s.send({ t: 'error', rid, code: 'not_found', message: 'لا يوجد هذا التحدّي' });
+    if (mine.b !== me.id) return s.send({ t: 'error', rid, code: 'not_yours', message: 'هذا تحدٍّ أرسلتَه أنت' });
+    if (mine.done) return s.send({ t: 'error', rid, code: 'done', message: 'انتهى هذا التحدّي' });
+    const score = Math.max(0, Math.min(99999, Math.floor(Number(sc) || 0)));
+    const time = Math.max(0, Math.min(3600000, Math.floor(Number(ms) || 0)));
+    // الخادم يحسم: الأعلى نقاطًا، وعند التساوي الأسرع، ثم تعادل
+    const win = score > mine.as ? me.id : score < mine.as ? mine.a
+      : time < mine.am ? me.id : time > mine.am ? mine.a : null;
+    const other = this.byId.get(mine.a);
+    for (const [acc, c] of [[me, mine] as const, ...(other ? [[other, this.chalBox(other).find(x => x.id === cid)] as const] : [])]) {
+      if (!c) continue;
+      c.bs = score; c.bm = time; c.done = true; c.win = win;
+      this.persist(acc);
+    }
+    this.sendChal(s, rid);
+    if (other) this.pushChal(other.id, 'done', me);
+  }
+
   friendAdd(s: Session, want: unknown, rid?: string): void {
     const me = s.account;
     if (typeof want !== 'string' || !want.trim())
@@ -646,6 +738,9 @@ export class TahaddiService {
       case 'friends': return this.friends(s, msg.rid);
       case 'dm': return this.dm(s, msg.to, msg.text, msg.rid);
       case 'dmThread': return this.dmThread(s, msg.with, msg.rid);
+      case 'chalSend': return this.chalSend(s, msg.to, msg.qs, msg.sc, msg.ms, msg.rid);
+      case 'chalList': return this.chalList(s, msg.rid);
+      case 'chalPlay': return this.chalPlay(s, msg.id, msg.sc, msg.ms, msg.rid);
       case 'friendAdd': return this.friendAdd(s, msg.id, msg.rid);
       case 'friendAccept': return this.friendAccept(s, msg.id, msg.rid);
       case 'friendRemove': return this.friendRemove(s, msg.id, msg.rid);

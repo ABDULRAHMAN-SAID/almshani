@@ -255,6 +255,53 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
    check('التخمين المتكرّر يحرق الرمز',burned.t==='error'&&burned.code==='code_burned',JSON.stringify(burned));
    await D1.close();await D2.close();await D3.close();
   }
+  /* ═══ تحدٍّ غير متزامن: الخادم يحسم، ولا يلعب أحدٌ تحدّي نفسه ولا مرّتين ═══ */
+  {
+   const C1=client(),C2=client(),C3=client();
+   const u1=await hello(C1,undefined,'سعود'),u2=await hello(C2,undefined,'نورة'),u3=await hello(C3,undefined,'غريب');
+   const Q8=['q1','q2','q3','q4','q5','q6','q7','q8'];
+   const noFr=await C1.req({t:'chalSend',to:u2.id,qs:Q8,sc:100,ms:9000});
+   check('تحدّي غير صديق يُرفض',noFr.t==='error'&&noFr.code==='not_friend',JSON.stringify(noFr));
+   await C1.req({t:'friendAdd',id:u2.id});await C2.req({t:'friendAdd',id:u1.id});
+   const selfC=await C1.req({t:'chalSend',to:u1.id,qs:Q8,sc:100,ms:9000});
+   check('لا تتحدَّ نفسك',selfC.t==='error'&&selfC.code==='self',JSON.stringify(selfC));
+   const few=await C1.req({t:'chalSend',to:u2.id,qs:['a','b'],sc:100,ms:9000});
+   check('عدد أسئلة خاطئ يُرفض',few.t==='error'&&few.code==='bad_qs',JSON.stringify(few));
+   const dupQ=await C1.req({t:'chalSend',to:u2.id,qs:['a','a','c','d','e','f','g','h'],sc:100,ms:9000});
+   check('أسئلة مكرّرة تُرفض',dupQ.t==='error'&&dupQ.code==='bad_qs',JSON.stringify(dupQ));
+   const sent=await C1.req({t:'chalSend',to:u2.id,qs:Q8,sc:2200,ms:40000});
+   check('التحدّي يُرسل ويظهر عند المتحدِّي بانتظار الردّ',
+    sent.t==='chalList'&&sent.list.length===1&&sent.list[0].mine===true&&sent.list[0].done===false
+    &&sent.list[0].myScore===2200&&sent.list[0].theirScore===null,JSON.stringify(sent).slice(0,170));
+   const again=await C1.req({t:'chalSend',to:u2.id,qs:Q8,sc:1,ms:1});
+   check('تحدٍّ معلّق واحد لكل صديق',again.t==='error'&&again.code==='pending',JSON.stringify(again));
+   const got=await C2.req({t:'chalList'});
+   const cid=got.list[0].id;
+   check('يصل المتحدَّى بالأسئلة نفسها ونتيجة خصمه',
+    got.list.length===1&&got.list[0].mine===false&&got.list[0].theirScore===2200
+    &&JSON.stringify(got.list[0].qs)===JSON.stringify(Q8),JSON.stringify(got).slice(0,170));
+   const notMine=await C1.req({t:'chalPlay',id:cid,sc:9999,ms:1});
+   check('لا يلعب المتحدِّي تحدّيه هو',notMine.t==='error'&&notMine.code==='not_yours',JSON.stringify(notMine));
+   const stranger=await C3.req({t:'chalPlay',id:cid,sc:9999,ms:1});
+   check('غريب لا يلعب تحدّي غيره',stranger.t==='error'&&stranger.code==='not_found',JSON.stringify(stranger));
+   const played=await C2.req({t:'chalPlay',id:cid,sc:2500,ms:30000});
+   check('الخادم يحسم للأعلى نقاطًا',
+    played.list[0].done===true&&played.list[0].won==='me'&&played.list[0].myScore===2500,JSON.stringify(played).slice(0,150));
+   const other=await C1.req({t:'chalList'});
+   check('والطرف الآخر يرى الحسم نفسه معكوسًا',
+    other.list[0].done===true&&other.list[0].won==='them'&&other.list[0].theirScore===2500,JSON.stringify(other).slice(0,150));
+   const twice=await C2.req({t:'chalPlay',id:cid,sc:9999,ms:1});
+   check('لا يُلعب التحدّي مرّتين',twice.t==='error'&&twice.code==='done',JSON.stringify(twice));
+   // التعادل في النقاط يحسمه الأسرع (بعد انتظار — حدّ المعدّل ستّة إرسالات في الرشقة)
+   await sleep(2600);
+   const snd2=await C1.req({t:'chalSend',to:u2.id,qs:Q8,sc:1000,ms:50000});
+   check('التحدّي الثاني يُرسل بعد أن انتهى الأوّل',snd2.t==='chalList',JSON.stringify(snd2).slice(0,110));
+   const g2=await C2.req({t:'chalList'});
+   const cid2=g2.list.find(c=>!c.done).id;
+   const tie=await C2.req({t:'chalPlay',id:cid2,sc:1000,ms:20000});
+   check('عند تساوي النقاط يفوز الأسرع',tie.list.find(c=>c.id===cid2).won==='me',JSON.stringify(tie).slice(0,140));
+   await C1.close();await C2.close();await C3.close();
+  }
   /* ═══ رمز الصداقة القصير: يُقرأ ويُملى، ويضيف كما يضيف المعرّف الطويل ═══ */
   {
    const A=client(),B=client();

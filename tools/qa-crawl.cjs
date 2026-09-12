@@ -30,6 +30,8 @@ const CAPTURES=[
  ['dmScr',R("tab('play');dmOpen('p0123456789ab','نورة')")],
  ['friendsScr',R("tab('play');push('friendsScr')")],
  ['recScr',R("tab('more');recOpen()")],
+ ['chalScr',R("tab('play');push('chalScr')")],
+ ['chalList',R("tab('play');CH.list=[{id:'c1',mine:false,done:false,withName:'نورة',qs:['a'],myScore:null,theirScore:2200,at:Date.now(),won:null,seen:false},{id:'c2',mine:true,done:true,withName:'خالد',qs:['a'],myScore:1900,theirScore:1400,at:Date.now(),won:'me',seen:true}];push('chalScr')")],
  ['recCode',R("tab('more');recOpen();setTimeout(()=>{REC.sent=1;REC.mask='s****d@mail.com';recScr()},200)")],
  ['rmInvite',R("tab('play');RM.code='ABCD';RM.game='barra';RM.host=1;RM.solo=0;push('roomScr','barra');setTimeout(()=>{try{rmInvite()}catch(e){}},300)")],
  ['knBot',R("push('rankedScr');knBot(58)")],
