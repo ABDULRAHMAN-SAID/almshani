@@ -33,13 +33,23 @@ jobs:
         env:
           TAHADDI_SERVER: ${{ vars.TAHADDI_SERVER }}
         run: node tools/build-www.cjs
-      # enablement تفعّل صفحات المستودع من الإجراء نفسه. بدونها كان كل نشر يفشل بـ
-      # «Get Pages site failed» حتى يفتحها المالك بيده من الإعدادات.
-      - uses: actions/configure-pages@v5
+      # enablement تحاول فتح صفحات المستودع من الإجراء نفسه، لكنّ رمز العمل لا يملك
+      # صلاحية إنشاء الموقع («Resource not accessible by integration») فتبقى نقرة
+      # واحدة على المالك. ولا نجعلها تُفشل التشغيل: خادم Fly يقدّم اللعبة بنفسه،
+      # وهذا الطريق اختياريّ — فينبّه ولا يصبغ سجلّ الإجراءات بالأحمر.
+      - id: pages
+        continue-on-error: true
+        uses: actions/configure-pages@v5
         with:
           enablement: true
+      - name: صفحات المستودع غير مفتوحة
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "::warning::لنشر نسخة الويب افتح Settings ← Pages ← Source: GitHub Actions مرّة واحدة. نشر الخادم على Fly لا يحتاج هذه الخطوة."
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outcome == 'success'
         with:
           path: www
       - id: deploy
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4

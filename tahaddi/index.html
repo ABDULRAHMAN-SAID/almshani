@@ -20656,7 +20656,13 @@ function exportData(){
  ov.querySelector('#exTx').value=txt;
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#exNo').onclick=()=>ov.remove();
- ov.querySelector('#exDl').onclick=()=>{
+ ov.querySelector('#exDl').onclick=async()=>{
+  // داخل الأرتيفاكت لا يعمل رابط التنزيل ولا يرمي خطأ: كان يقول «نُزّل» ولا شيء يُنزَّل.
+  // القدرة downloads هي الطريق الوحيد هناك، ويُسأل المشاهد قبل الحفظ.
+  try{
+   const dl=(window.claude&&window.claude.use)?await window.claude.use('downloads'):null;
+   if(dl&&dl.save){await dl.save({filename:name,data:txt});toast('نُزّل '+name);return}
+  }catch(e){toast('لم يُحفَظ الملفّ — انسخ النصّ');return}
   try{
    const b=new Blob([txt],{type:'application/json'}),u=URL.createObjectURL(b);
    const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();
