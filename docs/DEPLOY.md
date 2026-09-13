@@ -34,7 +34,17 @@ npm run docker:build && npm run docker:run          # نفس الشيء داخل
    أوّلًا (`tools/test-deploy.cjs`)، ثم يُنشئ التطبيق والقرص إن لم يكونا، ثم ينشر، ثم يقرأ
    `/health`، ويطبع الرابط الحيّ في ملخّص التشغيل.
 
-*ب · من جهازك:*
+*ب · من جهازك بأمر واحد:*
+
+```bash
+bash tools/deploy.sh --check     # يقول ما ينقص ولا ينشر شيئًا
+bash tools/deploy.sh             # يفحص الصورة، ينشئ التطبيق والقرص، ينشر، ويطبع الرابط الحيّ
+```
+
+يحتاج `flyctl` على جهازك (`curl -L https://fly.io/install.sh | sh`) وحساب Fly.
+ولا يُكتب فيه سرّ ولا يُقرأ منه: الأسرار كلّها عبر `fly secrets set` وحدها.
+
+وإن أردتَ الخطوات يدويًّا:
 
 ```bash
 fly auth login
