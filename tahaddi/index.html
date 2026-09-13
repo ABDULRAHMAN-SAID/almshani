@@ -23630,7 +23630,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.95';
+const APP_VER='5.96';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24236,14 +24236,14 @@ function rmOn(d,m){
    if(RM.solo&&isBot(d.turn))setTimeout(caBot,2200)}}
  else if(d.t==='det'&&d.to===me){RM.myKnow=RM.myKnow||{};RM.myKnow[d.target]=!!d.isM;RM.detRes={who:d.target,maf:!!d.isM}}
  else if(d.t==='sgQ'){RM.phase='sgAsk';
-  RM.sg={q:d.q,cat:d.cat||'',r:d.r|0,rounds:d.rounds|0,who:d.who||null,mine:null,res:null};
+  RM.sg={q:d.q,cat:d.cat||'',kind:d.kind||'',r:d.r|0,rounds:d.rounds|0,who:d.who||null,mine:null,res:null};
   if(RM.host){RM.sgH=RM.sgH||{r:0,rounds:d.rounds|0,used:[],pts:{},ans:{}};RM.sgH.ans={}}}
  else if(d.t==='sgV'&&RM.host){
   const from=(m&&m.peer)||d.by;
   if(from&&RM.sgH){RM.sgH.ans[from]=d.v|0;
    if(RM.phase==='sgAsk'&&sgAllIn())setTimeout(rmSgReveal,450)}}
  else if(d.t==='sgR'){RM.phase='sgRes';
-  if(RM.sg){RM.sg.res={ans:d.ans||{},win:typeof d.win==='number'?d.win:-1,ok:!!d.ok,votes:d.votes|0}}
+  if(RM.sg){RM.sg.res={ans:d.ans||{},ok:!!d.ok,votes:d.votes|0,gain:d.gain|0}}
   RM.sgPts=d.pts||{};}
  else if(d.t==='sgEnd'){RM.phase='sgEnd';RM.sgPts=d.pts||{};evtParty()}
  else if(d.t==='act'&&RM.host){
@@ -24542,7 +24542,7 @@ function rmStart(){
   return;
  }
  if(RM.game==='lk'||RM.game==='sr'){
-  RM.sgH={r:0,rounds:RM.sgR||8,used:[],pts:{},ans:{}};
+  RM.sgH={r:0,rounds:RM.sgR||10,used:[],pts:{},ans:{}};
   rmSend({t:'start',g:RM.game,ps,mid:rmNewMid()});
   setTimeout(rmSgQ,180);
   return;
@@ -24615,32 +24615,32 @@ function rmBarra(R){
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   لو خيروك وصراحة في غرفة (5.94)
+   لو خيروك وصراحة في غرفة (5.96 — على القانون نفسه)
    ───────────────────────────────────────────────────────────────────
-   نفس اللعبتين على أجهزة متفرّقة. مجرى الغرفة بثّ، فلو أُرسل الصوت صريحًا
-   لرآه الجميع قبل الكشف — وهو كلّ اللعبة. لذلك يصل كلّ صوت إلى المضيف
-   مُعمّىً بـ rmSendTo (5.89)، ولا يكشف إلا هو، ودفعةً واحدة.
+   اللعبتان أصلهما جلسة واحدة: صاحب الدور يجيب أو ينفّذ **أمام الجماعة**،
+   والجماعة تشهد. فالغرفة تنقل هذا كما هو: البطاقة تصل الجميع، وصاحب الدور
+   يجيب بصوته (في مكالمة أو مجلس واحد)، والبقيّة يحكمون بضغطة تصل المضيف
+   **مُعمّاة** (طبقة 5.89) فلا يرى أحد حكم غيره قبل الكشف، ثم يُعلن دفعةً.
    ═══════════════════════════════════════════════════════════════════ */
 function sgRoomRounds(){
- RM.sgR=RM.sgR||8;
+ RM.sgR=RM.sgR||10;
  return `<div style="font-size:11px;font-weight:800;color:var(--tx2);margin:4px 0 6px">عدد الجولات</div>
- <div class="cr" style="margin-bottom:12px">${[5,8,12,16].map(n=>
+ <div class="cr" style="margin-bottom:12px">${[6,10,16,24].map(n=>
   `<div class="fc ${RM.sgR===n?'on':''}" onclick="RM.sgR=${n};roomDraw()">${n}</div>`).join('')}</div>`;
 }
 const sgNm=p=>((RM.players||[]).find(x=>x.peer===p)||{}).name||'لاعب';
-/** المضيف: يختار سؤال الجولة ويبثّه (والسؤال ليس سرًّا — السرّ هو الأصوات) */
+/** المضيف: بطاقة الجولة ومن دوره — والبطاقة ليست سرًّا، السرّ هو الحكم */
 function rmSgQ(){
  if(!RM.host||!RM.sgH)return;
  const lk=RM.game==='lk';
- const p=sgPick(lk?LK_Q:SR_Q,null,RM.sgH.used);
+ const p=sgPick(lk?LK_CARDS:SR_Q,null,RM.sgH.used);
  if(!p)return;
  const ps=(RM.players||[]).map(x=>x.peer);
- const who=lk?null:ps[RM.sgH.r%Math.max(1,ps.length)];
- RM.sgH.ans={};
- RM.sgH.done=0;
- rmSend({t:'sgQ',q:p.q,cat:p.k.split('#')[0],r:RM.sgH.r,rounds:RM.sgH.rounds,who});
+ const who=ps[RM.sgH.r%Math.max(1,ps.length)];
+ RM.sgH.ans={};RM.sgH.done=0;
+ rmSend({t:'sgQ',q:p.q,cat:p.cat,kind:lk?p.cat:'',r:RM.sgH.r,rounds:RM.sgH.rounds,who});
 }
-/** صوتي يصل المضيف وحده مُعمّى */
+/** حكمي يصل المضيف وحده مُعمّى */
 function sgVote(v){
  if(!RM.sg||RM.sg.mine!=null)return;
  RM.sg.mine=v;
@@ -24649,28 +24649,21 @@ function sgVote(v){
  try{SFX.play('tap')}catch(e){}
  roomDraw();
 }
-/** هل صوّت كل من يُنتظر صوته؟ (صاحب السؤال في صراحة لا يحكم على نفسه) */
+/** صاحب الدور لا يحكم على نفسه */
 function sgAllIn(){
  if(!RM.sgH||!RM.sg)return false;
- const need=(RM.players||[]).map(x=>x.peer).filter(pr=>!(RM.game==='sr'&&pr===RM.sg.who));
+ const need=(RM.players||[]).map(x=>x.peer).filter(pr=>pr!==RM.sg.who);
  return need.length>0&&need.every(pr=>RM.sgH.ans[pr]!=null);
 }
 function rmSgReveal(){
  if(!RM.host||!RM.sgH||!RM.sg||RM.sgH.done)return;
  RM.sgH.done=1;
  const ans=RM.sgH.ans||{},pts=RM.sgH.pts||(RM.sgH.pts={});
- const vs=Object.keys(ans);
- let win=-1,ok=false;
- if(RM.game==='lk'){
-  const a=vs.filter(k=>ans[k]===0).length,b=vs.length-a;
-  win=a===b?-1:(a>b?0:1);
-  if(win>=0)vs.forEach(k=>{if(ans[k]===win)pts[k]=(pts[k]||0)+1});
- }else{
-  const yes=vs.filter(k=>ans[k]===1).length;
-  ok=vs.length>0&&yes*2>vs.length;
-  if(ok&&RM.sg.who)pts[RM.sg.who]=(pts[RM.sg.who]||0)+2;
- }
- rmSend({t:'sgR',ans,pts,win,ok,votes:vs.length});
+ const vs=Object.keys(ans),yes=vs.filter(k=>ans[k]===1).length;
+ const ok=vs.length>0&&yes*2>vs.length;
+ const gain=RM.game==='lk'?((LK_KIND[RM.sg.kind]||{p:1}).p):1;
+ if(ok&&RM.sg.who)pts[RM.sg.who]=(pts[RM.sg.who]||0)+gain;
+ rmSend({t:'sgR',ans,pts,ok,votes:vs.length,gain});
 }
 function rmSgNext(){
  if(!RM.host||!RM.sgH)return;
@@ -24678,89 +24671,73 @@ function rmSgNext(){
  if(RM.sgH.r>=RM.sgH.rounds){rmSend({t:'sgEnd',pts:RM.sgH.pts||{}});return}
  rmSgQ();
 }
-/** لوح النتائج في الغرفة */
-function sgRoomBoard(){
+function sgRoomBoard(unit){
  const pts=RM.sgPts||{};
  const rows=(RM.players||[]).map(p=>({p:p.peer,n:p.name,v:pts[p.peer]||0})).sort((a,b)=>b.v-a.v);
  const top=rows.length?rows[0].v:0;
  return rows.map((r,i)=>`<div class="li" style="margin-bottom:9px;${r.v===top&&top>0?'border-color:var(--gold)':''}"><div class="lr">
   <span style="flex-shrink:0;width:26px;text-align:center;font-weight:900">${r.v===top&&top>0?ico('medal',20,'#E8B23A'):(i+1)+'.'}</span>
-  <div class="lb"><div class="lt">${esc(r.n)}${r.p===RM.me?' (أنت)':''}</div><div class="ls">${r.v} نقطة</div></div>
+  <div class="lb"><div class="lt">${esc(r.n)}${r.p===RM.me?' (أنت)':''}</div><div class="ls">${r.v} ${unit}</div></div>
   </div></div>`).join('');
 }
 function rmSg(R){
  sgCss();
  const lk=RM.game==='lk',G=RM.sg;
+ const unit=lk?'نقطة':'إجابة';
  if(RM.phase==='sgEnd'){
   const pts=RM.sgPts||{};
   const rows=(RM.players||[]).map(p=>({p:p.peer,v:pts[p.peer]||0})).sort((a,b)=>b.v-a.v);
   const champ=rows.length&&rows[0].v>0?sgNm(rows[0].p):'';
-  return `<div class="sl" style="text-align:center">${champ?(lk?'أقربكم إلى الجماعة: ':'أصدقكم: ')+esc(champ):'انتهت الجلسة'}</div>
-  ${sgRoomBoard()}
+  return `<div class="sl" style="text-align:center">${champ?(lk?'الفائز: ':'أكثركم صراحةً: ')+esc(champ):'انتهت الجلسة'}</div>
+  ${sgRoomBoard(unit)}
+  ${lk?'':`<div class="note">${ico('shield',12)} التمرير حقّ — لا يُحسب على أحد</div>`}
   ${RM.host?`<button class="rbtn" style="margin-top:10px" onclick="rmStart()"><span>جلسة جديدة — نفس اللاعبين</span></button>`:'<div class="note">بانتظار المضيف…</div>'}`;
  }
  if(!G)return '<div class="note">…</div>';
- const head=`<div class="lkTop"><span>الجولة ${G.r+1} من ${G.rounds}</span><span>${esc(G.cat||'')}</span></div>`;
+ const mine=G.who===RM.me;
+ const K=lk?(LK_KIND[G.kind]||LK_KIND.real):null;
+ const head=`<div class="lkTop"><span>الجولة ${G.r+1} من ${G.rounds}</span>
+   <span>${lk?esc(K.n)+' · '+K.p+' '+(K.p===1?'نقطة':'نقاط'):esc(G.cat||'')}</span></div>`;
  const mini=`<div class="lkMini">${(RM.players||[]).map(p=>
-   `<span>${esc(p.name)} <b>${(RM.sgPts||{})[p.peer]||0}</b></span>`).join('')}</div>`;
+   `<span${p.peer===G.who?' class="me"':''}>${esc(p.name)} <b>${(RM.sgPts||{})[p.peer]||0}</b></span>`).join('')}</div>`;
+ const card = lk
+  ? `<div class="lkCard" style="--kc:${K.c}">
+     <div class="hd"><span class="kn">${esc(K.n)}</span><span class="pv">${K.p} ${K.p===1?'نقطة':'نقاط'}</span></div>
+     ${G.q.length>1?`<div class="q">لو خيّروك…</div>
+      <div class="lkOpt a"><span class="k">أ</span><span class="t">${esc(G.q[0])}</span></div>
+      <div class="lkOr">أم</div>
+      <div class="lkOpt b"><span class="k">ب</span><span class="t">${esc(G.q[1])}</span></div>`
+      :`<div class="q big">${esc(G.q[0])}</div>`}
+     <div class="say">${esc(K.d)}</div></div>`
+  : `<div class="srCard">
+     <div class="hd">${ico('sound',18)} صراحة يا <b>${esc(sgNm(G.who))}</b></div>
+     <div class="q">${esc(G.q)}</div>
+     <div class="say">${mine?'أجب بصوتك — ولك أن تمرّر':'استمع لجوابه ثم احكم'}</div></div>`;
  if(RM.phase==='sgAsk'){
   const waiting=RM.host&&RM.sgH?Object.keys(RM.sgH.ans).length:0;
-  const need=(RM.players||[]).length-(lk?0:1);
-  const hostBar=RM.host?`<div class="lkNote">${ico('group',13)} صوّت ${waiting} من ${Math.max(0,need)}</div>
-   <button class="rbtn" style="margin-top:10px" onclick="rmSgReveal()"><span>اكشف الأصوات</span></button>`:'';
-  if(lk){
-   const done=G.mine!=null;
-   return `${head}
-   <div class="lkPass">${ico('next',18)} ${done?'اختيارك محفوظ — ينتظر الباقون':'اختر سرًّا، ولا أحد يرى اختيارك حتى الكشف'}</div>
-   <button class="lkOpt a${done&&G.mine!==0?' dim':''}" ${done?'':'onclick="sgVote(0)"'}><span class="k">أ</span><span class="t">${esc(G.q[0])}</span></button>
-   <div class="lkOr">أم</div>
-   <button class="lkOpt b${done&&G.mine!==1?' dim':''}" ${done?'':'onclick="sgVote(1)"'}><span class="k">ب</span><span class="t">${esc(G.q[1])}</span></button>
-   ${hostBar}${mini}`;
-  }
-  const mine=G.who===RM.me;
-  return `${head}
-  <div class="srCard">
-   <div class="hd">${ico('sound',18)} صراحة يا <b>${esc(sgNm(G.who))}</b></div>
-   <div class="q">${esc(G.q)}</div>
-   <div class="say">${mine?'أجب بصوت مسموع — ثم يحكم الباقون':'استمع لجوابه ثم احكم'}</div>
-  </div>
-  ${mine?`<div class="lkNote">${ico('timer',13)} دورك — أجب ولا تصوّت على نفسك</div>`
-   :G.mine!=null?`<div class="lkNote">${ico('check',13)} سُجّل حكمك</div>`
-   :`<div class="srAct"><div class="srJudge">حكمك أنت</div>
-     <button class="rbtn" onclick="sgVote(1)"><span>أجاب بصراحة</span></button>
-     <button class="btn g" style="margin-top:9px" onclick="sgVote(0)">تهرّب</button></div>`}
-  ${hostBar}${mini}`;
+  const need=Math.max(0,(RM.players||[]).length-1);
+  const hostBar=RM.host?`<div class="lkNote">${ico('group',13)} حكم ${waiting} من ${need}</div>
+   <button class="rbtn" style="margin-top:10px" onclick="rmSgReveal()"><span>اكشف الحكم</span></button>`:'';
+  const turn=`<div class="lkTurn">${ico('next',16)} الدور على <b>${esc(sgNm(G.who))}</b>${mine?' — أنت':''}</div>`;
+  const act = mine
+   ? `<div class="lkNote">${ico('timer',13)} ${lk?(G.kind==='dare'?'نفّذها أمام الجميع':'اختر وقل لماذا'):'أجب بصوتك'} — ثم يحكم الباقون</div>`
+   : G.mine!=null ? `<div class="lkNote">${ico('check',13)} سُجّل حكمك</div>`
+   : `<div class="srAct"><div class="srJudge">حكمك أنت</div>
+      <button class="rbtn" onclick="sgVote(1)"><span>${lk?(G.kind==='dare'?'نفّذها':'أجاب'):'أجاب'}</span></button>
+      <button class="btn g" style="margin-top:9px" onclick="sgVote(0)">${lk?'رفض':'مرّر'}</button></div>`;
+  return `${head}${turn}${card}${act}${hostBar}${mini}`;
  }
  if(RM.phase==='sgRes'&&G.res){
-  const ans=G.res.ans||{};
-  if(lk){
-   const side=v=>{
-    const who=Object.keys(ans).filter(k=>ans[k]===v);
-    return `<div class="lkRes ${v===0?'a':'b'}${G.res.win===v?' won':''}">
-     ${G.res.win===v?'<span class="maj">الأغلبية</span>':''}
-     <div class="hd"><span class="k">${v===0?'أ':'ب'}</span><span class="t">${esc(G.q[v])}</span></div>
-     <div class="ct">${who.length} من ${G.res.votes}</div>
-     <div class="who">${who.map(k=>`<span>${esc(sgNm(k))}</span>`).join('')||'<span class="no">لا أحد</span>'}</div></div>`;
-   };
-   const lone=G.res.win>=0&&Object.keys(ans).filter(k=>ans[k]!==G.res.win).length===1&&G.res.votes>=4
-    ? sgNm(Object.keys(ans).filter(k=>ans[k]!==G.res.win)[0]):'';
-   return `${head}${side(0)}${side(1)}
-   <div class="lkNote">${G.res.win<0?ico('scale',13)+' انقسمتم نصفين — لا نقاط'
-     :lone?ico('flame',13)+' '+esc(lone)+' وحده ضد الجميع':ico('medal',13)+' من كان مع الأغلبية نال نقطة'}</div>
-   ${RM.host?`<button class="rbtn" style="margin-top:12px" onclick="rmSgNext()"><span>${RM.sgH&&RM.sgH.r+1>=RM.sgH.rounds?'النتيجة':'الجولة التالية'}</span></button>`:'<div class="note">بانتظار المضيف…</div>'}
-   ${mini}`;
-  }
-  const yes=Object.keys(ans).filter(k=>ans[k]===1).length;
+  const gain=G.res.gain||1;
   return `${head}
-  <div class="srCard"><div class="hd">${ico('sound',18)} <b>${esc(sgNm(G.who))}</b></div>
-   <div class="q">${G.res.ok?'صدّقه الجالسون':'لم يقتنعوا'}</div>
-   <div class="say">${yes} من ${G.res.votes} قالوا إنّه أجاب بصراحة${G.res.ok?' — نقطتان له':''}</div></div>
+  <div class="srCard"><div class="hd">${ico('medal',18)} <b>${esc(sgNm(G.who))}</b></div>
+   <div class="q">${G.res.ok?(lk?'نالها — '+gain+' '+(gain===1?'نقطة':'نقاط'):'صارح الجالسين'):'بلا نقاط هذه الجولة'}</div>
+   <div class="say">${G.res.votes} من الجالسين حكموا${G.res.ok?'' :lk?' — لم تُقبل':' — مرّر، وهذا حقّه'}</div></div>
   ${RM.host?`<button class="rbtn" style="margin-top:12px" onclick="rmSgNext()"><span>${RM.sgH&&RM.sgH.r+1>=RM.sgH.rounds?'النتيجة':'الجولة التالية'}</span></button>`:'<div class="note">بانتظار المضيف…</div>'}
   ${mini}`;
  }
  return '<div class="note">…</div>';
 }
-
 /* ═══ دعوة إلى غرفتك (5.86) ═══
    الكود وحده لا يكفي: من يستقبله يحتاج رابط اللعبة نفسه. زرّ المشاركة يرسل
    الاثنين معًا، وزرّ «ادعُ صديقًا» يرسلهما في الدردشة الخاصّة لمن اخترته. */
@@ -34257,8 +34234,8 @@ const SG_ART={
 };
 /* ألعاب الجلسة: حديث لا مهارة، فلا رتبة لها ولا مكان بين الألعاب المصنّفة */
 const SG_GAMES=[
- ['lkSetup','لو خيروك','خياران لا ثالث لهما — والأغلبية تكسب','lk'],
- ['srSetup','صراحة','سؤال لواحد، والبقيّة يحكمون: صدق أم تهرّب','sr']
+ ['lkSetup','لو خيروك','بطاقة لكل دور: حقيقة · خيال · جرأة · نعم أو لا','lk'],
+ ['srSetup','صراحة','زجاجة تدور، ومن أشارت إليه أجاب — والتمرير حقّ','sr']
 ];
 function sgRow(r){
  return `<button class="sgRow" onclick="push('${r[0]}')">
@@ -34808,32 +34785,52 @@ function drawEnd(){
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   لو خيروك · صراحة — ألعاب الجلسة (5.94)
+   لو خيروك · صراحة — ألعاب الجلسة (5.96: على قانونهما الحقيقيّ)
    ───────────────────────────────────────────────────────────────────
-   لعبتا حديث لا لعبتا مهارة: لا رتبة فيهما ولا نقاط تصنيف، وإنما جولات
-   قصيرة تفتح الكلام بين الجالسين. لذلك هما خارج قائمة الألعاب المصنّفة
-   في ليلة العائلة، لهما قسمهما الخاصّ.
-   المحتوى كلّه مناسب للعائلة — لا سؤال يُحرج أحدًا أمام أهله.
+   الأولى كانت مبنيّة عندي على «توقّع الأغلبية»، وتلك لعبة أخرى.
+   «لو خيروك» الحقيقية لعبة أدوار ببطاقات: من ٢ إلى ٨ لاعبين، وأربعة
+   أصناف — حقيقة · خيال · جرأة · نعم أو لا — يسحب صاحب الدور بطاقة
+   ويقرأها بصوت عالٍ ويجيب أو ينفّذ **أمام الجماعة**، ولكل بطاقة نقاطها،
+   ومن جمع أكثر فاز.
+   و«صراحة» لا نقاط فيها أصلًا: زجاجة تدور فمن أشارت إليه أجاب. وقاعدتها
+   الأولى في كل ما كُتب عنها هي **الحدود والرضا** — ولمن لا يريد أن يجيب
+   أن يمرّر بلا لوم؛ لذلك تُعرض الحدود قبل أوّل سؤال، والتمرير حقّ معلن.
    ═══════════════════════════════════════════════════════════════════ */
-const LK_Q={
- 'عام':[
+const LK_KIND={
+ real :{n:'حقيقة',   p:2,c:'#5AA9F0',d:'اختر من الواقع وقل لماذا'},
+ fancy:{n:'خيال',    p:2,c:'#B08BFF',d:'خيالٌ لا يقع — فاختر بصدق'},
+ dare :{n:'جرأة',    p:3,c:'#E8734A',d:'نفّذها أمام الجالسين'},
+ yesno:{n:'نعم أو لا',p:1,c:'#2ECC71',d:'جواب واحد: نعم أو لا'}
+};
+const LK_CARDS={
+ real:[
   ['تعيش سنة بلا إنترنت','تعيش سنة بلا سيارة'],
   ['تنام أربع ساعات وتصحو نشيطًا','تنام عشر ساعات وتصحو كسلان'],
   ['بيت واسع بعيد عن أهلك','بيت صغير جنب أهلك'],
   ['تفقد جوالك أسبوعًا','تفقد محفظتك أسبوعًا'],
   ['صيف كامل بلا مكيّف','شتاء كامل بلا دفّاية'],
-  ['تعيد سنة من عمرك كما هي','تقفز سنة إلى الأمام'],
-  ['لا تخطئ أبدًا','لا تنسى شيئًا أبدًا'],
-  ['شهرة بلا مال','مال بلا شهرة'],
-  ['مدينة لا تنام','قرية هادئة على البحر'],
   ['عمل تحبّه براتب قليل','عمل تكرهه براتب مضاعف'],
   ['تسافر أسبوعًا كل شهر','تسافر شهرين كل سنة'],
-  ['جوال بطاريته أسبوع وكاميرته سيّئة','كاميرا ممتازة وبطارية نصف يوم'],
   ['تقرأ كتابًا كل أسبوع','تشاهد فيلمًا كل يوم'],
-  ['تُلغى كل الامتحانات','يُلغى الدوام الصباحي'],
-  ['بيت بلا نوافذ','بيت بلا أبواب داخلية']
+  ['كبسة كل يوم سنة','برجر كل يوم سنة'],
+  ['حلو بلا مالح','مالح بلا حلو'],
+  ['قهوة بلا سكّر مدى العمر','شاي بلا نعناع مدى العمر'],
+  ['تأكل وحدك في مطعم فخم','تأكل مع الكل على الأرض'],
+  ['رحلة برّية مع أصدقائك','رحلة طيران فاخرة وحدك'],
+  ['تزور بلدًا واحدًا عشر مرّات','عشرة بلدان مرّة واحدة'],
+  ['تصل مبكرًا بساعة','تصل متأخّرًا عشر دقائق'],
+  ['تعتذر وأنت على حق','تسكت وأنت مظلوم'],
+  ['تقول رأيك كاملًا دائمًا','تسمع رأي الناس فيك كاملًا'],
+  ['مليون اليوم وتنفقه في شهر','مئة ألف كل سنة عشر سنوات'],
+  ['راتب مضاعف ودوام مضاعف','نصف الراتب ونصف الدوام'],
+  ['سيّارة فاخرة وبيت صغير','بيت واسع وسيّارة قديمة'],
+  ['تعمل لنفسك بلا ضمان','تعمل لغيرك براتب ثابت'],
+  ['تعرف كم يملك كل من حولك','يعرفون كم تملك'],
+  ['هديّة غالية لا تحبّها','هديّة رخيصة اخترتها بنفسك'],
+  ['مدينة لا تنام','قرية هادئة على البحر'],
+  ['جوال بطاريته أسبوع وكاميرته سيّئة','كاميرا ممتازة وبطارية نصف يوم']
  ],
- 'قدرات':[
+ fancy:[
   ['تطير','تختفي'],
   ['تقرأ أفكار الناس','يقرؤون أفكارك ويحبّونك'],
   ['ترجع بالزمن ولا تغيّر شيئًا','ترى الغد ولا تخبر أحدًا'],
@@ -34845,79 +34842,71 @@ const LK_Q={
   ['تنسخ نفسك مرّة واحدة','توقف الزمن دقيقة كل يوم'],
   ['تتذكّر كل شيء قرأته','تفهم أي شيء من أول مرّة'],
   ['تُسمِع صوتك للعالم كلّه دقيقة','تسمع ما يقوله العالم عنك دقيقة'],
-  ['تحوّل الحديد ذهبًا مرّة في السنة','لا تمرض أبدًا']
+  ['تحوّل الحديد ذهبًا مرّة في السنة','لا تمرض أبدًا'],
+  ['تعيش مئة سنة في زمنك','عشرين سنة في زمن تختاره'],
+  ['تفهم لغة الحيوانات','يفهمك كل إنسان بلا كلام'],
+  ['بيت يطير ولا يهبط إلا مرّة في الشهر','بيت تحت البحر بنافذة واحدة'],
+  ['تنسى أسوأ يوم في حياتك','تتذكّر أجمل يوم كأنّك فيه'],
+  ['تصير أشهر إنسان سنة واحدة','أغنى إنسان يومًا واحدًا'],
+  ['تأكل ولا تشبع وتلذّ','تشبع بلا أن تأكل'],
+  ['تمشي على الماء','تختفي عن كاميرا واحدة تختارها'],
+  ['يُستجاب لك دعاء واحد لغيرك','دعوتان لنفسك']
  ],
- 'أكل':[
-  ['كبسة كل يوم سنة','برجر كل يوم سنة'],
-  ['حلو بلا مالح','مالح بلا حلو'],
-  ['قهوة بلا سكّر مدى العمر','شاي بلا نعناع مدى العمر'],
-  ['تأكل وحدك في مطعم فخم','تأكل مع الكل على الأرض'],
-  ['فطور كبير بلا عشاء','عشاء كبير بلا فطور'],
-  ['تمر بلا قهوة','قهوة بلا تمر'],
-  ['كل الأكل حارّ','كل الأكل بارد'],
-  ['تطبخ لعشرين ضيفًا','تغسل صحون عشرين ضيفًا'],
-  ['مندي كل جمعة','مشاوي كل خميس'],
-  ['تشرب عصيرًا لا تعرف طعمه','تأكل صحنًا لا تعرف اسمه'],
-  ['بيتزا بلا جبن','برجر بلا لحم'],
-  ['تفقد حاسّة الشمّ','تفقد نصف حاسّة التذوّق']
+ dare:[
+  ['قلّد صوت أحد الجالسين حتى يعرفوه'],
+  ['غنِّ مقطعًا من أغنية تحبّها بصوت مسموع'],
+  ['تكلّم بلهجة غير لهجتك دقيقة كاملة'],
+  ['امدح من على يمينك بثلاث جمل صادقة'],
+  ['اروِ أطرف موقف مرّ عليك هذا الشهر'],
+  ['قلّد مذيع نشرة أخبار وأعلن خبرًا عن الجلسة'],
+  ['اتّصل بأحد أهلك وقل له إنّك تحبّه ثم أغلق'],
+  ['صف كل واحد في الجلسة بكلمة واحدة'],
+  ['ارسم وجه من أمامك في عشر ثوانٍ وأرِهم'],
+  ['قل خمسة أشياء تشكر الله عليها الآن'],
+  ['تحدّث دقيقة كاملة بلا أن تقول «أنا»'],
+  ['قلّد مشية أحد الجالسين ودعهم يخمّنون'],
+  ['أعطِ جوالك لمن على يسارك يكتب حالتك دقيقة'],
+  ['اعتذر لأحد الجالسين عن شيء تذكره'],
+  ['قل أطول جملة تستطيعها بنَفَس واحد'],
+  ['علّم الجالسين شيئًا تجيده في نصف دقيقة'],
+  ['قلّد ردّة فعلك لو ربحت مليونًا الآن'],
+  ['اختر واحدًا واحكِ أوّل مرّة قابلته فيها']
  ],
- 'سفر':[
-  ['رحلة برّية مع أصدقائك','رحلة طيران فاخرة وحدك'],
-  ['جبال باردة','صحراء دافئة'],
-  ['تسافر بلا خريطة','تسافر بجدول لكل ساعة'],
-  ['تنام في خيمة','تنام في فندق بلا نافذة'],
-  ['تزور بلدًا واحدًا عشر مرّات','عشرة بلدان مرّة واحدة'],
-  ['تضيع في مدينة لا تعرفها','تتأخّر على طائرتك ساعة'],
-  ['بحر بلا شبكة','مدينة بشبكة بطيئة'],
-  ['تحمل حقيبة واحدة صغيرة','تنتظر حقائبك ساعتين'],
-  ['رحلة مفاجئة بعد ساعة','رحلة مخطّطة بعد سنة'],
-  ['تسافر مع عائلتك كلّها','تسافر مع صديق واحد'],
-  ['تصوّر كل شيء ولا تعيشه','تعيش كل شيء بلا صورة واحدة'],
-  ['تسكن قرب المطار','تسكن قرب البحر بساعتين من كل شيء']
- ],
- 'مواقف':[
-  ['تنسى اسم شخص أمامه','تناديه باسم غيره'],
-  ['تقع أمام الناس','ينكشف خطؤك في اجتماع'],
-  ['تعتذر وأنت على حق','تسكت وأنت مظلوم'],
-  ['تقول رأيك كاملًا دائمًا','تسمع رأي الناس فيك كاملًا'],
-  ['تصل مبكرًا بساعة','تصل متأخّرًا عشر دقائق'],
-  ['يضحك عليك الكل دقيقة','يتجاهلك الكل ساعة'],
-  ['تلقي كلمة أمام مئة شخص','تكتب رسالة يقرؤها ألف'],
-  ['تُصوَّر وأنت نائم','يُسجَّل صوتك وأنت تغنّي'],
-  ['تعترف بخطأ صغير اليوم','تخفيه سنة'],
-  ['تجلس مع من لا تحبّه ساعة','تعتذر لمن ظلمك'],
-  ['تُسأل سؤالًا محرجًا أمام الكل','تسأل أنت سؤالًا محرجًا'],
-  ['تنسى هديّة عيد ميلاد صديقك','ينسى هو هديّتك']
- ],
- 'مال':[
-  ['مليون اليوم وتنفقه في شهر','مئة ألف كل سنة عشر سنوات'],
-  ['راتب مضاعف ودوام مضاعف','نصف الراتب ونصف الدوام'],
-  ['تربح ولا تخبر أحدًا','تخسر ويعرف الكل'],
-  ['تقرض صديقك ولا يردّ','تعتذر عن القرض وتخسره'],
-  ['سيّارة فاخرة وبيت صغير','بيت واسع وسيّارة قديمة'],
-  ['تشتري ما تريد ولا تسافر','تسافر دائمًا ولا تشتري شيئًا'],
-  ['تعمل لنفسك بلا ضمان','تعمل لغيرك براتب ثابت'],
-  ['تدفع وتنتظر سنة','تنتظر شهرًا وتدفع الضعف'],
-  ['تعرف كم يملك كل من حولك','يعرفون كم تملك'],
-  ['هديّة غالية لا تحبّها','هديّة رخيصة اخترتها بنفسك'],
-  ['توفّر نصف دخلك وتعيش بسيطًا','تنفق كل دخلك وتعيش مرفّهًا'],
-  ['تجد ألفًا في الشارع','يعيد لك أحدهم ألفًا نسيتها']
+ yesno:[
+  ['هل غششت في اختبار يومًا؟'],
+  ['هل أخفيت هديّة لم تعجبك؟'],
+  ['هل تأخّرت عن موعد وكذبت في السبب؟'],
+  ['هل قرأت رسالة ليست لك؟'],
+  ['هل ندمت على شراء شيء هذا الشهر؟'],
+  ['هل تتحدّث إلى نفسك حين تكون وحدك؟'],
+  ['هل بكيت من فيلم؟'],
+  ['هل نسيت عيد ميلاد قريب لك؟'],
+  ['هل تخاف من شيء يضحك عليه الناس؟'],
+  ['هل قلت «وصلت» وأنت لم تخرج بعد؟'],
+  ['هل تركت رسالة بلا ردّ عمدًا؟'],
+  ['هل جرّبت أن تنام والنور مضاء لأنّك كسلان؟'],
+  ['هل غيّرت رأيك في شخص بعد موقف واحد؟'],
+  ['هل تحفظ رقم أحد عن ظهر قلب؟'],
+  ['هل سبق أن ضعت في مكان وأنت تدّعي أنّك تعرفه؟'],
+  ['هل تأكل شيئًا لا يحبّه أحد من أهلك؟'],
+  ['هل اشتقت لأحد اليوم ولم تخبره؟'],
+  ['هل تصدّق أنّك ستنفّذ ما وعدت به نفسك هذه السنة؟']
  ]
 };
 const SR_Q={
  'خفيف':[
   'ما آخر شيء ضحكت عليه حتى دمعت؟',
   'ما أكثر أغنية تسمعها ولا تعترف بها؟',
-  'كم مرّة أجّلت المنبّه هذا الصباح؟',
   'ما الشيء الذي تشتريه ولا تحتاجه أبدًا؟',
   'ما أغرب عادة عندك لا يعرفها أحد؟',
   'ما آخر رسالة أرسلتها وندمت عليها؟',
   'ما الطبق الذي تدّعي أنّك تجيده ولا تجيده؟',
-  'متى آخر مرّة بكيت؟ ولا تقل «لا أتذكّر».',
+  'متى آخر مرّة بكيت؟',
   'ما الشيء الذي تخاف منه ويضحك عليه الناس؟',
   'كم ساعة في جوّالك اليوم؟ اقرأ الرقم بصوت عالٍ.',
   'ما أسوأ قصّة شعر مرّت عليك؟',
-  'ما الشيء الذي تؤجّله منذ شهور؟'
+  'ما الشيء الذي تؤجّله منذ شهور؟',
+  'ما أكثر شيء يعرفه عنك أهلك وتظنّه سرًّا؟'
  ],
  'ذكريات':[
   'ما أجمل يوم مرّ عليك ولم تخبر عنه أحدًا؟',
@@ -34928,10 +34917,10 @@ const SR_Q={
   'ما الشيء الذي كنت تخافه صغيرًا وتضحك عليه الآن؟',
   'من صديق الطفولة الذي تتمنّى لو تراه اليوم؟',
   'ما أصعب قرار اتّخذته وأنت غير متأكّد؟',
-  'ما الكذبة الصغيرة التي قلتها لأهلك ولم تنكشف؟',
   'ما أكثر هديّة أثّرت فيك؟ ومن أعطاك إيّاها؟',
   'ما المكان الذي كلّما مررت به تذكّرت شيئًا؟',
-  'ما أوّل مرّة شعرت فيها أنّك كبرت؟'
+  'ما أوّل مرّة شعرت فيها أنّك كبرت؟',
+  'ما أطرف كذبة صغيرة قلتها صغيرًا وانكشفت؟'
  ],
  'آراء':[
   'من في هذه الجلسة أكثر واحد يتكلّم ولا يسمع؟',
@@ -34944,22 +34933,22 @@ const SR_Q={
   'ما أسوأ نصيحة سمعتها وقيل لك إنّها ذهب؟',
   'لو اخترت واحدًا هنا يمثّلك في موقف صعب، من؟',
   'ما الشيء الذي تجامل فيه دائمًا وأنت غير مقتنع؟',
-  'من أكثر شخص هنا يستحقّ اعتذارًا منك؟',
-  'ما رأيك في نفسك بجملة واحدة صادقة؟'
+  'ما رأيك في نفسك بجملة واحدة صادقة؟',
+  'ما القرار الذي يأخذه الناس ولا تفهمه أبدًا؟'
  ],
  'الأصدقاء':[
-  'من آخر شخص تكلّمت عنه في غيابه؟ وماذا قلت؟',
-  'ما السرّ الذي حفظته لصديق ولم تفشه؟ قل نوعه لا تفاصيله.',
   'من أكثر واحد هنا تثق به؟ ولماذا؟',
   'من أكثر شخص ساعدك ولم تشكره كما يجب؟',
   'ما أكثر شيء تغيّر فيك بسبب صديق؟',
-  'لو احتجت ألف ريال الآن، من أول من تتّصل به هنا؟',
+  'لو احتجت مساعدة الآن، من أول من تتّصل به هنا؟',
   'من في الجلسة يعرفك أكثر من نفسك؟',
   'ما أكثر مرّة خذلت فيها صديقًا؟',
   'من أكثر واحد هنا تتمنّى لو كان أخاك؟',
   'ما الشيء الذي يفعله أصدقاؤك ويزعجك ولا تقوله؟',
   'من آخر شخص اعتذرت له بصدق؟',
-  'ما أجمل كلمة قالها لك صديق وما زلت تذكرها؟'
+  'ما أجمل كلمة قالها لك صديق وما زلت تذكرها؟',
+  'من أكثر شخص هنا يستحقّ اعتذارًا منك؟',
+  'ما الصداقة التي تندم أنّك تركتها تمضي؟'
  ],
  'المستقبل':[
   'أين ترى نفسك بعد خمس سنوات بصدق لا بأمنيات؟',
@@ -34972,10 +34961,238 @@ const SR_Q={
   'لو سافرت سنة كاملة، ماذا تأخذ معك ومن؟',
   'ما المهارة التي تندم أنّك لم تتعلّمها مبكرًا؟',
   'ما الوعد الذي قطعته على نفسك هذه السنة؟',
-  'من الشخص الذي تريد أن تفتخر بك؟',
+  'من الشخص الذي تريد أن يفتخر بك؟',
   'ما أصعب شيء تعرف أنّك ستضطرّ لمواجهته قريبًا؟'
  ]
 };
+/** سحب بلا تكرار داخل الجلسة الواحدة — يُعاد التدوير إذا فرغ المختار */
+function sgPick(bank,cats,used){
+ let pool=[];
+ (cats&&cats.length?cats:Object.keys(bank)).forEach(c=>{
+  (bank[c]||[]).forEach((q,i)=>pool.push({q,k:c+'#'+i,cat:c}));
+ });
+ if(!pool.length)return null;
+ let left=pool.filter(x=>used.indexOf(x.k)<0);
+ if(!left.length){used.length=0;left=pool}
+ const p=left[Math.floor(Math.random()*left.length)];
+ used.push(p.k);
+ return p;
+}
+function sgCatTap(c){
+ const i=PT.cats.indexOf(c);
+ if(i<0)PT.cats.push(c);
+ else if(PT.cats.length>1)PT.cats.splice(i,1);
+ else toast('اترك صنفًا واحدًا على الأقل');
+}
+const sgRounds=(f)=>`<div class="sl">عدد الجولات</div>
+ <div class="cr">${[6,10,16,24].map(n=>
+  `<div class="fc ${PT.rounds===n?'on':''}" onclick="PT.rounds=${n};${f}(1)">${n}</div>`).join('')}</div>`;
+const sgCount=(f,min,max)=>`<div class="sl">عدد اللاعبين</div>
+ <div class="cr">${Array.from({length:max-min+1},(_,i)=>min+i).map(n=>
+  `<div class="fc ${PT.n===n?'on':''}" onclick="PT.n=${n};${f}(1)">${n}</div>`).join('')}</div>`;
+
+/* ── لو خيروك: أدوار وبطاقات ونقاط ── */
+function lkSetup(keep){
+ sgCss();
+ if(!keep||!PT||PT.g!=='lk')PT={g:'lk',n:4,rounds:10,cats:Object.keys(LK_CARDS)};
+ go(`<div class="scr on">${tb('لو خيروك')}
+ <div class="wb" style="text-align:start">بطاقة لكل دور: تسحبها وتقرأها بصوت عالٍ، ثم تجيب أو تنفّذ أمام الجالسين. لكل صنف نقاطه، ومن جمع أكثر فاز.</div>
+ <div class="lkKinds">${Object.keys(LK_KIND).map(k=>{const d=LK_KIND[k];
+  return `<button class="lkKind ${PT.cats.indexOf(k)>=0?'on':''}" style="--kc:${d.c}" onclick="sgCatTap('${k}');lkSetup(1)">
+   <span class="nm">${d.n}</span><span class="pt">${d.p} ${d.p===1?'نقطة':'نقاط'}</span><span class="ds">${d.d}</span></button>`}).join('')}</div>
+ ${sgCount('lkSetup',2,8)}${ptNameFields()}${sgRounds('lkSetup')}
+ <button class="rbtn" style="margin-top:18px" onclick="lkStart()"><span>ابدأ — البطاقة الأولى</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="push('roomScr','lk')">${ico('web',13)} غرفة مع أصدقاء — كلٌّ بجوّاله</button></div>`);
+}
+function lkStart(){
+ Router.enter('party');
+ PT.pts=Array.from({length:PT.n},()=>0);
+ PT.used=[];PT.r=0;PT.done=[];
+ lkRound();
+}
+function lkRound(){
+ const p=sgPick(LK_CARDS,PT.cats,PT.used);
+ if(!p){toast('لا صنف مختار');return lkSetup()}
+ PT.kind=p.cat;PT.card=p.q;PT.idx=PT.r%PT.n;PT.flip=0;PT.pick=null;
+ lkDraw();
+}
+/** البطاقة مقلوبة حتى يقلبها صاحب الدور — كما في الورق */
+function lkDraw(){sgCss();setArena('barra');
+ const K=LK_KIND[PT.kind],two=PT.card.length>1;
+ go(`<div class="scr on">${ptHead('لو خيروك',1)}
+ <div class="lkTop"><span>الجولة ${PT.r+1} من ${PT.rounds}</span><span>${esc(K.n)} · ${K.p} ${K.p===1?'نقطة':'نقاط'}</span></div>
+ <div class="lkTurn">${ico('next',16)} الدور على <b>${esc(ptName(PT.idx))}</b></div>
+ ${!PT.flip?`<button class="lkBack" onclick="PT.flip=1;lkDraw()" style="--kc:${K.c}">
+   <span class="lg"></span><span class="t">اسحب بطاقتك</span><span class="s">${esc(K.n)}</span></button>`
+ :`<div class="lkCard" style="--kc:${K.c}">
+   <div class="hd"><span class="kn">${esc(K.n)}</span><span class="pv">${K.p} ${K.p===1?'نقطة':'نقاط'}</span></div>
+   ${two?`<div class="q">لو خيّروك…</div>
+    <button class="lkOpt a${PT.pick===0?' on':''}" onclick="PT.pick=0;lkDraw()"><span class="k">أ</span><span class="t">${esc(PT.card[0])}</span></button>
+    <div class="lkOr">أم</div>
+    <button class="lkOpt b${PT.pick===1?' on':''}" onclick="PT.pick=1;lkDraw()"><span class="k">ب</span><span class="t">${esc(PT.card[1])}</span></button>`
+   :`<div class="q big">${esc(PT.card[0])}</div>`}
+   <div class="say">${esc(K.d)} — والجالسون يسمعون</div>
+  </div>
+  <div class="srAct">
+   <div class="srJudge">حكم الجالسين</div>
+   <button class="rbtn" onclick="lkJudge(1)"><span>${PT.kind==='dare'?'نفّذها':'أجاب'} — ${K.p} ${K.p===1?'نقطة':'نقاط'}</span></button>
+   <button class="btn g" style="margin-top:9px" onclick="lkJudge(0)">رفض — بلا نقاط</button>
+  </div>`}
+ <div class="lkMini">${PT.pts.map((p,i)=>`<span${i===PT.idx?' class="me"':''}>${esc(ptName(i))} <b>${p}</b></span>`).join('')}</div>
+ </div>`);
+}
+function lkJudge(ok){
+ const K=LK_KIND[PT.kind];
+ if(ok)PT.pts[PT.idx]=(PT.pts[PT.idx]||0)+K.p;
+ evtParty();
+ try{SFX.play(ok?'win':'tick')}catch(e){}
+ PT.r++;
+ if(PT.r>=PT.rounds)return lkEnd();
+ lkRound();
+}
+function lkEnd(){sgCss();setArena('barra');
+ if(window.FX)FX.win();
+ const rank=Array.from({length:PT.n},(_,i)=>({i,p:PT.pts[i]||0})).sort((a,b)=>b.p-a.p);
+ const top=rank.length?rank[0].p:0;
+ go(`<div class="scr on">${ptHead('لو خيروك')}
+ <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">
+  ${top>0?'الفائز: <b class="mtl" style="font-size:15px">'+esc(ptName(rank[0].i))+'</b>':'لم يجمع أحد نقطة — أعيدوها'}</div>
+ ${sgBoard('نقطة')}
+ <button class="rbtn" style="margin-top:10px" onclick="lkStart()"><span>جولة جديدة — نفس اللاعبين</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
+}
+
+/* ── صراحة: زجاجة تدور، وحدودٌ قبل أوّل سؤال ── */
+function srSetup(keep){
+ sgCss();
+ if(!keep||!PT||PT.g!=='sr')PT={g:'sr',n:5,rounds:16,cats:Object.keys(SR_Q)};
+ go(`<div class="scr on">${tb('صراحة')}
+ <div class="wb" style="text-align:start">اجلسوا دائرة، وتدور الزجاجة: من أشارت إليه أجاب بصدق. لا نقاط ولا فائز — والتمرير حقّ لمن لا يريد أن يجيب.</div>
+ ${sgCount('srSetup',3,10)}${ptNameFields()}
+ <div class="sl">فئات الأسئلة</div>
+ <div class="cr">${Object.keys(SR_Q).map(c=>
+  `<div class="fc ${PT.cats.indexOf(c)>=0?'on':''}" onclick="sgCatTap('${c}');srSetup(1)">${c}</div>`).join('')}</div>
+ ${sgRounds('srSetup')}
+ <button class="rbtn" style="margin-top:18px" onclick="srLimits()"><span>ابدأ الجلسة</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="push('roomScr','sr')">${ico('web',13)} غرفة مع أصدقاء — كلٌّ بجوّاله</button></div>`);
+}
+/** الحدود أوّلًا: هذه هي القاعدة الأولى للعبة في كل ما كُتب عنها، لا زينة */
+function srLimits(){sgCss();setArena('barra');
+ Router.enter('party');
+ go(`<div class="scr on">${ptHead('صراحة',1)}
+ <div class="srLim">
+  <div class="hd">${ico('shield',18)} حدود الجلسة</div>
+  <ul>
+   <li>لمن لا يريد أن يجيب أن <b>يمرّر</b> — بلا لوم ولا عقوبة.</li>
+   <li>لا سؤال عن سرّ غيرك، ولا عن مال أحد ولا بيته.</li>
+   <li>ما يُقال في الجلسة يبقى فيها.</li>
+   <li>لا جوّال يُفتَّش، ولا طلب خارج اللعبة.</li>
+  </ul>
+ </div>
+ <button class="rbtn" style="margin-top:16px" onclick="srStart()"><span>اتّفقنا — أديروا الزجاجة</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع</button></div>`);
+}
+function srStart(){
+ Router.enter('party');
+ PT.ans=Array.from({length:PT.n},()=>0);
+ PT.skip=Array.from({length:PT.n},()=>0);
+ PT.used=[];PT.r=0;PT.idx=0;PT.spin=0;
+ srSpin();
+}
+/** الزجاجة تدور فعلًا: الاختيار أوّلًا ثم تُوجَّه إليه بالحركة */
+function srSpin(){sgCss();setArena('barra');
+ PT.idx=Math.floor(Math.random()*PT.n);
+ if(PT.n>1&&PT.idx===PT.last)PT.idx=(PT.idx+1+Math.floor(Math.random()*(PT.n-1)))%PT.n;
+ PT.last=PT.idx;PT.spin=1;
+ const step=360/PT.n, deg=1440+PT.idx*step;
+ go(`<div class="scr on">${ptHead('صراحة',1)}
+ <div class="lkTop"><span>الجولة ${PT.r+1} من ${PT.rounds}</span><span>تدور…</span></div>
+ <div class="srRing">
+  ${Array.from({length:PT.n},(_,i)=>{const a=(i*step-90)*Math.PI/180,R=40;
+   return `<div class="srNm" style="left:${(50+R*Math.cos(a)).toFixed(1)}%;top:${(50+R*Math.sin(a)).toFixed(1)}%">${esc(ptName(i))}</div>`}).join('')}
+  <div class="srBottle" id="srBt" style="--deg:${deg}deg">${srBottleArt()}</div>
+ </div>
+ <div class="note" id="srWho">الزجاجة تدور…</div>
+ </div>`);
+ try{SFX.play('tick')}catch(e){}
+ setTimeout(()=>{try{SFX.play('ok')}catch(e){}
+  const el=document.getElementById('srWho');
+  if(el)el.textContent='الزجاجة أشارت إلى '+ptName(PT.idx);
+  setTimeout(()=>{if(PT&&PT.g==='sr'&&PT.spin)srAsk()},900);
+ },2300);
+}
+function srBottleArt(){
+ return `<svg viewBox="0 0 40 120" width="30" height="90" aria-hidden="true">
+ <defs><linearGradient id="sgBt" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0" stop-color="#2E6B4A"/><stop offset=".42" stop-color="#6FD39B"/><stop offset="1" stop-color="#1C4430"/></linearGradient></defs>
+ <path d="M15 8 h10 v20 c0 6 7 10 7 20 v56 a8 8 0 0 1 -8 8 h-8 a8 8 0 0 1 -8 -8 V48 c0-10 7-14 7-20 Z"
+  fill="url(#sgBt)" stroke="#123123" stroke-width="2"/>
+ <rect x="14" y="2" width="12" height="8" rx="2" fill="#C9A227" stroke="#6B5410" stroke-width="1.5"/>
+ <rect x="11" y="62" width="18" height="26" rx="3" fill="#F3E6C4" opacity=".9"/>
+ <path d="M11 40 v46" stroke="rgba(255,255,255,.5)" stroke-width="3" stroke-linecap="round"/></svg>`;
+}
+function srAsk(){sgCss();setArena('barra');
+ PT.spin=0;
+ const p=sgPick(SR_Q,PT.cats,PT.used);
+ if(!p){toast('لا فئة مختارة');return srSetup()}
+ PT.q=p.q;PT.cat=p.cat;
+ srCard();
+}
+function srCard(){sgCss();setArena('barra');
+ go(`<div class="scr on">${ptHead('صراحة',1)}
+ <div class="lkTop"><span>الجولة ${PT.r+1} من ${PT.rounds}</span><span>${esc(PT.cat||'')}</span></div>
+ <div class="srCard">
+  <div class="hd">${ico('sound',18)} صراحة يا <b>${esc(ptName(PT.idx))}</b></div>
+  <div class="q">${esc(PT.q)}</div>
+  <div class="say">أجب بصوت مسموع — ولك أن تمرّر</div>
+ </div>
+ <div class="srAct">
+  <button class="rbtn" onclick="srDone(1)"><span>أجاب</span></button>
+  <button class="btn g" style="margin-top:9px" onclick="srDone(0)">مرّر — حقّه</button>
+  <button class="btn g" style="margin-top:9px" onclick="srSwap()">سؤال آخر</button>
+ </div>
+ <div class="lkMini">${PT.ans.map((v,i)=>`<span${i===PT.idx?' class="me"':''}>${esc(ptName(i))} <b>${v}</b></span>`).join('')}</div>
+ </div>`);
+}
+function srSwap(){
+ const p=sgPick(SR_Q,PT.cats,PT.used);
+ if(p){PT.q=p.q;PT.cat=p.cat}
+ try{SFX.play('tap')}catch(e){}
+ srCard();
+}
+function srDone(ok){
+ if(ok)PT.ans[PT.idx]=(PT.ans[PT.idx]||0)+1;else PT.skip[PT.idx]=(PT.skip[PT.idx]||0)+1;
+ evtParty();
+ try{SFX.play(ok?'win':'tap')}catch(e){}
+ PT.r++;
+ if(PT.r>=PT.rounds)return srEnd();
+ srSpin();
+}
+function srEnd(){sgCss();setArena('barra');
+ if(window.FX)FX.win();
+ const rows=Array.from({length:PT.n},(_,i)=>({i,a:PT.ans[i]||0,s:PT.skip[i]||0})).sort((a,b)=>b.a-a.a);
+ const top=rows.length?rows[0].a:0;
+ go(`<div class="scr on">${ptHead('صراحة')}
+ <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">
+  ${top>0?'أكثركم صراحةً: <b class="mtl" style="font-size:15px">'+esc(ptName(rows[0].i))+'</b>':'جلسة هادئة'}</div>
+ ${rows.map((r,pos)=>`<div class="li" style="margin-bottom:9px;${r.a===top&&top>0?'border-color:var(--gold)':''}"><div class="lr">
+  <span style="flex-shrink:0;width:26px;text-align:center;font-weight:900">${r.a===top&&top>0?ico('medal',20,'#E8B23A'):(pos+1)+'.'}</span>
+  <div class="lb"><div class="lt">${esc(ptName(r.i))}</div>
+   <div class="ls">أجاب ${r.a}${r.s?' · مرّر '+r.s:''}</div></div>
+  </div></div>`).join('')}
+ <div class="note">${ico('shield',12)} التمرير حقّ — لا يُحسب على أحد</div>
+ <button class="rbtn" style="margin-top:10px" onclick="srStart()"><span>جلسة جديدة — نفس اللاعبين</span></button>
+ <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
+}
+/** لوح النتائج المشترك */
+function sgBoard(unit){
+ const rank=Array.from({length:PT.n},(_,i)=>({i,p:PT.pts[i]||0})).sort((a,b)=>b.p-a.p);
+ const top=rank.length?rank[0].p:0;
+ return rank.map((r,pos)=>`<div class="li" style="margin-bottom:9px;${r.p===top&&top>0?'border-color:var(--gold)':''}"><div class="lr">
+  <span style="flex-shrink:0;width:26px;text-align:center;font-weight:900">${r.p===top&&top>0?ico('medal',20,'#E8B23A'):(pos+1)+'.'}</span>
+  <div class="lb"><div class="lt">${esc(ptName(r.i))}</div><div class="ls">${r.p} ${unit}</div></div>
+  </div></div>`).join('');
+}
 
 var _sgCss=0;
 function sgCss(){
@@ -35032,6 +35249,56 @@ function sgCss(){
  '.srCard .say{font-size:10.5px;color:#8F9BBC;margin-top:10px}',
  '.srAct{border-radius:20px;padding:12px;background:rgba(8,12,26,.9);border:1px solid #2A3358}',
  '.srJudge{text-align:center;font-size:10.5px;font-weight:900;color:#7E89AA;margin-bottom:9px;letter-spacing:.06em}',
+ /* ═══ 5.96: بطاقة لو خيروك — ظهرٌ يُقلب، ووجهٌ بلون صنفه ونقاطه ═══ */
+ '.lkKinds{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin:4px 0 2px}',
+ '.lkKind{display:block;text-align:start;padding:11px 12px;border-radius:15px;cursor:pointer;font-family:inherit;',
+ ' color:#C7CFE4;background:rgba(8,12,26,.86);border:1px solid #2A3358;opacity:.55}',
+ '.lkKind.on{opacity:1;color:#F2F5FC;border-color:var(--kc);background:linear-gradient(160deg,rgba(8,12,26,.9),rgba(8,12,26,.7))}',
+ '.lkKind .nm{display:block;font-size:13.5px;font-weight:900;color:var(--kc)}',
+ '.lkKind .pt{display:block;font-size:10px;font-weight:900;color:#E8B23A;margin-top:2px}',
+ '.lkKind .ds{display:block;font-size:10px;color:#8F9BBC;margin-top:4px;line-height:1.5}',
+ '.lkTurn{display:flex;align-items:center;gap:8px;justify-content:center;font-size:12.5px;color:#C7CFE4;',
+ ' padding:9px 12px;border-radius:13px;background:rgba(8,12,26,.9);border:1px solid #2A3358;margin-bottom:12px}',
+ '.lkTurn b{color:#FFE9A8}',
+ '.lkBack{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;width:100%;',
+ ' min-height:190px;border-radius:22px;cursor:pointer;font-family:inherit;color:#F2F5FC;position:relative;overflow:hidden;',
+ ' border:1px solid transparent;background:linear-gradient(160deg,#1B2244,#0A0F22) padding-box,',
+ '  linear-gradient(140deg,var(--kc),#2A3358 60%,#8A6A22) border-box;',
+ ' box-shadow:0 16px 34px -20px #000,inset 0 1px 0 rgba(255,255,255,.06)}',
+ '.lkBack::before{content:"";position:absolute;inset:10px;border-radius:16px;border:1px dashed rgba(232,178,58,.22);pointer-events:none}',
+ '.lkBack .lg{width:46px;height:46px;background-image:var(--logo);background-size:contain;background-repeat:no-repeat;',
+ ' background-position:center;opacity:.85}',
+ '.lkBack .t{font-size:15px;font-weight:900}',
+ '.lkBack .s{font-size:11px;font-weight:800;color:var(--kc)}',
+ '.lkBack:active{transform:scale(.99)}',
+ '.lkCard{border-radius:22px;padding:14px 14px 15px;margin-bottom:12px;position:relative;',
+ ' border:1px solid transparent;background:linear-gradient(165deg,#161C38,#0A0F22) padding-box,',
+ '  linear-gradient(140deg,var(--kc),#2A3358 70%) border-box;',
+ ' box-shadow:0 16px 34px -22px #000}',
+ '.lkCard .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}',
+ '.lkCard .kn{font-size:12px;font-weight:900;color:var(--kc)}',
+ '.lkCard .pv{font-size:10px;font-weight:900;color:#2A1E04;padding:3px 9px;border-radius:9px;',
+ ' background:linear-gradient(140deg,#FFE39A,#C9971F)}',
+ '.lkCard .q{font-size:11.5px;font-weight:800;color:#8F9BBC;margin-bottom:9px}',
+ '.lkCard .q.big{font-size:18px;font-weight:900;color:#F7F8FC;line-height:1.55;margin:6px 0 4px;text-wrap:balance}',
+ '.lkCard .say{font-size:10.5px;color:#8F9BBC;margin-top:10px;line-height:1.6}',
+ '.lkOpt.on{outline:2px solid #FFE9A8;outline-offset:2px}',
+ '.lkMini span.me{border-color:rgba(232,178,58,.6);color:#FFE9A8}',
+ /* ═══ صراحة: زجاجة تدور وسط دائرة الأسماء ═══ */
+ '.srRing{position:relative;width:100%;max-width:320px;aspect-ratio:1;margin:12px auto 6px;border-radius:50%;',
+ ' background:radial-gradient(circle at 50% 45%,rgba(232,178,58,.10),rgba(8,12,26,.9) 62%);',
+ ' border:1px solid #2A3358}',
+ '.srRing .srNm{position:absolute;z-index:2;transform:translate(-50%,-50%);font-size:10.5px;font-weight:800;',
+ ' color:#D7DDEE;background:rgba(8,12,26,.94);border:1px solid #333C66;border-radius:9px;padding:4px 8px;',
+ ' white-space:nowrap;max-width:88px;overflow:hidden;text-overflow:ellipsis}',
+ '.srBottle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(var(--deg,0deg));',
+ ' transition:transform 2.2s cubic-bezier(.16,.85,.2,1);transform-origin:50% 50%;filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}',
+ '.srLim{border-radius:20px;padding:16px 15px;border:1px solid rgba(232,178,58,.45);',
+ ' background:linear-gradient(165deg,#241C3E,#0C1122)}',
+ '.srLim .hd{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:900;color:#FFE9A8;margin-bottom:10px}',
+ '.srLim ul{margin:0;padding-inline-start:18px}',
+ '.srLim li{font-size:12.5px;color:#C7CFE4;line-height:1.85;margin-bottom:4px}',
+ '.srLim b{color:#FFE9A8}',
  '.lkNote{margin-top:10px;padding:9px 11px;border-radius:13px;background:rgba(8,12,26,.9);border:1px solid #2A3358;',
  ' font-size:10.5px;font-weight:800;color:#C7CFE4;display:flex;align-items:center;gap:7px;justify-content:center;text-align:center}',
  /* صفّ لعبة الجلسة في ليلة العائلة — بلا شريط رتبة، فهما بلا تصنيف */
@@ -35050,194 +35317,6 @@ function sgCss(){
  ].join('\n');
  var st=document.createElement('style');st.id='sgStyle';st.textContent=css;document.head.appendChild(st);
 }
-/** اختيار بلا تكرار داخل الجلسة الواحدة — يُعاد التدوير إذا فرغ البنك */
-function sgPick(bank,cats,used){
- let pool=[];
- (cats&&cats.length?cats:Object.keys(bank)).forEach(c=>{
-  (bank[c]||[]).forEach((q,i)=>pool.push({q,k:c+'#'+i}));
- });
- if(!pool.length)return null;
- let left=pool.filter(x=>used.indexOf(x.k)<0);
- if(!left.length){used.length=0;left=pool}
- const p=left[Math.floor(Math.random()*left.length)];
- used.push(p.k);
- return p;
-}
-/** شريط فئات متعدّد الاختيار — لا تُترك الجلسة بلا فئة واحدة */
-function sgCats(bank,redraw){
- const all=Object.keys(bank);
- if(!PT.cats)PT.cats=all.slice();
- return `<div class="sl">الفئات <small class="ptHint">اختر ما يناسب جلستكم</small></div>
- <div class="cr">${all.map(c=>
-  `<div class="fc ${PT.cats.indexOf(c)>=0?'on':''}" onclick="sgCatTap('${c}');${redraw}(1)">${c}</div>`).join('')}</div>`;
-}
-function sgCatTap(c){
- const i=PT.cats.indexOf(c);
- if(i<0)PT.cats.push(c);
- else if(PT.cats.length>1)PT.cats.splice(i,1);
- else toast('اترك فئة واحدة على الأقل');
-}
-const sgRounds=(f)=>`<div class="sl">عدد الجولات</div>
- <div class="cr">${[5,8,12,16].map(n=>
-  `<div class="fc ${PT.rounds===n?'on':''}" onclick="PT.rounds=${n};${f}(1)">${n}</div>`).join('')}</div>`;
-const sgCount=(f,min,max)=>`<div class="sl">عدد اللاعبين</div>
- <div class="cr">${Array.from({length:max-min+1},(_,i)=>min+i).map(n=>
-  `<div class="fc ${PT.n===n?'on':''}" onclick="PT.n=${n};${f}(1)">${n}</div>`).join('')}</div>`;
-/** لوح النتائج المشترك بين اللعبتين */
-function sgBoard(unit){
- const rank=Array.from({length:PT.n},(_,i)=>({i,p:PT.pts[i]||0})).sort((a,b)=>b.p-a.p);
- const top=rank.length?rank[0].p:0;
- return rank.map((r,pos)=>`<div class="li" style="margin-bottom:9px;${r.p===top&&top>0?'border-color:var(--gold)':''}"><div class="lr">
-  <span style="flex-shrink:0;width:26px;text-align:center;font-weight:900">${r.p===top&&top>0?ico('medal',20,'#E8B23A'):(pos+1)+'.'}</span>
-  <div class="lb"><div class="lt">${esc(ptName(r.i))}</div><div class="ls">${r.p} ${unit}</div></div>
-  </div></div>`).join('');
-}
-
-/* ── لو خيروك ── */
-function lkSetup(keep){
- sgCss();
- if(!keep||!PT||PT.g!=='lk')PT={g:'lk',n:4,rounds:8,cats:Object.keys(LK_Q).slice()};
- go(`<div class="scr on">${tb('لو خيروك')}
- <div class="wb" style="text-align:start">خياران لا ثالث لهما. يمرّ الجوال على الكل، كلٌّ يختار سرًّا، ثم تنكشف الأصوات — ومن كان مع الأغلبية نال نقطة.</div>
- ${sgCount('lkSetup',2,10)}${ptNameFields()}${sgRounds('lkSetup')}${sgCats(LK_Q,'lkSetup')}
- <button class="rbtn" style="margin-top:18px" onclick="lkStart()"><span>ابدأ — مرروا الجوال</span></button>
- <button class="btn g" style="margin-top:9px" onclick="push('roomScr','lk')">${ico('web',13)} غرفة مع أصدقاء — كلٌّ بجوّاله</button></div>`);
-}
-function lkStart(){
- Router.enter('party');
- PT.pts=Array.from({length:PT.n},()=>0);
- PT.used=[];PT.r=0;
- lkRound();
-}
-function lkRound(){
- const p=sgPick(LK_Q,PT.cats,PT.used);
- if(!p){toast('لا فئات مختارة');return lkSetup()}
- PT.q=p.q;PT.cat=p.k.split('#')[0];PT.idx=0;PT.ans=[];
- lkAsk();
-}
-function lkAsk(){sgCss();setArena('barra');
- if(PT.idx>=PT.n)return lkReveal();
- go(`<div class="scr on">${ptHead('لو خيروك',1)}
- <div class="lkTop"><span>الجولة ${PT.r+1} من ${PT.rounds}</span><span>${esc(PT.cat||"")}</span></div>
- <div class="lkPass">${ico('next',18)} مرّروا الجوال إلى <b>${esc(ptName(PT.idx))}</b> — اختياره سرّ حتى النهاية</div>
- <button class="lkOpt a" onclick="lkPick(0)"><span class="k">أ</span><span class="t">${esc(PT.q[0])}</span></button>
- <div class="lkOr">أم</div>
- <button class="lkOpt b" onclick="lkPick(1)"><span class="k">ب</span><span class="t">${esc(PT.q[1])}</span></button>
- </div>`);
-}
-function lkPick(v){
- PT.ans[PT.idx]=v;PT.idx++;
- try{SFX.play('tap')}catch(e){}
- lkAsk();
-}
-function lkReveal(){sgCss();setArena('barra');
- const a=PT.ans.filter(x=>x===0).length,b=PT.n-a;
- const win=a===b?-1:(a>b?0:1);
- if(win>=0)PT.ans.forEach((v,i)=>{if(v===win)PT.pts[i]=(PT.pts[i]||0)+1});
- const lone=win>=0&&(win===0?b:a)===1&&PT.n>=4
-  ? ptName(PT.ans.indexOf(win===0?1:0)) : '';
- evtParty();
- try{SFX.play(win<0?'tick':'win')}catch(e){}
- const side=(v,cnt)=>`<div class="lkRes ${v===0?'a':'b'}${win===v?' won':''}">
-  ${win===v?'<span class="maj">الأغلبية</span>':''}
-  <div class="hd"><span class="k">${v===0?'أ':'ب'}</span><span class="t">${esc(PT.q[v])}</span></div>
-  <div class="ct">${cnt} من ${PT.n}</div>
-  <div class="who">${PT.ans.map((x,i)=>x===v?`<span>${esc(ptName(i))}</span>`:'').join('')||'<span class="no">لا أحد</span>'}</div>
- </div>`;
- go(`<div class="scr on">${ptHead('لو خيروك',1)}
- <div class="lkTop"><span>الجولة ${PT.r+1} من ${PT.rounds}</span><span>انكشفت الأصوات</span></div>
- ${side(0,a)}${side(1,b)}
- <div class="lkNote">${win<0?ico('scale',13)+' انقسمتم نصفين — لا نقاط هذه الجولة'
-   :lone?ico('flame',13)+' '+esc(lone)+' وحده ضد الجميع':ico('medal',13)+' من كان مع الأغلبية نال نقطة'}</div>
- <button class="rbtn" style="margin-top:12px" onclick="lkNext()"><span>${PT.r+1>=PT.rounds?'النتيجة':'الجولة التالية'}</span></button>
- <div class="lkMini">${PT.pts.map((p,i)=>`<span>${esc(ptName(i))} <b>${p}</b></span>`).join('')}</div>
- </div>`);
-}
-function lkNext(){
- PT.r++;
- if(PT.r>=PT.rounds)return lkEnd();
- lkRound();
-}
-function lkEnd(){sgCss();setArena('barra');
- if(window.FX)FX.win();
- go(`<div class="scr on">${ptHead('لو خيروك')}
- <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">${PT.rounds} جولات — من قرأ الجماعة أكثر؟</div>
- ${sgBoard('نقطة')}
- <button class="rbtn" style="margin-top:10px" onclick="lkStart()"><span>جولة جديدة — نفس اللاعبين</span></button>
- <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
-}
-
-/* ── صراحة ── */
-function srSetup(keep){
- sgCss();
- if(!keep||!PT||PT.g!=='sr')PT={g:'sr',n:4,rounds:8,cats:Object.keys(SR_Q).slice()};
- go(`<div class="scr on">${tb('صراحة')}
- <div class="wb" style="text-align:start">سؤال واحد لشخص واحد، والبقيّة يحكمون: أجاب بصراحة أم تهرّب؟ الصراحة نقطتان، ولكلّ لاعب تبديل واحد طوال الجلسة.</div>
- ${sgCount('srSetup',3,10)}${ptNameFields()}${sgRounds('srSetup')}${sgCats(SR_Q,'srSetup')}
- <button class="rbtn" style="margin-top:18px" onclick="srStart()"><span>ابدأ الجلسة</span></button>
- <button class="btn g" style="margin-top:9px" onclick="push('roomScr','sr')">${ico('web',13)} غرفة مع أصدقاء — كلٌّ بجوّاله</button></div>`);
-}
-function srStart(){
- Router.enter('party');
- PT.pts=Array.from({length:PT.n},()=>0);
- PT.swap=Array.from({length:PT.n},()=>1);
- PT.used=[];PT.r=0;
- srRound();
-}
-function srRound(){
- PT.idx=PT.r%PT.n;
- const p=sgPick(SR_Q,PT.cats,PT.used);
- if(!p){toast('لا فئات مختارة');return srSetup()}
- PT.q=p.q;PT.cat=p.k.split('#')[0];
- srAsk();
-}
-function srAsk(){sgCss();setArena('barra');
- const who=ptName(PT.idx),can=PT.swap[PT.idx]>0;
- go(`<div class="scr on">${ptHead('صراحة',1)}
- <div class="lkTop"><span>الجولة ${PT.r+1} من ${PT.rounds}</span><span>${esc(PT.cat)}</span></div>
- <div class="srCard">
-  <div class="hd">${ico('sound',18)} صراحة يا <b>${esc(who)}</b></div>
-  <div class="q">${esc(PT.q)}</div>
-  <div class="say">أجب بصوت مسموع أمام الجميع</div>
- </div>
- <div class="srAct">
-  <div class="srJudge">حكم الجالسين</div>
-  <button class="rbtn" onclick="srJudge(1)"><span>أجاب بصراحة — نقطتان</span></button>
-  <button class="btn g" style="margin-top:9px" onclick="srJudge(0)">تهرّب — بلا نقاط</button>
-  <button class="btn g" style="margin-top:9px${can?'':';opacity:.45'}" ${can?'onclick="srSwap()"':'disabled'}>
-   ${can?'بدّل السؤال — تبديلك الوحيد':'استهلكت تبديلك'}</button>
- </div>
- <div class="lkMini">${PT.pts.map((p,i)=>`<span>${esc(ptName(i))} <b>${p}</b></span>`).join('')}</div>
- </div>`);
-}
-function srSwap(){
- if(PT.swap[PT.idx]<=0)return;
- PT.swap[PT.idx]--;
- const p=sgPick(SR_Q,PT.cats,PT.used);
- if(p){PT.q=p.q;PT.cat=p.k.split('#')[0]}
- try{SFX.play('tap')}catch(e){}
- srAsk();
-}
-function srJudge(ok){
- if(ok)PT.pts[PT.idx]=(PT.pts[PT.idx]||0)+2;
- evtParty();
- try{SFX.play(ok?'win':'tick')}catch(e){}
- PT.r++;
- if(PT.r>=PT.rounds)return srEnd();
- srRound();
-}
-function srEnd(){sgCss();setArena('barra');
- if(window.FX)FX.win();
- const rank=Array.from({length:PT.n},(_,i)=>({i,p:PT.pts[i]||0})).sort((a,b)=>b.p-a.p);
- const top=rank.length?rank[0].p:0;
- go(`<div class="scr on">${ptHead('صراحة')}
- <div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">
-  ${top>0?'أصدقكم هذه الجلسة: <b class="mtl" style="font-size:15px">'+esc(ptName(rank[0].i))+'</b>':'لم يصارح أحد — أعيدوها'}</div>
- ${sgBoard('نقطة')}
- <button class="rbtn" style="margin-top:10px" onclick="srStart()"><span>جلسة جديدة — نفس اللاعبين</span></button>
- <button class="btn g" style="margin-top:9px" onclick="Router.settle('partyScr')">رجوع لليلة العائلة</button></div>`);
-}
-
 /* ═══════════ الأندية v1 — محلية بصدق: الأعضاء آليون ومعلَنون كذلك ═══════════ */
 const CLUBS=[
  {id:'falcons',n:'صقور الجزيرة',i:'flame',c:'#E8B23A',m:'العلو للصقور',base:1450},
