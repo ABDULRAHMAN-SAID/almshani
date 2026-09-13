@@ -45,7 +45,7 @@ var NET=(function(){
  }
  function fire(k,v){(listeners[k]||[]).forEach(function(f){try{f(v)}catch(e){}})}
  function setState(patch){Object.assign(st,patch);fire('state',state())}
- function state(){return {mode:st.mode,connected:st.connected,id:st.id,code:st.code,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
+ function state(){return {signIn:st.signIn||null,email:st.email||'',emailOk:!!st.emailOk,mode:st.mode,connected:st.connected,id:st.id,code:st.code,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
  function on(k,f){if(!listeners[k])listeners[k]=[];listeners[k].push(f);return function(){listeners[k]=listeners[k].filter(function(x){return x!==f})}}
 
  function send(m){if(ws&&ws.readyState===1){try{ws.send(JSON.stringify(m))}catch(e){}return true}return false}
@@ -65,6 +65,7 @@ var NET=(function(){
  function onMsg(m){
   if(m.t==='welcome'){
    var resumed=dropped&&st.peer&&m.peer===st.peer;
+   st.signIn=m.signIn||null;st.email=m.email||'';st.emailOk=!!m.emailOk;
    setState({connected:true,id:m.id,code:m.code||null,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
    backoff=1000;
    if(Object.keys(myPresence).length)send({t:'presence',patch:myPresence});   // بعد إعادة الاتصال يعود حضوري
@@ -168,6 +169,15 @@ var NET=(function(){
  function setEmail(email){return request({t:'setEmail',email:email})}
  /* هويّة الحساب: رمز إلى البريد ثم تحقّق — وعند النجاح قد يتبنّى هذا الجهاز حسابًا آخر */
  function authStart(email){return request({t:'authStart',email:email})}
+ /* 5.95: الدخول بالبريد وحده — بلا رمز إلّا حين يكون البريد لحساب آخر */
+ function adopt(m){setState({token:m.token,id:m.id,code:m.code||null,name:m.name,hasCloud:!!m.hasCloud});
+  st.email=m.email||st.email;st.emailOk=true;return m}
+ function authEmail(email){return request({t:'authEmail',email:email}).then(function(m){
+  return m.t==='authOk'?adopt(m):m;                    // authSent ⇒ هذا البريد لحساب آخر ويحتاج رمزًا
+ })}
+ function authGoogle(idToken){return request({t:'authGoogle',idToken:idToken}).then(adopt)}
+ function xferNew(){return request({t:'xferNew'})}
+ function xferUse(code){return request({t:'xferUse',code:code}).then(adopt)}
  function authVerify(email,code){
   return request({t:'authVerify',email:email,code:code}).then(function(m){
    // الرمز الجديد يصير رمز هذا الجهاز: الاتصال القادم يفتح الحساب المُستعاد
@@ -216,7 +226,7 @@ var NET=(function(){
  }
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
-  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,authEmail:authEmail,authGoogle:authGoogle,xferNew:xferNew,xferUse:xferUse,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
  chalSend:chalSend,chalList:chalList,chalPlay:chalPlay,
   purchase:purchase,purchases:purchases,

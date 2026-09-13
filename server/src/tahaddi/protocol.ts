@@ -38,6 +38,10 @@ export type ClientMsg =
   | { t: 'setEmail'; rid?: string; email: string }
   // ── هويّة الحساب: بريد مُثبَت برمز لمرّة واحدة، يستعيد الحساب على أيّ جهاز ──
   | { t: 'authStart'; rid?: string; email: string }
+  | { t: 'authEmail'; rid?: string; email: string }
+  | { t: 'authGoogle'; rid?: string; idToken: string }
+  | { t: 'xferNew'; rid?: string }
+  | { t: 'xferUse'; rid?: string; code: string }
   | { t: 'authVerify'; rid?: string; email: string; code: string }
   | { t: 'setName'; rid?: string; name: string }
   | { t: 'saveCloud'; rid?: string; save: CloudSave }
@@ -85,10 +89,12 @@ export interface LeaderRow { id: string; name: string; tier: number; div: number
 
 export type ServerMsg =
   | { t: 'emailSet'; rid?: string; email: string }
-  | { t: 'authSent'; rid?: string; to: string; mode: 'live' | 'dev' }
+  | { t: 'authSent'; rid?: string; to: string; mode: 'live' | 'dev'; needCode?: boolean }
+  | { t: 'xferCode'; rid?: string; code: string; exp: number }
   /** نجح التحقّق: إن حمل token فهو حساب آخر يتبنّاه هذا الجهاز (استعادة) */
   | { t: 'authOk'; rid?: string; email: string; restored: boolean; token: string; id: string; code: string; name: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
-  | { t: 'welcome'; rid?: string; token: string; id: string; code: string; name: string; peer: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean }
+  | { t: 'welcome'; rid?: string; token: string; id: string; code: string; name: string; peer: string; ranks: Record<string, RankProfile>; seasonId: number; hasCloud: boolean;
+      email?: string; emailOk?: boolean; signIn?: { google?: string; mail: boolean } }
   | { t: 'nameSet'; rid?: string; name: string }
   | { t: 'cloudSaved'; rid?: string; t2: number }
   | { t: 'cloud'; rid?: string; save: CloudSave | null; ranks: Record<string, RankProfile> }

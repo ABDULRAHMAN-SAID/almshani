@@ -73,6 +73,8 @@ const maskMail = (e: string): string => {
    البريد المُثبَت هو الهويّة، والرمز طريق إثباته: ستّة أرقام، عشر دقائق، خمس
    محاولات، ويُبطَل بعد أوّل نجاح. ولا يُعاد الرمز إلى العميل أبدًا في أي حال. */
 const OTP_TTL = 10 * 60 * 1000;
+const XFER_TTL = 10 * 60 * 1000;           // رمز نقل الحساب: عشر دقائق ومرّة واحدة
+const XFER_RE = /^[2-9A-HJ-NP-Z]{8}$/;
 const OTP_TRIES = 5;
 const OTP_GAP = 45 * 1000;        // لا رمز جديد قبل مرور هذه المدّة
 const MAX_FRIENDS = 200;
@@ -91,7 +93,8 @@ const RATE: Record<string, [number, number]> = {
   dm: [12, 2], dmThread: [16, 4],
   chalSend: [6, 0.5], chalList: [12, 2], chalPlay: [8, 0.5],
   setName: [6, 1], setEmail: [6, 1], purchase: [8, 1], purchases: [8, 1],
-  authStart: [4, 0.05], authVerify: [10, 0.2]
+  authStart: [4, 0.05], authVerify: [10, 0.2],
+  authEmail: [6, 0.1], authGoogle: [8, 0.2], xferNew: [4, 0.1], xferUse: [8, 0.2]
 };
 const RATE_ANY: [number, number] = [30, 10];
 const MAX_PEER_LIST = 60;      // صفّ البحث عن مباراة قد يكون ضخمًا — تكفي عيّنة للاختيار منها
@@ -119,6 +122,7 @@ export class TahaddiService {
   private byCode = new Map<string, Account>();        // رمز الصديق → الحساب
   private byEmail = new Map<string, Account>();       // بريد مُثبَت → الحساب (الهويّة الحقيقية)
   private otp = new Map<string, { code: string; exp: number; tries: number; at: number }>();
+  private xfer = new Map<string, { token: string; exp: number }>();   // رمز نقل → الحساب المقصود
   private sessions = new Map<string, Session>();      // peer → session
   private groups = new Map<string, Set<Session>>();   // مفتاح المجموعة → جلساتها (فهرس البثّ)
   private byAcc = new Map<string, Set<Session>>();    // معرّف الحساب → جلساته
@@ -263,7 +267,10 @@ export class TahaddiService {
     this.gJoin(session, IDLE); this.accJoin(session);
     if (!account.code) { account.code = this.mkCode(); this.byCode.set(account.code, account); }
     send({ t: 'welcome', rid, token: account.token, id: account.id, code: account.code, name: account.name, peer,
-      ranks: account.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!account.save });
+      ranks: account.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!account.save,
+      email: account.email ?? '', emailOk: !!account.emailOk,
+      // العميل لا يخمّن ما يدعمه الخادم: يعرض ما هو مفعّل فعلًا
+      signIn: { google: (process.env.TAHADDI_GOOGLE_CLIENT_ID ?? '').trim() || undefined, mail: mailMode() !== 'off' } });
     this.sendSelf(session);
     this.persist(account);
     return session;
@@ -334,6 +341,100 @@ export class TahaddiService {
     if (!acc.code) { acc.code = this.mkCode(); this.byCode.set(acc.code, acc); }
     this.persist(acc);
     s.send({ t: 'authOk', rid, email: e, restored, token: acc.token, id: acc.id, code: acc.code,
+      name: acc.name, ranks: acc.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!acc.save });
+    this.sendSelf(s);
+  }
+
+  /* ═══ الدخول بالبريد بلا رمز (5.95) ═══
+     المطلوب: تضغط بريدك فتدخل. وهذا آمن ما دام البريد لا يخصّ حسابًا آخر:
+      · بريد جديد، أو بريد هذا الحساب نفسه ⇒ دخول فوريّ بلا رمز.
+      · بريد يملكه حساب آخر ⇒ لا يُسلَّم بالكتابة وحدها (وإلّا فكل حساب مفتوح
+        لمن يعرف بريد صاحبه). عندها: رمز إلى البريد إن كان الإرسال مفعّلًا،
+        وإلّا رمز نقل من الجهاز القديم. وهذه الحالة وحدها ترى رمزًا. */
+  async authEmail(s: Session, email: unknown, rid?: string): Promise<void> {
+    const e = typeof email === 'string' ? email.trim().toLowerCase() : '';
+    if (e.length < 5 || e.length > 120 || !MAIL_RE.test(e))
+      return s.send({ t: 'error', rid, code: 'bad_email', message: 'بريد غير صالح' });
+    const owner = this.byEmail.get(e);
+    if (owner && owner !== s.account) {
+      if (mailMode() === 'off')
+        return s.send({ t: 'error', rid, code: 'need_transfer',
+          message: 'هذا البريد لحساب آخر — انقله برمز من جهازك القديم' });
+      return this.authStart(s, e, rid);                  // يردّ authSent، والعميل يطلب الرمز
+    }
+    const acc = s.account;
+    if (acc.email && acc.email !== e) this.byEmail.delete(acc.email);
+    acc.email = e; acc.emailOk = true;
+    this.byEmail.set(e, acc);
+    acc.lastSeen = Date.now();
+    if (!acc.code) { acc.code = this.mkCode(); this.byCode.set(acc.code, acc); }
+    this.persist(acc);
+    s.send({ t: 'authOk', rid, email: e, restored: false, token: acc.token, id: acc.id, code: acc.code,
+      name: acc.name, ranks: acc.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!acc.save });
+    this.sendSelf(s);
+  }
+
+  /** دخول بحساب Google: هوية مُثبَتة من طرف ثالث — بلا رمز ولو على جهاز جديد */
+  async authGoogle(s: Session, idToken: unknown, rid?: string): Promise<void> {
+    const cid = (process.env.TAHADDI_GOOGLE_CLIENT_ID ?? '').trim();
+    if (!cid) return s.send({ t: 'error', rid, code: 'google_off', message: 'الدخول بـGoogle غير مفعّل على هذا الخادم' });
+    const tok = typeof idToken === 'string' ? idToken : '';
+    if (!tok || tok.length > 4096) return s.send({ t: 'error', rid, code: 'bad_token', message: 'رمز غير صالح' });
+    type GClaims = { aud?: string; email?: string; email_verified?: string | boolean; exp?: string | number };
+    let claims: GClaims | null = null;
+    try {
+      const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(tok));
+      if (r.ok) claims = await r.json() as GClaims;
+    } catch { claims = null; }
+    if (!claims) return s.send({ t: 'error', rid, code: 'google_fail', message: 'تعذّر التحقّق مع Google' });
+    const okAud = String(claims.aud ?? '') === cid;
+    const okVer = claims.email_verified === true || claims.email_verified === 'true';
+    const exp = Number(claims.exp ?? 0) * 1000;
+    const e = String(claims.email ?? '').trim().toLowerCase();
+    if (!okAud || !okVer || !MAIL_RE.test(e) || !(exp > Date.now()))
+      return s.send({ t: 'error', rid, code: 'google_bad', message: 'تحقّق Google لم ينجح' });
+    const owner = this.byEmail.get(e);
+    let acc = s.account, restored = false;
+    if (owner && owner !== acc) { acc = owner; restored = true; this.accLeave(s); s.account = acc; this.accJoin(s); }
+    else {
+      if (acc.email && acc.email !== e) this.byEmail.delete(acc.email);
+      acc.email = e; acc.emailOk = true; this.byEmail.set(e, acc);
+    }
+    acc.lastSeen = Date.now();
+    if (!acc.code) { acc.code = this.mkCode(); this.byCode.set(acc.code, acc); }
+    this.persist(acc);
+    s.send({ t: 'authOk', rid, email: e, restored, token: acc.token, id: acc.id, code: acc.code,
+      name: acc.name, ranks: acc.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!acc.save });
+    this.sendSelf(s);
+  }
+
+  /* ═══ نقل الحساب بين جهازين بلا بريد ولا خادم بريد ═══
+     الجهاز القديم يولّد رمزًا لمرّة واحدة، والجديد يدخله فينتقل الحساب إليه. */
+  xferNew(s: Session, rid?: string): void {
+    for (const [k, v] of this.xfer) if (v.exp < Date.now()) this.xfer.delete(k);
+    let code = '';
+    for (let i = 0; i < 6 && !code; i++) {
+      const c = this.mkCode() + this.mkCode().slice(0, 2);
+      if (!this.xfer.has(c)) code = c;
+    }
+    if (!code) return s.send({ t: 'error', rid, code: 'busy', message: 'حاول مرّة أخرى' });
+    const exp = Date.now() + XFER_TTL;
+    this.xfer.set(code, { token: s.account.token, exp });
+    s.send({ t: 'xferCode', rid, code, exp });
+  }
+  xferUse(s: Session, code: unknown, rid?: string): void {
+    const c = codeNorm(typeof code === 'string' ? code : '');
+    if (!XFER_RE.test(c)) return s.send({ t: 'error', rid, code: 'bad_code', message: 'رمز غير صالح' });
+    const rec = this.xfer.get(c);
+    if (!rec || rec.exp < Date.now()) { this.xfer.delete(c); return s.send({ t: 'error', rid, code: 'code_expired', message: 'انتهت صلاحية الرمز' }); }
+    const acc = this.accounts.get(rec.token);
+    if (!acc) { this.xfer.delete(c); return s.send({ t: 'error', rid, code: 'not_found', message: 'الحساب غير موجود' }); }
+    this.xfer.delete(c);                                  // لمرّة واحدة
+    if (acc === s.account)
+      return s.send({ t: 'error', rid, code: 'same', message: 'هذا حسابك أصلًا على هذا الجهاز' });
+    this.accLeave(s); s.account = acc; this.accJoin(s);
+    acc.lastSeen = Date.now(); this.persist(acc);
+    s.send({ t: 'authOk', rid, email: acc.email ?? '', restored: true, token: acc.token, id: acc.id, code: acc.code ?? '',
       name: acc.name, ranks: acc.ranks, seasonId: RankCore.SEASON_ID, hasCloud: !!acc.save });
     this.sendSelf(s);
   }
@@ -728,6 +829,10 @@ export class TahaddiService {
       case 'setEmail': return this.setEmail(s, msg.email, msg.rid);
       case 'authStart': { void this.authStart(s, msg.email, msg.rid); return; }
       case 'authVerify': return this.authVerify(s, msg.email, msg.code, msg.rid);
+      case 'authEmail': { void this.authEmail(s, msg.email, msg.rid); return; }
+      case 'authGoogle': { void this.authGoogle(s, msg.idToken, msg.rid); return; }
+      case 'xferNew': return this.xferNew(s, msg.rid);
+      case 'xferUse': return this.xferUse(s, msg.code, msg.rid);
       case 'saveCloud': return this.saveCloud(s, msg.save, msg.rid);
       case 'loadCloud': return this.loadCloud(s, msg.rid);
       case 'submitResult': return this.submitResult(s, msg.report, msg.rid);

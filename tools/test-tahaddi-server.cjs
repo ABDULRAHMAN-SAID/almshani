@@ -213,6 +213,54 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
    check('معرّف غير صالح يُرفض',badId.t==='error'&&badId.code==='bad_id');
    await D1.close();await D2.close();
   }
+  /* ═══ الدخول بالبريد بلا رمز، ونقل الحساب بين جهازين (5.95) ═══ */
+  {
+   const M='faisal@mail.com';
+   const A=client();const wa=await hello(A,undefined,'فيصل');
+   check('الترحيب يقول ما يدعمه الخادم من طرق الدخول',
+    wa.signIn&&typeof wa.signIn.mail==='boolean',JSON.stringify(wa.signIn));
+   const badE=await A.req({t:'authEmail',email:'لا-بريد'});
+   check('بريد غير صالح يُرفض في الدخول المباشر',badE.t==='error'&&badE.code==='bad_email',JSON.stringify(badE));
+   const inA=await A.req({t:'authEmail',email:M});
+   check('بريد جديد ⇒ دخول فوريّ بلا رمز، على الحساب نفسه',
+    inA.t==='authOk'&&inA.restored===false&&inA.id===wa.id&&inA.email===M,JSON.stringify(inA).slice(0,140));
+   const again=await A.req({t:'authEmail',email:M});
+   check('إعادة الدخول بالبريد نفسه على الجهاز نفسه ⇒ بلا رمز كذلك',again.t==='authOk',JSON.stringify(again).slice(0,90));
+   await A.req({t:'saveCloud',save:{t:Date.now(),blob:{coins:5150}}});
+
+   // جهاز آخر يكتب البريد نفسه: لا يُسلَّم الحساب بالكتابة وحدها
+   const B=client();const wb=await hello(B,undefined,'جهاز ثانٍ');
+   check('الجهاز الثاني بدأ بحساب مستقلّ',wb.id!==wa.id,wb.id+' / '+wa.id);
+   const claim=await B.req({t:'authEmail',email:M});
+   check('بريد يملكه حساب آخر لا يُسلَّم بلا إثبات — يُطلب رمز',
+    claim.t==='authSent'&&/\*/.test(claim.to||''),JSON.stringify(claim));
+   const stillB=await B.req({t:'loadCloud'});
+   check('ولم ينتقل شيء إلى الجهاز الثاني بمجرّد الكتابة',
+    !stillB.save||!stillB.save.blob||stillB.save.blob.coins!==5150,JSON.stringify(stillB).slice(0,110));
+
+   // نقل الحساب برمز من الجهاز الأوّل — بلا بريد أصلًا
+   const badX=await B.req({t:'xferUse',code:'ZZZZ'});
+   check('رمز نقل غير صالح يُرفض',badX.t==='error'&&badX.code==='bad_code',JSON.stringify(badX));
+   const gone=await B.req({t:'xferUse',code:'23456789'});
+   check('رمز نقل لم يُولَّد يُرفض',gone.t==='error'&&gone.code==='code_expired',JSON.stringify(gone));
+   const xc=await A.req({t:'xferNew'});
+   check('الجهاز الأوّل يولّد رمز نقل من ثمانية أحرف',
+    xc.t==='xferCode'&&/^[2-9A-HJ-NP-Z]{8}$/.test(xc.code||'')&&xc.exp>Date.now(),JSON.stringify(xc));
+   const self=await A.req({t:'xferUse',code:xc.code});
+   check('لا ينقل الجهاز حسابه إلى نفسه',self.t==='error'&&self.code==='same',JSON.stringify(self));
+   const xc2=await A.req({t:'xferNew'});
+   const moved=await B.req({t:'xferUse',code:xc2.code});
+   check('الرمز ينقل الحساب كاملًا إلى الجهاز الثاني',
+    moved.t==='authOk'&&moved.restored===true&&moved.id===wa.id&&moved.token===wa.token,JSON.stringify(moved).slice(0,140));
+   const cl2=await B.req({t:'loadCloud'});
+   check('والحفظ السحابي انتقل معه',cl2.save&&cl2.save.blob&&cl2.save.blob.coins===5150,JSON.stringify(cl2).slice(0,110));
+   const twice=await B.req({t:'xferUse',code:xc2.code});
+   check('رمز النقل لمرّة واحدة',twice.t==='error'&&twice.code==='code_expired',JSON.stringify(twice));
+   const goff=await B.req({t:'authGoogle',idToken:'x'.repeat(40)});
+   check('الدخول بـGoogle يقول بوضوح إنّه غير مفعّل بلا معرّف عميل',
+    goff.t==='error'&&goff.code==='google_off',JSON.stringify(goff));
+   await A.close();await B.close();
+  }
   /* ═══ هويّة الحساب: بريد مُثبَت برمز يستعيد الحساب على جهاز آخر ═══ */
   {
    const codeOf=m=>{const all=[...server.logs.join('').matchAll(/رمز (\S+) هو (\d{6})/g)].filter(x=>x[1]===m);

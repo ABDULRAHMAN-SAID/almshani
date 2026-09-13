@@ -1857,6 +1857,30 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .frIdSm{margin-top:9px;font-size:9.5px;color:var(--mut);font-family:ui-monospace,Menlo,Consolas,monospace;
  letter-spacing:.4px;cursor:pointer;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px 0}
 .fin.frCin{text-align:center;letter-spacing:5px;font-size:19px;font-weight:900;text-transform:uppercase}
+/* ═══ الدخول (5.95): شاشة واحدة، حقل واحد، زرّ واحد ═══ */
+.scr.on.auWrap{display:flex;flex-direction:column;min-height:calc(100dvh - 34px);padding:0 6px}
+.auTop{text-align:center;padding:26px 10px 4px}
+.auLogo{width:118px;height:118px;margin:0 auto;background-image:var(--logo);background-size:contain;
+ background-repeat:no-repeat;background-position:center;filter:drop-shadow(0 8px 24px rgba(232,178,58,.3))}
+.auT{font-size:22px;font-weight:900;margin-top:14px;letter-spacing:-.2px}
+.auS{font-size:12.5px;color:var(--tx2);margin-top:8px;line-height:1.75;max-width:320px;margin-inline:auto}
+.auBox{margin-top:auto;padding-top:22px}
+.auMail{text-align:center;direction:ltr;font-size:17px;font-weight:700;min-height:54px}
+.auHint{font-size:11px;color:var(--tx2);text-align:center;margin:9px 0 13px;line-height:1.6;min-height:18px}
+.auHint.bad{color:var(--no);font-weight:800}
+.auOr{display:flex;align-items:center;gap:10px;margin:14px 0 11px;color:var(--mut);font-size:10.5px;font-weight:800}
+.auOr i{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--bd),transparent)}
+.auG{display:flex;align-items:center;justify-content:center;gap:9px;background:#FFFFFF;color:#1F2430;
+ border:1px solid #DADCE0;font-weight:800}
+.auG:active{filter:brightness(.96)}
+.auFoot{margin-top:16px;padding-bottom:6px}
+.auLegal{font-size:10.5px;color:var(--mut);text-align:center;margin-top:12px;line-height:1.7}
+.auLegal b{display:inline-block;color:var(--gold);cursor:pointer;padding:11px 6px;margin:-11px 0}
+.xfCode{margin-top:14px;text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:30px;font-weight:900;
+ letter-spacing:7px;color:#FFE9A8;padding:16px 10px;border-radius:16px;
+ background:linear-gradient(160deg,#241C3E,#0C1122);border:1px solid rgba(232,178,58,.55)}
+.xfLeft{display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;font-size:11.5px;color:var(--tx2);font-weight:800}
+.xfLeft b{color:var(--gold);font-variant-numeric:tabular-nums}
 /* دعوة إلى الغرفة: شريط أزرار تحت تذكرة الكود */
 .rmTkA{display:flex;gap:7px;margin-top:11px}
 .rmTkA>*{flex:1 1 0;min-height:40px;margin:0;font-size:11.5px;white-space:nowrap;padding-inline:6px}
@@ -15463,7 +15487,7 @@ var NET=(function(){
  }
  function fire(k,v){(listeners[k]||[]).forEach(function(f){try{f(v)}catch(e){}})}
  function setState(patch){Object.assign(st,patch);fire('state',state())}
- function state(){return {mode:st.mode,connected:st.connected,id:st.id,code:st.code,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
+ function state(){return {signIn:st.signIn||null,email:st.email||'',emailOk:!!st.emailOk,mode:st.mode,connected:st.connected,id:st.id,code:st.code,name:st.name,peer:st.peer,token:st.token,seasonId:st.seasonId,hasCloud:st.hasCloud,lastError:st.lastError}}
  function on(k,f){if(!listeners[k])listeners[k]=[];listeners[k].push(f);return function(){listeners[k]=listeners[k].filter(function(x){return x!==f})}}
 
  function send(m){if(ws&&ws.readyState===1){try{ws.send(JSON.stringify(m))}catch(e){}return true}return false}
@@ -15483,6 +15507,7 @@ var NET=(function(){
  function onMsg(m){
   if(m.t==='welcome'){
    var resumed=dropped&&st.peer&&m.peer===st.peer;
+   st.signIn=m.signIn||null;st.email=m.email||'';st.emailOk=!!m.emailOk;
    setState({connected:true,id:m.id,code:m.code||null,name:m.name,peer:m.peer,token:m.token,seasonId:m.seasonId,hasCloud:!!m.hasCloud,lastError:null});
    backoff=1000;
    if(Object.keys(myPresence).length)send({t:'presence',patch:myPresence});   // بعد إعادة الاتصال يعود حضوري
@@ -15586,6 +15611,15 @@ var NET=(function(){
  function setEmail(email){return request({t:'setEmail',email:email})}
  /* هويّة الحساب: رمز إلى البريد ثم تحقّق — وعند النجاح قد يتبنّى هذا الجهاز حسابًا آخر */
  function authStart(email){return request({t:'authStart',email:email})}
+ /* 5.95: الدخول بالبريد وحده — بلا رمز إلّا حين يكون البريد لحساب آخر */
+ function adopt(m){setState({token:m.token,id:m.id,code:m.code||null,name:m.name,hasCloud:!!m.hasCloud});
+  st.email=m.email||st.email;st.emailOk=true;return m}
+ function authEmail(email){return request({t:'authEmail',email:email}).then(function(m){
+  return m.t==='authOk'?adopt(m):m;                    // authSent ⇒ هذا البريد لحساب آخر ويحتاج رمزًا
+ })}
+ function authGoogle(idToken){return request({t:'authGoogle',idToken:idToken}).then(adopt)}
+ function xferNew(){return request({t:'xferNew'})}
+ function xferUse(code){return request({t:'xferUse',code:code}).then(adopt)}
  function authVerify(email,code){
   return request({t:'authVerify',email:email,code:code}).then(function(m){
    // الرمز الجديد يصير رمز هذا الجهاز: الاتصال القادم يفتح الحساب المُستعاد
@@ -15634,7 +15668,7 @@ var NET=(function(){
  }
 
  return {boot:boot,connect:connect,disconnect:disconnect,retry:retry,state:state,on:on,
-  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
+  saveCloud:saveCloud,loadCloud:loadCloud,setName:setName,setEmail:setEmail,authStart:authStart,authVerify:authVerify,authEmail:authEmail,authGoogle:authGoogle,xferNew:xferNew,xferUse:xferUse,submitResult:submitResult,leaderboard:leaderboard,profile:profile,
   friends:friends,friendAdd:friendAdd,friendAccept:friendAccept,friendRemove:friendRemove,dm:dm,dmThread:dmThread,
  chalSend:chalSend,chalList:chalList,chalPlay:chalPlay,
   purchase:purchase,purchases:purchases,
@@ -18548,7 +18582,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','gamesScr','dmScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
-  'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup','lkSetup','srSetup',
+  'gameRankScr','soloScr','roomScr','barraSetup','mafiaSetup','drawSetup','lkSetup','srSetup','xferScr','xferShow',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
   'clEventsScr','clMoreScr','errLogScr'].forEach(n=>R.register(n,{}));
@@ -20402,25 +20436,144 @@ function emailSave(id,next){
  return true;
 }
 /** إنشاء الحساب: أوّل شاشة يراها من لا حساب له — اسم وبريد، وبهما يبدأ اللعب */
-function authScr(){
- go(`<div class="scr on" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:88vh;text-align:center;padding:22px">
- <div class="flt2" style="width:124px;height:124px;background-image:var(--logo);background-size:contain;background-repeat:no-repeat;background-position:center;
-  filter:drop-shadow(0 8px 24px rgba(232,178,58,.3))"></div>
- <div style="font-size:21px;font-weight:900;margin-top:14px">${T('أنشئ حسابك')}</div>
- <div style="font-size:13px;color:var(--tx2);margin-top:7px;line-height:1.7;max-width:310px">${T('اسمك واسم بريدك — بهما يُنشأ حسابك ويعود تقدّمك على أي جهاز.')}</div>
- <input class="fin" id="auName" maxlength="14" placeholder="${T('اسم اللاعب')}"
-  style="margin-top:16px;text-align:center;font-size:16px;font-weight:800" value="${esc(S.name||'')}"
-  onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('auMail').focus()}">
- <input class="fin" id="auMail" type="email" inputmode="email" autocomplete="email" maxlength="80" placeholder="name@mail.com"
-  style="margin-top:9px;text-align:center;font-size:16px;font-weight:700;direction:ltr" value="${esc(S.email||'')}"
-  onkeydown="if(event.key==='Enter'){event.preventDefault();authCreate()}">
- <div class="note" id="auMailH">${T('حرفان على الأقل')} · ${T('بريدك الإلكتروني')}</div>
- <div style="width:100%;margin-top:auto;padding-top:24px">
- <button class="rbtn" onclick="authCreate()"><span>${ico('check',15)} ${T('إنشاء الحساب')}</span></button>
- <button class="btn g" style="margin-top:10px" onclick="recOpen()">${ico('reset',14)} ${T('لي حساب — استعِده ببريدي')}</button></div></div>`);
- setTimeout(()=>{const el=document.getElementById('auName');if(el&&!(S.name||'').trim())el.focus()},120);
+/* ═══════════════════════════════════════════════════════════════════
+   الدخول (5.95) — بريدك وحده، بلا رمز سرّيّ
+   ───────────────────────────────────────────────────────────────────
+   تضغط الحقل فيعرض هاتفك بريدك المحفوظ، تختاره وتدخل. لا كلمة مرور ولا
+   رمز — إلّا في حالة واحدة لا مفرّ منها: أن يكون البريد **لحساب آخر**؛
+   فتسليمه بالكتابة وحدها يعني أن كل حساب مفتوح لمن يعرف بريد صاحبه.
+   عندها: رمز إلى البريد إن كان الإرسال مفعّلًا، وإلّا نقلٌ برمز من الجهاز
+   القديم (الإعدادات ← الحساب ← نقل الحساب).
+   وحيث يكون Google مفعّلًا على الخادم فهو الأسرع: ضغطة واحدة، هويّة مُثبَتة،
+   وبلا رمز ولو على جهاز جديد.
+   ═══════════════════════════════════════════════════════════════════ */
+/** بعد أي دخول: الرمز والهويّة يُحفظان على الجهاز، وإلّا فتح التطبيق غدًا بحساب جديد */
+function authKeep(m){
+ if(!m||!m.token)return;
+ S.account={token:m.token,id:m.id,code:m.code||null,name:m.name};
+ if(m.email)S.email=m.email;
+ S.emailOk=!!m.email;
+ if(m.restored&&m.name&&String(m.name).trim().length>=2){S.name=m.name;S.namedByMe=1}
+ saveState();
 }
-/* ═══════════ 5.91 · الحساب يتبع بريدك لا جهازك ═══════════
+let AU={busy:0,msg:'',err:0};
+function auSign(){try{return (window.NET&&NET.state().signIn)||null}catch(e){return null}}
+function authScr(){
+ const sg=auSign();
+ go(`<div class="scr on auWrap">
+ <div class="auTop">
+  <div class="flt2 auLogo"></div>
+  <div class="auT">${T('أهلًا بك في تحدّي')}</div>
+  <div class="auS">${T('ادخل ببريدك — بلا كلمة مرور ولا رمز. حسابك يتبع بريدك فيعود على أي جهاز.')}</div>
+ </div>
+ <div class="auBox">
+  <input class="fin auMail" id="auMail" type="email" inputmode="email" autocomplete="email"
+   name="email" enterkeyhint="go" maxlength="80" placeholder="name@mail.com"
+   value="${esc(S.email||'')}" oninput="AU.err=0;auHint('')"
+   onkeydown="if(event.key==='Enter'){event.preventDefault();auGo()}">
+  <div class="auHint${AU.err?' bad':''}" id="auHint">${esc(AU.msg||T('اضغط الحقل واختر بريدك من هاتفك'))}</div>
+  <button class="rbtn" id="auGo" ${AU.busy?'disabled':''} onclick="auGo()">
+   <span>${AU.busy?T('لحظة…'):T('دخول')}</span></button>
+  ${sg&&sg.google?`<div class="auOr"><i></i><span>${T('أو')}</span><i></i></div>
+  <button class="btn g auG" onclick="auGoogle()">${gBrand()} ${T('المتابعة بحساب Google')}</button>`:''}
+ </div>
+ <div class="auFoot">
+  <button class="btn g" onclick="push('xferScr')">${T('عندي رمز نقل من جهازي القديم')}</button>
+  <div class="auLegal">${T('بالدخول أنت توافق على')}
+   <b onclick="push('legalScr')">${T('الشروط والخصوصية')}</b></div>
+ </div></div>`);
+ setTimeout(()=>{const el=document.getElementById('auMail');if(el&&!(S.email||'').trim())el.focus()},140);
+}
+/** شعار Google الرسميّ — رسمه لا يُغيَّر ولا يُستبدل بأيقونة اللعبة */
+function gBrand(){
+ return `<svg viewBox="0 0 48 48" width="17" height="17" aria-hidden="true" style="vertical-align:-.2em">
+ <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-2.7-.4-3.9H24v7.1h12.1c-.2 1.8-1.6 4.6-4.5 6.4l-.1.3 6.5 5 .5.1c4.1-3.8 6.6-9.4 6.6-15z"/>
+ <path fill="#34A853" d="M24 46c5.9 0 10.9-1.9 14.5-5.3l-6.9-5.3c-1.8 1.3-4.3 2.2-7.6 2.2-5.8 0-10.7-3.8-12.5-9.1l-.3 0-6.7 5.2-.1.3C7.9 41.1 15.4 46 24 46z"/>
+ <path fill="#FBBC05" d="M11.5 28.5c-.5-1.4-.8-2.9-.8-4.5s.3-3.1.7-4.5v-.3l-6.8-5.3-.2.1A22 22 0 0 0 2 24c0 3.5.9 6.9 2.4 9.9l7.1-5.4z"/>
+ <path fill="#EA4335" d="M24 9.5c4.1 0 6.9 1.8 8.5 3.3l6.2-6C34.9 3.3 29.9 1 24 1 15.4 1 7.9 5.9 4.4 13.1l7.1 5.4C13.3 13.3 18.2 9.5 24 9.5z"/></svg>`;
+}
+function auHint(msg,bad){
+ AU.msg=msg||'';AU.err=bad?1:0;
+ const el=document.getElementById('auHint');
+ if(el){el.textContent=msg||T('اضغط الحقل واختر بريدك من هاتفك');el.classList.toggle('bad',!!bad)}
+}
+function auBusy(on){
+ AU.busy=on?1:0;
+ const b=document.getElementById('auGo');
+ if(b){b.disabled=!!on;b.innerHTML='<span>'+T(on?'لحظة…':'دخول')+'</span>'}
+}
+/** الدخول: بريد صالح ⇒ داخل. وما عدا ذلك يُقال سببه بوضوح */
+async function auGo(){
+ if(AU.busy)return;
+ const el=document.getElementById('auMail');
+ const e=String(el?el.value:'').trim().toLowerCase();
+ if(!MAIL_OK.test(e)){auHint(T('اكتب بريدًا صالحًا مثل name@mail.com'),1);if(el)el.focus();return}
+ S.email=e;saveState();
+ if(!(typeof netOnline==='function'&&netOnline()&&window.NET)){
+  // بلا خادم: البريد يُحفظ على الجهاز ويُربط أوّل ما يتّصل — ولا يُكذَب على اللاعب
+  S.emailOk=false;saveState();
+  toast(T('حُفظ بريدك — سيُربط حسابك أوّل ما يتّصل الإنترنت'));
+  return authDone();
+ }
+ auBusy(1);
+ try{
+  const m=await NET.authEmail(e);
+  if(m&&m.t==='authSent'){                       // البريد لحساب آخر: رمز واحد يحميه
+   auBusy(0);
+   REC={email:e,sent:1,busy:0,msg:'',mask:m.to||e};
+   toast(T('هذا البريد لحساب سابق — أُرسل رمز للتأكّد أنّه لك'));
+   return push('recScr');
+  }
+  authKeep(m);
+  auBusy(0);
+  try{if(S.namedByMe&&(S.name||'').trim().length>=2)NET.setName(S.name).catch(()=>{})}catch(x){}
+  authDone();
+ }catch(err){
+  auBusy(0);
+  const c=err&&err.code;
+  if(c==='need_transfer'){
+   toast(T('هذا البريد لحساب آخر — انقله برمز من جهازك القديم'));
+   return push('xferScr');
+  }
+  auHint(T(c==='bad_email'?'بريد غير صالح':'تعذّر الدخول الآن — تحقّق من اتصالك'),1);
+ }
+}
+/** Google: ضغطة واحدة، ويختار الهاتف الحساب المسجَّل فيه */
+async function auGoogle(){
+ const sg=auSign();
+ if(!sg||!sg.google)return toast(T('الدخول بـGoogle غير مفعّل على هذا الخادم'));
+ auBusy(1);
+ try{
+  const tok=await gsiToken(sg.google);
+  if(!tok){auBusy(0);return}
+  const m=await NET.authGoogle(tok);
+  authKeep(m);auBusy(0);
+  toast(T(m.restored?'عاد حسابك كاملًا':'تمّ الدخول'));
+  authDone();
+ }catch(e){auBusy(0);toast(T('تعذّر الدخول بـGoogle'))}
+}
+/** مكتبة Google تُحمَّل عند الطلب وحده — لا تُثقل الإقلاع ولا تُحمَّل بلا حاجة */
+function gsiToken(clientId){
+ return new Promise((res,rej)=>{
+  const go=()=>{
+   try{
+    google.accounts.id.initialize({client_id:clientId,callback:r=>res(r&&r.credential||''),
+      auto_select:false,cancel_on_tap_outside:true});
+    google.accounts.id.prompt(n=>{if(n&&(n.isNotDisplayed&&n.isNotDisplayed()||n.isSkippedMoment&&n.isSkippedMoment()))res('')});
+   }catch(e){rej(e)}
+  };
+  if(window.google&&google.accounts&&google.accounts.id)return go();
+  const sc=document.createElement('script');
+  sc.src='https://accounts.google.com/gsi/client';sc.async=true;sc.defer=true;
+  sc.onload=go;sc.onerror=()=>rej(new Error('gsi'));
+  document.head.appendChild(sc);
+ });
+}
+const MAIL_OK=/^[^\s@]{1,64}@[^\s@.]+(\.[^\s@.]+)+$/;
+
+/* ═══════════ الاستعادة بالرمز — الحالة الوحيدة التي يظهر فيها رمز (5.91) ═══════════
+   لا تُفتح إلا حين يكون البريد لحساب آخر: تسليمه بالكتابة وحدها يعني أن كل
+   حساب مفتوح لمن يعرف بريد صاحبه. وما عدا ذلك فالدخول بالبريد وحده.
    كان الحساب مفتاحه رمزًا مخزّنًا في المتصفّح: من مسح بياناته — أو بدّل جهازه —
    فقد رتبته وبطاقاته ومشترياته بلا طريق للعودة. الآن البريد **المُثبَت برمز**
    هو الهويّة: تكتب بريدك، يصلك رمز من ستّة أرقام، وبه يعود حسابك كما هو على
@@ -20470,7 +20623,7 @@ function recCheck(){
  REC.msg='';recBusy(1);
  NET.authVerify(REC.email,c).then(m=>{
   S.email=m.email;S.emailOk=1;
-  S.account={token:m.token,id:m.id,code:m.code||null,name:m.name};
+  authKeep(m);
   if(m.name)S.name=m.name;
   saveState();
   if(m.restored){
@@ -20486,15 +20639,96 @@ function recCheck(){
  }).catch(e=>{REC.msg=(e&&e.message)||'الرمز غير صحيح';recBusy(0)});
 }
 /** إنشاء الحساب: الاسم ثم البريد — كلاهما مطلوب */
-function authCreate(){
- const ne=document.getElementById('auName'),h=document.getElementById('auMailH');
- const nv=(ne?ne.value:'').trim();
- if(nv.length<2){if(h){h.textContent=T('حرفان على الأقل');h.style.color='var(--no)'}if(ne)ne.focus();return}
- S.name=nv;
- if(!emailSave('auMail',authDone))return;
- if(typeof netOnline==='function'&&netOnline()&&window.NET)NET.setName(nv).catch(()=>{});
+
+/** الخروج: لا يُحذف شيء من الخادم — يترك هذا الجهاز وحده */
+function signOutAsk(){
+ confirmSheet('تسجيل الخروج؟',
+  (S.emailOk&&S.email)?('حسابك محفوظ ببريدك <b dir="ltr">'+esc(S.email)+'</b> ويعود بإدخاله. هذا الجهاز يبدأ بحساب جديد.')
+   :'بريدك غير مربوط — إن خرجت الآن فلا طريق للعودة إلى هذا الحساب. اربط بريدك أوّلًا.',
+  'خروج',
+  ()=>{
+   S.account=null;S.emailOk=false;saveState();
+   Router.reset('authScr');
+  });
 }
-function authDone(){Router.reset(S.tutorial_completed?'playScr':'welcomeScr');if(S.tutorial_completed){cur='play';nav()}}
+/* ═══ نقل الحساب بين جهازين — بلا بريد ولا انتظار ═══
+   الجهاز القديم يولّد رمزًا لعشر دقائق، والجديد يدخله فينتقل الحساب بكل ما فيه. */
+let XF={code:'',exp:0,busy:0,tm:null};
+function xferScr(){
+ const left=XF.exp?Math.max(0,Math.round((XF.exp-Date.now())/1000)):0;
+ go(`<div class="scr on">${tbar(T('نقل الحساب'))}
+ <div class="wb" style="text-align:start">${ico('info',13)}
+  ${T('على جهازك القديم: الإعدادات ← الحساب ← «انقل حسابي». يظهر رمز من ثمانية أحرف، اكتبه هنا خلال عشر دقائق فينتقل حسابك بكل تقدّمه.')}</div>
+ <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:10px 0 5px">${T('رمز النقل')}</div>
+ <input class="fin frCin" id="xfIn" maxlength="8" placeholder="————————" autocomplete="off"
+  oninput="this.value=this.value.toUpperCase().replace(/[^2-9A-HJ-NP-Z]/g,'').slice(0,8)"
+  onkeydown="if(event.key==='Enter'){event.preventDefault();xferGo()}">
+ <button class="rbtn" style="margin-top:13px" ${XF.busy?'disabled':''} onclick="xferGo()">
+  <span>${ico('check',14)} ${T(XF.busy?'…':'انقل حسابي إلى هنا')}</span></button>
+ <div class="note">${T('الرمز لمرّة واحدة، ولا ينقل شيئًا إلّا إن كان جهازك القديم قد ولّده للتوّ.')}</div>
+ </div>`);
+ setTimeout(()=>{const el=document.getElementById('xfIn');if(el)el.focus()},140);
+}
+async function xferGo(){
+ if(XF.busy)return;
+ const el=document.getElementById('xfIn'),c=String(el?el.value:'').trim().toUpperCase();
+ if(c.length!==8)return toast(T('الرمز ثمانية أحرف'));
+ if(!(typeof netOnline==='function'&&netOnline()&&window.NET))return toast(T('النقل يحتاج اتصالًا بالخادم'));
+ XF.busy=1;xferScr();
+ try{
+  const m=await NET.xferUse(c);
+  XF.busy=0;
+  authKeep(m);
+  try{const c=await NET.loadCloud();netMergeCloud(c);saveState()}catch(e){}
+  toast(T('انتقل حسابك إلى هذا الجهاز'));
+  authDone();
+ }catch(e){
+  XF.busy=0;xferScr();
+  const c2=e&&e.code;
+  toast(T(c2==='code_expired'?'انتهت صلاحية الرمز — ولّد رمزًا جديدًا'
+    :c2==='same'?'هذا حسابك أصلًا على هذا الجهاز'
+    :c2==='bad_code'?'رمز غير صالح':'تعذّر النقل الآن'));
+ }
+}
+/** على الجهاز القديم: يولّد الرمز ويعرضه مع عدّاد */
+async function xferMake(){
+ if(!(typeof netOnline==='function'&&netOnline()&&window.NET))return toast(T('يحتاج اتصالًا بالخادم'));
+ try{
+  const m=await NET.xferNew();
+  XF.code=m.code;XF.exp=m.exp||Date.now()+600000;
+  push('xferShow');
+ }catch(e){toast(T('تعذّر توليد الرمز'))}
+}
+function xferShow(){
+ clearInterval(XF.tm);
+ const draw=()=>{
+  const el=document.getElementById('xfLeft');
+  if(!el)return clearInterval(XF.tm);
+  const s2=Math.max(0,Math.round((XF.exp-Date.now())/1000));
+  el.textContent=Math.floor(s2/60)+':'+String(s2%60).padStart(2,'0');
+  if(s2<=0)clearInterval(XF.tm);
+ };
+ go(`<div class="scr on">${tbar(T('انقل حسابي'))}
+ <div class="wb" style="text-align:start">${ico('info',13)}
+  ${T('اكتب هذا الرمز في الجهاز الجديد: شاشة الدخول ← «عندي رمز نقل». ينتقل حسابك بكل تقدّمه ومشترياته.')}</div>
+ <div class="xfCode" dir="ltr">${esc(XF.code)}</div>
+ <div class="xfLeft">${ico('timer',13)} ${T('ينتهي خلال')} <b id="xfLeft">10:00</b></div>
+ <button class="rbtn" style="margin-top:14px" onclick="copyOut('${esc(XF.code)}',T('نُسخ الرمز'))">
+  <span>${ico('scroll',14)} ${T('نسخ الرمز')}</span></button>
+ <div class="note">${T('لا تعطِ الرمز إلا لجهازك أنت — من يكتبه يأخذ الحساب.')}</div>
+ </div>`);
+ draw();XF.tm=setInterval(draw,1000);
+}
+function authDone(){
+ // 5.56: اللاعب يسمّي نفسه. والاسم الافتراضي الذي يعطيه الخادم («لاعب 156»)
+ // ليس اختيارًا منه، فالعلامة namedByMe وحدها تقول إنّه سمّى نفسه فعلًا.
+ if(!S.namedByMe||(S.name||'').trim().length<2)return askName(()=>{
+  try{if(netOnline()&&window.NET)NET.setName(S.name).catch(()=>{})}catch(e){}
+  authGo2();
+ });
+ authGo2();
+}
+function authGo2(){Router.reset(S.tutorial_completed?'playScr':'welcomeScr');if(S.tutorial_completed){cur='play';nav()}}
 /** تغيير البريد من الإعدادات */
 function emailAsk(){
  go(`<div class="scr on" style="display:flex;flex-direction:column;min-height:88vh;padding:0 20px 20px">
@@ -20589,11 +20823,27 @@ function setSection(k){
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
     onclick="push('emailAsk')">${T('تغيير')}</button></div></div>
   <div class="li" style="margin-top:9px"><div class="lr">
-   <div class="lb"><div class="lt">${S.emailOk?'حسابك يتبع بريدك':'ثبّت بريدك'}</div>
-    <div class="ls">${S.emailOk?'يعود كاملًا على أي جهاز برمز يصل بريدك'
-     :'بلا تثبيت يضيع حسابك إن مسحتَ بيانات المتصفّح أو بدّلتَ جهازك'}</div></div>
+   <div class="lb"><div class="lt">${S.emailOk?'حسابك يتبع بريدك':'اربط بريدك'}</div>
+    <div class="ls">${S.emailOk?'يعود كاملًا على أي جهاز بمجرّد إدخال بريدك'
+     :'بلا ربط يضيع حسابك إن مسحتَ بيانات المتصفّح أو بدّلتَ جهازك'}</div></div>
    <button class="${S.emailOk?'btn g':'rbtn'}" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
-    onclick="recOpen()">${S.emailOk?'استعادة':'ثبّت الآن'}</button></div></div>
+    onclick="${S.emailOk?'recOpen()':"push('authScr')"}">${S.emailOk?'استعادة برمز':'اربط الآن'}</button></div></div>
+  <div class="sl" style="margin-top:14px">نقل الحساب</div>
+  <div class="li"><div class="lr">
+   <div class="lb"><div class="lt">انقل حسابي إلى جهاز آخر</div>
+    <div class="ls">رمز لعشر دقائق تكتبه في الجهاز الجديد — ينتقل تقدّمك ومشترياتك كلّها</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="xferMake()">ولّد رمزًا</button></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
+   <div class="lb"><div class="lt">عندي رمز نقل</div>
+    <div class="ls">من جهازك القديم — يحلّ حسابه محلّ الحساب الحالي على هذا الجهاز</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="push('xferScr')">أدخِل الرمز</button></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
+   <div class="lb"><div class="lt">تسجيل الخروج</div>
+    <div class="ls">يترك هذا الجهاز بحساب جديد — وحسابك يبقى محفوظًا ببريدك</div></div>
+   <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="signOutAsk()">خروج</button></div></div>
   <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">اسمك في اللعبة</div><div class="ls">${esc(S.name||'—')} — <span>${T('هذا ما يراه من يلعب معك')}</span></div></div>
    <button class="btn g" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
@@ -20705,7 +20955,7 @@ function renameAsk(){
 function doRename(){
  const v=$('nm').value.trim();
  if(v.length<2){toast('الاسم قصير جدًا');return}
- S.name=v;toast('حُفظ الاسم');if(netOnline())NET.setName(v).catch(()=>{});back();
+ S.name=v;S.namedByMe=1;toast('حُفظ الاسم');if(netOnline())NET.setName(v).catch(()=>{});back();
 }
 function delAsk(){
  go(`<div class="scr on">${tbar('حذف الحساب')}
@@ -21417,7 +21667,7 @@ let VBnameNext=null;
 function nameSave(){
  const el=document.getElementById('nmFirst');const v=(el?el.value:'').trim();
  if(v.length<2){const h=document.getElementById('nmHint');if(h){h.textContent='اكتب اسمًا من حرفين على الأقل';h.style.color='var(--no)'}return}
- S.name=v;saveState();if(typeof netOnline==='function'&&netOnline()&&window.NET)NET.setName(v).catch(()=>{});
+ S.name=v;S.namedByMe=1;saveState();if(typeof netOnline==='function'&&netOnline()&&window.NET)NET.setName(v).catch(()=>{});
  const nx=VBnameNext;VBnameNext=null;
  if(nx){back();setTimeout(nx,60);return}
  push('askTut');
@@ -23380,7 +23630,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.94';
+const APP_VER='5.95';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -41661,7 +41911,7 @@ function tab(k){cur=k;nav();hideArena();
 
 // ═══════════ الشاشات ═══════════
 function splash(){
- loadState();ecoNorm();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
+ loadState();ecoNorm();nameMigrate();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
  if(!hasAccount())Router.reset('authScr');            // 5.68: لا لعب بلا حساب — البريد أوّلًا
  else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
  else Router.reset('welcomeScr');
@@ -42497,6 +42747,10 @@ function ecoNum(v,cap){
  const n=Math.floor(Number(v));
  if(!isFinite(n)||n<0)return 0;
  return Math.min(n,cap||ECO_CAP);
+}
+/* ترحيل 5.95: من كان له اسم وبريد قبل هذه النسخة فقد سمّى نفسه — لا يُسأل من جديد */
+function nameMigrate(){
+ try{if(!S.namedByMe&&String(S.name||'').trim().length>=2&&!/^لاعب \d+$/.test(String(S.name).trim())){S.namedByMe=1}}catch(e){}
 }
 function ecoNorm(){
  if(typeof S!=='object'||!S)return;
