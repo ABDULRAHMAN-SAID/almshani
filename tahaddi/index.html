@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#080B14">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
@@ -35,7 +35,11 @@
 html{overflow-x:hidden}
 body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflow-x:hidden}
 .tapName{display:inline-block;padding:8px 6px;margin:-6px -2px;min-height:36px;border-radius:8px}
-#app{max-width:520px;margin:0 auto;min-height:100vh;padding-bottom:76px}
+#app{max-width:520px;margin:0 auto;min-height:100vh;
+ /* الشريط السفليّ ثابت فوق المحتوى: القاع يترك ارتفاعه كاملًا ومعه شريط الهاتف،
+    وإلّا جلس آخر زرّ تحته — وهو ما كان يحدث بأربعة بكسلات فقط من الفسحة */
+ padding-bottom:calc(92px + env(safe-area-inset-bottom));
+ padding-inline:env(safe-area-inset-left) env(safe-area-inset-right)}
 .scr{display:none;padding:14px 14px 20px;animation:fi .28s ease}
 .scr.on{display:block}
 @keyframes fi{from{transform:translateY(8px)}to{transform:none}}
@@ -197,7 +201,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .unoTopWrap{display:inline-block;border-radius:13px}
 .unoC.wild{background:#1B2030!important}
 .unoQuad{position:absolute;inset:5px;border-radius:6px;overflow:hidden;display:grid;
- grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
 .unoQuad i{display:block}
 .unoSlot{flex-shrink:0;position:relative;
  transition:transform .32s cubic-bezier(.34,.9,.36,1),opacity .3s ease}
@@ -326,7 +330,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .rmSeat span b{color:var(--gold);font-size:9px}
 .rmSeat.empty .rmAv{border-style:dashed;border-color:#3A4470;background:rgba(255,255,255,.03);color:#6E7A9C;animation:puls 2.4s ease-in-out infinite}
 .rmSeat.empty span{color:#8B96B6}
-.rmGames{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.rmGames{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-bottom:12px}
 .rmGames .rmGame{padding:8px 3px 7px;font-size:9.5px;gap:5px}
 .rmGame .art{width:36px;height:36px;line-height:0}.rmGame .art svg{width:100%;height:100%}
 .rmGameNow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:13px;margin-bottom:12px;background:rgba(6,9,17,.6);border:1px solid var(--bd)}
@@ -350,7 +354,9 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
  box-shadow:0 4px 12px rgba(232,178,58,.3)}
 .rkBadge{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:900;border-radius:7px;padding:2px 8px}
 /* شريط سفلي فخم — زجاج داكن وخيط ذهبي وميدالية معدنية */
-.nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;height:72px;
+.nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;
+ height:calc(72px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+ box-sizing:border-box;
  background:linear-gradient(180deg,rgba(21,28,48,.9),rgba(9,13,24,.98));backdrop-filter:blur(16px);
  display:flex;align-items:center;justify-content:space-around;z-index:40;padding:0 6px;
  border-top:1px solid rgba(232,178,58,.32);box-shadow:0 -10px 30px rgba(0,0,0,.5)}
@@ -387,7 +393,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .nvi.mid .l{margin-top:6px;color:var(--tx)}
 
 /* عام */
-.tbar{display:flex;align-items:center;padding:8px 0 14px}
+.tbar{display:flex;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 0 14px}
 .tbar h2{font-size:17px;font-weight:800;flex:1;text-align:center}
 #app button{min-height:36px}
 .bk{background:linear-gradient(160deg,#1E2750,#0C1229);border:1.5px solid rgba(232,178,58,.75);color:#F5D98A;font-size:23px;cursor:pointer;
@@ -408,7 +414,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  background-position:var(--ux) var(--uy);background-repeat:no-repeat;filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .rkEmb{display:inline-block;position:relative;flex-shrink:0;vertical-align:middle;background:var(--ranks) no-repeat;background-size:1000% 100%;background-position:var(--rx) 0;
  filter:drop-shadow(0 5px 7px rgba(0,0,0,.5))}
-.rkRow{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;background:linear-gradient(168deg,#1C2540,#0E1526);border:1px solid var(--bd);border-radius:14px;padding:10px 8px}
+.rkRow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;background:linear-gradient(168deg,#1C2540,#0E1526);border:1px solid var(--bd);border-radius:14px;padding:10px 8px}
 .rkCell{text-align:center;min-width:0;border-radius:12px;padding:6px 2px 5px;border:1px solid transparent}
 .rkCell:not(.got){filter:grayscale(1);opacity:.42}
 .rkCell.best{border-color:var(--tc);background:radial-gradient(circle at 50% 30%,rgba(255,255,255,.06),transparent 70%);box-shadow:0 0 16px color-mix(in srgb,var(--tc) 45%,transparent)}
@@ -570,8 +576,8 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .rsb{color:var(--tx2);margin-top:5px;font-size:13px}
 .rpt{font-size:42px;font-weight:900;color:var(--gold);margin-top:16px}
 .rpl{color:var(--tx2);font-size:13px}
-.stg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:20px}
-.stc{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:10px 12px;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;text-align:start}
+.stg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:20px}
+.stc{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:10px 12px;display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:10px;align-items:center;text-align:start}
 .stc .i{grid-row:1/3;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
  background:radial-gradient(circle at 40% 30%,#2A3556,#111828);border:1px solid rgba(232,178,58,.3);
  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 3px 8px rgba(0,0,0,.45)}
@@ -602,12 +608,12 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.14),rgba(0,0,0,.4));
  box-shadow:0 0 22px var(--rcs,rgba(232,178,58,.28)),inset 0 2px 8px rgba(255,255,255,.12),inset 0 -6px 12px rgba(0,0,0,.4)}
 .mfDisc svg,.mfDisc .uico{width:46px!important;height:46px!important;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
-.mfRoles{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;text-align:start}
+.mfRoles{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin-top:10px;text-align:start}
 .mfRole{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid var(--rc);border-radius:10px;padding:6px 9px;font-size:11.5px;min-height:36px}
 .mfRole b{color:var(--rc);margin-inline-start:auto;font-size:11.5px}
 /* ضد الكمبيوتر — رقاقات اللاعبين والحوار والأصوات ولوحة الرسم */
-.vbGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.vbGrid.g3{grid-template-columns:repeat(3,1fr);gap:6px}
+.vbGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.vbGrid.g3{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .vbScene.full.picking .vbFeedW{max-height:66px}
 .vbScene.full.picking .vbRoster{padding-top:2px;padding-bottom:3px}
 .vbScene.full.picking .vbPickH{padding:6px 9px}
@@ -625,7 +631,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbSay>svg,.vbSay>span{flex-shrink:0;border-radius:50%;margin-top:2px}
 .vbBub{background:var(--card);border:1px solid var(--bd);border-radius:12px 12px 12px 3px;padding:7px 10px;font-size:12px;line-height:1.6;flex:1;min-width:0}
 .vbBub b{color:var(--gold)}
-.vbVotes{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vbVotes{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
 .vbVotes>div{display:flex;justify-content:space-between;align-items:center;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:6px 9px;font-size:11.5px;min-width:0}
 .vbVotes>div span,.vbVotes>div b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .vbVotes b{color:var(--no)}
@@ -859,7 +865,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbStage{height:246px}
 .vbCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;filter:drop-shadow(0 8px 10px rgba(0,0,0,.6))}
 .vbScene.barra .vbCenter{top:13%}
-.vbSeats{position:absolute;inset:0;display:block;padding:0}
+.vbSeats{position:absolute;inset:0;display:block;padding:0;transform-origin:50% 50%;transition:transform .25s ease}
 .vbSeat{position:absolute;transform:translate(-50%,-50%);width:76px;cursor:pointer}
 .vbAv>span.vbNum{position:absolute;top:-4px;left:-5px;width:17px;height:17px;border-radius:50%;background:#0B1020;border:1px solid var(--gold);color:#FFE9A8;font-size:9.5px;font-weight:900;display:flex;align-items:center;justify-content:center;z-index:2}
 .vbAv>span.vbBadge{width:18px;height:18px;display:flex}
@@ -1036,7 +1042,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  background:var(--card);border:1px solid var(--bd)}
 .rn{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;
  font-size:12px;font-weight:800;flex-shrink:0}
-.ga{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.ga{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:9px}
 .ac{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:11px 7px;text-align:center}
 .ac.un{border-color:var(--gold);background:rgba(232,178,58,.07)}
 .ac .i{font-size:26px}
@@ -1234,7 +1240,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  padding:2px 8px;border-radius:8px;margin-top:1px}
 .sclue.rawi{border-color:var(--pur)}
 .sclue.wait{opacity:.65;animation:none}
-.mosaic{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.mosaic{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
 .mtile{min-height:52px;border-radius:11px;display:flex;align-items:center;justify-content:center;
  text-align:center;padding:6px 7px;font-size:10.8px;font-weight:700;line-height:1.4;
  background:linear-gradient(145deg,#232C4A,#161D30);border:1px solid var(--bd);color:var(--mut);
@@ -1250,9 +1256,11 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .mitem.sel{border-color:var(--pur);transform:translateY(-2px)}
 .mitem .mdot{position:absolute;top:-4px;left:-4px;width:11px;height:11px;border-radius:50%;
  border:2px solid var(--bg)}
-input.est{width:100%;appearance:none;-webkit-appearance:none;height:8px;border-radius:8px;
- background:var(--elev);outline:none;margin:6px 0 4px}
-input.est::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:26px;height:26px;border-radius:50%;
+input.est{width:100%;appearance:none;-webkit-appearance:none;height:36px;background:transparent;
+ outline:none;margin:2px 0;cursor:pointer}
+input.est::-webkit-slider-runnable-track{height:8px;border-radius:8px;background:var(--elev)}
+input.est::-moz-range-track{height:8px;border-radius:8px;background:var(--elev)}
+input.est::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;margin-top:-9px;width:26px;height:26px;border-radius:50%;
  background:linear-gradient(145deg,#F0C25A,#C08C18);border:3px solid var(--bg);cursor:pointer;
  box-shadow:0 2px 8px rgba(232,178,58,.5)}
 input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
@@ -1402,7 +1410,7 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 .dqm{width:46px;height:46px;border-radius:11px;background:var(--elev);border:1.5px dashed var(--bd);
  display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--gold)}
 .dqm.dFlip{animation:qflip .5s ease;border-style:solid;border-color:var(--gold)}
-.dops{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:100%}
+.dops{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;width:100%}
 .dop{font-size:9.5px;font-weight:800;background:var(--elev);border:1px solid var(--bd);
  border-radius:8px;padding:5px 4px;transition:all .5s}
 .dop.dGone{opacity:.22;text-decoration:line-through;border-color:var(--no);transform:scale(.94)}
@@ -1511,7 +1519,7 @@ body.clQuiet #bgBeam,body.clQuiet #bgLat{opacity:.03!important}
 .dkHead{display:flex;align-items:center;gap:8px}
 .dkMeta{font-size:10.5px;color:var(--tx2);flex:1;min-width:0}
 .dkEdit{width:auto;padding:0 12px;min-height:36px;font-size:11.5px;margin:0}
-.dkSlots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.dkSlots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:9px}
 .dkSlot{position:relative;min-height:44px}
 .dkSlot.empty{border:1.5px dashed rgba(232,178,58,.4);border-radius:10px;display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;color:var(--mut);background:rgba(255,255,255,.02)}
 .dkX{position:absolute;top:-5px;left:-5px;width:18px;height:18px;border-radius:50%;background:var(--no);color:#fff;display:flex;align-items:center;justify-content:center;border:1px solid #0B1020;pointer-events:none;z-index:2}
@@ -1587,12 +1595,12 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .qvd{font-size:12.5px;color:var(--tx2);margin-bottom:16px}
 
 /* ═══ تذكرة الموسم ═══ */
-.szhead{display:grid;grid-template-columns:34px 1fr 1fr;gap:8px;margin:14px 0 8px;position:sticky;top:0;
+.szhead{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:8px;margin:14px 0 8px;position:sticky;top:0;
  z-index:5;background:linear-gradient(180deg,var(--bg) 78%,transparent);padding:6px 0}
 .szht{text-align:center;font-size:12px;font-weight:900;color:var(--tx2);background:var(--card);
  border:1px solid var(--bd);border-radius:10px;padding:6px 0}
 .szht.p{color:var(--gold);border-color:rgba(232,178,58,.45);background:rgba(232,178,58,.07)}
-.szrow{display:grid;grid-template-columns:34px 1fr 1fr;gap:8px;margin-bottom:8px;align-items:stretch}
+.szrow{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px;align-items:stretch}
 .szrow.ms .szchip{border-width:1.5px;box-shadow:0 0 14px rgba(232,178,58,.12),0 4px 0 #0A0F1D}
 .szlv{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:900;color:var(--mut);
  background:var(--surf);border:1px solid var(--bd);border-radius:10px}
@@ -1610,7 +1618,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .szchip.p.lock{background:rgba(232,178,58,.04)}
 
 /* ═══ المتجر الدولاري التجريبي ═══ */
-.gpkg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:6px}
+.gpkg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-bottom:6px}
 .gpk{position:relative;background:linear-gradient(170deg,#1E1834,#120E22);border:1px solid #3B2F5C;
  border-radius:14px;padding:14px 10px 12px;text-align:center;cursor:pointer;
  box-shadow:0 4px 0 #0A0F1D;transition:transform .12s}
@@ -1685,7 +1693,10 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
   radial-gradient(124% 78% at 50% 42%,transparent 32%,rgba(4,6,12,.5) 82%,rgba(3,4,9,.86) 100%)}
 .vbScene.full:not(.is3d) .vbSeats.grid{position:absolute;inset:0;z-index:2;
  display:grid;grid-template-columns:repeat(var(--vbc,3),minmax(0,1fr));grid-auto-rows:min-content;
- gap:var(--vbgap,8px);padding:9px 9px 10px;align-content:center;justify-content:stretch}
+ gap:var(--vbgap,8px);padding:9px 9px 10px;justify-content:stretch;
+ /* «safe» توسّط ما دام يسع، وتلتصق بالأعلى إن ضاق — بلا هذا كان التوسيط يدفع
+    الصفّ الأوّل فوق الإطار فيُقصّ، والتمرير يجعل آخر مرشّح قابلًا للوصول دائمًا */
+ align-content:safe center;overflow-y:auto;overscroll-behavior:contain}
 .vbScene.full:not(.is3d) .vbSeats.grid .vbSeat{position:relative;
  left:auto!important;top:auto!important;transform:none;order:1;   /* الموضع السطريّ للقوس يغلب أيّ محدِّد، وتوسيط القوس يزيح البلاطة نصف عرضها */
  width:auto;min-width:0;min-height:0;gap:0;padding:7px 5px 7px;border-radius:16px;justify-content:center;
@@ -1761,17 +1772,17 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 
 /* أسماء لاعبي وضع التمرير */
 .ptHint{font-weight:800;font-size:9.5px;color:var(--mut);margin-inline-start:6px}
-.ptNames{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.ptNames{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
 .ptNm{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--bd);
  border-radius:11px;padding:0 9px;min-height:42px}
 .ptNm b{flex:0 0 auto;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;
  background:linear-gradient(160deg,#F6D98A,#B0801A);color:#1A1204;font-size:10.5px;font-weight:900}
-.ptNm input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--tx);
+.ptNm input{flex:1;min-width:0;align-self:stretch;min-height:42px;background:none;border:0;outline:none;color:var(--tx);
  font-family:inherit;font-size:12.5px;font-weight:800;padding:0}
 .ptNm input::placeholder{color:var(--mut);font-weight:700}
 
 /* الدردشة الخاصّة وبطاقة اللاعب */
-.pcStats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pcStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .pcS{background:var(--card);border:1px solid var(--bd);border-radius:13px;padding:9px 6px;text-align:center}
 .pcS b{display:block;font-size:16px;font-weight:900;color:var(--gold)}
 .pcS span{display:block;font-size:9.5px;font-weight:800;color:var(--mut);margin-top:3px}
@@ -1844,7 +1855,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .frCardA{display:flex;gap:8px}
 .frCardA>*{flex:1 1 0;min-height:42px;margin:0;font-size:12.5px;white-space:nowrap;padding-inline:8px}
 .frIdSm{margin-top:9px;font-size:9.5px;color:var(--mut);font-family:ui-monospace,Menlo,Consolas,monospace;
- letter-spacing:.4px;cursor:pointer;min-height:20px;padding:3px 0}
+ letter-spacing:.4px;cursor:pointer;min-height:40px;display:flex;align-items:center;justify-content:center;padding:6px 0}
 .fin.frCin{text-align:center;letter-spacing:5px;font-size:19px;font-weight:900;text-transform:uppercase}
 /* دعوة إلى الغرفة: شريط أزرار تحت تذكرة الكود */
 .rmTkA{display:flex;gap:7px;margin-top:11px}
@@ -18691,7 +18702,7 @@ function cardsScr(){
  <div class="cr">${[['all','الكل'],...Object.entries(TCAT).map(([k,v])=>[k,v.i+' '+v.n])].map(([k,n])=>
   `<div class="fc ${cFilter.t===k?'on':''}" onclick="cFilter.t='${k}';cardsScr()">${n}</div>`).join('')}</div>
  <div class="sl">${list.length} بطاقة</div>
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${list.map(c=>{const st=S.cards.owned[c.id],inDk=dk.cards.includes(c.id);
   return `<div class="cgWrap${inDk?' in':''}">${gcard(c.id,{lv:st?.lv,cap:cardCap(r),locked:!st,sm:1,ready:st&&canUpgrade(c.id),
    tap:`push('cardDetail',${c.id})`})}${st?`<span class="cgChip" onclick="event.stopPropagation();toggleDeck(${c.id})">${inDk?ico('check',11)+' في التشكيلة':ico('plus',11)+' أضف'}</span>`:''}</div>`}).join('')}</div>
@@ -18739,7 +18750,7 @@ function cardDetail(id){
  <div class="orn" style="margin-top:12px"><div class="in">${ornCorners()}
  <div style="font-size:15px;font-weight:800;color:${R.g}">${c.s}</div>
  <div style="font-size:13px;line-height:1.8;margin-top:9px">${c.d}</div>
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:12px">
  ${[[`${ico('energy',14)} الطاقة`,c.e+''],[`${ico(TCAT_ICO[c.t],12)} النوع`,TCAT[c.t].n],[`${ico('gem',12)} الندرة`,rar.n]]
   .map(([l,v])=>`<div style="background:var(--elev);border:1px solid var(--bd);border-radius:10px;padding:8px 4px;text-align:center">
   <div style="font-size:9.5px;color:var(--tx2);font-weight:800">${l}</div>
@@ -18870,7 +18881,7 @@ function deckScr(){
  const c4=d.cards.filter(i=>cardById(i).e===4).length;
  const lg=d.cards.filter(i=>cardById(i).r==='legendary').length;
  go(`<div class="scr on">${tbar('تشكيلتي',d.name)}
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
  ${d.cards.map(id=>gcard(id,{lv:S.cards.owned[id]?.lv,cap:cardCap(r),sm:1,
    ready:canUpgrade(id),tap:`push('cardDetail',${id})`})).join('')}</div>
  ${energyStrip(d.cards)}
@@ -18886,13 +18897,13 @@ function deckScr(){
   `<div style="margin-top:9px;font-size:11.5px;color:var(--ok);text-align:center">${ico('check',14)} التشكيلة صالحة</div>`}
 
  <div class="sl">الاحتياط — ${(d.side||[]).length}/2</div>
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
  ${(d.side||[]).map(id=>gcard(id,{lv:S.cards.owned[id]?.lv,cap:cardCap(r),sm:1,
    tap:`push('cardDetail',${id})`})).join('')||
   '<div class="note" style="grid-column:1/-1">لا احتياط</div>'}</div>
 
  <div class="sl">مجموعتك</div>
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
  ${CARDS.filter(c=>S.cards.owned[c.id]&&!d.cards.includes(c.id))
    .map(c=>gcard(c.id,{lv:S.cards.owned[c.id].lv,cap:cardCap(r),sm:1,
     ready:canUpgrade(c.id),tap:`toggleDeck(${c.id})`})).join('')||
@@ -20523,7 +20534,15 @@ if(window.MUSIC){
     لحن أصليّ مركّب داخل اللعبة — يبدأ عند أوّل لمسة لأن المتصفّح لا يفتح الصوت
     قبلها، ويخفت داخل اللعب ولا يُقطع، ويقف مع مفتاح الإعدادات. */
  MUSIC.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.music}});
- document.addEventListener('pointerdown',()=>{try{MUSIC.sync()}catch(e){}},{passive:true,once:false});
+ /* 5.95: تبدأ مع فتح التطبيق لا مع أوّل لمسة.
+    المتصفّح في الويب يمنع الصوت قبل إشارة من المستخدم، لكنّ التطبيق المثبَّت
+    (PWA على الشاشة الرئيسية، وCapacitor في المتجرين) يسمح — فتُجرَّب فورًا،
+    وتُعاد المحاولة عند أوّل إشارة أيًّا كانت إن مُنعت. */
+ const mscGo=()=>{try{MUSIC.sync()}catch(e){}};
+ mscGo();
+ setTimeout(mscGo,400);           // بعد أن تستقرّ الحالة المحفوظة
+ ['pointerdown','touchstart','keydown','click'].forEach(ev=>
+  document.addEventListener(ev,mscGo,{passive:true}));
  document.addEventListener('visibilitychange',()=>{try{document.hidden?MUSIC.stop():MUSIC.sync()}catch(e){}});
 }
 if(window.SFX){
@@ -20736,7 +20755,7 @@ function energyStrip(ids){
 
 // ═══════════ شبكة الإحصائيات ═══════════
 function statGrid(rows){
- return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ return `<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${rows.map(([label,val,col])=>`<div>
   <div style="font-size:11px;font-weight:800;color:${col||'var(--gold)'};margin-bottom:5px">${label}</div>
   <div style="background:linear-gradient(168deg,#1C2540,#0E1526);
@@ -20880,7 +20899,7 @@ function shopScr(){
    ${bought?`${ico('check',14)}`:`${d.cost} ${d.cur===`gems`?`${ico('gem',15)}`:`${ico(`coin`,15)}`}`}</button></div></div>`}).join(``)}
 
  ${banner("الصناديق")}
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${Object.entries(ECON.chests).map(([k,c])=>`
   <div onclick="push('chestScr','${k}')" style="cursor:pointer;border-radius:14px;padding:1.5px;
    background:linear-gradient(150deg,${c.c},${c.c}44)">
@@ -20894,14 +20913,14 @@ function shopScr(){
    </div></div>`).join('')}</div>
 
  ${banner('الجواهر')}
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
  ${ECON.gemPacks.map(p=>packTile({
    art:GEM_ART[p.art](),n:p.n+' — '+usdTxt(p.usd),amount:p.gems,cur:'gem',tag:p.tag,
    price:'شراء بـ '+usdTxt(p.usd),id:p.id,buy:`buyGemPack('${p.id}')`})).join('')}</div>
  <div class="note">شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من Google Play وApp Store</div>
 
  ${banner('العملات')}
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
  ${ECON.coinPacks.map(p=>packTile({
    art:coinArt(p.art),n:p.n,amount:p.coins,cur:'coin',tag:p.tag,h:78,
    price:p.gems+` ${ico('gem',15)}`,id:p.id,buy:`buyCoins('${p.id}')`})).join('')}</div>
@@ -21047,7 +21066,7 @@ function renderReward(a){
  ${left>1?`<button class="btn g" style="margin-top:9px"
   onclick="revealAll(${JSON.stringify(a).replace(/"/g,'&quot;')})">فتح الكل</button>`:''}</div>`:
  `<div class="sl">${L.length?'حصلت على':'لم يحمل الصندوق شيئًا هذه المرّة'}</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${L.map(x=>`<div class="li" style="margin:0"><div style="text-align:center">
   ${miniReward(x)}</div></div>`).join('')}</div>
  <div style="margin-top:16px"><button class="rbtn" onclick="back()"><span>تم</span></button></div>`}
@@ -21178,7 +21197,7 @@ function emoteScr(){
    <div style="font-size:12.5px;font-weight:900;color:${T.c}">${T.n}${t==='legendary'?' — متحركة':''}</div>
    <div style="font-size:10px;color:var(--mut)">${ownN}/${allN}</div>
    <div style="flex:1;height:1px;background:linear-gradient(90deg,${T.c}44,transparent)"></div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">${L.map(tile).join('')}</div>`};
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:9px">${L.map(tile).join('')}</div>`};
  go(`<div class="scr on">${tbar('التعبيرات')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="font-size:12.5px;font-weight:800;margin-bottom:9px">مجموعتك داخل المباراة — ${S.emoteDeck.length}/8</div>
@@ -21483,7 +21502,7 @@ function tDraw(){
  }
  if(s.k==='multi'){
   body=`<div class="qbox"><div class="qboxi">${s.q}</div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:12px">
   ${s.items.map((it,i)=>{const on=T2.picked.has(i);
    let cls='pk'+(on?' on':'');
    if(T2.ans)cls='pk '+(it.ok?'ok2':on?'no2':'');
@@ -21500,7 +21519,7 @@ function tDraw(){
    <button class="btn g" style="width:auto;padding:8px 18px" onclick="tBid(-1)">−</button>
    <button class="btn g" style="width:auto;padding:8px 18px" onclick="tBid(1)">+</button></div>`:''}
   </div></div></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:12px">
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:7px;margin-top:12px">
   ${s.pool.map((it,i)=>{const on=T2.picked.has(i);
    let cls='pk'+(on?' on':'');
    if(T2.ans)cls='pk '+(on?(it.ok?'ok2':'no2'):'');
@@ -22407,7 +22426,7 @@ function drawBelongs(st){
   ${st.reveal?`<span class="c" style="margin-right:auto">المطلوب <span class="mtl">${st.reveal}</span></span>`:''}
  </div></div>
  <div class="mmid">
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding-bottom:6px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;padding-bottom:6px">
  ${st.items.map((it,i)=>{
   const on=st.picked.has(i);
   const cls=M.ans?('pk '+(it.ok?'ok2':(on?'no2':''))):('pk'+(on?' on':''));
@@ -22566,7 +22585,7 @@ function auctionProve(st){
  ${st.counter?`<div class="hint" style="margin-bottom:8px">${ico('counter',16)} العدّاد: يوجد ${st.counter} إجابة صحيحة</div>`:''}
  </div>
  <div class="mmid">
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding-bottom:6px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:7px;padding-bottom:6px">
  ${st.pool.map((it,i)=>{
    const on=st.picked.has(i);
    return `<div class="pk ${on?'on':''}" data-i="${i}" onclick="aPick(${i})">
@@ -22609,7 +22628,7 @@ function auctionResult(st){
  <div class="note" style="text-align:right;margin-top:6px">
  كل إجابة خاطئة ألغت إجابة صحيحة واحدة</div>
  </div></div>
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:12px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:7px;margin-top:12px">
  ${st.pool.map((it,i)=>{
    const on=st.picked.has(i);
    if(!on)return '';
@@ -22706,7 +22725,7 @@ function drawDuel(st){
  return `<div class="qbox"><div class="qboxi" style="font-size:14.5px">${st.d.q}
  <div style="font-size:12px;color:var(--tx2);margin-top:6px">
  أنت ${st.myN}/${st.need} · المنافس ${st.oppN}/${st.need}</div></div></div>
- <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:12px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:7px;margin-top:12px">
  ${st.cards.map((c,i)=>{
   const o=st.owner[i];
   const bg=o==='me'?'rgba(55,138,221,.28)':o==='opp'?'rgba(226,75,74,.28)':
@@ -23064,7 +23083,7 @@ function playCss(){
  '.plBtn[disabled]{opacity:.45;cursor:default;box-shadow:none}',
 
  /* شبكة ألعابك */
- '.plGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}',
+ '.plGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}',
  '.plCard{position:relative;overflow:hidden;border-radius:17px;padding:12px;cursor:pointer;text-align:start;',
  ' background:linear-gradient(160deg,#17203E,#0A1022);border:1px solid #2A3358;font-family:inherit;color:#EDF1FA}',
  '.plCard:active{transform:scale(.975)}',
@@ -24705,7 +24724,7 @@ function rmDraw(R){
   const myVote=(R.find(p=>p.me)||{}).vote;
   const tally={};R.forEach(p=>{if(p.vote)tally[p.vote]=(tally[p.vote]||0)+1});
   return `<div class="sl" style="margin:12px 0 9px;text-align:center">صوّت لأفضل رسمة «${RM.word}» (غير رسمتك)</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
   ${RM.players.map(p=>p.peer===RM.me?'':`<div onclick="rmVote('${p.peer}')"
    style="cursor:pointer;border:2px solid ${myVote===p.peer?'var(--gold)':'#3B2F5C'};border-radius:14px;overflow:hidden;background:#fff">
    <canvas class="rmArt" data-p="${p.peer}" width="300" height="300" style="width:100%;display:block"></canvas>
@@ -25022,7 +25041,7 @@ function unoCounted(){try{const e=EV();e.unoCards=(e.unoCards||0)+1;trk('uno_car
 function unoColAsk(i){
  const ov=document.createElement('div');ov.className='qvov';
  ov.innerHTML=`<div class="qvbox"><div class="qvt">اختر اللون</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:10px">
  ${[['r','أحمر'],['g','أخضر'],['b','أزرق'],['y','أصفر']].map(([k,n])=>
   `<button class="btn" data-c="${k}" style="background:linear-gradient(145deg,${UNO_COL[k][0]},${UNO_COL[k][1]})">${n}</button>`).join('')}</div>
  <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
@@ -32057,6 +32076,41 @@ function vbStep(n){document.querySelectorAll('#vbSteps span').forEach(el=>{const
 function vbAiChip(){const el=document.getElementById('vbAiChip');if(!el||typeof AI==='undefined')return;const on=AI.enabled();el.hidden=false;el.classList.toggle('on',on);el.classList.toggle('off',!on);
  el.innerHTML=ico(on?'sparkle':'info',15);el.title=on?'ذكاء اصطناعي':'عقل محلي'}   // 5.64: رقاقة الذكاء صارت زرًّا في الرأس ليتّسع صفّ الرقاقات
 function vbSeatState(i){return VB.seat&&VB.seat(i)||{}}
+/* 5.95: المسرح يتقلّص في مرحلة التصويت (شريط التصويت يأخذ من عموده)، والحلقة
+   مواضعها نسبيّة لكن أجسام المقاعد بالبكسل — فكانت تخرج من صندوق المسرح
+   ويقصّها overflow:hidden: المقعد العلويّ نصفه فوق الإطار والسفليّ تحته.
+   القياس بعد الرسم أصدق من أي معادلة: يُؤخذ صندوق المقاعد كلّها ويُصغَّر
+   حتى يسع، فتبقى الحلقة كاملة في كل ارتفاع وكل عدد لاعبين. */
+function vbSeatsFit(){
+ const el=document.getElementById('vbSeats'),stg=document.getElementById('vbStage');
+ if(!el||!stg)return;
+ el.style.transform='';
+ if(el.classList.contains('grid'))return;   // الطاولة المرتّبة تُمرَّر، فلا تُصغَّر
+ const b=stg.getBoundingClientRect();
+ if(b.height<40||b.width<40)return;
+ let t=Infinity,bo=-Infinity,l=Infinity,r=-Infinity;
+ el.querySelectorAll('.vbSeat').forEach(s=>{const q=s.getBoundingClientRect();
+  if(q.width<1)return;t=Math.min(t,q.top);bo=Math.max(bo,q.bottom);l=Math.min(l,q.left);r=Math.max(r,q.right)});
+ if(!isFinite(t)||bo<=t)return;
+ const k=Math.min(1,(b.height-16)/(bo-t),(b.width-12)/Math.max(1,r-l));
+ el.style.transform=k<0.995?'scale('+k.toFixed(3)+')':'';
+}
+/* القياس الأوّل يقع قبل أن تستقرّ الخطوط والصور، فيُعاد في الإطار التالي.
+   ومراقب الحجم يعيده عند كل تغيّر للمسرح: دوران الجهاز، فتح لوحة المفاتيح،
+   أو انتقال المرحلة الذي يقلّص العمود. */
+let _vbFitRO=null;
+function vbSeatsFit2(){
+ vbSeatsFit();requestAnimationFrame(vbSeatsFit);
+ try{
+  const stg=document.getElementById('vbStage');
+  if(stg&&typeof ResizeObserver!=='undefined'&&stg.__fitRO!==1){
+   stg.__fitRO=1;
+   if(_vbFitRO)try{_vbFitRO.disconnect()}catch(e){}
+   _vbFitRO=new ResizeObserver(()=>vbSeatsFit());
+   _vbFitRO.observe(stg);
+  }
+ }catch(e){}
+}
 function vbSeats(){
  const el=document.getElementById('vbSeats');if(!el)return;
  const n=VB.names.length,d3=typeof VB3!=='undefined'&&VB3.on;   // في المشهد المجسّم العلامة قرص رقم فقط: الصورة في شريط اللاعبين
@@ -32076,6 +32130,7 @@ function vbSeats(){
   return `<div class="vbSeat${i===0?' me':''}${st.dead?' dead':''}${st.talk?' talk':''}${st.mark?' mark':''}${pk?' pick':''}" data-seat="${i}" style="left:${p.x.toFixed(1)}%;top:${p.y.toFixed(1)}%;--sc:${st.c||'#E8B23A'}${pk?';--pk:'+(VB.pick.c||'#E8B23A'):''}" onclick="${pk?`${VB.pick.cb}(${i})`:`vbPlayerSheet(${i})`}">
    <div class="vbAv">${d3?'':vbFace(i,40)}<span class="vbNum">${i+1}</span>${st.badge?`<span class="vbBadge">${st.badge}</span>`:''}${st.dead?`<span class="vbX">${ico('cross',14)}</span>`:''}${card}</div>
    <div class="vbNm">${esc(nm)}${i===0?'<i>أنت</i>':''}</div>${pill?`<div class="vbPill${dim?' dim':''}" style="--pc:${pc}">${esc(pill)}</div>`:''}</div>`}).join('');
+ vbSeatsFit2();
  vbRoster();
  const c=document.getElementById('vbCount');if(c)c.textContent=(VB.alive?VB.alive.length:n)+'/'+n;
  el.classList.toggle('grid',!d3);
@@ -34175,7 +34230,7 @@ function barraVote(){setArena('barra');
  clearInterval(PT.tm);
  go(`<div class="scr on">${ptHead('برا السالفة',1)}
  <div class="sl" style="text-align:center">اتفقوا: من برا السالفة؟</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${Array.from({length:PT.n},(_,i)=>`<button class="btn g" onclick="barraEnd(${i})">${esc(ptName(i))}</button>`).join('')}
  </div></div>`);
 }
@@ -34195,7 +34250,7 @@ function barraGuess(){
  <div style="font-size:12px;color:var(--tx2);margin-top:7px;line-height:1.7">مرّروا له الجوال: إن خمّن الكلمة من أوّل مرّة فاز هو، وإلا فازت المجموعة.</div>
  </div></div></div>
  <div class="sl" style="text-align:center">ما الكلمة يا برا السالفة؟</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${opts.map(w=>`<button class="btn g" onclick="barraFinal('${w===PT.word?'guessed':'caught'}',${PT.spy})">${esc(w)}</button>`).join('')}
  </div></div>`);
 }
@@ -34303,7 +34358,7 @@ function mafGate(title,role,desc,next){
 function mafPick(title,cb,exclude,day){
  go(`<div class="scr on">${ptHead(day?'مافيا — الصباح '+PT.day:'مافيا — الليلة '+PT.day,1)}
  <div class="sl" style="text-align:center">${title}</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px">
  ${PT.alive.filter(i=>!(exclude||[]).includes(i)).map(i=>
   `<button class="btn g" onclick="${cb}(${i})">${esc(ptName(i))}</button>`).join('')}
  </div>
@@ -34477,7 +34532,7 @@ function drawVote(){
  if(PT.vi>=PT.n){drawEnd();return}
  go(`<div class="scr on">${ptHead('التصويت',1)}
  <div class="sl" style="text-align:center">${esc(ptName(PT.vi))}: صوّت لأفضل رسمة «${PT.word}» (غير رسمتك)</div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
  ${PT.imgs.map((im,i)=>i===PT.vi?'':`<div onclick="PT.votes[${i}]++;PT.vi++;drawVote()"
   style="cursor:pointer;border:2px solid #3B2F5C;border-radius:14px;overflow:hidden;background:#fff">
   <img src="${im}" style="width:100%;display:block">
@@ -35175,7 +35230,7 @@ function clanCss(){
 '.clAnn .t{font-size:9.5px;font-weight:900;color:#B99BF7;display:flex;align-items:center;gap:5px;margin-bottom:4px}',
 '.clAnn .b{font-size:11.5px;line-height:1.7;color:#E8EBF2;word-break:break-word}',
 '.clAnn .w{font-size:9.5px;color:#68738E;margin-top:5px}',
-'.clQa{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px}',
+'.clQa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:12px}',
 '.clQa>button{position:relative;background:#11192B;border:1px solid #28324E;border-radius:14px;',
 ' padding:9px 3px 8px;color:#F2F4F8;font-family:inherit;font-size:9.5px;font-weight:800;cursor:pointer;',
 ' display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:58px}',
@@ -37426,7 +37481,7 @@ function clanCss2(){
  '.clPan.tap:active{transform:scale(.995)}',
 
  /* أزرار الإجراءات */
- '.clActs{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}',
+ '.clActs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-top:14px}',
  '.clAct{position:relative;display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:17px;',
  ' min-height:72px;text-align:start;cursor:pointer;font-family:inherit;color:#F4F6FC;',
  ' background:linear-gradient(158deg,#18203F,#0A1022);border:1.5px solid var(--ac);',
@@ -37470,7 +37525,7 @@ function clanCss2(){
  '.clThumb{position:relative;overflow:hidden;width:82px;height:66px;flex-shrink:0;border-radius:13px;',
  ' border:1px solid #333F68;background:#0A1024}',
  '.clThumb svg{position:absolute;inset:0;width:100%;height:100%}',
- '.clAnimG{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}',
+ '.clAnimG{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:4px}',
  '.clAnimT{position:relative;border-radius:14px;overflow:hidden;cursor:pointer;',
  ' background:#0A1024;border:1.5px solid #2C3660}',
  '.clAnimT.on{border-color:#F5C542;box-shadow:0 0 18px -6px rgba(245,197,66,.9)}',
@@ -37924,7 +37979,7 @@ function clMemberScr(uid){
 
   // أزرار اللاعب العادية — لا زر طرد أحمر بجانب الاسم
   h+=clSecTitle('إجراءات');
-  h+=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+  h+=`<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:8px">
    ${clQuickBtn('plus','إضافة صديق',"clAddFriend('"+key+"')")}
    ${clQuickBtn('swords','تحدٍّ ودي',"clFriendly('"+key+"')")}
    ${clQuickBtn('flag','إبلاغ',"clReport('"+key+"')")}</div>`;
@@ -41622,7 +41677,7 @@ function home(){
  <div class="ncd" onclick="push('netsScr')" style="height:150px">${ART.general}
  <div class="bd2"><div class="t">${ico('map',16)} ادخل الشبكة</div>
  <div class="mt">افتح العقد واجمع النجوم · ${done}/${NODES.length} عقدة</div></div></div>
- <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+ <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-top:4px">
  <div class="li" style="text-align:center;cursor:pointer;margin:0" onclick="push('quickScr')">
  <div style="font-size:26px">${ico('energy',15)}</div><div class="lt" style="margin-top:6px">تحدٍ سريع</div>
  <div class="ls">6 أسئلة</div></div>
