@@ -56,8 +56,19 @@ const entryFile=(cmd.match(/"([^"]*\.m?js)"/)||[])[1]||'';
  check('قرص render مركّب على المجلّد نفسه',RENDER.includes('mountPath: '+path.dirname(dataFile)));
  check('فحص الصحّة /health في fly وrender والصورة',
    FLY.includes('path = "/health"')&&RENDER.includes('healthCheckPath: /health')&&/HEALTHCHECK[\s\S]*\/health/.test(FINAL));
- check('آلة واحدة على الأقل تبقى حيّة — الغرف على WebSocket',
-   /min_machines_running\s*=\s*[1-9]/.test(FLY)&&/auto_stop_machines\s*=\s*false/.test(FLY));
+ // سياسةُ النوم متّسقة مع نفسها.
+ //
+ // كان الحارس يفرض «لا تنم أبدًا» خوفًا على الغرف. والخوف في غير محلّه:
+ // اتصال WebSocket المفتوح حركةٌ قائمة عند وسيط Fly فلا تُوقَف الآلة ولاعبٌ
+ // متّصل، وإنما تنام حين تخلو — ولا غرفةَ تُحفظ حينئذ. وفرضُ اليقظة الدائمة
+ // يدفع أربعًا وعشرين ساعة في اليوم على لعبةٍ فارغة، وهذا مالٌ لا هندسة.
+ //
+ // فالمفحوص الآن الاتّساق لا القيمة: من أباح للآلة أن تنام وجب أن يوقظها
+ // الطلب. وآلةٌ تنام ولا تستيقظ لعبةٌ ميتة، وهذا وحده ما يجب أن يسقط.
+ const sleeps=/min_machines_running\s*=\s*0\b/.test(FLY);
+ const wakes=/auto_start_machines\s*=\s*true/.test(FLY);
+ check('الآلة إن نامت أيقظها الطلب — وإلّا بقيت حيّة',!sleeps||wakes,
+   sleeps?'تنام عند الخلوّ وتستيقظ عند أوّل طلب':'حيّة دائمًا');
 
  sec('بناء تخطيط الصورة وإقلاعه بدلالات node:20');
  const bundle=path.join(ROOT,'server/dist/tahaddi.js');
