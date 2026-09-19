@@ -14158,232 +14158,338 @@ if(typeof module!=='undefined'&&module.exports)module.exports=ICO2;
 /* ⟦/src⟧ */
 /* ⟦src:src/ui/homeart.js⟧ */
 /**
- * رسوم الصفحة الرئيسية — لوحات مرسومة بحجم كبير (٤٨–١٤٠ بكسل) لا أيقونات سطريّة.
- * لكلّ لوحة معرّفات تدرّج خاصّة بها (بادئة ha-) فلا تتصادم مع غيرها في الصفحة.
- * الاستعمال: HOME_ART.get('dice') → وسم svg كامل بنسبة عرض ثابتة.
- * هذه رسوم مشهديّة (ظلّ وإضاءة وعمق) — تكمّل أيقونات ICO2 المسطّحة ولا تحلّ محلّها.
+ * رسوم تحدّي المُجسَّمة — لوحات بعمق حقيقيّ لا أشكال مسطّحة:
+ * تدرّج متعدّد المحطّات للجسم، وجه مُضاء ووجه مُظلم، لمعة زجاجيّة ضبابيّة،
+ * حافّة مُضاءة رفيعة، ظلّ مُلقى تحت الجسم، ووهج لونيّ خلفه.
+ * المرشّحات والتدرّجات مشتركة ببادئة ha- وتتكرّر في كل لوحة بلا ضرر (أوّل تعريف يسود).
+ *   HOME_ART.get(name) → وسم svg كامل
+ *   HOME_ART.names     → كل الأسماء
  */
 var HOME_ART=(function(){
  'use strict';
  var A={};
- /** تدرّج خطّيّ سريع */
- function lg(id,a,b,c,x2,y2){
-  return '<linearGradient id="'+id+'" x1="0" y1="0" x2="'+(x2==null?.45:x2)+'" y2="'+(y2==null?1:y2)+'">'+
-   '<stop offset="0" stop-color="'+a+'"/><stop offset="'+(c?.5:1)+'" stop-color="'+b+'"/>'+
-   (c?'<stop offset="1" stop-color="'+c+'"/>':'')+'</linearGradient>';
+
+ /* ── لبنات ── */
+ function lg(id,stops,x2,y2){
+  return '<linearGradient id="'+id+'" x1="0" y1="0" x2="'+(x2==null?.4:x2)+'" y2="'+(y2==null?1:y2)+'">'+
+   stops.map(function(s){return '<stop offset="'+s[0]+'" stop-color="'+s[1]+'"/>'}).join('')+'</linearGradient>';
  }
- function rg(id,a,b,cx,cy,r){
-  return '<radialGradient id="'+id+'" cx="'+(cx||.35)+'" cy="'+(cy||.3)+'" r="'+(r||.9)+'">'+
-   '<stop offset="0" stop-color="'+a+'"/><stop offset="1" stop-color="'+b+'"/></radialGradient>';
+ function rg(id,stops,cx,cy,r){
+  return '<radialGradient id="'+id+'" cx="'+(cx||.34)+'" cy="'+(cy||.28)+'" r="'+(r||.85)+'">'+
+   stops.map(function(s){return '<stop offset="'+s[0]+'" stop-color="'+s[1]+'"/>'}).join('')+'</radialGradient>';
  }
- /** لمعة زجاجيّة بيضاء */
- function sh(x,y,rx,ry,rot,o){
-  return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#fff" opacity="'+(o==null?.38:o)+
-   '" transform="rotate('+(rot||0)+' '+x+' '+y+')"/>';
+ /* لمعة ضبابيّة بيضاء — روح الشكل المُجسَّم */
+ function spec(x,y,rx,ry,rot,o,bl){
+  return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#fff" opacity="'+(o==null?.5:o)+
+   '" filter="url(#ha-b'+(bl||3)+')" transform="rotate('+(rot||0)+' '+x+' '+y+')"/>';
  }
- /** ظلّ أرضيّ ناعم تحت الجسم */
- function floor(x,y,rx,ry,o){
-  return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#000" opacity="'+(o==null?.28:o)+'"/>';
+ /* ظلّ مُلقى تحت الجسم */
+ function cast(x,y,rx,ry,o){
+  return '<ellipse cx="'+x+'" cy="'+y+'" rx="'+rx+'" ry="'+ry+'" fill="#05070E" opacity="'+(o==null?.55:o)+'" filter="url(#ha-b6)"/>';
  }
- /** بريق رباعيّ الأطراف */
- function spark(x,y,s,c,o){
-  return '<path d="M'+x+' '+(y-s)+' Q'+(x+s*.22)+' '+(y-s*.22)+' '+(x+s)+' '+y+
-   ' Q'+(x+s*.22)+' '+(y+s*.22)+' '+x+' '+(y+s)+' Q'+(x-s*.22)+' '+(y+s*.22)+' '+(x-s)+' '+y+
-   ' Q'+(x-s*.22)+' '+(y-s*.22)+' '+x+' '+(y-s)+' Z" fill="'+(c||'#FFE9A8')+'" opacity="'+(o==null?.95:o)+'"/>';
+ /* وهج لونيّ خلف الجسم */
+ function glow(x,y,r,c,o){
+  return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+c+'" opacity="'+(o==null?.3:o)+'" filter="url(#ha-b10)"/>';
  }
- /** تاج ذهبيّ صغير يوضع فوق جسم */
- function crown(x,y,w){
-  var s=w/40;
-  return '<g transform="translate('+x+' '+y+') scale('+s+')">'+
-   '<path d="M-20 14 L-17 -10 L-8 0 L0 -16 L8 0 L17 -10 L20 14 Z" fill="url(#ha-au)"/>'+
-   '<path d="M0 -16 L8 0 L17 -10 L20 14 H0 Z" fill="#B7860F" opacity=".5"/>'+
-   '<rect x="-21" y="13" width="42" height="8" rx="3" fill="url(#ha-au)"/>'+
-   '<rect x="-21" y="13" width="42" height="3" fill="#FFF3C8" opacity=".6"/>'+
-   '<circle cx="-17" cy="-11" r="3.4" fill="#FFF3C8"/><circle cx="0" cy="-17" r="3.8" fill="#FFF3C8"/>'+
-   '<circle cx="17" cy="-11" r="3.4" fill="#FFF3C8"/>'+
-   '<circle cx="-11" cy="17" r="2.2" fill="#E2584F"/><circle cx="0" cy="17" r="2.4" fill="#35C47A"/>'+
-   '<circle cx="11" cy="17" r="2.2" fill="#4A93E8"/>'+
-   sh(-9,4,6,3,-24,.3)+'</g>';
+ /* حافّة مُضاءة: نسخة من المسار بخطّ فاتح شفّاف */
+ function rim(d,c,w,o){
+  return '<path d="'+d+'" fill="none" stroke="'+(c||'#fff')+'" stroke-width="'+(w||1.4)+'" opacity="'+(o==null?.45:o)+'" stroke-linejoin="round"/>';
  }
- /** التدرّجات المشتركة لكل اللوحات */
+ function P(d,f,x){return '<path d="'+d+'" fill="'+f+'"'+(x||'')+'/>'}
+ function R(x,y,w,h,r,f,x2){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+r+'" fill="'+f+'"'+(x2||'')+'/>'}
+ function C(x,y,r,f,x2){return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+f+'"'+(x2||'')+'/>'}
+ function PG(p,f,x){return '<polygon points="'+p+'" fill="'+f+'"'+(x||'')+'/>'}
+ function S(d,c,w,x){return '<path d="'+d+'" fill="none" stroke="'+c+'" stroke-width="'+w+'" stroke-linecap="round" stroke-linejoin="round"'+(x||'')+'/>'}
+ function star(cx,cy,R0,r0,n,rot){n=n||5;var p=[],i,a,q;for(i=0;i<n*2;i++){a=-Math.PI/2+(rot||0)+i*Math.PI/n;q=i%2?r0:R0;
+  p.push((cx+Math.cos(a)*q).toFixed(2)+','+(cy+Math.sin(a)*q).toFixed(2))}return p.join(' ')}
+ /* بريق رباعيّ ناعم */
+ function spk(x,y,s,c,o){
+  return '<path d="M'+x+' '+(y-s)+' Q'+(x+s*.2)+' '+(y-s*.2)+' '+(x+s)+' '+y+
+   ' Q'+(x+s*.2)+' '+(y+s*.2)+' '+x+' '+(y+s)+' Q'+(x-s*.2)+' '+(y+s*.2)+' '+(x-s)+' '+y+
+   ' Q'+(x-s*.2)+' '+(y-s*.2)+' '+x+' '+(y-s)+' Z" fill="'+(c||'#FFF3C8')+'" opacity="'+(o==null?.95:o)+'"/>';
+ }
+ /* هالة ذهبيّة ناعمة خلف جسم لامع — طبقتان بلا أشعّة حادّة */
+ function halo(x,y,r,c){
+  return '<circle cx="'+x+'" cy="'+y+'" r="'+r+'" fill="'+(c||'#FFC94A')+'" opacity=".2" filter="url(#ha-b10)"/>'+
+   '<circle cx="'+x+'" cy="'+y+'" r="'+(r*.62)+'" fill="'+(c||'#FFE9A8')+'" opacity=".22" filter="url(#ha-b10)"/>';
+ }
+
+ var GOLD=[[0,'#FFF8DC'],[.22,'#FFE08A'],[.5,'#EFB43C'],[.76,'#BE8214'],[1,'#8A5A0C']];
  var DEFS='<defs>'+
-  lg('ha-au','#FFF0BC','#EFC152','#B7860F')+
-  lg('ha-rd','#FF9B8E','#E2584F','#8F2622')+
-  lg('ha-pu','#D9BBFF','#9B6CF0','#5A2FAD')+
-  lg('ha-bl','#B9DDFF','#4A93E8','#1E579C')+
-  lg('ha-gr','#A9F2CB','#35C47A','#12714A')+
-  lg('ha-wd','#E8C79B','#AC7742','#5E3A1B')+
-  rg('ha-iv','#FFFFFF','#CFD8E6')+
-  rg('ha-gl','#FFF6CF','#F2B93A',.36,.3,.95)+
-  lg('ha-st','#EAF0FA','#9FADC4','#5B6779')+
+  '<filter id="ha-b3" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter>'+
+  '<filter id="ha-b6" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="6"/></filter>'+
+  '<filter id="ha-b10" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="10"/></filter>'+
+  '<filter id="ha-dp" x="-40%" y="-40%" width="190%" height="190%"><feDropShadow dx="0" dy="5" stdDeviation="4.5" flood-color="#04060C" flood-opacity=".6"/></filter>'+
+  lg('ha-au',GOLD)+
+  lg('ha-au2',[[0,'#FFEFC0'],[.4,'#E8B23A'],[1,'#7E5008']],.9,.6)+
+  lg('ha-rd',[[0,'#FFC2B6'],[.24,'#F4796C'],[.58,'#D9453C'],[1,'#7E1C18']])+
+  lg('ha-pu',[[0,'#EAD6FF'],[.24,'#B98BFF'],[.58,'#8B4FE8'],[1,'#41197F']])+
+  lg('ha-bl',[[0,'#D6ECFF'],[.24,'#8CC2FF'],[.56,'#3F86E0'],[1,'#12386E']])+
+  lg('ha-gr',[[0,'#CFFBE2'],[.24,'#73E4AC'],[.56,'#2BB273'],[1,'#0A5236']])+
+  lg('ha-wd',[[0,'#F3D9B4'],[.26,'#D2A167'],[.6,'#9C6733'],[1,'#4E2E12']])+
+  lg('ha-st',[[0,'#FFFFFF'],[.26,'#DCE4F0'],[.6,'#96A3B8'],[1,'#3F4A5C']])+
+  rg('ha-iv',[[0,'#FFFFFF'],[.55,'#F1F4FA'],[1,'#B9C3D4']])+
+  rg('ha-gl',[[0,'#FFFBE4'],[.42,'#FFDE85'],[1,'#D9901A']],.36,.3,.95)+
   '</defs>';
 
- function wrap(vb,body,cls){
-  return '<svg class="hart'+(cls?' '+cls:'')+'" viewBox="'+vb+'" xmlns="http://www.w3.org/2000/svg" '+
-   'preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+DEFS+body+'</svg>';
+ function wrap(vb,body){
+  return '<svg class="hart" viewBox="'+vb+'" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+DEFS+body+'</svg>';
  }
 
- /* ── لوحة البطل: نرد متوَّج وبطاقات مروحيّة ── */
- A.dice=wrap('0 0 200 170',
-  floor(104,150,58,11,.32)+
-  /* بطاقات خلفيّة */
-  '<g transform="rotate(-20 44 78)"><rect x="18" y="44" width="52" height="72" rx="9" fill="url(#ha-bl)"/>'+
-   '<rect x="24" y="50" width="40" height="60" rx="6" fill="#fff" opacity=".13"/>'+
-   '<path d="M44 66 c-6-7 -17-3 -17 6 c0 8 17 21 17 21 s17-13 17-21 c0-9 -11-13 -17-6 Z" fill="#fff" opacity=".55"/></g>'+
-  '<g transform="rotate(16 162 76)"><rect x="136" y="42" width="52" height="72" rx="9" fill="url(#ha-gr)"/>'+
-   '<rect x="142" y="48" width="40" height="60" rx="6" fill="#fff" opacity=".13"/>'+
-   '<path d="M162 64 c-6-7 -17-3 -17 6 c0 8 17 21 17 21 s17-13 17-21 c0-9 -11-13 -17-6 Z" fill="#fff" opacity=".55"/></g>'+
-  '<g transform="rotate(28 176 96)"><rect x="150" y="62" width="50" height="70" rx="9" fill="url(#ha-pu)"/>'+
-   '<rect x="156" y="68" width="38" height="58" rx="6" fill="#fff" opacity=".13"/></g>'+
-  /* النرد */
-  '<rect x="58" y="60" width="92" height="92" rx="22" fill="url(#ha-iv)"/>'+
-  '<path d="M104 60 h24 a22 22 0 0 1 22 22 v48 a22 22 0 0 1 -22 22 h-24 Z" fill="#AEBACC" opacity=".38"/>'+
-  '<circle cx="80" cy="82" r="8" fill="#141B2B"/><circle cx="128" cy="82" r="8" fill="#141B2B"/>'+
-  '<circle cx="104" cy="106" r="8" fill="#141B2B"/>'+
-  '<circle cx="80" cy="130" r="8" fill="#141B2B"/><circle cx="128" cy="130" r="8" fill="#141B2B"/>'+
-  sh(82,76,20,10,-22,.5)+
-  crown(113,44,66)+
-  spark(38,32,11)+spark(176,34,8)+spark(28,116,7,'#FFF3C8',.8)+spark(186,132,6,'#FFF3C8',.7));
+ /* ═══ تاج ذهبيّ مُجسَّم يوضع فوق جسم ═══ */
+ function crown(x,y,w){
+  var s=w/40,d='M-20 13 L-17.5 -11 L-8.5 -1 L0 -17 L8.5 -1 L17.5 -11 L20 13 Z';
+  return '<g transform="translate('+x+' '+y+') scale('+s+')" filter="url(#ha-dp)">'+
+   P(d,'url(#ha-au)')+
+   P('M0 -17 L8.5 -1 L17.5 -11 L20 13 H0 Z','#A06F0E',' opacity=".42"')+
+   rim('M-20 13 L-17.5 -11 L-8.5 -1 L0 -17','#FFF8DC',1.6,.75)+
+   R(-21,12,42,8.5,3,'url(#ha-au2)')+
+   R(-20,12.6,40,2.4,1.2,'#FFF6D2',' opacity=".72"')+
+   C(-17.5,-12,3.6,'url(#ha-gl)')+C(0,-18,4,'url(#ha-gl)')+C(17.5,-12,3.6,'url(#ha-gl)')+
+   C(-11,16.5,2.2,'#E2584F')+C(0,16.5,2.4,'#35C47A')+C(11,16.5,2.2,'#4A93E8')+
+   spec(-9,2,6.5,3.4,-24,.34)+'</g>';
+ }
 
- /* ── لوحة البطل: كأس التصنيف ── */
- A.trophy=wrap('0 0 200 170',
-  floor(100,152,52,10,.3)+
-  '<path d="M64 34 H136 V82 C136 104 120 120 100 120 C80 120 64 104 64 82 Z" fill="url(#ha-au)"/>'+
-  '<path d="M100 34 H136 V82 C136 104 120 120 100 120 Z" fill="#A9760E" opacity=".38"/>'+
-  '<path d="M64 44 H40 a6 6 0 0 0 -6 6 v10 c0 20 13 32 30 35" fill="none" stroke="url(#ha-au)" stroke-width="11" stroke-linecap="round"/>'+
-  '<path d="M136 44 H160 a6 6 0 0 1 6 6 v10 c0 20 -13 32 -30 35" fill="none" stroke="#B7860F" stroke-width="11" stroke-linecap="round"/>'+
-  '<rect x="90" y="118" width="20" height="18" fill="url(#ha-au)"/>'+
-  '<path d="M66 136 H134 L142 152 H58 Z" fill="url(#ha-au)"/>'+
-  '<rect x="58" y="148" width="84" height="6" rx="3" fill="#8A6212"/>'+
-  '<polygon points="100,52 108,72 130,72 112,85 119,106 100,93 81,106 88,85 70,72 92,72" fill="#FFF6CF" opacity=".92"/>'+
-  sh(78,52,11,22,-12,.34)+
-  spark(38,42,10)+spark(164,54,8)+spark(46,116,6,'#FFF3C8',.75));
+ /* ═══ النرد المتوَّج ═══ */
+ function pip(x,y,r){
+  return C(x,y,r,'#0E1422')+C(x-r*.25,y-r*.28,r*.5,'#2C3550',' opacity=".55"');
+ }
+ A.dice=wrap('0 0 200 180',
+  glow(104,96,62,'#FFD976',.2)+halo(104,96,74)+
+  cast(106,156,56,10,.5)+
+  '<g transform="rotate(-18 44 80)">'+R(18,44,54,74,10,'url(#ha-bl)')+R(24,50,42,62,7,'#fff',' opacity=".16"')+
+   P('M45 68 c-6.5-8 -18-3.4 -18 6.4 c0 8.6 18 22 18 22 s18-13.4 18-22 c0-9.8 -11.5-14.4 -18-6.4 Z','#fff',' opacity=".62"')+
+   spec(30,56,13,7,-30,.4)+'</g>'+
+  '<g transform="rotate(15 164 78)">'+R(138,44,54,74,10,'url(#ha-gr)')+R(144,50,42,62,7,'#fff',' opacity=".16"')+
+   P('M165 68 c-6.5-8 -18-3.4 -18 6.4 c0 8.6 18 22 18 22 s18-13.4 18-22 c0-9.8 -11.5-14.4 -18-6.4 Z','#fff',' opacity=".62"')+
+   spec(150,56,13,7,-30,.4)+'</g>'+
+  '<g transform="rotate(30 178 100)">'+R(152,64,52,72,10,'url(#ha-pu)')+R(158,70,40,60,7,'#fff',' opacity=".14"')+
+   spec(164,76,12,6,-30,.35)+'</g>'+
+  '<g filter="url(#ha-dp)">'+
+   R(56,58,94,94,24,'url(#ha-iv)')+
+   P('M103 58 h23 a24 24 0 0 1 24 24 v46 a24 24 0 0 1 -24 24 h-23 Z','#96A3B8',' opacity=".3"')+
+   P('M56 82 a24 24 0 0 1 24 -24 h46 a24 24 0 0 1 24 24 z','#fff',' opacity=".5"')+
+   pip(79,81,8.4)+pip(127,81,8.4)+pip(103,105,8.4)+pip(79,129,8.4)+pip(127,129,8.4)+
+   spec(80,76,22,11,-24,.62)+
+   rim('M56 82 a24 24 0 0 1 24 -24 h23','#fff',2.6,.9)+
+  '</g>'+
+  crown(112,42,70)+
+  spk(34,30,12)+spk(180,36,9)+spk(24,118,8,'#FFF3C8',.8)+spk(190,134,7,'#FFF3C8',.7));
 
- /* ── لوحة البطل: ليلة العائلة ── */
+ /* ═══ الكأس ═══ */
+ A.trophy=wrap('0 0 200 180',
+  glow(100,84,58,'#FFC94A',.24)+halo(100,84,70)+
+  cast(100,160,50,9,.5)+
+  '<g filter="url(#ha-dp)">'+
+   S('M64 46 H38 a7 7 0 0 0 -7 7 v9 c0 21 14 33 33 36','url(#ha-st)',12)+
+   S('M136 46 H162 a7 7 0 0 1 7 7 v9 c0 21 -14 33 -33 36','#9A6B0E',12)+
+   P('M62 30 H138 V80 C138 104 121 121 100 121 C79 121 62 104 62 80 Z','url(#ha-au)')+
+   P('M100 30 H138 V80 C138 104 121 121 100 121 Z','#96670C',' opacity=".38"')+
+   rim('M62 30 H138','#FFF8DC',2.4,.85)+
+   rim('M62 30 V80 C62 100 74 114 88 118','#FFF0B8',2,.5)+
+   PG(star(100,74,25,11),'#FFF9E2',' opacity=".95"')+
+   PG(star(100,74,25,11),'none',' stroke="#C08A16" stroke-width="1.4" opacity=".5"')+
+   R(88,119,24,19,2,'url(#ha-au2)')+
+   P('M64 138 H136 L145 157 H55 Z','url(#ha-au)')+
+   P('M100 138 H136 L145 157 H100 Z','#96670C',' opacity=".34"')+
+   R(53,154,94,8,4,'url(#ha-au2)')+
+   spec(78,50,13,26,-12,.42)+
+  '</g>'+
+  spk(34,42,11)+spk(168,54,9)+spk(44,120,7,'#FFF3C8',.75)+spk(158,124,6,'#FFF3C8',.7));
+
+ /* ═══ ضيوف ليلة العائلة ═══ */
  function guest(x,y,hr,bw,bh,g,dk){
-  return '<rect x="'+(x-bw)+'" y="'+y+'" width="'+(2*bw)+'" height="'+bh+'" rx="'+(bw*.92)+'" fill="'+g+'"/>'+
-   '<circle cx="'+x+'" cy="'+(y-hr*.72)+'" r="'+hr+'" fill="'+g+'"/>'+
-   '<path d="M'+x+' '+(y-hr*1.72)+' a'+hr+' '+hr+' 0 0 1 0 '+(2*hr)+' Z" fill="'+dk+'" opacity=".26"/>'+
-   sh(x-hr*.38,y-hr*1.12,hr*.42,hr*.25,-26,.42);
+  return '<g filter="url(#ha-dp)">'+
+   R(x-bw,y,2*bw,bh,bw*.92,g)+
+   P('M'+x+' '+y+' h'+bw+' a'+(bw*.92)+' '+(bw*.92)+' 0 0 1 0 '+bh+' h-'+bw+' Z',dk,' opacity=".3"')+
+   C(x,y-hr*.76,hr,g)+
+   P('M'+x+' '+(y-hr*.76-hr)+' a'+hr+' '+hr+' 0 0 1 0 '+(2*hr)+' Z',dk,' opacity=".3"')+
+   spec(x-hr*.36,y-hr*1.18,hr*.44,hr*.26,-26,.5)+
+   rim('M'+(x-hr*.92)+' '+(y-hr*1.16)+' a'+hr+' '+hr+' 0 0 1 '+(hr*.82)+' -'+(hr*.5),'#fff',1.8,.5)+
+  '</g>';
  }
- A.party=wrap('0 0 200 170',
-  floor(100,152,62,11,.3)+
-  guest(44,96,20,26,56,'url(#ha-gr)','#0E5C3B')+
-  guest(156,96,20,26,56,'url(#ha-bl)','#17457C')+
-  guest(100,84,27,35,68,'url(#ha-pu)','#4B2596')+
-  crown(100,32,58)+
-  spark(26,50,10)+spark(176,44,8)+spark(20,122,6,'#FFF3C8',.7)+spark(184,126,6,'#FFF3C8',.7));
+ A.party=wrap('0 0 200 180',
+  glow(100,92,64,'#9B6CF0',.26)+
+  cast(100,158,60,10,.48)+
+  guest(48,100,20,25,56,'url(#ha-gr)','#0A5236')+
+  guest(152,100,20,25,56,'url(#ha-bl)','#12386E')+
+  guest(100,86,28,36,70,'url(#ha-pu)','#41197F')+
+  crown(100,30,60)+
+  spk(26,52,10)+spk(178,46,9)+spk(20,126,7,'#FFF3C8',.7)+spk(186,130,7,'#FFF3C8',.7));
 
- /* ── مصباح المعلومات ── */
- A.bulb=wrap('0 0 120 120',
-  '<g stroke="url(#ha-au)" stroke-width="6" stroke-linecap="round" opacity=".85">'+
-   '<path d="M60 8 V20"/><path d="M20 24 L29 33"/><path d="M100 24 L91 33"/>'+
-   '<path d="M10 62 H23"/><path d="M110 62 H97"/></g>'+
-  '<path d="M60 22 C41 22 27 36 27 54 C27 68 36 74 41 86 H79 C84 74 93 68 93 54 C93 36 79 22 60 22 Z" fill="url(#ha-gl)"/>'+
-  '<path d="M60 22 C79 22 93 36 93 54 C93 68 84 74 79 86 H60 Z" fill="#D89A18" opacity=".3"/>'+
-  '<path d="M48 86 L51 58 M72 86 L69 58 M51 58 H69" fill="none" stroke="#C07F0E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>'+
-  '<rect x="41" y="86" width="38" height="12" rx="4" fill="url(#ha-st)"/>'+
-  '<rect x="45" y="100" width="30" height="11" rx="4.5" fill="#7E8AA0"/>'+
-  '<rect x="41" y="86" width="38" height="4" rx="2" fill="#fff" opacity=".45"/>'+
-  sh(45,40,9,16,-22,.5));
+ /* ═══ مصباح المعلومات ═══ */
+ A.bulb=wrap('0 0 128 128',
+  glow(64,52,40,'#FFD05A',.4)+
+  '<g stroke="url(#ha-au)" stroke-width="6" stroke-linecap="round" opacity=".9">'+
+   '<path d="M64 6 V19"/><path d="M20 22 L30 32"/><path d="M108 22 L98 32"/>'+
+   '<path d="M8 64 H22"/><path d="M120 64 H106"/></g>'+
+  cast(64,118,24,5,.45)+
+  '<g filter="url(#ha-dp)">'+
+   P('M64 21 C43 21 28 36 28 55 C28 70 38 77 43 90 H85 C90 77 100 70 100 55 C100 36 85 21 64 21 Z','url(#ha-gl)')+
+   P('M64 21 C85 21 100 36 100 55 C100 70 90 77 85 90 H64 Z','#C4820E',' opacity=".26"')+
+   rim('M64 21 C43 21 28 36 28 55 C28 66 33 73 38 82','#FFFBE4',2.4,.7)+
+   S('M50 90 L54 60 M78 90 L74 60 M54 60 q10 -9 20 0','#B8760A',4.4,' opacity=".6"')+
+   R(43,90,42,13,4,'url(#ha-st)')+
+   R(43,90,42,4,2,'#fff',' opacity=".6"')+
+   R(47,105,34,12,5,'#7D8899')+
+   R(47,105,34,4,2,'#C6CEDB',' opacity=".7"')+
+   spec(46,42,11,19,-22,.55)+
+  '</g>');
 
- /* ── قناعا التمثيل ── */
+ /* ═══ قناعا التمثيل ═══ */
  function mask(x,y,s,fill,dark,happy){
-  var g='<g transform="translate('+x+' '+y+') scale('+s+')">'+
-   '<path d="M-26 -30 C-10 -36 10 -36 26 -30 C26 6 16 34 0 34 C-16 34 -26 6 -26 -30 Z" fill="'+fill+'"/>'+
-   '<path d="M0 -34 C10 -34 18 -32 26 -30 C26 6 16 34 0 34 Z" fill="'+dark+'" opacity=".32"/>';
-  g+= happy
-   ? '<path d="M-17 -10 q6 -8 12 0" fill="none" stroke="'+dark+'" stroke-width="4" stroke-linecap="round"/>'+
-     '<path d="M5 -10 q6 -8 12 0" fill="none" stroke="'+dark+'" stroke-width="4" stroke-linecap="round"/>'+
-     '<path d="M-13 8 q13 14 26 0" fill="none" stroke="'+dark+'" stroke-width="4.5" stroke-linecap="round"/>'
-   : '<path d="M-17 -6 q6 8 12 0" fill="none" stroke="'+dark+'" stroke-width="4" stroke-linecap="round"/>'+
-     '<path d="M5 -6 q6 8 12 0" fill="none" stroke="'+dark+'" stroke-width="4" stroke-linecap="round"/>'+
-     '<path d="M-12 16 q12 -13 24 0" fill="none" stroke="'+dark+'" stroke-width="4.5" stroke-linecap="round"/>'+
-     '<path d="M-10 2 q0 8 -3 12" fill="none" stroke="#9FD8FF" stroke-width="3" stroke-linecap="round"/>';
-  return g+sh(-13,-20,8,5,-24,.34)+'</g>';
+  return '<g transform="translate('+x+' '+y+') scale('+s+')" filter="url(#ha-dp)">'+
+   P('M-27 -31 C-11 -38 11 -38 27 -31 C27 6 17 35 0 35 C-17 35 -27 6 -27 -31 Z',fill)+
+   P('M0 -35 C11 -35 19 -33 27 -31 C27 6 17 35 0 35 Z',dark,' opacity=".3"')+
+   rim('M-27 -31 C-11 -38 11 -38 27 -31','#fff',2,.55)+
+   (happy
+    ? S('M-18 -10 q6.5 -9 13 0','#8A5C08',4.4)+S('M5 -10 q6.5 -9 13 0','#8A5C08',4.4)+
+      P('M-14 7 q14 16 28 0 q-14 8 -28 0 Z','#6A4406')+S('M-14 7 q14 16 28 0','#6A4406',4.6)
+    : S('M-18 -6 q6.5 9 13 0','#3A1A6E',4.4)+S('M5 -6 q6.5 9 13 0','#3A1A6E',4.4)+
+      S('M-13 17 q13 -14 26 0','#3A1A6E',4.6)+
+      S('M-11 2 q1 9 -3 13','#9FD8FF',3.2))+
+   spec(-14,-21,9,5.5,-24,.42)+'</g>';
  }
- A.masks=wrap('0 0 120 120',
-  floor(60,108,40,7,.26)+
-  mask(78,62,1.05,'url(#ha-pu)','#4B2596',0)+
-  mask(44,58,1.15,'url(#ha-au)','#9A6A0C',1)+
-  spark(16,26,8)+spark(106,30,7,'#FFF3C8',.85));
+ A.masks=wrap('0 0 128 128',
+  glow(64,60,42,'#C79A3A',.26)+
+  cast(64,114,40,6,.42)+
+  mask(84,66,1.06,'url(#ha-pu)','#41197F',0)+
+  mask(46,60,1.18,'url(#ha-au)','#8A5A0C',1)+
+  spk(16,26,9)+spk(112,30,8,'#FFF3C8',.85));
 
- /* ── منبّه تحدّي الوقت ── */
- A.clock=wrap('0 0 120 120',
-  floor(60,110,36,7,.26)+
-  '<circle cx="30" cy="26" r="13" fill="url(#ha-rd)"/><circle cx="90" cy="26" r="13" fill="#A6302B"/>'+
-  '<path d="M44 96 L34 112" stroke="#8F2622" stroke-width="9" stroke-linecap="round"/>'+
-  '<path d="M76 96 L86 112" stroke="#8F2622" stroke-width="9" stroke-linecap="round"/>'+
-  '<rect x="54" y="8" width="12" height="12" rx="4" fill="#A6302B"/>'+
-  '<circle cx="60" cy="64" r="42" fill="url(#ha-rd)"/>'+
-  '<path d="M60 22 a42 42 0 0 1 0 84 Z" fill="#8F2622" opacity=".32"/>'+
-  '<circle cx="60" cy="64" r="32" fill="#FFF3E8"/>'+
-  '<circle cx="60" cy="64" r="32" fill="none" stroke="#E4C9B8" stroke-width="2"/>'+
-  '<g stroke="#8F2622" stroke-width="3" stroke-linecap="round">'+
-   '<path d="M60 38 V44"/><path d="M60 84 V90"/><path d="M34 64 H40"/><path d="M80 64 H86"/></g>'+
-  '<path d="M60 64 V42" stroke="#33231F" stroke-width="5" stroke-linecap="round"/>'+
-  '<path d="M60 64 L78 74" stroke="#33231F" stroke-width="5" stroke-linecap="round"/>'+
-  '<circle cx="60" cy="64" r="4.5" fill="#E2584F"/>'+
-  sh(40,42,12,7,-30,.5)+spark(104,52,7,'#FFF3C8',.8));
+ /* ═══ منبّه تحدّي الوقت ═══ */
+ A.clock=wrap('0 0 128 128',
+  glow(64,64,42,'#E2584F',.24)+
+  cast(64,116,34,6,.45)+
+  '<g filter="url(#ha-dp)">'+
+   C(31,26,14,'url(#ha-rd)')+C(97,26,14,'#A6302B')+
+   spec(27,21,6,3.4,-28,.5)+
+   S('M46 100 L35 117','#7E1C18',10)+S('M82 100 L93 117','#7E1C18',10)+
+   R(57,6,14,13,5,'#B7352F')+
+   C(64,66,44,'url(#ha-rd)')+
+   P('M64 22 a44 44 0 0 1 0 88 Z','#7E1C18',' opacity=".3"')+
+   rim('M64 22 a44 44 0 0 0 -42 31','#FFC2B6',2.6,.6)+
+   C(64,66,34,'#FFF6EC')+
+   C(64,66,34,'none',' stroke="#D9B7A4" stroke-width="2"')+
+   P('M34 58 a34 34 0 0 1 44 -22 a40 40 0 0 0 -44 22 Z','#fff',' opacity=".8"')+
+   '<g stroke="#8F2622" stroke-width="3.4" stroke-linecap="round">'+
+    '<path d="M64 38 V45"/><path d="M64 87 V94"/><path d="M33 66 H40"/><path d="M88 66 H95"/></g>'+
+   S('M64 66 V42','#2A1D1A',5.4)+S('M64 66 L83 77','#2A1D1A',5.4)+
+   C(64,66,5,'#E2584F')+C(64,66,2.2,'#7E1C18')+
+   spec(42,44,13,8,-30,.5)+
+  '</g>'+spk(110,50,8,'#FFF3C8',.8));
 
- /* ── بطاقات أونو ── */
- function pcard(x,y,rot,c,dk){
-  return '<g transform="rotate('+rot+' '+x+' '+y+')"><rect x="'+(x-21)+'" y="'+(y-30)+'" width="42" height="60" rx="8" fill="'+c+'"/>'+
-   '<rect x="'+(x-15)+'" y="'+(y-24)+'" width="30" height="48" rx="5" fill="#fff" opacity=".16"/>'+
-   '<path d="M'+x+' '+(y-30)+' h21 v60 h-21 Z" fill="'+dk+'" opacity=".26"/></g>';
+ /* ═══ بطاقات أونو ═══ */
+ function pcard(x,y,rot,g,dk){
+  return '<g transform="rotate('+rot+' '+x+' '+y+')" filter="url(#ha-dp)">'+
+   R(x-22,y-31,44,62,8,g)+
+   R(x-16,y-25,32,50,5,'#fff',' opacity=".18"')+
+   P('M'+x+' '+(y-31)+' h22 v62 h-22 Z',dk,' opacity=".22"')+
+   rim('M'+(x-22)+' '+(y-23)+' v-4 a8 8 0 0 1 8 -4 h14','#fff',2,.65)+
+   spec(x-11,y-20,10,6,-28,.4)+'</g>';
  }
- A.cards=wrap('0 0 120 120',
-  floor(60,108,38,7,.26)+
-  pcard(36,64,-20,'url(#ha-gr)','#12714A')+
-  pcard(60,58,-4,'url(#ha-bl)','#1E579C')+
-  pcard(84,64,14,'url(#ha-rd)','#8F2622')+
-  '<polygon points="84,48 88,58 99,58 90,65 93,76 84,69 75,76 78,65 69,58 80,58" fill="url(#ha-au)" transform="rotate(14 84 62)"/>'+
-  spark(18,30,8)+spark(104,28,7,'#FFF3C8',.85));
+ A.cards=wrap('0 0 128 128',
+  glow(64,62,42,'#FFD976',.22)+halo(64,62,48)+
+  cast(64,112,38,6,.45)+
+  pcard(36,68,-22,'url(#ha-gr)','#0A5236')+
+  pcard(62,60,-4,'url(#ha-bl)','#12386E')+
+  pcard(90,68,16,'url(#ha-rd)','#7E1C18')+
+  '<g transform="rotate(16 90 64)">'+PG(star(90,64,15,6.6),'url(#ha-au)')+
+   PG(star(90,64,15,6.6),'none',' stroke="#B8871E" stroke-width="1.2" opacity=".6"')+'</g>'+
+  spk(16,28,9)+spk(112,26,8,'#FFF3C8',.85));
 
- /* ── لوح الكيرم ── */
- A.carrom=wrap('0 0 120 120',
-  floor(60,108,40,7,.26)+
-  '<rect x="14" y="18" width="92" height="92" rx="10" fill="url(#ha-wd)"/>'+
-  '<rect x="22" y="26" width="76" height="76" rx="5" fill="#F0DCB4"/>'+
-  '<rect x="22" y="26" width="76" height="76" rx="5" fill="none" stroke="#B98C4E" stroke-width="2"/>'+
-  '<circle cx="60" cy="64" r="17" fill="none" stroke="#C99A55" stroke-width="2"/>'+
-  '<circle cx="30" cy="34" r="6.5" fill="#1A1208"/><circle cx="90" cy="34" r="6.5" fill="#1A1208"/>'+
-  '<circle cx="30" cy="94" r="6.5" fill="#1A1208"/><circle cx="90" cy="94" r="6.5" fill="#1A1208"/>'+
-  '<circle cx="53" cy="58" r="7.5" fill="#F6ECD6"/><circle cx="53" cy="56.6" r="7.5" fill="#FFFBF0"/>'+
-  '<circle cx="68" cy="60" r="7.5" fill="#241A0C"/><circle cx="68" cy="58.6" r="7.5" fill="#3B2C16"/>'+
-  '<circle cx="60" cy="72" r="8" fill="#9E2A22"/><circle cx="60" cy="70.6" r="8" fill="#E2584F"/>'+
-  sh(60,68,3,1.6,0,.45)+
-  sh(38,38,14,8,-28,.3)+spark(106,24,7,'#FFF3C8',.8));
+ /* ═══ لوح الكيرم ═══ */
+ function disc(x,y,r,top,side,dk){
+  return C(x,y+r*.18,r,dk,' opacity=".5"')+C(x,y,r,side)+C(x,y-r*.1,r*.92,top)+
+   '<ellipse cx="'+(x-r*.3)+'" cy="'+(y-r*.42)+'" rx="'+(r*.42)+'" ry="'+(r*.24)+'" fill="#fff" opacity=".5" transform="rotate(-26 '+(x-r*.3)+' '+(y-r*.42)+')"/>';
+ }
+ A.carrom=wrap('0 0 128 128',
+  glow(64,64,44,'#D2A167',.2)+
+  cast(64,116,42,6,.45)+
+  '<g filter="url(#ha-dp)">'+
+   R(12,16,104,100,11,'url(#ha-wd)')+
+   R(12,16,104,100,11,'none',' stroke="#5E3A1B" stroke-width="2" opacity=".55"')+
+   R(20,24,88,84,6,'#F6E6C6')+
+   R(20,24,88,84,6,'none',' stroke="#BC9155" stroke-width="2.4"')+
+   R(20,24,88,10,6,'#fff',' opacity=".5"')+
+   C(64,66,19,'none',' stroke="#CFA463" stroke-width="2.4"')+
+   C(64,66,7,'none',' stroke="#CFA463" stroke-width="1.6"')+
+   C(29,35,7.4,'#140D05')+C(99,35,7.4,'#140D05')+C(29,97,7.4,'#140D05')+C(99,97,7.4,'#140D05')+
+   disc(52,58,8.6,'#FFF7E4','#D9C69E','#6A5334')+
+   disc(76,62,8.6,'#3E2E16','#241A0C','#0D0803')+
+   disc(64,78,9.2,'#F0776C','#B33127','#5C120E')+
+   spec(40,36,16,9,-28,.42)+
+  '</g>'+spk(112,22,8,'#FFF3C8',.8));
 
- /* ── لوح المهمّات ── */
- A.clip=wrap('0 0 120 120',
-  floor(60,110,34,6,.24)+
-  '<rect x="20" y="16" width="80" height="94" rx="11" fill="url(#ha-bl)"/>'+
-  '<path d="M60 16 h29 a11 11 0 0 1 11 11 v72 a11 11 0 0 1 -11 11 H60 Z" fill="#17457C" opacity=".3"/>'+
-  '<rect x="28" y="28" width="64" height="72" rx="7" fill="#F3F7FE"/>'+
-  '<rect x="44" y="8" width="32" height="16" rx="6" fill="#8894AB"/>'+
-  '<rect x="44" y="8" width="32" height="6" rx="3" fill="#C4CCDB"/>'+
-  '<g stroke="#B6C2D6" stroke-width="5" stroke-linecap="round">'+
-   '<path d="M52 48 H82"/><path d="M52 64 H82"/><path d="M52 80 H74"/></g>'+
-  '<circle cx="40" cy="48" r="6.5" fill="#35C47A"/>'+
-  '<path d="M37 48 l2.4 2.6 4.2 -5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'+
-  '<circle cx="40" cy="64" r="6.5" fill="#35C47A"/>'+
-  '<path d="M37 64 l2.4 2.6 4.2 -5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'+
-  '<circle cx="40" cy="80" r="6.5" fill="none" stroke="#B6C2D6" stroke-width="3"/>'+
-  sh(34,34,10,6,-28,.32));
+ /* ═══ لوح المهمّات ═══ */
+ A.clip=wrap('0 0 128 128',
+  glow(64,64,38,'#4A93E8',.22)+
+  cast(64,118,32,5,.42)+
+  '<g filter="url(#ha-dp)">'+
+   R(20,16,88,100,12,'url(#ha-bl)')+
+   P('M64 16 h32 a12 12 0 0 1 12 12 v76 a12 12 0 0 1 -12 12 H64 Z','#12386E',' opacity=".26"')+
+   rim('M32 16 h64','#D6ECFF',2.4,.6)+
+   R(28,28,72,78,8,'#F7FAFF')+
+   R(28,28,72,8,4,'#fff',' opacity=".9"')+
+   R(46,7,36,17,6,'url(#ha-st)')+
+   R(48,9,32,5,2.5,'#fff',' opacity=".7"')+
+   '<g stroke="#C3CEDF" stroke-width="5.4" stroke-linecap="round">'+
+    '<path d="M55 48 H88"/><path d="M55 66 H88"/><path d="M55 84 H80"/></g>'+
+   C(41,48,7.4,'#2BB273')+S('M37.4 48 l2.8 3 5-5.8','#fff',3)+
+   C(41,66,7.4,'#2BB273')+S('M37.4 66 l2.8 3 5-5.8','#fff',3)+
+   C(41,84,7.4,'none',' stroke="#C3CEDF" stroke-width="3.2"')+
+   spec(36,36,12,7,-28,.4)+
+  '</g>');
 
- /* ── هديّة المكافأة ── */
- A.gift=wrap('0 0 120 120',
-  floor(60,108,34,6,.26)+
-  '<rect x="20" y="48" width="80" height="58" rx="9" fill="url(#ha-pu)"/>'+
-  '<path d="M60 48 h31 a9 9 0 0 1 9 9 v40 a9 9 0 0 1 -9 9 H60 Z" fill="#4B2596" opacity=".3"/>'+
-  '<rect x="14" y="34" width="92" height="20" rx="7" fill="#A87BF5"/>'+
-  '<path d="M60 34 h39 a7 7 0 0 1 7 7 v6 a7 7 0 0 1 -7 7 H60 Z" fill="#4B2596" opacity=".26"/>'+
-  '<rect x="50" y="34" width="20" height="72" fill="url(#ha-au)"/>'+
-  '<rect x="50" y="34" width="20" height="72" fill="#fff" opacity=".12"/>'+
-  '<path d="M60 34 C46 34 31 28 35 18 C39 10 53 15 60 34 C67 15 81 10 85 18 C89 28 74 34 60 34 Z" fill="url(#ha-au)"/>'+
-  '<circle cx="60" cy="32" r="5.5" fill="#FFF3C8"/>'+
-  sh(32,44,11,5,-16,.3)+spark(104,26,8)+spark(16,24,6,'#FFF3C8',.8));
+ /* ═══ هديّة المكافأة ═══ */
+ A.gift=wrap('0 0 128 128',
+  glow(64,68,40,'#9B6CF0',.26)+
+  cast(64,114,34,6,.45)+
+  '<g filter="url(#ha-dp)">'+
+   R(20,50,88,62,10,'url(#ha-pu)')+
+   P('M64 50 h34 a10 10 0 0 1 10 10 v42 a10 10 0 0 1 -10 10 H64 Z','#41197F',' opacity=".28"')+
+   R(13,34,102,22,8,'#A87BF5')+
+   P('M64 34 h43 a8 8 0 0 1 8 8 v6 a8 8 0 0 1 -8 8 H64 Z','#41197F',' opacity=".24"')+
+   R(13,34,102,7,4,'#E5D2FF',' opacity=".6"')+
+   R(52,34,24,78,0,'url(#ha-au)')+
+   R(54,34,7,78,0,'#FFF6D2',' opacity=".45"')+
+   P('M64 34 C48 34 31 27 36 16 C41 7 56 13 64 34 C72 13 87 7 92 16 C97 27 80 34 64 34 Z','url(#ha-au)')+
+   C(64,31,6.4,'url(#ha-gl)')+
+   spec(34,46,13,6,-16,.36)+
+  '</g>'+spk(110,26,9)+spk(16,24,7,'#FFF3C8',.8));
+
+ /* ═══ قفل الغرفة الخاصّة ═══ */
+ A.lock=wrap('0 0 128 128',
+  glow(64,72,40,'#9B6CF0',.28)+
+  cast(64,116,32,6,.45)+
+  '<g filter="url(#ha-dp)">'+
+   S('M40 58 V42 a24 24 0 0 1 48 0 V58','url(#ha-st)',13)+
+   S('M42 56 V42 a22 22 0 0 1 14 -20','#fff',3.4,' opacity=".55"')+
+   R(24,56,80,56,15,'url(#ha-pu)')+
+   P('M64 56 h25 a15 15 0 0 1 15 15 v26 a15 15 0 0 1 -15 15 H64 Z','#41197F',' opacity=".28"')+
+   rim('M24 71 a15 15 0 0 1 15 -15 h50','#EAD6FF',2.6,.65)+
+   C(64,80,9,'#2E1259')+C(64,80,6,'#4B1D8C')+
+   P('M60.6 84 h6.8 l2 16 h-10.8 Z','#2E1259')+
+   spec(40,68,12,7,-26,.44)+
+  '</g>'+spk(108,34,8,'#E8D6FF',.75));
+
+ /* ═══ آليّ التدريب ═══ */
+ A.robot=wrap('0 0 128 128',
+  glow(64,68,40,'#2FC4A8',.28)+
+  cast(64,116,32,6,.45)+
+  '<g filter="url(#ha-dp)">'+
+   S('M64 20 V34','url(#ha-st)',6)+C(64,16,7,'url(#ha-gl)')+
+   R(12,58,14,26,7,'url(#ha-st)')+R(102,58,14,26,7,'#6E7A8C')+
+   R(22,32,84,74,22,'url(#ha-st)')+
+   P('M64 32 h20 a22 22 0 0 1 22 22 v30 a22 22 0 0 1 -22 22 H64 Z','#4A5567',' opacity=".26"')+
+   rim('M22 54 a22 22 0 0 1 22 -22 h40','#fff',3,.7)+
+   R(32,48,64,34,15,'#101827')+
+   R(34,50,60,14,10,'#233049',' opacity=".8"')+
+   C(48,65,8,'#2FC4A8')+C(48,65,4.4,'#C9FFF4')+
+   C(80,65,8,'#2FC4A8')+C(80,65,4.4,'#C9FFF4')+
+   R(52,90,24,7,3.5,'#96A3B8',' opacity=".7"')+
+   spec(40,42,14,7,-26,.5)+
+  '</g>'+spk(108,32,8,'#C9FFF4',.7));
 
  return {get:function(n){return A[n]||''},names:Object.keys(A)};
 })();
@@ -24676,7 +24782,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.11';
+const APP_VER='6.20';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -34762,11 +34868,9 @@ function hubCss(){
  '.ghHero::before{content:"";position:absolute;top:-45%;right:-15%;width:65%;height:120%;pointer-events:none;',
  ' background:radial-gradient(closest-side,rgba(139,92,240,.22),transparent)}',
  '.ghHero .row{display:flex;align-items:center;gap:14px;position:relative}',
- '.ghHero .art{width:104px;height:104px;flex-shrink:0;border-radius:22px;overflow:hidden;position:relative;',
- ' background:#0A1022;border:1px solid #3A4674;',
- ' box-shadow:0 10px 24px rgba(0,0,0,.5),0 0 34px -6px rgba(232,178,58,.45),inset 0 1px 0 rgba(255,255,255,.12)}',
- '.ghHero .art::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;',
- ' background:radial-gradient(closest-side at 30% 26%,rgba(255,240,200,.22),transparent 70%)}',
+ '.ghHero .art{width:118px;height:118px;flex-shrink:0;position:relative;',
+ ' filter:drop-shadow(0 10px 16px rgba(0,0,0,.55))}',
+ '.ghHero .art{background:radial-gradient(closest-side,rgba(255,214,120,.32),rgba(255,214,120,.1) 56%,transparent 74%)}',
  '.ghHero .art svg{width:100%;height:100%;display:block}',
  '.ghHero .bd{flex:1;min-width:0}',
  '.ghHero .nm{font-size:23px;font-weight:900;line-height:1.15;color:#F7F8FC}',
@@ -34787,8 +34891,10 @@ function hubCss(){
  '.ghBar{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}',
  '.ghBar .mid{flex:1;min-width:0;text-align:center;padding-top:2px}',
  '.ghBar .cr{display:block;line-height:0;margin-bottom:2px}',
- '.ghBar h2{font-size:27px;font-weight:900;line-height:1.1;color:#FFF3D2;',
- ' text-shadow:0 2px 14px rgba(232,178,58,.35)}',
+ '.ghBar h2{font-size:28px;font-weight:900;line-height:1.1;',
+ ' background:linear-gradient(176deg,#FFF8DC 6%,#FFE08A 34%,#EFB43C 62%,#C08A16 100%);',
+ ' -webkit-background-clip:text;background-clip:text;color:transparent;',
+ ' filter:drop-shadow(0 2px 10px rgba(232,178,58,.45))}',
  '.ghBar .ghTag{font-size:11.5px;font-weight:700;color:#93A6CC;margin-top:5px;line-height:1.5}',
  '.ghBar .sp{width:46px;flex-shrink:0}',
 
@@ -34809,11 +34915,11 @@ function hubCss(){
  ' background:linear-gradient(180deg,rgba(255,255,255,.05),transparent 40%)}',
  '.ghWay:active{transform:scale(.985)}',
  '.ghWay.main{border-color:var(--ac);box-shadow:0 12px 30px -14px var(--ac),inset 0 0 0 1px rgba(232,178,58,.18)}',
- '.ghWay .ic{width:50px;height:50px;flex-shrink:0;border-radius:15px;display:flex;align-items:center;justify-content:center;',
+ '.ghWay .ic{width:54px;height:54px;flex-shrink:0;border-radius:16px;display:flex;align-items:center;justify-content:center;',
  ' background:linear-gradient(160deg,var(--acs,rgba(255,255,255,.05)),rgba(8,12,28,.8));border:1px solid var(--acg,#2A3358);',
  ' box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 6px 14px rgba(0,0,0,.4)}',
  '.ghWay .ic svg{filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}',
- '.ghWay .ic .art{width:42px;height:42px;display:block;line-height:0}',
+ '.ghWay .ic .art{width:48px;height:48px;display:block;line-height:0}',
  '.ghWay .ic .art svg{width:100%;height:100%;display:block}',
  '.ghWay .bd{flex:1;min-width:0;display:block}',
  '.ghWay .t{display:block;font-size:15px;font-weight:900;line-height:1.2}',
@@ -34929,7 +35035,7 @@ function gameHub(g){
  const R=GH_ROUTE[def.id]||{};
  const pl=ghRange(def.minP,def.maxP,def.maxP>=11?'لاعبًا':'لاعبين');
  const noRp=ghPill('','بلا نقاط تصنيف').replace('class="ghPill"','class="ghPill nr"');
- const art=GAME_ART[def.rmKey]||ico(def.icon,64);
+ const art=GAME_ART[def.rmKey]||HOME_ART.get('bulb')||ico(def.icon,64);
  go(`<div class="scr on">${ghBar(def.ar,m.tag||'')}
  <div class="ghHero">
   <div class="row">
@@ -34947,15 +35053,15 @@ function gameHub(g){
  </div>
 
  <div class="ghSec"><i></i><b>${ico('crown',15)}</b><span>اختر طريقة اللعب</span><b>${ico('crown',15)}</b><i></i></div>
- ${ghWay('main',ico('trophy',27),'لعب مصنّف','نافس لاعبين حقيقيّين وارفع تصنيفك',
+ ${ghWay('main',`<span class="art">${HOME_ART.get('trophy')}</span>`,'لعب مصنّف','نافس لاعبين حقيقيّين وارفع تصنيفك',
    [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time),ghPill(ico('trophy',10),'جوائز ومكافآت')],
    R.ranked||`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
  ${ghWay('',`<span class="art">${art}</span>`,'لعب عادي','استمتع بمباراة سريعة دون تأثير على التصنيف',
    [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.quick),ghPill(ico('gift',10),'بلا قيود')],
    R.casual||`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
- ${def.room?ghWay('',ico('lock',27,'purple'),'غرفة خاصّة','العب مع أصدقائك في غرفة مخصّصة',
+ ${def.room?ghWay('',`<span class="art">${HOME_ART.get('lock')}</span>`,'غرفة خاصّة','العب مع أصدقائك في غرفة مخصّصة',
    [ghPill(ico('group',10),pl),ghPill(ico('web',10),'برمز غرفة'),noRp],`push('roomScr','${g}')`,'#B05CF0'):''}
- ${def.bot?ghWay('',ico('robot',27),'ضد الكمبيوتر','حسّن مهاراتك مع مستويات متعدّدة',
+ ${def.bot?ghWay('',`<span class="art">${HOME_ART.get('robot')}</span>`,'ضد الكمبيوتر','حسّن مهاراتك مع مستويات متعدّدة',
    [ghPill(ico('user',10),'لاعب واحد'),ghPill(ico('timer',10),m.bot||m.quick),ghPill(ico('chart',10),'مستويات متعدّدة')],
    `push('soloScr','${g}')`,'#2FC4A8'):''}
  ${(R.extra||[]).map(x=>ghWay('',ico(x.ic,27),x.t,x.s,
