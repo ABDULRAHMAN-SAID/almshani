@@ -9,21 +9,12 @@ self.addEventListener('install',e=>{
  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',e=>{
- e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k!==CACHE+'-fonts').map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+ e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
 self.addEventListener('fetch',e=>{
  const req=e.request;
  if(req.method!=='GET')return;
  const url=new URL(req.url);
- // خطّ Cairo من Google Fonts: يُخزَّن كما هو (استجابة مبهمة) كي لا يسقط الخطّ دون اتصال
- if(/^fonts\.(googleapis|gstatic)\.com$/.test(url.hostname)){
-  e.respondWith(caches.open(CACHE+'-fonts').then(async c=>{
-   const hit=await c.match(req);if(hit)return hit;
-   try{const r=await fetch(req);if(r&&(r.ok||r.type==='opaque'))c.put(req,r.clone());return r}
-   catch(err){return new Response('',{status:504})}
-  }));
-  return;
- }
  if(url.origin!==self.location.origin)return;                 // الخادم البعيد وغيره: شأن المتصفح
  if(/\/(health|ws)$/.test(url.pathname))return;               // حالة الخادم لا تُخزَّن
  // الهيكل: من المخزن فورًا، ثم تحديث صامت من الشبكة للإطلاقة التالية

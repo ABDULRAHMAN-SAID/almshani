@@ -33,6 +33,8 @@ var NET=(function(){
   if(typeof W.WebSocket!=='function')return 'local';
   if(serverOrigin())return 'server';                                   // خادم مضبوط: يعمل من أي مضيف ثابت أو تطبيق متجر
   try{
+   // تطبيق أندرويد: الصفحة تأتي من أصول الحزمة، ولا يوجد خادم على هذا الأصل
+   if(W.location.hostname==='appassets.androidplatform.net')return 'local';
    if(/^https?:$/.test(W.location.protocol))return 'server';          // نفس الأصل: يُتحقّق منه بـ /health
   }catch(e){}
   return 'local';

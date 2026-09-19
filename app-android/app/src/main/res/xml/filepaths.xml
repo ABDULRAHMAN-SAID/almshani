@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+ <!-- ملفّ التصدير يُكتب في مخبأ التطبيق وحده، ويُشارَك عبر عنوان محتوى مؤقّت -->
+ <cache-path name="share" path="share/"/>
+</paths>

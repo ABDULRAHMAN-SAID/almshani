@@ -1,0 +1,7 @@
+# أصول اللعبة تُولَّد قبل البناء من tahaddi/ ولا تُحفظ مرّتين في المستودع
+app/src/main/assets/
+build/
+app/build/
+.gradle/
+local.properties
+app/version.properties

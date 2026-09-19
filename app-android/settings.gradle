@@ -1,0 +1,11 @@
+/* مشروع تطبيق أندرويد للعبة «تحدّي»: غلاف WebView يشغّل اللعبة من أصول التطبيق نفسه.
+   اللعبة تُنسخ إلى app/src/main/assets/ قبل البناء بأمر: node tools/build-www.cjs app-android/app/src/main/assets */
+pluginManagement{
+ repositories{ google(); mavenCentral(); gradlePluginPortal() }
+}
+dependencyResolutionManagement{
+ repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+ repositories{ google(); mavenCentral() }
+}
+rootProject.name='tahaddi'
+include ':app'

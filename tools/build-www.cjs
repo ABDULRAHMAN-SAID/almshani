@@ -21,6 +21,9 @@ if(SERVER){
 fs.writeFileSync(path.join(OUT,'index.html'),html);
 for(const f of ['sw.js','manifest.webmanifest'])fs.copyFileSync(path.join(SRC,f),path.join(OUT,f));
 for(const f of fs.readdirSync(path.join(SRC,'icons')))fs.copyFileSync(path.join(SRC,'icons',f),path.join(OUT,'icons',f));
+/* الخطّ مضمَّن داخل اللعبة (tools/build-fonts.cjs)؛ نصّ ترخيصه يُنشر بجانبها كما تشترط SIL OFL */
+fs.mkdirSync(path.join(OUT,'fonts'),{recursive:true});
+fs.copyFileSync(path.join(SRC,'fonts','OFL.txt'),path.join(OUT,'fonts','OFL.txt'));
 fs.writeFileSync(path.join(OUT,'.nojekyll'),'');
 const ver=(html.match(/APP_VER='([^']+)'/)||[])[1];
 

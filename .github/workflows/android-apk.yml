@@ -1,0 +1,97 @@
+name: تطبيق أندرويد (APK)
+
+# يُشغَّل بيد المالك من تبويب Actions، أو تلقائيًّا حين تتغيّر اللعبة أو مشروع التطبيق.
+# الناتج: ملفّ APK يُنزَّل من صفحة التشغيل ويُثبَّت على الهاتف مباشرة — بلا حساب ولا متجر.
+on:
+  workflow_dispatch:
+    inputs:
+      server:
+        description: 'عنوان الخادم (اتركه فارغًا ليأخذ متغيّر المستودع TAHADDI_SERVER)'
+        required: false
+        default: ''
+  push:
+    branches: [claude/3d-game-design-c59zac]
+    paths:
+      - 'tahaddi/**'
+      - 'app-android/**'
+      - 'tools/build-www.cjs'
+      - 'tools/android-sync.cjs'
+      - '.github/workflows/android-apk.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: بناء حزمة التطبيق
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: التحقّق من تطابق اللعبة مع وحداتها المصدرية
+        run: node tools/build.mjs --check
+
+      - name: تجهيز أصول التطبيق ورقم الإصدار
+        env:
+          TAHADDI_SERVER: ${{ inputs.server != '' && inputs.server || vars.TAHADDI_SERVER }}
+        run: node tools/android-sync.cjs
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: تثبيت حزم عدّة أندرويد المطلوبة
+        run: |
+          set -eu
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          if [ -z "$SDK" ]; then echo "لا توجد عدّة أندرويد على المشغّل"; exit 1; fi
+          SDKMAN="$SDK/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$SDKMAN" ]; then SDKMAN="$(find "$SDK" -name sdkmanager -type f | head -1)"; fi
+          yes | "$SDKMAN" --licenses > /dev/null 2>&1 || true
+          "$SDKMAN" "platforms;android-35" "build-tools;35.0.0" "platform-tools" > /dev/null
+          echo "sdk.dir=$SDK" > app-android/local.properties
+
+      - name: بناء APK
+        working-directory: app-android
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+
+      - name: تسمية الحزمة باسم الإصدار
+        id: pack
+        run: |
+          set -eu
+          VER=$(grep '^versionName=' app-android/app/version.properties | cut -d= -f2)
+          mkdir -p out
+          cp app-android/app/build/outputs/apk/debug/app-debug.apk "out/tahaddi-$VER.apk"
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
+          ls -lh out
+
+      - name: رفع الحزمة للتنزيل
+        uses: actions/upload-artifact@v4
+        with:
+          name: tahaddi-apk-${{ steps.pack.outputs.ver }}
+          path: out/*.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: ملخّص
+        run: |
+          {
+            echo "## تطبيق «تحدّي» جاهز"
+            echo ""
+            echo "- الإصدار: **${{ steps.pack.outputs.ver }}**"
+            echo "- نزّل الملفّ من قسم **Artifacts** في أسفل هذه الصفحة: \`tahaddi-apk-${{ steps.pack.outputs.ver }}\`"
+            echo "- فُكّ الضغط عن الملفّ المنزَّل، ثم افتح ملفّ \`.apk\` من هاتفك واسمح بالتثبيت من هذا المصدر."
+          } >> "$GITHUB_STEP_SUMMARY"

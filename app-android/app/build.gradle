@@ -1,0 +1,45 @@
+plugins{ id 'com.android.application' }
+
+/* رقم الإصدار مصدره واحد: APP_VER داخل اللعبة، يكتبه tools/android-sync.cjs هنا */
+def vp=new Properties()
+def vf=file('version.properties')
+if(vf.exists()) vf.withInputStream{ vp.load(it) }
+def verName=vp.getProperty('versionName','0.0')
+def verCode=(vp.getProperty('versionCode','1')) as int
+
+android{
+ namespace 'com.almshani.tahaddi'
+ compileSdk 35
+
+ defaultConfig{
+  applicationId 'com.almshani.tahaddi'
+  minSdk 24
+  targetSdk 35
+  versionCode verCode
+  versionName verName
+ }
+
+ buildTypes{
+  debug{
+   /* حزمة تُثبَّت مباشرة على الهاتف: توقيع التصحيح يكفي للتثبيت اليدويّ */
+   minifyEnabled false
+  }
+  release{
+   minifyEnabled false
+   proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+  }
+ }
+
+ /* BuildConfig مطفأة افتراضيًّا منذ AGP 8؛ الشيفرة تستعملها لتمييز بناء التصحيح */
+ buildFeatures{ buildConfig true }
+
+ compileOptions{
+  sourceCompatibility JavaVersion.VERSION_17
+  targetCompatibility JavaVersion.VERSION_17
+ }
+}
+
+dependencies{
+ implementation 'androidx.appcompat:appcompat:1.7.0'
+ implementation 'androidx.webkit:webkit:1.12.1'
+}
