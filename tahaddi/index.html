@@ -19222,7 +19222,8 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  R.register('chalScr',{render:()=>chalScr()});
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
- R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&GAME_DEFS.find(x=>x.rmKey===g)),fallback:'partyScr'});
+ R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&
+  GAME_DEFS.find(x=>x.rmKey===g||x.id===g)),fallback:'partyScr'});
  // محرّرات: سؤال قبل المغادرة بتغييرات
  R.register('renameAsk',{dirty:()=>{const el=$('nm');return !!el&&el.value.trim()!==(S.name||'')}});
  R.register('clCreateScr',{dirty:formDirty});
@@ -19242,6 +19243,12 @@ function formDirty(){return [...document.querySelectorAll('#app .fin')].some(el=
 /** شريط علوي موحّد: كل شاشة لها رجوع */
 /** سهم الرجوع — يشير إلى اليمين لأن الواجهة عربية، ويأخذ لون الزرّ */
 function bkChev(){return '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M9.2 5.2 L16 12 L9.2 18.8" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
+/** رأس حصن اللعبة: تاج ذهبيّ فوق الاسم ولافتته تحته — تصميم المالك */
+const ghBar=(t,tag)=>`<div class="ghBar">
+ <button class="bk" onclick="back()">${bkChev()}</button>
+ <div class="mid"><span class="cr">${ico('crown',20)}</span>
+  <h2>${t}</h2>${tag?`<div class="ghTag">${tag}</div>`:''}</div>
+ <span class="sp"></span></div>`;
 const tbar=(t,sub)=>`<div class="tbar">
  <button class="bk" onclick="back()">${bkChev()}</button>
  <h2>${t}${sub?`<div style="font-size:10.5px;color:var(--tx2);font-weight:600;margin-top:1px">${sub}</div>`:''}</h2>
@@ -24365,7 +24372,7 @@ function plGames(all){
  return `<div class="plGrid">${rows.map(g=>{
    const p=rankOf(g.id),col=plTierCol(p);
    const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
-   const goTo=g.rmKey?`push('gameHub','${g.rmKey}')`:`push('rankedScr')`;   // الأسئلة لا غرفة لها: بابها شاشة عالم المعرفة
+   const goTo=`push('gameHub','${g.rmKey||g.id}')`;   // لكلّ لعبة حصنها، والأسئلة منها
    return `<button class="plCard" onclick="${goTo}">
     <span class="em${p.placed?'':' un'}">${p.placed?tierEmblem(p.tier,36):'؟'}</span>
     <span class="hd"><span class="art">${GAME_ART[g.rmKey]||ico(g.icon,46)}</span></span>
@@ -24493,7 +24500,7 @@ function plDots(){
 
 /** أوضاع اللعب — أربع بطاقات، والبقيّة خلف «عرض الكل» */
 const PL_MODES=[
- {a:'#7B3FD6',b:'#4A1C93',art:'bulb',t:'معلومات',s:'اختبر معلوماتك العامّة',g:'knowledge',go:"push('rankedScr')"},
+ {a:'#7B3FD6',b:'#4A1C93',art:'bulb',t:'معلومات',s:'اختبر معلوماتك العامّة',g:'knowledge',go:"push('gameHub','knowledge')"},
  {a:'#1E9A6E',b:'#0B4F39',art:'masks',t:'مافيا',s:'مدينة نائمة ومافيا تصطاد',g:'mafia',go:"push('gameHub','mafia')"},
  {a:'#D9475A',b:'#7E1E2E',art:'carrom',t:'كيرم',s:'صوّب وأسقط قطعك قبل خصمك',g:'carrom',go:"push('gameHub','carrom')"},
  {a:'#2F72D8',b:'#143C7E',art:'cards',t:'أونو',s:'تخلّص من بطاقاتك قبل الجميع',g:'uno',go:"push('gameHub','uno')"}
@@ -24533,7 +24540,6 @@ function playScr(){
  <div class="hmSec"><b>أوضاع اللعب</b><span onclick="push('gamesScr')">عرض الكل ${chev()}</span></div>
  ${plModes()}
  ${plDaily()}
- <div class="plSec">${plHero()}</div>
  <div class="plSec">
   ${plRow(ico('group',20),'ليلة العائلة','ألعاب جماعية للأصدقاء والعائلة',"push('partyScr')",'#8B5CF0',
    `<span class="plMini">${fam.map(k=>`<span>${GAME_ART[k]||''}</span>`).join('')}</span>`)}
@@ -24670,7 +24676,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.10';
+const APP_VER='6.11';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -34706,12 +34712,18 @@ const DIFF_SAY={
 var _hubCss=0;
 /** بيانات عرض مركز اللعبة: نوع اللعبة ومدّتها التقريبية بكل طريقة */
 const GAME_META={
- carrom:{type:'لعبة لوح',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة'},
- uno:   {type:'لعبة بطاقات',  time:'10 - 20 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة'},
- mafia: {type:'لعبة أدوار',   time:'20 - 40 دقيقة',quick:'15 - 25 دقيقة',bot:'8 - 15 دقيقة'},
- draw:  {type:'لعبة رسم',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'3 - 5 دقائق'},
+ carrom:{type:'لعبة لوح',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة',
+  tag:'دقّة المهارة .. متعة التحدّي',  sub:'اللعبة الكلاسيكيّة المحبوبة'},
+ uno:   {type:'لعبة بطاقات',  time:'10 - 20 دقيقة',quick:'5 - 10 دقائق',bot:'5 - 15 دقيقة',
+  tag:'السرعة، الحماس، متعة التحدّي', sub:'اللعبة الكلاسيكيّة المحبوبة'},
+ mafia: {type:'لعبة أدوار',   time:'20 - 40 دقيقة',quick:'15 - 25 دقيقة',bot:'8 - 15 دقيقة',
+  tag:'ليل، وشكّ، ومدينة تبحث عن قاتل',tag2:'',sub:'لعبة الأدوار والخداع'},
+ draw:  {type:'لعبة رسم',     time:'10 - 15 دقيقة',quick:'5 - 10 دقائق',bot:'3 - 5 دقائق',
+  tag:'ريشة وخيال .. وتخمين سريع',    sub:'ارسم ودع الباقين يخمّنون'},
+ knowledge:{type:'أسئلة ومعرفة',time:'8 - 12 دقيقة',quick:'4 - 6 دقائق',bot:'4 - 6 دقائق',
+  tag:'معلومة تلو الأخرى .. من يعرف أكثر؟',sub:'قلب تحدّي'},
 };
-function ghRange(a,b,unit){return a+' - '+b+' '+unit}
+function ghRange(a,b,unit){return a===b?(a===2?'لاعبان':a+' '+unit):a+' - '+b+' '+unit}
 /** حبّة معلومات — أي مدى رقمي فيها يُعزل ليُقرأ تصاعديًا داخل النصّ العربي */
 function ghPill(icon,t){return '<span class="ghPill">'+icon+'<span>'+String(t).replace(/(\d+) - (\d+)/g,'<bdi dir="ltr">$1 - $2</bdi>')+'</span></span>'}
 function ghChev(){return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
@@ -34750,9 +34762,11 @@ function hubCss(){
  '.ghHero::before{content:"";position:absolute;top:-45%;right:-15%;width:65%;height:120%;pointer-events:none;',
  ' background:radial-gradient(closest-side,rgba(139,92,240,.22),transparent)}',
  '.ghHero .row{display:flex;align-items:center;gap:14px;position:relative}',
- '.ghHero .art{width:74px;height:74px;flex-shrink:0;border-radius:18px;overflow:hidden;',
+ '.ghHero .art{width:104px;height:104px;flex-shrink:0;border-radius:22px;overflow:hidden;position:relative;',
  ' background:#0A1022;border:1px solid #3A4674;',
- ' box-shadow:0 8px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}',
+ ' box-shadow:0 10px 24px rgba(0,0,0,.5),0 0 34px -6px rgba(232,178,58,.45),inset 0 1px 0 rgba(255,255,255,.12)}',
+ '.ghHero .art::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;',
+ ' background:radial-gradient(closest-side at 30% 26%,rgba(255,240,200,.22),transparent 70%)}',
  '.ghHero .art svg{width:100%;height:100%;display:block}',
  '.ghHero .bd{flex:1;min-width:0}',
  '.ghHero .nm{font-size:23px;font-weight:900;line-height:1.15;color:#F7F8FC}',
@@ -34769,12 +34783,20 @@ function hubCss(){
  '.ghRank .rp{font-size:10px;color:#8F9BBC}',
  '.ghRank .go{margin-inline-start:auto;color:#E8B23A;display:flex;flex-shrink:0}',
 
- /* عنوان القسم بخطّين ومعيّنين ذهبيين */
+ /* رأس الحصن: تاج فوق الاسم ولافتة تحته */
+ '.ghBar{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}',
+ '.ghBar .mid{flex:1;min-width:0;text-align:center;padding-top:2px}',
+ '.ghBar .cr{display:block;line-height:0;margin-bottom:2px}',
+ '.ghBar h2{font-size:27px;font-weight:900;line-height:1.1;color:#FFF3D2;',
+ ' text-shadow:0 2px 14px rgba(232,178,58,.35)}',
+ '.ghBar .ghTag{font-size:11.5px;font-weight:700;color:#93A6CC;margin-top:5px;line-height:1.5}',
+ '.ghBar .sp{width:46px;flex-shrink:0}',
+
+ /* عنوان القسم بخطّين وتاجين ذهبيين */
  '.ghSec{display:flex;align-items:center;gap:9px;margin:2px 0 13px;color:#E8B23A;font-size:14px;font-weight:900}',
  '.ghSec i{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(232,178,58,.55))}',
  '.ghSec i:last-child{background:linear-gradient(90deg,rgba(232,178,58,.55),transparent)}',
- '.ghSec b{width:7px;height:7px;flex-shrink:0;transform:rotate(45deg);background:linear-gradient(135deg,#FFE9A8,#B8871E);',
- ' box-shadow:0 0 7px rgba(232,178,58,.7)}',
+ '.ghSec b{flex-shrink:0;line-height:0;filter:drop-shadow(0 0 7px rgba(232,178,58,.5))}',
  '.ghSec span{text-shadow:0 0 12px rgba(232,178,58,.35);white-space:nowrap}',
 
  /* بطاقات طرق اللعب — لون مميّز لكل طريقة، أيقونة في مربّع، وحبّات معلومات */
@@ -34791,12 +34813,14 @@ function hubCss(){
  ' background:linear-gradient(160deg,var(--acs,rgba(255,255,255,.05)),rgba(8,12,28,.8));border:1px solid var(--acg,#2A3358);',
  ' box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 6px 14px rgba(0,0,0,.4)}',
  '.ghWay .ic svg{filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}',
+ '.ghWay .ic .art{width:42px;height:42px;display:block;line-height:0}',
+ '.ghWay .ic .art svg{width:100%;height:100%;display:block}',
  '.ghWay .bd{flex:1;min-width:0;display:block}',
  '.ghWay .t{display:block;font-size:15px;font-weight:900;line-height:1.2}',
  '.ghWay.main .t{font-size:16px}',
  '.ghWay .s{display:block;font-size:10.5px;color:#8F9BBC;margin-top:3px;line-height:1.5}',
- '.ghWay .pl{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}',
- '.ghPill{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:9px;font-size:9.5px;font-weight:800;',
+ '.ghWay .pl{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}',
+ '.ghPill{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:9px;font-size:9px;font-weight:800;',
  ' background:rgba(8,12,28,.7);border:1px solid #2C3660;color:#C5CDE3;white-space:nowrap}',
  '.ghPill svg{flex-shrink:0}',
  '.ghPill.nr{color:#8F9BBC;border-style:dashed}',
@@ -34888,26 +34912,33 @@ function ghWay(cls,icon,t,s,pills,call,acc,off){
   ${off?'':`<span class="go">${ghChev()}</span>`}</button>`;
 }
 
+/** ألعاب بلا غرف لها مساراتها الخاصّة بدل شاشة المطابقة */
+const GH_ROUTE={knowledge:{ranked:"push('rankedScr')",casual:"vsScr()",extra:[
+ {ic:'energy',t:'تحدٍّ سريع',s:'ستّ أسئلة سريعة — درّب نفسك وحدك',
+  pl:[['user','لاعب واحد'],['timer','4 - 6 دقائق'],['gift','بلا قيود']],go:"push('quickScr')",ac:'#2FC4A8'},
+ {ic:'swords',t:'تحدِّ صديقًا',s:'ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
+  pl:[['group','لاعبان'],['web','برمز صديق'],['timer','بلا وقت']],go:"push('chalScr')",ac:'#F0567F'}]}};
 /** مركز اللعبة — بطاقة اللعبة، رتبتك فيها، ثم طرق لعبها كلّ بلونها */
 function gameHub(g){
  hubCss();rankAll();hubRegister();
- const def=GAME_DEFS.find(x=>x.rmKey===g);
+ const def=GAME_DEFS.find(x=>x.rmKey===g)||GAME_DEFS.find(x=>x.id===g);
  if(!def)return partyScr();
- RM.game=g;
+ if(def.rmKey)RM.game=def.rmKey;                     // عالم المعرفة بلا غرفة، فلا يُلوَّث مفتاح الغرفة
  const p=rankOf(def.id),col=plTierCol(p);
- const m=GAME_META[g]||{type:'لعبة جماعية',time:'10 - 20 دقيقة',quick:'5 - 10 دقائق'};
+ const m=GAME_META[def.rmKey||def.id]||{type:'لعبة جماعية',time:'10 - 20 دقيقة',quick:'5 - 10 دقائق'};
+ const R=GH_ROUTE[def.id]||{};
  const pl=ghRange(def.minP,def.maxP,def.maxP>=11?'لاعبًا':'لاعبين');
  const noRp=ghPill('','بلا نقاط تصنيف').replace('class="ghPill"','class="ghPill nr"');
- go(`<div class="scr on">${tbar(def.ar)}
+ const art=GAME_ART[def.rmKey]||ico(def.icon,64);
+ go(`<div class="scr on">${ghBar(def.ar,m.tag||'')}
  <div class="ghHero">
   <div class="row">
-   <div class="art">${GAME_ART[g]||''}</div>
+   <div class="art">${art}</div>
    <div class="bd">
     <div class="nm">${esc(def.ar)}</div>
-    <div class="ty">${m.type}</div>
-    <div class="ghPk"><i></i>اختر نمط اللعب</div>
+    <div class="ty">${m.sub||m.type}</div>
+    <div class="pills">${ghPill(ico('group',13),pl)}${ghPill(ico('timer',13),m.time)}</div>
    </div></div>
-  <div class="pills">${ghPill(ico('group',13),pl)}${ghPill(ico('timer',13),m.time)}</div>
   <button class="ghRank" onclick="push('gameRankScr','${def.id}')">
    ${ico('medal',16,col)}
    <span class="rt" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</span>
@@ -34915,15 +34946,20 @@ function gameHub(g){
    <span class="go">${ghChev()}</span></button>
  </div>
 
- <div class="ghSec"><i></i><b></b><span>اختر طريقة اللعب</span><b></b><i></i></div>
- ${ghWay('main',ico('shield',27),'لعب مصنّف','تنافس مع لاعبين آخرين وارتقِ في التصنيفات',
-   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time)],`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
- ${ghWay('',ico('play',27,'blue'),'لعب عادي','استمتع بمباراة سريعة دون تأثير على التصنيف',
-   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.quick)],`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
- ${ghWay('',ico('lock',27,'purple'),'غرفة خاصة','أنشئ غرفة برمز وادعُ أصدقاءك للعب',
-   [ghPill(ico('group',10),pl),ghPill(ico('web',10),'برمز غرفة'),noRp],`push('roomScr','${g}')`,'#B05CF0')}
- ${def.bot?ghWay('',ico('robot',27),'ضد الكمبيوتر','تدرّب وتحدَّ قدراتك ضد الذكاء الاصطناعي',
-   [ghPill(ico('user',10),'لاعب واحد'),ghPill(ico('timer',10),m.bot||m.quick),noRp],`push('soloScr','${g}')`,'#2FC4A8'):''}
+ <div class="ghSec"><i></i><b>${ico('crown',15)}</b><span>اختر طريقة اللعب</span><b>${ico('crown',15)}</b><i></i></div>
+ ${ghWay('main',ico('trophy',27),'لعب مصنّف','نافس لاعبين حقيقيّين وارفع تصنيفك',
+   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time),ghPill(ico('trophy',10),'جوائز ومكافآت')],
+   R.ranked||`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
+ ${ghWay('',`<span class="art">${art}</span>`,'لعب عادي','استمتع بمباراة سريعة دون تأثير على التصنيف',
+   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.quick),ghPill(ico('gift',10),'بلا قيود')],
+   R.casual||`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
+ ${def.room?ghWay('',ico('lock',27,'purple'),'غرفة خاصّة','العب مع أصدقائك في غرفة مخصّصة',
+   [ghPill(ico('group',10),pl),ghPill(ico('web',10),'برمز غرفة'),noRp],`push('roomScr','${g}')`,'#B05CF0'):''}
+ ${def.bot?ghWay('',ico('robot',27),'ضد الكمبيوتر','حسّن مهاراتك مع مستويات متعدّدة',
+   [ghPill(ico('user',10),'لاعب واحد'),ghPill(ico('timer',10),m.bot||m.quick),ghPill(ico('chart',10),'مستويات متعدّدة')],
+   `push('soloScr','${g}')`,'#2FC4A8'):''}
+ ${(R.extra||[]).map(x=>ghWay('',ico(x.ic,27),x.t,x.s,
+   x.pl.map(q=>ghPill(ico(q[0],10),q[1])),x.go,x.ac)).join('')}
  ${def.pass?ghWay('',ico('cards',27,'red'),'تمرير الجوال','جهاز واحد يدور بينكم في المجلس نفسه',
    [ghPill(ico('group',10),pl),ghPill(ico('door',10),'جهاز واحد'),noRp],`ptWay='pass';ptOpen('${g}')`,'#F0567F'):''}
  <div class="ghNote">نقاط التصنيف من «اللعب المصنّف» وحده — لئلّا تُجمع الرتب من غرف الأصدقاء.</div>

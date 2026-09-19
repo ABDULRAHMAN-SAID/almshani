@@ -28,7 +28,7 @@ module.exports=[
  ['knBot',R("push('rankedScr');knBot(58)")],
  ['playModesScr',R("push('playModesScr')")],
  ['partyScr',R("push('partyScr')")],
- ...['carrom','uno','mafia','draw'].map(g=>[`gameHub-${g}`,R(`push('gameHub','${g}')`)]),
+ ...['carrom','uno','mafia','draw','knowledge'].map(g=>[`gameHub-${g}`,R(`push('gameHub','${g}')`)]),
  ...['knowledge','carrom','uno','mafia','drawing'].map(g=>[`gameRankScr-${g}`,R(`push('gameRankScr','${g}')`)]),
  ['rankGuideScr-placed',R("const p=rankOf('carrom');p.placed=true;p.tier=5;p.div=1;p.rp=40;push('rankGuideScr','carrom')")],
  ['rankGuideScr-unplaced',R("rankOf('knowledge').placed=false;push('rankGuideScr','knowledge')")],
