@@ -13,7 +13,7 @@ art/scenes/layers/
 # مشاهد أماكن اللعب المخبوزة تُحفظ في المستودع بصيغة JPG؛ الـPNG الخام ناتج البناء
 art/scenes/vn-*.png
 
-# لقطات فحص غلاف أندرويد
-.qa-android-shell.png
-.qa-shout.png
-.qa-go.png
+# لقطات الفحص والمراجعة البصريّة — ناتج أدوات، لا مصدر
+.qa-*.png
+.s-*.png
+.icons-*.png
