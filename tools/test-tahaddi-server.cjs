@@ -44,7 +44,7 @@ async function hello(c,token,name){await c.open;return c.req({t:'hello',token,na
   sec('الحساب');
   const A=client(),B=client();
   const wa=await hello(A,undefined,'عبدالرحمن'),wb=await hello(B,undefined,'x');
-  check('ترحيب برمز وهوية ثابتة وستّ رتب',wa.t==='welcome'&&wa.token.length===32&&/^p[0-9a-f]+$/.test(wa.id)&&Object.keys(wa.ranks).length===6,JSON.stringify(wa).slice(0,200));
+  check('ترحيب برمز وهوية ثابتة وخمس رتب',wa.t==='welcome'&&wa.token.length===32&&/^p[0-9a-f]+$/.test(wa.id)&&Object.keys(wa.ranks).length===5,JSON.stringify(wa).slice(0,200));
   check('الاسم يُنظَّف: القصير يُستبدل باسم افتراضي',wb.name.startsWith('لاعب-'),wb.name);
   const A2=client();const wa2=await hello(A2,wa.token);
   check('الرمز نفسه = الحساب نفسه من جهاز آخر',wa2.id===wa.id&&wa2.name==='عبدالرحمن');

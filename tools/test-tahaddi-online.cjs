@@ -175,7 +175,7 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    back.peer===peerB0&&back.me===peerB0&&back.ph==='uno'&&back.hand===handB0&&rosterA2===2&&back.roster===2&&back.msg==='',JSON.stringify({peerB0,handB0,back,rosterA2}));
   check('اللاعب يُعلَم بعودة الاتصال',back.toast);
   check('صفر أخطاء JS في المتصفحين',A._errs.length===0&&B._errs.length===0,(A._errs.concat(B._errs)).slice(0,3).join(' | '));
-  sec('لو خيروك وصراحة في غرفة: الدور على واحد، والجماعة تشهد والحكم مُعمّى');
+  sec('لو خيروك في غرفة: الدور على واحد، والجماعة تشهد والحكم مُعمّى');
   // اللعبتان أصلهما جلسة: صاحب الدور يجيب أو ينفّذ أمام الجماعة، والجماعة تشهد
   const ctxD=await browser.newContext({viewport:{width:390,height:844}});
   const D=await ctxD.newPage();D._errs=[];D.on('pageerror',e=>D._errs.push('D: '+e.message));
@@ -221,27 +221,6 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
    lkR.every(r=>r.ph==='sgRes'&&r.ok===true&&r.gain===kindPts)&&lkR[0].pts[lkQ[0].who]===kindPts,
    JSON.stringify(lkR.map(r=>[r.ph,r.ok,r.gain]))+' kind='+lkQ[0].kind+' pts='+kindPts);
 
-  await room('sr');
-  await A.evaluate(()=>{RM.sgR=3;rmStart()});
-  await sleep(1700);
-  const srQ=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({who:RM.sg&&RM.sg.who,me:RM.me,q:RM.sg&&RM.sg.q}))));
-  check('صراحة توجّه السؤال إلى لاعب واحد يعرفه الجميع',
-   srQ[0].who&&srQ.every(x=>x.who===srQ[0].who)&&typeof srQ[0].q==='string',JSON.stringify(srQ.map(x=>x.who)));
-  await B.evaluate(()=>sgVote(1));await sleep(400);
-  await D.evaluate(()=>sgVote(1));
-  await sleep(1800);
-  const srR=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({ph:RM.phase,ok:RM.sg&&RM.sg.res&&RM.sg.res.ok,pts:RM.sgPts}))));
-  check('من أجاب تُحسب له إجابة واحدة لا نقاط',
-   srR.every(r=>r.ph==='sgRes'&&r.ok===true&&r.pts[srQ[0].who]===1&&Object.keys(r.pts).length===1),JSON.stringify(srR));
-  await A.evaluate(()=>rmSgNext());await sleep(1000);
-  await A.evaluate(()=>sgVote(0));await D.evaluate(()=>sgVote(0));await sleep(1300);
-  await A.evaluate(()=>rmSgNext());await sleep(900);
-  await A.evaluate(()=>sgVote(0));await B.evaluate(()=>sgVote(0));await sleep(1300);
-  await A.evaluate(()=>rmSgNext());await sleep(1300);
-  const srEndP=await Promise.all([A,B,D].map(p=>p.evaluate(()=>({ph:RM.phase,right:/التمرير حقّ/.test(document.body.innerText)}))));
-  check('الجلسة تنتهي عند الثلاثة، والنهاية تقول إنّ التمرير حقّ',
-   srEndP.every(x=>x.ph==='sgEnd'&&x.right),JSON.stringify(srEndP));
-  check('صفر أخطاء JS في الجهاز الثالث',D._errs.length===0,D._errs.slice(0,3).join(' | '));
   await ctxD.close();
 
   const health=await A.evaluate(async p=>{const r=await fetch(`http://localhost:${p}/health`);return r.json()},PORT);

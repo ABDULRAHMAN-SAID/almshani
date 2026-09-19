@@ -13,7 +13,7 @@ const srv=http.createServer((q,s)=>{let f=q.url.split('?')[0];if(f==='/')f='/ind
  await app.waitForFunction(()=>typeof vbSceneSvg==='function',null,{timeout:30000});
  const venues=process.argv.includes('--venues');   // --venues: مشاهد أماكن اللعب بطول الشاشة (vnSceneSvg 400×800) بدل لوحتي المسرح
  const page=await b.newPage({viewport:venues?{width:400,height:800}:{width:400,height:246},deviceScaleFactor:venues?3:4});
- for(const kind of (venues?['carrom','uno','atelier','mafia','barra','studio']:['mafia','barra'])){
+ for(const kind of (venues?['carrom','uno','atelier','mafia','majlis','studio']:['mafia','majlis'])){
   const svg=await app.evaluate(({k,v})=>v?vnSceneSvg(k):vbSceneSvg(k,k==='mafia'?424242:777777),{k:kind,v:venues});
   await page.setContent(`<!doctype html><html><head><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@900&display=swap" rel="stylesheet"><style>html,body{margin:0;background:transparent}svg{display:block}</style></head><body><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 ${venues?800:246}" width="400" height="${venues?800:246}">${svg}</svg></body></html>`,{waitUntil:'load'});
   await page.waitForTimeout(600);

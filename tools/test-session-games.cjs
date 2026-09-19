@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /**
- * ألعاب الجلسة على قانونها (5.96):
+ * «لو خيروك» على قانونها (5.99):
  *   NODE_PATH=$(npm root -g) node tools/test-session-games.cjs
  * لو خيروك: بطاقة تُسحب مقلوبة وتُقلب، والدور يلفّ، ولكل صنف نقاطه، والرفض بلا نقاط.
- * صراحة: الحدود قبل أوّل سؤال، وزجاجة تدور ولا تعيد الشخص نفسه، والتمرير حقّ يُعدّ ولا يُعاقب.
  */
 const {chromium}=require('playwright');const http=require('h'+'ttp'),fs=require('fs'),path=require('path');
 const ROOT='/home/user/almshani/tahaddi',PORT=8879;
@@ -44,34 +43,6 @@ const T=(n,ok,i)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;console.log
  T('النقاط بحسب صنف البطاقة، والرفض بلا نقاط',JSON.stringify(r.pts)==='[2,4,6]',JSON.stringify(r.pts));
  T('الجلسة تنتهي بلوح فائز',r.end);
 
- // ── صراحة: حدود ثم زجاجة ثم إجابة أو تمرير
- r=await pg.evaluate(async()=>{
-  Router.settle('partyScr');await new Promise(r=>setTimeout(r,200));
-  push('srSetup');await new Promise(r=>setTimeout(r,250));
-  PT.n=4;PT.rounds=8;srSetup(1);await new Promise(r=>setTimeout(r,100));
-  ptNameSet(0,'سعود');ptNameSet(1,'نورة');ptNameSet(2,'فهد');ptNameSet(3,'ريم');
-  srLimits();await new Promise(r=>setTimeout(r,150));
-  const lim=/يمرّر/.test(document.body.innerText)&&/حدود الجلسة/.test(document.body.innerText);
-  srStart();await new Promise(r=>setTimeout(r,120));
-  const ring=document.querySelectorAll('.srRing .srNm').length, bottle=!!document.querySelector('.srBottle');
-  const picks=[];let same=0;
-  for(let i=0;i<8;i++){
-   picks.push(PT.idx);
-   if(i&&picks[i]===picks[i-1])same++;
-   PT.spin=0;srAsk();await new Promise(r=>setTimeout(r,60));
-   srDone(i%3?1:0);await new Promise(r=>setTimeout(r,60));
-   if(PT.r<PT.rounds){PT.spin=1;/* تخطّي انتظار الدوران */}
-  }
-  return {lim,ring,bottle,same,ans:PT.ans.slice(),skip:PT.skip.slice(),
-   end:/أكثركم صراحةً|جلسة هادئة/.test(document.body.innerText),
-   right:/التمرير حقّ/.test(document.body.innerText)};
- });
- T('الحدود تُعرض قبل أوّل سؤال، والتمرير حقّ معلن',r.lim,'');
- T('حلقة الأسماء والزجاجة تُرسَمان',r.ring===4&&r.bottle,JSON.stringify([r.ring,r.bottle]));
- T('الزجاجة لا تعيد الشخص نفسه مرّتين متتاليتين',r.same===0,r.same);
- T('الإجابات تُعدّ والتمرير يُعدّ منفصلًا بلا عقوبة',
-   r.ans.reduce((a,b)=>a+b,0)===5&&r.skip.reduce((a,b)=>a+b,0)===3,JSON.stringify([r.ans,r.skip]));
- T('النهاية تقول من صارح أكثر وتؤكّد أنّ التمرير حقّ',r.end&&r.right,JSON.stringify([r.end,r.right]));
  T('صفر أخطاء JS',errs.length===0,errs.slice(0,2).join(' | '));
  console.log('\n'+(fail?`✗ ${fail} فشل / ${pass} نجح`:`ألعاب الجلسة سليمة ✔ (${pass} فحصًا)`));
  await b.close();srv.close();

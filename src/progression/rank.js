@@ -26,7 +26,7 @@ var RankCore=(function(){
  /** موسم واحد عالمي، ورتبة مستقلّة لكل لعبة داخله */
  var SEASON_ID=4;
  /** معرّفات الألعاب إنجليزية — لا يُستخدم الاسم العربي مفتاحًا للتخزين */
- var GAMES=['knowledge','carrom','uno','mafia','drawing','outsider'];
+ var GAMES=['knowledge','carrom','uno','mafia','drawing'];
  /** تعريف كل لعبة — scoreModel يحدّد كيف تتحوّل نتيجة المباراة إلى نقاط تصنيف */
  var GAME_DEFS=[
   {id:'knowledge',ar:'عالم المعرفة',icon:'bulb',rmKey:null,
@@ -43,10 +43,7 @@ var RankCore=(function(){
    scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:1,pass:1,minP:5,maxP:12,status:'live'},
   {id:'drawing',  ar:'مسابقة الرسم',icon:'palette',rmKey:'draw',
    desc:'كلمة واحدة والكلّ يرسم — صوّتوا لأفضل لوحة.',
-   scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:10,status:'live'},
-  {id:'outsider', ar:'برا السالفة', icon:'bulb',rmKey:'barra',
-   desc:'الكلّ يعرف الكلمة إلا واحدًا — اكشفوه بالأسئلة.',
-   scoreModel:'roundsAggregate',ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:8,status:'live'}
+   scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:10,status:'live'}
  ];
  function gameDef(id){for(var i=0;i<GAME_DEFS.length;i++)if(GAME_DEFS[i].id===id)return GAME_DEFS[i];return null}
 

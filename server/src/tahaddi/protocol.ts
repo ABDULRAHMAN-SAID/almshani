@@ -1,7 +1,7 @@
 // عقد الشبكة لتحدّي — العميل يرسل ادّعاءات ونوايا، والخادم يملك الحقيقة ويردّ بها.
 // كل رسالة عميل قد تحمل rid (معرّف طلب) فيعيده الخادم في الردّ لمطابقة الوعود.
 
-export type GameId = 'knowledge' | 'carrom' | 'uno' | 'mafia' | 'drawing' | 'outsider';
+export type GameId = 'knowledge' | 'carrom' | 'uno' | 'mafia' | 'drawing';
 export type Mode = 'ranked' | 'casual' | 'room' | 'bot' | 'pass' | 'training';
 
 /** ملفّ تصنيف لعبة واحدة — الشكل نفسه الذي يستعمله العميل (src/progression/rank.js) */

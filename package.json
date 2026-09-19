@@ -24,6 +24,7 @@
     "android:sync": "node tools/android-sync.cjs",
     "test:android": "node tools/test-android-shell.cjs",
     "test:voice": "node tools/test-voice.cjs",
+    "test:difficulty": "node tools/test-difficulty.cjs",
     "web:serve": "npm run build:tahaddi && npm run start:tahaddi",
     "docker:build": "docker build -f server/Dockerfile -t tahaddi .",
     "docker:run": "docker run --rm -p 8090:8090 -v tahaddi_data:/data tahaddi",

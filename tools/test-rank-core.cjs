@@ -10,7 +10,7 @@ const fresh=g=>R.newRankProfile(g||'carrom');
 const clone=o=>JSON.parse(JSON.stringify(o));
 
 sec('الشكل');
-check('ست ألعاب بتعريف ونموذج حساب',R.GAMES.length===6&&R.GAME_DEFS.every(g=>R.SCORE_MODELS[g.scoreModel]));
+check('خمس ألعاب بتعريف ونموذج حساب',R.GAMES.length===5&&R.GAME_DEFS.every(g=>R.SCORE_MODELS[g.scoreModel]));
 check('الملفّ الجديد غير مصنّف وليس برونزيًا',!fresh().placed&&R.rankName(fresh())==='برونزي III'&&R.score(fresh())===-1);
 check('قمة الأساطير بلا درجة',R.rankName({tier:9,div:0})==='قمة الأساطير');
 
@@ -59,9 +59,6 @@ sec('نماذج الحساب');
  const left=R.resolve(clone(m),{gameId:'mafia',mode:'ranked',matchId:'d',result:{teamWon:true,left:true},opponents:[]});
  const won=R.resolve(clone(m),{gameId:'mafia',mode:'ranked',matchId:'e',result:{teamWon:true,completed:true},opponents:[]});
  check('المافيا: الانسحاب يضرّ ولو فاز فريقك',left.rp<won.rp);
- const o=fresh('outsider');o.placed=true;o.tier=1;o.div=2;o.rp=50;
- const r=R.resolve(clone(o),{gameId:'outsider',mode:'ranked',matchId:'f',result:{roundsWon:1,rounds:1},opponents:[]});
- check('برا السالفة: جولة واحدة مكسوبة = فوز',r.rp>0);
 }
 
 sec('الحتمية والتكرار');

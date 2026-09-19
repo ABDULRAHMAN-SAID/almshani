@@ -22,12 +22,11 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
   // كل دالة فيها go( في المصدر، وأين تقع في السجلّ: شاشة باسمها أو داخل تدفّق حيّ
   const FLOW={mDraw:'match',mResult:'mResult',introDraw:'intro',preMatchOld:null,
    tDraw:'tutorial',tDone:'tutorial',draw:'quiz',done:'quiz',mmDraw:'mmScr',roomDraw:'room',
-   barraDeal:'party',barraTalk:'party',barraVote:'party',barraEnd:'party',
    mafiaDeal:'party',mafGate:'party',mafPick:'party',mafCheck:'party',mafiaMorning:'party',mafLynch:'party',mafWinCheck:'party',
    drawPass:'party',drawBoard:'party',drawVote:'party',drawEnd:'party',
    drawAv:'avScr',renderReward:'rewardScr',renameAsk:'renameAsk',
    clanScrFail:'*',clScreen:'*',clGo:'*',clEmptyScr:'*',clErrScr:'*'};
-  const names=['drawAv','introDraw','drawLesson','cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','setScr','setSection','renameAsk','delAsk','shopScr','chestScr','oddsScr','renderReward','wildScr','evoShopScr','emoteScr','colScr','welcomeScr','askTut','skipAsk','tDraw','tDone','rankedScr','preMatchOld','mDraw','mResult','playScr','evtScr','seasonScr','moreScr','playModesScr','mmScr','mmDraw','roomScr','roomDraw','soloScr','partyScr','gameHub','gameRankScr','barraSetup','barraDeal','barraTalk','barraVote','barraEnd','mafiaSetup','mafiaDeal','mafGate','mafPick','mafCheck','mafiaMorning','mafLynch','mafWinCheck','drawSetup','drawPass','drawBoard','drawVote','drawEnd','clanScrFail','clScreen','clGo','clEmptyScr','clErrScr','clChatScr','clRequestSupportScr','clSupportScr','clDonorsScr','clEventsScr','clAchScr','home','netsScr','mapScr','quickScr','draw','done','misScr','achScr','storeScr','lbScr','profileView'];
+  const names=['drawAv','introDraw','drawLesson','cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','setScr','setSection','renameAsk','delAsk','shopScr','chestScr','oddsScr','renderReward','wildScr','evoShopScr','emoteScr','colScr','welcomeScr','askTut','skipAsk','tDraw','tDone','rankedScr','preMatchOld','mDraw','mResult','playScr','evtScr','seasonScr','moreScr','playModesScr','mmScr','mmDraw','roomScr','roomDraw','soloScr','partyScr','gameHub','gameRankScr','mafiaSetup','mafiaDeal','mafGate','mafPick','mafCheck','mafiaMorning','mafLynch','mafWinCheck','drawSetup','drawPass','drawBoard','drawVote','drawEnd','clanScrFail','clScreen','clGo','clEmptyScr','clErrScr','clChatScr','clRequestSupportScr','clSupportScr','clDonorsScr','clEventsScr','clAchScr','home','netsScr','mapScr','quickScr','draw','done','misScr','achScr','storeScr','lbScr','profileView'];
   const miss=[],dead=[];
   for(const n of names){
    const f=FLOW.hasOwnProperty(n)?FLOW[n]:n;
@@ -157,10 +156,10 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
 
  // ── ي) ليلة العائلة ──
  const fam=await page.evaluate(async()=>{
-  tab('play');push('partyScr');ptWay='pass';ptOpen('barra');
+  tab('play');push('partyScr');ptWay='pass';ptOpen('mafia');
   const setup=Router.stack.map(f=>f.fn).join('>');
   const bk1=!!document.querySelector('#app .tbar .bk');
-  barraStart();await new Promise(r=>setTimeout(r,60));
+  mafiaStart();await new Promise(r=>setTimeout(r,60));
   const live=Router.stack.map(f=>f.fn).join('>'), bar=getComputedStyle(document.getElementById('nav')).display;
   const bk2=!!document.querySelector('#app .tbar .bk');
   back();await new Promise(r=>setTimeout(r,40));
@@ -169,8 +168,8 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
   await new Promise(r=>setTimeout(r,60));
   return {setup,bk1,live,bar,bk2,asked,after:Router.stack.map(f=>f.fn).join('>')};
  });
- check('شاشة إعداد «برا السالفة» تُدفع فوق ليلة العائلة ولها رجوع',fam.setup==='playScr>partyScr>barraSetup'&&fam.bk1,JSON.stringify(fam));
- check('اللعبة الحيّة إطار بلا شريط وله زرّ رجوع مرئي',fam.live==='playScr>partyScr>barraSetup>party'&&fam.bar==='none'&&fam.bk2,JSON.stringify(fam));
+ check('شاشة إعداد «مافيا» تُدفع فوق ليلة العائلة ولها رجوع',fam.setup==='playScr>partyScr>mafiaSetup'&&fam.bk1,JSON.stringify(fam));
+ check('اللعبة الحيّة إطار بلا شريط وله زرّ رجوع مرئي',fam.live==='playScr>partyScr>mafiaSetup>party'&&fam.bar==='none'&&fam.bk2,JSON.stringify(fam));
  check('إنهاء اللعبة بعد السؤال يهبط على ليلة العائلة',fam.asked&&fam.after==='playScr>partyScr',JSON.stringify(fam));
 
  // ── ك) التعليم: تخطّي ثم «متابعة» يعيدك إلى مكانك في التدريب ──
