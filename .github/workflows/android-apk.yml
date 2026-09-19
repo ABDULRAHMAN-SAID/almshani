@@ -68,6 +68,11 @@ jobs:
         working-directory: app-android
         run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
 
+      - name: شجرة الاعتماديات عند الإخفاق
+        if: failure()
+        working-directory: app-android
+        run: ./gradlew :app:dependencies --configuration debugRuntimeClasspath --no-daemon || true
+
       - name: تسمية الحزمة باسم الإصدار
         id: pack
         run: |

@@ -40,6 +40,11 @@ android{
 }
 
 dependencies{
+ /* منذ Kotlin 1.8 اندمجت kotlin-stdlib-jdk7/jdk8 في kotlin-stdlib. مكتبات أندرويد ما زالت
+    تجرّ نسخة 1.6.21 منهما، فتتكرّر الأصناف ويسقط البناء. قائمة الإصدارات تصعّدهما إلى نسخة
+    صارت فيها غلافًا فارغًا يشير إلى kotlin-stdlib، فيزول التكرار بلا استثناءات يدويّة. */
+ implementation platform('org.jetbrains.kotlin:kotlin-bom:1.9.24')
+
  implementation 'androidx.appcompat:appcompat:1.7.0'
  implementation 'androidx.webkit:webkit:1.12.1'
 }
