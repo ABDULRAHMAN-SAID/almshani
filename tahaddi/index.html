@@ -1362,7 +1362,50 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
  display:flex;align-items:center;justify-content:center;padding:0}
 .efab:active{transform:scale(.92)}
 .ebar.fx{position:fixed;left:10px;bottom:calc(134px + env(safe-area-inset-bottom));z-index:42;
- max-width:78vw;flex-wrap:wrap;box-shadow:0 8px 24px rgba(0,0,0,.55);margin:0}
+ width:min(332px,calc(100vw - 20px));max-width:calc(100vw - 20px);flex-direction:column;align-items:stretch;
+ gap:8px;overflow:visible;box-shadow:0 8px 24px rgba(0,0,0,.55);margin:0}
+/* ═══ الصيحات (5.98): لوحة واحدة — مجموعات اللحظة، جملها، ثم التعابير ═══ */
+.ebRow{display:flex;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding-bottom:2px}
+.ebRow::-webkit-scrollbar{display:none}
+.shRow{display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding-bottom:2px;
+ -webkit-mask:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 4px),#000);
+ mask:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 4px),#000)}
+.shRow::-webkit-scrollbar{display:none}
+.shCh{flex:0 0 auto;display:flex;align-items:center;min-height:38px;padding:0 12px;border-radius:11px;
+ font-size:11.5px;font-weight:900;white-space:nowrap;cursor:pointer;
+ background:var(--elev);border:1px solid var(--bd);color:var(--tx2)}
+.shCh.on{background:linear-gradient(180deg,#FFE9A8,#E8C25A);border-color:#E8B23A;color:#5E4408}
+.shList{display:flex;flex-direction:column;gap:6px;max-height:174px;overflow-y:auto;
+ overscroll-behavior:contain;scrollbar-width:none}
+.shList::-webkit-scrollbar{display:none}
+.shPl{display:flex;align-items:center;min-height:42px;padding:9px 13px;border-radius:11px;
+ font-size:12.5px;font-weight:800;line-height:1.55;color:var(--tx);cursor:pointer;
+ background:var(--surf);border:1px solid var(--bd);transition:border-color .12s,transform .1s}
+.shPl:active{transform:scale(.98);border-color:#E8B23A}
+/* اللحظة ساخنة: الزرّ ينبض ويعلّم بنقطة — «قربت تفوز، قل شيئًا» بلا نصّ يزحم الشاشة */
+.efab.hot{animation:efabHot 1.3s ease-in-out infinite}
+.efab.hot::after{content:'';position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;
+ background:#E8B23A;border:2px solid var(--bg)}
+@keyframes efabHot{0%,100%{box-shadow:0 4px 14px rgba(0,0,0,.55),0 0 0 0 rgba(232,178,58,.55)}
+ 50%{box-shadow:0 4px 14px rgba(0,0,0,.55),0 0 0 10px rgba(232,178,58,0)}}
+/* فقاعة الصيحة: شريط كلام مع مؤشّر صوت ينبض ما دام الصوت يعمل */
+.shfx{position:fixed;left:50%;transform:translateX(-50%);z-index:43;pointer-events:none;
+ display:flex;flex-direction:column;align-items:center;gap:6px;animation:shPop .28s cubic-bezier(.2,1.5,.4,1)}
+.shfx.me{bottom:27%}
+.shfx.op{top:16%}
+.shwv{display:flex;align-items:flex-end;gap:3px;height:16px}
+.shwv i{width:3px;height:5px;border-radius:2px;background:#E8B23A;animation:shWv .62s ease-in-out infinite}
+.shfx.op .shwv i{background:#8FA9D8}
+.shtx{max-width:min(300px,84vw);padding:10px 18px;border-radius:14px;text-align:center;
+ font-size:15px;font-weight:900;line-height:1.5;color:#5E4408;
+ background:linear-gradient(180deg,#FFE9A8,#E8C25A);border:1px solid rgba(255,255,255,.45);
+ box-shadow:0 10px 26px rgba(0,0,0,.5)}
+.shfx.op .shtx{color:#EAF0FF;background:linear-gradient(180deg,#2E3A58,#1A2236);border-color:#43507A}
+.shnm{font-size:11px;font-weight:900;color:#fff;background:rgba(6,8,16,.68);padding:3px 10px;border-radius:9px}
+@keyframes shWv{0%,100%{height:4px;opacity:.55}50%{height:16px;opacity:1}}
+@keyframes shPop{from{opacity:0;transform:translateX(-50%) translateY(10px) scale(.92)}
+ to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+@media (prefers-reduced-motion:reduce){.efab.hot{animation:none}.shfx{animation:none}.shwv i{animation:none;height:9px}}
 .ebubfx{position:fixed;left:50%;z-index:43;display:flex;flex-direction:column;align-items:center;gap:5px;
  animation:ebubIn .32s cubic-bezier(.2,1.3,.4,1);pointer-events:none;
  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
@@ -15782,6 +15825,245 @@ var SFX=(function(){
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
 /* ⟦/src⟧ */
+/* ⟦src:src/audio/voice.js⟧ */
+/**
+ * الصيحات — صوت بشريّ مركَّب داخل اللعبة، بلا ملفّ صوت واحد.
+ *
+ *   VOICE.init({enabled:()=>bool, speech:()=>bool})
+ *   VOICE.say('ههه قربت أفوز انتبه', {seed:7, tone:'brag'})
+ *   VOICE.hasSpeech()   هل في الجهاز صوت عربيّ حقيقيّ؟
+ *   VOICE.stop()
+ *
+ * لماذا مركَّب ولا ملفّات: اللعبة ملفّ واحد يُحمَّل كاملًا، وتسجيل عشرات الجمل
+ * بصوت بشريّ يعني ميجابايتات تُنزَّل مرّة واحدة وتُحمَل أبدًا. وصوت النظام
+ * (speechSynthesis) لا يوجد على كلّ هاتف: هواتف كثيرة بلا محرّك نطق عربيّ،
+ * والمتصفّحات الصامتة تعيد قائمة أصوات فارغة. فلو اتّكأنا عليه وحده لسكتت
+ * اللعبة عند نصف اللاعبين.
+ *
+ * فالأساس هنا تركيب صوتيّ بالصيغ الرنينيّة (formants): نبضة حنجرة (sawtooth)
+ * تمرّ في ثلاثة مرشّحات نطاقيّة مضبوطة على رنين الحركات العربية، تُفتح وتُغلق
+ * مقطعًا مقطعًا بإيقاع الجملة نفسها. النتيجة صوت «يتكلّم» لا يُفهم حرفه لكن
+ * تُفهم نبرته — وهي الطريقة نفسها التي تتكلّم بها شخصيات الألعاب منذ عقود.
+ * ولكلّ لاعب بذرة تثبّت طبقة صوته، فلا يتشابه صوتان في الغرفة.
+ *
+ * وإن وُجد صوت عربيّ حقيقيّ في الجهاز استُعمل بدله: أفضل ما يتوفّر، لا أقلّه.
+ *
+ * لا DOM هنا إلا window. لا يرمي أبدًا.
+ */
+var VOICE=(function(){
+ 'use strict';
+ var W=(typeof window!=='undefined')?window:null;
+ var ctx=null, enabled=function(){return true}, speech=function(){return true};
+ var voices=null, playing=null;
+
+ function init(o){
+  if(o&&typeof o.enabled==='function')enabled=o.enabled;
+  if(o&&typeof o.speech==='function')speech=o.speech;
+  warm();
+ }
+ function AC(){return W?(W.AudioContext||W.webkitAudioContext):null}
+ function ac(){
+  if(ctx)return ctx;
+  var A=AC();if(!A)return null;
+  try{ctx=new A()}catch(e){ctx=null}
+  return ctx;
+ }
+
+ /* ── صوت النظام: قائمة الأصوات تصل متأخّرة في بعض المتصفّحات ── */
+ function synth(){try{return W&&W.speechSynthesis}catch(e){return null}}
+ function warm(){
+  var s=synth();if(!s)return;
+  try{voices=s.getVoices()||[]}catch(e){voices=[]}
+  try{if(typeof s.addEventListener==='function')
+   s.addEventListener('voiceschanged',function(){try{voices=s.getVoices()||[]}catch(e){}});}catch(e){}
+ }
+ function arVoice(){
+  var s=synth();if(!s)return null;
+  if(!voices||!voices.length){try{voices=s.getVoices()||[]}catch(e){voices=[]}}
+  for(var i=0;i<voices.length;i++)if(/^ar\b|^ar[-_]/i.test(voices[i].lang||''))return voices[i];
+  return null;
+ }
+ function hasSpeech(){return !!arVoice()}
+
+ /* ── البذرة: رقم صغير يثبّت طبقة صوت اللاعب فلا تتبدّل بين جملة وأخرى ── */
+ function rng(seed){
+  var s=(seed|0)||1;
+  return function(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff};
+ }
+
+ /* رنين الحركات العربية: (F1,F2,F3) بالهرتز — الفتحة مفتوحة، الكسرة عالية، الضمة مظلمة */
+ var VOW={
+  a:[700,1220,2600], aa:[730,1090,2440],
+  i:[330,2200,3000], ii:[290,2350,3100],
+  u:[350,850,2500],  uu:[320,760,2400]
+ };
+ var VK=['a','aa','i','ii','u','uu'];
+
+ /* الحروف المدّية والحركات تحدّد لون المقطع؛ ما عداها ساكن يبدأ مقطعًا جديدًا */
+ function vowelOf(ch){
+  if(ch==='ا'||ch==='آ'||ch==='أ'||ch==='إ')return 'aa';
+  if(ch==='ي'||ch==='ى'||ch==='ئ')return 'ii';
+  if(ch==='و'||ch==='ؤ')return 'uu';
+  if(ch==='َ')return 'a';
+  if(ch==='ِ')return 'i';
+  if(ch==='ُ')return 'u';
+  return null;
+ }
+ /* الحروف الانفجارية تبدأ بطقّة قصيرة، فيُسمع للمقطع مَخرج لا مجرّد نغمة */
+ function isStop(ch){return 'بتدطضجقكءأإئؤ'.indexOf(ch)>=0}
+ function isHiss(ch){return 'سشصثفحخهز'.indexOf(ch)>=0}
+
+ /**
+  * يحوّل الجملة إلى مقاطع: لكلّ مقطع حركة ونوع مَخرج ومكان وقفة.
+  * لا يقرأ النصّ قراءة صحيحة — ولا يحتاج: المطلوب إيقاع الجملة لا حروفها.
+  */
+ function syllables(text,seed){
+  var r=rng(seed), out=[], cur=null, i, ch, v;
+  var s=String(text||'').replace(/[^؀-ۿ\s]/g,' ');
+  for(i=0;i<s.length;i++){
+   ch=s[i];
+   if(ch===' '){if(cur){cur.gap=1;cur=null}continue}
+   v=vowelOf(ch);
+   if(v){
+    if(cur&&!cur.v)cur.v=v;
+    else out.push(cur={v:v,on:'soft',gap:0});
+    continue;
+   }
+   out.push(cur={v:null,on:isStop(ch)?'stop':isHiss(ch)?'hiss':'soft',gap:0});
+  }
+  /* مقطع بلا حركة يأخذ واحدة من البذرة — فتختلف الجملة نفسها بين لاعبين */
+  for(i=0;i<out.length;i++)if(!out[i].v)out[i].v=VK[Math.floor(r()*VK.length)];
+  if(out.length>14)out=out.slice(0,14);            // جملة طويلة لا تُقرأ كاملة: تُقتطع فلا تصير هذيانًا
+  if(!out.length)out=[{v:'a',on:'soft',gap:0}];
+  return out;
+ }
+
+ /* نغمة الجملة: الفخر يرتفع، الحزن ينزل، السؤال يصعد في آخره */
+ var TONE={
+  brag:  {f0:1.12, span: 0.16, rate:1.00, g:1.00},
+  tease: {f0:1.06, span: 0.22, rate:1.08, g:0.96},
+  cheer: {f0:1.16, span: 0.26, rate:1.06, g:1.00},
+  calm:  {f0:1.00, span:-0.06, rate:0.96, g:0.90},
+  sad:   {f0:0.90, span:-0.20, rate:0.90, g:0.86}
+ };
+
+ function babble(text,opt){
+  var c=ac();if(!c)return false;
+  if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
+  var o=opt||{}, seed=(o.seed|0)||3, T=TONE[o.tone]||TONE.brag;
+  var r=rng(seed*7919+13);
+  var base=(112+r()*54)*T.f0;                       // طبقة اللاعب: من صوت غليظ إلى رفيع
+  var ask=/؟|\?/.test(String(text||''));
+  var sy=syllables(text,seed), t=c.currentTime+0.02, n=sy.length;
+
+  var master=c.createGain();
+  master.gain.value=0.9*(T.g||1);
+  master.connect(c.destination);
+
+  for(var k=0;k<n;k++){
+   var s=sy[k], p=n>1?k/(n-1):0;
+   var f0=base*(1+T.span*p)*(ask&&p>0.72?1.16:1)*(0.97+r()*0.06);
+   var dur=(s.on==='stop'?0.085:0.11)*(1/T.rate)*(0.88+r()*0.28);
+   emit(c,master,f0,VOW[s.v]||VOW.a,t,dur,s.on,base);
+   t+=dur*0.82+(s.gap?0.075:0.012);
+  }
+  try{master.gain.setValueAtTime(master.gain.value,t);}catch(e){}
+  setTimeout(function(){try{master.disconnect()}catch(e){}},Math.ceil((t-c.currentTime+0.4)*1000));
+  return true;
+ }
+
+ /** مقطع واحد: حنجرة + ثلاثة رنينات + مَخرج، بغلاف يفتح ويغلق */
+ function emit(c,out,f0,F,t0,d,on,base){
+  var g=c.createGain();
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(0.22,t0+(on==='stop'?0.012:0.03));
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  g.connect(out);
+
+  var src=c.createOscillator();
+  src.type='sawtooth';
+  src.frequency.setValueAtTime(f0,t0);
+  src.frequency.linearRampToValueAtTime(f0*(0.97+Math.random()*0.06),t0+d);   // تذبذب خفيف: لا نغمة آلية مستقيمة
+
+  /* ثلاثة مرشّحات نطاقيّة متوازية هي ما يجعل الصوت «حلقًا» لا «صفّارة» */
+  var i,amp=[1,0.55,0.22];
+  for(i=0;i<3;i++){
+   var bp=c.createBiquadFilter();
+   bp.type='bandpass';
+   bp.frequency.value=F[i];
+   bp.Q.value=i===0?7:10;
+   var vg=c.createGain();vg.gain.value=amp[i];
+   src.connect(bp);bp.connect(vg);vg.connect(g);
+  }
+  src.start(t0);src.stop(t0+d+0.05);
+
+  if(on==='stop'||on==='hiss'){
+   var nb=noiseBuf(c);
+   if(nb){
+    var ns=c.createBufferSource();ns.buffer=nb;
+    var nf=c.createBiquadFilter();nf.type=on==='hiss'?'highpass':'bandpass';
+    nf.frequency.value=on==='hiss'?3200:F[1];
+    var ng=c.createGain();
+    var nd=on==='hiss'?0.055:0.026;
+    ng.gain.setValueAtTime(on==='hiss'?0.055:0.085,t0);
+    ng.gain.exponentialRampToValueAtTime(0.0001,t0+nd);
+    ns.connect(nf);nf.connect(ng);ng.connect(out);
+    ns.start(t0);ns.stop(t0+nd+0.02);
+   }
+  }
+  return base;
+ }
+ var _nb=null;
+ function noiseBuf(c){
+  if(_nb)return _nb;
+  try{
+   _nb=c.createBuffer(1,Math.floor(c.sampleRate*0.2),c.sampleRate);
+   var d=_nb.getChannelData(0);
+   for(var i=0;i<d.length;i++)d[i]=Math.random()*2-1;
+  }catch(e){_nb=null}
+  return _nb;
+ }
+
+ /** ينطق الجملة: صوت النظام العربيّ إن وُجد، وإلّا الصوت المركَّب */
+ function say(text,opt){
+  var on=false;try{on=!!enabled()}catch(e){}
+  if(!on)return false;
+  var o=opt||{}, t=String(text||'').trim();
+  if(!t)return false;
+  var useTTS=false;try{useTTS=!!speech()}catch(e){}
+  if(useTTS){
+   var v=arVoice(), s=synth();
+   if(v&&s){
+    try{
+     s.cancel();
+     var u=new W.SpeechSynthesisUtterance(t);
+     u.voice=v;u.lang=v.lang||'ar';
+     var T=TONE[o.tone]||TONE.brag;
+     var r=rng(((o.seed|0)||3)*31+5);
+     u.pitch=Math.max(0.5,Math.min(1.8,T.f0*(0.88+r()*0.4)));
+     u.rate=Math.max(0.6,Math.min(1.6,T.rate*1.02));
+     u.volume=1;
+     playing=u;s.speak(u);
+     return 'tts';
+    }catch(e){/* صوت النظام رفض: نكمل بالمركَّب */}
+   }
+  }
+  return babble(t,o)?'synth':false;
+ }
+ function stop(){
+  var s=synth();
+  if(s){try{s.cancel()}catch(e){}}
+  playing=null;
+ }
+ function unlock(){var c=ac();if(c&&c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}}
+ function available(){return !!AC()}
+
+ return {init:init,say:say,stop:stop,unlock:unlock,warm:warm,
+  hasSpeech:hasSpeech,available:available,
+  _syllables:syllables,_babble:babble};
+})();
+if(typeof module!=='undefined'&&module.exports)module.exports=VOICE;
+/* ⟦/src⟧ */
 /* ⟦src:src/audio/music.js⟧ */
 /**
  * موسيقى «تحدّي» — لحن أصليّ مركّب داخل اللعبة بلا ملفّ صوت واحد.
@@ -18137,6 +18419,7 @@ function mSubmit(val){
  M.log.push({k,ok,pts,oppPts});if(window.SFX)SFX.fx(ok?'ok':'bad');
  M.lastOk=ok;M.lastPts=pts;M.lastOppPts=oppPts;
  if(Math.random()<.35)oppEmote(roundWinner==='opp'?'win':'lose');
+ else if(Math.random()<.22)oppShout(roundWinner==='opp'?'win':'lose');
  mAutoNext();   // يضبط العدّاد قبل الرسم ليظهر الرقم داخل الزر
  mDraw();
 }
@@ -20759,7 +21042,7 @@ const SETS=[
  {k:`data`,i:`${ico('save',16)}`,n:`البيانات`,d:'حذف الحساب · تصدير'},
  {k:`about`,i:`${ico('info',16)}`,n:`عن اللعبة`,d:'الإصدار · الشروط'}
 ];
-const DEF_OPT={haptic:0,confirm:1,fast:0,sfx:1,music:1,musicV:1,nMatch:1,nSeason:1,nFriend:1,aiBots:1,
+const DEF_OPT={haptic:0,confirm:1,fast:0,sfx:1,music:1,musicV:1,shout:1,shoutTTS:1,nMatch:1,nSeason:1,nFriend:1,aiBots:1,
  seeProfile:'all',challenge:'friends'};
 function ensureOpt(){
  if(!S.opt)S.opt={...DEF_OPT};else Object.keys(DEF_OPT).forEach(k=>{if(S.opt[k]===undefined)S.opt[k]=DEF_OPT[k]});
@@ -20784,6 +21067,15 @@ if(window.MUSIC){
  ['pointerdown','touchstart','keydown','click'].forEach(ev=>
   document.addEventListener(ev,mscGo,{passive:true}));
  document.addEventListener('visibilitychange',()=>{try{document.hidden?MUSIC.stop():MUSIC.sync()}catch(e){}});
+}
+if(window.VOICE){
+ /* الصيحات تتبع مفتاحها وحده: من أغلق المؤثّرات قد يريد سماع خصمه */
+ VOICE.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.shout},
+             speech:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.shoutTTS}});
+ document.addEventListener('pointerdown',()=>VOICE.unlock(),{passive:true});
+ /* الزرّ ينبض حين تسخن اللحظة — فحص خفيف كلّ ثانية ونصف، ولا يُعاد رسم شاشة */
+ setInterval(()=>{const f=document.querySelector('.efab');if(!f)return;
+  try{f.classList.toggle('hot',!!(((S&&S.opt)||DEF_OPT).shout)&&shoutHot())}catch(e){}},1500);
 }
 if(window.SFX){
  SFX.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.sfx},haptic:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.haptic}});
@@ -20872,7 +21164,14 @@ function setSection(k){
   tgl('aiBots','آليون بذكاء اصطناعي','في مافيا وبرا السالفة ضد الكمبيوتر: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي');
  if(SEC==='sound')body=tgl('sfx','المؤثرات الصوتية','نقرات وإصابات ونتائج وضربات الكيرم — مركّبة داخل اللعبة')+
   tgl('music','موسيقى الخلفية','لحن هادئ يبدأ مع اللعبة ويخفت داخل المباريات — مركّب داخل اللعبة بلا ملفّ صوت')+
-  `<div class="note">تبدأ الموسيقى عند أوّل لمسة — المتصفّح لا يفتح الصوت قبلها.</div>`;
+  tgl('shout','الصيحات','جملة تقولها بصوتك في اللعب — والخصم يسمعها بصوته هو')+
+  tgl('shoutTTS','استعمل صوت جهازك للصيحات',(window.VOICE&&VOICE.hasSpeech())
+    ?'في جهازك صوت عربيّ حقيقيّ — يُستعمل بدل الصوت المركّب'
+    :'لا يوجد صوت عربيّ في هذا الجهاز الآن، فالصيحات تُقال بالصوت المركّب')+
+  `<div class="li" style="cursor:pointer" onclick="shoutTry()"><div class="lr">
+   <div class="lb"><div class="lt">جرّب صيحة</div><div class="ls">اسمع كيف يخرج صوتك قبل أن تقولها في مباراة</div></div>
+   <span style="color:var(--gold)">${ico('sound',18)}</span></div></div>
+  <div class="note">تبدأ الموسيقى عند أوّل لمسة — المتصفّح لا يفتح الصوت قبلها.</div>`;
  if(SEC==='notif')body=tgl('nMatch','دعوات المباريات')+tgl('nSeason','بداية ونهاية الموسم')+
   tgl('nFriend','نشاط الأصدقاء')+`<div class="note">لا تصل إشعارات في نسخة الويب؛ تُحفظ هذه التفضيلات وتُطبَّق في تطبيق المتجر</div>`;
  if(SEC==='privacy')body=`
@@ -22420,9 +22719,30 @@ function myEmoteDeck(){
 function emoteBarDom(send){
  const ex=document.querySelector('.ebar.fx');
  if(ex){ex.remove();return}
+ _shoutG=null;
  const d=document.createElement('div');d.className='ebar fx';
- d.innerHTML=myEmoteDeck().map(k=>`<div class="ebi" onclick="${send}('${k}')">${face(k,38)}</div>`).join('');
+ d.innerHTML=shoutPanelHtml()+
+  `<div class="ebRow">${myEmoteDeck().map(k=>`<div class="ebi" onclick="${send}('${k}')">${face(k,38)}</div>`).join('')}</div>`;
  document.body.appendChild(d);
+}
+/* الصيحات فوق التعابير في اللوحة نفسها: زرّ واحد لا زرّان، والمجموعة المفتوحة
+   هي مجموعة اللحظة — فمن قرب من الفوز يجد جملته أمامه بلا بحث */
+function shoutPanelHtml(){
+ const on=!!(((S&&S.opt)||DEF_OPT).shout);
+ if(!on)return '';
+ const g=_shoutG||shoutMoment();
+ const lines=SHOUTS.filter(x=>x.g===g);
+ return `<div class="shRow">${SHOUT_G.map(x=>
+   `<div class="shCh${x.k===g?' on':''}" onclick="shoutTab('${x.k}')">${x.n}</div>`).join('')}</div>
+  <div class="shList">${lines.map(x=>
+   `<div class="shPl" onclick="sayShout('${x.i}')">${esc(x.t)}</div>`).join('')}</div>`;
+}
+function shoutTab(k){
+ _shoutG=k;
+ const p=document.querySelector('.ebar.fx');if(!p)return;
+ const rows=p.querySelectorAll('.shRow,.shList');
+ rows.forEach(n=>n.remove());
+ p.insertAdjacentHTML('afterbegin',shoutPanelHtml());
 }
 function emoteBar(){emoteBarDom('sendEmote')}
 function sendEmote(k){
@@ -22436,6 +22756,189 @@ function oppEmote(kind){
  if(!M||M.muted)return;
  const pool=kind==='win'?['laugh','confident','crown','fire','falcon','lion','wink']:kind==='lose'?['shock','tense','angry','sad']:['think','watch','camel','owl','hourglass'];
  bubbleFx(pool[Math.floor(Math.random()*pool.length)],'op',M.rival?M.rival.n:'الخصم');
+}
+
+/* ═══ الصيحات (5.98) — جملة تقولها بصوتك في وجه خصمك ═══
+   طلب المالك: «إذا واحد قرب يفوز يختار جملة صوتية». فالبنك مقسوم على اللحظة
+   لا على المزاج: قربت أفوز · راجع لك · غمزة · حماس · ذوق · تحية · ختام،
+   واللعبة تفتح المجموعة التي تناسب ما يجري الآن بدل أن يبحث اللاعب عنها.
+   الصوت مركَّب في src/audio/voice.js: لا ملفّ ولا ميجابايت، ولكلّ لاعب طبقة صوت. */
+const SHOUT_G=[
+ {k:'near', n:'قربت أفوز', t:'brag'},
+ {k:'back', n:'راجع لك',   t:'cheer'},
+ {k:'tease',n:'غمزة',      t:'tease'},
+ {k:'hype', n:'حماس',      t:'cheer'},
+ {k:'nice', n:'ذوق',       t:'calm'},
+ {k:'hi',   n:'تحية',      t:'calm'},
+ {k:'gg',   n:'ختام',      t:'calm'}
+];
+const SHOUTS=[
+ {i:'n1',g:'near',t:'ههه قربت أفوز، انتبه لنفسك'},
+ {i:'n2',g:'near',t:'ما بخليك، الفوز لي'},
+ {i:'n3',g:'near',t:'جهّز عذرك من الحين'},
+ {i:'n4',g:'near',t:'خطوة وحدة وتخلص السالفة'},
+ {i:'n5',g:'near',t:'أشوف الكأس من هنا'},
+ {i:'n6',g:'near',t:'لا تزعل، بس أنا فايز'},
+ {i:'n7',g:'near',t:'اللي ورايا ما يلحقني'},
+ {i:'n8',g:'near',t:'عد للعشرة وبيخلص'},
+ {i:'n9',g:'near',t:'طيّب، خلاص؟'},
+ {i:'n10',g:'near',t:'سكّر الباب ورايا'},
+ {i:'b1',g:'back',t:'ولا يهمك، لسه بدري'},
+ {i:'b2',g:'back',t:'شوي وترجع لي'},
+ {i:'b3',g:'back',t:'هذي بداية بس'},
+ {i:'b4',g:'back',t:'الرجعة أحلى من البداية'},
+ {i:'b5',g:'back',t:'ما خلصت اللعبة'},
+ {i:'b6',g:'back',t:'صبرك عليّ، جاي'},
+ {i:'b7',g:'back',t:'لا تفرح بسرعة'},
+ {i:'b8',g:'back',t:'الجولة الجاية لي'},
+ {i:'b9',g:'back',t:'أنا بس أسخّن'},
+ {i:'b10',g:'back',t:'خلّنا نشوف آخرها'},
+ {i:'t1',g:'tease',t:'وش صار؟'},
+ {i:'t2',g:'tease',t:'تأكّد من إجابتك'},
+ {i:'t3',g:'tease',t:'إيه، شكلك نسيت'},
+ {i:'t4',g:'tease',t:'ما توقّعت منك'},
+ {i:'t5',g:'tease',t:'خذ وقتك، ما نستعجل'},
+ {i:'t6',g:'tease',t:'تحتاج مساعدة؟'},
+ {i:'t7',g:'tease',t:'هذي سهلة والله'},
+ {i:'t8',g:'tease',t:'ياه، قريبة'},
+ {i:'t9',g:'tease',t:'بالتوفيق، تحتاجه'},
+ {i:'t10',g:'tease',t:'تكفى ركّز شوي'},
+ {i:'h1',g:'hype',t:'يلا يلا!'},
+ {i:'h2',g:'hype',t:'هذي هي!'},
+ {i:'h3',g:'hype',t:'أشوفك!'},
+ {i:'h4',g:'hype',t:'حماس!'},
+ {i:'h5',g:'hype',t:'كمّلها كمّلها'},
+ {i:'h6',g:'hype',t:'ما شاء الله عليك'},
+ {i:'h7',g:'hype',t:'أسطورة'},
+ {i:'h8',g:'hype',t:'وش هالضربة'},
+ {i:'c1',g:'nice',t:'لعبة حلوة'},
+ {i:'c2',g:'nice',t:'برافو عليك'},
+ {i:'c3',g:'nice',t:'تستاهل'},
+ {i:'c4',g:'nice',t:'تعلّمت منك'},
+ {i:'c5',g:'nice',t:'يعطيك العافية'},
+ {i:'c6',g:'nice',t:'منافس محترم'},
+ {i:'c7',g:'nice',t:'لا بأس، تصير'},
+ {i:'c8',g:'nice',t:'ولا يهمك'},
+ {i:'s1',g:'hi',t:'هلا والله'},
+ {i:'s2',g:'hi',t:'حيّاكم'},
+ {i:'s3',g:'hi',t:'يلا نبدأ'},
+ {i:'s4',g:'hi',t:'جاهز؟'},
+ {i:'s5',g:'hi',t:'بسم الله'},
+ {i:'s6',g:'hi',t:'خلّونا نستمتع'},
+ {i:'g1',g:'gg',t:'لعب نظيف'},
+ {i:'g2',g:'gg',t:'نعيدها؟'},
+ {i:'g3',g:'gg',t:'الله يعطيك العافية'},
+ {i:'g4',g:'gg',t:'كانت ممتعة'},
+ {i:'g5',g:'gg',t:'تستاهل الفوز'},
+ {i:'g6',g:'gg',t:'إلى اللقاء'}
+];
+const SHOUT_CD=3000;
+let _shoutCd=0, _shoutG=null;
+const shoutById=i=>SHOUTS.find(x=>x.i===i)||null;
+const shoutGroup=k=>SHOUT_G.find(g=>g.k===k)||SHOUT_G[0];
+
+/** طبقة صوت ثابتة للاعب: الاسم نفسه يعطي الصوت نفسه في كلّ مرّة */
+function shoutSeed(name){
+ const s=String(name||(S&&S.name)||'لاعب');
+ let h=7;
+ for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
+ return (h%9973)+11;
+}
+
+/**
+ * اللحظة الحيّة: أيّ مجموعة تناسب ما يجري الآن؟
+ * تقرأ أيّ لعبة تكون مفتوحة، وتعود 'hi' إن لم تكن في لعب.
+ */
+function shoutMoment(){
+ try{
+  if(typeof M!=='undefined'&&M&&M.rounds&&M.rounds.length){
+   const left=M.rounds.length-M.i, d=(M.me|0)-(M.opp|0);
+   if(left<=0)return 'gg';                      // انتهت الجولات: وقت الختام لا وقت التفاخر
+   if(d>0&&left<=2)return 'near';
+   if(d<0)return 'back';
+   if(d>0)return 'tease';
+   return 'hype';
+  }
+  if(typeof RM!=='undefined'&&RM&&RM.code){
+   if(RM.phase==='over'||RM.phase==='end')return 'gg';
+   const u=RM.uno;
+   if(u&&u.cnt&&u.cnt.length){
+    const mine=(RM.hand||[]).length;
+    const rivalLow=u.cnt.some(c=>c.p!==RM.me&&c.n<=2);
+    if(mine&&mine<=2)return 'near';
+    if(rivalLow)return 'back';
+   }
+   if(RM.ca&&RM.ca.sc){
+    const v=Object.keys(RM.ca.sc).map(k=>RM.ca.sc[k]|0);
+    if(v.length>1){const mx=Math.max.apply(null,v),mine=RM.ca.sc[RM.me]|0;
+     if(mine===mx&&mx>=20)return 'near';
+     if(mine<mx)return 'back';}
+   }
+   const pts=(RM.sgH&&RM.sgH.pts)||null;
+   if(pts){
+    const v=Object.keys(pts).map(k=>pts[k]|0);
+    if(v.length>1){const mx=Math.max.apply(null,v),mine=pts[RM.me]|0;
+     if(mine===mx&&mx>0)return 'near';
+     if(mine<mx)return 'back';}
+   }
+   return RM.phase==='idle'?'hi':'hype';
+  }
+ }catch(e){}
+ return 'hi';
+}
+/** اللحظة ساخنة: الفوز على بُعد خطوة، أو أنت متأخّر — الزرّ ينبض حينها */
+function shoutHot(){const g=shoutMoment();return g==='near'||g==='back'}
+
+/** الفقاعة: شريط كلام يطلع من جهة المتكلّم، بنبض يتبع الصوت */
+function shoutFx(text,side,label){
+ const old=document.querySelector('.shfx.'+side);if(old)old.remove();
+ const d=document.createElement('div');d.className='shfx '+side;
+ d.innerHTML=`<div class="shwv">${[0,1,2,3,4].map(i=>`<i style="animation-delay:${i*0.09}s"></i>`).join('')}</div>
+ <div class="shtx">${esc(text)}</div>${label?`<div class="shnm">${esc(label)}</div>`:''}`;
+ document.body.appendChild(d);
+ setTimeout(()=>{if(d.parentNode)d.remove()},3200);
+}
+
+/** يقولها: فقاعة + صوت + بثّ للغرفة */
+function sayShout(id){
+ const sh=shoutById(id);if(!sh)return;
+ const now=Date.now();
+ if(now<_shoutCd){toast('مهلة قصيرة بين الصيحات');return}
+ _shoutCd=now+SHOUT_CD;
+ const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();
+ shoutOut(sh,'me',null);
+ try{if(typeof RM!=='undefined'&&RM&&RM.code&&typeof rmSend==='function')rmSend({t:'shout',by:RM.me,i:id});}catch(e){}
+}
+/** ينطق صيحة وصلت — منّي أو من غيري */
+function shoutOut(sh,side,label){
+ if(!sh)return;
+ shoutFx(sh.t,side,label);
+ try{if(window.SFX)SFX.play(side==='me'?'ok':'tap')}catch(e){}
+ try{
+  const o=(S&&S.opt)||DEF_OPT;
+  if(o.shout&&window.VOICE)VOICE.say(sh.t,{seed:shoutSeed(label||(S&&S.name)),tone:shoutGroup(sh.g).t});
+ }catch(e){}
+}
+/** تجربة من الإعدادات: جملة من مجموعة اللحظة، بصوتك أنت */
+function shoutTry(){
+ const o=(S&&S.opt)||DEF_OPT;
+ if(!o.shout){toast('الصيحات مغلقة — افتحها أولًا');return}
+ const pool=SHOUTS.filter(x=>x.g==='near');
+ const sh=pool[Math.floor(Math.random()*pool.length)];
+ _shoutCd=0;
+ shoutOut(sh,'me',null);
+ const how=(window.VOICE&&VOICE.hasSpeech()&&o.shoutTTS)?'بصوت جهازك':'بالصوت المركّب داخل اللعبة';
+ toast('قيلت '+how);
+}
+/** الآليّ يردّ أحيانًا — بصوته هو، لا بصوتي */
+function oppShout(kind){
+ try{
+  if(typeof M==='undefined'||!M||M.muted)return;
+  const g=kind==='win'?'tease':kind==='lose'?'back':'hype';
+  const pool=SHOUTS.filter(x=>x.g===g);
+  if(!pool.length)return;
+  shoutOut(pool[Math.floor(Math.random()*pool.length)],'op',M.rival?M.rival.n:'الخصم');
+ }catch(e){}
 }
 
 // ── الرسم الرئيسي ──
@@ -23636,7 +24139,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='5.97';
+const APP_VER='5.98';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24219,6 +24722,11 @@ function rmOn(d,m){
  else if(d.t==='morn'){RM.phase='morning';RM.alive=d.alive||RM.alive;RM.res={killed:d.killed};RM.day=d.day||RM.day}
  else if(d.t==='lynch'){RM.phase='lynch';RM.alive=d.alive||RM.alive;RM.res={who:d.who,role:d.role}}
  else if(d.t==='over'){RM.phase='over';RM.res=d;evtGame(d);rmSettle(d)}
+ else if(d.t==='shout'){                                  // صيحة لاعب آخر: تُسمع بصوته هو لا بصوتي
+  if(d.by===me)return;
+  const p=(RM.players||[]).find(x=>x.peer===d.by);
+  shoutOut(shoutById(d.i),'op',(p&&p.n)||'لاعب');
+ }
  else if(d.t==='st'){ // مسارات رسم — لا صور: تبقى تحت حد الرسالة
   RM.art=RM.art||{};
   if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
