@@ -1391,6 +1391,20 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
  animation:ebigBob 2.6s ease-in-out infinite,ebigSheen 3.4s ease-in-out infinite;transform-origin:50% 90%}
 @keyframes ebigBob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
 @keyframes ebigSheen{0%,15%{background-position:140% 0}65%,100%{background-position:-140% 0}}
+/* ═══ ساحات الكيرم ═══ */
+.arGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.arCard{display:flex;flex-direction:column;gap:5px;padding:7px;border-radius:15px;
+ background:var(--elev);border:2px solid transparent;text-align:center;cursor:pointer}
+.arCard.on{border-color:#E8B23A;box-shadow:0 0 0 3px rgba(232,178,58,.14)}
+.arCard.lk{opacity:.72}
+.arArt{display:block;width:100%;aspect-ratio:1;border-radius:10px;background-size:cover;
+ background-position:center;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)}
+.arNm{font-size:12.5px;font-weight:800;color:var(--tx)}
+.arSt{font-size:10.5px;color:var(--tx2);display:flex;align-items:center;justify-content:center;gap:4px}
+.ghArena{display:flex;align-items:center;gap:8px;width:100%;margin-top:9px;padding:12px 13px;
+ border-radius:14px;background:var(--elev);border:1px solid var(--bd);color:var(--tx);
+ font-size:12.5px;font-weight:700;cursor:pointer}
+.ghArena b{margin-inline-start:auto;font-size:11.5px;color:#E8B23A;font-weight:800}
 /* ═══ زر التعبيرات أسفل اليسار — كلاش ستايل ═══ */
 .efab{position:fixed;left:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:42;
  width:48px;height:48px;border-radius:50%;background:linear-gradient(145deg,#2A3550,#161D30);
@@ -19312,7 +19326,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
-  'playScr','gamesScr','dmScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
+  'playScr','gamesScr','dmScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr','arenaScr',
   'gameRankScr','soloScr','roomScr','mafiaSetup','drawSetup','lkSetup','xferScr','xferShow',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
@@ -26949,7 +26963,40 @@ const CA_TEX={c:'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQD
    الصورة تُرسم كاملة على اللوحة بحيث يقع مربّع جيوبها تمامًا على ساحة اللعب،
    ثم تُرسم أفواه الجيوب برمجيًا بمقاس CA_POCK نفسه فيتطابق المنظر مع الفيزياء. */
 const CA_MGF={c:0.135,m:0.195};      // هامش الإطار نسبةً إلى ساحة اللعب في كل صورة
-function caMG(){const g=CA_MGF[_ca.skin==='m'?'m':'c'];return Math.round(CA_VW*g/(1+2*g))}
+
+/**
+ * ساحات الكيرم — لوحٌ لكلّ ذوق.
+ *
+ * وهامشُ كلّ ساحةٍ (`mg`) مقيسٌ من صورتها لا مقدَّر: `tools/build-arenas.py`
+ * يكشف مراكز الجيوب الأربعة ويقيس الإطار ثم يقصّ، فيقع مربّع الجيوب على ساحة
+ * اللعب تمامًا. والجيب الذي تراه العين هو الذي تسقط فيه القطعة — ولو قُصّت
+ * بالعين لسقطت القطعة في هواء.
+ *
+ * وصورُها ملفّاتٌ إلى جانب اللعبة لا نصوصٌ داخلها: الساحة تُنزَّل حين تُختار
+ * وحدها، فلا يحمل من لعب بالأصليّة وزنَ سبعٍ لم يفتحها.
+ */
+const CA_ARENAS=[
+ {k:'madain',n:'مدائن',mg:0.1497,p:0},
+ {k:'sahil',n:'الساحل',mg:0.098,p:1200},
+ {k:'mina',n:'الميناء',mg:0.1018,p:1800},
+ {k:'marsa',n:'المرسى',mg:0.1503,p:2400},
+ {k:'hisn',n:'الحصن',mg:0.0922,p:3000}
+];
+const CA_ARENA=Object.fromEntries(CA_ARENAS.map(a=>[a.k,a]));
+/** الساحة المختارة — والأصليّة هي الافتراض متى غابت أو لم تُملك. */
+function caArena(){
+ const k=_ca.arena;
+ return (k&&CA_ARENA[k]&&caOwns(k))?CA_ARENA[k]:null;
+}
+function caOwns(k){
+ const a=CA_ARENA[k];
+ return !!a&&(!a.p||((S.arenas||[]).indexOf(k)>=0));
+}
+function caMG(){
+ const a=caArena();
+ const g=a?a.mg:CA_MGF[_ca.skin==='m'?'m':'c'];
+ return Math.round(CA_VW*g/(1+2*g));
+}
 /* صورتا اللوح المرجعيتان على خلفية بيضاء حول الإطار المستدير — كانت تظهر حدودًا بيضاء
    حول اللوح. نُفرغ الهامش الأبيض المتّصل بالحواف (ملء فيضي من الزوايا) فيبقى الإطار
    الخشبي وحده على خلفية الشاشة، ولا يُمسّ أي أبيض داخل اللوح. */
@@ -26974,12 +27021,30 @@ function caTexClean(im){
  c._cleared=n;return c;
 }
 function caTexLoad(){
- if(_ca.texGo)return;_ca.texGo=1;_ca.tex={};
- ['c','m'].forEach(k=>{
+ if(!_ca.tex)_ca.tex={};
+ if(!_ca.texGo){_ca.texGo=1;
+  ['c','m'].forEach(k=>{
+   const im=new Image();
+   im.onload=()=>{_ca.tex[k]=caTexClean(im);_ca.bg=null;caRender()};
+   im.src=CA_TEX[k];
+  });
+ }
+ const ar=caArena();                       // الساحة المختارة تُنزَّل وحدها عند الحاجة
+ if(ar&&!_ca.tex[ar.k]&&!_ca['go_'+ar.k]){
+  _ca['go_'+ar.k]=1;
   const im=new Image();
-  im.onload=()=>{_ca.tex[k]=caTexClean(im);_ca.bg=null;caRender()};
-  im.src=CA_TEX[k];
- });
+  im.onload=()=>{_ca.tex[ar.k]=caTexClean(im);_ca.bg=null;caRender()};
+  im.onerror=()=>{_ca['go_'+ar.k]=0};        // فشل التنزيل ⇒ تبقى الأصليّة، ويُعاد لاحقًا
+  im.src='arenas/'+ar.k+'.jpg';
+ }
+}
+/** يختار ساحة — ولا يختار ما لا يملك. */
+function caSetArena(k){
+ if(k&&!caOwns(k))return false;
+ _ca.arena=k||'';
+ try{localStorage.setItem('caArena',_ca.arena)}catch(e){}
+ _ca.bg=null;caTexLoad();caRender();
+ return true;
 }
 function caSkinTog(){
  _ca.skin=(_ca.skin==='m')?'c':'m';
@@ -26999,7 +27064,8 @@ function caWell(x,px,py,PR,md,i){
 // (حلقات الجيوب الفاتحة أُزيلت — الحافة الداكنة تُخبز في الخلفية داخل caWell)
 function caBoardImg(W,H,four){
  if(typeof H==='boolean'||H==null){four=H;H=W}   // النداء القديم caBoardImg(W,four): لوح مربّع
- const k=four?'m':'c', key=W+'x'+H+'|'+k;
+ const ar=caArena();
+ const k=ar?ar.k:(four?'m':'c'), key=W+'x'+H+'|'+k;
  if(_ca.bg&&_ca.bgKey===key)return _ca.bg;
  const M=caMG(),P=W-M*2,sc=P/CA_R,PR=CA_POCK*sc;
  const c=document.createElement('canvas');c.width=W;c.height=H;
@@ -27218,6 +27284,7 @@ function caLoop(){
 function caLoopOn(){if(!_ca.loop&&!_ca.sim)_ca.loop=requestAnimationFrame(caLoop)}
 function caSkinLoad(){
  try{const v=localStorage.getItem('caSkin');if(v==='m'||v==='c')_ca.skin=v}catch(e){}
+ try{const v=localStorage.getItem('caArena');if(v&&CA_ARENA[v])_ca.arena=v}catch(e){}
 }
 function caHandImg(){
  if(_ca.hand||_ca.handLoad)return;_ca.handLoad=1;
@@ -35067,15 +35134,53 @@ function gameHub(g){
    (R.soloPl||[['user','لاعب واحد'],['timer',m.bot||m.quick],['chart','مستويات متعدّدة']])
      .map(q=>ghPill(ico(q[0],10),q[1])),
    R.solo||`push('soloScr','${g}')`,'#2FC4A8')}
+ ${def.id==='carrom'?`<button class="ghArena" onclick="push('arenaScr')">
+   ${ico('palette',16)}<span>ساحات الكيرم</span>
+   <b>${esc((caArena()&&caArena().n)||'الأصليّة')}</b>${ghChev()}</button>`:''}
  <div class="ghNote">نقاط التصنيف من اللعب أونلاين وحده — واللعب ضدّ الكمبيوتر للتمرين بلا رتب.</div>
  </div>`);
+}
+
+/**
+ * الساحات — لوحُ الكيرم الذي يناسبك.
+ *
+ * وتُعرض بصورها لا بأسمائها: من يشتري لوحًا يشتري ما يراه، فالاسم وحده لا
+ * يبيع خشبًا منقوشًا. والمملوكة تُختار بضغطة، والمقفلة تُشترى بسعرها معروضًا
+ * قبل الضغط لا بعده.
+ */
+function arenaScr(){
+ hubCss();hubRegister();
+ const cur=_ca.arena||'';
+ go(`<div class="scr on">${tb('ساحات الكيرم')}
+ <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:10px">
+  اختر اللوح الذي تلعب عليه. ويبقى اختيارك في كلّ مبارياتك.</div>
+ <div class="arGrid">
+  <button class="arCard${cur?'':' on'}" onclick="arenaPick('')">
+   <span class="arArt" style="background:linear-gradient(145deg,#5C2A14,#2A1308)"></span>
+   <span class="arNm">الأصليّة</span><span class="arSt">مملوكة</span></button>
+  ${CA_ARENAS.map(a=>{
+   const own=caOwns(a.k),on=cur===a.k;
+   return `<button class="arCard${on?' on':''}${own?'':' lk'}" onclick="arenaPick('${a.k}')">
+    <span class="arArt" style="background-image:url(arenas/${a.k}.jpg)"></span>
+    <span class="arNm">${esc(a.n)}</span>
+    <span class="arSt">${own?(on?'مختارة':'مملوكة'):`${ico('coin',11)} ${a.p}`}</span></button>`}).join('')}
+ </div></div>`);
+}
+function arenaPick(k){
+ if(!k||caOwns(k)){caSetArena(k);refresh(arenaScr);return}
+ const a=CA_ARENA[k];if(!a)return;
+ confirmSheet(`شراء ساحة «${a.n}»`,`${a.p} عملة — تبقى لك، وتختارها متى شئت.`,'اشترِ',()=>{
+  if((S.coins|0)<a.p){toast('عملاتك لا تكفي');return}
+  S.coins-=a.p;if(!S.arenas)S.arenas=[];S.arenas.push(k);saveState();
+  caSetArena(k);toast(`صارت «${a.n}» ساحتك`);refresh(arenaScr);
+ });
 }
 
 /** يسجّل شاشات اللعب في سجلّ الشاشات فيعمل زرّ الرجوع ومكدّس التنقّل */
 function hubRegister(){
  try{
   if(typeof SCR==='object'&&SCR){
-   SCR.gameHub=gameHub;SCR.gameRankScr=gameRankScr;SCR.partyScr=partyScr;SCR.playScr=playScr;
+   SCR.gameHub=gameHub;SCR.gameRankScr=gameRankScr;SCR.arenaScr=arenaScr;SCR.partyScr=partyScr;SCR.playScr=playScr;
   }
  }catch(e){}
 }
