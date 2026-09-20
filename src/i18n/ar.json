@@ -29,7 +29,6 @@
   "play.passPhone": "تمرير الجوال",
   "play.matchmaking": "البحث عن منافس",
   "play.yourGames": "ألعابك",
-  "play.family": "ليلة العائلة",
   "play.familyDesc": "ألعاب جماعية للأصدقاء والعائلة",
   "play.exploreGames": "استكشف الألعاب",
   "play.missions": "مهام اللعب",
@@ -69,9 +68,7 @@
   "game.knowledge": "عالم المعرفة",
   "game.carrom": "كيرم",
   "game.uno": "أونو",
-  "game.mafia": "مافيا",
   "game.drawing": "مسابقة الرسم",
-  "game.outsider": "برا السالفة",
 
   "leaderboard.title": "لوحة الصدارة",
   "leaderboard.league": "الدوري",

@@ -15702,7 +15702,7 @@ var RankCore=(function(){
  /** موسم واحد عالمي، ورتبة مستقلّة لكل لعبة داخله */
  var SEASON_ID=4;
  /** معرّفات الألعاب إنجليزية — لا يُستخدم الاسم العربي مفتاحًا للتخزين */
- var GAMES=['knowledge','carrom','uno','mafia','drawing'];
+ var GAMES=['knowledge','carrom','uno','drawing'];
  /** تعريف كل لعبة — scoreModel يحدّد كيف تتحوّل نتيجة المباراة إلى نقاط تصنيف */
  var GAME_DEFS=[
   {id:'knowledge',ar:'عالم المعرفة',icon:'bulb',rmKey:null,
@@ -15714,9 +15714,6 @@ var RankCore=(function(){
   {id:'uno',      ar:'أونو',        icon:'cards',rmKey:'uno',
    desc:'تخلّص من بطاقاتك قبل الجميع.',
    scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:0,minP:2,maxP:4,status:'live'},
-  {id:'mafia',    ar:'مافيا',       icon:'user',rmKey:'mafia',
-   desc:'مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي.',
-   scoreModel:'teamResult',ranked:1,casual:1,room:1,bot:1,pass:1,minP:5,maxP:12,status:'live'},
   {id:'drawing',  ar:'مسابقة الرسم',icon:'palette',rmKey:'draw',
    desc:'كلمة واحدة والكلّ يرسم — صوّتوا لأفضل لوحة.',
    scoreModel:'placement', ranked:1,casual:1,room:1,bot:1,pass:1,minP:3,maxP:10,status:'live'}
@@ -24577,13 +24574,10 @@ function plBell(){
 const PL_SLIDES=[
  {a:'#17557C',b:'#0B2742',art:'dice',t:'اللعبة الجماعية<br>الأكثر متعة!',
   p:'اجتمع مع أصدقائك واختبر معلوماتك وذكاءك في جولات مشوّقة.',
-  c:'ابدأ اللعب',go:"push('gamesScr')",ti:'group',tg:'خمس ألعاب<br>في مكان واحد'},
+  c:'ابدأ اللعب',go:"push('gamesScr')",ti:'group',tg:'أربع ألعاب<br>في مكان واحد'},
  {a:'#4A3210',b:'#1A1004',art:'trophy',t:'ارتقِ في<br>التصنيف',
   p:'العب مصنّفًا واصعد من البرونزيّ إلى القمّة — رتبة لكلّ لعبة.',
-  c:'العب مصنّفًا',go:"push('rankedScr')",ti:'shield',tg:'عشر رتب<br>بثلاث درجات'},
- {a:'#4A2A7A','b':'#1E1038',art:'party',t:'ليلة العائلة',
-  p:'أنشئ غرفة برمز واحد، وشاركه أصدقاءك ليدخلوا اللعبة نفسها.',
-  c:'أنشئ غرفة',go:"push('partyScr')",ti:'door',tg:'رمز واحد<br>يجمعكم'}
+  c:'العب مصنّفًا',go:"push('rankedScr')",ti:'shield',tg:'عشر رتب<br>بثلاث درجات'}
 ];
 function plCarousel(){
  return `<div class="hmCarWrap">
@@ -24607,7 +24601,6 @@ function plDots(){
 /** أوضاع اللعب — أربع بطاقات، والبقيّة خلف «عرض الكل» */
 const PL_MODES=[
  {a:'#7B3FD6',b:'#4A1C93',art:'bulb',t:'معلومات',s:'اختبر معلوماتك العامّة',g:'knowledge',go:"push('gameHub','knowledge')"},
- {a:'#1E9A6E',b:'#0B4F39',art:'masks',t:'مافيا',s:'مدينة نائمة ومافيا تصطاد',g:'mafia',go:"push('gameHub','mafia')"},
  {a:'#D9475A',b:'#7E1E2E',art:'carrom',t:'كيرم',s:'صوّب وأسقط قطعك قبل خصمك',g:'carrom',go:"push('gameHub','carrom')"},
  {a:'#2F72D8',b:'#143C7E',art:'cards',t:'أونو',s:'تخلّص من بطاقاتك قبل الجميع',g:'uno',go:"push('gameHub','uno')"}
 ];
@@ -24639,7 +24632,6 @@ function plDaily(){
 function playScr(){
  rankAll();playCss();hubRegister();evtRefresh();
  if(!S.cards)S.cards=defaultCards();
- const fam=['mafia','draw','uno','carrom'];
  go(`<div class="scr on"><div class="plWrap">
  ${plHead()}
  ${plCarousel()}
@@ -24647,8 +24639,6 @@ function playScr(){
  ${plModes()}
  ${plDaily()}
  <div class="plSec">
-  ${plRow(ico('group',20),'ليلة العائلة','ألعاب جماعية للأصدقاء والعائلة',"push('partyScr')",'#8B5CF0',
-   `<span class="plMini">${fam.map(k=>`<span>${GAME_ART[k]||''}</span>`).join('')}</span>`)}
   ${plRow(ico('user',20),'الأصدقاء والدعوة',frMyCode()?'رمزك '+frMyCode()+' — شاركه ليضيفك':'أضف برمز صديقك وشارك رمزك',
    "push('friendsScr')",'#3AAE6E',(FR&&FR.in&&FR.in.length)?`<span class="plNew">${FR.in.length}</span>`:'')}
   ${plRow(ico('swords',20),'تحدِّ صديقًا','ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
@@ -25105,7 +25095,6 @@ function playModesScr(){
   ]},
   {t:'اجتماعي',items:[
    {k:'casual',n:'تحدي الخصم',d:'منافس تدريبي',go:'vsScr()'},
-   {k:'party',n:'ليلة العائلة',d:'مافيا · رسم · لو خيروك',go:"push('partyScr')"},
   ]}
  ];
  const lockTxt=u=>{
@@ -35019,11 +35008,20 @@ function ghWay(cls,icon,t,s,pills,call,acc,off){
 }
 
 /** ألعاب بلا غرف لها مساراتها الخاصّة بدل شاشة المطابقة */
-const GH_ROUTE={knowledge:{ranked:"push('rankedScr')",casual:"vsScr()",extra:[
- {ic:'energy',t:'تحدٍّ سريع',s:'ستّ أسئلة سريعة — درّب نفسك وحدك',
-  pl:[['user','لاعب واحد'],['timer','4 - 6 دقائق'],['gift','بلا قيود']],go:"push('quickScr')",ac:'#2FC4A8'},
- {ic:'swords',t:'تحدِّ صديقًا',s:'ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
-  pl:[['group','لاعبان'],['web','برمز صديق'],['timer','بلا وقت']],go:"push('chalScr')",ac:'#F0567F'}]}};
+/**
+ * طريقا اللعب — لا أكثر.
+ *
+ * كانت ستًّا: مصنّف وعاديّ وغرفة وكمبيوتر وتمرير وإضافات. والمالك يريد سؤالًا
+ * واحدًا يُجاب بضغطة: **مع من تلعب؟** فصارت اثنتين — لاعبٌ حقيقيّ أونلاين، أو
+ * الكمبيوتر. ومن كثُرت أمامه الأبواب وقف عندها ولم يدخل.
+ *
+ * وعالم المعرفة لا كمبيوتر فيه، فبابه الثاني «تحدٍّ سريع» — أنت وحدك والأسئلة.
+ */
+const GH_ROUTE={
+ knowledge:{online:"push('rankedScr')",
+            solo:"push('quickScr')",soloT:'تحدٍّ سريع',soloS:'ستّ أسئلة — درّب نفسك وحدك',
+            soloPl:[['user','لاعب واحد'],['timer','4 - 6 دقائق'],['gift','بلا قيود']]}
+};
 /** مركز اللعبة — بطاقة اللعبة، رتبتك فيها، ثم طرق لعبها كلّ بلونها */
 function gameHub(g){
  hubCss();rankAll();hubRegister();
@@ -35052,23 +35050,15 @@ function gameHub(g){
    <span class="go">${ghChev()}</span></button>
  </div>
 
- <div class="ghSec"><i></i><b>${ico('crown',15)}</b><span>اختر طريقة اللعب</span><b>${ico('crown',15)}</b><i></i></div>
- ${ghWay('main',`<span class="art">${HOME_ART.get('trophy')}</span>`,'لعب مصنّف','نافس لاعبين حقيقيّين وارفع تصنيفك',
+ <div class="ghSec"><i></i><b>${ico('crown',15)}</b><span>مع من تلعب؟</span><b>${ico('crown',15)}</b><i></i></div>
+ ${ghWay('main',`<span class="art">${HOME_ART.get('trophy')}</span>`,'أونلاين ضدّ لاعب حقيقيّ','نبحث لك عن خصمٍ الآن — وفوزك يرفع تصنيفك',
    [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time),ghPill(ico('trophy',10),'جوائز ومكافآت')],
-   R.ranked||`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
- ${ghWay('',`<span class="art">${art}</span>`,'لعب عادي','استمتع بمباراة سريعة دون تأثير على التصنيف',
-   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.quick),ghPill(ico('gift',10),'بلا قيود')],
-   R.casual||`push('mmScr',{g:'${g}',mode:'casual'})`,'#4C9AF0')}
- ${def.room?ghWay('',`<span class="art">${HOME_ART.get('lock')}</span>`,'غرفة خاصّة','العب مع أصدقائك في غرفة مخصّصة',
-   [ghPill(ico('group',10),pl),ghPill(ico('web',10),'برمز غرفة'),noRp],`push('roomScr','${g}')`,'#B05CF0'):''}
- ${def.bot?ghWay('',`<span class="art">${HOME_ART.get('robot')}</span>`,'ضد الكمبيوتر','حسّن مهاراتك مع مستويات متعدّدة',
-   [ghPill(ico('user',10),'لاعب واحد'),ghPill(ico('timer',10),m.bot||m.quick),ghPill(ico('chart',10),'مستويات متعدّدة')],
-   `push('soloScr','${g}')`,'#2FC4A8'):''}
- ${(R.extra||[]).map(x=>ghWay('',ico(x.ic,27),x.t,x.s,
-   x.pl.map(q=>ghPill(ico(q[0],10),q[1])),x.go,x.ac)).join('')}
- ${def.pass?ghWay('',ico('cards',27,'red'),'تمرير الجوال','جهاز واحد يدور بينكم في المجلس نفسه',
-   [ghPill(ico('group',10),pl),ghPill(ico('door',10),'جهاز واحد'),noRp],`ptWay='pass';ptOpen('${g}')`,'#F0567F'):''}
- <div class="ghNote">نقاط التصنيف من «اللعب المصنّف» وحده — لئلّا تُجمع الرتب من غرف الأصدقاء.</div>
+   R.online||`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
+ ${ghWay('',`<span class="art">${HOME_ART.get('robot')}</span>`,R.soloT||'ضدّ الكمبيوتر',R.soloS||'حسّن مهاراتك مع مستويات متعدّدة',
+   (R.soloPl||[['user','لاعب واحد'],['timer',m.bot||m.quick],['chart','مستويات متعدّدة']])
+     .map(q=>ghPill(ico(q[0],10),q[1])),
+   R.solo||`push('soloScr','${g}')`,'#2FC4A8')}
+ <div class="ghNote">نقاط التصنيف من اللعب أونلاين وحده — واللعب ضدّ الكمبيوتر للتمرين بلا رتب.</div>
  </div>`);
 }
 
