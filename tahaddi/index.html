@@ -14846,6 +14846,14 @@ const EMO_FX={
 /** الملصق الكبير للأسطورية المرسومة — يتمايل ويتوهّج ويمرّ عليه ضوء */
 function emoBig(k,cls){const u=EMO_BIG[k];return '<span class="ebigW"><img class="ebig'+(cls?' '+cls:'')+'" src="'+u+'" alt=""><i class="ebigS" style="--im:url('+u+')"></i></span>'}
 /** وجه تعبير — ميدالية معدنية بإحساس ثلاثي الأبعاد، والأسطوري يتحرك */
+/**
+ * الأشكال التعبيرية — مُطفأة بطلب المالك: «سوف أعيدها لاحقًا».
+ *
+ * وأُطفئت بمفتاحٍ لا بمحذفة: الميداليات ومجموعاتها وصناديقها بناءٌ كامل، وحذفه
+ * حذفٌ لا رجعة فيه. فمتى أراد عودتها قُلب هذا السطر وحده.
+ */
+const EMOTES_ON=false;
+
 function face(k,s){
  s=s||40;
  const e=(typeof EMOTES!=='undefined'&&EMOTES.find(x=>x.k===k))||null;
@@ -15622,14 +15630,14 @@ function drawAv(){
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:6px 0">
  <div style="display:inline-block;border-radius:50%;padding:3px;
-  background:linear-gradient(145deg,#FFE9A8,#A87518)">${S.avatarEmote?face(S.avatarEmote,104):avatarSVG(avEdit,104)}</div>
+  background:linear-gradient(145deg,#FFE9A8,#A87518)">${(EMOTES_ON&&S.avatarEmote)?face(S.avatarEmote,104):avatarSVG(avEdit,104)}</div>
  <div class="mtl" style="font-size:16px;margin-top:9px">${S.name}</div></div>
  </div></div>
  <div style="margin:14px 0">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">صورة الملف الشخصي — شخصيتك المرسومة أو ميدالية من تعبيراتك</div>
  <div class="cr">
   <div onclick="setAvEmote(null)" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${!S.avatarEmote?'#E8B23A':'transparent'}">${avatarSVG(avEdit,44)}</div>
-  ${(S.emotes||[]).map(k=>`<div onclick="setAvEmote('${k}')" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${S.avatarEmote===k?'#E8B23A':'transparent'}">${face(k,44)}</div>`).join('')}
+  ${(EMOTES_ON?(S.emotes||[]):[]).map(k=>`<div onclick="setAvEmote('${k}')" style="flex-shrink:0;cursor:pointer;border-radius:50%;padding:2px;border:2.5px solid ${S.avatarEmote===k?'#E8B23A':'transparent'}">${face(k,44)}</div>`).join('')}
  </div></div>
  <div style="margin:14px 0">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">الإطار — حصري من مسار الموسم المميز ${ico('crown',13)}</div>
@@ -23160,8 +23168,12 @@ function emoteBarDom(send){
  if(ex){ex.remove();return}
  _shoutG=null;
  const d=document.createElement('div');d.className='ebar fx';
- d.innerHTML=shoutPanelHtml()+
-  `<div class="ebRow">${myEmoteDeck().map(k=>`<div class="ebi" onclick="${send}('${k}')">${face(k,38)}</div>`).join('')}</div>`;
+ const deck=EMOTES_ON
+  ? `<div class="ebRow">${myEmoteDeck().map(k=>`<div class="ebi" onclick="${send}('${k}')">${face(k,38)}</div>`).join('')}</div>`
+  : '';
+ const head=shoutPanelHtml();
+ if(!head&&!deck){d.remove();return}      // لوحةٌ فارغة لا تُفتح
+ d.innerHTML=head+deck;
  document.body.appendChild(d);
 }
 /* الصيحات فوق التعابير في اللوحة نفسها: زرّ واحد لا زرّان، والمجموعة المفتوحة
