@@ -30,7 +30,7 @@ const SCREENS=[
  ['clMembersScr','الأعضاء'],['clChatScr','الدردشة'],['clEventsScr','منافسات النادي'],
  ['clDonorsScr','الداعمون'],['clMoreScr','مزيد النادي'],['clCreateScr','إنشاء نادٍ']
 ];
-const HUBS=['carrom','uno','draw'];
+const HUBS=['carrom','uno'];
 
 function latin(t){
  return [...new Set((t.match(/[A-Za-z][A-Za-z'’\-]+/g)||[]))]

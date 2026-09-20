@@ -30,7 +30,7 @@ const CAPTURES=require('./qa-states.cjs');
  await page.evaluate(()=>{
   S.tutorial_completed=true;S.tutDone=1;S.dev=1;S.coins=5000;S.gems=120;S.name='عبدالرحمن';
   const all=rankAll();const set=(g,t,d,rp)=>{const q=all[g];q.placed=true;q.tier=t;q.div=d;q.rp=rp;q.gamesPlayed=20;q.wins=12;q.losses=8;q.seasonBest={tier:t,div:d}};
-  set('knowledge',4,2,64);set('carrom',9,0,100);set('uno',2,1,30);set('drawing',5,2,55);
+  set('knowledge',4,2,64);set('carrom',9,0,100);set('uno',2,1,30);
   window.qaWait=ms=>new Promise(r=>setTimeout(r,ms));
   window.qaImg=col=>{const c=document.createElement('canvas');c.width=300;c.height=200;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,300,200);x.strokeStyle=col;x.lineWidth=8;x.beginPath();x.arc(150,100,60,0,6.3);x.stroke();return c.toDataURL('image/png')};
   window.qaClan=()=>{if(!S.clan||!S.clan.c){CLAN.act(S.uid,'create',{n:'فرسان المعرفة',desc:'نادٍ تنافسي للاختبار',i:'book',col:'#5AC8F5',jt:'req'});CLAN.seedBots(S.clan.c.id,12)}};
