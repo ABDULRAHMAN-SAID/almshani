@@ -9,6 +9,10 @@ on:
         description: 'عنوان الخادم (اتركه فارغًا ليأخذ متغيّر المستودع TAHADDI_SERVER)'
         required: false
         default: ''
+      home:
+        description: 'عنوان اللعبة على الويب — التطبيق يحمّل أحدثها منه ويرجع لنسخته عند انقطاع الشبكة (فارغ = متغيّر TAHADDI_HOME)'
+        required: false
+        default: ''
   push:
     branches: [claude/3d-game-design-c59zac]
     paths:
@@ -44,6 +48,7 @@ jobs:
       - name: تجهيز أصول التطبيق ورقم الإصدار
         env:
           TAHADDI_SERVER: ${{ inputs.server != '' && inputs.server || vars.TAHADDI_SERVER }}
+          TAHADDI_HOME: ${{ inputs.home != '' && inputs.home || vars.TAHADDI_HOME }}
         run: node tools/android-sync.cjs
 
       - uses: actions/setup-java@v4

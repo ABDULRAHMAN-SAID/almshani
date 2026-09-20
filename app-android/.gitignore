@@ -5,3 +5,5 @@ app/build/
 .gradle/
 local.properties
 app/version.properties
+# عنوان اللعبة على الويب — يكتبه tools/android-sync.cjs عند كل بناء
+app/src/main/res/values/tahaddi-home.xml

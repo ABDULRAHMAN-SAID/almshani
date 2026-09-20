@@ -8,6 +8,9 @@
  *    والويب يحملان الملفّ نفسه، ولا يوجد مسار بناء ثانٍ يتأخّر عن الأوّل.
  * ٢) يكتب app-android/app/version.properties من APP_VER داخل اللعبة، فلا يُحدَّث رقم
  *    الإصدار في مكانين. الرمز الرقميّ = الرئيسيّ×١٠٠٠ + الفرعيّ (٥٫٩٦ ← ٥٠٩٦) فيبقى تصاعديًّا.
+ * ٣) يكتب TAHADDI_HOME في مورد نصّي يقرؤه الغلاف: عنوان اللعبة على الويب. فإن ضُبط
+ *    حمّل التطبيقُ أحدثَ لعبةٍ من الشبكة، وإن انقطعت رجع إلى نسخة الحزمة. وبلا ضبطٍ
+ *    يبقى التطبيق على نسخته الداخلية كما كان.
  */
 const fs=require('fs'),path=require('path'),{execFileSync}=require('child_process');
 const ROOT=path.join(__dirname,'..');
@@ -24,7 +27,17 @@ if(!Number.isInteger(code)||code<=0)throw new Error('رقم إصدار غير ص
 fs.writeFileSync(path.join(ROOT,'app-android','app','version.properties'),
  `# مولَّد من tools/android-sync.cjs — لا يُحرَّر يدويًّا\nversionName=${name}\nversionCode=${code}\n`);
 
+/* عنوان اللعبة على الويب — https وحدها، وبلا محارف تكسر ملفّ الموارد.
+   والتحقّق هنا لا في جافا: خطأٌ في البناء أوضح من تطبيقٍ يفتح على بياض. */
+const HOME=(process.env.TAHADDI_HOME||'').trim();
+if(HOME&&!/^https:\/\/[^\s"'<>&]+$/.test(HOME))
+ throw new Error('TAHADDI_HOME لا بدّ أن يكون عنوان https بلا محارف خاصّة: '+HOME);
+fs.writeFileSync(path.join(ROOT,'app-android','app','src','main','res','values','tahaddi-home.xml'),
+ `<?xml version="1.0" encoding="utf-8"?>\n`+
+ `<!-- مولَّد من tools/android-sync.cjs — لا يُحرَّر يدويًّا -->\n`+
+ `<resources>\n <string name="tahaddi_home">${HOME}</string>\n</resources>\n`);
+
 let n=0,bytes=0;
 (function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){
  const p=path.join(d,e.name); if(e.isDirectory())walk(p); else {n++;bytes+=fs.statSync(p).size}}})(ASSETS);
-console.log(`✓ أصول التطبيق جاهزة — ${n} ملفًّا · ${(bytes/1048576).toFixed(1)}م · الإصدار ${name} (${code})`);
+console.log(`✓ أصول التطبيق جاهزة — ${n} ملفًّا · ${(bytes/1048576).toFixed(1)}م · الإصدار ${name} (${code}) · اللعبة على الويب: ${HOME||'(الحزمة وحدها)'}`);

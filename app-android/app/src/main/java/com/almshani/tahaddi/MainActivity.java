@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.MimeTypeMap;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -48,12 +49,41 @@ public class MainActivity extends AppCompatActivity {
  private static final String ORIGIN = "https://appassets.androidplatform.net";
  private static final String HOME = ORIGIN + "/assets/index.html?src=app";
 
+ /**
+  * اللعبة البعيدة — تُكتب عند البناء في `tahaddi_home`، وفارغةٌ تعني «من الحزمة وحدها».
+  *
+  * ولماذا بعيدةٌ وفي الحزمة نسخة؟ لأن المالك يعدّل كل يوم، وتنزيلُ حزمةٍ جديدة
+  * وتثبيتُها عند كل تعديل يقتل حلقة العمل. فإن وُجد الإنترنت حُمِّلت أحدثُ لعبةٍ
+  * من الشبكة، وإن انقطع رجع إلى نسخة الحزمة فلعب بلا إنترنت — لا صفحةَ خطأٍ بيضاء.
+  *
+  * ونسخة الحزمة تبقى كاملةً لا طُعمًا: من ثبّت ولم يفتح الإنترنت قطّ يلعب كما
+  * يلعب غيره، وهذا ما يجعل التطبيق تطبيقًا لا غلافَ موقع.
+  */
+ private String remote = "";
+ private String remoteOrigin = "";
+ private boolean fellBack = false;
+
  private WebView web;
+
+ /** البعيدة إن ضُبطت، وإلّا نسخة الحزمة. */
+ private String startUrl() { return remote.isEmpty() ? HOME : remote; }
 
  @SuppressLint("SetJavaScriptEnabled")
  @Override
  protected void onCreate(Bundle saved) {
   super.onCreate(saved);
+
+  /* https وحدها تُقبل: تحميلٌ غير مشفّر يجعل الصفحة سياقًا غير آمن فيسقط
+     crypto.subtle ويتعطّل ختم الغرف — ولا يُقبل في أندرويد الحديث أصلًا. */
+  remote = getString(R.string.tahaddi_home).trim();
+  if (!remote.isEmpty()) {
+   Uri r = Uri.parse(remote);
+   if ("https".equals(r.getScheme()) && r.getAuthority() != null) {
+    remoteOrigin = "https://" + r.getAuthority();
+   } else {
+    remote = "";
+   }
+  }
 
   final WebViewAssetLoader loader = new WebViewAssetLoader.Builder()
    .setDomain("appassets.androidplatform.net")
@@ -96,9 +126,22 @@ public class MainActivity extends AppCompatActivity {
    @Override
    public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
     Uri u = r.getUrl();
-    if (u != null && ORIGIN.equals(u.getScheme() + "://" + u.getAuthority())) return false;
+    if (u == null) return false;
+    final String o = u.getScheme() + "://" + u.getAuthority();
+    if (ORIGIN.equals(o)) return false;
+    /* اللعبة البعيدة أصلُ التطبيق أيضًا — لولا هذا لخرجت كل نقرةٍ فيها إلى المتصفّح */
+    if (!remoteOrigin.isEmpty() && remoteOrigin.equals(o)) return false;
     /* روابط خارجية (الخصوصية على الويب، الدعم، تسجيل جوجل) تُفتح في المتصفّح */
     return openOutside(u);
+   }
+
+   @Override
+   public void onReceivedError(WebView v, WebResourceRequest r, WebResourceError e) {
+    /* البعيدة لم تصل — نرجع إلى نسخة الحزمة مرّةً واحدة. والحارس `fellBack`
+       يمنع دورةً لا تنتهي لو سقطت نسخة الحزمة هي الأخرى. */
+    if (remote.isEmpty() || fellBack || !r.isForMainFrame()) return;
+    fellBack = true;
+    v.loadUrl(HOME);
    }
   });
 
@@ -150,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
   });
 
   if (saved != null) web.restoreState(saved);
-  else web.loadUrl(HOME);
+  else web.loadUrl(startUrl());
  }
 
  /** الجسر الوحيد بين الصفحة وأندرويد. صنف داخليّ معلن عامًّا لأنّ WebView يستدعيه بالانعكاس. */
