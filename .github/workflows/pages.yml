@@ -26,9 +26,13 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+        with: {fetch-depth: 2}          # الحارس يقارن بالدفعة السابقة
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: هل رُفع رقم الإصدار؟
+        # لعبةٌ تغيّرت ورقمها ثابت تصل ولا تُعلن — فاحص التحديث يقارن الرقم.
+        run: node tools/check-version.cjs HEAD~1
       - name: تجهيز www/
         env:
           TAHADDI_SERVER: ${{ vars.TAHADDI_SERVER }}

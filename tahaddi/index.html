@@ -1692,6 +1692,9 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  box-shadow:0 8px 22px rgba(0,0,0,.5);animation:pop .25s ease}
 #verBar b{font-size:13px;font-weight:900;color:var(--gold)}
 #verBar span{font-size:11px;font-weight:800;color:var(--tx2)}
+/* «لاحقًا»: شريطٌ لا يُخفى يصير عائقًا لا خبرًا — ومن أخفاه يجده في الإعدادات */
+#verBar i{flex:none;width:26px;height:26px;line-height:24px;text-align:center;font-style:normal;
+ font-size:17px;font-weight:900;color:var(--tx2);border-radius:9px;border:1px solid var(--bd)}
 .qvov{position:fixed;inset:0;z-index:80;background:rgba(4,6,12,.72);backdrop-filter:blur(4px);
  display:flex;align-items:center;justify-content:center;padding:26px;animation:fi .2s ease}
 .qvbox{background:linear-gradient(170deg,#1A2237,#0F1524);border:1px solid var(--bd);border-radius:18px;
@@ -24854,7 +24857,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.28';
+const APP_VER='6.33';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -42631,9 +42634,17 @@ function verBar(){
  if(!VER_READY||document.getElementById('verBar'))return;
  var b=document.createElement('div');
  b.id='verBar';
- b.innerHTML='<b>تحديث جاهز · '+esc(VER_READY)+'</b><span>اضغط للتطبيق</span>';
- b.onclick=function(){try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}
-  location.reload()};
+ b.innerHTML='<b>تحديث جاهز · '+esc(VER_READY)+'</b><span>اضغط للتطبيق</span>'+
+  '<i id="verX" aria-label="لاحقًا">&#215;</i>';
+ b.onclick=function(ev){
+  /* الإخفاء لا يطبّق: من ضغط «لاحقًا» لا يريد إعادة تحميلٍ الآن */
+  if(ev&&ev.target&&ev.target.id==='verX'){ev.stopPropagation();b.remove();return}
+  try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}
+  /* إعادة التحميل قد يردّها مخزنٌ وسيط بالنسخة نفسها، فيضغط ولا يتغيّر شيء.
+     وعنوانٌ لم يُطلب قطّ لا يوجد في مخزنٍ أصلًا. */
+  try{var u=new URL(location.href);u.searchParams.set('v',VER_READY);location.replace(u.toString())}
+  catch(e){location.reload()}
+ };
  document.body.appendChild(b);
 }
 var _verSaid=0;
@@ -43667,6 +43678,22 @@ splash();
  if(/claude\.ai$/.test(location.hostname)||(window.claude&&typeof window.claude.use==='function'))return;
  // تطبيق أندرويد: الأصول داخل الحزمة أصلًا، فتخزينها ثانية يضيع عشرة ميجابايت من الهاتف بلا فائدة
  if(location.hostname==='appassets.androidplatform.net')return;
+ /* وغلافُ أندرويد حين يفتح اللعبة من الشبكة: لا عامل خدمة البتّة.
+    للغلاف صفحتُه الاحتياطية داخل الحزمة، فالعامل تكرارٌ لا يفيد — ويؤذي:
+    كان يخدم من مخزنه أوّلًا فيبقى الجهاز على نسخةٍ قديمة، ويمنع وصولَ
+    الإصلاح الذي يصلحه. حلقةٌ لا تُفتح من الداخل.
+    والكشف من بصمة المتصفّح: WebView وحدها تحمل الوسم wv، فلا حاجة إلى
+    تغييرٍ في الغلاف ولا إلى تثبيتٍ جديد.
+    ومن كان عنده عاملٌ قديم يُنزَع الآن مع مخازنه — وهذا هو مفتاح الحلقة. */
+ if(/;\s*wv\)/.test(navigator.userAgent||'')){
+  navigator.serviceWorker.getRegistrations().then(function(rs){
+   rs.forEach(function(r){r.unregister()});
+  }).catch(function(){});
+  if(window.caches&&caches.keys)caches.keys().then(function(ks){
+   ks.forEach(function(k){if(/^tahaddi-/.test(k))caches.delete(k)});
+  }).catch(function(){});
+  return;
+ }
  navigator.serviceWorker.register('sw.js?v='+APP_VER).catch(function(){});
 }catch(e){}})();
 </script>
