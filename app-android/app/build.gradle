@@ -21,8 +21,12 @@ android{
 
  buildTypes{
   debug{
-   /* حزمة تُثبَّت مباشرة على الهاتف: توقيع التصحيح يكفي للتثبيت اليدويّ */
-   minifyEnabled false
+   /* حزمة تُثبَّت مباشرة على الهاتف: توقيع التصحيح يكفي للتثبيت اليدويّ.
+      والتصغير مفعّل هنا كما في release — لأنّ هذه هي الحزمة التي تُنزَّل فعلًا،
+      وشيفرة androidx غير المستعملة كانت ٢٫٥ ميجا من تنزيله. */
+   minifyEnabled true
+   shrinkResources true
+   proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
   }
   release{
    minifyEnabled false

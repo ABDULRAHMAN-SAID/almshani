@@ -9,8 +9,11 @@
  * ٢) يكتب app-android/app/version.properties من APP_VER داخل اللعبة، فلا يُحدَّث رقم
  *    الإصدار في مكانين. الرمز الرقميّ = الرئيسيّ×١٠٠٠ + الفرعيّ (٥٫٩٦ ← ٥٠٩٦) فيبقى تصاعديًّا.
  * ٣) يكتب TAHADDI_HOME في مورد نصّي يقرؤه الغلاف: عنوان اللعبة على الويب. فإن ضُبط
- *    حمّل التطبيقُ أحدثَ لعبةٍ من الشبكة، وإن انقطعت رجع إلى نسخة الحزمة. وبلا ضبطٍ
- *    يبقى التطبيق على نسخته الداخلية كما كان.
+ *    حمّل التطبيقُ أحدثَ لعبةٍ من الشبكة.
+ * ٤) وحين يُضبط، لا تُحزَم اللعبة مرّتين: نسخة الحزمة كانت ٥٫٥ من ٩٫٢ ميجا —
+ *    نصف التنزيل لملفٍّ لا يُفتح إلّا حين تنقطع الشبكة. فتُستبدل بصفحة اعتذار
+ *    صغيرة، ويصير التطبيق ملفًّا يُنزَّل على شبكةٍ ضعيفة دون أن ينقطع.
+ *    وTAHADDI_FULL=1 يُرجع النسخة الكاملة لمن أرادها.
  */
 const fs=require('fs'),path=require('path'),{execFileSync}=require('child_process');
 const ROOT=path.join(__dirname,'..');
@@ -36,6 +39,30 @@ fs.writeFileSync(path.join(ROOT,'app-android','app','src','main','res','values',
  `<?xml version="1.0" encoding="utf-8"?>\n`+
  `<!-- مولَّد من tools/android-sync.cjs — لا يُحرَّر يدويًّا -->\n`+
  `<resources>\n <string name="tahaddi_home">${HOME}</string>\n</resources>\n`);
+
+/* نصف الحزمة كان نسخةً ثانية من اللعبة لا تُفتح إلّا بلا شبكة. فحين يكون لها بيتٌ
+   على الويب تُترك صفحةٌ تقول ذلك بوضوح، لا صفحةٌ بيضاء ولا لعبةٌ مكرّرة. */
+if(HOME&&process.env.TAHADDI_FULL!=='1'){
+ const arenas=path.join(ASSETS,'arenas');
+ if(fs.existsSync(arenas))fs.rmSync(arenas,{recursive:true,force:true});
+ fs.writeFileSync(path.join(ASSETS,'index.html'),
+`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>تحدي — عالم المعرفة</title><style>
+html,body{margin:0;height:100%;background:#080B14;color:#F2F4F8;
+ font-family:system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;-webkit-text-size-adjust:100%}
+.w{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:18px;padding:32px;text-align:center;box-sizing:border-box}
+h1{margin:0;font-size:26px;font-weight:900;color:#E8B23A;letter-spacing:.5px}
+p{margin:0;font-size:15px;line-height:1.7;color:#9AA3B8;max-width:320px}
+button{margin-top:6px;padding:14px 34px;font:inherit;font-weight:900;font-size:16px;
+ color:#1A1408;background:#E8B23A;border:0;border-radius:14px;cursor:pointer}
+</style></head><body><div class="w">
+<h1>تحدّي</h1>
+<p>اللعبة تحتاج اتصالًا بالإنترنت. تأكّد من الشبكة ثم أعد المحاولة.</p>
+<button onclick="location.href='${HOME}'">أعد المحاولة</button>
+</div></body></html>\n`);
+}
 
 let n=0,bytes=0;
 (function walk(d){for(const e of fs.readdirSync(d,{withFileTypes:true})){

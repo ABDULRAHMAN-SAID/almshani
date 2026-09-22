@@ -25,8 +25,16 @@ let ok=0,bad=0;
 const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '+n+(d!==undefined?'  → '+d:'')))};
 
 (async()=>{
- if(!fs.existsSync(path.join(ASSETS,'index.html'))){
+ const bundled=path.join(ASSETS,'index.html');
+ if(!fs.existsSync(bundled)){
   console.error('أصول التطبيق غير مجهّزة — شغّل: node tools/android-sync.cjs');process.exit(1);
+ }
+ /* بناءٌ بـTAHADDI_HOME يترك صفحة اعتذارٍ صغيرة مكان اللعبة، وهذه الفحوص تفحص
+    اللعبة داخل الحزمة. فالرسالة تقول ما يُفعل بدل أن تسقط اثنا عشر فحصًا بلا سبب. */
+ if(fs.statSync(bundled).size<20000){
+  console.error('الحزمة الحالية بُنيت على لعبة الويب، فليس فيها لعبةٌ تُفحص.');
+  console.error('لفحص الغلاف: node tools/android-sync.cjs   (بلا TAHADDI_HOME)');
+  process.exit(1);
  }
  const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',args:['--no-sandbox','--use-gl=angle','--use-angle=swiftshader']});
  const ctx=await b.newContext({viewport:{width:412,height:915},deviceScaleFactor:2,locale:'ar',isMobile:true,hasTouch:true});
