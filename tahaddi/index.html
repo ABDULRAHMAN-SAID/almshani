@@ -16380,6 +16380,9 @@ var SFX=(function(){
  function slideStop(){if(!SL)return;var s=SL;SL=null;try{s.g.gain.value=0.0001;s.src.stop()}catch(e){}}
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
+ /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
+ var STYLE='wood';
+ function style(s){if(s)STYLE=String(s);return STYLE}
  var loading={};
  function loadSprite(name,url,seg){
   if(SPR[name]||loading[name]||!W||typeof W.fetch!=='function')return;
@@ -16396,7 +16399,7 @@ var SFX=(function(){
  /** يعزف مقطعًا من عيّنة: يختار صيغةً عشوائيّة، ويضبط الشدّة والنبرة بالسرعة */
  function sample(name,key,t0,opt){
   var s=SPR[name];if(!s||!s.buf)return false;
-  var list=s.seg[key];if(!list||!list.length)return false;
+  var list=s.seg[STYLE+'_'+key]||s.seg[key];if(!list||!list.length)return false;
   var c=ac();if(!c)return false;
   var seg=list[(Math.random()*list.length)|0];
   var v=opt&&opt.v!=null?opt.v:8;
@@ -16405,9 +16408,14 @@ var SFX=(function(){
   var rate=0.94+Math.random()*0.10+Math.min(0.06,v/200);
   var src=c.createBufferSource(),vol=c.createGain();
   src.buffer=s.buf;src.playbackRate.value=rate;
-  vol.gain.value=g*0.9;
+  /* النهاية بمنحدرٍ لا بقطع: ترميز Opus يؤخّر المحتوى بضع مللي ثوانٍ عن مواضع JSON،
+     فكان آخر العيّنة يُقطع قبل خفوته ويُسمع «طقطقة» — والفجوة بين العيّنات ٣٠ م.ث تتّسع للامتداد */
+  var dur=seg[1]+0.004, end=t0+dur/rate;
+  vol.gain.setValueAtTime(g*0.9,t0);
+  vol.gain.setValueAtTime(g*0.9,Math.max(t0,end-0.006));
+  vol.gain.linearRampToValueAtTime(0,end);
   src.connect(vol);vol.connect(c.destination);
-  try{src.start(t0,seg[0],seg[1])}catch(e){return false}
+  try{src.start(t0,seg[0],dur)}catch(e){return false}
   return true;
  }
 
@@ -16418,8 +16426,9 @@ var SFX=(function(){
   win:   function(t){[523,659,784,1047].forEach(function(f,i){tone(f,t+i*0.11,0.24,'triangle',0.15)})},
   lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
   /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
-  strike:function(t,o){if(!sample('carrom','strike',t,{v:12}))
-           {noise(t,0.06,0.28,2400);tone(170,t,0.05,'square',0.05)}},
+  /* الإطلاق: نقرة الإصبع تكاد لا تُسمع في الواقع — همسةٌ خافتة، والطقّة الحقيقيّة عند أوّل اصطدام */
+  strike:function(t,o){if(!sample('carrom','flick',t,{v:5,gain:0.45}))
+           {noise(t,0.025,0.08,3400)}},
   pot:   function(t,o){if(!sample('carrom','pot',t,{v:10}))
            {tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)}},
   hit:   function(t,o){if(!sample('carrom','hit',t,o))
@@ -16453,7 +16462,7 @@ var SFX=(function(){
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,available:available,hapticAvailable:hapticAvailable,
+ return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,style:style,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
@@ -24654,7 +24663,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.44';
+const APP_VER='6.45';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25755,7 +25764,10 @@ function soloScr(g){
  ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
- <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
+ <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
+ <div class="sl">التدريب</div>
+ <div class="cr"><div class="fc ${S.caGuide?'on':''}" onclick="S.caGuide=!S.caGuide;try{saveState()}catch(e){}soloScr('carrom')">${ico('search',12)} خطّ التصويب: ${S.caGuide?'مفعّل':'مطفأ'}</div></div>
+ <div class="note">خطّ التصويب يريك أين يصيب الضارب — للتدريب مع الكمبيوتر فقط، ولا يعمل أبدًا مع اللاعبين</div>`:''}
  ${g==='mafia'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
  <div class="cr">${[5,6,7,8].map(n=>`<div class="fc ${(RM.mbN||6)===n?'on':''}" onclick="RM.mbN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
  <div class="wb" style="text-align:start">تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.</div>
@@ -26603,7 +26615,10 @@ var CarromPhysics=(function(){
    var cross=(c0.d<0)?c0:((c1.d<0)?c1:null);
    if(cross){
     S.pot.push(p.t);
+    // ox/oy/fr: موضع القطعة قبل هذه الخطوة ورقمها — يستعملها العرض ليستوفي إطار الدخول
+    //           إلى الجيب فلا تقفز القطعة (٦٫٤٥)؛ لا أثر لها في المحاكاة نفسها
     S.drop.push({t:p.t,r:p.r,x:p.x,y:p.y,
+                 ox:(p.px!=null?p.px:x0),oy:(p.py!=null?p.py:y0),fr:S.frame,
                  px:P[cross.pocket][0],py:P[cross.pocket][1],f:0});
     S.events.push({e:'pot',t:p.t,pocket:cross.pocket,speed:Math.hypot(p.vx,p.vy)});
     ps.splice(i,1);
@@ -26930,11 +26945,15 @@ function caStep(){
  if(n<1&&S2.frame===0)n=1;
  if(n>4){n=4;_ca.acc=0}else _ca.acc-=n*CA_DT;
  let ev=[];
- for(let i=0;i<n&&!CarromPhysics.settled(S2);i++){const e=CarromPhysics.step(S2);if(e&&e.length)ev=ev.concat(e)}
+ /* الاستيفاء (٦٫٤٥): المحاكاة خطواتٌ ثابتة (٦٠/ث) حتّى تتّفق الأجهزة، والشاشة قد تكون ٩٠ أو ١٢٠
+    هرتز — فكان ثلث الإطارات أو نصفها بلا حركة ثمّ قفزة: تعرّجٌ يُغثي. الآن يُحفظ موضع كلّ قطعة
+    قبل آخر خطوة، ويُرسم بينه وبين موضعها الحاليّ بنسبة ما تراكم من الزمن. */
+ for(let i=0;i<n&&!CarromPhysics.settled(S2);i++){for(const p of S2.pcs){p.px=p.x;p.py=p.y}for(const d of S2.drop){d.pf=d.f}const e=CarromPhysics.step(S2);if(e&&e.length)ev=ev.concat(e)}
+ _ca.alpha=Math.max(0,Math.min(1,_ca.acc/CA_DT));
  caFx(ev);                          // الأحداث تُترجَم إلى إحساس، لا إلى فيزياء
  /* زحف الخشب: حفيفٌ متّصل يتبع مجموع سرعات القطع — «ليش بلاستيك وليس زحفًا على الخشب؟» */
  if(window.SFX&&SFX.slide){let mv=0;for(const p of S2.pcs){const v=Math.hypot(p.vx||0,p.vy||0);if(v>0.12)mv+=v}SFX.slide(Math.min(1,mv/12))}
- if(n>0)caRender();
+ caRender();                        // كلّ إطارٍ يُرسم — والاستيفاء يملأ ما بين الخطوات
  if(!CarromPhysics.settled(S2)){_ca.anim=requestAnimationFrame(caStep);return}
  if(window.SFX&&SFX.slide)SFX.slide(0);
  // استقرّ اللوح: من ضرب يبثّ الوضع النهائي مرجعًا للجميع
@@ -27046,6 +27065,15 @@ function caSetArena(k){
  try{localStorage.setItem('caArena',_ca.arena)}catch(e){}
  _ca.bg=null;caTexLoad();caRender();
  return true;
+}
+const CA_SFX=['wood','dry','heavy'], CA_SFX_NAME={wood:'خشبيّ',dry:'جافّ',heavy:'ثقيل'};
+/** نمط الطقّات — يُقرأ عند الدخول ويُبدَّل بزرٍّ يُسمعك النمط فورًا */
+function caSfxStyle(){let v='wood';try{v=localStorage.getItem('caSfx')||'wood'}catch(e){}if(CA_SFX.indexOf(v)<0)v='wood';if(window.SFX&&SFX.style)SFX.style(v);return v}
+function caSfxTog(btn){
+ const cur=caSfxStyle(), nx=CA_SFX[(CA_SFX.indexOf(cur)+1)%CA_SFX.length];
+ try{localStorage.setItem('caSfx',nx)}catch(e){}
+ if(window.SFX&&SFX.style){SFX.style(nx);SFX.unlock();SFX.play('hit',{v:9});setTimeout(()=>SFX.play('hit',{v:5}),160)}
+ if(btn)btn.textContent='صوت الطقّات: '+CA_SFX_NAME[nx];
 }
 function caSkinTog(){
  _ca.skin=(_ca.skin==='m')?'c':'m';
@@ -27204,7 +27232,10 @@ function caRender(rest){
  const tgt=_ca.sx;
  if(_ca.sxV==null)_ca.sxV=tgt;
  const base=CA_BASE;
- let pcs=(_ca.sim?_ca.sim.pcs:(rest||(RM.ca?RM.ca.pcs:[]))).map(p=>{const q=V(p.x,p.y),w=Vv(p.vx||0,p.vy||0);return {x:q[0],y:q[1],vx:w[0],vy:w[1],t:p.t,r:p.r||CA_PR}});
+ const al=_ca.sim&&_ca.alpha!=null?_ca.alpha:1;
+ let pcs=(_ca.sim?_ca.sim.pcs:(rest||(RM.ca?RM.ca.pcs:[]))).map(p=>{
+  const ix=(_ca.sim&&p.px!=null)?p.px+(p.x-p.px)*al:p.x, iy=(_ca.sim&&p.py!=null)?p.py+(p.y-p.py)*al:p.y;
+  const q=V(ix,iy);return {x:q[0],y:q[1],t:p.t,r:p.r||CA_PR}});
  let sPos=null, sSide=0, sSeat=ms;   // الضارب الساكن: موضعه في إطار العرض، وجهة صاحبه، ومقعده
  if(!_ca.sim&&RM.ca){
   if(RM.ca.turn===RM.me){sPos={x:_ca.drag?_ca.drag.sx:_ca.sxV,y:base}}
@@ -27250,18 +27281,18 @@ function caRender(rest){
  for(const p of pcs){
   const r=(p.r||CA_PR)*sc,X=PX(p.x),Y=PY(p.y);
   const sp=caDisc(p.t,r),o=sp._o;
-  const vx=(p.vx||0)*sc,vy=(p.vy||0)*sc;
-  if(Math.hypot(vx,vy)>sc){   // أثر حركة: نسختان باهتتان خلف القطعة
-   cx.globalAlpha=.18;cx.drawImage(sp,X-vx*1.1-o,Y-vy*1.1-o);
-   cx.globalAlpha=.09;cx.drawImage(sp,X-vx*2.1-o,Y-vy*2.1-o);
-   cx.globalAlpha=1;
-  }
-  cx.drawImage(sp,X-o,Y-o);
+  cx.drawImage(sp,X-o,Y-o);   // بلا أثر حركة: الاستيفاء يكفي، والصورة المزدوجة كانت تُدوّخ
  }
  // القطع وهي تسقط في الحفرة: تنزلق إلى الفوهة وتغوص وتَعتِم — لا تختفي فجأة
  const drops=(_ca.sim&&_ca.sim.drop)||_ca.drop||[];
  for(const d0 of drops){
-  const q=V(d0.x,d0.y),qp=V(d0.px,d0.py), d={f:d0.f,t:d0.t,r:d0.r,x:q[0],y:q[1],px:qp[0],py:qp[1]};
+  /* السقوط يُستوفى كالقطع: إطارُ الدخول من موضع القطعة قبل الخطوة، وتقدّمُ الغوص بين خطوتين —
+     وإلّا قفزت القطعة عند فم الجيب على شاشات ٩٠/١٢٠ هرتز */
+  const ia=(_ca.sim&&_ca.alpha!=null)?_ca.alpha:1;
+  const fresh=!!(_ca.sim&&d0.ox!=null&&d0.fr===_ca.sim.frame-1);
+  const dx0=fresh?d0.ox+(d0.x-d0.ox)*ia:d0.x, dy0=fresh?d0.oy+(d0.y-d0.oy)*ia:d0.y;
+  const fi=(_ca.sim&&d0.pf!=null)?d0.pf+(d0.f-d0.pf)*ia:d0.f;
+  const q=V(dx0,dy0),qp=V(d0.px,d0.py), d={f:fi,t:d0.t,r:d0.r,x:q[0],y:q[1],px:qp[0],py:qp[1]};
   const e=Math.min(1,d.f);
   const slide=Math.min(1,e/.42), sz=Math.max(0,(e-.34)/.66);   // تنزلق أولًا ثم تغوص
   const ez=1-Math.pow(1-slide,2.4), gz=sz*sz;
@@ -27310,7 +27341,8 @@ function caRender(rest){
    cx.fillText(can?'أفلت الآن — تُلغى الضربة':'↓ للإلغاء أنزل إصبعك إلى هنا وأفلت',W/2,W+(H-W)/2);
   }
   // خطّ التصويب الأماميّ: إلى أوّل تماسّ، ثمّ سهما الانطلاق — وحين لا يُرسم (إلغاء/خلف/سحبٌ قصير) يبقى خطّ الاتجاه القديم
-  const g=(!can&&!back&&raw>=10)?caGuide(d.sx,d.sy,-d.dx,-d.dy,caLocalPcs(caMySeat())):null;
+  // خطّ التصويب غشٌّ في المباراة (قال المالك) — للتدريب مع الكمبيوتر فقط وباختيارٍ من شاشة الإعداد
+  const g=(RM.solo&&S.caGuide&&!can&&!back&&raw>=10)?caGuide(d.sx,d.sy,-d.dx,-d.dy,caLocalPcs(caMySeat())):null;
   if(!g){
    cx.setLineDash([8,6]);cx.lineWidth=2.6;
    cx.strokeStyle=can?'rgba(190,190,200,.45)':back?'rgba(226,75,74,.85)':'rgba(255,233,168,.6)';
@@ -27452,7 +27484,7 @@ function caSfxLoad(){
  }).catch(()=>{_caSfx=0});
 }
 function caInit(){
- caSfxLoad();
+ caSfxLoad();caSfxStyle();
  const cv=document.getElementById('caC');if(!cv||cv._on)return;cv._on=1;
  caSkinLoad();caTexLoad();caHandImg();
  caRender();caLoopOn();
@@ -27598,6 +27630,7 @@ function rmCarrom(R){
   ${seat.map(chip).join('')}</div>
  <div style="display:flex;justify-content:center;margin-top:6px">
   <button onclick="caSkinTog()" style="background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">${ico('palette',13)} بدّل شكل اللوح</button>
+  <button onclick="caSfxTog(this)" style="margin-inline-start:8px;background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">صوت الطقّات: ${CA_SFX_NAME[caSfxStyle()]}</button>
  </div>
  <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب باليد · اسحب على اللوح وأفلت · للإلغاء أنزل إصبعك تحت اللوح':'دور '+nm(C.turn)+' — يصوّب…'}</div>
  ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}

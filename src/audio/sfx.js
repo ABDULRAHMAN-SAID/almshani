@@ -106,6 +106,9 @@ var SFX=(function(){
  function slideStop(){if(!SL)return;var s=SL;SL=null;try{s.g.gain.value=0.0001;s.src.stop()}catch(e){}}
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
+ /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
+ var STYLE='wood';
+ function style(s){if(s)STYLE=String(s);return STYLE}
  var loading={};
  function loadSprite(name,url,seg){
   if(SPR[name]||loading[name]||!W||typeof W.fetch!=='function')return;
@@ -122,7 +125,7 @@ var SFX=(function(){
  /** يعزف مقطعًا من عيّنة: يختار صيغةً عشوائيّة، ويضبط الشدّة والنبرة بالسرعة */
  function sample(name,key,t0,opt){
   var s=SPR[name];if(!s||!s.buf)return false;
-  var list=s.seg[key];if(!list||!list.length)return false;
+  var list=s.seg[STYLE+'_'+key]||s.seg[key];if(!list||!list.length)return false;
   var c=ac();if(!c)return false;
   var seg=list[(Math.random()*list.length)|0];
   var v=opt&&opt.v!=null?opt.v:8;
@@ -131,9 +134,14 @@ var SFX=(function(){
   var rate=0.94+Math.random()*0.10+Math.min(0.06,v/200);
   var src=c.createBufferSource(),vol=c.createGain();
   src.buffer=s.buf;src.playbackRate.value=rate;
-  vol.gain.value=g*0.9;
+  /* النهاية بمنحدرٍ لا بقطع: ترميز Opus يؤخّر المحتوى بضع مللي ثوانٍ عن مواضع JSON،
+     فكان آخر العيّنة يُقطع قبل خفوته ويُسمع «طقطقة» — والفجوة بين العيّنات ٣٠ م.ث تتّسع للامتداد */
+  var dur=seg[1]+0.004, end=t0+dur/rate;
+  vol.gain.setValueAtTime(g*0.9,t0);
+  vol.gain.setValueAtTime(g*0.9,Math.max(t0,end-0.006));
+  vol.gain.linearRampToValueAtTime(0,end);
   src.connect(vol);vol.connect(c.destination);
-  try{src.start(t0,seg[0],seg[1])}catch(e){return false}
+  try{src.start(t0,seg[0],dur)}catch(e){return false}
   return true;
  }
 
@@ -144,8 +152,9 @@ var SFX=(function(){
   win:   function(t){[523,659,784,1047].forEach(function(f,i){tone(f,t+i*0.11,0.24,'triangle',0.15)})},
   lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
   /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
-  strike:function(t,o){if(!sample('carrom','strike',t,{v:12}))
-           {noise(t,0.06,0.28,2400);tone(170,t,0.05,'square',0.05)}},
+  /* الإطلاق: نقرة الإصبع تكاد لا تُسمع في الواقع — همسةٌ خافتة، والطقّة الحقيقيّة عند أوّل اصطدام */
+  strike:function(t,o){if(!sample('carrom','flick',t,{v:5,gain:0.45}))
+           {noise(t,0.025,0.08,3400)}},
   pot:   function(t,o){if(!sample('carrom','pot',t,{v:10}))
            {tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)}},
   hit:   function(t,o){if(!sample('carrom','hit',t,o))
@@ -179,7 +188,7 @@ var SFX=(function(){
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,available:available,hapticAvailable:hapticAvailable,
+ return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,style:style,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;

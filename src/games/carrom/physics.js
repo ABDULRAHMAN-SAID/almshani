@@ -137,7 +137,10 @@ var CarromPhysics=(function(){
    var cross=(c0.d<0)?c0:((c1.d<0)?c1:null);
    if(cross){
     S.pot.push(p.t);
+    // ox/oy/fr: موضع القطعة قبل هذه الخطوة ورقمها — يستعملها العرض ليستوفي إطار الدخول
+    //           إلى الجيب فلا تقفز القطعة (٦٫٤٥)؛ لا أثر لها في المحاكاة نفسها
     S.drop.push({t:p.t,r:p.r,x:p.x,y:p.y,
+                 ox:(p.px!=null?p.px:x0),oy:(p.py!=null?p.py:y0),fr:S.frame,
                  px:P[cross.pocket][0],py:P[cross.pocket][1],f:0});
     S.events.push({e:'pot',t:p.t,pocket:cross.pocket,speed:Math.hypot(p.vx,p.vy)});
     ps.splice(i,1);
