@@ -23,7 +23,7 @@ on:
       - '.github/workflows/android-apk.yml'
 
 permissions:
-  contents: read
+  contents: write   # لنشر الحزمة كإصدار برابط تنزيل مباشر
 
 concurrency:
   group: android-apk-${{ github.ref }}
@@ -96,12 +96,31 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+      - name: نشر الحزمة برابط مباشر لا يتغيّر
+        # ملفّات Actions تنزل مضغوطة، وفكّ الضغط على الهاتف يقصّ الملفّ أحيانًا
+        # فيرفضه أندرويد بـ«مشكلة أثناء تحليل الحزمة». والإصدار يعطي الملفّ نفسه
+        # بلا ضغط، على رابطٍ ثابت لا يتغيّر مع الإصدارات — فيُحفظ مرّةً ويُفتح دائمًا.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VER: ${{ steps.pack.outputs.ver }}
+        run: |
+          set -eu
+          cp "out/tahaddi-$VER.apk" out/tahaddi.apk
+          NOTES="الإصدار $VER — اضغط \`tahaddi.apk\` تحت ليبدأ التنزيل مباشرةً، ثم افتحه واسمح بالتثبيت من هذا المصدر."
+          if ! gh release view apk >/dev/null 2>&1; then
+            gh release create apk --title "تحدّي $VER" --notes "$NOTES"
+          else
+            gh release edit apk --title "تحدّي $VER" --notes "$NOTES"
+          fi
+          gh release upload apk out/tahaddi.apk --clobber
+
       - name: ملخّص
         run: |
           {
             echo "## تطبيق «تحدّي» جاهز"
             echo ""
             echo "- الإصدار: **${{ steps.pack.outputs.ver }}**"
-            echo "- نزّل الملفّ من قسم **Artifacts** في أسفل هذه الصفحة: \`tahaddi-apk-${{ steps.pack.outputs.ver }}\`"
-            echo "- فُكّ الضغط عن الملفّ المنزَّل، ثم افتح ملفّ \`.apk\` من هاتفك واسمح بالتثبيت من هذا المصدر."
+            echo "- **رابط التنزيل المباشر (احفظه — لا يتغيّر):**"
+            echo "  https://github.com/${{ github.repository }}/releases/download/apk/tahaddi.apk"
+            echo "- افتح الملفّ المنزَّل من هاتفك واسمح بالتثبيت من هذا المصدر. لا حاجة لفكّ ضغط."
           } >> "$GITHUB_STEP_SUMMARY"
