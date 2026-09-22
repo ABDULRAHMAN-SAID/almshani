@@ -91,15 +91,16 @@ var SFX=(function(){
   if(!SL){
    var src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
    src.buffer=slideBuf(c);src.loop=true;
-   f.type='bandpass';f.frequency.value=900;f.Q.value=0.7;
+   f.type='bandpass';f.frequency.value=2400;f.Q.value=0.6;   // التسجيل الحقيقيّ: طاقة الانزلاق بين ١٫٤ و٥٫٥ ك.هرتز
    g.gain.value=0.0001;
    src.connect(f);f.connect(g);g.connect(c.destination);
    try{src.start()}catch(e){return false}
    SL={src:src,f:f,g:g};
   }
-  var gain=0.04+0.30*Math.pow(level,0.7);
+  /* الشدّة: في التسجيل حفيف الحركة أخفض من ضربة الضارب بنحو ٣٠ dB — كان هنا أعلى بعشرة أضعاف */
+  var gain=0.006+0.034*Math.pow(level,0.7);
   SL.g.gain.setTargetAtTime(gain,now,0.05);
-  SL.f.frequency.setTargetAtTime(650+1400*level,now,0.08);
+  SL.f.frequency.setTargetAtTime(1900+1500*level,now,0.08);
   SL.src.playbackRate.setTargetAtTime(0.8+0.45*level,now,0.08);
   return true;
  }
@@ -107,7 +108,7 @@ var SFX=(function(){
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
- var STYLE='wood';
+ var STYLE='real';
  function style(s){if(s)STYLE=String(s);return STYLE}
  var loading={};
  function loadSprite(name,url,seg){
@@ -125,12 +126,19 @@ var SFX=(function(){
  /** يعزف مقطعًا من عيّنة: يختار صيغةً عشوائيّة، ويضبط الشدّة والنبرة بالسرعة */
  function sample(name,key,t0,opt){
   var s=SPR[name];if(!s||!s.buf)return false;
-  var list=s.seg[STYLE+'_'+key]||s.seg[key];if(!list||!list.length)return false;
+  var list=s.seg[STYLE+'_'+key]||s.seg[key]||s.seg['wood_'+key];if(!list||!list.length)return false;   // ملفٌّ قديم من عامل خدمةٍ سابق: عيّنةٌ أفضل من تركيب
   var c=ac();if(!c)return false;
-  var seg=list[(Math.random()*list.length)|0];
   var v=opt&&opt.v!=null?opt.v:8;
-  /* الشدّة تتبع السرعة بمنحنىً هادئ: اللمسة تُهمَس والضربة تُقرَع */
-  var g=Math.max(0.10,Math.min(1,Math.pow(v/9,1.15)))*(opt&&opt.gain!=null?opt.gain:1);
+  /* أربع صيغٍ للطقّة: الأوليان ضربةُ الضارب (قويّة، عريضة الطيف) والأخريان قطعةٌ بقطعة
+     (أخفض وأقصر) — كما في التسجيل الحقيقيّ. السرعة تختار الصنف، والعشوائيّة الصيغة */
+  /* من اصطدم؟ المحرّك يعرف (opt.s = الضارب طرفٌ في الاصطدام) — السرعة وحدها كانت تُخطئ:
+     معظم ضربات الضارب أبطأ من ٦٫٥ عند التماسّ فتُسمَع طقّة قطعة. السرعة تُبقى احتياطًا. */
+  var pool=list, coin=false;
+  if(key==='hit'&&list.length>=4&&STYLE==='real'){var st=(opt&&opt.s!=null)?!!opt.s:v>=6.5;pool=st?list.slice(0,2):list.slice(2);coin=!st}
+  var seg=pool[(Math.random()*pool.length)|0];
+  /* الشدّة تتبع السرعة بمنحنىً هادئ: اللمسة تُهمَس والضربة تُقرَع.
+     صيغ القطعة بقطعة مخفَّضةٌ في الملفّ أصلًا (−٧٫٥ dB) فمنحناها شبه مستوٍ — وإلّا هبطت ٢٥ dB */
+  var g=(coin?0.6+0.4*Math.min(1,v/6.5):Math.max(0.10,Math.min(1,Math.pow(v/9,1.15))))*(opt&&opt.gain!=null?opt.gain:1);
   var rate=0.94+Math.random()*0.10+Math.min(0.06,v/200);
   var src=c.createBufferSource(),vol=c.createGain();
   src.buffer=s.buf;src.playbackRate.value=rate;

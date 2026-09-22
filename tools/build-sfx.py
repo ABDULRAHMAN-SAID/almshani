@@ -75,13 +75,47 @@ def pot_of(st):
             s_=int(dt*SR); e=min(n,s_+len(c)); y[s_:e]+=c[:e-s_]
         return y*attack(n,0.6)
     return pot
+# ٦٫٤٦ «real»: مضبوطٌ على قياس تسجيلٍ حقيقيّ أرسله المالك (٨ طقّات + انزلاق):
+#   ضربة الضارب: نقرةٌ عريضة الطيف (مركزها ~٥ ك.هرتز، معظم طاقتها فوق ٢٫٢ ك.هرتز) تهبط ١٥ dB في
+#   مللي ثانية واحدة و٢٢ dB في ثلاث، ثمّ ذيلٌ خافت (−٢٧ dB) فيه ٤٠٠–٢٢٠٠ هرتز.
+#   قطعةٌ بقطعة: أخفض بـ٧–١١ dB، مركزها ~٣٫٩ ك.هرتز، رنينٌ عند ~١٧٣٠ و~٦٦٠ هرتز، تهبط ١٣ dB في
+#   ٢ م.ث و٢٢ dB في ١٢ م.ث. الصيغتان الأوليان للضارب والأخريان للقطع؛ sample() يختار بالسرعة.
+def real_hit_strike():
+    n=int(0.06*SR); y=np.zeros(n)
+    y+=1.0*noise_burst(60,2200,14000,0.55)
+    y+=0.15*noise_burst(60,800,3000,2.0)
+    y+=modes(60,[420,1100,1730],[0.05,0.04,0.03],[25,15,9],0.03)
+    return y*attack(n,0.25)
+def real_hit_coin():
+    n=int(0.05*SR); y=np.zeros(n)
+    y+=1.0*noise_burst(50,2000,8000,0.9)
+    y+=modes(50,[1730,3900,660,1100],[0.30,0.30,0.10,0.12],[6,3.5,7,5],0.02)
+    return y*attack(n,0.3)*0.5
+_real_i=[0]
+def real_hit(v=1.0):
+    _real_i[0]+=1
+    return real_hit_strike() if _real_i[0]<=2 else real_hit_coin()
+def real_wall():
+    n=int(0.07*SR); y=np.zeros(n)
+    y+=1.0*noise_burst(70,600,3000,2.5)
+    y+=modes(70,[320,900,1700],[0.35,0.25,0.12],[20,12,7],0.03)
+    return y*attack(n,0.5)
+def real_pot():
+    b=700
+    n=int(0.20*SR); y=np.zeros(n)
+    y[:len(modes(60,[b],[1],[30]))]+=modes(60,[b,b*2,b*3.6],[1.0,0.45,0.2],[24,13,8],0.03)
+    y[:int(0.06*SR)]+=0.8*noise_burst(60,900,6000,6)
+    for i,dt in enumerate([0.055,0.095,0.128,0.152]):
+        c=modes(30,[b*3.6,b*6.9],[0.5,0.25],[5,3],0.05)*(0.7*0.72**i)
+        s_=int(dt*SR); e=min(n,s_+len(c)); y[s_:e]+=c[:e-s_]
+    return y*attack(n,0.5)
 def flick():
     """نقرة الإصبع على الضارب: في الواقع تكاد لا تُسمع — همسةٌ قصيرة لا طرقة"""
     y=modes(30,[2600,4100],[0.6,0.3],[4,3],0.05)
     y+=1.0*noise_burst(30,1800,7000,2.0)
     return y*attack(len(y),0.3)*0.55
 
-SEG=[('flick',2,flick)]
+SEG=[('flick',2,flick),('real_hit',4,real_hit),('real_wall',3,real_wall),('real_pot',2,real_pot)]
 for _name,_st in STYLES.items():
     SEG+=[(_name+'_hit',4,hit_of(_st)),(_name+'_wall',3,wall_of(_st)),(_name+'_pot',2,pot_of(_st))]
 GAP=int(0.03*SR)
@@ -92,11 +126,14 @@ for name,count,fn in SEG:
         y=fn()
         # حراسة النطاق وتسوية كل عيّنة إلى قمّةٍ واحدة — التفاوت يُضبط عند اللعب بالسرعة
         sos_h=butter(4,180/(SR/2),btype='high',output='sos'); y=sosfilt(sos_h,y)
-        y/=max(1e-9,np.max(np.abs(y))); y*=0.9
+        pk=max(1e-9,np.max(np.abs(y)))
+        y/=pk; y*=0.9
+        if name=='real_hit' and i>=2: y*=0.42   # قطعةٌ بقطعة: −٧٫٥ dB عن ضربة الضارب كما في التسجيل
         f=int(0.004*SR); y[-f:]*=np.linspace(1,0,f)
         OPUS_LAG=0.0072   # MediaRecorder/Opus يترك ٧٫٢ م.ث صمتٍ في أوّل الملفّ (pre_skip=0) — قِيس بالارتباط المتبادل
         sprite[name].append([round(pos/SR+OPUS_LAG,4),round(len(y)/SR+0.002,4)])
         parts.append(y); parts.append(np.zeros(GAP)); pos+=len(y)+GAP
+parts.append(np.zeros(int(0.30*SR)))   # ذيلُ صمتٍ: مسجّل المتصفّح يقصّ آخر الملفّ فلا يُقصّ آخر مقطع
 data=np.concatenate(parts)
 
 out=os.path.join(os.path.dirname(__file__),'..','tahaddi','audio'); os.makedirs(out,exist_ok=True)

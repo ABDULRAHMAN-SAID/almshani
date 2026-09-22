@@ -16365,15 +16365,16 @@ var SFX=(function(){
   if(!SL){
    var src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
    src.buffer=slideBuf(c);src.loop=true;
-   f.type='bandpass';f.frequency.value=900;f.Q.value=0.7;
+   f.type='bandpass';f.frequency.value=2400;f.Q.value=0.6;   // التسجيل الحقيقيّ: طاقة الانزلاق بين ١٫٤ و٥٫٥ ك.هرتز
    g.gain.value=0.0001;
    src.connect(f);f.connect(g);g.connect(c.destination);
    try{src.start()}catch(e){return false}
    SL={src:src,f:f,g:g};
   }
-  var gain=0.04+0.30*Math.pow(level,0.7);
+  /* الشدّة: في التسجيل حفيف الحركة أخفض من ضربة الضارب بنحو ٣٠ dB — كان هنا أعلى بعشرة أضعاف */
+  var gain=0.006+0.034*Math.pow(level,0.7);
   SL.g.gain.setTargetAtTime(gain,now,0.05);
-  SL.f.frequency.setTargetAtTime(650+1400*level,now,0.08);
+  SL.f.frequency.setTargetAtTime(1900+1500*level,now,0.08);
   SL.src.playbackRate.setTargetAtTime(0.8+0.45*level,now,0.08);
   return true;
  }
@@ -16381,7 +16382,7 @@ var SFX=(function(){
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
- var STYLE='wood';
+ var STYLE='real';
  function style(s){if(s)STYLE=String(s);return STYLE}
  var loading={};
  function loadSprite(name,url,seg){
@@ -16399,12 +16400,19 @@ var SFX=(function(){
  /** يعزف مقطعًا من عيّنة: يختار صيغةً عشوائيّة، ويضبط الشدّة والنبرة بالسرعة */
  function sample(name,key,t0,opt){
   var s=SPR[name];if(!s||!s.buf)return false;
-  var list=s.seg[STYLE+'_'+key]||s.seg[key];if(!list||!list.length)return false;
+  var list=s.seg[STYLE+'_'+key]||s.seg[key]||s.seg['wood_'+key];if(!list||!list.length)return false;   // ملفٌّ قديم من عامل خدمةٍ سابق: عيّنةٌ أفضل من تركيب
   var c=ac();if(!c)return false;
-  var seg=list[(Math.random()*list.length)|0];
   var v=opt&&opt.v!=null?opt.v:8;
-  /* الشدّة تتبع السرعة بمنحنىً هادئ: اللمسة تُهمَس والضربة تُقرَع */
-  var g=Math.max(0.10,Math.min(1,Math.pow(v/9,1.15)))*(opt&&opt.gain!=null?opt.gain:1);
+  /* أربع صيغٍ للطقّة: الأوليان ضربةُ الضارب (قويّة، عريضة الطيف) والأخريان قطعةٌ بقطعة
+     (أخفض وأقصر) — كما في التسجيل الحقيقيّ. السرعة تختار الصنف، والعشوائيّة الصيغة */
+  /* من اصطدم؟ المحرّك يعرف (opt.s = الضارب طرفٌ في الاصطدام) — السرعة وحدها كانت تُخطئ:
+     معظم ضربات الضارب أبطأ من ٦٫٥ عند التماسّ فتُسمَع طقّة قطعة. السرعة تُبقى احتياطًا. */
+  var pool=list, coin=false;
+  if(key==='hit'&&list.length>=4&&STYLE==='real'){var st=(opt&&opt.s!=null)?!!opt.s:v>=6.5;pool=st?list.slice(0,2):list.slice(2);coin=!st}
+  var seg=pool[(Math.random()*pool.length)|0];
+  /* الشدّة تتبع السرعة بمنحنىً هادئ: اللمسة تُهمَس والضربة تُقرَع.
+     صيغ القطعة بقطعة مخفَّضةٌ في الملفّ أصلًا (−٧٫٥ dB) فمنحناها شبه مستوٍ — وإلّا هبطت ٢٥ dB */
+  var g=(coin?0.6+0.4*Math.min(1,v/6.5):Math.max(0.10,Math.min(1,Math.pow(v/9,1.15))))*(opt&&opt.gain!=null?opt.gain:1);
   var rate=0.94+Math.random()*0.10+Math.min(0.06,v/200);
   var src=c.createBufferSource(),vol=c.createGain();
   src.buffer=s.buf;src.playbackRate.value=rate;
@@ -24663,7 +24671,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.45';
+const APP_VER='6.46';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -26911,7 +26919,7 @@ function caFx(ev){
   if(sp<0.35)continue;                         // لمسةٌ لا تُسمع على لوحٍ حقيقيّ
   if(now-(_ca.fxT[key]||0)<22)continue;        // طقّتان في ٢٢ مللي ثانية تُسمعان واحدة
   _ca.fxT[key]=now;budget--;
-  SFX.play(key,{v:sp});
+  SFX.play(key,{v:sp,s:key==='hit'&&(e.a==='s'||e.b==='s')});   // هويّة المصطدم من المحرّك: ضاربٌ أم قطعة
   if(key==='hit'&&sp>7)SFX.haptic('hit');      // الضربة القويّة تُحَسّ في اليد
  }
 }
@@ -27066,9 +27074,9 @@ function caSetArena(k){
  _ca.bg=null;caTexLoad();caRender();
  return true;
 }
-const CA_SFX=['wood','dry','heavy'], CA_SFX_NAME={wood:'خشبيّ',dry:'جافّ',heavy:'ثقيل'};
+const CA_SFX=['real','wood','dry','heavy'], CA_SFX_NAME={real:'حقيقيّ',wood:'خشبيّ',dry:'جافّ',heavy:'ثقيل'};
 /** نمط الطقّات — يُقرأ عند الدخول ويُبدَّل بزرٍّ يُسمعك النمط فورًا */
-function caSfxStyle(){let v='wood';try{v=localStorage.getItem('caSfx')||'wood'}catch(e){}if(CA_SFX.indexOf(v)<0)v='wood';if(window.SFX&&SFX.style)SFX.style(v);return v}
+function caSfxStyle(){let v='real';try{v=localStorage.getItem('caSfx')||'real'}catch(e){}if(CA_SFX.indexOf(v)<0)v='real';if(window.SFX&&SFX.style)SFX.style(v);return v}
 function caSfxTog(btn){
  const cur=caSfxStyle(), nx=CA_SFX[(CA_SFX.indexOf(cur)+1)%CA_SFX.length];
  try{localStorage.setItem('caSfx',nx)}catch(e){}
@@ -27479,8 +27487,9 @@ function caHandImg(){
 let _caSfx=0;
 function caSfxLoad(){
  if(_caSfx||!window.SFX||!SFX.loadSprite)return;_caSfx=1;
- fetch('audio/carrom.json').then(r=>r.ok?r.json():null).then(j=>{
-  if(j&&j.seg)SFX.loadSprite('carrom','audio/carrom.webm',j.seg);
+ // الرابط موسومٌ بالإصدار: عامل الخدمة القديم لا يجد ملفّ الإصدار السابق في خزانته
+ fetch('audio/carrom.json?v='+APP_VER).then(r=>r.ok?r.json():null).then(j=>{
+  if(j&&j.seg)SFX.loadSprite('carrom','audio/carrom.webm?v='+APP_VER,j.seg);
  }).catch(()=>{_caSfx=0});
 }
 function caInit(){

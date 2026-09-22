@@ -10,7 +10,7 @@ const fresh=g=>R.newRankProfile(g||'carrom');
 const clone=o=>JSON.parse(JSON.stringify(o));
 
 sec('الشكل');
-check('خمس ألعاب بتعريف ونموذج حساب',R.GAMES.length===5&&R.GAME_DEFS.every(g=>R.SCORE_MODELS[g.scoreModel]));
+check('ثلاث ألعاب بتعريف ونموذج حساب (المافيا والرسم أُزيلا في ٦٫٢٦)',R.GAMES.length===3&&R.GAME_DEFS.every(g=>R.SCORE_MODELS[g.scoreModel]));
 check('الملفّ الجديد غير مصنّف وليس برونزيًا',!fresh().placed&&R.rankName(fresh())==='برونزي III'&&R.score(fresh())===-1);
 check('قمة الأساطير بلا درجة',R.rankName({tier:9,div:0})==='قمة الأساطير');
 
@@ -55,10 +55,10 @@ sec('نماذج الحساب');
  const last=R.resolve(clone(u),{gameId:'uno',mode:'ranked',matchId:'b',result:{place:4,total:4},opponents:[{mmr:1000}]});
  const mid=R.resolve(clone(u),{gameId:'uno',mode:'ranked',matchId:'c',result:{place:2,total:4},opponents:[{mmr:1000}]});
  check('الترتيب: الأول يكسب، الأخير يخسر، الوسط بينهما',first.rp>0&&last.rp<0&&mid.rp>last.rp&&mid.rp<first.rp,JSON.stringify([first.rp,mid.rp,last.rp]));
- const m=fresh('mafia');m.placed=true;m.tier=1;m.div=2;m.rp=50;
- const left=R.resolve(clone(m),{gameId:'mafia',mode:'ranked',matchId:'d',result:{teamWon:true,left:true},opponents:[]});
- const won=R.resolve(clone(m),{gameId:'mafia',mode:'ranked',matchId:'e',result:{teamWon:true,completed:true},opponents:[]});
- check('المافيا: الانسحاب يضرّ ولو فاز فريقك',left.rp<won.rp);
+ // نموذج الفريق بقي بعد إزالة المافيا: الانسحاب يضرّ ولو فاز فريقك
+ const left=R.SCORE_MODELS.teamResult({teamWon:true,left:true});
+ const won=R.SCORE_MODELS.teamResult({teamWon:true,completed:true});
+ check('نموذج الفريق: الانسحاب يضرّ ولو فاز فريقك',left.strength<won.strength&&!left.won&&won.won);
 }
 
 sec('الحتمية والتكرار');
