@@ -24671,7 +24671,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.46';
+const APP_VER='6.47';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25774,8 +25774,8 @@ function soloScr(g){
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
  <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
  <div class="sl">التدريب</div>
- <div class="cr"><div class="fc ${S.caGuide?'on':''}" onclick="S.caGuide=!S.caGuide;try{saveState()}catch(e){}soloScr('carrom')">${ico('search',12)} خطّ التصويب: ${S.caGuide?'مفعّل':'مطفأ'}</div></div>
- <div class="note">خطّ التصويب يريك أين يصيب الضارب — للتدريب مع الكمبيوتر فقط، ولا يعمل أبدًا مع اللاعبين</div>`:''}
+ <div class="cr"><div class="fc ${S.caGuide!==false?'on':''}" onclick="S.caGuide=S.caGuide===false;try{saveState()}catch(e){}soloScr('carrom')">${ico('search',12)} خطّ التصويب: ${S.caGuide!==false?'مفعّل':'مطفأ'}</div></div>
+ <div class="note">خطّ التصويب يريك أين يصيب الضارب أوّل قطعة — كما في ألعاب الكيرم المعروفة. أطفئه إن أردت التحدّي</div>`:''}
  ${g==='mafia'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
  <div class="cr">${[5,6,7,8].map(n=>`<div class="fc ${(RM.mbN||6)===n?'on':''}" onclick="RM.mbN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
  <div class="wb" style="text-align:start">تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.</div>
@@ -25892,10 +25892,18 @@ function caBotPick(pcs,mine,P0,rnd){
  const PC=CarromPhysics.C, tr=PC.strikerMass*(1+PC.pieceE)/(PC.strikerMass+1);
  /* القوّة اللازمة: سرعة القطعة لتبلغ الجيب تحت احتكاك الانزلاق u²=2·roll·s، مقسومةً على
     ما ينتقل إليها من الضارب (m(1+e)/(m+1))·cos(القطع)، زائد ما يفقده الضارب في طريقه */
- const needPw=c=>{const uC=Math.sqrt(2*PC.roll*(c.pd+60));const uS=uC/Math.max(0.25,tr*Math.cos(c.cut));return Math.sqrt(uS*uS+2*PC.roll*c.d)};
+ /* نموذج الاحتكاك v←v·drag−roll لا صيغة له مغلقة، فنقلبه بالبحث الثنائيّ: سرعةُ القطعة التي
+    تقطع مسافة الجيب، ثمّ سرعةُ الضارب التي تصل بعد مسافته بتلك السرعة (المراجعة: صيغة كولوم
+    كانت تُنقص القوّة ٢٢–٣٦٪ فيُقصّر الآليّ). */
+ const stopDist=v=>{let x=0;for(let i=0;i<4000&&v>PC.stopSpeed;i++){x+=v;v=v*PC.drag-PC.roll}return x};
+ const spFor=s=>{let lo=0,hi=CA_VMAX*2;for(let i=0;i<28;i++){const m=(lo+hi)/2;if(stopDist(m)<s)lo=m;else hi=m}return hi};
+ const needPw=c=>{const uS=spFor(c.pd+60)/Math.max(0.25,tr*Math.cos(c.cut));
+  let lo=uS,hi=CA_VMAX*2;
+  for(let i=0;i<28;i++){const m=(lo+hi)/2;let v=m,x=0;for(let k=0;k<4000&&x<c.d&&v>PC.stopSpeed;k++){x+=v;v=v*PC.drag-PC.roll}if(v<uS)lo=m;else hi=m}
+  return hi};
  const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.hit.x));return {sx,ang:Math.atan2(c.hit.y-base,c.hit.x-sx)}};
  /* السقف من الصعوبة: السهل محدودٌ بنطاقه فتقف قطعته قبل الجيب كالمبتدئ، والمحاكي يأخذ ما يلزم */
- const capPw=v=>Math.min(P0.sim?CA_VMAX*0.85:P0.pw[1]*1.1,Math.max(P0.pw[0],v));
+ const capPw=v=>Math.min(P0.sim?Math.min(CA_VMAX*0.85,P0.pw[1]*1.7):P0.pw[1]*1.1,Math.max(P0.pw[0],v));   // pw[1] حيٌّ لكلّ المستويات
  let pick=null;
  const nSim=blind?0:(P0.sim||0);
  if(nSim&&cands.length){
@@ -26521,8 +26529,11 @@ var CarromPhysics=(function(){
      • احتكاك انزلاق ثابت (طرح) — هو الذي يوقف القطعة وقفةً نظيفة.
      الأول وحده لا يُوقف شيئًا أبدًا: يقارب الصفر ولا يبلغه، فتزحف القطعة
      دقائق بسرعة لا تُرى. */
-  drag:1,                // احتكاك نسبيّ لكل إطار
-  roll:0.026,            // احتكاك انزلاق ثابت لكل إطار
+  /* ٦٫٤٧: مقيسان من تتبّع القطع في فيديوٍ أرسله المالك (٦٠ إطارًا/ث):
+     تباطؤ القطعة ≈ ١٩٠ + ٠٫٣٥·v وحدة/ث² — ثابتٌ (كولوم) مع قليلٍ من السحب النسبيّ.
+     كان roll=0.026 (٩٣ وحدة/ث²) فتطفو القطع ثلاثة أضعاف ما ينبغي. */
+  drag:0.994,            // احتكاك نسبيّ لكل إطار (٠٫٣٥/ث)
+  roll:0.053,            // احتكاك انزلاق ثابت لكل إطار (١٩٠ وحدة/ث²)
   stopSpeed:0.05,        // دون هذا تُعدّ ساكنة
   wallE:0.72,            // ارتداد الجدار
   pieceE:0.86,           // ارتداد بين القطع
@@ -26724,7 +26735,7 @@ var CarromPhysics=(function(){
 /* ⟦/src⟧ */
 
 const CA_R=400, CA_PR=13, CA_SR=16.5;
-const CA_VMAX=13;   // أقصى سرعة للضارب (وحدة/إطار) — كانت 7 وحكم المالك أنها ضعيفة
+const CA_VMAX=20;   // أقصى سرعة للضارب (وحدة/إطار) — قِيست من الفيديو: ~١٢٠٠ وحدة/ث عند ضربةٍ عاديّة
 /* فمُ الجيب المرسوم يساوي فمَه الفيزيائي بالضبط — لا رقمَين للشيء نفسه */
 const CA_POCK=CarromPhysics.visualR();
 // نصف السرعة بالضبط: احتكاك أبطأ يعوّض نقص السرعة فتبقى المسافة نفسها
@@ -27218,20 +27229,16 @@ function caRender(rest){
  const M=caMG(),P=W-M*2,sc=P/CA_R;
  const PX=u=>M+u*sc, PY=v=>M+v*sc;
  cx.drawImage(caBoardImg(W,H,md),0,0);   // الخلفية بحجم اللوحة كلّها — لا clearRect ولا تدرّج كل إطار
- if(cv.parentElement)cv.parentElement.classList.toggle('caDrag',!!_ca.drag&&!_ca.sim);   // شارة مقعدي تفسح لشريط الإلغاء
+ if(cv.parentElement)cv.parentElement.classList.toggle('caDrag',!_ca.sim&&(!!_ca.drag||(H>W&&!!RM.ca&&RM.ca.turn===RM.me)));   // شارة مقعدي تفسح لشريط التحريك طوال دوري
  const tk=_ca.t||0;
  if(H>W){
-  if(RM.ca&&RM.ca.turn===RM.me&&!_ca.sim&&!_ca.drag){
-   const ty=W+(H-W)*.17, x0=PX(CA_SR+26), x1=PX(CA_R-CA_SR-26);
-   cx.lineCap='round';
-   cx.strokeStyle='rgba(0,0,0,.55)';cx.lineWidth=12;
-   cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
-   cx.strokeStyle=md?'rgba(246,246,240,.32)':'rgba(255,214,138,.38)';cx.lineWidth=3.4;
-   cx.beginPath();cx.moveTo(x0,ty);cx.lineTo(x1,ty);cx.stroke();
-   cx.fillStyle=md?'rgba(246,246,240,.8)':'rgba(255,233,168,.85)';
-   cx.font='bold '+Math.round(18*sc)+'px system-ui';
-   cx.textAlign='center';cx.textBaseline='middle';
-   cx.fillText('‹',x0-12,ty);cx.fillText('›',x1+12,ty);
+  if(RM.ca&&RM.ca.turn===RM.me&&!_ca.sim){
+   /* شريط تحريك الضارب: حوضٌ مستدير الطرفين ومقبضٌ على شكل الضارب — كما في اللعبة المرجعيّة */
+   const ty=W+(H-W)*.5, x0=PX(CA_SR+26), x1=PX(CA_R-CA_SR-26), th=Math.min((H-W)*.62,44*sc);
+   caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.fillStyle='rgba(20,10,4,.72)';cx.fill();
+   cx.strokeStyle='rgba(255,214,138,.28)';cx.lineWidth=1.5;caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.stroke();
+   const kx=PX(_ca.drag?_ca.drag.sx:_ca.sxV), kr=th*.42, ks=caDisc('s',kr);
+   cx.globalAlpha=_ca.drag?.55:1;cx.drawImage(ks,kx-ks._o,ty-ks._o);cx.globalAlpha=1;
   }
  }
  /* كلّ ما يُرسم يمرّ بإطار مقعدي: أنا أسفل دائمًا، والخصم على ضلعه الحقيقيّ */
@@ -27340,20 +27347,30 @@ function caRender(rest){
  }
  if(_ca.drag){
   const d=_ca.drag, raw=Math.hypot(d.dx,d.dy), pw=caPower(raw), can=!!d.cancel, back=!can&&!!d.back&&raw>=10;
-  // منطقة الإلغاء: المسند تحت اللوح — تظهر أثناء التصويب فقط، وتحمرّ حين يدخلها الإصبع
-  if(H>W){
-   const zh=Math.min((H-W)*.72,40*sc), zw=Math.min(W*.86,300*sc), zx=W/2-zw/2, zy=W+(H-W)/2-zh/2;
-   cx.fillStyle=can?'rgba(226,75,74,.94)':'rgba(6,9,17,.72)';caRR(cx,zx,zy,zw,zh,zh/2);cx.fill();
-   cx.strokeStyle=can?'#FFB4B3':'rgba(226,75,74,.85)';cx.lineWidth=2;caRR(cx,zx,zy,zw,zh,zh/2);cx.stroke();
-   cx.fillStyle='#fff';cx.font='900 '+Math.round(13.5*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';
-   cx.fillText(can?'أفلت الآن — تُلغى الضربة':'↓ للإلغاء أنزل إصبعك إلى هنا وأفلت',W/2,W+(H-W)/2);
+  // دائرة الإلغاء حول الضارب: شفّافةٌ أثناء السحب، وتحمرّ حين يعود الإصبع إليها
+  cx.beginPath();cx.arc(PX(d.sx),PY(d.sy),CA_GAUGE*sc,0,7);
+  cx.fillStyle=can?'rgba(226,75,74,.16)':'rgba(255,255,255,'+(0.05+0.06*pw).toFixed(3)+')';cx.fill();
+  cx.setLineDash([3,5]);cx.strokeStyle=can?'rgba(226,75,74,.9)':'rgba(255,255,255,'+(0.22+0.4*pw).toFixed(3)+')';cx.lineWidth=1.6;cx.stroke();cx.setLineDash([]);
+  if(can){cx.fillStyle='#FFB4B3';cx.font='900 '+Math.round(12*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('أفلت للإلغاء',PX(d.sx),PY(d.sy)-CA_GAUGE*sc-9*sc)}
+  // خطّ السحب المنقّط من الضارب نحو الإصبع (خلفه)…
+  if(raw>=10&&!can){
+   const pl=Math.min(95,raw), ux=d.dx/raw, uy=d.dy/raw;
+   cx.fillStyle=back?'rgba(226,75,74,.85)':'rgba(255,255,255,.85)';
+   for(let k=1;k<=6;k++){const t=k/6, rr=(1.2+1.6*(1-t))*sc;cx.beginPath();cx.arc(PX(d.sx+ux*pl*t),PY(d.sy+uy*pl*t),rr,0,7);cx.fill()}
   }
-  // خطّ التصويب الأماميّ: إلى أوّل تماسّ، ثمّ سهما الانطلاق — وحين لا يُرسم (إلغاء/خلف/سحبٌ قصير) يبقى خطّ الاتجاه القديم
-  // خطّ التصويب غشٌّ في المباراة (قال المالك) — للتدريب مع الكمبيوتر فقط وباختيارٍ من شاشة الإعداد
-  const g=(RM.solo&&S.caGuide&&!can&&!back&&raw>=10)?caGuide(d.sx,d.sy,-d.dx,-d.dy,caLocalPcs(caMySeat())):null;
-  if(!g){
-   cx.setLineDash([8,6]);cx.lineWidth=2.6;
-   cx.strokeStyle=can?'rgba(190,190,200,.45)':back?'rgba(226,75,74,.85)':'rgba(255,233,168,.6)';
+  // …والسهم الذهبيّ في اتّجاه الضربة، طوله بالقوّة
+  if(raw>=10&&!can&&!back){
+   const ux=-d.dx/raw, uy=-d.dy/raw, L=(CA_SR*1.4)+34*pw, ax0=PX(d.sx+ux*CA_SR*1.05), ay0=PY(d.sy+uy*CA_SR*1.05), ax1=PX(d.sx+ux*(CA_SR*1.05+L)), ay1=PY(d.sy+uy*(CA_SR*1.05+L));
+   const gr=cx.createLinearGradient(ax0,ay0,ax1,ay1);gr.addColorStop(0,'rgba(232,178,58,.35)');gr.addColorStop(1,'#FFB000');
+   cx.strokeStyle=gr;cx.lineWidth=4.2*sc;cx.lineCap='round';cx.beginPath();cx.moveTo(ax0,ay0);cx.lineTo(ax1,ay1);cx.stroke();
+   const a=Math.atan2(ay1-ay0,ax1-ax0),h=11*sc;cx.fillStyle='#FFB000';cx.beginPath();cx.moveTo(ax1+Math.cos(a)*h*.6,ay1+Math.sin(a)*h*.6);
+   cx.lineTo(ax1-Math.cos(a-.6)*h,ay1-Math.sin(a-.6)*h);cx.lineTo(ax1-Math.cos(a+.6)*h,ay1-Math.sin(a+.6)*h);cx.closePath();cx.fill();
+  }
+  // خطّ التصويب المنقّط إلى أوّل تماسّ — مفعّلٌ افتراضًا كما في اللعبة المرجعيّة، ويُطفأ من إعداد التدريب
+  const g=(S.caGuide!==false&&!can&&!back&&raw>=10)?caGuide(d.sx,d.sy,-d.dx,-d.dy,caLocalPcs(caMySeat())):null;
+  if(!g&&raw>=10&&!can){
+   cx.setLineDash([8,6]);cx.lineWidth=2.2;
+   cx.strokeStyle=back?'rgba(226,75,74,.85)':'rgba(255,233,168,.5)';
    cx.beginPath();cx.moveTo(PX(d.sx),PY(d.sy));
    cx.lineTo(PX(d.sx-d.dx*1.2),PY(d.sy-d.dy*1.2));cx.stroke();cx.setLineDash([]);
   }
@@ -27398,7 +27415,9 @@ function caRender(rest){
  }
 }
 /** القوّة من طول السحب: تربيعية فوق حدّ أدنى — لمسة خفيفة تدفع، وسحب كامل يضرب بكل القوّة */
-function caPower(raw){const p=Math.min(1,raw/95);return 0.22+0.78*p*p}
+function caPower(raw){const p=Math.min(1,raw/95);return 0.10+0.90*p*p}   // الأرضيّة ٠٫١٠: لمسةٌ تدفع القطعة بضع وحدات
+const CA_CANCEL=14;          // العودة إلى ما دون ١٤ وحدة من نقطة الضغط بعد الابتعاد = إلغاء
+const CA_GAUGE=CA_SR*3.2;    // دائرة القوّة المرسومة حول الضارب (٥٣ وحدة) — منظرٌ كاللعبة المرجعيّة
 /* ═══ خطّ التصويب (٦٫٤٤) ═══
    قال المالك عن Carrom Pool: «الضرب والقوانين والفيزياء ممتازة». وسرُّ إحساسها بالضبط
    خطٌّ أماميّ يريك قبل الإفلات أين يصيب الضارب أوّلَ قطعة، وإلى أين تنطلق هي، وإلى
@@ -27510,10 +27529,10 @@ function caInit(){
   // اسحب اليد على المسند أو اقبض الضارب نفسه لتحريكه — بلا قفزات
   /* الشريط الأسفل من اللوح (حول خطّ القاعدة) والمسند تحته: كلاهما لتحريك الضارب،
      فلا تبدأ ضربةٌ من هناك. */
-  if(y>CA_BASE-12){
-   _ca.slide=1;_ca.grab=Math.abs(x-_ca.sx)<38?x-_ca.sx:0;_ca.sx=CACL(x-_ca.grab);
-  }else if(Math.hypot(x-_ca.sx,y-sy)<=CA_SR*2.4){
-   _ca.slide=1;_ca.grab=x-_ca.sx;
+  /* كما في Carrom Pool: المسند وحده يحرّك الضارب (مقبضٌ على شريط)، وأيّ ضغطةٍ على اللوح —
+     حتى فوق الضارب — تبدأ تصويبًا. والإلغاء بإرجاع الإصبع إلى دائرة الضارب. */
+  if(y>CA_R){
+   _ca.slide=1;_ca.grab=Math.abs(x-_ca.sx)<38?x-_ca.sx:0;_ca.sx=_ca.sxV=CACL(x-_ca.grab);
   }else{
    // التصويب: اسحب من أي نقطة على اللوح — المسافة والاتجاه هما القوة
    _ca.slide=0;_ca.drag={sx:_ca.sx,sy,px:x,py:y,dx:0,dy:0};
@@ -27524,7 +27543,7 @@ function caInit(){
  cv.onpointermove=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
   const[x,y]=pos(e);
-  if(_ca.slide){e.preventDefault();_ca.sx=CACL(x-(_ca.grab||0));caLoopOn();caRender();return}
+  if(_ca.slide){e.preventDefault();_ca.sx=_ca.sxV=CACL(x-(_ca.grab||0));caLoopOn();caRender();return}
   if(!_ca.drag)return;e.preventDefault();
   _ca.drag.dx=Math.max(-95,Math.min(95,x-_ca.drag.px));
   _ca.drag.dy=Math.max(-95,Math.min(95,y-_ca.drag.py));
@@ -27534,7 +27553,12 @@ function caInit(){
   /* كانت تُقاس من حافّة الساحة فتقع في الإطار الخشبيّ، وسحبةُ قوّةٍ كاملة تُلغي. الآن: داخل
      الشريط الأحمر في المسند نفسه، وبعد تجاوز سقف القوّة (٩٥) من نقطة الضغط بهامش — فلا
      تُلغى ضربةٌ قويّة، ويُلغى ما نزل عمدًا إلى الشريط. */
-  _ca.drag.cancel=caLedgeU()>0&&y>caLedgeTopU()+caLedgeU()*0.55&&y>_ca.drag.py+95+25;
+  /* الإلغاء: أعِد إصبعك إلى حيث ضغطت وأفلت. كانت الدائرة حول الضارب هي المقياس، فصارت سحبةُ
+     قوّةٍ من ضغطةٍ قرب الضارب تُلغى، والضربة الخفيفة من فوقه مستحيلة (المراجعة). الآن المقياس
+     نقطة الضغط نفسها، ولا يُعدّ إلغاءً إلّا بعد أن يبتعد الإصبع عنها أوّلًا. */
+  const pl=Math.hypot(_ca.drag.dx,_ca.drag.dy);
+  if(pl>=CA_CANCEL)_ca.drag.out=1;
+  _ca.drag.cancel=!!_ca.drag.out&&pl<CA_CANCEL;
   _ca.drag.back=-_ca.drag.dy>0;   // السحب إلى الأعلى = ضربة للخلف — ممنوعة قانونًا
   caRender();
  };
@@ -27641,7 +27665,7 @@ function rmCarrom(R){
   <button onclick="caSkinTog()" style="background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">${ico('palette',13)} بدّل شكل اللوح</button>
   <button onclick="caSfxTog(this)" style="margin-inline-start:8px;background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">صوت الطقّات: ${CA_SFX_NAME[caSfxStyle()]}</button>
  </div>
- <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب باليد · اسحب على اللوح وأفلت · للإلغاء أنزل إصبعك تحت اللوح':'دور '+nm(C.turn)+' — يصوّب…'}</div>
+ <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب من الشريط الأسفل · اسحب على اللوح وأفلت · للإلغاء أعِد إصبعك إلى دائرة الضارب':'دور '+nm(C.turn)+' — يصوّب…'}</div>
  ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}
  <div class="note">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 <b>بشرط تغطيتها</b>
   بقطعة من لونك وإلا عادت للمركز · الضارب في الجيب: −1 وتعود إحدى قطعك · قطعة الخصم تُحتسب له</div>`;
@@ -35119,19 +35143,19 @@ const DIFFS=[['easy','سهل',ico('bulb',20)],['mid','متوسط',ico('robot',20
    فيبقى الفرق في مكان واحد ويُكتب في البطاقة نفسها. (عقل المافيا يفرّع على اسم
    المستوى أيضًا في حواره واستنتاجه، وهذا فرق في الكلام لا في رقم يُضبط هنا.)
      carrom.noise   انحراف التصويب بالراديان — ٠٫٢٨ يطيش، ٠٫٠١٢ يصيب
-     carrom.pw      مدى قوة الضربة        carrom.blind احتمال اختيار هدف رديء
+     carrom.pw      [أدنى قوّة, أقصى قوّة] — بلا sim السقف pw[1]×1.1، ومع sim السقف min(CA_VMAX×0.85, pw[1]×1.7)        carrom.blind احتمال اختيار هدف رديء
      uno.rand       احتمال ورقة عشوائية   uno.hunt  ملاحقة من اقترب من الفوز
      uno.say/catch  «أونو» وضبط من نسيها  uno.think زمن التفكير
      mafia.talk     ثواني النقاش          mafia.bluff هل ينتحل المحقّق كذبًا
      draw.opts      عدد الخيارات          draw.ms    زمن الرسم بالمللي */
 const DIFF_P={
- easy:{n:'سهل',  carrom:{noise:0.28,pw:[2.8,4.6],blind:0.45},
+ easy:{n:'سهل',  carrom:{noise:0.28,pw:[4.2,7.0],blind:0.45},
        uno:{rand:0.85,hunt:0,say:0.45,catch:0.20,think:1900},
        mafia:{talk:120,bluff:0},draw:{opts:4,ms:14000}},
- mid: {n:'متوسط',carrom:{noise:0.04,pw:[4.4,6.0],blind:0.15,sim:3},
+ mid: {n:'متوسط',carrom:{noise:0.04,pw:[6.6,9.0],blind:0.15,sim:3},
        uno:{rand:0.25,hunt:0.5,say:0.80,catch:0.65,think:1500},
        mafia:{talk:90,bluff:1},draw:{opts:6,ms:11000}},
- hard:{n:'صعب',  carrom:{noise:0.01,pw:[5.2,6.6],blind:0,sim:6},
+ hard:{n:'صعب',  carrom:{noise:0.01,pw:[7.8,10.0],blind:0,sim:6},
        uno:{rand:0,hunt:1,say:1,catch:1,think:1000},
        mafia:{talk:75,bluff:1},draw:{opts:8,ms:8500}}
 };

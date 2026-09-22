@@ -12,6 +12,9 @@ const ck=(n,ok,d)=>{ok?(pass++,console.log('  ✓ '+n)):(fail++,console.log('  �
 const at=(x,y,vx,vy,t)=>({x,y,vx,vy,t:t||'w'});
 const shoot=(pieces)=>{const S=P.create(pieces);return P.run(S)};
 const near=p=>{let m=1e9;for(const[px,py]of P.pockets())m=Math.min(m,Math.hypot(p.x-px,p.y-py));return m};
+// مدى الضربة بنموذج الاحتكاك نفسه (ثابتٌ + نسبيّ منذ ٦٫٤٧): مجموع السرعات حتى السكون
+const reach=sp=>{let v=sp,d=0;for(let i=0;i<100000&&v>C.stopSpeed;i++){d+=v;v=v*C.drag-C.roll}return d};
+const spFor=dist=>{let sp=0.5;while(reach(sp)<dist*1.08&&sp<60)sp+=0.1;return +sp.toFixed(1)};   // أصغر سرعةٍ تبلغ المسافة بهامش ٨٪
 
 console.log('\n── هندسة اللوح ──');
 ck('الجدران مقطوعة عند الجيوب — أربع قطع لا أربعة خطوط ممتدّة',
@@ -23,15 +26,14 @@ ck('مركز القطعة يستطيع بلوغ مركز الجيب — لا ح�
 console.log('\n── التجربة التي كانت تفشل: الضارب ──');
 {
  const dir=Math.atan2(-1,-1);let hit=0,tot=0;
- const reach=sp=>sp*sp/(2*C.roll);   // مدى الضربة تحت احتكاك الانزلاق
  const dist=Math.hypot(240,240);
- for(let sp=1;sp<=7;sp+=0.1){
+ for(let sp=1;sp<=spFor(dist)+3;sp+=0.1){   // الحدّ يتبع نموذج الاحتكاك — كان 7 فصار المسح فارغًا بعد ٦٫٤٧
   if(reach(sp)<dist*1.02)continue;           // ضربة أضعف من أن تصل ليست عطلًا
   tot++;
   const r=shoot([at(240,240,Math.cos(dir)*sp,Math.sin(dir)*sp,'s')]);
   if(r.pot.includes('s'))hit++;
  }
- ck('الضارب المصوَّب على قلب الجيب يسقط كلّما بلغته (كان 0 من 88)',hit===tot,hit+' / '+tot);
+ ck('الضارب المصوَّب على قلب الجيب يسقط كلّما بلغته (كان 0 من 88)',tot>0&&hit===tot,hit+' / '+tot);
 }
 {
  let ever=0,tot=0;
@@ -84,7 +86,7 @@ console.log('\n── لا سقوط بلا فم ──');
 {
  // ضربة الحافة إلى الزاوية تسديدة مشروعة في الكيرم — يجب أن تنجح
  let railed=0;
- for(const sp of [4,5.5,7]){
+ for(const sp of [spFor(330),spFor(420),spFor(600)]){   // سرعاتٌ تبلغ الزاوية من x=300 بنموذج الاحتكاك الحاليّ
   const r=shoot([at(300,C.pieceR+0.5,-sp,0)]);
   if(r.pot.length)railed++;
  }
@@ -134,13 +136,14 @@ console.log('\n── سلوك يمكن للاعب أن يتوقّعه ──');
   return lo===null?0:(hi-lo);
  };
  // سرعات تبلغ الزاوية فعلًا: المدى v²/2roll يجب أن يتجاوز 283
- const c3=cone(4.5),c5=cone(5.5),c9=cone(7);
+ const s3=spFor(320),s5=spFor(380),s9=spFor(520);
+ const c3=cone(s3),c5=cone(s5),c9=cone(s9);
  ck('مخروط القبول موجود عند كل سرعة تبلغ الجيب (كان ±0.5°)',c3>2&&c5>2&&c9>2,
-    `4.5→${c3}° · 5.5→${c5}° · 7→${c9}°`);
+    `${s3}→${c3}° · ${s5}→${c5}° · ${s9}→${c9}°`);
  // ما يشعر به اللاعب حقًّا: التصويب الصحيح لا يخيب أبدًا مهما كانت القوّة.
  // (المخروط الواسع عند القوّة العالية على لوح خالٍ ارتدادات حقيقية لا خلل.)
  let direct=0,dt=0;
- for(const sp of [4.5,5,5.5,6,6.5,7])for(const e of [-1,-0.5,0,0.5,1]){
+ for(const sp of [320,360,400,450,500,560].map(spFor))for(const e of [-1,-0.5,0,0.5,1]){
   dt++;
   const a=(225+e)*Math.PI/180;
   if(shoot([at(200,200,Math.cos(a)*sp,Math.sin(a)*sp)]).pot.length)direct++;

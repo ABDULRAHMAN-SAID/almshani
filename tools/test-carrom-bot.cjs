@@ -10,11 +10,11 @@ const phys=fs.readFileSync(path.join(ROOT,'src','games','carrom','physics.js'),'
 function fn(name){const m=html.match(new RegExp('\\nfunction '+name+'\\([^)]*\\)\\{[\\s\\S]*?\\n\\}\\n'));if(!m)throw new Error('لم أجد '+name);return m[0]}
 function cst(re){const m=html.match(re);if(!m)throw new Error('ثابت مفقود '+re);return m[0]}
 const src=[phys,';',
- cst(/const CA_R=400, CA_PR=13, CA_SR=16\.5;/),cst(/const CA_VMAX=13;/),cst(/const CA_BASE=CA_R-CA_SR-22;/),
+ cst(/const CA_R=400, CA_PR=13, CA_SR=16\.5;/),cst(/const CA_VMAX=\d+;/),cst(/const CA_BASE=CA_R-CA_SR-22;/),
  fn('caBlocked'),fn('caBlockedAt'),fn('caFreeX'),fn('caBotPick'),
  ';({caBotPick,CarromPhysics,CA_R,CA_PR,CA_SR,CA_BASE})'].join('\n');
 const {caBotPick,CarromPhysics:PH,CA_R,CA_PR,CA_BASE}=(0,eval)(src);
-const DIFF={easy:{noise:0.28,pw:[2.8,4.6],blind:0.45},mid:{noise:0.04,pw:[4.4,6.0],blind:0.15,sim:3},hard:{noise:0.01,pw:[5.2,6.6],blind:0,sim:6}};
+const DIFF={easy:{noise:0.28,pw:[4.2,7.0],blind:0.45},mid:{noise:0.04,pw:[6.6,9.0],blind:0.15,sim:3},hard:{noise:0.01,pw:[7.8,10.0],blind:0,sim:6}};
 const tbl=html.match(/carrom:\{noise:[^}]*\}/g)||[];   // يجب أن يطابق جدول الصعوبة في اللعبة
 function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 function randomBoard(n,rng){const P=[];let g=0;while(P.length<n&&g++<5000){const x=40+rng()*320,y=40+rng()*320;if(P.every(p=>Math.hypot(p.x-x,p.y-y)>=CA_PR*2.2))P.push({x,y,t:P.length===0?'q':(P.length%2?'w':'b')})}return P}
