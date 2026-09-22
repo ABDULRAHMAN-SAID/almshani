@@ -14957,7 +14957,7 @@ function arPillar(g){
    الرسم: مرسم بنافذة ورفّ ألوان ورذاذ طلاء. مافيا: مدينة الليل بقمر وأفق مبانٍ. المجلس: فوانيس وسجّاد.
    كلها SVG وCSS بلا صور؛ لا مرشّحات ثقيلة؛ والألوان لا تزاحم النصوص فوقها. */
 const VENUE_NAMES={carrom:'مجلس الكيرم',uno:'طاولة الأونو',atelier:'المرسم',mafia:'مدينة الليل',majlis:'المجلس'};
-const ARENA_FLOWS=/^(match|intro|quiz|room|party|vsbot|roomScr|mmScr|soloScr)$/;   // التدفّقات التي تملك مكانًا خلفها
+const ARENA_FLOWS=/^(match|intro|quiz|room|roomScr|mmScr|soloScr)$/;   // التدفّقات التي تملك مكانًا خلفها
 function vnRnd(seed){let h=seed|0||7;return()=>{h=Math.imul(h^(h>>>15),2246822507)>>>0;h=Math.imul(h^(h>>>13),3266489909)>>>0;return((h^(h>>>16))>>>0)%10000/10000}}
 function vnLattice(id,col,op){   // نقش مشربية: نجمة ثمانية داخل معيّن
  return `<pattern id="${id}" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -19326,8 +19326,8 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
-  'playScr','gamesScr','dmScr','moreScr','playModesScr','partyScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr','arenaScr',
-  'gameRankScr','soloScr','roomScr','mafiaSetup','drawSetup','lkSetup','xferScr','xferShow',
+  'playScr','gamesScr','dmScr','moreScr','playModesScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr','arenaScr',
+  'gameRankScr','soloScr','roomScr','xferScr','xferShow',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
   'clAdminLogScr','clAchScr','clSettingsScr','clMyNotifScr','clBannedScr','clSearchScr','clPublicScr',
   'clEventsScr','clMoreScr','errLogScr'].forEach(n=>R.register(n,{}));
@@ -19345,7 +19345,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
  R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&
-  GAME_DEFS.find(x=>x.rmKey===g||x.id===g)),fallback:'partyScr'});
+  GAME_DEFS.find(x=>x.rmKey===g||x.id===g)),fallback:'playScr'});
  // محرّرات: سؤال قبل المغادرة بتغييرات
  R.register('renameAsk',{dirty:()=>{const el=$('nm');return !!el&&el.value.trim()!==(S.name||'')}});
  R.register('clCreateScr',{dirty:formDirty});
@@ -19356,8 +19356,6 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  R.register('mResult', {render:a=>mResult.apply(null,a||[])});
  R.register('tutorial',{bar:false,render:()=>tDraw(),     leave:()=>push('skipAsk')});
  R.register('room',    {bar:false,render:()=>roomDraw(),  leave:()=>rmBack()});
- R.register('party',   {bar:false,render:()=>{},          leave:()=>ptExit()});   // لا يُدفع فوقه شيء
- R.register('vsbot',   {bar:false,render:()=>{},          leave:()=>vbExit()});   // مافيا والرسم ضد الكمبيوتر
  R.register('quiz',    {bar:false,render:()=>draw(),      leave:()=>quizExit()});
 })();
 /** أي حقل في الشاشة كُتب فيه شيء */
@@ -24795,7 +24793,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.25';
+const APP_VER='6.26';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25199,7 +25197,7 @@ function rmLeave(silent){
  try{cancelAnimationFrame(_ca.loop)}catch(e){}
  _ca.sim=null;_ca.drag=null;_ca.aim=null;_ca.slide=0;_ca.sx=null;_ca.sxV=null;
  _ca.anim=null;_ca.loop=0;_ca.grab=0;
- if(!silent&&!Router.exit('room'))partyScr();
+ if(!silent&&!Router.exit('room'))push('playScr');
 }
 /** «رجوع» داخل غرفة: أثناء المباراة سؤال، وفي الردهة مغادرة */
 function rmBack(){
@@ -25373,8 +25371,6 @@ function rmOn(d,m){
   if(d.secs)rmTimer(d.secs)}
  else if(d.t==='end'){RM.phase='end';RM.res=d;rmSettle(d)}
  else if(d.t==='night'){RM.phase='night';RM.step=d.step;RM.msg=d.m||'';RM.day=d.day||RM.day}
- else if(d.t==='morn'){RM.phase='morning';RM.alive=d.alive||RM.alive;RM.res={killed:d.killed};RM.day=d.day||RM.day}
- else if(d.t==='lynch'){RM.phase='lynch';RM.alive=d.alive||RM.alive;RM.res={who:d.who,role:d.role}}
  else if(d.t==='over'){RM.phase='over';RM.res=d;evtGame(d);rmSettle(d)}
  else if(d.t==='emo'){                                    // تعبير لاعب آخر
   if(d.by===me)return;
@@ -25386,10 +25382,6 @@ function rmOn(d,m){
   const p=(RM.players||[]).find(x=>x.peer===d.by);
   shoutOut(shoutById(d.i),'op',(p&&p.n)||'لاعب');
  }
- else if(d.t==='st'){ // مسارات رسم — لا صور: تبقى تحت حد الرسالة
-  RM.art=RM.art||{};
-  if(d.by!==RM.me)RM.art[d.by]=(RM.art[d.by]||[]).concat(d.s||[]);   // خطوطي رُسمت محليًا فلا تُضاعَف بالصدى
-  if(RM.phase==='vote')setTimeout(rmPaintAll,30);}
  else if(d.t==='hand'&&d.to===me){RM.hand=(d.h||[]).slice()}
  else if(d.t==='unoIntro'){RM.phase='uno';RM.uno=null;unoIntroPlay(d)}
  else if(d.t==='uno'){
@@ -25407,18 +25399,6 @@ function rmOn(d,m){
   if(wasShot){_ca.aim=null;setTimeout(()=>caPlay(d.shot),20)}
   else{setTimeout(caRender,40);
    if(RM.solo&&isBot(d.turn))setTimeout(caBot,2200)}}
- else if(d.t==='det'&&d.to===me){RM.myKnow=RM.myKnow||{};RM.myKnow[d.target]=!!d.isM;RM.detRes={who:d.target,maf:!!d.isM}}
- else if(d.t==='sgQ'){RM.phase='sgAsk';
-  RM.sg={q:d.q,cat:d.cat||'',kind:d.kind||'',r:d.r|0,rounds:d.rounds|0,who:d.who||null,mine:null,res:null};
-  if(RM.host){RM.sgH=RM.sgH||{r:0,rounds:d.rounds|0,used:[],pts:{},ans:{}};RM.sgH.ans={}}}
- else if(d.t==='sgV'&&RM.host){
-  const from=(m&&m.peer)||d.by;
-  if(from&&RM.sgH){RM.sgH.ans[from]=d.v|0;
-   if(RM.phase==='sgAsk'&&sgAllIn())setTimeout(rmSgReveal,450)}}
- else if(d.t==='sgR'){RM.phase='sgRes';
-  if(RM.sg){RM.sg.res={ans:d.ans||{},ok:!!d.ok,votes:d.votes|0,gain:d.gain|0}}
-  RM.sgPts=d.pts||{};}
- else if(d.t==='sgEnd'){RM.phase='sgEnd';RM.sgPts=d.pts||{};evtParty()}
  else if(d.t==='act'&&RM.host){
   if(RM.game==='uno')unoAct(d);
   else if(RM.game==='carrom')caAct(d);
@@ -25598,12 +25578,9 @@ function roomDraw(){
   body=`${rmLobbyRing(R)}
   ${RM.host?`<div class="sl">اللعبة</div>
    <div class="rmGames">
-    ${[['mafia','مافيا'],['draw','الرسم'],['uno','أونو'],['carrom','كيرم'],
-       ['lk','لو خيروك']].map(([g,n])=>
+    ${[['uno','أونو'],['carrom','كيرم']].map(([g,n])=>
      `<div class="rmGame ${RM.game===g?'on':''}" onclick="RM.game='${g}';roomDraw()">
-      <span class="art">${GAME_ART[g]||SG_ART[g]||''}</span><span>${n}</span></div>`).join('')}</div>
-   ${RM.game==='draw'?ptCatsRoom():''}
-   ${RM.game==='lk'?sgRoomRounds():''}
+      <span class="art">${GAME_ART[g]||''}</span><span>${n}</span></div>`).join('')}</div>
    <button class="goBtn" onclick="rmStart()">
     <i class="goPlay">${ico('play',18)}</i><b>ابدأ اللعبة</b>
     <em class="goDiff">${R.length} لاعبين</em></button>
@@ -25698,45 +25675,18 @@ function rmStart(){
  if(R.length<lim[0]){toast(`تحتاج ${lim[0]} لاعبين على الأقل`);return}
  if(R.length>lim[1]){toast(`الحد الأقصى ${lim[1]} لاعبين لهذه اللعبة`);return}
  const ps=R.map(p=>({peer:p.peer,name:p.name,id:p.id||null,av:p.av||null}));   // 5.82: الصورة والمعرّف يرافقان اللاعب داخل اللعبة
- if(RM.game==='draw'){
-  const ws=PARTY_WORDS[RM.cat||'أماكن'];
-  RM.art={};
-  rmSend({t:'start',g:'draw',ps,mid:rmNewMid(),cat:RM.cat,w:ws[Math.floor(Math.random()*ws.length)]});
-  setTimeout(()=>rmSend({t:'ph',p:'paint',secs:75}),140);
-  return;
- }
- // 5.90: لعبة مجهولة كانت تسقط في فرع المافيا صامتةً — الآن تُرفض بوضوح
- if(!/^(draw|uno|carrom|mafia|lk)$/.test(RM.game)){
+ // 5.90: لعبة مجهولة لا تسقط في فرعٍ صامت — تُرفض بوضوح
+ if(!/^(uno|carrom)$/.test(RM.game)){
   toast('هذه اللعبة لا تُلعب في غرفة');
   return;
  }
- // 5.89: ما كان فيه سرّ لا يبدأ بلا تعمية — الأدوار المكشوفة أسوأ من لعبة لا تبدأ
- if(/^(uno|mafia|lk)$/.test(RM.game)&&!rmCrypto()){
+ // 5.89: ما كان فيه سرّ لا يبدأ بلا تعمية — يدٌ مكشوفة أسوأ من لعبة لا تبدأ
+ if(RM.game==='uno'&&!rmCrypto()){
   toast('هذا الاتصال لا يدعم التعمية — افتح اللعبة من رابطها الآمن (https)');
   return;
  }
- if(RM.game==='lk'){
-  RM.sgH={r:0,rounds:RM.sgR||10,used:[],pts:{},ans:{}};
-  rmSend({t:'start',g:RM.game,ps,mid:rmNewMid()});
-  setTimeout(rmSgQ,180);
-  return;
- }
  if(RM.game==='uno'){rmSend({t:'start',g:'uno',ps,mid:rmNewMid()});setTimeout(unoDeal,160);return}
- if(RM.game==='carrom'){rmSend({t:'start',g:'carrom',ps,mid:rmNewMid()});setTimeout(caDeal,160);return}
- // (الفرق تُشتق من الترتيب: الزوجي أبيض والفردي أسود)
- {
-  const roles=[];
-  const nM=ps.length>=8?2:1;
-  for(let i=0;i<nM;i++)roles.push('مافيا');
-  roles.push('طبيب','محقق');
-  while(roles.length<ps.length)roles.push('مواطن');
-  vbShuffle(roles);
-  RM.secret={roles:{}};
-  ps.forEach((p,i)=>RM.secret.roles[p.peer]=roles[i]);
-  rmSend({t:'start',g:'mafia',ps,mid:rmNewMid()});
-  ps.forEach((p,i)=>rmSendTo(p.peer,{t:'role',r:roles[i]}));
-  setTimeout(()=>rmSend({t:'ph',p:'deal2',m:'انظر لدورك ثم اضغط جاهز'}),120);
- }
+ rmSend({t:'start',g:'carrom',ps,mid:rmNewMid()});setTimeout(caDeal,160);
 }
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -25949,9 +25899,7 @@ function soloBegin(g){
  soloStart(g,RM.diff||'mid');
 }
 function soloStart(g,diff){
- if(!/^(mafia|draw|uno|carrom)$/.test(g)){toast('لا لعب ضد الكمبيوتر في هذه اللعبة');return}
- if(g==='mafia')return mfStart(diff);
- if(g==='draw')return dbStart(diff);
+ if(!/^(uno|carrom)$/.test(g)){toast('لا لعب ضد الكمبيوتر في هذه اللعبة');return}
  RM.solo=1;RM.diff=diff||'mid';
  const n=g==='carrom'?((RM.caN||2)-1):(RM.bots||1);
  soloTransport(n);
@@ -34830,8 +34778,6 @@ const GAME_ART={
  </svg>`
 };
 const PT_GAMES=[
- [ico('search',20),'مافيا','مدينة نائمة ومافيا تصطاد — التطبيق هو الراوي','mafia',1,1],
- [ico('palette',20),'مسابقة الرسم','كلمة واحدة والكل يرسم — صوتوا لأفضل لوحة','draw',1,1],
  [ico('cards',20),'أونو','108 بطاقات · تخطي وعكس و+2 و+4 — يدك في هاتفك وحدك','uno',0,1],
  [ico('ball',20),'كيرم','لوح خشبي بفيزياء حقيقية — صوّب واضرب وأدخل قطعك','carrom',0,1]
 ];
