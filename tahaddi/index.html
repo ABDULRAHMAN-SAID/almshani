@@ -16258,8 +16258,15 @@ if(typeof module!=='undefined'&&module.exports)module.exports=NET;
  *   SFX.init({enabled:()=>bool, haptic:()=>bool})   من يقرّر التشغيل؟ إعدادات اللاعب
  *   SFX.unlock()      عند أول لمسة — المتصفح لا يفتح الصوت قبلها
  *   SFX.fx('ok')      صوت + اهتزاز معًا      SFX.play(k) / SFX.haptic(k) كلٌّ على حدة
- * الأسماء: tap · ok · bad · win · lose · strike · pot · coin
+ * الأسماء: tap · ok · bad · win · lose · strike · pot · coin · hit · wall
+ *   SFX.loadSprite(name,url,seg)   عيّنات مسجَّلة في ملفٍّ واحد تُفكّ مرّةً (٦٫٤١)
+ *   SFX.play(k,{v})                v سرعة الاصطدام: تضبط الشدّة والنبرة
  * لا DOM هنا إلا window/navigator. لا يرمي أبدًا.
+ *
+ * لماذا عيّنات (٦٫٤١): طقّة قطعةٍ خشبيّة على لوحٍ خشبيّ لها رنيناتٌ لا يبلغها
+ * مذبذبٌ ومرشّح، وصاحب اللعبة سمع الفرق: «صوت ما صحيح ولا يعطي شعور».
+ * فتُؤلَّف في tools/build-sfx.py وتُضغط في ملفٍّ واحد، وتُقتطع عند اللعب
+ * بمصدر مخزنٍ رخيص — لا تركيب حيّ، فلا يتكرّر ما وقع للموسيقى.
  */
 var SFX=(function(){
  'use strict';
@@ -16310,29 +16317,69 @@ var SFX=(function(){
   s.connect(f);f.connect(v);v.connect(c.destination);
   s.start(t0);s.stop(t0+d+0.02);
  }
+ /* ── العيّنات ── */
+ var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
+ var loading={};
+ function loadSprite(name,url,seg){
+  if(SPR[name]||loading[name]||!W||typeof W.fetch!=='function')return;
+  loading[name]=1;
+  W.fetch(url).then(function(r){return r.ok?r.arrayBuffer():null}).then(function(ab){
+   if(!ab)throw 0;
+   var c=ac();if(!c)throw 0;
+   return new Promise(function(res,rej){
+    /* الصيغتان: وعدٌ في المتصفّحات الحديثة، ونداءان في WebView أقدم */
+    try{var p=c.decodeAudioData(ab,res,rej);if(p&&p.then)p.then(res,rej)}catch(e){rej(e)}
+   });
+  }).then(function(buf){SPR[name]={buf:buf,seg:seg||{}}}).catch(function(){}).then(function(){delete loading[name]});
+ }
+ /** يعزف مقطعًا من عيّنة: يختار صيغةً عشوائيّة، ويضبط الشدّة والنبرة بالسرعة */
+ function sample(name,key,t0,opt){
+  var s=SPR[name];if(!s||!s.buf)return false;
+  var list=s.seg[key];if(!list||!list.length)return false;
+  var c=ac();if(!c)return false;
+  var seg=list[(Math.random()*list.length)|0];
+  var v=opt&&opt.v!=null?opt.v:8;
+  /* الشدّة تتبع السرعة بمنحنىً هادئ: اللمسة تُهمَس والضربة تُقرَع */
+  var g=Math.max(0.10,Math.min(1,Math.pow(v/9,1.15)))*(opt&&opt.gain!=null?opt.gain:1);
+  var rate=0.94+Math.random()*0.10+Math.min(0.06,v/200);
+  var src=c.createBufferSource(),vol=c.createGain();
+  src.buffer=s.buf;src.playbackRate.value=rate;
+  vol.gain.value=g*0.9;
+  src.connect(vol);vol.connect(c.destination);
+  try{src.start(t0,seg[0],seg[1])}catch(e){return false}
+  return true;
+ }
+
  var LIB={
   tap:   function(t){tone(880,t,0.045,'sine',0.07)},
   ok:    function(t){tone(660,t,0.09,'triangle',0.15);tone(990,t+0.08,0.15,'triangle',0.15)},
   bad:   function(t){tone(230,t,0.2,'sawtooth',0.10,150)},
   win:   function(t){[523,659,784,1047].forEach(function(f,i){tone(f,t+i*0.11,0.24,'triangle',0.15)})},
   lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
-  strike:function(t){noise(t,0.06,0.28,2400);tone(170,t,0.05,'square',0.05)},
-  pot:   function(t){tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)},
+  /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
+  strike:function(t,o){if(!sample('carrom','strike',t,{v:12}))
+           {noise(t,0.06,0.28,2400);tone(170,t,0.05,'square',0.05)}},
+  pot:   function(t,o){if(!sample('carrom','pot',t,{v:10}))
+           {tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)}},
+  hit:   function(t,o){if(!sample('carrom','hit',t,o))
+           {var v=o&&o.v||6;noise(t,0.022,Math.min(0.22,0.03*v),5200);tone(1900,t,0.03,'square',Math.min(0.06,0.008*v),1300)}},
+  wall:  function(t,o){if(!sample('carrom','wall',t,o))
+           {var v=o&&o.v||6;noise(t,0.05,Math.min(0.2,0.03*v),1400);tone(420,t,0.05,'sine',Math.min(0.08,0.012*v),300)}},
   coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)},
   /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
   tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},
   tickHot:function(t){noise(t,0.022,0.115,7000);tone(2050,t,0.034,'square',0.062,1500)},
   timeUp:function(t){tone(300,t,0.34,'triangle',0.16,120);noise(t,0.09,0.10,1200)}
  };
- var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15]};
+ var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],hit:[7]};
 
- function play(k){
+ function play(k,opt){
   var f=LIB[k];if(!f)return false;
   var on=false;try{on=!!enabled()}catch(e){}
   if(!on)return false;
   var c=ac();if(!c)return false;
   if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
-  try{f(c.currentTime)}catch(e){return false}
+  try{f(c.currentTime,opt||null)}catch(e){return false}
   return true;
  }
  function vibe(k){
@@ -16341,11 +16388,11 @@ var SFX=(function(){
   if(!on||!W||!W.navigator||typeof W.navigator.vibrate!=='function')return false;
   try{return !!W.navigator.vibrate(pat)}catch(e){return false}
  }
- function fx(k){var a=play(k),b=vibe(k);return a||b}
+ function fx(k,opt){var a=play(k,opt),b=vibe(k);return a||b}
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,available:available,hapticAvailable:hapticAvailable,
+ return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
@@ -24546,7 +24593,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.40';
+const APP_VER='6.41';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -26645,10 +26692,24 @@ function caAct(d){
 }
 let _ca={sim:null,drag:null,anim:null};
 /** أحداث المحرّك → إحساس. الفيزياء لا ترسم ولا تهتزّ؛ هذه تفعل. */
+/** أحداث المحرّك → إحساس. الفيزياء لا ترسم ولا تهتزّ؛ هذه تفعل.
+    كانت تسمع السقوط وحده، وكلّ اصطدامٍ بينهما صامت — المحرّك يبلّغ عن `hit`
+    و`wall` بسرعتهما ولا أحد يترجمهما. فصار لكلّ اصطدامٍ طقّته بشدّته، مع
+    سقفٍ في الإطار وفاصلٍ أدنى بين طقّتين حتى لا تصير الضربة القويّة رشّاشًا. */
 function caFx(ev){
  if(!ev||!ev.length)return;
+ const now=performance.now();_ca.fxT=_ca.fxT||{};
+ let budget=3;
  for(const e of ev){
-  if(e.e==='pot'){if(window.SFX)SFX.fx('pot');if(window.FX&&FX.pop)try{FX.pop()}catch(x){}}
+  if(e.e==='pot'){if(window.SFX)SFX.fx('pot');if(window.FX&&FX.pop)try{FX.pop()}catch(x){}continue}
+  if(budget<=0||!window.SFX)continue;
+  const key=e.e==='hit'?'hit':(e.e==='wall'?'wall':null);if(!key)continue;
+  const sp=e.speed||0;
+  if(sp<0.35)continue;                         // لمسةٌ لا تُسمع على لوحٍ حقيقيّ
+  if(now-(_ca.fxT[key]||0)<22)continue;        // طقّتان في ٢٢ مللي ثانية تُسمعان واحدة
+  _ca.fxT[key]=now;budget--;
+  SFX.play(key,{v:sp});
+  if(key==='hit'&&sp>7)SFX.haptic('hit');      // الضربة القويّة تُحَسّ في اليد
  }
 }
 function caPlay(shot){
@@ -27038,7 +27099,16 @@ function caHandImg(){
  img.src='data:image/svg+xml;utf8,'+encodeURIComponent(
   HAND_SVG.replace('<svg ','<svg width="120" height="150" '));
 }
+/** عيّنات الخشب تُحمَّل مرّةً عند أوّل لوح، لا عند فتح اللعبة */
+let _caSfx=0;
+function caSfxLoad(){
+ if(_caSfx||!window.SFX||!SFX.loadSprite)return;_caSfx=1;
+ fetch('audio/carrom.json').then(r=>r.ok?r.json():null).then(j=>{
+  if(j&&j.seg)SFX.loadSprite('carrom','audio/carrom.webm',j.seg);
+ }).catch(()=>{_caSfx=0});
+}
 function caInit(){
+ caSfxLoad();
  const cv=document.getElementById('caC');if(!cv||cv._on)return;cv._on=1;
  caSkinLoad();caTexLoad();caHandImg();
  caRender();caLoopOn();

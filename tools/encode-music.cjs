@@ -11,8 +11,10 @@
 const {chromium}=require('playwright');
 const fs=require('fs'),path=require('path');
 const ROOT=path.join(__dirname,'..');
-const SRC=path.join(ROOT,'tahaddi','audio','menu.wav');
-const OUT=path.join(ROOT,'tahaddi','audio','menu.webm');
+/* بلا وسائط: موسيقى القائمة. وبوسيطين: أيّ ملفّ صوتٍ إلى أيّ ناتج —
+   أصوات الكيرم تمرّ من هنا كذلك (٦٫٤١). */
+const SRC=path.resolve(process.argv[2]||path.join(ROOT,'tahaddi','audio','menu.wav'));
+const OUT=path.resolve(process.argv[3]||path.join(ROOT,'tahaddi','audio','menu.webm'));
 const CHROME='/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 
 (async()=>{
@@ -31,7 +33,8 @@ const CHROME='/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
   const src=ctx.createBufferSource();src.buffer=buf;src.connect(dest);
   const mime=['audio/webm;codecs=opus','audio/webm'].find(m=>MediaRecorder.isTypeSupported(m));
   if(!mime)throw new Error('لا صيغة مدعومة');
-  const rec=new MediaRecorder(dest.stream,{mimeType:mime,audioBitsPerSecond:96000});
+  /* الطقّات نبضاتٌ حادّة، وopus عند ٩٦ ك يمسحها؛ ١٢٨ ك يحفظ هجومها — والملفّ ما زال صغيرًا */
+  const rec=new MediaRecorder(dest.stream,{mimeType:mime,audioBitsPerSecond:128000});
   const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
   const done=new Promise(r=>rec.onstop=r);
   rec.start();src.start();
@@ -46,5 +49,5 @@ const CHROME='/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
  await b.close();
  fs.writeFileSync(OUT,Buffer.from(b64,'base64'));
  const a=fs.statSync(SRC).size,z=fs.statSync(OUT).size;
- console.log('✓ tahaddi/audio/menu.webm — '+(z/1024).toFixed(0)+' ك.ب  (من '+(a/1048576).toFixed(2)+' م.ب · '+Math.round((1-z/a)*100)+'٪ أقلّ)');
+ console.log('✓ '+path.relative(ROOT,OUT)+' — '+(z/1024).toFixed(0)+' ك.ب  (من '+(a/1024).toFixed(0)+' ك.ب · '+Math.round((1-z/a)*100)+'٪ أقلّ)');
 })().catch(e=>{console.error('✗ '+e.message);process.exit(1)});
