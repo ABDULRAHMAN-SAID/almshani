@@ -24654,7 +24654,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.43';
+const APP_VER='6.44';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27309,10 +27309,38 @@ function caRender(rest){
    cx.fillStyle='#fff';cx.font='900 '+Math.round(13.5*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';
    cx.fillText(can?'أفلت الآن — تُلغى الضربة':'↓ للإلغاء أنزل إصبعك إلى هنا وأفلت',W/2,W+(H-W)/2);
   }
-  cx.setLineDash([8,6]);cx.lineWidth=2.6;
-  cx.strokeStyle=can?'rgba(190,190,200,.45)':back?'rgba(226,75,74,.85)':'rgba(255,233,168,.92)';
-  cx.beginPath();cx.moveTo(PX(d.sx),PY(d.sy));
-  cx.lineTo(PX(d.sx-d.dx*2.4),PY(d.sy-d.dy*2.4));cx.stroke();cx.setLineDash([]);
+  // خطّ التصويب الأماميّ: إلى أوّل تماسّ، ثمّ سهما الانطلاق — وحين لا يُرسم (إلغاء/خلف/سحبٌ قصير) يبقى خطّ الاتجاه القديم
+  const g=(!can&&!back&&raw>=10)?caGuide(d.sx,d.sy,-d.dx,-d.dy,caLocalPcs(caMySeat())):null;
+  if(!g){
+   cx.setLineDash([8,6]);cx.lineWidth=2.6;
+   cx.strokeStyle=can?'rgba(190,190,200,.45)':back?'rgba(226,75,74,.85)':'rgba(255,233,168,.6)';
+   cx.beginPath();cx.moveTo(PX(d.sx),PY(d.sy));
+   cx.lineTo(PX(d.sx-d.dx*1.2),PY(d.sy-d.dy*1.2));cx.stroke();cx.setLineDash([]);
+  }
+  {
+   if(g){
+    cx.setLineDash([4,8]);cx.lineWidth=2.2;cx.strokeStyle='rgba(255,255,255,.85)';
+    cx.beginPath();cx.moveTo(PX(g.x0),PY(g.y0));cx.lineTo(PX(g.x1),PY(g.y1));cx.stroke();cx.setLineDash([]);
+    if(g.kind!=='end'){
+     // شبح الضارب عند التماسّ
+     cx.beginPath();cx.arc(PX(g.x1),PY(g.y1),CA_SR*sc,0,7);
+     cx.strokeStyle='rgba(255,255,255,.9)';cx.lineWidth=1.8;cx.stroke();
+     cx.fillStyle='rgba(255,255,255,.14)';cx.fill();
+     const arrow=(x,y,nx,ny,len,col,w)=>{
+      const ex=x+nx*len,ey=y+ny*len;
+      cx.strokeStyle=col;cx.lineWidth=w;cx.lineCap='round';
+      cx.beginPath();cx.moveTo(PX(x),PY(y));cx.lineTo(PX(ex),PY(ey));cx.stroke();
+      const a=Math.atan2(ny,nx),h=7*sc;
+      cx.beginPath();cx.moveTo(PX(ex),PY(ey));cx.lineTo(PX(ex)-Math.cos(a-.5)*h,PY(ey)-Math.sin(a-.5)*h);
+      cx.moveTo(PX(ex),PY(ey));cx.lineTo(PX(ex)-Math.cos(a+.5)*h,PY(ey)-Math.sin(a+.5)*h);cx.stroke();
+     };
+     if(g.kind==='piece'){
+      arrow(g.p.x,g.p.y,g.pn[0],g.pn[1],26+40*g.pk,'rgba(255,233,168,.95)',3);          // القطعة
+      if(g.sn)arrow(g.x1,g.y1,g.sn[0],g.sn[1],14+30*g.sk,'rgba(255,255,255,.55)',2);   // الضارب بعدها
+     }else if(g.sn)arrow(g.x1,g.y1,g.sn[0],g.sn[1],40,'rgba(255,255,255,.6)',2);         // ارتداد الجدار
+    }
+   }
+  }
   cx.beginPath();
   cx.arc(PX(d.sx),PY(d.sy),CA_SR*sc*1.5,-Math.PI/2,-Math.PI/2+Math.PI*2*pw);
   cx.strokeStyle=can?'#9AA0AE':pw>.8?'#FF7B58':'#FFE9A8';cx.lineWidth=4;cx.lineCap='round';cx.stroke();
@@ -27322,13 +27350,57 @@ function caRender(rest){
   // نسبة القوّة فوق الضارب
   const lab=can?'إلغاء':back?'ممنوع للخلف':Math.round(pw*100)+'%';
   cx.font='900 '+Math.round(13*sc)+'px system-ui';cx.textAlign='center';cx.textBaseline='middle';
-  const tw=cx.measureText(lab).width+14*sc, tx=PX(d.sx), ty=PY(d.sy)-CA_SR*sc*2.6;
+  // التماسّ قريبٌ من القاعدة: لوحة النسبة تنحّي إلى جانب الضارب كي لا تغطّي الشبح والسهم
+  const near=g&&g.kind!=='end'&&Math.hypot(g.x1-g.x0,g.y1-g.y0)<CA_SR*3.6+9, side=d.sx<CA_R/2?1:-1;
+  const tw=cx.measureText(lab).width+14*sc, tx=near?PX(d.sx)+side*CA_SR*sc*3.2:PX(d.sx), ty=near?PY(d.sy):PY(d.sy)-CA_SR*sc*2.6;
   cx.fillStyle='rgba(6,9,17,.7)';caRR(cx,tx-tw/2,ty-9*sc,tw,18*sc,9*sc);cx.fill();
   cx.fillStyle=can||back?'#FFB4B3':pw>.8?'#FF9A7A':'#FFE9A8';cx.fillText(lab,tx,ty);
  }
 }
 /** القوّة من طول السحب: تربيعية فوق حدّ أدنى — لمسة خفيفة تدفع، وسحب كامل يضرب بكل القوّة */
 function caPower(raw){const p=Math.min(1,raw/95);return 0.22+0.78*p*p}
+/* ═══ خطّ التصويب (٦٫٤٤) ═══
+   قال المالك عن Carrom Pool: «الضرب والقوانين والفيزياء ممتازة». وسرُّ إحساسها بالضبط
+   خطٌّ أماميّ يريك قبل الإفلات أين يصيب الضارب أوّلَ قطعة، وإلى أين تنطلق هي، وإلى
+   أين ينحرف هو — أو أين يرتدّ من الجدار. هذا يحسبه هندسيًّا في إطار اللاعب المحلّي:
+   مسحُ دائرةٍ بنصف قطر الضارب على الشعاع، وأقربُ تماسٍّ مع قطعةٍ أو جدار. وطوله
+   محدود (CA_GUIDE) كما تحدّه اللعبة تلك بـ«دقّة التصويب». */
+const CA_GUIDE=250;
+function caGuide(sx,sy,dx,dy,pcs){
+ const L=Math.hypot(dx,dy);if(L<1e-6)return null;
+ const ux=dx/L,uy=dy/L;
+ let best={t:CA_GUIDE,kind:'end'};
+ // القطع: |P0+t·u−c|=SR+PR
+ const RR=CA_SR+CA_PR;
+ for(const p of pcs){
+  const fx=sx-p.x,fy=sy-p.y, b=fx*ux+fy*uy, c=fx*fx+fy*fy-RR*RR;
+  const disc=b*b-c;if(disc<0)continue;
+  const t=-b-Math.sqrt(disc);
+  if(t>0.5&&t<best.t)best={t,kind:'piece',p};
+ }
+ // الجدران: المحرّك يوقف مركز الضارب على بُعد r+jawR من الحافّة
+ const WD=CA_SR+CarromPhysics.C.jawR;
+ const walls=[[ux<0?(WD-sx)/ux:Infinity,'l'],[ux>0?(CA_R-WD-sx)/ux:Infinity,'r'],[uy<0?(WD-sy)/uy:Infinity,'t'],[uy>0?(CA_R-WD-sy)/uy:Infinity,'b']];
+ for(const[t,w]of walls){if(t>0.5&&t<best.t)best={t,kind:'wall',w}}
+ const hx=sx+ux*best.t, hy=sy+uy*best.t;
+ const out={x0:sx,y0:sy,x1:hx,y1:hy,kind:best.kind,ux,uy};
+ if(best.kind==='piece'){
+  const p=best.p, nx=(p.x-hx)/RR, ny=(p.y-hy)/RR;     // اتّجاه انطلاق القطعة: من مركز الضارب إلى مركزها
+  const dot=ux*nx+uy*ny;
+  out.p=p;out.pn=[nx,ny];out.pk=Math.max(0,dot);
+  /* ما يبقى للضارب: المماسّ كلّه + ما يحتفظ به من العموديّ (M−e)/(M+1) ≈ ٠٫٥ بكتلة ٢٫٧
+     وارتداد ٠٫٨٦ — لا يقف عند الضربة المباشرة بل يتبع القطعة بنصف سرعته. */
+  const PC=CarromPhysics.C, kn=(PC.strikerMass-PC.pieceE)/(PC.strikerMass+1);
+  const tx=ux-(1-kn)*dot*nx, ty=uy-(1-kn)*dot*ny, tl=Math.hypot(tx,ty);
+  out.sn=tl>0.05?[tx/tl,ty/tl]:null;out.sk=tl;
+ }else if(best.kind==='wall'){
+  // الارتداد يضرب العموديّ في wallE ويُبقي المماسّ — لا مرآةً تامّة (فرقٌ حتى ٩°)
+  const e=CarromPhysics.C.wallE, lr=(best.w==='l'||best.w==='r');
+  const rx=lr?-ux*e:ux, ry=lr?uy:-uy*e, rl=Math.hypot(rx,ry)||1;
+  out.sn=[rx/rl,ry/rl];
+ }
+ return out;
+}
 /** ارتفاع المسند تحت اللوح بوحدات اللوح */
 function caLedgeU(){const cv=document.getElementById('caC');if(!cv||!(cv.height>cv.width))return 0;const M=caMG(),sc=(cv.width-M*2)/CA_R;return (cv.height-cv.width)/sc}
 /** أعلى المسند بوحدات اللوح: تحت ساحة اللعب يأتي الإطار الخشبيّ (M) ثمّ المسند */
