@@ -1684,6 +1684,14 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .pus .pu:active{transform:translateY(3px)}
 
 /* حوار الخروج الداخلي */
+/* شريط التحديث: يخبر ولا يقاطع، والضغط عليه يطبّق */
+#verBar{position:fixed;inset-inline:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;
+ display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
+ padding:11px 15px;border-radius:14px;border:1.5px solid var(--gold);
+ background:linear-gradient(180deg,#2A2208,#1A1508);
+ box-shadow:0 8px 22px rgba(0,0,0,.5);animation:pop .25s ease}
+#verBar b{font-size:13px;font-weight:900;color:var(--gold)}
+#verBar span{font-size:11px;font-weight:800;color:var(--tx2)}
 .qvov{position:fixed;inset:0;z-index:80;background:rgba(4,6,12,.72);backdrop-filter:blur(4px);
  display:flex;align-items:center;justify-content:center;padding:26px;animation:fi .2s ease}
 .qvbox{background:linear-gradient(170deg,#1A2237,#0F1524);border:1px solid var(--bd);border-radius:18px;
@@ -21706,6 +21714,10 @@ function setSection(k){
   <div style="font-size:11.5px;color:var(--tx2);margin-top:9px">الإصدار ${APP_VER}</div>
   <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">${Q.length} سؤالًا · 40 بطاقة</div>
   </div></div></div>
+  <div class="li" style="margin-top:9px"><div class="lr">
+   <div class="lb"><div class="lt">التحديثات</div><div class="ls">${VER_READY?`تحديث جاهز · ${esc(VER_READY)} — اضغط ليُطبَّق`:'اللعبة تجلب أحدث نسخة من الويب بلا تثبيت'}</div></div>
+   <button class="btn ${VER_READY?'gd':'g'}" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
+    onclick="${VER_READY?`try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){};location.reload()`:'verFetch(true)'}">${VER_READY?'طبّق':'تحقّق'}</button></div></div>
   ${[['terms','الشروط والأحكام'],['privacy','سياسة الخصوصية'],['licenses','التراخيص']].map(([k,n])=>
   `<div class="li" style="cursor:pointer" onclick="push('legalScr','${k}')"><div class="lr">
    <div class="lb"><div class="lt">${n}</div></div>${chev()}</div></div>`).join('')}`;
@@ -42563,6 +42575,10 @@ function tab(k){cur=k;nav();hideArena();
 function splash(){
  loadState();ecoNorm();nameMigrate();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
  verCheck();
+ verFetch(false);
+ document.addEventListener('visibilitychange',function(){
+  if(!document.hidden)verFetch(false);      // تطبيقٌ يبقى مفتوحًا أيامًا لا يُقلع
+ });
  if(!hasAccount())Router.reset('authScr');            // 5.68: لا لعب بلا حساب — البريد أوّلًا
  else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
  else Router.reset('welcomeScr');
@@ -42582,6 +42598,43 @@ function verCheck(){
       وهذه قيمةٌ واحدة قصيرة، فكتابتها فورًا أرخص من إبطال التأجيل كلّه. */
    try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}}
  }catch(e){}
+}
+/* ═══════════════════════════════════════════════════════════════════
+   فحص التحديث — على منوال أنشطتي
+   ───────────────────────────────────────────────────────────────────
+   الغلاف يفتح اللعبة من الويب، فالتحديث يصل حين يقرّر المتصفّح تجديد
+   صفحته — لا حين يُنشر. فينتظر المالك ولا يدري.
+   فتفحص اللعبة بنفسها: تجلب version.json (عشرات البايتات لا ٩٫٨ ميجا)
+   عند الإقلاع وعند كل رجوعٍ إليها من الخلفية، فإن وجدت أحدث عرضت شريطًا.
+   ولا تُعيد التحميل من تلقائها: من كان في مباراةٍ فقدها، فالقرار له.
+   ═══════════════════════════════════════════════════════════════════ */
+var VER_READY='';                       // الإصدار المنشور حين يكون أحدث
+var _verBusy=0;
+/** @param {boolean} say هل يُبلَّغ بالنتيجة ولو لم يتغيّر شيء؟ (زرّ يدويّ) */
+function verFetch(say){
+ if(_verBusy)return;
+ if(location.protocol==='file:'){if(say)toast('الفحص لا يعمل في هذه النسخة');return}
+ _verBusy=1;if(say)toast('يفحص…');
+ fetch('version.json?t='+Date.now(),{cache:'no-store'})
+  .then(function(r){return r.ok?r.json():null})
+  .then(function(j){
+   _verBusy=0;
+   if(!j||!j.v){if(say)toast('تعذّر الفحص — تحقّق من الاتصال');return}
+   if(j.v===APP_VER){if(say)toast('أنت على آخر نسخة');return}
+   VER_READY=j.v;verBar();
+   if(say)toast('تحديث جاهز — اضغط الشريط أعلى الشاشة');
+  })
+  .catch(function(){_verBusy=0;if(say)toast('تعذّر الفحص — تحقّق من الاتصال')});
+}
+/** شريط أعلى الشاشة: يخبر ولا يقاطع، والضغط عليه يطبّق */
+function verBar(){
+ if(!VER_READY||document.getElementById('verBar'))return;
+ var b=document.createElement('div');
+ b.id='verBar';
+ b.innerHTML='<b>تحديث جاهز · '+esc(VER_READY)+'</b><span>اضغط للتطبيق</span>';
+ b.onclick=function(){try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}
+  location.reload()};
+ document.body.appendChild(b);
 }
 var _verSaid=0;
 /** يُنادى بعد رسم الرئيسية — الشاشة موجودة فتُرى النافذة.

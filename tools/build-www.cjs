@@ -35,6 +35,10 @@ fs.copyFileSync(path.join(SRC,'fonts','OFL.txt'),path.join(OUT,'fonts','OFL.txt'
 fs.writeFileSync(path.join(OUT,'.nojekyll'),'');
 const ver=(html.match(/APP_VER='([^']+)'/)||[])[1];
 
+/* ملفّ الإصدار: اللعبة تفحصه لتعرف أنّ نسخةً أحدث نُشرت. وهي ٩٫٨ ميجا،
+   فلا يُفحص بجلبها — يُجلب هذا وهو عشرات البايتات. */
+fs.writeFileSync(path.join(OUT,'version.json'),JSON.stringify({v:ver,at:Date.now()})+'\n');
+
 /* الصفحات القانونية: المتجران يطلبان رابط سياسة خصوصية يعمل قبل النشر.
    النصّ مصدره واحد داخل اللعبة (بين علامتَي ⟦legal⟧) فلا يفترق ما في التطبيق عمّا على الويب. */
 const legalSrc=(html.match(/\/\* ⟦legal⟧ \*\/([\s\S]*?)\/\* ⟦\/legal⟧ \*\//)||[])[1];
