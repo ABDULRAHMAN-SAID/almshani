@@ -16540,11 +16540,12 @@ if(typeof module!=='undefined'&&module.exports)module.exports=VOICE;
 var MUSIC=(function(){
  'use strict';
  var W=(typeof window!=='undefined')?window:null;
- var ctx=null,master=null,verb=null,on=false,timer=null,ducked=false;
+ var ctx=null,master=null,verb=null,lim=null,on=false,timer=null,ducked=false;
+ var live=[];                           // الأصوات المنتهية تُفصَل، وإلّا نما رسم الصوت بلا حدّ
  var enabled=function(){return true};
  var barAt=0,bar=0;                     // متى تبدأ المازورة التالية، وأيّ مازورة هي
  var BPM=64, BEAT=60/BPM, BAR=BEAT*4;   // إيقاع القائمة — ولكل مشهد إيقاعه في SCENES
- var VOL=0.5, DUCK=0.16;                // مستوى هادئ أصلًا، وأهدأ أثناء اللعب
+ var VOL=0.44, DUCK=0.14;                // مستوى هادئ أصلًا، وأهدأ أثناء اللعب
 
  function init(o){if(o&&typeof o.enabled==='function')enabled=o.enabled}
  function AC(){return W?(W.AudioContext||W.webkitAudioContext):null}
@@ -16578,7 +16579,16 @@ var MUSIC=(function(){
   var wet=ctx.createGain();wet.gain.value=0.34;
   verb=reverb(ctx);
   verb.connect(wet);wet.connect(master);
-  master.connect(ctx.destination);
+  /* كل آلة تدخل master بمستواها، ومجموعها في المازورة المزدحمة يتجاوز الواحد
+     فيقصّه المخرج قصًّا صلبًا — وهو التشوّه الذي يُسمع. الحاجز يمسك القمم
+     وحدها ويترك ما دونها كما هو، فلا يُسمع عمله إلّا بغياب التشويه. */
+  lim=ctx.createDynamicsCompressor();
+  lim.threshold.setValueAtTime(-9,ctx.currentTime);
+  lim.knee.setValueAtTime(4,ctx.currentTime);
+  lim.ratio.setValueAtTime(14,ctx.currentTime);
+  lim.attack.setValueAtTime(0.004,ctx.currentTime);
+  lim.release.setValueAtTime(0.22,ctx.currentTime);
+  master.connect(lim);lim.connect(ctx.destination);
   return ctx;
  }
  /** كل صوت يذهب إلى الجافّ والمبلَّل معًا — نسبة الصدى بحسب الطبقة */
@@ -16586,7 +16596,19 @@ var MUSIC=(function(){
   var g=ctx.createGain(),s=ctx.createGain();
   s.gain.value=send==null?0.5:send;
   g.connect(master);g.connect(s);s.connect(verb);
+  live.push({g:g,s:s,t:ctx.currentTime});
   return g;
+ }
+ /** الآلة تصمت بانتهاء مذبذبها، لكن عقدتَي كسبها تبقيان موصولتين بـmaster
+     فينمو الرسم كل مازورة ويثقل على الهاتف حتى يتقطّع الصوت. وأطول صوت
+     يُجدوَل قبل موعده بثانيتين ويمتدّ أربعًا، فاثنتا عشرة ثانية هامشٌ وافر. */
+ function sweep(){
+  var now=ctx.currentTime,i=0;
+  while(i<live.length&&live[i].t<now-12){
+   try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}
+   i++;
+  }
+  if(i)live.splice(0,i);
  }
 
  /* ── الآلات ── */
@@ -16897,6 +16919,7 @@ var MUSIC=(function(){
    try{schedule(bar%sc.bars,barAt)}catch(e){}
    barAt+=b;bar++;
   }
+  try{sweep()}catch(e){}
  }
  /** تبديل اللحن بتلاشٍ متقاطع: القديم يخبو بينما الجديد يدخل — لا قطع */
  function scene(name){
@@ -16942,6 +16965,13 @@ var MUSIC=(function(){
    master.gain.setValueAtTime(master.gain.value,t);
    master.gain.linearRampToValueAtTime(0.0001,t+1.1);               // يخرج بتلاشٍ لا بقطع
   }catch(e){}
+  /* التلاشي ثانية، وأطول ذيلٍ مجدوَل أربع — فبعد ستٍّ لم يبقَ ما يُسمع،
+     وترك الرسم معلّقًا حتى التشغيل التالي يثقل بلا فائدة. */
+  W.setTimeout(function(){
+   if(on)return;
+   for(var i=0;i<live.length;i++){try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}}
+   live.length=0;
+  },6000);
  }
  /** أثناء اللعب تنخفض ولا تُقطع — فإن خرجتَ عادت كما كانت */
  function duck(v){
@@ -24670,7 +24700,7 @@ function playScr(){
    <span class="mo" onclick="push('bcOddsScr')">الاحتمالات ${chev('currentColor',12)}</span></div>
   ${battleChestRow(1)}
  </div>
- <div style="text-align:center;font-size:9.5px;color:var(--mut);margin-top:18px;padding:11px 0;min-height:36px" onclick="devTap()">نسخة تجريبية ${APP_VER}${S.dev?' · وضع المطوّر':''}</div>
+ <div style="text-align:center;font-size:${VER_NEW?'11.5px':'9.5px'};color:${VER_NEW?'var(--gold)':'var(--mut)'};font-weight:${VER_NEW?'900':'400'};margin-top:18px;padding:11px 0;min-height:36px" onclick="devTap()">${VER_NEW?`تحديث جديد · ${APP_VER}`:`نسخة تجريبية ${APP_VER}`}${S.dev?' · وضع المطوّر':''}</div>
  </div></div>`);
  bcTick();plDots();
 }
@@ -24793,7 +24823,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.26';
+const APP_VER='6.27';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -42513,10 +42543,30 @@ function tab(k){cur=k;nav();hideArena();
 // ═══════════ الشاشات ═══════════
 function splash(){
  loadState();ecoNorm();nameMigrate();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
+ verCheck();
  if(!hasAccount())Router.reset('authScr');            // 5.68: لا لعب بلا حساب — البريد أوّلًا
- else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
+ else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr');setTimeout(verAnnounce,900)}
  else Router.reset('welcomeScr');
  netBoot();
+}
+/* التطبيق يحمّل أحدث لعبةٍ من الويب، فالتحديث يصل بلا تثبيت — ولا شيء يقوله.
+   فكان المالك يفتح التطبيق ولا يدري أوصل تعديله أم لا. الآن يُقارَن الإصدار
+   بما رآه آخر مرّة: إن تغيّر قيل له مرّةً واحدة، ومن أين إلى أين. */
+var VER_NEW='';
+function verCheck(){
+ try{
+  var seen=S.verSeen||'';
+  if(seen&&seen!==APP_VER)VER_NEW=seen;        // أوّل تشغيلٍ لا يُعلَن: ليس تحديثًا
+  if(seen!==APP_VER){S.verSeen=APP_VER;saveState()}
+ }catch(e){}
+}
+var _verSaid=0;
+/** يُنادى بعد رسم الرئيسية — الشاشة موجودة فيُرى التنبيه.
+    والعلامة الذهبية تبقى طول الجلسة، والتنبيه يُقال مرّة. */
+function verAnnounce(){
+ if(!VER_NEW||_verSaid)return;
+ _verSaid=1;
+ try{toast('تحديث جديد وصل — الإصدار '+APP_VER)}catch(e){}
 }
 function start(){cur='play';nav();
  if(!S.tutDone){tutStart();return}

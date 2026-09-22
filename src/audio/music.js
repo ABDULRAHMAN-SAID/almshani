@@ -18,11 +18,12 @@
 var MUSIC=(function(){
  'use strict';
  var W=(typeof window!=='undefined')?window:null;
- var ctx=null,master=null,verb=null,on=false,timer=null,ducked=false;
+ var ctx=null,master=null,verb=null,lim=null,on=false,timer=null,ducked=false;
+ var live=[];                           // الأصوات المنتهية تُفصَل، وإلّا نما رسم الصوت بلا حدّ
  var enabled=function(){return true};
  var barAt=0,bar=0;                     // متى تبدأ المازورة التالية، وأيّ مازورة هي
  var BPM=64, BEAT=60/BPM, BAR=BEAT*4;   // إيقاع القائمة — ولكل مشهد إيقاعه في SCENES
- var VOL=0.5, DUCK=0.16;                // مستوى هادئ أصلًا، وأهدأ أثناء اللعب
+ var VOL=0.44, DUCK=0.14;                // مستوى هادئ أصلًا، وأهدأ أثناء اللعب
 
  function init(o){if(o&&typeof o.enabled==='function')enabled=o.enabled}
  function AC(){return W?(W.AudioContext||W.webkitAudioContext):null}
@@ -56,7 +57,16 @@ var MUSIC=(function(){
   var wet=ctx.createGain();wet.gain.value=0.34;
   verb=reverb(ctx);
   verb.connect(wet);wet.connect(master);
-  master.connect(ctx.destination);
+  /* كل آلة تدخل master بمستواها، ومجموعها في المازورة المزدحمة يتجاوز الواحد
+     فيقصّه المخرج قصًّا صلبًا — وهو التشوّه الذي يُسمع. الحاجز يمسك القمم
+     وحدها ويترك ما دونها كما هو، فلا يُسمع عمله إلّا بغياب التشويه. */
+  lim=ctx.createDynamicsCompressor();
+  lim.threshold.setValueAtTime(-9,ctx.currentTime);
+  lim.knee.setValueAtTime(4,ctx.currentTime);
+  lim.ratio.setValueAtTime(14,ctx.currentTime);
+  lim.attack.setValueAtTime(0.004,ctx.currentTime);
+  lim.release.setValueAtTime(0.22,ctx.currentTime);
+  master.connect(lim);lim.connect(ctx.destination);
   return ctx;
  }
  /** كل صوت يذهب إلى الجافّ والمبلَّل معًا — نسبة الصدى بحسب الطبقة */
@@ -64,7 +74,19 @@ var MUSIC=(function(){
   var g=ctx.createGain(),s=ctx.createGain();
   s.gain.value=send==null?0.5:send;
   g.connect(master);g.connect(s);s.connect(verb);
+  live.push({g:g,s:s,t:ctx.currentTime});
   return g;
+ }
+ /** الآلة تصمت بانتهاء مذبذبها، لكن عقدتَي كسبها تبقيان موصولتين بـmaster
+     فينمو الرسم كل مازورة ويثقل على الهاتف حتى يتقطّع الصوت. وأطول صوت
+     يُجدوَل قبل موعده بثانيتين ويمتدّ أربعًا، فاثنتا عشرة ثانية هامشٌ وافر. */
+ function sweep(){
+  var now=ctx.currentTime,i=0;
+  while(i<live.length&&live[i].t<now-12){
+   try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}
+   i++;
+  }
+  if(i)live.splice(0,i);
  }
 
  /* ── الآلات ── */
@@ -375,6 +397,7 @@ var MUSIC=(function(){
    try{schedule(bar%sc.bars,barAt)}catch(e){}
    barAt+=b;bar++;
   }
+  try{sweep()}catch(e){}
  }
  /** تبديل اللحن بتلاشٍ متقاطع: القديم يخبو بينما الجديد يدخل — لا قطع */
  function scene(name){
@@ -420,6 +443,13 @@ var MUSIC=(function(){
    master.gain.setValueAtTime(master.gain.value,t);
    master.gain.linearRampToValueAtTime(0.0001,t+1.1);               // يخرج بتلاشٍ لا بقطع
   }catch(e){}
+  /* التلاشي ثانية، وأطول ذيلٍ مجدوَل أربع — فبعد ستٍّ لم يبقَ ما يُسمع،
+     وترك الرسم معلّقًا حتى التشغيل التالي يثقل بلا فائدة. */
+  W.setTimeout(function(){
+   if(on)return;
+   for(var i=0;i<live.length;i++){try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}}
+   live.length=0;
+  },6000);
  }
  /** أثناء اللعب تنخفض ولا تُقطع — فإن خرجتَ عادت كما كانت */
  function duck(v){
