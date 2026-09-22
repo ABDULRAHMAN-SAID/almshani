@@ -84,7 +84,7 @@ module.exports=[
  ['carrom-shot',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(400);caPlay({x:200,y:360,vx:-1.5,vy:-6});await qaWait(350)")],
  ['carrom-aim',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(700);_ca.sx=200;_ca.sxV=200;_ca.drag={sx:200,sy:361.5,px:200,py:380,dx:40,dy:70,cancel:false};caRender()")],
  ['carrom-back',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(700);_ca.sx=200;_ca.sxV=200;_ca.drag={sx:200,sy:361.5,px:200,py:380,dx:20,dy:-40,cancel:false,back:true};caRender()")],
- ['carrom-cancel',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(700);_ca.sx=200;_ca.sxV=200;_ca.drag={sx:200,sy:361.5,px:200,py:380,dx:10,dy:-60,cancel:true};caRender()")],
+ ['carrom-cancel',R("push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await qaWait(700);_ca.sx=200;_ca.sxV=200;_ca.drag={sx:200,sy:361.5,px:200,py:380,dx:0,dy:95,cancel:true};caRender()")],
  ['carrom-4p',R("push('gameHub','carrom');RM.caN=4;soloStart('carrom','hard');await qaWait(500)")],
  ['uno-deal',R("push('gameHub','uno');RM.bots=1;soloStart('uno','mid');await qaWait(900)")],
  ['uno-lot',R("push('gameHub','uno');RM.bots=3;soloStart('uno','hard');await qaWait(5400)")],

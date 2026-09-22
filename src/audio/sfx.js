@@ -6,6 +6,7 @@
  * الأسماء: tap · ok · bad · win · lose · strike · pot · coin · hit · wall
  *   SFX.loadSprite(name,url,seg)   عيّنات مسجَّلة في ملفٍّ واحد تُفكّ مرّةً (٦٫٤١)
  *   SFX.play(k,{v})                v سرعة الاصطدام: تضبط الشدّة والنبرة
+ *   SFX.slide(level)               حفيف الانزلاق على الخشب ٠..١ — صفرٌ يُسكته (٦٫٤٣)
  * لا DOM هنا إلا window/navigator. لا يرمي أبدًا.
  *
  * لماذا عيّنات (٦٫٤١): طقّة قطعةٍ خشبيّة على لوحٍ خشبيّ لها رنيناتٌ لا يبلغها
@@ -62,6 +63,47 @@ var SFX=(function(){
   s.connect(f);f.connect(v);v.connect(c.destination);
   s.start(t0);s.stop(t0+d+0.02);
  }
+ /* ── زحف الخشب (٦٫٤٣) ──
+    حفيفٌ متّصل ما دامت القطع تنزلق: ضجيجٌ ورديٌّ يدور في حلقة عبر مرشّح نطاقيّ،
+    شدّته وتردّده يتبعان مجموع السرعات، ويخفت إلى الصفر حين يسكن اللوح.
+    عقدةٌ واحدة لا مذبذبات — فلا يتكرّر ما وقع للموسيقى الحيّة. */
+ var SL=null, slideB=null;
+ function slideBuf(c){
+  if(slideB&&slideB.sampleRate===c.sampleRate)return slideB;   // يُولَّد مرّةً لا مع كلّ ضربة
+  var n=c.sampleRate*2, b=c.createBuffer(1,n,c.sampleRate), d=b.getChannelData(0);
+  var b0=0,b1=0,b2=0;
+  for(var i=0;i<n;i++){var w=Math.random()*2-1;b0=0.997*b0+0.029*w;b1=0.985*b1+0.032*w;b2=0.95*b2+0.048*w;d[i]=(b0+b1+b2+w*0.05)*0.6}
+  // وصلٌ ناعم بين نهاية الحلقة وبدايتها
+  var f=Math.floor(c.sampleRate*0.02);for(var j=0;j<f;j++){var k=j/f;d[j]*=k;d[n-1-j]*=k}
+  slideB=b;return b;
+ }
+ function slide(level){
+  var on=false;try{on=!!enabled()}catch(e){}
+  var c=ctx;
+  if(!on||!c){if(SL)slideStop();return false}
+  level=Math.max(0,Math.min(1,+level||0));
+  var now=c.currentTime;
+  if(level<=0.001){
+   if(SL){SL.g.gain.setTargetAtTime(0.0001,now,0.08);var s=SL;SL=null;setTimeout(function(){try{s.src.stop()}catch(e){}},500)}
+   return true;
+  }
+  if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
+  if(!SL){
+   var src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+   src.buffer=slideBuf(c);src.loop=true;
+   f.type='bandpass';f.frequency.value=900;f.Q.value=0.7;
+   g.gain.value=0.0001;
+   src.connect(f);f.connect(g);g.connect(c.destination);
+   try{src.start()}catch(e){return false}
+   SL={src:src,f:f,g:g};
+  }
+  var gain=0.04+0.30*Math.pow(level,0.7);
+  SL.g.gain.setTargetAtTime(gain,now,0.05);
+  SL.f.frequency.setTargetAtTime(650+1400*level,now,0.08);
+  SL.src.playbackRate.setTargetAtTime(0.8+0.45*level,now,0.08);
+  return true;
+ }
+ function slideStop(){if(!SL)return;var s=SL;SL=null;try{s.g.gain.value=0.0001;s.src.stop()}catch(e){}}
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  var loading={};
@@ -137,7 +179,7 @@ var SFX=(function(){
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,available:available,hapticAvailable:hapticAvailable,
+ return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;

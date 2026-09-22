@@ -1694,8 +1694,17 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  transition:border-color .2s,box-shadow .2s}
 .caSeat.on{border-color:var(--gold);color:#FFE9A8;box-shadow:inset 0 0 0 3px rgba(232,178,58,.22),0 0 14px rgba(232,178,58,.5)}
 .caSeat .nm{max-width:78px;overflow:hidden;text-overflow:ellipsis}
+.caSeat .caAv{width:20px;height:20px;border-radius:50%;overflow:hidden;flex-shrink:0;display:inline-block;border:1px solid rgba(255,233,168,.5);background:#1B1410}
+.caSeat .caAv svg{width:100%;height:100%;display:block}
+/* قائمة الباحثين: صورةٌ واسمٌ لكلّ من ينتظر معك */
+.mmList{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:12px}
+.mmP{display:flex;align-items:center;gap:7px;padding:5px 10px 5px 6px;border-radius:14px;background:rgba(10,14,24,.6);border:1px solid rgba(255,214,138,.22);font-size:11.5px;font-weight:900;color:var(--tx)}
+.mmP.me{border-color:var(--gold)}
+.mmAv{width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;display:inline-block;background:#1B1410}
+.mmAv svg{width:100%;height:100%;display:block}
 .caSeat b{color:var(--gold);font-size:12px}
-.caSeat.bot{bottom:-11px;left:50%;transform:translateX(-50%)}
+.caSeat.bot{bottom:-11px;left:50%;transform:translateX(-50%);transition:opacity .15s}
+.caWrap.caDrag .caSeat.bot{opacity:0}
 .caSeat.top{top:-11px;left:50%;transform:translateX(-50%)}
 /* الجانبيّان مُداران داخل حزام الإطار الخشبيّ (٤٦ بكسل) — كانا فوق ساحة اللعب عند خطّ قاعدة صاحبهما تمامًا فيحجبان ضاربه ويده */
 .caSeat.rgt{right:0;top:44%;transform:translate(calc(50% - 23px),-50%) rotate(-90deg)}
@@ -15504,20 +15513,23 @@ function avUnlocked(a){
 let AV_SEQ=0;
 /** يرسم الأفاتار بحجم معيّن — بورتريه مرسوم، لا ملصق */
 function avatarSVG(cfg,size){
- const c=cfg||S.av||AV_DEFAULT;
- const sk=AV.skin[c.skin]||AV.skin[0];
- const hr=AV.hair[c.hair]||AV.hair[0];
- const bg=AV.bg[c.bg]||AV.bg[0];
- const hs=AV.hairStyle[c.hairStyle]?.id||'short';
- const ey=AV.eyes[c.eyes]?.id||'normal';
- const mo=AV.mouth[c.mouth]?.id||'smile';
- const ac=AV.acc[c.acc]?.id||'none';
- const bd=AV.beard[c.beard]?.id||'none';
+ const c=(cfg&&typeof cfg==='object')?cfg:(S.av||AV_DEFAULT);
+ /* الإعدادات قد تأتي من حضور لاعبٍ بعيد (غير موثوق): فهرسٌ صحيحٌ ضمن المدى وإلّا الأوّل.
+    كان 'length' أو 'map' يمرّ فينهار الرسم للغرفة كلّها، ونصٌّ يُحقن في id السمة. */
+ const ix=(arr,i)=>(Number.isInteger(i)&&i>=0&&i<arr.length)?i:0;
+ const sk=AV.skin[ix(AV.skin,c.skin)];
+ const hr=AV.hair[ix(AV.hair,c.hair)];
+ const bg=AV.bg[ix(AV.bg,c.bg)];
+ const hs=AV.hairStyle[ix(AV.hairStyle,c.hairStyle)].id||'short';
+ const ey=AV.eyes[ix(AV.eyes,c.eyes)].id||'normal';
+ const mo=AV.mouth[ix(AV.mouth,c.mouth)].id||'smile';
+ const ac=AV.acc[ix(AV.acc,c.acc)].id||'none';
+ const bd=AV.beard[ix(AV.beard,c.beard)].id||'none';
  const mid=shade(sk,-22),dark=shade(sk,-46),deep=shade(sk,-72),lip=shade(sk,-76);
  const rim=shade(sk,30);
  // معرّف فريد لكل نسخة: حين تُرسم الشخصية مرّتين (شريط مخفيّ + مسرح) يلتقط المتصفّح أوّل
  // معرّف مكرّر، وإن كان داخل display:none فشلت كل التدرّجات وظهرت خلفية الإطار مكانها.
- const uid='a'+(AV_SEQ=(AV_SEQ+1)%1000000).toString(36)+c.skin+c.hair+c.bg+(hs[0]||'')+(ey[0]||'')+(mo[0]||'')+(ac[0]||'')+(bd[0]||'');
+ const uid=('a'+(AV_SEQ=(AV_SEQ+1)%1000000).toString(36)+ix(AV.skin,c.skin)+ix(AV.hair,c.hair)+ix(AV.bg,c.bg)+(hs[0]||'')+(ey[0]||'')+(mo[0]||'')+(ac[0]||'')+(bd[0]||'')).replace(/[^A-Za-z0-9_-]/g,'');
  const hrHi=shade(hr,62),hrLo=shade(hr,-18),hrDp=shade(hr,-34),hrRim=shade(hr,86);
 
  // الرأس: بيضويّ بفكّ وذقن، لا دائرة
@@ -16268,6 +16280,7 @@ if(typeof module!=='undefined'&&module.exports)module.exports=NET;
  * الأسماء: tap · ok · bad · win · lose · strike · pot · coin · hit · wall
  *   SFX.loadSprite(name,url,seg)   عيّنات مسجَّلة في ملفٍّ واحد تُفكّ مرّةً (٦٫٤١)
  *   SFX.play(k,{v})                v سرعة الاصطدام: تضبط الشدّة والنبرة
+ *   SFX.slide(level)               حفيف الانزلاق على الخشب ٠..١ — صفرٌ يُسكته (٦٫٤٣)
  * لا DOM هنا إلا window/navigator. لا يرمي أبدًا.
  *
  * لماذا عيّنات (٦٫٤١): طقّة قطعةٍ خشبيّة على لوحٍ خشبيّ لها رنيناتٌ لا يبلغها
@@ -16324,6 +16337,47 @@ var SFX=(function(){
   s.connect(f);f.connect(v);v.connect(c.destination);
   s.start(t0);s.stop(t0+d+0.02);
  }
+ /* ── زحف الخشب (٦٫٤٣) ──
+    حفيفٌ متّصل ما دامت القطع تنزلق: ضجيجٌ ورديٌّ يدور في حلقة عبر مرشّح نطاقيّ،
+    شدّته وتردّده يتبعان مجموع السرعات، ويخفت إلى الصفر حين يسكن اللوح.
+    عقدةٌ واحدة لا مذبذبات — فلا يتكرّر ما وقع للموسيقى الحيّة. */
+ var SL=null, slideB=null;
+ function slideBuf(c){
+  if(slideB&&slideB.sampleRate===c.sampleRate)return slideB;   // يُولَّد مرّةً لا مع كلّ ضربة
+  var n=c.sampleRate*2, b=c.createBuffer(1,n,c.sampleRate), d=b.getChannelData(0);
+  var b0=0,b1=0,b2=0;
+  for(var i=0;i<n;i++){var w=Math.random()*2-1;b0=0.997*b0+0.029*w;b1=0.985*b1+0.032*w;b2=0.95*b2+0.048*w;d[i]=(b0+b1+b2+w*0.05)*0.6}
+  // وصلٌ ناعم بين نهاية الحلقة وبدايتها
+  var f=Math.floor(c.sampleRate*0.02);for(var j=0;j<f;j++){var k=j/f;d[j]*=k;d[n-1-j]*=k}
+  slideB=b;return b;
+ }
+ function slide(level){
+  var on=false;try{on=!!enabled()}catch(e){}
+  var c=ctx;
+  if(!on||!c){if(SL)slideStop();return false}
+  level=Math.max(0,Math.min(1,+level||0));
+  var now=c.currentTime;
+  if(level<=0.001){
+   if(SL){SL.g.gain.setTargetAtTime(0.0001,now,0.08);var s=SL;SL=null;setTimeout(function(){try{s.src.stop()}catch(e){}},500)}
+   return true;
+  }
+  if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
+  if(!SL){
+   var src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
+   src.buffer=slideBuf(c);src.loop=true;
+   f.type='bandpass';f.frequency.value=900;f.Q.value=0.7;
+   g.gain.value=0.0001;
+   src.connect(f);f.connect(g);g.connect(c.destination);
+   try{src.start()}catch(e){return false}
+   SL={src:src,f:f,g:g};
+  }
+  var gain=0.04+0.30*Math.pow(level,0.7);
+  SL.g.gain.setTargetAtTime(gain,now,0.05);
+  SL.f.frequency.setTargetAtTime(650+1400*level,now,0.08);
+  SL.src.playbackRate.setTargetAtTime(0.8+0.45*level,now,0.08);
+  return true;
+ }
+ function slideStop(){if(!SL)return;var s=SL;SL=null;try{s.g.gain.value=0.0001;s.src.stop()}catch(e){}}
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  var loading={};
@@ -16399,7 +16453,7 @@ var SFX=(function(){
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,available:available,hapticAvailable:hapticAvailable,
+ return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
@@ -21325,7 +21379,7 @@ if(window.MUSIC){
  setTimeout(mscGo,400);           // بعد أن تستقرّ الحالة المحفوظة
  ['pointerdown','touchstart','keydown','click'].forEach(ev=>
   document.addEventListener(ev,mscGo,{passive:true}));
- document.addEventListener('visibilitychange',()=>{try{document.hidden?MUSIC.stop():MUSIC.sync()}catch(e){}});
+ document.addEventListener('visibilitychange',()=>{try{document.hidden?MUSIC.stop():MUSIC.sync()}catch(e){}try{if(document.hidden&&window.SFX&&SFX.slide)SFX.slide(0)}catch(e){}});
 }
 if(window.VOICE){
  /* الصيحات تتبع مفتاحها وحده: من أغلق المؤثّرات قد يريد سماع خصمه */
@@ -24600,7 +24654,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.42';
+const APP_VER='6.43';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25005,6 +25059,7 @@ function rmLeave(silent){
  _ca.sim=null;_ca.drag=null;_ca.aim=null;_ca.aimV=null;_ca.slide=0;_ca.sx=null;_ca.sxV=null;
  _ca.anim=null;_ca.loop=0;_ca.grab=0;
  try{if(_ca.botTm)clearInterval(_ca.botTm)}catch(e){}_ca.botTm=null;_ca.botKey=null;
+ try{if(window.SFX&&SFX.slide)SFX.slide(0)}catch(e){}
  if(!silent&&!Router.exit('room'))push('playScr');
 }
 /** «رجوع» داخل غرفة: أثناء المباراة سؤال، وفي الردهة مغادرة */
@@ -25270,7 +25325,7 @@ async function mmScr(g,mode){
  }
  if(!nameReady(()=>mmScr(g,mode)))return;   // الاسم قبل الدخول في طابور البحث
  RM.name=S.name||RM.name||'لاعب';RM.mm=1;RM.mmT=0;
- try{await c.presence({pc:null,lf:g,nm:RM.name,hs:null,vt:null})}catch(e){}
+ try{await c.presence({pc:null,lf:g,nm:RM.name,hs:null,vt:null,av:S.av||null})}catch(e){}
  RM.unsub.forEach(u=>{try{u()}catch(e){}});
  RM.unsub=[c.onPeers(()=>mmTick())];
  clearInterval(_mmTm);
@@ -25309,6 +25364,8 @@ function mmDraw(){
   <div style="font-size:12px;color:var(--tx2);margin-top:7px">
    في البحث الآن: <b style="color:var(--gold)">${S2.length}</b> · نحتاج <b>${lim[0]}</b><br>
    مضى ${RM.mmT||0} ثانية</div>
+  ${S2.length?`<div class="mmList">${S2.map(p=>{const me=!!(p.isMe&&p.sameTab),nm=String((p.presence&&p.presence.nm)||'لاعب').slice(0,18),av=p.presence&&p.presence.av&&typeof p.presence.av==='object'?p.presence.av:null;
+    return `<div class="mmP${me?' me':''}"><span class="mmAv">${me?avatarArt(38):(av?avatarSVG(av,38):personArt(nm,38))}</span><span class="n">${me?'أنت':esc(nm)}</span></div>`}).join('')}</div>`:''}
  </div></div></div>
  ${(RM.mmT||0)>12?`<div class="wb" style="text-align:start;margin-top:12px">${ico('info',12)}
   لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب مع الكمبيوتر.</div>
@@ -25817,7 +25874,8 @@ function caBotPick(pcs,mine,P0,rnd){
     ما ينتقل إليها من الضارب (m(1+e)/(m+1))·cos(القطع)، زائد ما يفقده الضارب في طريقه */
  const needPw=c=>{const uC=Math.sqrt(2*PC.roll*(c.pd+60));const uS=uC/Math.max(0.25,tr*Math.cos(c.cut));return Math.sqrt(uS*uS+2*PC.roll*c.d)};
  const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.hit.x));return {sx,ang:Math.atan2(c.hit.y-base,c.hit.x-sx)}};
- const capPw=v=>Math.min(CA_VMAX*0.85,Math.max(P0.pw[0],v));
+ /* السقف من الصعوبة: السهل محدودٌ بنطاقه فتقف قطعته قبل الجيب كالمبتدئ، والمحاكي يأخذ ما يلزم */
+ const capPw=v=>Math.min(P0.sim?CA_VMAX*0.85:P0.pw[1]*1.1,Math.max(P0.pw[0],v));
  let pick=null;
  const nSim=blind?0:(P0.sim||0);
  if(nSim&&cands.length){
@@ -26874,8 +26932,11 @@ function caStep(){
  let ev=[];
  for(let i=0;i<n&&!CarromPhysics.settled(S2);i++){const e=CarromPhysics.step(S2);if(e&&e.length)ev=ev.concat(e)}
  caFx(ev);                          // الأحداث تُترجَم إلى إحساس، لا إلى فيزياء
+ /* زحف الخشب: حفيفٌ متّصل يتبع مجموع سرعات القطع — «ليش بلاستيك وليس زحفًا على الخشب؟» */
+ if(window.SFX&&SFX.slide){let mv=0;for(const p of S2.pcs){const v=Math.hypot(p.vx||0,p.vy||0);if(v>0.12)mv+=v}SFX.slide(Math.min(1,mv/12))}
  if(n>0)caRender();
  if(!CarromPhysics.settled(S2)){_ca.anim=requestAnimationFrame(caStep);return}
+ if(window.SFX&&SFX.slide)SFX.slide(0);
  // استقرّ اللوح: من ضرب يبثّ الوضع النهائي مرجعًا للجميع
  _ca.sim=null;
  const rest=S2.pcs.filter(p=>p.t!=='s').map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,t:p.t}));
@@ -27121,9 +27182,10 @@ function caRender(rest){
  const M=caMG(),P=W-M*2,sc=P/CA_R;
  const PX=u=>M+u*sc, PY=v=>M+v*sc;
  cx.drawImage(caBoardImg(W,H,md),0,0);   // الخلفية بحجم اللوحة كلّها — لا clearRect ولا تدرّج كل إطار
+ if(cv.parentElement)cv.parentElement.classList.toggle('caDrag',!!_ca.drag&&!_ca.sim);   // شارة مقعدي تفسح لشريط الإلغاء
  const tk=_ca.t||0;
  if(H>W){
-  if(RM.ca&&RM.ca.turn===RM.me&&!_ca.sim){
+  if(RM.ca&&RM.ca.turn===RM.me&&!_ca.sim&&!_ca.drag){
    const ty=W+(H-W)*.17, x0=PX(CA_SR+26), x1=PX(CA_R-CA_SR-26);
    cx.lineCap='round';
    cx.strokeStyle='rgba(0,0,0,.55)';cx.lineWidth=12;
@@ -27239,12 +27301,14 @@ function caRender(rest){
  }
  if(_ca.drag){
   const d=_ca.drag, raw=Math.hypot(d.dx,d.dy), pw=caPower(raw), can=!!d.cancel, back=!can&&!!d.back&&raw>=10;
-  // منطقة الإلغاء: الشريط العلوي فوق الساحة — تظهر أثناء التصويب فقط
-  const zh=Math.min(M*.72,36*sc), zw=Math.min(W*.7,190*sc), zx=W/2-zw/2, zy=M/2-zh/2;
-  cx.fillStyle=can?'rgba(226,75,74,.94)':'rgba(6,9,17,.66)';caRR(cx,zx,zy,zw,zh,zh/2);cx.fill();
-  cx.strokeStyle=can?'#FFB4B3':'rgba(226,75,74,.85)';cx.lineWidth=2;caRR(cx,zx,zy,zw,zh,zh/2);cx.stroke();
-  cx.fillStyle='#fff';cx.font='900 '+Math.round(13.5*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';
-  cx.fillText(can?'أفلت هنا لإلغاء الضربة':'✕ اسحب إلى هنا للإلغاء',W/2,M/2);
+  // منطقة الإلغاء: المسند تحت اللوح — تظهر أثناء التصويب فقط، وتحمرّ حين يدخلها الإصبع
+  if(H>W){
+   const zh=Math.min((H-W)*.72,40*sc), zw=Math.min(W*.86,300*sc), zx=W/2-zw/2, zy=W+(H-W)/2-zh/2;
+   cx.fillStyle=can?'rgba(226,75,74,.94)':'rgba(6,9,17,.72)';caRR(cx,zx,zy,zw,zh,zh/2);cx.fill();
+   cx.strokeStyle=can?'#FFB4B3':'rgba(226,75,74,.85)';cx.lineWidth=2;caRR(cx,zx,zy,zw,zh,zh/2);cx.stroke();
+   cx.fillStyle='#fff';cx.font='900 '+Math.round(13.5*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';
+   cx.fillText(can?'أفلت الآن — تُلغى الضربة':'↓ للإلغاء أنزل إصبعك إلى هنا وأفلت',W/2,W+(H-W)/2);
+  }
   cx.setLineDash([8,6]);cx.lineWidth=2.6;
   cx.strokeStyle=can?'rgba(190,190,200,.45)':back?'rgba(226,75,74,.85)':'rgba(255,233,168,.92)';
   cx.beginPath();cx.moveTo(PX(d.sx),PY(d.sy));
@@ -27265,6 +27329,10 @@ function caRender(rest){
 }
 /** القوّة من طول السحب: تربيعية فوق حدّ أدنى — لمسة خفيفة تدفع، وسحب كامل يضرب بكل القوّة */
 function caPower(raw){const p=Math.min(1,raw/95);return 0.22+0.78*p*p}
+/** ارتفاع المسند تحت اللوح بوحدات اللوح */
+function caLedgeU(){const cv=document.getElementById('caC');if(!cv||!(cv.height>cv.width))return 0;const M=caMG(),sc=(cv.width-M*2)/CA_R;return (cv.height-cv.width)/sc}
+/** أعلى المسند بوحدات اللوح: تحت ساحة اللعب يأتي الإطار الخشبيّ (M) ثمّ المسند */
+function caLedgeTopU(){const cv=document.getElementById('caC');if(!cv)return CA_R;const M=caMG(),sc=(cv.width-M*2)/CA_R;return (cv.width-M)/sc}
 function caRR(cx,x,y,w,h,r){r=Math.min(r,w/2,h/2);cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
 function caLoop(){
  _ca.loop=0;
@@ -27327,7 +27395,9 @@ function caInit(){
   const sy=BASE();
   if(_ca.sx==null)_ca.sx=CACL(CA_R/2);
   // اسحب اليد على المسند أو اقبض الضارب نفسه لتحريكه — بلا قفزات
-  if(y>CA_R){
+  /* الشريط الأسفل من اللوح (حول خطّ القاعدة) والمسند تحته: كلاهما لتحريك الضارب،
+     فلا تبدأ ضربةٌ من هناك. */
+  if(y>CA_BASE-12){
    _ca.slide=1;_ca.grab=Math.abs(x-_ca.sx)<38?x-_ca.sx:0;_ca.sx=CACL(x-_ca.grab);
   }else if(Math.hypot(x-_ca.sx,y-sy)<=CA_SR*2.4){
    _ca.slide=1;_ca.grab=x-_ca.sx;
@@ -27345,7 +27415,13 @@ function caInit(){
   if(!_ca.drag)return;e.preventDefault();
   _ca.drag.dx=Math.max(-95,Math.min(95,x-_ca.drag.px));
   _ca.drag.dy=Math.max(-95,Math.min(95,y-_ca.drag.py));
-  _ca.drag.cancel=y<-6;   // الإصبع فوق الساحة (في الإطار العلوي) = إلغاء عند الإفلات
+  /* الإلغاء تحت لا فوق — «عندما أريد أُلغي المفروض تحت وليس فوق»: الإصبع ينزل
+     تحت اللوح إلى أسفل المسند (أو يخرج من اللوحة) = إلغاء عند الإفلات. وإعادة الإصبع
+     إلى الضارب (قوّة دون ١٠) تُلغي أيضًا. */
+  /* كانت تُقاس من حافّة الساحة فتقع في الإطار الخشبيّ، وسحبةُ قوّةٍ كاملة تُلغي. الآن: داخل
+     الشريط الأحمر في المسند نفسه، وبعد تجاوز سقف القوّة (٩٥) من نقطة الضغط بهامش — فلا
+     تُلغى ضربةٌ قويّة، ويُلغى ما نزل عمدًا إلى الشريط. */
+  _ca.drag.cancel=caLedgeU()>0&&y>caLedgeTopU()+caLedgeU()*0.55&&y>_ca.drag.py+95+25;
   _ca.drag.back=-_ca.drag.dy>0;   // السحب إلى الأعلى = ضربة للخلف — ممنوعة قانونًا
   caRender();
  };
@@ -27428,8 +27504,9 @@ function rmCarrom(R){
  const myCol=C.col[RM.me],foeCol=myCol==='w'?'b':'w';
  const chip=o=>{
   const me2=o.p.peer===RM.me, on=C.turn===o.p.peer;
+  const av=me2?avatarArt(20):(o.p.av?avatarSVG(o.p.av,20):personArt(o.p.name,20));
   return `<div class="caSeat ${o.side}${on?' on':''}">
-   <span class="caDot ${C.col[o.p.peer]==='w'?'w':'b'}"></span>
+   <span class="caAv">${av}</span><span class="caDot ${C.col[o.p.peer]==='w'?'w':'b'}"></span>
    <span class="nm">${me2?'أنت':esc(o.p.name)}</span>
    <b>${left(C.col[o.p.peer])}</b></div>`;
  };
@@ -27450,7 +27527,7 @@ function rmCarrom(R){
  <div style="display:flex;justify-content:center;margin-top:6px">
   <button onclick="caSkinTog()" style="background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">${ico('palette',13)} بدّل شكل اللوح</button>
  </div>
- <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب باليد · اسحب على اللوح وأفلت · للإلغاء اسحب إلى الأعلى':'دور '+nm(C.turn)+' — يصوّب…'}</div>
+ <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب باليد · اسحب على اللوح وأفلت · للإلغاء أنزل إصبعك تحت اللوح':'دور '+nm(C.turn)+' — يصوّب…'}</div>
  ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}
  <div class="note">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 <b>بشرط تغطيتها</b>
   بقطعة من لونك وإلا عادت للمركز · الضارب في الجيب: −1 وتعود إحدى قطعك · قطعة الخصم تُحتسب له</div>`;
@@ -32713,7 +32790,7 @@ function vb3dAvatarOf(i,model){if(i===model.me)return S.av||AV_DEFAULT;if(model.
 function vb3dLook(i,model){
  const me=i===model.me,nm=model.names[i]||'لاعب',av=vb3dAvatarOf(i,model),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
  const id=(k,v)=>((AV[k][v]||AV[k][0]).id);
- return {f,me,host:i===model.host,skin:AV.skin[av.skin]||AV.skin[0],hair:AV.hair[av.hair]||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
+ return {f,me,host:i===model.host,skin:(Number.isInteger(av.skin)&&AV.skin[av.skin])||AV.skin[0],hair:(Number.isInteger(av.hair)&&AV.hair[av.hair])||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
   beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5],h:h};
 }
 function vb3dTexIris(){return vb3dTex('iris',96,96,(g,w,h)=>{g.clearRect(0,0,w,h);

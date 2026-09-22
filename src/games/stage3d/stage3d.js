@@ -125,7 +125,7 @@ function vb3dAvatarOf(i,model){if(i===model.me)return S.av||AV_DEFAULT;if(model.
 function vb3dLook(i,model){
  const me=i===model.me,nm=model.names[i]||'لاعب',av=vb3dAvatarOf(i,model),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
  const id=(k,v)=>((AV[k][v]||AV[k][0]).id);
- return {f,me,host:i===model.host,skin:AV.skin[av.skin]||AV.skin[0],hair:AV.hair[av.hair]||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
+ return {f,me,host:i===model.host,skin:(Number.isInteger(av.skin)&&AV.skin[av.skin])||AV.skin[0],hair:(Number.isInteger(av.hair)&&AV.hair[av.hair])||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
   beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5],h:h};
 }
 function vb3dTexIris(){return vb3dTex('iris',96,96,(g,w,h)=>{g.clearRect(0,0,w,h);

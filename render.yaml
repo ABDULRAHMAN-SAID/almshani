@@ -1,11 +1,17 @@
-# نشر خادم تحدّي على Render — اربط المستودع في لوحة Render واختر Blueprint.
+# نشر خادم تحدّي على Render — الخطّة المجّانيّة، بلا بطاقة:
+#   render.com ← New ← Blueprint ← اختر هذا المستودع وفرعه ← Apply.
+# العنوان الناتج https://<name>.onrender.com يقدّم اللعبة والخادم معًا.
+#
+# المجّانيّ ينام بعد ربع ساعة خلوّ (أوّل لاعبٍ ينتظر نحو دقيقة حتى يقوم)، وبلا قرصٍ
+# دائم: الغرف والبحث لا يحتاجان قرصًا، والحسابات تعود من الصفر عند كلّ إعادة تشغيل.
+# للاحتفاظ بالحسابات: plan: starter مع القرص أدناه (مدفوع).
 services:
   - type: web
     name: tahaddi
     runtime: docker
     dockerfilePath: ./server/Dockerfile
     dockerContext: .
-    plan: starter
+    plan: free
     healthCheckPath: /health
     envVars:
       - key: PORT
@@ -15,10 +21,11 @@ services:
       - key: TAHADDI_DIR
         value: /app/tahaddi
       - key: TAHADDI_DATA_FILE
-        value: /data/tahaddi.json
+        value: /tmp/tahaddi.json
       # - key: TAHADDI_ORIGINS
       #   value: https://<user>.github.io,capacitor://localhost,https://localhost
-    disk:
-      name: tahaddi-data
-      mountPath: /data
-      sizeGB: 1
+    # للخطّة المدفوعة: قرصٌ دائم للحسابات
+    # disk:
+    #   name: tahaddi-data
+    #   mountPath: /data
+    #   sizeGB: 1
