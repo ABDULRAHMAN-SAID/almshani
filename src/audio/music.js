@@ -38,14 +38,32 @@ var MUSIC=(function(){
 
  /* ── الصدى: ضجيج متلاشٍ يُصنع مرّة ويُستعمل للجميع — يعطي المكان عمقًا ── */
  function reverb(c){
-  var len=Math.floor(c.sampleRate*2.6),b=c.createBuffer(2,len,c.sampleRate);
+  /* كان الأثر ضجيجًا أبيض خامًا بلا ترشيح: والغرفة الحقيقية تبتلع الحادّ في
+     أوّل عشرات الأجزاء من الثانية، فذيلٌ أبيض كامل الطيف لا يُسمع صدىً بل
+     هسيسًا فوق كلّ نغمة — وهو «التشويش». فيمرّ الضجيج بمرشّحٍ أحاديّ القطب
+     يضيق مع الزمن، فيعتم الذيل كما يعتم في غرفة.
+     وطوله كان ٢٫٦ ثانية ستيريو، والالتفاف أثقل عقدةٍ في الصوت وكلفته تتبع
+     الطول — وهي تعمل بلا انقطاع على معالج الهاتف حتى ينقطع الصوت. فصار
+     ١٫٤، وعلى الأجهزة قليلة النوى ٠٫٩: صدىً أقصر خيرٌ من صوتٍ متقطّع. */
+  var slow=false;
+  try{slow=(navigator.hardwareConcurrency||8)<=4}catch(e){}
+  var secs=slow?0.9:1.4;
+  var len=Math.floor(c.sampleRate*secs),b=c.createBuffer(2,len,c.sampleRate);
+  var peak=0;
   for(var ch=0;ch<2;ch++){
-   var d=b.getChannelData(ch);
+   var d=b.getChannelData(ch),lp=0;
    for(var i=0;i<len;i++){
     var t=i/len;
-    d[i]=(Math.random()*2-1)*Math.pow(1-t,2.6)*(1-t*0.35);
+    var n=(Math.random()*2-1)*Math.pow(1-t,2.2);
+    lp+=(0.30-0.26*t)*(n-lp);        // القطع ينزل مع الزمن فيعتم الذيل
+    d[i]=lp*(1-t*0.25);
+    var a=d[i]<0?-d[i]:d[i];if(a>peak)peak=a;
    }
   }
+  /* الترشيح يخفض السعة كثيرًا، فبلا تسوية يختفي الصدى ويُظنّ معطّلًا */
+  if(peak>0.0001){var k=0.85/peak;
+   for(var ch2=0;ch2<2;ch2++){var dd=b.getChannelData(ch2);
+    for(var j=0;j<len;j++)dd[j]*=k;}}
   var cv=c.createConvolver();cv.buffer=b;return cv;
  }
 

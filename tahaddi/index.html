@@ -16560,14 +16560,32 @@ var MUSIC=(function(){
 
  /* ── الصدى: ضجيج متلاشٍ يُصنع مرّة ويُستعمل للجميع — يعطي المكان عمقًا ── */
  function reverb(c){
-  var len=Math.floor(c.sampleRate*2.6),b=c.createBuffer(2,len,c.sampleRate);
+  /* كان الأثر ضجيجًا أبيض خامًا بلا ترشيح: والغرفة الحقيقية تبتلع الحادّ في
+     أوّل عشرات الأجزاء من الثانية، فذيلٌ أبيض كامل الطيف لا يُسمع صدىً بل
+     هسيسًا فوق كلّ نغمة — وهو «التشويش». فيمرّ الضجيج بمرشّحٍ أحاديّ القطب
+     يضيق مع الزمن، فيعتم الذيل كما يعتم في غرفة.
+     وطوله كان ٢٫٦ ثانية ستيريو، والالتفاف أثقل عقدةٍ في الصوت وكلفته تتبع
+     الطول — وهي تعمل بلا انقطاع على معالج الهاتف حتى ينقطع الصوت. فصار
+     ١٫٤، وعلى الأجهزة قليلة النوى ٠٫٩: صدىً أقصر خيرٌ من صوتٍ متقطّع. */
+  var slow=false;
+  try{slow=(navigator.hardwareConcurrency||8)<=4}catch(e){}
+  var secs=slow?0.9:1.4;
+  var len=Math.floor(c.sampleRate*secs),b=c.createBuffer(2,len,c.sampleRate);
+  var peak=0;
   for(var ch=0;ch<2;ch++){
-   var d=b.getChannelData(ch);
+   var d=b.getChannelData(ch),lp=0;
    for(var i=0;i<len;i++){
     var t=i/len;
-    d[i]=(Math.random()*2-1)*Math.pow(1-t,2.6)*(1-t*0.35);
+    var n=(Math.random()*2-1)*Math.pow(1-t,2.2);
+    lp+=(0.30-0.26*t)*(n-lp);        // القطع ينزل مع الزمن فيعتم الذيل
+    d[i]=lp*(1-t*0.25);
+    var a=d[i]<0?-d[i]:d[i];if(a>peak)peak=a;
    }
   }
+  /* الترشيح يخفض السعة كثيرًا، فبلا تسوية يختفي الصدى ويُظنّ معطّلًا */
+  if(peak>0.0001){var k=0.85/peak;
+   for(var ch2=0;ch2<2;ch2++){var dd=b.getChannelData(ch2);
+    for(var j=0;j<len;j++)dd[j]*=k;}}
   var cv=c.createConvolver();cv.buffer=b;return cv;
  }
 
@@ -24703,6 +24721,7 @@ function playScr(){
  <div style="text-align:center;font-size:${VER_NEW?'11.5px':'9.5px'};color:${VER_NEW?'var(--gold)':'var(--mut)'};font-weight:${VER_NEW?'900':'400'};margin-top:18px;padding:11px 0;min-height:36px" onclick="devTap()">${VER_NEW?`تحديث جديد · ${APP_VER}`:`نسخة تجريبية ${APP_VER}`}${S.dev?' · وضع المطوّر':''}</div>
  </div></div>`);
  bcTick();plDots();
+ verAnnounce();          // الرئيسية رُسمت، فالنافذة تجد شاشةً تظهر فوقها
 }
 
 /* ═══ صناديق المعارك — نظام كلاش رويال: الفوز أونلاين يُسقط صندوقًا بحظ معلَن ═══ */
@@ -24823,7 +24842,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.27';
+const APP_VER='6.28';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -42545,7 +42564,7 @@ function splash(){
  loadState();ecoNorm();nameMigrate();ensureOpt();applyLang();   // 5.87: الإعدادات تُهيّأ عند الإقلاع لا عند فتح شاشتها — الموسيقى تقرؤها قبل ذلك
  verCheck();
  if(!hasAccount())Router.reset('authScr');            // 5.68: لا لعب بلا حساب — البريد أوّلًا
- else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr');setTimeout(verAnnounce,900)}
+ else if(S.tutorial_completed){cur='play';nav();Router.reset('playScr')}
  else Router.reset('welcomeScr');
  netBoot();
 }
@@ -42556,17 +42575,36 @@ var VER_NEW='';
 function verCheck(){
  try{
   var seen=S.verSeen||'';
+  if(!seen){try{seen=localStorage.getItem('tahaddi_ver_seen')||''}catch(e){}}
   if(seen&&seen!==APP_VER)VER_NEW=seen;        // أوّل تشغيلٍ لا يُعلَن: ليس تحديثًا
-  if(seen!==APP_VER){S.verSeen=APP_VER;saveState()}
+  if(seen!==APP_VER){S.verSeen=APP_VER;saveState();
+   /* saveState مؤجَّلة، ومن أغلق التطبيق قبل أن تُكتب رأى النافذة مرّة ثانية.
+      وهذه قيمةٌ واحدة قصيرة، فكتابتها فورًا أرخص من إبطال التأجيل كلّه. */
+   try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}}
  }catch(e){}
 }
 var _verSaid=0;
-/** يُنادى بعد رسم الرئيسية — الشاشة موجودة فيُرى التنبيه.
-    والعلامة الذهبية تبقى طول الجلسة، والتنبيه يُقال مرّة. */
+/** يُنادى بعد رسم الرئيسية — الشاشة موجودة فتُرى النافذة.
+    وهي نافذة وسط الشاشة لا رسالة عابرة: المالك طلب أن **يرى** أنّ التحديث
+    وصل، والرسالة العابرة تمرّ قبل أن يرفع عينه إليها. والعلامة الذهبية
+    أسفل الرئيسية تبقى طول الجلسة، والنافذة تُفتح مرّة. */
 function verAnnounce(){
  if(!VER_NEW||_verSaid)return;
  _verSaid=1;
- try{toast('تحديث جديد وصل — الإصدار '+APP_VER)}catch(e){}
+ try{
+  const from=VER_NEW;
+  const ov=document.createElement('div');ov.className='qvov';
+  ov.innerHTML=`<div class="qvbox">
+   <div style="font-size:30px;line-height:1">${ico('gift',30)}</div>
+   <div class="qvt" style="color:var(--gold)">تحديث جديد وصل</div>
+   <div class="qvd">اللعبة انتقلت من ${esc(from)} إلى <b style="color:var(--gold)">${esc(APP_VER)}</b>
+    — بلا تنزيل ولا تثبيت.</div>
+   <button class="btn gd" id="qvOk">تمام</button></div>`;
+  document.body.appendChild(ov);
+  const close=()=>ov.remove();
+  ov.addEventListener('click',e=>{if(e.target===ov)close()});
+  ov.querySelector('#qvOk').onclick=close;
+ }catch(e){}
 }
 function start(){cur='play';nav();
  if(!S.tutDone){tutStart();return}
