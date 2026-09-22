@@ -46,7 +46,9 @@ def write_const(src, name, out):
 def main():
     src = open(GAME, encoding='utf-8').read()
     src = write_const(src, 'VB_SCENE_IMG', pack(('mafia', 'barra'), '', W, H, 82))
-    src = write_const(src, 'VN_SCENE_IMG', pack(('carrom', 'uno', 'atelier', 'mafia', 'barra', 'studio'), 'vn-', VN_W, VN_H, 80))
+    # الكيرم يرسم مجلسه متّجهيًّا (٦٫٣٩): وسائد أربع حول موضع اللوح، لا غرفةٌ
+    # بمصباحٍ معلّق لا علاقة لها باللعبة. فلا يُخبز له مشهد ولو وُجدت صورته.
+    src = write_const(src, 'VN_SCENE_IMG', pack(('uno', 'atelier', 'mafia', 'barra', 'studio'), 'vn-', VN_W, VN_H, 80))
     open(GAME, 'w', encoding='utf-8').write(src)
 
 if __name__ == '__main__':
