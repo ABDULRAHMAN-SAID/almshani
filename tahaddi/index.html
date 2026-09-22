@@ -1710,6 +1710,15 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caRules{margin-inline-start:auto;padding:5px 11px;border-radius:10px;cursor:pointer;
  background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--tx2);
  font:900 10.5px system-ui}
+/* لوحة نقاط المباراة: رصيدك، وأيّ لوحٍ نحن فيه، ورصيدهم */
+.caScore{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ margin:0 0 9px;padding:6px 12px;border-radius:12px;
+ background:linear-gradient(180deg,rgba(232,178,58,.10),rgba(232,178,58,.04));
+ border:1px solid rgba(232,178,58,.24)}
+.caScore .pt{font-size:10.5px;font-weight:800;color:var(--tx2)}
+.caScore .pt b{font-size:17px;font-weight:900;color:var(--tx2);margin-inline-end:4px}
+.caScore .pt.me b{color:var(--gold)}
+.caScore .bd{font-size:9.5px;font-weight:800;color:var(--mut)}
 /* شريط التحديث: يخبر ولا يقاطع، والضغط عليه يطبّق */
 #verBar{position:fixed;inset-inline:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;
  display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
@@ -24537,7 +24546,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.39';
+const APP_VER='6.40';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25138,10 +25147,16 @@ function rmOn(d,m){
   if(document.getElementById('rmScr'))roomDraw();}
  else if(d.t==='cast'){
   const wasShot=!!d.shot;
-  RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,msg:d.msg||''};
+  /* كانت `q` و`M` تُسقطان هنا، فلا يرى اللاعب حال الملكة ولا نقاط المباراة
+     مهما بثّهما المضيف. وعطلٌ في المستقبِل لا يظهر في المرسِل — كشفه
+     اختبارُ نهاية لوحٍ كامل لا قراءةُ الشيفرة. */
+  const boardTurned=!!(RM.ca&&RM.ca.M&&d.M&&d.M.boards!==RM.ca.M.boards);
+  RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,q:d.q||null,M:d.M||null,msg:d.msg||''};
   RM.phase='carrom';
   if(wasShot){_ca.aim=null;setTimeout(()=>caPlay(d.shot),20)}
   else{setTimeout(caRender,40);
+   /* لوحٌ جديد أو تغيّر حال الملكة: الشريط واللوحة فوق اللوح تُعاد كتابتهما */
+   if(boardTurned&&document.getElementById('rmScr'))setTimeout(roomDraw,60);
    if(RM.solo&&isBot(d.turn))setTimeout(caBot,2200)}}
  else if(d.t==='act'&&RM.host){
   if(RM.game==='uno')unoAct(d);
@@ -26494,8 +26509,8 @@ const CA_POCK=CarromPhysics.visualR();
 // نصف السرعة بالضبط: احتكاك أبطأ يعوّض نقص السرعة فتبقى المسافة نفسها
 /* الاحتكاك والسكون صارا داخل وحدة الفيزياء — لا رقمَين لنفس القاعدة */
 const CA_VW=720, CA_LED=96;   // عرض اللوحة · مسند اليد (هامش الإطار يتبع الشكل)
-function caDeal(){
- if(!RM.host)return;
+/** ترتيب القطع التسع عشرة: الملكة في القلب، وحلقتان حولها بالتناوب */
+function caLayout(){
  const P2=[],cx=CA_R/2,cy=CA_R/2;
  P2.push({x:cx,y:cy,t:'q'});                        // الملكة في القلب
  for(let ring=0;ring<2;ring++){
@@ -26505,16 +26520,34 @@ function caDeal(){
    P2.push({x:cx+Math.cos(a)*rad,y:cy+Math.sin(a)*rad,t:(i%2?'w':'b')});
   }
  }
+ return P2;
+}
+/* الحساب الرسميّ للاتحاد الدوليّ (٦٫٤٠):
+   الفائز باللوح يأخذ نقطةً عن كلّ قطعةٍ باقيةٍ لخصمه، و٣ للملكة إن غطّاها
+   — ولا تُحسب إن بلغ رصيدُه ٢٢ فأكثر — والحدّ ١٢ نقطة للّوح الواحد.
+   والمباراة ٢٥ نقطة أو ثمانية ألواح، أيّهما أوّل.
+   وكان الحساب قبلها نقطةً لكلّ قطعةٍ تُدخلها — وهو حسابٌ اخترعتُه لا قانون. */
+const CA_TARGET=25, CA_BOARDS=8, CA_CAP=12, CA_Q=3, CA_QLOCK=22;
+function caDeal(){
+ if(!RM.host)return;
  const ps=RM.players;
- RM.C={pcs:P2,turn:0,sc:{},col:{},got:{},q:null,shot:null};
- // لاعبان: أبيض ضد أسود · أربعة: فريقان متقابلان
+ RM.C={pcs:caLayout(),turn:0,sc:{},col:{},got:{},q:null,qWin:null,shot:null,
+  M:{pts:{w:0,b:0},boards:0,first:0}};
+ // لاعبان: أبيض ضدّ أسود · أربعة: فريقان متقابلان، فالشريكان يشتركان في اللون
  ps.forEach((p,i)=>{RM.C.sc[p.peer]=0;RM.C.col[p.peer]=(i%2===0)?'w':'b'});
- caPub('ابدأ — صوّب واضرب!');
+ caPub('اللوح ١ — صوّب واضرب!');
+}
+/** لوحٌ جديد داخل المباراة نفسها: القطع تعود، والنقاط المتراكمة تبقى */
+function caNextBoard(C,msg){
+ C.pcs=caLayout();C.got={};C.q=null;C.qWin=null;C.shot=null;
+ C.M.first=(C.M.first+1)%RM.players.length;   // البادئ يتبدّل لوحًا بعد لوح
+ C.turn=C.M.first;
+ caPub(msg+' · اللوح '+(C.M.boards+1));
 }
 function caPub(msg,shot){
  const C=RM.C;
  rmSend({t:'cast',pcs:C.pcs,turn:RM.players[C.turn].peer,sc:C.sc,col:C.col,
-  q:C.q||null,msg:msg||'',shot:shot||null});
+  q:C.q||null,M:C.M||null,msg:msg||'',shot:shot||null});
 }
 // يعيد قطعة إلى اللوح قرب المركز في أقرب موضع خالٍ
 function caPutBack(C,t){
@@ -26547,11 +26580,14 @@ function caAct(d){
  const owner=t=>RM.players.find(p=>C.col[p.peer]===t&&p.peer!==cur)
    ||RM.players.find(p=>C.col[p.peer]===t);
  let gotMine=0,foul=0,gotQ=0;
+ /* القطع تُعدّ ولا تُنقَّط: في القانون الرسميّ النقاط تُحسب عند نهاية اللوح
+    من قطع الخصم الباقية، لا قطعةً بقطعة. و`got` عدّادُ ما أدخله كلٌّ منهم —
+    يلزم لإرجاع قطعةٍ عند خطأ الضارب. */
  pot.forEach(t=>{
-  if(t==='s'){foul=1;C.sc[cur]=Math.max(0,C.sc[cur]-1)}
+  if(t==='s')foul=1;
   else if(t==='q'){gotQ=1}
-  else if(t===mine){gotMine++;C.sc[cur]+=1;C.got[cur]=(C.got[cur]||0)+1}
-  else{const o=owner(t);if(o){C.sc[o.peer]+=1;C.got[o.peer]=(C.got[o.peer]||0)+1}}
+  else if(t===mine){gotMine++;C.got[cur]=(C.got[cur]||0)+1}
+  else{const o=owner(t);if(o)C.got[o.peer]=(C.got[o.peer]||0)+1}
  });
  // خطأ الضارب: تعود إحدى قطعك المُدخَلة إلى اللوح
  if(foul&&(C.got[cur]||0)>0&&caPutBack(C,mine)){
@@ -26559,26 +26595,44 @@ function caAct(d){
  }else if(foul)notes.push('خطأ الضارب −1');
  // الملكة تحتاج تغطية
  if(gotQ){
-  if(gotMine&&!foul){C.sc[cur]+=3;C.q=null;notes.push('الملكة مُغطّاة +3')}
+  if(gotMine&&!foul){C.qWin=cur;C.q=null;notes.push('الملكة مُغطّاة')}
   else{C.q=cur;notes.push('أدخلت الملكة — غطِّها بقطعة من لونك')}
  }else if(C.q===cur){
-  if(gotMine&&!foul){C.sc[cur]+=3;C.q=null;notes.push('الملكة مُغطّاة +3')}
+  if(gotMine&&!foul){C.qWin=cur;C.q=null;notes.push('الملكة مُغطّاة')}
   else{C.q=null;caPutBack(C,'q');notes.push('لم تُغطَّ الملكة — عادت إلى المركز')}
  }
  const left=t=>C.pcs.filter(p=>p.t===t).length;
  // القانون: لا تُدخل قطعتك الأخيرة والملكة ما زالت على اللوح — تعود القطعة إلى المركز وينتقل الدور
  const queenIn=!C.pcs.some(p=>p.t==='q')||gotQ||C.q===cur;
  if(!left(mine)&&!queenIn&&caPutBack(C,mine)){
-  C.got[cur]=Math.max(0,(C.got[cur]||0)-1);C.sc[cur]=Math.max(0,C.sc[cur]-1);
+  C.got[cur]=Math.max(0,(C.got[cur]||0)-1);
   notes.push('قطعتك الأخيرة قبل الملكة — عادت إلى المركز');
   C.turn=(C.turn+1)%RM.players.length;
   caPub([d.msg||''].concat(notes).filter(Boolean).join(' · '));
   return;
  }
  if(!left(mine)){
-  if(C.q===cur){C.sc[cur]+=3;C.q=null}          // آخر قطعة تُغطّي الملكة
-  rmSend({t:'over',msg:`فاز ${RM.players.find(p=>p.peer===cur).name}! ${ico('trophy',13)}`,win:'carrom',by:cur,
-   all:RM.players.map(p=>({n:p.name,r:C.sc[p.peer]+' نقطة'}))});
+  if(C.q===cur){C.qWin=cur;C.q=null}            // آخر قطعةٍ تُغطّي الملكة
+  /* حساب اللوح كما عند الاتحاد: قطع الخصم الباقية، و٣ للملكة إن غطّاها
+     ورصيدُه دون ٢٢، والمجموع لا يتجاوز ١٢. */
+  const foe=mine==='w'?'b':'w';
+  const before=C.M.pts[mine]||0;
+  let pts=left(foe);
+  const qMine=C.qWin&&C.col[C.qWin]===mine;
+  if(qMine&&before<CA_QLOCK)pts+=CA_Q;
+  pts=Math.min(CA_CAP,pts);
+  C.M.pts[mine]=before+pts;
+  C.M.boards++;
+  const nm2=RM.players.find(p=>p.peer===cur).name;
+  const line=`${nm2} كسب اللوح — ${pts} نقطة`+(qMine?' (منها ٣ للملكة)':'');
+  const done=C.M.pts[mine]>=CA_TARGET||C.M.boards>=CA_BOARDS;
+  if(!done){caNextBoard(C,line);return}
+  /* نهاية المباراة: الفائز صاحب الرصيد الأعلى — والفريق لونٌ لا شخص */
+  const wCol=C.M.pts.w>=C.M.pts.b?'w':'b';
+  const champ=RM.players.find(p=>C.col[p.peer]===wCol)||RM.players[0];
+  rmSend({t:'over',win:'carrom',by:champ.peer,
+   msg:`${line} · انتهت المباراة بعد ${C.M.boards} ألواح ${ico('trophy',13)}`,
+   all:RM.players.map(p=>({n:p.name,r:(C.M.pts[C.col[p.peer]]||0)+' نقطة'}))});
   return;
  }
  const keep=(gotMine>0||gotQ)&&!foul;
@@ -27055,11 +27109,16 @@ function caRulesSheet(){
    أخطأتَ أو أدخلتَ الضارب أو قطعةَ خصمك ← ينتقل الدور لمن على يمينك.<br><br>
    <b style="color:var(--gold)">الملكة الحمراء</b><br>
    تُدخِلها ثم <b>تغطّيها</b>: تُدخل قطعةً من لونك في الضربة التالية.
-   فإن لم تغطّها عادت إلى المنتصف ولم تُحسب لك.
-   والمغطّاة تزيدك ثلاث نقاط.<br><br>
-   <b style="color:var(--gold)">الفوز</b><br>
-   من أدخل قطعَ لونه كلّها أوّلًا فاز باللوح. ولا تُدخل قطعتك الأخيرة
+   فإن لم تغطّها عادت إلى المنتصف ولم تُحسب لك.<br><br>
+   <b style="color:var(--gold)">الفوز باللوح</b><br>
+   من أدخل قطعَ لونه كلّها أوّلًا كسب اللوح. ولا تُدخل قطعتك الأخيرة
    والملكةُ ما زالت على اللوح — تعود القطعة إلى المنتصف وينتقل الدور.<br><br>
+   <b style="color:var(--gold)">النقاط</b><br>
+   كاسب اللوح يأخذ <b>نقطةً عن كلّ قطعةٍ باقيةٍ لخصمه</b>،
+   و<b>ثلاثًا</b> للملكة إن غطّاها — ولا تُحسب الملكة إن بلغ رصيدُه ٢٢ فأكثر.
+   والحدّ ١٢ نقطةً للّوح الواحد.<br><br>
+   <b style="color:var(--gold)">المباراة</b><br>
+   تنتهي عند <b>٢٥ نقطة</b> أو بعد <b>ثمانية ألواح</b>، أيّهما أوّل.<br><br>
    <b style="color:var(--gold)">خطأ الضارب</b><br>
    أدخلتَ الضارب ← تعود إحدى قطعك المُدخَلة إلى اللوح.
   </div>
@@ -27087,6 +27146,8 @@ function rmCarrom(R){
  const SIDE=nP>=4?['bot','rgt','top','lft']:(nP===3?['bot','rgt','top']:['bot','top']);
  const seat=RM.players.map((p,i)=>({p:p,side:SIDE[(i-meIdx+nP)%nP]||'bot'}));
  const qWho=C.q?(C.q===RM.me?'أنت':nm(C.q)):null;
+ const M=C.M||{pts:{w:0,b:0},boards:0};
+ const myCol=C.col[RM.me],foeCol=myCol==='w'?'b':'w';
  const chip=o=>{
   const me2=o.p.peer===RM.me, on=C.turn===o.p.peer;
   return `<div class="caSeat ${o.side}${on?' on':''}">
@@ -27095,11 +27156,16 @@ function rmCarrom(R){
    <b>${left(C.col[o.p.peer])}</b></div>`;
  };
  return `<div class="caBar">
-   <span class="caMine"><span class="caDot ${C.col[RM.me]==='w'?'w':'b'}"></span>
-    لونك ${colName(C.col[RM.me])} — أدخل ${left(C.col[RM.me])} الباقية</span>
+   <span class="caMine"><span class="caDot ${myCol==='w'?'w':'b'}"></span>
+    لونك ${colName(myCol)} — أدخل ${left(myCol)} الباقية</span>
    <span class="caQ ${C.q?'hot':''}">${C.q?`الملكة مع ${qWho} — تحتاج تغطية`
      :(C.pcs.some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت')}</span>
    <button class="caRules" onclick="caRulesSheet()">القوانين</button>
+  </div>
+  <div class="caScore">
+   <span class="pt me"><b>${M.pts[myCol]||0}</b> لك</span>
+   <span class="bd">اللوح ${(M.boards||0)+1} من ${CA_BOARDS} · حتى ${CA_TARGET}</span>
+   <span class="pt"><b>${M.pts[foeCol]||0}</b> لهم</span>
   </div>
  <div class="caWrap big"><canvas id="caC" width="720" height="816"></canvas>
   ${seat.map(chip).join('')}</div>
