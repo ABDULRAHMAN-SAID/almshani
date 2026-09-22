@@ -24795,7 +24795,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.24';
+const APP_VER='6.25';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24806,7 +24806,7 @@ function EV(){
 /* أهداف اليوم تغطّي كل الألعاب: هدفان عامّان، وهدف من كل لعبة يتبدّل يوميًا */
 const EVT_POOL={
  general:[
-  {k:'p3', n:'العب 3 جولات اليوم — أسئلة أو كيرم أو أونو أو ليلة العائلة', need:3, of:e=>e.plays+(e.carrom||0)+(e.uno||0)+(e.party||0), r:{t:'gems',v:20}, ri:'gem', rn:'20 جوهرة'},
+  {k:'p3', n:'العب 3 جولات اليوم — أسئلة أو كيرم أو أونو', need:3, of:e=>e.plays+(e.carrom||0)+(e.uno||0), r:{t:'gems',v:20}, ri:'gem', rn:'20 جوهرة'},
   {k:'w2', n:'افز بجولتين في أي لعبة', need:2, of:e=>e.wins+(e.carromWin||0)+(e.unoWin||0), r:{t:'gems',v:30}, ri:'gem', rn:'30 جوهرة'}],
  quiz:[
   {k:'c20',n:'أجب 20 إجابة صحيحة',            need:20,of:e=>e.correct,   r:{t:'coins',v:2500},ri:'coin', rn:'2500 عملة'},
@@ -24820,10 +24820,7 @@ const EVT_POOL={
  uno:[
   {k:'uw1',n:'افز بجولة أونو',                 need:1, of:e=>e.unoWin||0,    r:{t:'gems',v:35},  ri:'gem',  rn:'35 جوهرة'},
   {k:'uc15',n:'العب 15 بطاقة أونو',            need:15,of:e=>e.unoCards||0,  r:{t:'coins',v:1200},ri:'coin', rn:'1200 عملة'},
-  {k:'ug2',n:'العب جولتي أونو',                need:2, of:e=>e.uno||0,       r:{t:'coins',v:1000},ri:'coin', rn:'1000 عملة'}],
- party:[
-  {k:'f1', n:'أنهِ جولة من ليلة العائلة',      need:1, of:e=>e.party||0,     r:{t:'gems',v:25},  ri:'gem',  rn:'25 جوهرة'},
-  {k:'f2', n:'أنهِ جولتين من ليلة العائلة',    need:2, of:e=>e.party||0,     r:{t:'coins',v:1500},ri:'coin', rn:'1500 عملة'}]
+  {k:'ug2',n:'العب جولتي أونو',                need:2, of:e=>e.uno||0,       r:{t:'coins',v:1000},ri:'coin', rn:'1000 عملة'}]
 };
 const EVT_GOALS=[];
 function evtRefresh(){
@@ -24831,7 +24828,7 @@ function evtRefresh(){
  let h=7;for(const ch of String(d))h=(h*31+ch.charCodeAt(0))>>>0;
  const pick=(a,i)=>a[(h+i)%a.length];
  EVT_GOALS.length=0;
- EVT_GOALS.push(EVT_POOL.general[0],EVT_POOL.general[1],pick(EVT_POOL.quiz,1),pick(EVT_POOL.carrom,2),pick(EVT_POOL.uno,3),pick(EVT_POOL.party,4));
+ EVT_GOALS.push(EVT_POOL.general[0],EVT_POOL.general[1],pick(EVT_POOL.quiz,1),pick(EVT_POOL.carrom,2),pick(EVT_POOL.uno,3));
  EVT_GOALS._day=d;
 }
 /** نهاية لعبة في غرفة (كيرم/أونو/مافيا/رسم): تُحتسب لأهداف اليوم والمهام */
