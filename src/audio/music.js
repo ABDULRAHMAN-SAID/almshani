@@ -20,6 +20,7 @@ var MUSIC=(function(){
  var W=(typeof window!=='undefined')?window:null;
  var ctx=null,master=null,verb=null,lim=null,on=false,timer=null,ducked=false;
  var live=[];                           // الأصوات المنتهية تُفصَل، وإلّا نما رسم الصوت بلا حدّ
+ var baked={},src=null,srcGain=null;    // اللحن مُولَّدًا مرّةً، ومصدره الواحد الذي يعزفه
  var enabled=function(){return true};
  var barAt=0,bar=0;                     // متى تبدأ المازورة التالية، وأيّ مازورة هي
  var BPM=64, BEAT=60/BPM, BAR=BEAT*4;   // إيقاع القائمة — ولكل مشهد إيقاعه في SCENES
@@ -407,6 +408,64 @@ var MUSIC=(function(){
   sc.draw(i%sc.bars,t,b,b/4);
  }
 
+ /* ═══ التوليد المسبق ═══
+    كان اللحن يُركَّب حيًّا: كل نغمةٍ مذبذبٌ ومرشّحٌ وعقدتا كسب، فبلغت الأصوات
+    العازفة في اللحظة الواحدة **إحدى وأربعين** — قياسًا لا تقديرًا. والحاسوب
+    يحتملها، ومعالج الهاتف لا يلحقها وهو يرسم اللعبة معها، فيتأخّر عن موعد
+    الإطار الصوتيّ فيُسمع تقطّعًا وخشونة. وليس قصًّا: أعلى قيمةٍ في المخرج
+    ٠٫٣٠ من ١٫٠ ونسبة القصّ صفر.
+    فاللحن دورةٌ تتكرّر بلا تغيّر، وتوليدُ ما لا يتغيّر في كل مرّة عبث:
+    يُولَّد مرّةً في سياقٍ غير حيّ (OfflineAudioContext) ثم يُعزف مقطعًا واحدًا
+    مكرَّرًا — فتصير الأصوات العازفة **واحدًا**، وكلفة العزف لا شيء.
+    وإن تعذّر التوليد (متصفّح قديم أو ذاكرة) رجعنا إلى التركيب الحيّ كما كان. */
+ var OAC=W&&(W.OfflineAudioContext||W.webkitOfflineAudioContext);
+ function bakeScene(name){
+  if(baked[name])return Promise.resolve(baked[name]);
+  if(!OAC||!ctx)return Promise.resolve(null);
+  var sc=SCENES[name];if(!sc)return Promise.resolve(null);
+  var b=60/sc.bpm*4, loop=sc.bars*b, tail=2.2, rate=ctx.sampleRate||44100;
+  var frames=Math.ceil((loop+tail)*rate);
+  if(frames>rate*90)return Promise.resolve(null);      // حارسٌ للذاكرة
+  var oc;try{oc=new OAC(2,frames,rate)}catch(e){return Promise.resolve(null)}
+  var keep={ctx:ctx,master:master,verb:verb,cur:cur};
+  try{
+   ctx=oc;cur=name;
+   master=oc.createGain();master.gain.value=1;
+   var wet=oc.createGain();wet.gain.value=0.34;
+   verb=reverb(oc);verb.connect(wet);wet.connect(master);
+   master.connect(oc.destination);
+   for(var i=0;i<sc.bars;i++)schedule(i,i*b);
+  }catch(e){ctx=keep.ctx;master=keep.master;verb=keep.verb;cur=keep.cur;return Promise.resolve(null)}
+  ctx=keep.ctx;master=keep.master;verb=keep.verb;cur=keep.cur;
+  return oc.startRendering().then(function(buf){
+   /* الذيل يُطوى على البداية فلا تُسمع فجوةٌ عند إعادة الدورة */
+   var n=Math.floor(loop*rate),tl=Math.min(buf.length-n,Math.floor(tail*rate));
+   for(var ch=0;ch<buf.numberOfChannels;ch++){
+    var d=buf.getChannelData(ch);
+    for(var j=0;j<tl;j++)d[j]+=d[n+j];
+   }
+   baked[name]={buf:buf,loop:loop};
+   return baked[name];
+  }).catch(function(){return null});
+ }
+ /** يعزف الدورة المُولَّدة — مصدرٌ واحد بدل إحدى وأربعين */
+ function play(name){
+  return bakeScene(name).then(function(bk){
+   if(!bk||!on||!ctx)return false;
+   stopSrc();
+   srcGain=ctx.createGain();srcGain.gain.value=1;srcGain.connect(master);
+   src=ctx.createBufferSource();src.buffer=bk.buf;
+   src.loop=true;src.loopStart=0;src.loopEnd=bk.loop;
+   src.connect(srcGain);src.start();
+   if(timer){W.clearInterval(timer);timer=null}   // لا جدولة حيّة بعد اليوم
+   return true;
+  });
+ }
+ function stopSrc(){
+  if(src){try{src.stop()}catch(e){}try{src.disconnect()}catch(e){}src=null}
+  if(srcGain){try{srcGain.disconnect()}catch(e){}srcGain=null}
+ }
+
  /** الحارس: يجدول ما يقترب موعده ثم ينام — لا حساب في كل إطار */
  function tick(){
   if(!on||!ctx)return;
@@ -429,7 +488,7 @@ var MUSIC=(function(){
    master.gain.linearRampToValueAtTime(0.0001,t+0.75);
    master.gain.linearRampToValueAtTime(level(),t+2.6);
    barAt=t+0.85;
-   tick();
+   if(src)play(cur);else tick();
   }catch(e){}
   return cur;
  }
@@ -446,8 +505,11 @@ var MUSIC=(function(){
   master.gain.cancelScheduledValues(c.currentTime);
   master.gain.setValueAtTime(0.0001,c.currentTime);
   master.gain.linearRampToValueAtTime(level(),c.currentTime+3.2);   // يدخل من بعيد لا يقتحم
+  /* المُولَّد أوّلًا. وريثما يُولَّد أوّل مرّة (أجزاء من الثانية) يعزف الحيُّ
+     فلا تبدأ اللعبة صامتة، ثم يتوقّف الجدول حين يجهز. */
   tick();
   timer=W.setInterval(tick,700);
+  play(cur).then(function(ok){if(!ok&&on&&!timer)timer=W.setInterval(tick,700)});
   return true;
  }
  function stop(){
@@ -465,6 +527,7 @@ var MUSIC=(function(){
      وترك الرسم معلّقًا حتى التشغيل التالي يثقل بلا فائدة. */
   W.setTimeout(function(){
    if(on)return;
+   stopSrc();
    for(var i=0;i<live.length;i++){try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}}
    live.length=0;
   },6000);
