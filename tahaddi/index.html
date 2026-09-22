@@ -16616,21 +16616,21 @@ var MUSIC=(function(){
      فيضرب الغشاء حدّه الميكانيكيّ فيرتجّ — وهو الطنين الذي وصفه المالك:
      «كتلفزيون بجانبه مكالمة هاتف». والملفّ سليم: لا قصَّ ولا نقرات ولا قفزات،
      والتشوّه يقع في السمّاعة لا في الإشارة، فلا يظهر في قياس المخرج.
-     فمرشّحان متتاليان عند ١٩٠ هرتز (٢٤ ديسيبل/أوكتاف): عند ٩٥ هرتز ‎-٢٤‎
-     وعند ٤١ نحو ‎-٤٠‎ — فلا يصل السمّاعةَ ما تعجز عنه. */
-  var hp1=ctx.createBiquadFilter(),hp2=ctx.createBiquadFilter();
-  hp1.type=hp2.type='highpass';
-  hp1.frequency.setValueAtTime(190,ctx.currentTime);
-  hp2.frequency.setValueAtTime(190,ctx.currentTime);
-  hp1.Q.setValueAtTime(0.7,ctx.currentTime);
-  hp2.Q.setValueAtTime(0.7,ctx.currentTime);
+     فثلاثة مرشّحات متتالية عند ١٩٠ هرتز (٣٦ ديسيبل/أوكتاف): الميل الأحدّ يقطع
+     ما دون العتبة دون أن يُنحّف ما فوقها — وهو ما تحتاجه سمّاعةٌ صغيرة. */
+  var hp1=ctx.createBiquadFilter(),hp2=ctx.createBiquadFilter(),hp3=ctx.createBiquadFilter();
+  hp1.type=hp2.type=hp3.type='highpass';
+  [hp1,hp2,hp3].forEach(function(h){
+   h.frequency.setValueAtTime(190,ctx.currentTime);
+   h.Q.setValueAtTime(0.7,ctx.currentTime);
+  });
   lim=ctx.createDynamicsCompressor();
   lim.threshold.setValueAtTime(-9,ctx.currentTime);
   lim.knee.setValueAtTime(4,ctx.currentTime);
   lim.ratio.setValueAtTime(14,ctx.currentTime);
   lim.attack.setValueAtTime(0.004,ctx.currentTime);
   lim.release.setValueAtTime(0.22,ctx.currentTime);
-  master.connect(hp1);hp1.connect(hp2);hp2.connect(lim);lim.connect(ctx.destination);
+  master.connect(hp1);hp1.connect(hp2);hp2.connect(hp3);hp3.connect(lim);lim.connect(ctx.destination);
   return ctx;
  }
  /** كل صوت يذهب إلى الجافّ والمبلَّل معًا — نسبة الصدى بحسب الطبقة */
@@ -16832,7 +16832,10 @@ var MUSIC=(function(){
   sN.connect(f);f.connect(v);v.connect(out);
   sN.start(t);sN.stop(t+0.3);
   if(!hi){var o=ctx.createOscillator(),vv=ctx.createGain();
-   o.type='sine';o.frequency.setValueAtTime(112,t);o.frequency.exponentialRampToValueAtTime(62,t+0.16);
+   /* كان ١١٢ ← ٦٢ هرتز: نبضٌ منخفض يتكرّر مع كل ضربة، فيرتجّ غشاء السمّاعة
+      ارتجاجًا **إيقاعيًّا** — وهو ما سمعه المالك طنينًا كالتداخل لا كالنغمة.
+      فصار ٣٠٠ ← ١٧٠: ضربةٌ تُسمع نقرًا لا ارتجاجًا، ويمرّ أكثرها من المرشّح. */
+   o.type='sine';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(170,t+0.13);
    vv.gain.setValueAtTime(0.0001,t);vv.gain.exponentialRampToValueAtTime(g*1.1,t+0.008);
    vv.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
    o.connect(vv);vv.connect(out);o.start(t);o.stop(t+0.24)}
@@ -24934,7 +24937,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.35';
+const APP_VER='6.36';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
