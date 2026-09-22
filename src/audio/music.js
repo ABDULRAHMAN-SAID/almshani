@@ -26,7 +26,30 @@ var MUSIC=(function(){
  var BPM=64, BEAT=60/BPM, BAR=BEAT*4;   // إيقاع القائمة — ولكل مشهد إيقاعه في SCENES
  var VOL=0.44, DUCK=0.14;                // مستوى هادئ أصلًا، وأهدأ أثناء اللعب
 
- function init(o){if(o&&typeof o.enabled==='function')enabled=o.enabled}
+ function init(o){
+  if(o&&typeof o.enabled==='function')enabled=o.enabled;
+  /* «الصوت مرّات يروح ولازم أتحرّك» — سياق الصوت يُعلَّق: يوقفه النظام حين
+     تغيب الصفحة أو يوفّر الطاقة، فلا يعود من تلقائه. وكان استئنافه يقع مرّةً
+     عند التشغيل وحده، فمن عُلِّق سياقه بعد ذلك بقي صامتًا حتى يلمس شيئًا.
+     فصار يُستأنف عند كل عودةٍ إلى الصفحة، وعند كل لمسةٍ ما دامت الموسيقى
+     مشغّلة — والاستئناف بلا تعليقٍ لا يضرّ. */
+  if(!W||init._w)return; init._w=1;
+  var wake=function(){
+   if(!on||!ctx)return;
+   if(ctx.state==='suspended'){try{ctx.resume().catch(function(){})}catch(e){}}
+  };
+  try{
+   if(W.document&&W.document.addEventListener){
+    W.document.addEventListener('visibilitychange',function(){if(!W.document.hidden)wake()});
+    ['pointerdown','touchstart','keydown'].forEach(function(ev){
+     W.document.addEventListener(ev,wake,{passive:true,capture:true});
+    });
+   }
+   W.addEventListener('focus',wake);
+   /* وحارسٌ دوريّ: بعض الأجهزة تُعلّق بلا حدثٍ يُنبّه */
+   W.setInterval(wake,4000);
+  }catch(e){}
+ }
  function AC(){return W?(W.AudioContext||W.webkitAudioContext):null}
 
  /* ── نصف نغمة فوق «لا» ٤٤٠ — الأسماء بالنظام العلمي ── */
@@ -336,22 +359,37 @@ var MUSIC=(function(){
  ];
 
  /** مازورة القائمة — تُستدعى قبل موعدها بثانيتين */
+ /* ═══ لحن القائمة — أُعيد تأليفه في ٦٫٣٦ ═══
+    الأوّل كان كامل الطبقات: وتريّات وقيثارة ونفخ وباصٌّ وطبل. وثلاث محاولاتٍ
+    لتهذيبه لم تُرضِ صاحبه: «والله تشوّه… خلاص أرجوك غيّره». فالتهذيب انتهى
+    والتأليف بدأ، وشرطُه الأوّل أن يُولد نظيفًا على سمّاعة هاتف لا أن يُنظَّف
+    بعد ولادته:
+
+      لا طبل ولا إيقاع    — النبض المنخفض المتكرّر كان مصدر الطنين الإيقاعيّ
+      لا باصّ             — أدنى نغمةٍ هنا D3 (١٤٧ هرتز)، وأكثر اللحن فوق ٢٥٠
+      ثلاث طبقاتٍ لا خمس  — وسادة، ونقرةٌ متفرّقة، ونايٌ يتنفّس في الثانية
+
+    وهو أهدأ: ٥٢ نبضة لا ٦٤، وثماني مازوراتٍ لا ستّ عشرة. والهدوء مقصود —
+    موسيقى قائمةٍ تُسمع دقائق طويلة، فالقليل فيها أبقى من الكثير. */
+ var CALM=[
+  /* [وتر الوسادة, نغمات النقر, نغمة الناي] — كلّها فوق ١٤٠ هرتز */
+  [['D4','F4','A4'],   ['D5','A4','F5'],   'A4'],
+  [['C4','F4','A4'],   ['F5','C5','A4'],   'F4'],
+  [['Bb3','D4','F4'],  ['D5','F5','Bb4'],  'D5'],
+  [['A3','C4','E4'],   ['E5','C5','A4'],   'C5'],
+  [['D4','F4','A4'],   ['A4','D5','F5'],   'D5'],
+  [['G3','Bb3','D4'],  ['Bb4','D5','G5'],  'Bb4'],
+  [['A3','C#4','E4'],  ['E5','A4','C#5'],  'A4'],
+  [['D4','F4','A4'],   ['F5','D5','A4'],   'F4']
+ ];
  function barMenu(i,t,B,BT){
-  var half=i%8, second=i>=8;
-  var c=CH[half], mel=MEL[half];
-  var gp=second?0.052:0.044;                    /* الدورة الثانية أعلى قليلًا */
-  c[0].forEach(function(n){pad(hz(n),t,B*0.99,gp)});
-  bass(hz(c[1]),t,B*0.9,0.15);
-  if(half===0||half===4)drum(t,0.10);
-  if(second&&(half===2||half===6))drum(t+BT*2,0.055);
-  /* القيثارة: ستّ نقرات في المازورة — الدورة الأولى أخفّ */
-  c[2].forEach(function(n,k){
-   pluck(hz(n),t+k*(B/6),0.85,second?0.075:0.055);
-  });
-  /* اللحن يدخل في الدورة الثانية وحدها — البداية هادئة تمامًا */
-  if(second)mel.forEach(function(m){
-   horn(hz(m[0]),t+m[1]*BT,m[2]*BT,0.062);
-  });
+  var r=CALM[i%8];
+  /* الوسادة: الوتر يتنفّس المازورة كلّها — هي الأساس، وتتداخل مع التي بعدها */
+  r[0].forEach(function(n){pad(hz(n),t,B*1.04,0.050)});
+  /* النقر: ثلاث نقراتٍ متفرّقة لا ستّ متلاحقة — الفراغ بينها هو الهدوء */
+  r[1].forEach(function(n,k){pluck(hz(n),t+(k*2+1)*(B/6),1.05,0.046)});
+  /* الناي: نفَسٌ واحد في كل مازورةٍ ثانية — فلا يزدحم الهواء */
+  if(i%2===1)ney(hz(r[2]),t+BT*0.6,BT*2.4,0.040);
  }
 
  /* ═══ لحن المافيا ═══
@@ -413,7 +451,7 @@ var MUSIC=(function(){
 
  /* ═══ المشاهد: لكل واحد إيقاعه وعدد مازوراته وراسمه ═══ */
  var SCENES={
-  menu: {bpm:64,bars:16,draw:barMenu},
+  menu: {bpm:52,bars:8,draw:barMenu},
   mafia:{bpm:52,bars:8, draw:function(i,t,B,BT){barMafia(i,t,B,BT,false)}},
   night:{bpm:52,bars:8, draw:function(i,t,B,BT){barMafia(i,t,B,BT,true)}},
   majlis:{bpm:72,bars:8, draw:barBarra}
