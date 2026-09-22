@@ -30,6 +30,13 @@ if(fs.existsSync(AR)){
  for(const f of fs.readdirSync(AR))fs.copyFileSync(path.join(AR,f),path.join(OUT,'arenas',f));
 }
 /* الخطّ مضمَّن داخل اللعبة (tools/build-fonts.cjs)؛ نصّ ترخيصه يُنشر بجانبها كما تشترط SIL OFL */
+/* موسيقى القائمة ملفٌّ لا شيفرة (٦٫٣٨) — يُنسخ كما تُنسخ الخطوط والأيقونات */
+const AU=path.join(SRC,'audio');
+if(fs.existsSync(AU)){
+ fs.mkdirSync(path.join(OUT,'audio'),{recursive:true});
+ for(const f of fs.readdirSync(AU))fs.copyFileSync(path.join(AU,f),path.join(OUT,'audio',f));
+}
+
 fs.mkdirSync(path.join(OUT,'fonts'),{recursive:true});
 fs.copyFileSync(path.join(SRC,'fonts','OFL.txt'),path.join(OUT,'fonts','OFL.txt'));
 fs.writeFileSync(path.join(OUT,'.nojekyll'),'');

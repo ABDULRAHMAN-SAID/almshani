@@ -1,616 +1,128 @@
 /**
- * موسيقى «تحدّي» — لحن أصليّ مركّب داخل اللعبة بلا ملفّ صوت واحد.
+ * موسيقى «تحدّي» — ملفُّ صوتٍ يُشغَّل على مسار الوسائط، لا لحنٌ يُركَّب لحظيًّا.
  *
  *   MUSIC.init({enabled:()=>bool})   من يقرّر التشغيل؟ إعدادات اللاعب
  *   MUSIC.start()  عند أول لمسة (المتصفّح لا يفتح الصوت قبلها)
  *   MUSIC.stop()   ·  MUSIC.duck(on)  يخفض الصوت أثناء اللعب لا يقطعه
- *   MUSIC.scene('menu'|'mafia'|'night'|'majlis')   يبدّل اللحن بتلاشٍ متقاطع
- *   MUSIC.playing() · MUSIC.now()
+ *   MUSIC.scene(name)  ·  MUSIC.playing() · MUSIC.now()
  *
- * ثلاثة ألحان أصليّة، كلّها من تأليف اللعبة — لا عيّنات ولا اقتباس من لعبة أخرى:
- *   menu  رِي الصغرى · ٦٤ نبضة · ١٦ مازورة — وتريّات وقيثارة ونفخ نبيل هادئ
- *   mafia لا الصغرى بثانية منخفضة (فريجيّ) · ٥٢ نبضة · ٨ مازورات — طنين منخفض،
- *         نبض قلب، تشيلّو مكتوم، وجرس بعيد. و«night» أشدّ خفوتًا: بلا لحن.
- *   majlis حجاز على رِي · ٧٢ نبضة · ٨ مازورات — عود ينقر، ناي يتموّج، ودفّ خفيف
- * كلّها موجات مركّبة تمرّ بمرشّح ثم بصدى مولَّد من ضجيج متلاشٍ.
- * لا DOM هنا إلا window. لا يرمي أبدًا.
+ * لماذا تغيّرت الطريقة (٦٫٣٨):
+ * كان اللحن يُركَّب في الهاتف بـWeb Audio — عشرات المذبذبات والمرشّحات
+ * وصدىً التفافيّ، كلّها على المعالج نفسه الذي يرسم اللعبة. وصاحب اللعبة
+ * يسمع تشوّهًا وانقطاعًا («الصوت مرّات يروح ولازم أتحرّك»)، وستّ محاولاتٍ
+ * لتهذيب اللحن — حاجزٌ، وتنظيفُ عقد، وصدىً أقصر، وتوليدٌ مسبق، ورفعُ الباص،
+ * وإعادةُ تأليف — لم تُصلحه. فالعلّة في الطريقة لا في النغمات.
+ *
+ * والملفّ الجاهز يمرّ على مسار الوسائط في النظام: هو الذي يشغّل كل مقطعٍ
+ * يسمعه صاحب الهاتف، وقد بُني ليعمل على خيطٍ لا يزاحمه الرسم. وعنصر
+ * <audio> يتكفّل بالتكرار والاستئناف، فلا سياق صوتيّ ينام ولا يُستأنف.
+ *
+ * والموسيقى نفسها تُؤلَّف في tools/build-music.py وتُضغط في
+ * tools/encode-music.cjs — لا تُكتب باليد ولا تُقتبس من لعبةٍ أخرى.
  */
 var MUSIC=(function(){
  'use strict';
  var W=(typeof window!=='undefined')?window:null;
- var ctx=null,master=null,verb=null,lim=null,on=false,timer=null,ducked=false;
- var live=[];                           // الأصوات المنتهية تُفصَل، وإلّا نما رسم الصوت بلا حدّ
- var baked={},src=null,srcGain=null;    // اللحن مُولَّدًا مرّةً، ومصدره الواحد الذي يعزفه
+ var el=null,on=false,ducked=false,cur='menu',ready=false;
  var enabled=function(){return true};
- var barAt=0,bar=0;                     // متى تبدأ المازورة التالية، وأيّ مازورة هي
- var BPM=64, BEAT=60/BPM, BAR=BEAT*4;   // إيقاع القائمة — ولكل مشهد إيقاعه في SCENES
- var VOL=0.44, DUCK=0.14;                // مستوى هادئ أصلًا، وأهدأ أثناء اللعب
+ var VOL=0.42, DUCK=0.13, FADE=900;     // مللي ثانية للدخول والخروج
+ var TRACK={menu:'audio/menu.webm'};    // مشهدٌ واحد اليوم، والباب مفتوح لغيره
+ var fadeTimer=null;
 
- function init(o){
-  if(o&&typeof o.enabled==='function')enabled=o.enabled;
-  /* «الصوت مرّات يروح ولازم أتحرّك» — سياق الصوت يُعلَّق: يوقفه النظام حين
-     تغيب الصفحة أو يوفّر الطاقة، فلا يعود من تلقائه. وكان استئنافه يقع مرّةً
-     عند التشغيل وحده، فمن عُلِّق سياقه بعد ذلك بقي صامتًا حتى يلمس شيئًا.
-     فصار يُستأنف عند كل عودةٍ إلى الصفحة، وعند كل لمسةٍ ما دامت الموسيقى
-     مشغّلة — والاستئناف بلا تعليقٍ لا يضرّ. */
-  if(!W||init._w)return; init._w=1;
-  var wake=function(){
-   if(!on||!ctx)return;
-   if(ctx.state==='suspended'){try{ctx.resume().catch(function(){})}catch(e){}}
-  };
-  try{
-   if(W.document&&W.document.addEventListener){
-    W.document.addEventListener('visibilitychange',function(){if(!W.document.hidden)wake()});
-    ['pointerdown','touchstart','keydown'].forEach(function(ev){
-     W.document.addEventListener(ev,wake,{passive:true,capture:true});
-    });
-   }
-   W.addEventListener('focus',wake);
-   /* وحارسٌ دوريّ: بعض الأجهزة تُعلّق بلا حدثٍ يُنبّه */
-   W.setInterval(wake,4000);
-  }catch(e){}
- }
- function AC(){return W?(W.AudioContext||W.webkitAudioContext):null}
+ function init(o){if(o&&typeof o.enabled==='function')enabled=o.enabled}
 
- /* ── نصف نغمة فوق «لا» ٤٤٠ — الأسماء بالنظام العلمي ── */
- var STEP={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
- function hz(n){
-  var m=/^([A-G])([b#]?)(-?\d)$/.exec(n);if(!m)return 440;
-  var s=STEP[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0)+(+m[3]+1)*12;
-  return 440*Math.pow(2,(s-69)/12);
- }
-
- /* ── الصدى: ضجيج متلاشٍ يُصنع مرّة ويُستعمل للجميع — يعطي المكان عمقًا ── */
- function reverb(c){
-  /* كان الأثر ضجيجًا أبيض خامًا بلا ترشيح: والغرفة الحقيقية تبتلع الحادّ في
-     أوّل عشرات الأجزاء من الثانية، فذيلٌ أبيض كامل الطيف لا يُسمع صدىً بل
-     هسيسًا فوق كلّ نغمة — وهو «التشويش». فيمرّ الضجيج بمرشّحٍ أحاديّ القطب
-     يضيق مع الزمن، فيعتم الذيل كما يعتم في غرفة.
-     وطوله كان ٢٫٦ ثانية ستيريو، والالتفاف أثقل عقدةٍ في الصوت وكلفته تتبع
-     الطول — وهي تعمل بلا انقطاع على معالج الهاتف حتى ينقطع الصوت. فصار
-     ١٫٤، وعلى الأجهزة قليلة النوى ٠٫٩: صدىً أقصر خيرٌ من صوتٍ متقطّع. */
-  var slow=false;
-  try{slow=(navigator.hardwareConcurrency||8)<=4}catch(e){}
-  var secs=slow?0.9:1.4;
-  var len=Math.floor(c.sampleRate*secs),b=c.createBuffer(2,len,c.sampleRate);
-  var peak=0;
-  for(var ch=0;ch<2;ch++){
-   var d=b.getChannelData(ch),lp=0;
-   for(var i=0;i<len;i++){
-    var t=i/len;
-    var n=(Math.random()*2-1)*Math.pow(1-t,2.2);
-    lp+=(0.30-0.26*t)*(n-lp);        // القطع ينزل مع الزمن فيعتم الذيل
-    d[i]=lp*(1-t*0.25);
-    var a=d[i]<0?-d[i]:d[i];if(a>peak)peak=a;
-   }
-  }
-  /* الترشيح يخفض السعة كثيرًا، فبلا تسوية يختفي الصدى ويُظنّ معطّلًا */
-  if(peak>0.0001){var k=0.85/peak;
-   for(var ch2=0;ch2<2;ch2++){var dd=b.getChannelData(ch2);
-    for(var j=0;j<len;j++)dd[j]*=k;}}
-  var cv=c.createConvolver();cv.buffer=b;return cv;
- }
-
+ /** يُبنى عند أول طلبٍ لا عند تحميل الصفحة — فلا يُنزَّل لمن أطفأ الموسيقى */
  function build(){
-  if(ctx)return ctx;
-  var A=AC();if(!A)return null;
-  try{ctx=new A()}catch(e){ctx=null;return null}
-  master=ctx.createGain();master.gain.value=0;          // يدخل بتلاشٍ صاعد
-  var wet=ctx.createGain();wet.gain.value=0.34;
-  verb=reverb(ctx);
-  verb.connect(wet);wet.connect(master);
-  /* كل آلة تدخل master بمستواها، ومجموعها في المازورة المزدحمة يتجاوز الواحد
-     فيقصّه المخرج قصًّا صلبًا — وهو التشوّه الذي يُسمع. الحاجز يمسك القمم
-     وحدها ويترك ما دونها كما هو، فلا يُسمع عمله إلّا بغياب التشويه. */
-  /* سمّاعة الهاتف غشاءٌ صغير لا يُصدر ما دون ~٣٠٠ هرتز. واللحن ينزل إلى ٤١،
-     فيضرب الغشاء حدّه الميكانيكيّ فيرتجّ — وهو الطنين الذي وصفه المالك:
-     «كتلفزيون بجانبه مكالمة هاتف». والملفّ سليم: لا قصَّ ولا نقرات ولا قفزات،
-     والتشوّه يقع في السمّاعة لا في الإشارة، فلا يظهر في قياس المخرج.
-     فثلاثة مرشّحات متتالية عند ١٩٠ هرتز (٣٦ ديسيبل/أوكتاف): الميل الأحدّ يقطع
-     ما دون العتبة دون أن يُنحّف ما فوقها — وهو ما تحتاجه سمّاعةٌ صغيرة. */
-  var hp1=ctx.createBiquadFilter(),hp2=ctx.createBiquadFilter(),hp3=ctx.createBiquadFilter();
-  hp1.type=hp2.type=hp3.type='highpass';
-  [hp1,hp2,hp3].forEach(function(h){
-   h.frequency.setValueAtTime(190,ctx.currentTime);
-   h.Q.setValueAtTime(0.7,ctx.currentTime);
-  });
-  lim=ctx.createDynamicsCompressor();
-  lim.threshold.setValueAtTime(-9,ctx.currentTime);
-  lim.knee.setValueAtTime(4,ctx.currentTime);
-  lim.ratio.setValueAtTime(14,ctx.currentTime);
-  lim.attack.setValueAtTime(0.004,ctx.currentTime);
-  lim.release.setValueAtTime(0.22,ctx.currentTime);
-  master.connect(hp1);hp1.connect(hp2);hp2.connect(hp3);hp3.connect(lim);lim.connect(ctx.destination);
-  return ctx;
+  if(el||!W||!W.document)return el;
+  try{
+   el=W.document.createElement('audio');
+   el.src=TRACK[cur]||TRACK.menu;
+   el.loop=true;el.preload='auto';el.volume=0;
+   el.setAttribute('playsinline','');
+   /* يُلحق بالصفحة لا يُترك طليقًا: عنصرٌ غير مُلحَقٍ يعمل في كروميوم سطح
+      المكتب وقد لا يعمل في WebView — والهدف الهاتف لا المكتب. ومخفيٌّ
+      بلا أبعاد فلا يزاحم الواجهة ولا يظهر له شريط تحكّم. */
+   el.style.cssText='position:absolute;width:0;height:0;opacity:0;pointer-events:none';
+   if(W.document.body)W.document.body.appendChild(el);
+   else W.document.addEventListener('DOMContentLoaded',function(){
+    try{W.document.body.appendChild(el)}catch(e){}
+   });
+   el.addEventListener('canplaythrough',function(){ready=true});
+   /* لو أوقفه النظام (مكالمة، سمّاعة نُزعت) عاد من تلقائه ما دامت مشغّلة */
+   el.addEventListener('pause',function(){
+    if(on)try{el.play().catch(function(){})}catch(e){}
+   });
+  }catch(e){el=null}
+  return el;
  }
- /** كل صوت يذهب إلى الجافّ والمبلَّل معًا — نسبة الصدى بحسب الطبقة */
- function bus(send){
-  var g=ctx.createGain(),s=ctx.createGain();
-  s.gain.value=send==null?0.5:send;
-  g.connect(master);g.connect(s);s.connect(verb);
-  live.push({g:g,s:s,t:ctx.currentTime});
-  return g;
- }
- /** الآلة تصمت بانتهاء مذبذبها، لكن عقدتَي كسبها تبقيان موصولتين بـmaster
-     فينمو الرسم كل مازورة ويثقل على الهاتف حتى يتقطّع الصوت. وأطول صوت
-     يُجدوَل قبل موعده بثانيتين ويمتدّ أربعًا، فاثنتا عشرة ثانية هامشٌ وافر. */
- function sweep(){
-  var now=ctx.currentTime,i=0;
-  while(i<live.length&&live[i].t<now-12){
-   try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}
+
+ /** تلاشٍ يدويّ: عنصر الصوت لا يملك منحنياتٍ زمنية، والقفزة تُسمع */
+ function fade(to,ms,after){
+  if(!el)return;
+  if(fadeTimer){W.clearInterval(fadeTimer);fadeTimer=null}
+  var from=el.volume,steps=Math.max(1,Math.round(ms/40)),i=0;
+  fadeTimer=W.setInterval(function(){
    i++;
-  }
-  if(i)live.splice(0,i);
+   var v=from+(to-from)*(i/steps);
+   try{el.volume=Math.max(0,Math.min(1,v))}catch(e){}
+   if(i>=steps){W.clearInterval(fadeTimer);fadeTimer=null;if(after)after()}
+  },40);
  }
-
- /* ── الآلات ── */
- /** وتريّات: منشاران مُزاحان قليلًا خلف مرشّح يفتح ببطء — نفَس ممتدّ لا نغمة حادّة */
- function pad(f,t,d,g){
-  var out=bus(0.75),lp=ctx.createBiquadFilter(),v=ctx.createGain();
-  lp.type='lowpass';lp.Q.value=0.7;
-  lp.frequency.setValueAtTime(420,t);
-  lp.frequency.linearRampToValueAtTime(1150,t+d*0.55);
-  lp.frequency.linearRampToValueAtTime(520,t+d);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.linearRampToValueAtTime(g,t+d*0.34);           // دخول بطيء كقوس الكمان
-  v.gain.setValueAtTime(g,t+d*0.72);
-  v.gain.linearRampToValueAtTime(0.0001,t+d);
-  [0,-6,7].forEach(function(cents,i){
-   var o=ctx.createOscillator();
-   o.type=i===2?'triangle':'sawtooth';
-   o.frequency.value=f;o.detune.value=cents;
-   o.connect(v);o.start(t);o.stop(t+d+0.1);
-  });
-  v.connect(lp);lp.connect(out);
- }
- /** قيثارة: مثلّث ينقر ويخبو — حركة اللحن الهادئة تحت الغناء */
- function pluck(f,t,d,g){
-  var out=bus(0.55),o=ctx.createOscillator(),o2=ctx.createOscillator(),v=ctx.createGain(),lp=ctx.createBiquadFilter();
-  o.type='triangle';o.frequency.value=f;
-  o2.type='sine';o2.frequency.value=f*2;
-  lp.type='lowpass';lp.frequency.setValueAtTime(2600,t);
-  lp.frequency.exponentialRampToValueAtTime(700,t+d);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.exponentialRampToValueAtTime(g,t+0.012);
-  v.gain.exponentialRampToValueAtTime(0.0001,t+d);
-  var v2=ctx.createGain();v2.gain.value=0.22;o2.connect(v2);v2.connect(v);
-  o.connect(v);v.connect(lp);lp.connect(out);
-  o.start(t);o.stop(t+d+0.05);o2.start(t);o2.stop(t+d+0.05);
- }
- /** نفخ ناعم يحمل اللحن: منشار مكتوم بمرشّح يفتح مع النَّفَس */
- function horn(f,t,d,g){
-  var out=bus(0.6),o=ctx.createOscillator(),o2=ctx.createOscillator(),v=ctx.createGain(),lp=ctx.createBiquadFilter();
-  o.type='sawtooth';o.frequency.value=f;
-  o2.type='triangle';o2.frequency.value=f;o2.detune.value=5;
-  lp.type='lowpass';lp.Q.value=1.1;
-  lp.frequency.setValueAtTime(500,t);
-  lp.frequency.linearRampToValueAtTime(1700,t+Math.min(0.5,d*0.4));
-  lp.frequency.linearRampToValueAtTime(700,t+d);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.linearRampToValueAtTime(g,t+0.14);
-  v.gain.setValueAtTime(g,t+d*0.7);
-  v.gain.linearRampToValueAtTime(0.0001,t+d);
-  o.connect(v);o2.connect(v);v.connect(lp);lp.connect(out);
-  o.start(t);o.stop(t+d+0.08);o2.start(t);o2.stop(t+d+0.08);
- }
- /** جهير: جيب نقيّ تحت كل شيء — يُسمع بالصدر لا بالأذن */
- function bass(f,t,d,g){
-  var out=bus(0.12),o=ctx.createOscillator(),v=ctx.createGain();
-  o.type='sine';o.frequency.value=f;
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.linearRampToValueAtTime(g,t+0.06);
-  v.gain.setValueAtTime(g,t+d*0.8);
-  v.gain.linearRampToValueAtTime(0.0001,t+d);
-  o.connect(v);v.connect(out);o.start(t);o.stop(t+d+0.05);
- }
- /** طبل خافت: جيب يهبط سريعًا — نبضة واحدة لا إيقاع صاخب */
- function drum(t,g){
-  var out=bus(0.4),o=ctx.createOscillator(),v=ctx.createGain();
-  o.type='sine';
-  o.frequency.setValueAtTime(192,t);
-  o.frequency.exponentialRampToValueAtTime(42,t+0.34);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.exponentialRampToValueAtTime(g,t+0.014);
-  v.gain.exponentialRampToValueAtTime(0.0001,t+0.42);
-  o.connect(v);v.connect(out);o.start(t);o.stop(t+0.5);
- }
-
- /** طنين منخفض متّصل: أساس المافيا — لا لحن، حضور فقط */
- function drone(f,t,d,g){
-  var out=bus(0.5),v=ctx.createGain(),lp=ctx.createBiquadFilter();
-  lp.type='lowpass';lp.frequency.value=340;lp.Q.value=0.6;
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.linearRampToValueAtTime(g,t+d*0.3);
-  v.gain.setValueAtTime(g,t+d*0.75);
-  v.gain.linearRampToValueAtTime(0.0001,t+d);
-  [[0,'sawtooth'],[-11,'sawtooth'],[7,'triangle']].forEach(function(a){
-   var o=ctx.createOscillator();o.type=a[1];o.frequency.value=f;o.detune.value=a[0];
-   o.connect(v);o.start(t);o.stop(t+d+0.1);
-  });
-  v.connect(lp);lp.connect(out);
- }
- /** نبض قلب: ضربتان متتاليتان تحت السمع — توتّر المافيا بلا ضجيج */
- function heart(t,g){
-  [0,0.26].forEach(function(dt,i){
-   var out=bus(0.22),o=ctx.createOscillator(),v=ctx.createGain();
-   o.type='sine';
-   o.frequency.setValueAtTime(148,t+dt);
-   o.frequency.exponentialRampToValueAtTime(38,t+dt+0.2);
-   var gg=g*(i?0.62:1);
-   v.gain.setValueAtTime(0.0001,t+dt);
-   v.gain.exponentialRampToValueAtTime(gg,t+dt+0.012);
-   v.gain.exponentialRampToValueAtTime(0.0001,t+dt+0.26);
-   o.connect(v);v.connect(out);o.start(t+dt);o.stop(t+dt+0.32);
-  });
- }
- /** تشيلّو مكتوم: منشار خلف مرشّح واطئ — جملة المافيا القصيرة */
- function cello(f,t,d,g){
-  var out=bus(0.65),o=ctx.createOscillator(),o2=ctx.createOscillator(),v=ctx.createGain(),lp=ctx.createBiquadFilter();
-  o.type='sawtooth';o.frequency.value=f;
-  o2.type='sawtooth';o2.frequency.value=f;o2.detune.value=-9;
-  lp.type='lowpass';lp.Q.value=2.2;
-  lp.frequency.setValueAtTime(240,t);
-  lp.frequency.linearRampToValueAtTime(880,t+d*0.45);
-  lp.frequency.linearRampToValueAtTime(300,t+d);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.linearRampToValueAtTime(g,t+0.22);        // قوس بطيء لا نقرة
-  v.gain.setValueAtTime(g,t+d*0.66);
-  v.gain.linearRampToValueAtTime(0.0001,t+d);
-  o.connect(v);o2.connect(v);v.connect(lp);lp.connect(out);
-  o.start(t);o.stop(t+d+0.1);o2.start(t);o2.stop(t+d+0.1);
- }
- /** جرس بعيد: جيبان بنسبة غير صحيحة يخبوان طويلًا — الساعة في ليل المدينة */
- function bell(f,t,g){
-  var out=bus(0.9),v=ctx.createGain();
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.exponentialRampToValueAtTime(g,t+0.01);
-  v.gain.exponentialRampToValueAtTime(0.0001,t+2.4);
-  [[1,1],[2.76,0.4],[5.4,0.16]].forEach(function(a){
-   var o=ctx.createOscillator(),vv=ctx.createGain();
-   o.type='sine';o.frequency.value=f*a[0];vv.gain.value=a[1];
-   o.connect(vv);vv.connect(v);o.start(t);o.stop(t+2.5);
-  });
-  v.connect(out);
- }
- /** عود: نقرة بمثلّث ومنشار خفيف مع انزلاق بسيط في أوّلها — نبرة الوتر المشدود */
- function oud(f,t,d,g){
-  var out=bus(0.42),o=ctx.createOscillator(),o2=ctx.createOscillator(),v=ctx.createGain(),lp=ctx.createBiquadFilter();
-  o.type='triangle';
-  o.frequency.setValueAtTime(f*0.985,t);
-  o.frequency.linearRampToValueAtTime(f,t+0.035);   // شدّ الوتر عند النقر
-  o2.type='sawtooth';o2.frequency.value=f*2.005;
-  lp.type='lowpass';lp.frequency.setValueAtTime(3000,t);
-  lp.frequency.exponentialRampToValueAtTime(620,t+d);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.exponentialRampToValueAtTime(g,t+0.008);
-  v.gain.exponentialRampToValueAtTime(0.0001,t+d);
-  var v2=ctx.createGain();v2.gain.value=0.16;o2.connect(v2);v2.connect(v);
-  o.connect(v);v.connect(lp);lp.connect(out);
-  o.start(t);o.stop(t+d+0.05);o2.start(t);o2.stop(t+d+0.05);
- }
- /** ناي: جيب يتموّج مع نَفَس خفيف — لحن المجلس */
- function ney(f,t,d,g){
-  var out=bus(0.7),o=ctx.createOscillator(),v=ctx.createGain(),lfo=ctx.createOscillator(),lg=ctx.createGain();
-  o.type='sine';o.frequency.value=f;
-  lfo.type='sine';lfo.frequency.value=5.1;lg.gain.value=f*0.007;   // تموّج خفيف كنَفَس العازف
-  lfo.connect(lg);lg.connect(o.frequency);
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.linearRampToValueAtTime(g,t+0.16);
-  v.gain.setValueAtTime(g,t+d*0.72);
-  v.gain.linearRampToValueAtTime(0.0001,t+d);
-  var br=ctx.createBufferSource(),bg=ctx.createGain(),bp=ctx.createBiquadFilter();
-  if(!nz){nz=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);var dd=nz.getChannelData(0);
-   for(var i=0;i<dd.length;i++)dd[i]=Math.random()*2-1}
-  br.buffer=nz;br.loop=true;bp.type='bandpass';bp.frequency.value=f*2.2;bp.Q.value=3;
-  bg.gain.value=g*0.10;
-  br.connect(bp);bp.connect(bg);bg.connect(v);
-  o.connect(v);v.connect(out);
-  o.start(t);o.stop(t+d+0.08);br.start(t);br.stop(t+d+0.08);
-  lfo.start(t);lfo.stop(t+d+0.08);
- }
- var nz=null;
- /** دفّ: ضربة جلد خفيفة — «دم» عميقة أو «تك» قصيرة */
- function frame(t,g,hi){
-  var out=bus(0.3),v=ctx.createGain(),f=ctx.createBiquadFilter();
-  if(!nz){nz=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);var dd=nz.getChannelData(0);
-   for(var i=0;i<dd.length;i++)dd[i]=Math.random()*2-1}
-  var sN=ctx.createBufferSource();sN.buffer=nz;
-  f.type=hi?'highpass':'lowpass';f.frequency.value=hi?2600:520;f.Q.value=hi?0.7:1.4;
-  v.gain.setValueAtTime(0.0001,t);
-  v.gain.exponentialRampToValueAtTime(g,t+0.006);
-  v.gain.exponentialRampToValueAtTime(0.0001,t+(hi?0.07:0.19));
-  sN.connect(f);f.connect(v);v.connect(out);
-  sN.start(t);sN.stop(t+0.3);
-  if(!hi){var o=ctx.createOscillator(),vv=ctx.createGain();
-   /* كان ١١٢ ← ٦٢ هرتز: نبضٌ منخفض يتكرّر مع كل ضربة، فيرتجّ غشاء السمّاعة
-      ارتجاجًا **إيقاعيًّا** — وهو ما سمعه المالك طنينًا كالتداخل لا كالنغمة.
-      فصار ٣٠٠ ← ١٧٠: ضربةٌ تُسمع نقرًا لا ارتجاجًا، ويمرّ أكثرها من المرشّح. */
-   o.type='sine';o.frequency.setValueAtTime(300,t);o.frequency.exponentialRampToValueAtTime(170,t+0.13);
-   vv.gain.setValueAtTime(0.0001,t);vv.gain.exponentialRampToValueAtTime(g*1.1,t+0.008);
-   vv.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
-   o.connect(vv);vv.connect(out);o.start(t);o.stop(t+0.24)}
- }
-
- /* ═══ القطعة ═══
-    ١٦ مازورة: أربع جُمَل، الأولى تعرّف اللحن والثانية تجيبه، والثالثة ترتفع
-    والرابعة تعود. الوتر يُمدّ مازورة كاملة، والقيثارة تنقر ثمانيات هادئة. */
- var CH=[   /* [نغمات الوتر, جهيره, نغمات القيثارة الستّ] */
-  /* الباص كان في الأوكتاف الأوّل والثاني (٥٥ إلى ٩٨ هرتز) — تحت ما تُصدره
-     سمّاعة الهاتف. فصعد أوكتافًا: يُسمع نغمةً بدل أن يُسمع ارتجاجًا. */
-  [['D4','F4','A4'],'D3',['D4','A4','D5','F5','D5','A4']],
-  [['A3','C4','F4'],'Bb2',['F4','Bb4','D5','F5','D5','Bb4']],
-  [['A3','C4','F4'],'F3', ['A4','C5','F5','A5','F5','C5']],
-  [['G3','C4','E4'],'C3', ['G4','C5','E5','G5','E5','C5']],
-  [['D4','F4','A4'],'D3', ['D4','A4','D5','F5','D5','A4']],
-  [['A3','D4','F4'],'Bb2',['F4','Bb4','D5','F5','D5','Bb4']],
-  [['G3','Bb3','D4'],'G3',['G4','Bb4','D5','G5','D5','Bb4']],
-  [['A3','C#4','E4'],'A2',['A4','C#5','E5','A5','E5','C#5']]
- ];
- /* اللحن: [النغمة, بداية بالنبضات من أوّل المازورة, طولها بالنبضات] — الصمت جزء منه */
- var MEL=[
-  [],                                          /* ١ تنفّس: الوتريّات وحدها */
-  [['A4',0,3],['F4',3,1]],                     /* ٢ */
-  [['A4',0,2],['C5',2,2]],                     /* ٣ */
-  [['G4',0,3.5]],                              /* ٤ */
-  [['D5',0,2],['C5',2,1],['A4',3,1]],          /* ٥ الجملة تعلو */
-  [['F5',0,3.5]],                              /* ٦ */
-  [['D5',0,1.5],['C5',1.5,1],['Bb4',2.5,1.5]], /* ٧ */
-  [['A4',0,3.5]]                               /* ٨ تستقرّ */
- ];
-
- /** مازورة القائمة — تُستدعى قبل موعدها بثانيتين */
- /* ═══ لحن القائمة — أُعيد تأليفه في ٦٫٣٦ ═══
-    الأوّل كان كامل الطبقات: وتريّات وقيثارة ونفخ وباصٌّ وطبل. وثلاث محاولاتٍ
-    لتهذيبه لم تُرضِ صاحبه: «والله تشوّه… خلاص أرجوك غيّره». فالتهذيب انتهى
-    والتأليف بدأ، وشرطُه الأوّل أن يُولد نظيفًا على سمّاعة هاتف لا أن يُنظَّف
-    بعد ولادته:
-
-      لا طبل ولا إيقاع    — النبض المنخفض المتكرّر كان مصدر الطنين الإيقاعيّ
-      لا باصّ             — أدنى نغمةٍ هنا D3 (١٤٧ هرتز)، وأكثر اللحن فوق ٢٥٠
-      ثلاث طبقاتٍ لا خمس  — وسادة، ونقرةٌ متفرّقة، ونايٌ يتنفّس في الثانية
-
-    وهو أهدأ: ٥٢ نبضة لا ٦٤، وثماني مازوراتٍ لا ستّ عشرة. والهدوء مقصود —
-    موسيقى قائمةٍ تُسمع دقائق طويلة، فالقليل فيها أبقى من الكثير. */
- var CALM=[
-  /* [وتر الوسادة, نغمات النقر, نغمة الناي] — كلّها فوق ١٤٠ هرتز */
-  [['D4','F4','A4'],   ['D5','A4','F5'],   'A4'],
-  [['C4','F4','A4'],   ['F5','C5','A4'],   'F4'],
-  [['Bb3','D4','F4'],  ['D5','F5','Bb4'],  'D5'],
-  [['A3','C4','E4'],   ['E5','C5','A4'],   'C5'],
-  [['D4','F4','A4'],   ['A4','D5','F5'],   'D5'],
-  [['G3','Bb3','D4'],  ['Bb4','D5','G5'],  'Bb4'],
-  [['A3','C#4','E4'],  ['E5','A4','C#5'],  'A4'],
-  [['D4','F4','A4'],   ['F5','D5','A4'],   'F4']
- ];
- function barMenu(i,t,B,BT){
-  var r=CALM[i%8];
-  /* الوسادة: الوتر يتنفّس المازورة كلّها — هي الأساس، وتتداخل مع التي بعدها */
-  r[0].forEach(function(n){pad(hz(n),t,B*1.04,0.050)});
-  /* النقر: ثلاث نقراتٍ متفرّقة لا ستّ متلاحقة — الفراغ بينها هو الهدوء */
-  r[1].forEach(function(n,k){pluck(hz(n),t+(k*2+1)*(B/6),1.05,0.046)});
-  /* الناي: نفَسٌ واحد في كل مازورةٍ ثانية — فلا يزدحم الهواء */
-  if(i%2===1)ney(hz(r[2]),t+BT*0.6,BT*2.4,0.040);
- }
-
- /* ═══ لحن المافيا ═══
-    لا الصغرى بثانية منخفضة (Bb): مقام فريجيّ — أشدّ ظلمةً من الصغرى العادية.
-    ٥٢ نبضة في الدقيقة، ثمان مازورات (نحو ٣٧ ثانية). لا لحن يُغنّى: طنين يقبض،
-    نبض قلب بطيء، وتشيلّو يقول جملتين قصيرتين، وجرس بعيد يدقّ مرّتين في الدورة.
-    و«الليل» هو المشهد نفسه بلا تشيلّو وبنصف الشدّة — الصمت جزء من الخوف. */
- var MF_DRONE=['A2','A2','Bb2','Bb2','A2','A2','F2','E2'];
- var MF_CELLO=[               /* [نغمة, بداية بالنبضات, طول] لكل مازورة */
-  [],
-  [['A3',1,2.4]],
-  [['Bb3',0,1.6],['A3',2,1.8]],
-  [],
-  [['C4',1,2.2]],
-  [['Bb3',0,2.6]],
-  [['F3',0,3.2]],
-  [['E3',0,3.4]]
- ];
- function barMafia(i,t,B,BT,night){
-  var k=i%8, g=night?0.55:1;
-  drone(hz(MF_DRONE[k]),t,B*1.02,0.075*g);
-  drone(hz(MF_DRONE[k].replace(/\d$/,function(d){return +d+1})),t,B*1.02,0.030*g);
-  heart(t,0.115*g);                                 /* ضربة القلب أوّل كل مازورة */
-  if(!night&&(k===3||k===7))heart(t+BT*2,0.070);
-  if(!night)MF_CELLO[k].forEach(function(m){cello(hz(m[0]),t+m[1]*BT,m[2]*BT,0.055)});
-  if(k===0)bell(hz('A4'),t+BT*0.5,night?0.020:0.032);
-  if(k===4)bell(hz('E4'),t+BT*0.5,night?0.015:0.024);
- }
-
- /* ═══ لحن المجلس ═══
-    حجاز على رِي (D Eb F# G A Bb C): المقام الذي يُعرف من نغمتين — مجلس ومساء
-    وفضول. ٧٢ نبضة، ثمان مازورات (نحو ٢٧ ثانية). عود ينقر بالدور، ناي يجيبه،
-    ودفّ خفيف: «دم» على الواحد و«تك» على الثالث. */
- var BR_BASS=['D3','D3','G3','G3','Bb2','A2','D3','A2'];
- var BR_OUD=[                 /* ستّ نقرات في المازورة */
-  ['D4','Eb4','F#4','G4','F#4','Eb4'],
-  ['D4','A4','G4','F#4','Eb4','D4'],
-  ['G4','Bb4','A4','G4','F#4','G4'],
-  ['G4','A4','Bb4','A4','G4','F#4'],
-  ['Bb4','A4','G4','F#4','Eb4','D4'],
-  ['A4','G4','F#4','Eb4','D4','Eb4'],
-  ['D4','F#4','A4','D5','A4','F#4'],
-  ['A4','G4','F#4','Eb4','D4','D4']
- ];
- var BR_NEY=[
-  [], [['A4',2,1.8]], [], [['Bb4',1,2.4]],
-  [['A4',0,2.2]], [['F#4',2,1.6]], [], [['D4',0,3.2]]
- ];
- function barBarra(i,t,B,BT){
-  var k=i%8;
-  bass(hz(BR_BASS[k]),t,B*0.92,0.11);
-  pad(hz(BR_BASS[k].replace(/\d$/,function(d){return +d+2})),t,B*0.98,0.026);
-  frame(t,0.085,false);                    /* دم */
-  frame(t+BT*2,0.055,true);                /* تك */
-  if(k%2===1)frame(t+BT*3.5,0.035,true);
-  BR_OUD[k].forEach(function(n,j){oud(hz(n),t+j*(B/6),0.62,0.044)});
-  BR_NEY[k].forEach(function(m){ney(hz(m[0]),t+m[1]*BT,m[2]*BT,0.044)});
- }
-
- /* ═══ المشاهد: لكل واحد إيقاعه وعدد مازوراته وراسمه ═══ */
- var SCENES={
-  menu: {bpm:52,bars:8,draw:barMenu},
-  mafia:{bpm:52,bars:8, draw:function(i,t,B,BT){barMafia(i,t,B,BT,false)}},
-  night:{bpm:52,bars:8, draw:function(i,t,B,BT){barMafia(i,t,B,BT,true)}},
-  majlis:{bpm:72,bars:8, draw:barBarra}
- };
- var cur='menu';
- function schedule(i,t){
-  var sc=SCENES[cur]||SCENES.menu;
-  var b=60/sc.bpm*4;
-  sc.draw(i%sc.bars,t,b,b/4);
- }
-
- /* ═══ التوليد المسبق ═══
-    كان اللحن يُركَّب حيًّا: كل نغمةٍ مذبذبٌ ومرشّحٌ وعقدتا كسب، فبلغت الأصوات
-    العازفة في اللحظة الواحدة **إحدى وأربعين** — قياسًا لا تقديرًا. والحاسوب
-    يحتملها، ومعالج الهاتف لا يلحقها وهو يرسم اللعبة معها، فيتأخّر عن موعد
-    الإطار الصوتيّ فيُسمع تقطّعًا وخشونة. وليس قصًّا: أعلى قيمةٍ في المخرج
-    ٠٫٣٠ من ١٫٠ ونسبة القصّ صفر.
-    فاللحن دورةٌ تتكرّر بلا تغيّر، وتوليدُ ما لا يتغيّر في كل مرّة عبث:
-    يُولَّد مرّةً في سياقٍ غير حيّ (OfflineAudioContext) ثم يُعزف مقطعًا واحدًا
-    مكرَّرًا — فتصير الأصوات العازفة **واحدًا**، وكلفة العزف لا شيء.
-    وإن تعذّر التوليد (متصفّح قديم أو ذاكرة) رجعنا إلى التركيب الحيّ كما كان. */
- var OAC=W&&(W.OfflineAudioContext||W.webkitOfflineAudioContext);
- function bakeScene(name){
-  if(baked[name])return Promise.resolve(baked[name]);
-  if(!OAC||!ctx)return Promise.resolve(null);
-  var sc=SCENES[name];if(!sc)return Promise.resolve(null);
-  var b=60/sc.bpm*4, loop=sc.bars*b, tail=2.2, rate=ctx.sampleRate||44100;
-  var frames=Math.ceil((loop+tail)*rate);
-  if(frames>rate*90)return Promise.resolve(null);      // حارسٌ للذاكرة
-  var oc;try{oc=new OAC(2,frames,rate)}catch(e){return Promise.resolve(null)}
-  var keep={ctx:ctx,master:master,verb:verb,cur:cur};
-  try{
-   ctx=oc;cur=name;
-   master=oc.createGain();master.gain.value=1;
-   var wet=oc.createGain();wet.gain.value=0.34;
-   verb=reverb(oc);verb.connect(wet);wet.connect(master);
-   master.connect(oc.destination);
-   for(var i=0;i<sc.bars;i++)schedule(i,i*b);
-  }catch(e){ctx=keep.ctx;master=keep.master;verb=keep.verb;cur=keep.cur;return Promise.resolve(null)}
-  ctx=keep.ctx;master=keep.master;verb=keep.verb;cur=keep.cur;
-  return oc.startRendering().then(function(buf){
-   /* الذيل يُطوى على البداية فلا تُسمع فجوةٌ عند إعادة الدورة */
-   var n=Math.floor(loop*rate),tl=Math.min(buf.length-n,Math.floor(tail*rate));
-   for(var ch=0;ch<buf.numberOfChannels;ch++){
-    var d=buf.getChannelData(ch);
-    for(var j=0;j<tl;j++)d[j]+=d[n+j];
-   }
-   baked[name]={buf:buf,loop:loop};
-   return baked[name];
-  }).catch(function(){return null});
- }
- /** يعزف الدورة المُولَّدة — مصدرٌ واحد بدل إحدى وأربعين */
- function play(name){
-  return bakeScene(name).then(function(bk){
-   if(!bk||!on||!ctx)return false;
-   stopSrc();
-   srcGain=ctx.createGain();srcGain.gain.value=1;srcGain.connect(master);
-   src=ctx.createBufferSource();src.buffer=bk.buf;
-   src.loop=true;src.loopStart=0;src.loopEnd=bk.loop;
-   src.connect(srcGain);src.start();
-   if(timer){W.clearInterval(timer);timer=null}   // لا جدولة حيّة بعد اليوم
-   return true;
-  });
- }
- function stopSrc(){
-  if(src){try{src.stop()}catch(e){}try{src.disconnect()}catch(e){}src=null}
-  if(srcGain){try{srcGain.disconnect()}catch(e){}srcGain=null}
- }
-
- /** الحارس: يجدول ما يقترب موعده ثم ينام — لا حساب في كل إطار */
- function tick(){
-  if(!on||!ctx)return;
-  var now=ctx.currentTime,sc=SCENES[cur]||SCENES.menu,b=60/sc.bpm*4;
-  while(barAt<now+2.2){
-   try{schedule(bar%sc.bars,barAt)}catch(e){}
-   barAt+=b;bar++;
-  }
-  try{sweep()}catch(e){}
- }
- /** تبديل اللحن بتلاشٍ متقاطع: القديم يخبو بينما الجديد يدخل — لا قطع */
- function scene(name){
-  if(!SCENES[name]||name===cur)return cur;
-  cur=name;bar=0;
-  if(!on||!ctx)return cur;
-  try{
-   var t=ctx.currentTime;
-   master.gain.cancelScheduledValues(t);
-   master.gain.setValueAtTime(master.gain.value,t);
-   master.gain.linearRampToValueAtTime(0.0001,t+0.75);
-   master.gain.linearRampToValueAtTime(level(),t+2.6);
-   barAt=t+0.85;
-   if(src)play(cur);else tick();
-  }catch(e){}
-  return cur;
- }
- function now(){return cur}
  function level(){return ducked?DUCK:VOL}
 
  function start(){
   var okNow=false;try{okNow=!!enabled()}catch(e){}
   if(!okNow||on)return false;
-  var c=build();if(!c)return false;
-  if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
+  if(!build())return false;
   on=true;
-  barAt=c.currentTime+0.35;bar=0;
-  master.gain.cancelScheduledValues(c.currentTime);
-  master.gain.setValueAtTime(0.0001,c.currentTime);
-  master.gain.linearRampToValueAtTime(level(),c.currentTime+3.2);   // يدخل من بعيد لا يقتحم
-  /* المُولَّد أوّلًا. وريثما يُولَّد أوّل مرّة (أجزاء من الثانية) يعزف الحيُّ
-     فلا تبدأ اللعبة صامتة، ثم يتوقّف الجدول حين يجهز. */
-  tick();
-  timer=W.setInterval(tick,700);
-  play(cur).then(function(ok){if(!ok&&on&&!timer)timer=W.setInterval(tick,700)});
+  try{
+   el.volume=0;
+   var pr=el.play();
+   if(pr&&pr.catch)pr.catch(function(){on=false});
+  }catch(e){on=false;return false}
+  fade(level(),FADE*3);               // يدخل من بعيد لا يقتحم
   return true;
  }
  function stop(){
-  if(!on)return;
+  if(!on||!el)return;
   on=false;
-  if(timer){W.clearInterval(timer);timer=null}
-  if(!ctx)return;
-  var t=ctx.currentTime;
-  try{
-   master.gain.cancelScheduledValues(t);
-   master.gain.setValueAtTime(master.gain.value,t);
-   master.gain.linearRampToValueAtTime(0.0001,t+1.1);               // يخرج بتلاشٍ لا بقطع
-  }catch(e){}
-  /* التلاشي ثانية، وأطول ذيلٍ مجدوَل أربع — فبعد ستٍّ لم يبقَ ما يُسمع،
-     وترك الرسم معلّقًا حتى التشغيل التالي يثقل بلا فائدة. */
-  W.setTimeout(function(){
-   if(on)return;
-   stopSrc();
-   for(var i=0;i<live.length;i++){try{live[i].g.disconnect();live[i].s.disconnect()}catch(e){}}
-   live.length=0;
-  },6000);
+  fade(0,FADE,function(){try{el.pause()}catch(e){}});
  }
- /** أثناء اللعب تنخفض ولا تُقطع — فإن خرجتَ عادت كما كانت */
  function duck(v){
   ducked=!!v;
-  if(!on||!ctx)return;
-  try{
-   var t=ctx.currentTime;
-   master.gain.cancelScheduledValues(t);
-   master.gain.setValueAtTime(master.gain.value,t);
-   master.gain.linearRampToValueAtTime(level(),t+0.9);
-  }catch(e){}
+  if(!on||!el)return;
+  fade(level(),320);
  }
- /** يتبع الإعداد: يبدأ إن فُتح ويقف إن أُغلق */
+ /** مشهدٌ بمقطعٍ آخر يُبدَّل بتلاشٍ متقاطع؛ ومشهدٌ بلا مقطع يبقى على الحاليّ */
+ function scene(name){
+  if(name===cur)return cur;
+  var src=TRACK[name];
+  cur=name;
+  if(!src||!el||!on)return cur;
+  fade(0,420,function(){
+   try{el.src=src;el.load();var pr=el.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}
+   fade(level(),620);
+  });
+  return cur;
+ }
+ function playing(){return on&&!!el&&!el.paused}
+ function now(){return cur}
+ function available(){return !!(W&&W.document&&W.document.createElement);}
+
+ /** يتبع إعداد اللاعب: يبدأ إن فُتح ويقف إن أُغلق.
+     وهي مدخل اللعبة الوحيد للموسيقى — تُنادى عند الإقلاع وعند كل إشارة
+     وعند العودة من الخلفية. وسقوطُها من الواجهة يُسكت الموسيقى كلّها،
+     فحارس الغلاف يفحص وجودها بالاسم. */
  function sync(){
   var want=false;try{want=!!enabled()}catch(e){}
   if(want&&!on)return start();
   if(!want&&on)stop();
+  /* مشغّلةٌ لكن العنصر متوقّف (أوقفه النظام أو فشل التشغيل التلقائيّ):
+     هذه هي «الصوت يروح» — فتُعاد المحاولة عند كل نداء. */
+  if(want&&on&&el&&el.paused){try{var pr=el.play();if(pr&&pr.catch)pr.catch(function(){})}catch(e){}}
   return on;
  }
- function playing(){return on}
- function available(){return !!AC()}
 
- return {init:init,start:start,stop:stop,duck:duck,sync:sync,scene:scene,now:now,
-  playing:playing,available:available,
-  _scenes:Object.keys(SCENES),
-  _len:function(k){var sc=SCENES[k||cur]||SCENES.menu;return 60/sc.bpm*4*sc.bars}};
+ return {init:init,start:start,stop:stop,duck:duck,sync:sync,scene:scene,
+  playing:playing,available:available,now:now};
 })();
-if(typeof module!=='undefined'&&module.exports)module.exports=MUSIC;
