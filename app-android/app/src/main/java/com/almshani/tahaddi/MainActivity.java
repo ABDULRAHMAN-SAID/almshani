@@ -5,9 +5,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Base64;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.CookieManager;
@@ -179,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
   root.setBackgroundColor(Color.parseColor("#080B14"));
   root.addView(web);
   setContentView(root);
+  preferHighRefresh();
 
   /* من أندرويد ١٥ النافذة ممتدّة من حافة إلى حافة؛ نُبعد الصفحة عن الشريطين واللوحة بأنفسنا
      بدل الاعتماد على env(safe-area-inset-*) التي لا يملؤها WebView على كلّ الأجهزة */
@@ -201,6 +204,27 @@ public class MainActivity extends AppCompatActivity {
 
   if (saved != null) web.restoreState(saved);
   else web.loadUrl(startUrl());
+ }
+
+ /**
+  * ٦٫٦٥ — «ارفع الفريمات بحيث تكون ١٢٠ في الثانية»: كثيرٌ من الهواتف تُبقي التطبيقات على ٦٠ هرتز ما لم تطلب
+  * غيره. نطلب أعلى معدّل تحديثٍ تدعمه الشاشة بالدقّة نفسها (١٢٠ أو ٩٠ أو ١٤٤)، وWebView يرسم بمعدّلها.
+  */
+ private void preferHighRefresh() {
+  try {
+   Display d = getWindowManager().getDefaultDisplay();
+   Display.Mode cur = d.getMode(), best = cur;
+   for (Display.Mode m : d.getSupportedModes()) {
+    if (m.getPhysicalWidth() == cur.getPhysicalWidth() && m.getPhysicalHeight() == cur.getPhysicalHeight()
+     && m.getRefreshRate() > best.getRefreshRate()) best = m;
+   }
+   android.view.WindowManager.LayoutParams lp = getWindow().getAttributes();
+   lp.preferredDisplayModeId = best.getModeId();
+   if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) lp.preferredRefreshRate = best.getRefreshRate();
+   getWindow().setAttributes(lp);
+  } catch (Exception e) {
+   /* جهازٌ لا يكشف أنماط شاشته: يبقى على ما يختاره النظام */
+  }
  }
 
  /** الجسر الوحيد بين الصفحة وأندرويد. صنف داخليّ معلن عامًّا لأنّ WebView يستدعيه بالانعكاس. */
