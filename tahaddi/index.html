@@ -1751,10 +1751,6 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .csMid span.hot{color:#FFC9C7}
 .csMid small{font-size:9.5px;font-weight:800;color:#8E9AB3;margin-top:-3px}
 @media (max-width:380px){.csSeg{padding:8px 9px}.csMid b{font-size:10px}.csVal b{font-size:19px}}
-/* صورة اللاعب عند طرف شريط التحريك */
-.caSlAv{position:absolute;left:calc(12% - 22px);top:94.1%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;overflow:hidden;z-index:2;pointer-events:none;
- border:2.5px solid #E8B23A;box-shadow:0 0 0 3px rgba(14,26,48,.9),0 6px 14px rgba(0,0,0,.5);background:#16233D}
-.caSlAv svg{width:100%;height:100%;display:block}
 /* رسالة الإدخال: تظهر فوق اللوح لحظةً ثمّ تخفت */
 .caEnd{position:absolute;inset:0;z-index:5;display:flex;overflow:auto;padding:8px;box-sizing:border-box;background:rgba(5,8,16,.62);backdrop-filter:blur(2px)}
 .caEnd.in{animation:fi .25s ease}
@@ -1785,6 +1781,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  background:radial-gradient(circle at 35% 30%,#233A63,#0F1B31);border:1.5px solid rgba(140,170,220,.45);box-shadow:0 6px 14px rgba(0,0,0,.45)}
 .caRnd:active{transform:scale(.94)}
 .caBot .caStat{flex:1;margin:0;font-size:12px}
+.caSp{width:48px;flex-shrink:0}   /* يوازن زرّ التفاعل فيبقى سطر الدور في الوسط */
 /* قائمة الإعدادات */
 .cmBox{max-width:330px}
 .cmRow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;margin-top:8px;border-radius:13px;cursor:pointer;color:#FFE9A8;
@@ -24791,7 +24788,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.58';
+const APP_VER='6.59';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -28387,11 +28384,11 @@ function rmCarrom(R){
  </div>
  <div class="caWrap big${duo?' duo':''}"><canvas id="caC" width="720" height="816"></canvas>
   ${seat.map(chip).join('')}
-  <span class="caSlAv">${avatarArt(38)}</span>
   ${msg&&RM.phase!=='over'?`<div class="caFloat" key="${esc(msg).length}">${msg}</div>`:''}
   ${RM.phase==='over'?caMatchEnd(C):''}</div>
  <div class="caBot">
-  <button class="caRnd" onclick="caRulesSheet()" aria-label="القوانين">${ico('book',20)}</button>
+  <!-- ٦٫٥٩: زرّ القوانين وصورتي على الشريط أُزيلا («يحجب السفلي») — القوانين في قائمة الترس، وصورتي في لوحة النتيجة -->
+  <i class="caSp"></i>
   <div class="caStat${mine?' me':''}">${RM.phase==='over'?'<b>انتهت المباراة</b>':mine?'<b>دورك</b> — اسحب على اللوح وأفلت':'دور <b>'+esc(nm(C.turn))+'</b> — يصوّب…'}</div>
   <button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${face(myEmoteDeck()[0]||'laugh',22)}</button>
  </div>`;
