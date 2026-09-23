@@ -123,6 +123,28 @@ var SFX=(function(){
   return true;
  }
  function slideStop(){if(!SL)return;var s=SL;SL=null;try{s.g.gain.value=0.0001;s.src.stop()}catch(e){}}
+ /* ── حفيف تحريك الضارب (٦٫٦٧) ──
+    «حتى عند سحب الجيس… هناك صوتٌ جميل»: من التسجيل نفسه (orig_move، −٣٧ dB عن أعلى طقّة). يعلو بسرعة
+    الإصبع على الشريط أو في السحب للتصويب، ويسكت حين يقف الإصبع. قبل وصول الملفّ: صمت */
+ var MV=null;
+ function move(level){
+  var on=false;try{on=!!enabled()}catch(e){}
+  var c=ctx, rs=SPR.carrom&&SPR.carrom.buf&&SPR.carrom.seg.orig_move;
+  if(!on||!c||!rs||!rs.length){if(MV){try{MV.src.stop()}catch(e){}MV=null}return false}
+  level=Math.max(0,Math.min(1,+level||0));
+  var now=c.currentTime;
+  if(level<=0.001){if(MV)MV.g.gain.setTargetAtTime(0.0001,now,0.05);return true}
+  if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
+  if(!MV){
+   var src=c.createBufferSource(),g=c.createGain();
+   src.buffer=SPR.carrom.buf;src.loop=true;src.loopStart=rs[0][0];src.loopEnd=rs[0][0]+rs[0][1]-0.002;
+   g.gain.value=0.0001;src.connect(g);g.connect(c.destination);
+   try{src.start(0,rs[0][0]+Math.random()*(rs[0][1]-0.3))}catch(e){return false}
+   MV={src:src,g:g};
+  }
+  MV.g.gain.setTargetAtTime(Math.pow(level,0.8),now,0.03);
+  return true;
+ }
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
@@ -216,7 +238,7 @@ var SFX=(function(){
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,style:style,available:available,hapticAvailable:hapticAvailable,
+ return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,move:move,style:style,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;

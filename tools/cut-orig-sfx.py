@@ -87,6 +87,19 @@ out[-xf:]=out[-xf:]*np.sqrt(1-g)+head*np.sqrt(g)             # الحلقة: آ�
 out*=0.1/np.sqrt(np.mean(out**2))
 segs['orig_roll']=[len(out)]; parts.append(out)
 
+# ٦٫٦٧ — «حتى عند سحب الجيس… اسمع الفيديو، هناك صوتٌ جميل»: بين الضربات في التسجيل حفيفٌ متّصل (١–٨ ك.هرتز، بلا
+# طقّات) وقتَ يحرّك صاحبُ اللعبة ضاربه ويسحب للتصويب — وحركات الخصم صامتة في الفيديو (٢٫٣–٤٫٨ث). أربع فتراتٍ منه
+# تُسطَّح وتوصل حلقةً كالزحف؛ مستواه يضبطه build-sfx.py (−٣٧ dB عن أعلى طقّة، مقيسًا)
+MOVE=[(5.30,6.40),(11.10,11.60),(12.25,12.70),(20.25,20.85)]
+mv=flat(*MOVE[0])
+for (t0,t1) in MOVE[1:]:
+    r=flat(t0,t1); g=np.linspace(0,1,xf)
+    mv=np.concatenate([mv[:-xf],mv[-xf:]*np.sqrt(1-g)+r[:xf]*np.sqrt(g),r[xf:]])
+head=mv[:xf].copy(); mv=mv[xf:]; g=np.linspace(0,1,xf)
+mv[-xf:]=mv[-xf:]*np.sqrt(1-g)+head*np.sqrt(g)
+mv*=0.1/np.sqrt(np.mean(mv**2))
+segs['orig_move']=[len(mv)]; parts.append(mv)
+
 # السقوط في الجيب: من طقّات التسجيل نفسها
 from scipy.signal import butter,sosfilt
 def pot(tw,th):
@@ -111,6 +124,6 @@ data=np.concatenate(parts)
 i16=(np.clip(data,-1,1)*32767).astype(np.int16)
 wavfile.write(os.path.join(OUT,'orig.wav'),32000,i16)
 json.dump({'rate':32000,'order':list(segs.keys()),'len':segs,
-           'src':'تسجيل صاحب اللعبة (6def8aa) — الأزمنة: '+'; '.join('%s@%s'%(n,','.join('%.3f'%c[0] for c in l)) for n,l in CUTS)+'; orig_roll@'+','.join('%.2f–%.2f'%r for r in ROLL)+'; orig_pot=wall(8.113|3.396)↓+hit(2.460|16.774)'},
+           'src':'تسجيل صاحب اللعبة (6def8aa) — الأزمنة: '+'; '.join('%s@%s'%(n,','.join('%.3f'%c[0] for c in l)) for n,l in CUTS)+'; orig_roll@'+','.join('%.2f–%.2f'%r for r in ROLL)+'; orig_pot=wall(8.113|3.396)↓+hit(2.460|16.774); orig_move@'+','.join('%.2f–%.2f'%r for r in MOVE)},
           open(os.path.join(OUT,'orig.json'),'w'),ensure_ascii=False,indent=1)
 print('✓ tools/sfx-src/orig.wav — %.2f ث · %s'%(len(data)/32000,', '.join('%s×%d'%(k,len(v)) for k,v in segs.items())))

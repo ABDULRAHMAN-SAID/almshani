@@ -136,13 +136,16 @@ _oc={}; _i=0
 for _name in _oj['order']:
     _oc[_name]=[]
     for _n in _oj['len'][_name]: _oc[_name].append(_ow[_i:_i+_n].copy()); _i+=_n
-_pk=max(np.max(np.abs(y)) for k,l in _oc.items() if k!='orig_roll' for y in l)
+_pk=max(np.max(np.abs(y)) for k,l in _oc.items() if k not in('orig_roll','orig_move') for y in l)
 _k=0.9/_pk
 def _rms20(y):
     n=int(0.02*SR); return max(np.sqrt(np.mean(y[i:i+n]**2)) for i in range(0,max(1,len(y)-n),n//4))
-_loud=max(_rms20(y*_k) for k,l in _oc.items() if k!='orig_roll' for y in l)
+_loud=max(_rms20(y*_k) for k,l in _oc.items() if k not in('orig_roll','orig_move') for y in l)
 for _name in _oc:
-    if _name=='orig_roll':
+    if _name=='orig_move':
+        # حفيف تحريك الضارب: −٣٧ dB عن أعلى طقّة (المئين ٩٠ في التسجيل) — ٦٫٦٧
+        _r=_oc[_name][0]; _r*=(_loud*10**(-37/20))/np.sqrt(np.mean(_r**2)); _oc[_name]=[_r]
+    elif _name=='orig_roll':
         # الزحف في التسجيل أخفض من أعلى طقّةٍ بنحو ٣٠ dB (جذر متوسّط ٢٠ م.ث) — يُحفظ عند −٢٨ dB
         # فيكون هذا مستواه حين تتحرّك القطع كلّها (slide(1))، وأخفض كلّما هدأت
         _r=_oc[_name][0]; _r*=(_loud*10**(-28/20))/np.sqrt(np.mean(_r**2)); _oc[_name]=[_r]
