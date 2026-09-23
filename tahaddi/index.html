@@ -24896,7 +24896,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.84';
+const APP_VER='6.85';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27947,9 +27947,9 @@ const CA_SPR={};
    لا تدرّج شعاعيّ ولا بريق: ذاك ما كان يجعلها كرات.
    تُرسم مرّةً بضعف الدقّة وتُصغَّر عند النسخ — فتبقى الأخاديد حادّةً على الهاتف. */
 const CA_WOOD={
- w:{face:'#F2DEB2',lo:'#E3C690',edge:'#A98352',groove:'rgba(92,58,22,.50)',lit:'rgba(255,248,230,.55)',grain:'rgba(150,104,52,',gA:.10},
- b:{face:'#2A2624',lo:'#1C1918',edge:'#0B0909',groove:'rgba(0,0,0,.62)',lit:'rgba(255,255,255,.13)',grain:'rgba(90,80,72,',gA:.16},
- q:{face:'#BE2A32',lo:'#A21F27',edge:'#5E0E14',groove:'rgba(60,4,8,.55)',lit:'rgba(255,190,180,.30)',grain:'rgba(120,20,26,',gA:.18},
+ w:{face:'#F8F1E2',lo:'#E9DCC0',edge:'#B39A74',groove:'rgba(110,80,44,.36)',lit:'rgba(255,255,250,.70)',grain:'rgba(170,130,80,',gA:.06},
+ b:{face:'#2B2A2C',lo:'#141315',edge:'#050505',groove:'rgba(0,0,0,.70)',lit:'rgba(255,255,255,.16)',grain:'rgba(100,96,100,',gA:.10},
+ q:{face:'#D0303A',lo:'#A81E28',edge:'#5E0E14',groove:'rgba(60,4,8,.55)',lit:'rgba(255,190,180,.30)',grain:'rgba(120,20,26,',gA:.18},
  /* ٦٫٥٧ — «لون الجيس أريده مختلف»: الضارب كان عاجيًّا كالقطع البيضاء فيختلط بها. الآن أزرق ملكيّ بنقشٍ ذهبيّ */
  s:{face:'#2F63B8',lo:'#1F4A93',edge:'#0E2550',groove:'rgba(6,18,48,.62)',lit:'rgba(190,220,255,.42)',grain:'rgba(12,30,70,',gA:.10,gold:'#E8B23A'}
 };
@@ -28019,16 +28019,24 @@ function caDisc(t,r){
  x.restore();
  // شطفة الحافّة العلويّة: خيطٌ مضيء في جهة الضوء وخيطٌ معتم حول الإطار
  x.beginPath();x.arc(X,Y,R-Q*.6,Math.PI*.95,Math.PI*1.8);x.strokeStyle=P.lit;x.lineWidth=Q*1.1;x.stroke();
- /* ٦٫٨٢ — «القطع صارت كرتونيّة، أريدها واقعيّة»: خشبٌ حقيقيّ (عرقٌ وأخاديد محفورة) تحت طبقة ورنيشٍ ناعمة —
-    لمعةٌ منتشرة من أعلى اليسار تتلاشى بلا حدود، وانحناءٌ خفيف يعتم نحو أسفل اليمين. لا أشرطة ولا أقواس بيضاء، ولا ظلّ */
+ /* ٦٫٨٢ — «القطع صارت كرتونيّة، أريدها واقعيّة»، و٦٫٨٥ — «رجعت لأشياء قديمة»: ورنيش ٦٫٨٢ كان خافتًا فبدت القطع
+    كقطع ٦٫٧٩ نفسها. الآن خشبٌ حقيقيّ تحت طلاءٍ لامعٍ واضح كقطع اللعبة المرجعيّة، وكلّه تدرّجاتٌ ناعمة بلا أشرطة
+    ولا أقواسٍ مرسومة (هي ما جعل ٦٫٨٠ كرتونيّة): ١) قبّةٌ خفيفة: ضوءٌ من أعلى اليسار يعتم نحو الحافّة المقابلة،
+    ٢) انعكاسُ نافذةٍ ناعمٌ بيضاويّ يتلاشى بلا حدّ، ٣) ارتدادُ ضوءٍ خافتٌ على الحافّة السفلى. ولا ظلّ */
  {x.save();x.beginPath();x.arc(X,Y,R,0,7);x.clip();
-  const dk=t==='b';
-  const hl=x.createRadialGradient(X-R*.38,Y-R*.42,R*.04,X-R*.22,Y-R*.26,R*1.05);
-  hl.addColorStop(0,'rgba(255,255,255,'+(dk?.20:.30)+')');hl.addColorStop(.35,'rgba(255,255,255,'+(dk?.07:.10)+')');hl.addColorStop(1,'rgba(255,255,255,0)');
-  x.fillStyle=hl;x.fillRect(X-R,Y-R,R*2,R*2);
-  const vg=x.createRadialGradient(X-R*.18,Y-R*.22,R*.35,X,Y,R*1.02);
-  vg.addColorStop(.62,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,'+(dk?.30:.18)+')');
-  x.fillStyle=vg;x.fillRect(X-R,Y-R,R*2,R*2);
+  const dk=t==='b', lx=X-R*.34, ly=Y-R*.40;
+  const dm=x.createRadialGradient(lx,ly,R*.05,lx,ly,R*1.55);
+  dm.addColorStop(0,'rgba(255,255,255,'+(dk?.20:.26)+')');dm.addColorStop(.32,'rgba(255,255,255,0)');
+  dm.addColorStop(.62,'rgba(0,0,0,0)');dm.addColorStop(1,'rgba(0,0,0,'+(dk?.50:.26)+')');
+  x.fillStyle=dm;x.fillRect(X-R,Y-R,R*2,R*2);
+  x.save();x.translate(lx,ly);x.rotate(-Math.PI/4);x.scale(1,.55);
+  const sp=x.createRadialGradient(0,0,0,0,0,R*.46);
+  sp.addColorStop(0,'rgba(255,255,255,'+(dk?.80:.92)+')');sp.addColorStop(.28,'rgba(255,255,255,'+(dk?.42:.50)+')');
+  sp.addColorStop(.62,'rgba(255,255,255,'+(dk?.07:.10)+')');sp.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=sp;x.fillRect(-R,-R,R*2,R*2);x.restore();
+  const bx=X+R*.52, by=Y+R*.58, bo=x.createRadialGradient(bx,by,0,bx,by,R*.5);
+  bo.addColorStop(0,'rgba(255,255,255,'+(dk?.16:.14)+')');bo.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=bo;x.fillRect(X-R,Y-R,R*2,R*2);
   x.restore()}
  x.beginPath();x.arc(X,Y,R-th*.5,0,7);x.strokeStyle=P.edge;x.lineWidth=th;x.stroke();          // حافّةٌ ملوّنةٌ حادّة
  x.beginPath();x.arc(X,Y,R-Q*.45,0,7);x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=Q*.9;x.stroke();   // خيطٌ داكنٌ رفيع يفصلها عن الخشب
