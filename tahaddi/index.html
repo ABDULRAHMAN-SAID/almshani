@@ -629,7 +629,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .mfRoles{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px;margin-top:10px;text-align:start}
 .mfRole{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid var(--rc);border-radius:10px;padding:6px 9px;font-size:11.5px;min-height:36px}
 .mfRole b{color:var(--rc);margin-inline-start:auto;font-size:11.5px}
-/* ضد الكمبيوتر — رقاقات اللاعبين والحوار والأصوات ولوحة الرسم */
+/* ضد الذكاء الاصطناعي — رقاقات اللاعبين والحوار والأصوات ولوحة الرسم */
 .vbGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
 .vbGrid.g3{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .vbScene.full.picking .vbFeedW{max-height:66px}
@@ -1714,26 +1714,55 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caSeat.rgt,.caSeat.lft{padding-top:2px;padding-bottom:2px}
 .caSeat.rgt{right:0;top:44%;transform:translate(calc(50% - 10px),-50%) rotate(-90deg)}
 .caSeat.lft{left:0;top:44%;transform:translate(calc(-50% + 10px),-50%) rotate(90deg)}
-/* شريط القوانين فوق اللوح: لونك، وحال الملكة، وباب القانون */
-.caBar{display:flex;align-items:center;gap:7px;margin:4px 0 9px;flex-wrap:wrap;
- font-size:10.5px;font-weight:800}
-.caMine{display:flex;align-items:center;gap:5px;padding:5px 10px;border-radius:10px;
- background:rgba(232,178,58,.12);border:1px solid rgba(232,178,58,.3);color:#FFE9A8}
-.caQ{padding:5px 10px;border-radius:10px;background:rgba(255,255,255,.05);
- border:1px solid var(--bd);color:var(--tx2)}
-.caQ.hot{background:rgba(226,75,74,.16);border-color:rgba(226,75,74,.5);color:#FFC9C7}
-.caRules{margin-inline-start:auto;padding:5px 11px;border-radius:10px;cursor:pointer;
- background:rgba(255,255,255,.05);border:1px solid var(--bd);color:var(--tx2);
- font:900 10.5px system-ui}
-/* لوحة نقاط المباراة: رصيدك، وأيّ لوحٍ نحن فيه، ورصيدهم */
-.caScore{display:flex;align-items:center;justify-content:space-between;gap:8px;
- margin:0 0 9px;padding:6px 12px;border-radius:12px;
- background:linear-gradient(180deg,rgba(232,178,58,.10),rgba(232,178,58,.04));
- border:1px solid rgba(232,178,58,.24)}
-.caScore .pt{font-size:10.5px;font-weight:800;color:var(--tx2)}
-.caScore .pt b{font-size:17px;font-weight:900;color:var(--tx2);margin-inline-end:4px}
-.caScore .pt.me b{color:var(--gold)}
-.caScore .bd{font-size:9.5px;font-weight:800;color:var(--mut)}
+/* ٦٫٥٢ — رأس المباراة: بطاقتا اللاعبين وبينهما حال اللوح */
+.caHud{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:8px;margin:2px 0 10px}
+.caPl{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;min-width:0;
+ background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);
+ box-shadow:0 6px 16px rgba(0,0,0,.28);transition:box-shadow .25s,border-color .25s}
+.caPl.on{border-color:rgba(232,178,58,.85);box-shadow:0 0 0 2px rgba(232,178,58,.25),0 0 18px rgba(232,178,58,.35)}
+.caHavs{display:flex;flex-shrink:0}
+.caHav{width:34px;height:34px;border-radius:50%;overflow:hidden;display:inline-block;border:2px solid rgba(255,233,168,.55);background:#1B1410}
+.caHav+.caHav{margin-inline-start:-12px}
+.caHav svg{width:100%;height:100%;display:block}
+.caPi{display:flex;flex-direction:column;min-width:0;gap:2px}
+.caPi b{font-size:12.5px;font-weight:900;color:#F2F4F8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.caPi span{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:var(--tx2);white-space:nowrap}
+.caPi .caDot{width:10px;height:10px;flex-shrink:0}
+.caPs{margin-inline-start:auto;font-size:22px;font-weight:900;color:var(--tx2);font-variant-numeric:tabular-nums}
+.caPl.me .caPs{color:var(--gold)}
+@media (max-width:430px){.caPl{flex-wrap:wrap;row-gap:4px;padding:8px}.caPi{order:3;flex-basis:100%}}   /* الاسم في سطرٍ كامل على الهواتف */
+.caMid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 2px;min-width:74px}
+.caBd{font-size:13px;font-weight:900;color:#FFE9A8}.caBd em{font-style:normal;color:var(--mut);font-size:11px}
+.caTg{font-size:9.5px;font-weight:800;color:var(--mut)}
+.caQn{display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:900;color:var(--tx2);white-space:nowrap}
+.caQn i{width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FF8E88,#C62B33 60%,#6E1018);display:inline-block}
+.caQn.hot{color:#FFC9C7}
+.caWrap.duo .caSeat{display:none}        /* لاعبان: البطاقتان في الرأس تكفيان */
+/* شاشة الإعداد (٦٫٥٢): اختيارٌ مقسّم بدل الشارات، ومفتاحٌ حقيقيّ بدل «مفعّل/مطفأ» */
+.segC{display:flex;gap:8px}
+.segC button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 8px;border-radius:14px;cursor:pointer;
+ background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);color:var(--tx2);font-family:inherit}
+.segC button b{font-size:13.5px;font-weight:900;color:#F2F4F8}.segC button span{font-size:10px;font-weight:700}
+.segC button.on{border-color:rgba(232,178,58,.85);background:linear-gradient(180deg,rgba(232,178,58,.18),rgba(232,178,58,.05));box-shadow:0 0 0 2px rgba(232,178,58,.2)}
+.segC button.on b{color:#FFE9A8}
+.swRow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;cursor:pointer;
+ background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12)}
+.swRow>div{flex:1;display:flex;flex-direction:column;gap:3px}.swRow b{font-size:13px;font-weight:900;color:#F2F4F8}.swRow span{font-size:10.5px;color:var(--tx2);font-weight:700}
+.sw{width:44px;height:25px;border-radius:14px;background:var(--elev,#2A3042);position:relative;flex-shrink:0;transition:background .2s}
+.sw::after{content:'';position:absolute;top:3px;inset-inline-start:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:inset-inline-start .2s}
+.sw.on{background:var(--gold)}.sw.on::after{inset-inline-start:22px}
+.soloNote{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:14px}
+/* سطر الدور تحت اللوح — واحدٌ قصير */
+.caStat{text-align:center;font-size:12.5px;font-weight:800;color:var(--tx2);margin-top:10px}
+.caStat b{color:#F2F4F8}.caStat.me b{color:var(--gold)}
+/* شريط الأدوات: أيقونةٌ فوق كلمة، كأزرار الألعاب لا كأزرار النماذج */
+.caTools{display:flex;justify-content:center;gap:8px;margin:14px 0 18px}
+.caTool.out{color:#FF9A94}
+.caTool{flex:1 1 0;max-width:92px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px 9px;border-radius:14px;cursor:pointer;
+ background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);
+ color:#FFE9A8;font:800 10.5px var(--font,system-ui);box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.caTool:active{transform:scale(.96)}
+.caTool span{color:var(--tx2);white-space:nowrap}
 /* شريط التحديث: يخبر ولا يقاطع، والضغط عليه يطبّق */
 #verBar{position:fixed;inset-inline:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;
  display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
@@ -15879,7 +15908,7 @@ var RankCore=(function(){
  }
 
  /* ═══ الأوضاع: من يمنح نقاط تصنيف ومن لا يمنح ═══
-    قاعدة ثابتة لا استثناء لها: الغرف الخاصة والكمبيوتر والعادي والتمرير
+    قاعدة ثابتة لا استثناء لها: الغرف الخاصة والذكاء الاصطناعي والعادي والتمرير
     لا تمنح نقاط تصنيف إطلاقًا، حتى لا يصنع أحد حسابين ويجمع رتبة. */
  var MODES_ALL=['ranked','casual','room','bot','pass','training'];
  function grantsRP(mode){return mode==='ranked'}
@@ -17141,7 +17170,7 @@ function bindLegacyRanked(){
 }
 
 /* ═══ الأوضاع: من يمنح نقاط تصنيف ومن لا يمنح ═══
-   قاعدة ثابتة لا استثناء لها: الغرف الخاصة والكمبيوتر والعادي
+   قاعدة ثابتة لا استثناء لها: الغرف الخاصة والذكاء الاصطناعي والعادي
    والتمرير لا تمنح نقاط تصنيف إطلاقًا، حتى لا يصنع أحد حسابين
    ويجمع رتبة. تمنح إتقانًا فقط. */
 const MODES_ALL=RankCore.MODES_ALL;
@@ -18346,7 +18375,7 @@ function startRanked(intro){
  M={mid:'kn-'+Date.now().toString(36)+'-'+Math.floor(Math.random()*9999),
   rounds:(intro&&intro.seq)||buildRounds(r),i:0,me:0,opp:0,streak:0,menu:false,quitAsk:false,playedThisRound:false,
     oppMmr,oppSkill:(intro&&intro.skill)||(.55+Math.min(.2,r.tier*.02)),
-    casual:!!(intro&&intro.casual),   // 5.83: ضدّ الكمبيوتر — لعب حرّ لا يمسّ التصنيف
+    casual:!!(intro&&intro.casual),   // 5.83: ضدّ الذكاء الاصطناعي — لعب حرّ لا يمسّ التصنيف
     rival,oppHand:oppDeckFor(rival),oppKnown:[],oppLastPlayed:null,oppBlocked:null,
     vault:null,pick:null,knownNext:null,netOverrideNext:null,neutralNext:0,royalNext:0,
     energy:ENERGY_START,cycle:newCycle(deck),
@@ -18835,7 +18864,7 @@ function mEnd(){
  M.ended=true;
  clearInterval(M.tm);
  const won=M.me>M.opp;   // Best of 7
- const res=M.casual?{applied:false,reason:'ضدّ الكمبيوتر — بلا نقاط تصنيف'}
+ const res=M.casual?{applied:false,reason:'ضدّ الذكاء الاصطناعي — بلا نقاط تصنيف'}
   :resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
    result:{won:won},opponents:[{mmr:M.oppMmr}]});
  // مكافآت
@@ -20118,7 +20147,7 @@ const EN={
  'ليلًا: يظهر لك سؤال «من تفحص؟» — اختر لاعبًا وستعرف فورًا هل هو مافيا أم بريء.':'At night you’re asked “Who do you investigate?” — pick a player and you’ll know at once whether they’re Mafia or innocent.',
  'اتّهم أو اسأل أو دافع بكلماتك، وإذا انتهيت اضغط «جاهز» — التصويت يبدأ باتفاق الجميع أو بانتهاء الوقت':'Accuse, ask or defend in your own words, and press “Ready” when you’re done — voting starts when everyone agrees or time runs out',
  'النقاش مفتوح للجميع — اكتب متى شئت (رسالة كل خمس ثوانٍ): اتّهم، دافع، اسأل، أو أعلن دورك. وإذا انتهيت اضغط «جاهز».':'The discussion is open to everyone — write whenever you like (one message every five seconds): accuse, defend, ask, or declare your role. Press “Ready” when you’re done.',
- 'ضد الكمبيوتر':'Versus computer',
+ 'ضد الذكاء الاصطناعي':'Versus computer',
  'الفئة:':'Category:',
  'أماكن':'Places',
  'مستشفى':'Hospital',
@@ -20128,7 +20157,7 @@ const EN={
  'أحسنت':'Well done',
  'مفاجئ':'Surprising',
  'تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.':'You take a secret role among bot players: kill, save or investigate at night, then accuse and vote by day — and the bots do the same.',
- 'الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.':'The computer draws stroke by stroke and you guess the word from the options — the earlier you guess, the more you score. Six drawings per round.',
+ 'الذكاء الاصطناعي يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.':'The computer draws stroke by stroke and you guess the word from the options — the earlier you guess, the more you score. Six drawings per round.',
  'ابدأ اللعب':'Start playing',
  'ابدأ اللعب — سهل':'Start playing — Easy',
  'ابدأ اللعب — متوسط':'Start playing — Medium',
@@ -20155,7 +20184,7 @@ const EN={
  'حذف الحساب':'Delete account',
  'تحدي الخصم':'Challenge the opponent',
  'شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من Google Play وApp Store':'Test purchase — no real money is charged. At launch, prices show in your currency from Google Play and the App Store',
- 'في مافيا ضد الكمبيوتر: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي':'In Mafia and Out of the Loop versus the computer: they read the discussion, understand what you type and reply themselves — needs a connection; without one their local mind runs',
+ 'في مافيا ضد الذكاء الاصطناعي: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي':'In Mafia and Out of the Loop versus the computer: they read the discussion, understand what you type and reply themselves — needs a connection; without one their local mind runs',
  'الآليون هنا يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم':'The bots here think with AI: they read the whole discussion, understand what you type and reply themselves',
  'الآليون يعملون بعقلهم المحلي الآن — الذكاء الاصطناعي يحتاج اتصالًا بخادم مضبوط أو نسخة الأرتيفاكت':'The bots run on their local mind now — AI needs a configured server or the artifact build',
  'أنت':'You',
@@ -20308,7 +20337,7 @@ const EN={
  'متابعة التدريب':'Continue training',
  'إعادة تجربة التدريب':'Replay the training',
  'تعلّم والعب معنا':'Learn and play with us',
- 'مع الكمبيوتر':'Versus computer',
+ 'ضد الذكاء الاصطناعي':'Versus computer',
  'مستوى الخصم':'Opponent level',
  'سهل':'Easy',
  'متوسط':'Medium',
@@ -20316,9 +20345,10 @@ const EN={
  'يلعب بعشوائية ويخطئ كثيرًا':'Plays randomly and makes many mistakes',
  'يلعب بمنطق سليم ويخطئ أحيانًا':'Plays sensibly and errs sometimes',
  'يحسب أفضل نقلة ولا يسامح':'Calculates the best move and never forgives',
- 'اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار':'Playing the computer always works — no internet, no waiting',
+ 'يعمل بلا إنترنت وبلا انتظار — ولا يؤثّر في تصنيفك':'Works offline with no waiting — and does not affect your rating',
+ 'اللعب ضد الذكاء الاصطناعي يعمل دائمًا — بلا إنترنت وبلا انتظار':'Playing the computer always works — no internet, no waiting',
  'عدد اللاعبين':'Number of players',
- 'عدد اللاعبين (أنت + الكمبيوتر)':'Number of players (you + computer)',
+ 'عدد اللاعبين (أنت + الذكاء الاصطناعي)':'Number of players (you + computer)',
  'اختر اللعبة':'Choose a game',
  'الفئة':'Category',
  'الوقت المتبقّي':'Time left',
@@ -20357,7 +20387,7 @@ const EN={
  'تخلّص من بطاقاتك قبل الجميع.':'Get rid of your cards before everyone else.',
  'صوّب وأسقط قطعك قبل خصمك.':'Aim and pocket your pieces before your opponent.',
  'ألعاب جماعية للأصدقاء والعائلة':'Party games for friends and family',
- 'يمكنك اللعب مع الكمبيوتر الآن.':'You can play the computer now.',
+ 'يمكنك اللعب ضد الذكاء الاصطناعي الآن.':'You can play the computer now.',
  'البحث غير متاح هنا':'Search isn’t available here',
  'منافس تدريبي':'Practice opponent',
  'الراوي':'Narrator',
@@ -21535,7 +21565,7 @@ function setSection(k){
   <div class="note">${T('محتوى اللعب (الأسئلة وكلام الآليين) يبقى بالعربية')}</div>`;
  if(SEC==='game')body=tgl('stage3d','مسرح مجسّم في المافيا','مشهد ثلاثيّ الأبعاد بدل التصميم المسطّح — أثقل على الأجهزة الأقدم')+tgl('haptic','الاهتزاز عند اللمس',(window.SFX&&SFX.hapticAvailable())?'نقرات وإصابات ونتائج — تنبيه خفيف لا اهتزاز شاشة':'هذا الجهاز أو المتصفح لا يدعم الاهتزاز')+
   tgl('confirm','طلب التأكيد','قبل الانسحاب من مباراة أو مغادرة غرفة — حذف الحساب يُؤكَّد دائمًا')+
-  tgl('aiBots','آليون بذكاء اصطناعي','في مافيا ضد الكمبيوتر: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي');
+  tgl('aiBots','آليون بذكاء اصطناعي','في مافيا ضد الذكاء الاصطناعي: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي');
  if(SEC==='sound')body=tgl('sfx','المؤثرات الصوتية','نقرات وإصابات ونتائج وضربات الكيرم — مركّبة داخل اللعبة')+
   tgl('music','موسيقى الخلفية','لحن هادئ يبدأ مع اللعبة ويخفت داخل المباريات — مركّب داخل اللعبة بلا ملفّ صوت')+
   tgl('shout','الصيحات','جملة تقولها بصوتك في اللعب — والخصم يسمعها بصوته هو')+
@@ -22561,7 +22591,7 @@ function rankedScr(){
   </div></div></div>
   <div style="margin-top:16px"><button class="rbtn" onclick="preMatch()"><span>ابدأ مباراة التحديد</span></button></div>
   <div class="note">البطاقات تعمل · لا مساعدات تكشف الإجابة · لا وقت إضافي</div>
- <div class="sl" style="margin-top:18px">${ico('bulb',14)} ضدّ الكمبيوتر</div>
+ <div class="sl" style="margin-top:18px">${ico('bulb',14)} ضدّ الذكاء الاصطناعي</div>
  <div class="note" style="margin-top:0">نفس المباراة بسبع جولات — بلا انتظار خصم وبلا أثر على تصنيفك.</div>
  <div class="cr" style="margin-top:9px">${[['سهل',40],['عادي',58],['صعب',78]].map(([n,k])=>
   `<div class="fc" onclick="knBot(${k})">${n}</div>`).join('')}</div>
@@ -22596,14 +22626,14 @@ function rankedScr(){
  ${chev()}</div></div>
  <div style="margin-top:14px"><button class="rbtn" onclick="preMatch()"><span>ابحث عن مباراة</span></button></div>
  <div class="note">كلما ارتفعت رتبتك: قلّ الوقت · زادت الخيارات · دخلت أنماط أكثر</div>
- <div class="sl" style="margin-top:18px">${ico('bulb',14)} ضدّ الكمبيوتر</div>
+ <div class="sl" style="margin-top:18px">${ico('bulb',14)} ضدّ الذكاء الاصطناعي</div>
  <div class="note" style="margin-top:0">نفس المباراة بسبع جولات — بلا انتظار خصم وبلا أثر على تصنيفك.</div>
  <div class="cr" style="margin-top:9px">${[['سهل',40],['عادي',58],['صعب',78]].map(([n,k])=>
   `<div class="fc" onclick="knBot(${k})">${n}</div>`).join('')}</div>
  <div style="margin-top:10px">${plRow(ico('flame',20),'تحدٍ سريع','ست أسئلة بلا مباراة كاملة',"push('quickScr')",'#4C9AF0')}</div>
  </div>`);
 }
-/** 5.83: عالم المعرفة ضدّ الكمبيوتر — نفس المباراة بخصم آليّ بمستوى تختاره، وبلا تصنيف */
+/** 5.83: عالم المعرفة ضدّ الذكاء الاصطناعي — نفس المباراة بخصم آليّ بمستوى تختاره، وبلا تصنيف */
 function knBot(pct){
  if(!S.ranked)S.ranked=defaultRanked();
  startRanked({rv:RIVALS[Math.floor(Math.random()*RIVALS.length)],seq:buildRounds(S.ranked),
@@ -23136,7 +23166,7 @@ function sendEmote(k){
  const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();
  bubbleFx(k,'me');
 }
-/** تعبير داخل غرفة أو لعبة مع الكمبيوتر — يُبثّ فيراه الجميع */
+/** تعبير داخل غرفة أو لعبة ضد الذكاء الاصطناعي — يُبثّ فيراه الجميع */
 function rmEmoteBar(){emoteBarDom('rmEmote')}
 function rmEmote(k){
  const now=Date.now();
@@ -24715,7 +24745,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.52';
+const APP_VER='6.53';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25233,7 +25263,7 @@ function rmBind(){
    نقطة واحدة تترجم نتيجة كل لعبة إلى نتيجة تصنيف، ثم تسلّمها
    resolveMatch وهي التي تقرّر: هل يمنح هذا الوضع نقاطًا أصلًا؟ */
 
-/** وضع المباراة الجارية — الغرفة والكمبيوتر لا يمنحان نقاط تصنيف */
+/** وضع المباراة الجارية — الغرفة والذكاء الاصطناعي لا يمنحان نقاط تصنيف */
 function rmMode(){
  if(RM.solo)return 'bot';
  if(RM.mode)return RM.mode;
@@ -25318,8 +25348,8 @@ function rmOn(d,m){
   if(!_ca.aimV)_ca.aimV={x:d.x,y:d.y,ang:d.ang};
   const p=(RM.players||[]).find(x=>x.peer===d.by), who=(p&&p.name)||'الخصم';
   const ph=d.ph||'aim', txt=ph==='move'?'يحرّك الضارب على قاعدته…':ph==='set'?'ثبّت التصويب — يضرب!':'يصوّب…';
-  const el=document.querySelector('#rmScr .caTurn');
-  if(el)el.textContent='دور '+who+' — '+txt;
+  const el=document.querySelector('#rmScr .caStat');
+  if(el)el.innerHTML='دور <b>'+esc(who)+'</b> — '+txt;
   const first=RM.ca&&RM.ca.msg!=='الخصم يصوّب…';
   if(RM.ca)RM.ca.msg='الخصم يصوّب…';
   caLoopOn();setTimeout(caRender,0);
@@ -25375,13 +25405,13 @@ async function mmScr(g,mode){
   <div style="text-align:center;padding:16px 0">
    <div style="font-size:44px">${ico('globe',40)}</div>
    ${netHasServer()?`<div class="mtl" style="font-size:17px;margin-top:10px">لا اتصال بخادم تحدّي الآن</div>
-   <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">تأكد من الإنترنت ثم أعد المحاولة، أو العب مع الكمبيوتر ريثما تعود الشبكة.</div>
+   <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">تأكد من الإنترنت ثم أعد المحاولة، أو العب ضد الذكاء الاصطناعي ريثما تعود الشبكة.</div>
    <button class="rbtn" style="margin-top:16px" onclick="netRetryThen('mmScr',{g:'${g}',mode:'${mode||'casual'}'})"><span>${ico('reset',14)} إعادة المحاولة</span></button>`
    :`<div class="mtl" style="font-size:17px;margin-top:10px">البحث غير متاح هنا</div>
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
     اللعب مع لاعبين حقيقيين يحتاج فتح اللعبة من <b>رابط اللعبة المنشور</b>.<br>
-    يمكنك اللعب مع الكمبيوتر الآن.</div>`}
-   ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="push('soloScr','${g}')"><span>${ico('robot',13)} العب مع الكمبيوتر</span></button>`:''}
+    يمكنك اللعب ضد الذكاء الاصطناعي الآن.</div>`}
+   ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="push('soloScr','${g}')"><span>${ico('robot',13)} العب ضد الذكاء الاصطناعي</span></button>`:''}
   </div></div></div></div>`);
   return;
  }
@@ -25430,8 +25460,8 @@ function mmDraw(){
     return `<div class="mmP${me?' me':''}"><span class="mmAv">${me?avatarArt(38):(av?avatarSVG(av,38):personArt(nm,38))}</span><span class="n">${me?'أنت':esc(nm)}</span></div>`}).join('')}</div>`:''}
  </div></div></div>
  ${(RM.mmT||0)>12?`<div class="wb" style="text-align:start;margin-top:12px">${ico('info',12)}
-  لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب مع الكمبيوتر.</div>
-  ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);Router.replace('soloScr','${RM.game}')"><span>${ico('robot',13)} العب مع الكمبيوتر</span></button>`:''}
+  لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب ضد الذكاء الاصطناعي.</div>
+  ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);Router.replace('soloScr','${RM.game}')"><span>${ico('robot',13)} العب ضد الذكاء الاصطناعي</span></button>`:''}
   <button class="btn g" style="margin-top:9px" onclick="mmCancel(1);Router.replace('roomScr','${RM.game}')">${ico('next',13)} أنشئ غرفة بكود بدلًا من ذلك</button>`:''}
  <button class="btn g" style="margin-top:14px;color:var(--no)" onclick="mmCancel()">${ico('door',13)} إلغاء البحث</button>
  </div>`);
@@ -25508,9 +25538,10 @@ function roomDraw(){
  if(!RM.me){const me=rmMine();if(me)RM.me=me.peer}
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
  setArena(vnKind(RM.game),!playing||RM.phase==='over');   // مكان اللعبة خلف الغرفة دائمًا — أعتم في الردهة والنتيجة
- const head=playing
+ const head=(playing&&RM.game==='carrom'&&RM.phase!=='over')?''   // الكيرم: رأسه في بطاقتَي اللاعبين
+  :playing
   ?`<div class="rmTopMini"><span>${ico('group',11)} ${R.length}</span>
-    <span style="color:var(--gold)">${RM.solo?'مع الكمبيوتر':'كود '+RM.code}</span>
+    <span style="color:var(--gold)">${RM.solo?'ضد الذكاء الاصطناعي':'كود '+RM.code}</span>
     ${RM.solo?`<span>${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''}</span>`:''}</div>`
   :`<div class="rmTicket"><div class="rmTkL">كود الغرفة</div><div class="rmTkC" onclick="rmCopyCode()">${RM.code}</div>
   <div class="rmTkD">${RM.host?'أعطِ الكود لمن معك — يفتحون رابط اللعبة نفسه ويدخلون به':'دخلتَ الغرفة — يبدأ المضيف اللعبة حين يكتمل المجلس'}</div>
@@ -25549,8 +25580,9 @@ function roomDraw(){
     فيديو مسجَّل: هبوط السطوع من ١٥٧ إلى ٦٦ في إطارٍ واحد). الآن تُنقل اللوحة القديمة نفسها
     بما رُسم عليها ومستمعيها إلى الشاشة الجديدة — فلا إطار فارغ ولا انقطاع. */
  const oldCv=document.getElementById('caC');
- go(`<div class="scr on nofi" id="rmScr">${playing?`<button class="efab" onclick="rmEmoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>`:''}${tb(RM.code==='SOLO'?'مع الكمبيوتر':'غرفة '+(RM.code||''))}${head}${body}
- <button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button></div>`);
+ const caPlay_=playing&&RM.game==='carrom'&&RM.phase!=='over';   // الكيرم: الوجوه والخروج في شريط أدواته
+ go(`<div class="scr on nofi" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>`:''}${tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
+ ${caPlay_?'':`<button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button>`}</div>`);
  if(oldCv){const nw=document.getElementById('caC');if(nw&&nw!==oldCv){nw.replaceWith(oldCv);oldCv._pk=null;try{caPerspApply(oldCv);caRender()}catch(e){}try{caLoopOn()}catch(e){}}}
  if(typeof vb3dMountLobby==='function'){if(RM.phase==='lobby')vb3dMountLobby(rmLobbySeats(R),RM.game);else if(typeof VB3!=='undefined'&&VB3.lobby)vb3dDispose()}   // المجلس المجسّم في الردهة (5.52) — ويُفكّ حين تبدأ اللعبة أو تُغادَر الغرفة
  rmAutoStart(R);
@@ -25808,31 +25840,32 @@ function rmHostEnd(){
  const c=RMcap;if(c){try{c.presence({vt:null})}catch(e){}}
  rmSend({t:'end',sp:RM.secret.spy,w:RM.secret.word,acc:acc||''});
 }
-/* ══ اللعب مع الكمبيوتر: نفس محرك الغرفة بناقل محلي وخصوم آليين ══ */
+/* ══ اللعب ضد الذكاء الاصطناعي: نفس محرك الغرفة بناقل محلي وخصوم آليين ══ */
 const BOT_NAMES_AR=['سلطان','نورة','ريان','حكيم','أثير'],BOT_NAMES_EN=['Sultan','Noura','Rayan','Hakeem','Atheer'];
 /** أسماء الآليين تتبع لغة الواجهة — مجلس إنجليزي بأسماء عربية يبدو نصف مترجم */
 const BOT_NAMES=new Proxy({},{get:(o,k)=>{const L=(()=>{try{return S&&S.lang==='en'}catch(e){return false}})()?BOT_NAMES_EN:BOT_NAMES_AR;return k==='length'?L.length:L[k]}});
 function soloScr(g){
  const row=PT_GAMES.find(x=>x[3]===g)||[];
  setArena(vnKind(g),1);
- go(`<div class="scr on">${tb(T('مع الكمبيوتر'))}
+ go(`<div class="scr on">${tb(T('ضد الذكاء الاصطناعي'))}
  <div class="gHero xs">${GAME_ART[g]||''}</div>
  <div class="sl">${T('مستوى الخصم')}</div>
  <div class="dfRow">${DIFFS.map(([k,n,e])=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
   <i>${e}</i><b>${T(n)}</b><u>${((DIFF_SAY[g]||{})[k])||''}</u></div>`).join('')}</div>
- ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
+ ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الذكاء الاصطناعي)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
- <div class="cr">${[2,4].map(n=>`<div class="fc ${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
+ <div class="segC">${[[2,'لاعبان','وجهًا لوجه'],[4,'٤ لاعبين','فريقان — شريكك مقابلك']].map(([n,a,b])=>`<button class="${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
  <div class="sl">التدريب</div>
- <div class="cr"><div class="fc ${S.caGuide===true?'on':''}" onclick="S.caGuide=S.caGuide!==true;try{saveState()}catch(e){}soloScr('carrom')">${ico('search',12)} خطّ التوقّع: ${S.caGuide===true?'مفعّل':'مطفأ'}</div></div>
- <div class="note">مطفأٌ افتراضيًّا: السهم وحده يدلّك على اتّجاه ضربتك. خطّ التوقّع يريك مسبقًا أين تذهب القطعة المضروبة — للتدريب فقط</div>`:''}
- ${g==='mafia'?`<div class="sl">عدد اللاعبين (أنت + الكمبيوتر)</div>
+ <div class="swRow" onclick="S.caGuide=S.caGuide!==true;try{saveState()}catch(e){}soloScr('carrom')">
+  <div><b>خطّ التوقّع</b><span>يريك مسبقًا أين تذهب القطعة المضروبة — للتدريب فقط</span></div>
+  <i class="sw${S.caGuide===true?' on':''}"></i></div>`:''}
+ ${g==='mafia'?`<div class="sl">عدد اللاعبين (أنت + الذكاء الاصطناعي)</div>
  <div class="cr">${[5,6,7,8].map(n=>`<div class="fc ${(RM.mbN||6)===n?'on':''}" onclick="RM.mbN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
  <div class="wb" style="text-align:start">تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.</div>
  <div class="note" id="vbAiNote">…</div>`:''}
- ${g==='draw'?`<div class="wb" style="text-align:start">الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.</div>`:''}
- <div class="note">${T('اللعب مع الكمبيوتر يعمل دائمًا — بلا إنترنت وبلا انتظار')}</div>
+ ${g==='draw'?`<div class="wb" style="text-align:start">الذكاء الاصطناعي يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.</div>`:''}
+ <div class="note soloNote">${ico('info',11)} ${T('يعمل بلا إنترنت وبلا انتظار — ولا يؤثّر في تصنيفك')}</div>
  <div class="soloPad"></div>
  <div class="soloGo"><button class="goBtn" onclick="soloBegin('${g}')">
   <i class="goPlay">${ico('play',18)}</i><b>${T('ابدأ اللعب')}</b>
@@ -25856,7 +25889,7 @@ function soloBegin(g){
  soloStart(g,RM.diff||'mid');
 }
 function soloStart(g,diff){
- if(!/^(uno|carrom)$/.test(g)){toast('لا لعب ضد الكمبيوتر في هذه اللعبة');return}
+ if(!/^(uno|carrom)$/.test(g)){toast('لا لعب ضد الذكاء الاصطناعي في هذه اللعبة');return}
  RM.solo=1;RM.diff=diff||'mid';
  const n=g==='carrom'?((RM.caN||2)-1):(RM.bots||1);
  soloTransport(n);
@@ -25931,13 +25964,19 @@ function caBotPick(pcs,mine,P0,rnd){
    const ang=Math.atan2(py-t.y,px-t.x);
    const hit={x:t.x-Math.cos(ang)*(CA_PR+CA_SR),y:t.y-Math.sin(ang)*(CA_PR+CA_SR)};
    if(hit.y>base-10)return;                            // خلف الضارب أو على خطّه: لا تُضرب إلّا بالارتداد
-   const d=Math.hypot(hit.x-CA_R/2,hit.y-base);
-   const sx0=clampX(hit.x), sa=Math.atan2(hit.y-base,hit.x-sx0);
-   const cut=Math.abs(Math.atan2(Math.sin(sa-ang),Math.cos(sa-ang)));
-   if(cut>1.2)return;                                  // فوق ٧٠°: الدفع يذهب عرضًا وتقف القطعة قبل الجيب
-   const pd=Math.hypot(px-t.x,py-t.y);
-   const c={q:((t.t==='q'?-40:0)+d+pd*0.8+cut*100)*(blind?-1:1),hit,t,cut,pd,d};
-   cands.push(c);if(!best||c.q<best.q)best=c;
+   /* مواضع الضارب: تحت نقطة التماسّ مباشرةً، و(للصعب — ٦٫٥٢) على امتداد خطّ الجيب←القطعة حتّى القاعدة:
+      هناك تكون الضربة بلا قطعٍ، فتذهب القطعة إلى الجيب بأقلّ قوّة وأقلّ خطأ */
+   const xs=[clampX(hit.x)];
+   if(P0.zc&&Math.abs(t.y-py)>1){const zx=t.x+(base-t.y)*(t.x-px)/(t.y-py);if(zx>CA_SR+30&&zx<CA_R-CA_SR-30)xs.push(zx)}
+   xs.forEach(sx0=>{
+    const d=Math.hypot(hit.x-sx0,hit.y-base);
+    const sa=Math.atan2(hit.y-base,hit.x-sx0);
+    const cut=Math.abs(Math.atan2(Math.sin(sa-ang),Math.cos(sa-ang)));
+    if(cut>1.2)return;                                  // فوق ٧٠°: الدفع يذهب عرضًا وتقف القطعة قبل الجيب
+    const pd=Math.hypot(px-t.x,py-t.y);
+    const c={q:((t.t==='q'?-40:0)+d+pd*0.8+cut*100)*(blind?-1:1),hit,t,cut,pd,d,sx0};
+    cands.push(c);if(!best||c.q<best.q)best=c;
+   });
   });
  });
  const PC=CarromPhysics.C, tr=PC.strikerMass*(1+PC.pieceE)/(PC.strikerMass+1);
@@ -25952,29 +25991,61 @@ function caBotPick(pcs,mine,P0,rnd){
   let lo=uS,hi=CA_VMAX*2;
   for(let i=0;i<28;i++){const m=(lo+hi)/2;let v=m,x=0;for(let k=0;k<4000&&x<c.d&&v>PC.stopSpeed;k++){x+=v;v=v*PC.drag-PC.roll}if(v<uS)lo=m;else hi=m}
   return hi};
- const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.hit.x));return {sx,ang:Math.atan2(c.hit.y-base,c.hit.x-sx)}};
+ const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.sx0!=null?c.sx0:c.hit.x));return {sx,ang:Math.atan2(c.hit.y-base,c.hit.x-sx)}};
  /* السقف من الصعوبة: السهل محدودٌ بنطاقه فتقف قطعته قبل الجيب كالمبتدئ، والمحاكي يأخذ ما يلزم */
  const capPw=v=>Math.min(P0.sim?Math.min(CA_VMAX*0.85,P0.pw[1]*1.7):P0.pw[1]*1.1,Math.max(P0.pw[0],v));   // pw[1] حيٌّ لكلّ المستويات
  let pick=null;
  const nSim=blind?0:(P0.sim||0);
- if(nSim&&cands.length){
+ if(nSim&&(cands.length||P0.fine)){   // الصعب يبحث حتّى بلا مرشّحٍ هندسيّ
   cands.sort((a,b)=>a.q-b.q);
   const t0=(typeof performance!=='undefined'?performance:Date).now();
-  const late=()=>((typeof performance!=='undefined'?performance:Date).now()-t0)>220;   // سقف زمنيّ: لا يجمّد الجهاز
+  /* ميزانيّةٌ بعدد المحاكاة لا بالزمن: كان سقف ٢٢٠ م.ث يجعل قوّة الصعب تتبع سرعة الهاتف (المراجعة).
+     الزمن سقفٌ للأمان فقط */
+  let nRun=0;const BUDGET=P0.fine?80:40;
+  const late=()=>nRun>=BUDGET||((typeof performance!=='undefined'?performance:Date).now()-t0)>1500;
   let bestSc=-1e9;
   for(const c of cands.slice(0,nSim)){
    const A=aimAt(c), n0=needPw(c);
-   for(const k of [0.98,1.12,1.3]){
+   for(const k of (P0.fine?[0.94,1.04,1.16,1.3,1.46]:[0.98,1.12,1.3])){   // الصعب يجرّب قوىً أكثر
     const pw=capPw(n0*k);
     const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
     CarromPhysics.shoot(S,{x:A.sx,y:base,vx:Math.cos(A.ang)*pw,vy:Math.sin(A.ang)*pw});
-    const r=CarromPhysics.run(S,900);
+    const r=CarromPhysics.run(S,900);nRun++;
     let sc=0;for(const t of r.pot){if(t==='s')sc-=12;else if(t===mine)sc+=10;else if(t==='q')sc+=6;else sc-=4}
     sc-=c.q*0.002;                                     // كسر التعادل: الأقرب أوّلًا
     if(sc>bestSc){bestSc=sc;pick={sx:A.sx,ang:A.ang,pw}}
     if(late())break;
    }
    if(late())break;
+  }
+  /* الصعب (٦٫٥٢): يضبط الزاوية حول أفضل ضربة — كمن يعيد التصويب قبل الإفلات */
+  if(P0.fine&&pick&&!late()){
+   const pk=pick;
+   for(const da of [-0.018,-0.009,-0.004,0.004,0.009,0.018])for(const pm of [0.94,1,1.08]){
+    const ang2=pk.ang+da, pw2=capPw(pk.pw*pm);
+    const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
+    CarromPhysics.shoot(S,{x:pk.sx,y:base,vx:Math.cos(ang2)*pw2,vy:Math.sin(ang2)*pw2});
+    const r=CarromPhysics.run(S,900);nRun++;
+    let sc=0;for(const t of r.pot){if(t==='s')sc-=12;else if(t===mine)sc+=10;else if(t==='q')sc+=6;else sc-=4}
+    if(sc>bestSc+0.5){bestSc=sc;pick={sx:pk.sx,ang:ang2,pw:pw2}}
+    if(late())break;
+   }
+  }
+  /* الصعب بلا ضربةٍ مثمرة بعد: بحثٌ أوسع في الوقت الباقي — كلّ قطعةٍ له من ثلاثة مواضع وبثلاث قوى،
+     فتظهر الضربات غير المباشرة (قطعةٌ تدفع قطعة، ارتدادٌ من الجدار) التي لا يراها الحساب الهندسيّ */
+  if(P0.fine&&bestSc<=0&&!late()){
+   outer:for(const t of targets)for(const sx0 of [CA_SR+34,CA_R/2,CA_R-CA_SR-34,t.x]){
+    const sx=caFreeX(pcs,clampX(sx0)), a0=Math.atan2(t.y-base,t.x-sx);
+    if(t.y>base-10)continue;
+    for(const pw of [P0.pw[0],P0.pw[1],Math.min(CA_VMAX*0.85,P0.pw[1]*1.4)])for(const da of [0,0.03,-0.03]){
+     const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
+     CarromPhysics.shoot(S,{x:sx,y:base,vx:Math.cos(a0+da)*pw,vy:Math.sin(a0+da)*pw});
+     const r=CarromPhysics.run(S,900);nRun++;
+     let sc=0;for(const q of r.pot){if(q==='s')sc-=12;else if(q===mine)sc+=10;else if(q==='q')sc+=6;else sc-=4}
+     if(sc>bestSc){bestSc=sc;pick={sx,ang:a0+da,pw}}
+     if(late())break outer;
+    }
+   }
   }
   if(bestSc<=0)pick=null;                              // لا ضربة مثمرة في المحاكاة: نعود إلى الهندسة
  }
@@ -27965,28 +28036,43 @@ function rmCarrom(R){
    <span class="nm">${me2?'أنت':esc(o.p.name)}</span>
    <b>${left(C.col[o.p.peer])}</b></div>`;
  };
- return `<div class="caBar">
-   <span class="caMine"><span class="caDot ${myCol==='w'?'w':'b'}"></span>
-    لونك ${colName(myCol)} — أدخل ${left(myCol)} الباقية</span>
-   <span class="caQ ${C.q?'hot':''}">${C.q?`الملكة مع ${qWho} — تحتاج تغطية`
-     :(C.pcs.some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت')}</span>
-   <button class="caRules" onclick="caRulesSheet()">القوانين</button>
+ /* ٦٫٥٢ — «الأزرار كلّها غير احترافيّة»: كان فوق اللوح أربعة صفوف من الشارات والنصوص وتحته أزرارٌ
+    ونصوصٌ طويلة. الآن كما في الألعاب المحترفة: بطاقتا اللاعبين (صورة، اسم، ما بقي من قطعه، رصيده)
+    وبينهما اللوح والملكة؛ تحت اللوح سطرُ الدور وحده؛ ثمّ شريط أدواتٍ بأيقونات. والشرح في «القوانين». */
+ const duo=RM.players.length<=2;
+ const side=col=>{
+  const ps=RM.players.filter(p=>C.col[p.peer]===col), on=ps.some(p=>p.peer===C.turn), me2=col===myCol;
+  const avs=ps.map(p=>`<span class="caHav">${p.peer===RM.me?avatarArt(30):(p.av?avatarSVG(p.av,30):personArt(p.name,30))}</span>`).join('');
+  const who=duo?(me2?'أنت':esc(ps[0]?ps[0].name:'الخصم')):(me2?'فريقك':'الخصم');
+  return `<div class="caPl${me2?' me':''}${on?' on':''}">
+   <div class="caHavs">${avs}</div>
+   <div class="caPi"><b>${who}</b><span><i class="caDot ${col}"></i>${left(col)} باقية</span></div>
+   <div class="caPs">${M.pts[col]||0}</div>
+  </div>`;
+ };
+ const qTxt=C.q?(C.q===RM.me?'معك — غطِّها':'مع '+esc(nm(C.q))):(C.pcs.some(x=>x.t==='q')?'على اللوح':'أُخذت');
+ return `<div class="caHud">
+   ${side(myCol)}
+   <div class="caMid"><div class="caBd">اللوح ${(M.boards||0)+1} <em>من ${CA_BOARDS}</em></div>
+    <div class="caTg">إلى ${CA_TARGET}</div>
+    <div class="caQn${C.q?' hot':''}"><i></i>${qTxt}</div></div>
+   ${side(foeCol)}
   </div>
-  <div class="caScore">
-   <span class="pt me"><b>${M.pts[myCol]||0}</b> لك</span>
-   <span class="bd">اللوح ${(M.boards||0)+1} من ${CA_BOARDS} · حتى ${CA_TARGET}</span>
-   <span class="pt"><b>${M.pts[foeCol]||0}</b> لهم</span>
-  </div>
- <div class="caWrap big"><canvas id="caC" width="720" height="816"></canvas>
+ <div class="caWrap big${duo?' duo':''}"><canvas id="caC" width="720" height="816"></canvas>
   ${seat.map(chip).join('')}</div>
- <div style="display:flex;justify-content:center;margin-top:6px">
-  <button onclick="caSkinTog()" style="background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">${ico('palette',13)} بدّل شكل اللوح</button>
-  <button onclick="caSfxTog(this)" style="margin-inline-start:8px;background:linear-gradient(180deg,#3A2C18,#241A0E);border:1px solid rgba(255,214,138,.35);color:#FFE9A8;font:900 11px system-ui;padding:6px 13px;border-radius:11px">صوت الطقّات: ${CA_SFX_NAME[caSfxStyle()]}</button>
- </div>
- <div class="caTurn ${mine?'me':''}">${mine?'دورك — حرّك الضارب من الشريط الأسفل · اسحب على اللوح وأفلت · للإلغاء أعِد إصبعك إلى دائرة الضارب':'دور '+nm(C.turn)+' — يصوّب…'}</div>
- ${C.msg?`<div class="caMsg">${C.msg}</div>`:''}
- <div class="note caNote">قطعتك من لونك = نقطة ودور إضافي · الملكة الحمراء +3 <b>بشرط تغطيتها</b>
-  بقطعة من لونك وإلا عادت للمركز · الضارب في الجيب: −1 وتعود إحدى قطعك · قطعة الخصم تُحتسب له</div>`;
+ <div class="caStat${mine?' me':''}">${mine?'<b>دورك</b> · حرّك الضارب من الشريط ثم اسحب وأفلت':'دور <b>'+esc(nm(C.turn))+'</b> — يصوّب…'}</div>
+ ${C.msg?`<div class="caMsg"${C.msg==='الخصم يصوّب…'?' style="visibility:hidden"':''}>${C.msg}</div>`:''}   <!-- يبقى مكانه: لا يقفز الشريط تحت الإصبع -->
+ <div class="caTools">
+  <button class="caTool" onclick="caRulesSheet()">${ico('book',20)}<span>القوانين</span></button>
+  <button class="caTool" onclick="caSkinTog();caToolLbl('skin')">${ico('palette',20)}<span>اللوح</span></button>
+  <button class="caTool" onclick="caSfxTog(null);caToolLbl('sfx')">${ico('sound',20)}<span>الصوت</span></button>
+  <button class="caTool" onclick="rmEmoteBar()">${face(myEmoteDeck()[0]||'laugh',22)}<span>تفاعل</span></button>
+  <button class="caTool out" onclick="confirmSheet('الخروج من المباراة؟','${RM.solo?'تنتهي المباراة ولا تُحفظ نتيجتها':'المباراة جارية — إن غادرت الآن فلن تعود إليها'}','خروج',()=>rmLeave())">${ico('door',20)}<span>خروج</span></button>
+ </div>`;
+}
+/** بعد تبديل اللوح أو الصوت: إشعارٌ قصير بالاختيار الجديد — بلا إعادة بناء الشاشة */
+function caToolLbl(k){
+ try{toast(k==='skin'?'اللوح: '+(CA_SKIN_NAME[_ca.skin]||''):'صوت الطقّات: '+CA_SFX_NAME[caSfxStyle()])}catch(e){}
 }
 
 /* ── مافيا عبر الغرفة ── */
@@ -28154,7 +28240,7 @@ function ptExit(){
  confirmSheet('إنهاء اللعبة','ستتوقف الجولة الحالية ويعود الجميع لقائمة ليلة العائلة.','إنهاء',()=>{
   clearInterval(PT&&PT.tm);if(PT)PT.tm=null;Router.settle('partyScr')});
 }
-/* ═══════════ ضد الكمبيوتر — مافيا والرسم: أنت وحدك بين لاعبين آليين ═══════════ */
+/* ═══════════ ضد الذكاء الاصطناعي — مافيا والرسم: أنت وحدك بين لاعبين آليين ═══════════ */
 const VB_NAMES_AR=['سلطان','نورة','ريان','حكيم','أثير','لين','فهد','دانة','طلال','جود','ليان'];
 const VB_NAMES_EN=['Sultan','Noura','Rayan','Hakeem','Atheer','Leen','Fahad','Dana','Talal','Jood','Layan'];
 /** أسماء المجلس بلغة الواجهة — مجلس إنجليزي بأسماء عربية يبدو نصف مترجم */
@@ -28166,7 +28252,7 @@ function vbHead(t){return tb(t)}
 function vbExit(){
  const g=(VB&&VB.g)||'mafia';
  if(!VB||VB.over){vbKill();Router.settle('gameHub',g);return}   // انتهت الجولة أصلًا: رجوع بلا سؤال
- confirmSheet('مغادرة المباراة','ستنتهي هذه الجولة ضد الكمبيوتر ولن تُحتسب.','مغادرة',()=>{vbKill();Router.settle('gameHub',g)});
+ confirmSheet('مغادرة المباراة','ستنتهي هذه الجولة ضد الذكاء الاصطناعي ولن تُحتسب.','مغادرة',()=>{vbKill();Router.settle('gameHub',g)});
 }
 /** يوقف الجولة الحالية نهائيًّا: مؤقّتاتها ومهلها وحلقاتها ونداءات الذكاء الاصطناعي المعلّقة — كانت الجولة المهجورة تواصل اللعب في الخلفية */
 function vbKill(){
@@ -28179,7 +28265,7 @@ function vbKill(){
  mscScene('menu');mscDuck(0);   // المغادرة تعيد لحن القائمة
  if(typeof vb3dDispose==='function')vb3dDispose();
 }
-/** جولة ضد الكمبيوتر تُحتسب جولة ليلة عائلة في الأهداف اليومية والمهام */
+/** جولة ضد الذكاء الاصطناعي تُحتسب جولة ليلة عائلة في الأهداف اليومية والمهام */
 function vbDone(){evtParty();saveState()}
 function vbRnd(arr){return arr[Math.floor(Math.random()*arr.length)]}
 /** خلط عادل في مكانه (فيشر–ييتس) — sort بعشوائية يُنحّز توزيع الأدوار */
@@ -33119,7 +33205,7 @@ void main() {
 		}`};return md(Rx);})();
 /* ⟦/src⟧ */
 /* ⟦src:src/games/stage3d/stage3d.js⟧ */
-/* ═══ المجلس المجسّم (5.52): غرفة وشخصيات ثلاثية الأبعاد لمسرح مافيا ضد الكمبيوتر — WebGL عبر Three.js.
+/* ═══ المجلس المجسّم (5.52): غرفة وشخصيات ثلاثية الأبعاد لمسرح مافيا ضد الذكاء الاصطناعي — WebGL عبر Three.js.
    يُركَّب داخل #vbStage تحت طبقة المقاعد: الأسماء والشارات والبطاقات تبقى عناصر DOM وتُسقَط من مواضع الرؤوس في المشهد،
    والضغط على الشخصية نفسها يعمل كالضغط على مقعدها. إن غاب WebGL (أو في الاختبارات السريعة) يبقى المشهد المرسوم ثنائيّ الأبعاد. ═══ */
 const VB3={on:false,tex:{}};
@@ -33579,7 +33665,7 @@ function vb3dRoomSquare(sc){
  L.bounce=new T.DirectionalLight(0xC0A184,.24);L.bounce.position.set(-.5,-1.5,2.2);sc.add(L.bounce);   // ارتداد بارد من الحجر   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
  return {L,glow,sky,stars,day:{hemi:.28,key:2.5,lamp:25,post:17,rim:2.3,skyc:'#FFFFFF',starO:.7},night:{hemi:.13,key:1.45,lamp:13,post:9,rim:1.9,skyc:'#5A6090',starO:1}};
 }
-/* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
+/* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الذكاء الاصطناعي وللردهة ── */
 function vb3dStageModel(kind){const my=VB;return {kind,names:VB.names,me:0,empty:new Set(),host:-1,stage:'vbStage',seats:'#vbSeats .vbSeat',scene:'.vbScene',
  alive:()=>VB===my&&!!document.getElementById('vbStage'),night:()=>!!VB.night,tap:vb3dTap,
  state:i=>{const s=vbSeatState(i);return {dead:!!s.dead,talk:!!s.talk,mark:!!s.mark,pick:!!(VB.pick&&VB.pick.list.includes(i)&&!s.dead),pk:VB.pick&&VB.pick.c||'#E8B23A',
@@ -34361,7 +34447,7 @@ function vbNotesRender(){
   const fixed=VB.g==='mafia'&&VB.myKnow&&VB.myKnow[i]!=null?(VB.myKnow[i]?{t:'مافيا — فحصتُه',c:'#E24B4A'}:{t:'بريء — فحصتُه',c:'#2ECC71'}):null;
   return `<div class="vbNoteRow${st.dead?' dead':''}" onclick="${fixed?'':`vbNoteCycle(${i})`}">${vbFace(i,26)}<span class="vbNn">${esc(nm)}</span><b style="--nc:${(fixed||v).c}">${(fixed||v).t}${st.dead?' · خارج':''}</b></div>`}).join('');
 }
-function vbRules(){vbSheet(`<div class="shh"><div><div class="t">قوانين مافيا</div><div class="d">ضد الكمبيوتر</div></div></div><ol class="vbRulesL">${(VB_RULES[VB.g]||[]).map(r=>`<li>${r}</li>`).join('')}</ol>`)}
+function vbRules(){vbSheet(`<div class="shh"><div><div class="t">قوانين مافيا</div><div class="d">ضد الذكاء الاصطناعي</div></div></div><ol class="vbRulesL">${(VB_RULES[VB.g]||[]).map(r=>`<li>${r}</li>`).join('')}</ol>`)}
 function vbInfoSheet(){vbRoleGuide()}
 function vbEmoteBar(){emoteBarDom('vbEmote')}
 function vbEmote(k){const ex=document.querySelector('.ebar.fx');if(ex)ex.remove();if(window.bubbleFx)try{bubbleFx(k,'me')}catch(e){}const e=(window.EMOTES||[]).find(x=>x.k===k);vbMsg({k:'me',i:0,t:(e&&(e.m||e.n))||'تعبير',react:1,emo:k})}
@@ -34375,7 +34461,7 @@ function vbMic(){
  catch(e){toast('تعذّر تشغيل الميكروفون')}
 }
 
-/* ═══════════ الذكاء الاصطناعي لآليي «ضد الكمبيوتر» (5.43) ═══════════
+/* ═══════════ الذكاء الاصطناعي لآليي «ضد الذكاء الاصطناعي» (5.43) ═══════════
    الآليون في مافيا يقرؤون السجلّ كاملًا ويفهمون ما تكتبه ويقرّرون بأنفسهم عبر نموذج لغوي:
    في الأرتيفاكت عبر قدرة «sample» (بموافقة المشاهد وعلى حسابه)، ومن الخادم عبر POST /ai/chat
    (المفتاح ANTHROPIC_API_KEY على الخادم فقط — لا في العميل ولا في المستودع). بلا أيّ منهما، أو عند
@@ -34484,7 +34570,7 @@ function vbAiSheet(){
 }
 async function vbAiRetry(){toast('جارٍ المحاولة…');const ok=await AI.retry();vbAiChip();toast(ok?'الذكاء الاصطناعي يعمل الآن':'تعذّر التفعيل — '+(AI.status().why||'غير متاح هنا'))}
 
-/* ── مافيا ضد الكمبيوتر — مدينة ليلية، راوٍ، آليون يتكلّمون ويردّون على ما تكتب ── */
+/* ── مافيا ضد الذكاء الاصطناعي — مدينة ليلية، راوٍ، آليون يتكلّمون ويردّون على ما تكتب ── */
 function mfStart(diff){
  const n=Math.min(8,Math.max(5,RM.mbN||6));
  Router.enter('vsbot');
@@ -34499,7 +34585,7 @@ function mfStart(diff){
    badge:i===0?ico(mafSp(mfRole(0)).ic,12,mafSp(mfRole(0)).tint):(mfRole(0)==='مافيا'&&mfRole(i)==='مافيا'?ico('swords',12,'red'):(VB.myKnow[i]===true?ico('swords',12,'red'):VB.myKnow[i]===false?ico('check',12):'')),
    sub:!VB.alive.includes(i)?mfRole(i):'',me:mfRole(0)})};
  mfInitBrain();
- vbScene('mafia','مافيا',T('ضد الكمبيوتر')+' — '+n+' '+T('لاعبين'));
+ vbScene('mafia','مافيا',T('ضد الذكاء الاصطناعي')+' — '+n+' '+T('لاعبين'));
  vbAiIntro();
  const sp=mafSp(mfRole(0)),mates=VB.alive.filter(i=>i!==0&&mfRole(i)==='مافيا');
  vbMsg({k:'card',t:`<div class="mfDisc" style="--rc:${sp.ac};--rcs:${clRGBA(sp.ac,.3)}">${ico(sp.ic,46,sp.tint)}</div>
@@ -35244,7 +35330,7 @@ function mfEnd(win){
 }
 
 
-/* ── الرسم ضد الكمبيوتر: الكمبيوتر يرسم خطًّا خطًّا وأنت تخمّن — كلّما أبكرت كسبت أكثر ── */
+/* ── الرسم ضد الذكاء الاصطناعي: الذكاء الاصطناعي يرسم خطًّا خطًّا وأنت تخمّن — كلّما أبكرت كسبت أكثر ── */
 const DB_ART=(function(){
  const P=Math.PI;
  const C=(cx,cy,r,n)=>{n=n||28;const p=[];for(let i=0;i<=n;i++){const a=i/n*P*2;p.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}return p};
@@ -35294,7 +35380,7 @@ function dbRound(){
  const others=DB_ART.filter(a=>a.w!==art.w).sort(()=>Math.random()-.5).slice(0,nOpt-1).map(a=>a.w);
  VB.opts=others.concat([art.w]).sort(()=>Math.random()-.5);
  VB.p=0;VB.wrong=0;VB.done=false;
- go(`<div class="scr on">${vbHead('الكمبيوتر يرسم')}
+ go(`<div class="scr on">${vbHead('الذكاء الاصطناعي يرسم')}
  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--tx2)">
   <span>اللوحة ${VB.i+1} من ${VB.rounds.length}</span><span class="mtl" style="font-size:14px" id="dbPts">${VB.total} نقطة</span></div>
  <canvas id="dbc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;border:2px solid #3B2F5C;background:#fff;display:block"></canvas>
@@ -35319,7 +35405,7 @@ function dbPaint(cx,art,p){
    if(budget>=d){cx.lineTo(pts[i][0]*6,pts[i][1]*6);budget-=d}
    else{const f=budget/d;cx.lineTo((pts[i-1][0]+(pts[i][0]-pts[i-1][0])*f)*6,(pts[i-1][1]+(pts[i][1]-pts[i-1][1])*f)*6);budget=0;break}
   }
-  if(full&&s.f){cx.fillStyle=s.f;cx.fill()}          // يكتمل الخطّ فيتلوّن الشكل — كأن الكمبيوتر يلوّن بعد التخطيط
+  if(full&&s.f){cx.fillStyle=s.f;cx.fill()}          // يكتمل الخطّ فيتلوّن الشكل — كأن الذكاء الاصطناعي يلوّن بعد التخطيط
   cx.strokeStyle=s.c||'#1B2030';cx.lineWidth=s.w||7;cx.stroke();
  });
 }
@@ -35470,10 +35556,12 @@ const DIFF_P={
  easy:{n:'سهل',  carrom:{noise:0.28,pw:[5.6,9.4],blind:0.45},
        uno:{rand:0.85,hunt:0,say:0.45,catch:0.20,think:1900},
        mafia:{talk:120,bluff:0},draw:{opts:4,ms:14000}},
- mid: {n:'متوسط',carrom:{noise:0.04,pw:[8.8,12.0],blind:0.15,sim:3},
+ mid: {n:'متوسط',carrom:{noise:0.034,pw:[8.8,12.0],blind:0.13,sim:4},
        uno:{rand:0.25,hunt:0.5,say:0.80,catch:0.65,think:1500},
        mafia:{talk:90,bluff:1},draw:{opts:6,ms:11000}},
- hard:{n:'صعب',  carrom:{noise:0.01,pw:[10.4,13.4],blind:0,sim:6},
+ /* ٦٫٥٢ — «الصعوبة ارفعها ٥٠٪، والمتوسّط ١٠٪» (مقيسٌ على ٣٠٠ لوحةٍ عشوائيّة):
+    الصعب ٥٩٪ ← ٨٦٪ إدخالًا (موضعٌ بلا قطع zc، ضبطُ الزاوية fine، ٨٠ محاكاةً ثابتةً لا زمنًا، خطأ تصويبٍ ٠٫٠٠٠٦)؛ المتوسّط ~١٩٪ ← ٢١٪ */
+ hard:{n:'صعب',  carrom:{noise:0.0006,pw:[10.4,13.4],blind:0,sim:20,zc:1,fine:1},
        uno:{rand:0,hunt:1,say:1,catch:1,think:1000},
        mafia:{talk:75,bluff:1},draw:{opts:8,ms:8500}}
 };
@@ -35481,7 +35569,7 @@ const DIFF_P={
 const DFP=g=>((DIFF_P[RM.diff||'mid']||DIFF_P.mid)[g])||{};
 /** ما الذي يتغيّر فعلًا في هذه اللعبة؟ تُكتب في البطاقة فلا يبقى المستوى اسمًا */
 const DIFF_SAY={
- carrom:{easy:'يطيش كثيرًا ويضرب بخفّة',mid:'يصوّب جيّدًا ويخطئ أحيانًا',hard:'يصيب الجيب ويضرب بقوّة'},
+ carrom:{easy:'يطيش كثيرًا ويضرب بخفّة',mid:'يصوّب جيّدًا ويخطئ أحيانًا',hard:'دقيقٌ جدًّا — يُدخل أغلب ضرباته'},
  uno:   {easy:'يرمي ورقة عشوائية وينسى «أونو»',mid:'يحسب ألوانه ويقول «أونو» غالبًا',hard:'يلاحق من قرب ولا ينسى «أونو»'},
  mafia: {easy:'نقاش طويل ولا ينتحل المحقّق',mid:'نقاش أقصر وينتحل المحقّق أحيانًا',hard:'نقاش سريع وكذب متقن'},
  draw:  {easy:'يرسم على مهل وأربعة خيارات',mid:'أسرع وستّة خيارات',hard:'سريع جدًّا وثمانية خيارات'}
@@ -35702,7 +35790,7 @@ function ghWay(cls,icon,t,s,pills,call,acc,off){
  *
  * كانت ستًّا: مصنّف وعاديّ وغرفة وكمبيوتر وتمرير وإضافات. والمالك يريد سؤالًا
  * واحدًا يُجاب بضغطة: **مع من تلعب؟** فصارت اثنتين — لاعبٌ حقيقيّ أونلاين، أو
- * الكمبيوتر. ومن كثُرت أمامه الأبواب وقف عندها ولم يدخل.
+ * الذكاء الاصطناعي. ومن كثُرت أمامه الأبواب وقف عندها ولم يدخل.
  *
  * وعالم المعرفة لا كمبيوتر فيه، فبابه الثاني «تحدٍّ سريع» — أنت وحدك والأسئلة.
  */
@@ -35743,14 +35831,14 @@ function gameHub(g){
  ${ghWay('main',`<span class="art">${HOME_ART.get('trophy')}</span>`,'أونلاين ضدّ لاعب حقيقيّ','نبحث لك عن خصمٍ الآن — وفوزك يرفع تصنيفك',
    [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time),ghPill(ico('trophy',10),'جوائز ومكافآت')],
    R.online||`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
- ${ghWay('',`<span class="art">${HOME_ART.get('robot')}</span>`,R.soloT||'ضدّ الكمبيوتر',R.soloS||'حسّن مهاراتك مع مستويات متعدّدة',
+ ${ghWay('',`<span class="art">${HOME_ART.get('robot')}</span>`,R.soloT||'ضدّ الذكاء الاصطناعي',R.soloS||'حسّن مهاراتك مع مستويات متعدّدة',
    (R.soloPl||[['user','لاعب واحد'],['timer',m.bot||m.quick],['chart','مستويات متعدّدة']])
      .map(q=>ghPill(ico(q[0],10),q[1])),
    R.solo||`push('soloScr','${g}')`,'#2FC4A8')}
  ${def.id==='carrom'?`<button class="ghArena" onclick="push('arenaScr')">
    ${ico('palette',16)}<span>ساحات الكيرم</span>
    <b>${esc((caArena()&&caArena().n)||'الأصليّة')}</b>${ghChev()}</button>`:''}
- <div class="ghNote">نقاط التصنيف من اللعب أونلاين وحده — واللعب ضدّ الكمبيوتر للتمرين بلا رتب.</div>
+ <div class="ghNote">نقاط التصنيف من اللعب أونلاين وحده — واللعب ضدّ الذكاء الاصطناعي للتمرين بلا رتب.</div>
  </div>`);
 }
 
@@ -43955,7 +44043,7 @@ function rankGuideScr(g){
     ['up','النقاط','الفوز يمنح حتى 30 نقطة والخسارة تخصم حتى 28 بحسب قوّة النتيجة وفرق المهارة مع الخصم. مئة نقطة تصعدك درجة.'],
     ['shield','الحماية','بعد كل ترقية لك مباراة حماية واحدة لا تهبط فيها ولو خسرت.'],
     ['timer','الموسم','موسم واحد للجميع، ورتبة مستقلّة لكل لعبة. عند بداية الموسم تنزل درجتين فقط، لا إلى البرونزي.'],
-    ['scale','ما يُحتسب','المباريات المصنّفة فقط. اللعب العادي والغرف والكمبيوتر تحفظ إحصاءاتك ولا تمسّ رتبتك.']].map(([ic,h,d])=>
+    ['scale','ما يُحتسب','المباريات المصنّفة فقط. اللعب العادي والغرف والذكاء الاصطناعي تحفظ إحصاءاتك ولا تمسّ رتبتك.']].map(([ic,h,d])=>
   `<div class="li"><div class="lr"><span class="rgIc">${ico(ic,20)}</span><div class="lb"><div class="lt">${h}</div><div class="ls" style="line-height:1.6;white-space:normal">${d}</div></div></div></div>`).join('')}
  </div>`);
 }

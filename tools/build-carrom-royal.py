@@ -129,10 +129,14 @@ def ring_polar(img, lo, hi, dark=60):
     return ex, ey, w / 2, h / 2
 mx, my, mrx, mry = ring_polar(orig, int(52 * u), int(72 * u))
 ox_, oy_, orx, ory = ring_polar(ours, int(45 * u), int(75 * u))
-T = np.float32([[mrx / orx, 0, mx - mrx / orx * ox_], [0, mry / ory, my - mry / ory * oy_]])
+# ٦٫٥٢: دائرةٌ حقًّا لا قطعٌ ناقص («ليش الدائرة في النصّ شكلها بيضاوي؟»): دائرة الصورة المولَّدة ناقصة
+# (١١٥×١٣٢) ونسيج الكلاسيكيّ ناقصٌ قليلًا أيضًا (صورته الأصليّة غير مربّعة). يُصحَّح نسيجنا إلى دائرةٍ
+# نصف قطرها وسط المحورين، في مركز الساحة تمامًا، والقناع يغطّي القطع الناقص القديم كلّه
+Rr = (mrx + mry) / 2
+T = np.float32([[Rr / orx, 0, cx - Rr / orx * ox_], [0, Rr / ory, cy - Rr / ory * oy_]])
 ours_fit = cv2.warpAffine(ours, T, (N, N), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
 mask = np.zeros((N, N), np.uint8)
-cv2.ellipse(mask, (int(mx), int(my)), (int(mrx + 9 * u), int(mry + 9 * u)), 0, 0, 360, 255, -1)
+cv2.ellipse(mask, (int(mx), int(my)), (int(max(mrx, Rr) + 11 * u), int(max(mry, Rr) + 11 * u)), 0, 0, 360, 255, -1)
 ann = np.zeros((N, N), np.uint8)
 cv2.ellipse(ann, (int(mx), int(my)), (int(mrx + 30 * u), int(mry + 30 * u)), 0, 0, 360, 255, -1)
 cv2.ellipse(ann, (int(mx), int(my)), (int(mrx + 12 * u), int(mry + 12 * u)), 0, 0, 360, 0, -1)
@@ -174,7 +178,7 @@ def back(x, y):
 q = [back(0, 0), back(N, 0), back(N, N), back(0, N)]
 print('✓', os.path.relpath(out, ROOT), '%.0f ك.ب' % (os.path.getsize(out) / 1024), '· mg', MG)
 print('  الجيوب في الصورة:', {k: [round(v[0], 1), round(v[1], 1)] for k, v in P.items()})
-print('  الدائرة: الصورة', [round(mx), round(my), round(mrx), round(mry)], '· النسيج', [round(ox_), round(oy_), round(orx), round(ory)])
+print('  الدائرة: الصورة', [round(mx), round(my), round(mrx), round(mry)], '· النسيج', [round(ox_), round(oy_), round(orx), round(ory)], '→ دائرة نصف قطرها', round(Rr))
 print('  CA_ROYAL.q =', json.dumps(q))
 
 # ٤ — اليد الحقيقيّة بكمّ الدشداشة (arenas/hand.webp): قصٌّ بـ GrabCut من الصورة نفسها

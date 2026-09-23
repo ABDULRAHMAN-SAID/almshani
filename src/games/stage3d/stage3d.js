@@ -1,4 +1,4 @@
-/* ═══ المجلس المجسّم (5.52): غرفة وشخصيات ثلاثية الأبعاد لمسرح مافيا ضد الكمبيوتر — WebGL عبر Three.js.
+/* ═══ المجلس المجسّم (5.52): غرفة وشخصيات ثلاثية الأبعاد لمسرح مافيا ضد الذكاء الاصطناعي — WebGL عبر Three.js.
    يُركَّب داخل #vbStage تحت طبقة المقاعد: الأسماء والشارات والبطاقات تبقى عناصر DOM وتُسقَط من مواضع الرؤوس في المشهد،
    والضغط على الشخصية نفسها يعمل كالضغط على مقعدها. إن غاب WebGL (أو في الاختبارات السريعة) يبقى المشهد المرسوم ثنائيّ الأبعاد. ═══ */
 const VB3={on:false,tex:{}};
@@ -458,7 +458,7 @@ function vb3dRoomSquare(sc){
  L.bounce=new T.DirectionalLight(0xC0A184,.24);L.bounce.position.set(-.5,-1.5,2.2);sc.add(L.bounce);   // ارتداد بارد من الحجر   // 5.65: تعبئة خافتة مائلة — الملامح تُقرأ والثوب يحتفظ بلونه بلا ابيضاض
  return {L,glow,sky,stars,day:{hemi:.28,key:2.5,lamp:25,post:17,rim:2.3,skyc:'#FFFFFF',starO:.7},night:{hemi:.13,key:1.45,lamp:13,post:9,rim:1.9,skyc:'#5A6090',starO:1}};
 }
-/* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الكمبيوتر وللردهة ── */
+/* ── التركيب والتخطيط: نموذج المشهد يصف المقاعد (أسماء، أنا، فارغة، مضيف) وحالاتها — للمسرح ضد الذكاء الاصطناعي وللردهة ── */
 function vb3dStageModel(kind){const my=VB;return {kind,names:VB.names,me:0,empty:new Set(),host:-1,stage:'vbStage',seats:'#vbSeats .vbSeat',scene:'.vbScene',
  alive:()=>VB===my&&!!document.getElementById('vbStage'),night:()=>!!VB.night,tap:vb3dTap,
  state:i=>{const s=vbSeatState(i);return {dead:!!s.dead,talk:!!s.talk,mark:!!s.mark,pick:!!(VB.pick&&VB.pick.list.includes(i)&&!s.dead),pk:VB.pick&&VB.pick.c||'#E8B23A',
