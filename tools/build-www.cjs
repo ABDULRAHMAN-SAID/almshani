@@ -33,8 +33,8 @@ if(fs.existsSync(AR)){
 /* موسيقى القائمة ملفٌّ لا شيفرة (٦٫٣٨) — يُنسخ كما تُنسخ الخطوط والأيقونات */
 const AU=path.join(SRC,'audio');
 if(fs.existsSync(AU)){
- fs.mkdirSync(path.join(OUT,'audio'),{recursive:true});
- for(const f of fs.readdirSync(AU))fs.copyFileSync(path.join(AU,f),path.join(OUT,'audio',f));
+ /* بمجلّداته (audio/shouts/ لصيحات المالك المسجّلة — ٦٫٦٦): كان النسخ ملفًّا ملفًّا فيسقط عند أوّل مجلّد */
+ fs.cpSync(AU,path.join(OUT,'audio'),{recursive:true});
 }
 
 fs.mkdirSync(path.join(OUT,'fonts'),{recursive:true});

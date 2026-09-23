@@ -131,7 +131,7 @@ var VOICE=(function(){
    /* ٦٫٦٤ — «ما يجوز تستخدم هذا الصوت لكلماتٍ أخرى»: الضحكة للضحك وحده. جملةٌ فيها كلام تُقال كلامًا
       (بلا ضحكةٍ قبلها)، والضحكة المسجّلة لا تُسمع إلّا في صيحة الضحك */
    if(r)return speak(r,o);
-   if(laugh(0,null))return 'laugh';
+   if(laugh(0,null,null,function(){speak(text,o)}))return 'laugh';   // الملفّ تعذّر: صوت الجهاز بدله (المراجعة)
   }
   return speak(text,o);
  }

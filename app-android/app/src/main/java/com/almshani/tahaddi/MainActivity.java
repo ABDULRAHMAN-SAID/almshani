@@ -346,7 +346,8 @@ public class MainActivity extends AppCompatActivity {
  protected void onResume() {
   super.onResume();
   if (web != null) { web.resumeTimers(); web.onResume(); }
-  if (tts == null || ttsFailed) ttsStart(); else ttsCheck();   // ما زال يربط: يفحص حين يكتمل
+  /* ما زال يربط: ينتظر. فشل، أو ربط ولا عربيّ (قد يكون المحرّك انقطع أو ثُبّتت العربيّة للتوّ): يُعاد الربط (المراجعة) */
+  if (tts == null || ttsFailed || (ttsBound && !ttsReady)) ttsStart(); else ttsCheck();
  }
 
  @Override

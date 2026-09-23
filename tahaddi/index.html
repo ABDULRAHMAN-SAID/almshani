@@ -2176,6 +2176,8 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .efab,.caRnd{background:radial-gradient(circle at 50% 30%,#1D2436,#0A0E18);border:1px solid var(--lxLine);color:var(--lxG);
  box-shadow:0 0 0 3px rgba(8,11,20,.85),0 0 0 4px rgba(217,183,110,.2),0 8px 18px rgba(0,0,0,.5)}
 .emoFab{display:block;width:52%;height:52%}
+.btn.dbOpt.ok{border-color:var(--ok);color:var(--ok);background:rgba(46,204,113,.14)}
+@media (max-width:380px){.goBtn.caEndGo{min-height:44px}}
 #caFps{position:fixed;top:calc(6px + env(safe-area-inset-top));left:8px;z-index:90;pointer-events:none;
  font:800 11px/1 Cairo,system-ui;padding:5px 8px;border-radius:8px;background:rgba(8,11,20,.8);border:1px solid var(--lxLine2);color:#F6E3AE}
 #caFps.md{color:#F0B36A}#caFps.lo{color:#F09A98}
@@ -2223,7 +2225,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  background:#1B2234;border-top:1px solid var(--lxLine);border-left:1px solid var(--lxLine)}
 .shfx.anch .shwv{display:none}
 /* «.op» اسمُ خيار السؤال أيضًا (بطاقة بخلفيّة وإطار وحشوة وحركة) — كانت فقاعة الخصم تلبسه فيظهر حولها صندوق */
-.shfx.op{background:none;border:0;border-radius:0;padding:0;box-shadow:none;cursor:default}
+.shfx.op{background:none;border:0;border-radius:0;padding:0;margin:0;box-shadow:none;cursor:default;transition:none}
 .shfx.op:not(.anch){animation:shPop .28s cubic-bezier(.2,1.5,.4,1)}
 @keyframes shAn{from{opacity:0;transform:translateY(-6px) scale(.94)}to{opacity:1;transform:none}}
 </style>
@@ -15492,9 +15494,9 @@ const VN_SCENE_IMG={uno:'data:image/webp;base64,UklGRibYAABXRUJQVlA4IBrYAACwJAOd
 const VN_KIND={carrom:'carrom',uno:'uno',draw:'atelier',mafia:'mafia',quiz:'studio'};
 /* ٦٫٥٠: الكيرم باللوح الفاخر يجلس في غرفةٍ معتمة بضوءٍ دافئ كما في صورة المالك — لا في المجلس بالوسائد
    (الوسائد مرسومةٌ حول لوحٍ مستوٍ، واللوح المائل لا يقع بينها) */
-function caRoyalPref(){if(typeof _ca!=='undefined'&&_ca.skin)return _ca.skin==='r'&&!caArena();let v=null;try{v=localStorage.getItem('caSkin2')}catch(e){}
- let ar=null;try{ar=localStorage.getItem('caArena')}catch(e){}
- return (!v||v==='r')&&!(ar&&typeof CA_ARENA!=='undefined'&&CA_ARENA[ar]&&caOwns(ar))}
+/* ٦٫٦٦: لوحٌ واحد (الفاخر) — قيمةٌ قديمة في caSkin2 ('c'/'m') أو caArena كانت تختار خلفيّةً ثم تبدّلها عند البدء (المراجعة) */
+function caRoyalPref(){return true}
+try{localStorage.removeItem('caSkin2');localStorage.removeItem('caArena')}catch(e){}
 const vnKind=g=>(g==='carrom'&&caRoyalPref())?'carromR':(VN_KIND[g]||(g==='lk'?'majlis':'carrom'));
 function hexHue(h){const n=parseInt(String(h).replace('#',''),16);const r=(n>>16&255)/255,g=(n>>8&255)/255,b=(n&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(!d)return 0;let hh=mx===r?((g-b)/d)%6:mx===g?(b-r)/d+2:(r-g)/d+4;hh*=60;return hh<0?hh+360:hh}
 /** طبقة حيّة خفيفة فوق اللوحة المخبوزة: غبار يومض، مخروط ضوء يرتعش، نجوم، توهّج فوانيس، مصابيح الاستوديو */
@@ -16801,7 +16803,7 @@ var VOICE=(function(){
    /* ٦٫٦٤ — «ما يجوز تستخدم هذا الصوت لكلماتٍ أخرى»: الضحكة للضحك وحده. جملةٌ فيها كلام تُقال كلامًا
       (بلا ضحكةٍ قبلها)، والضحكة المسجّلة لا تُسمع إلّا في صيحة الضحك */
    if(r)return speak(r,o);
-   if(laugh(0,null))return 'laugh';
+   if(laugh(0,null,null,function(){speak(text,o)}))return 'laugh';   // الملفّ تعذّر: صوت الجهاز بدله (المراجعة)
   }
   return speak(text,o);
  }
@@ -17950,6 +17952,13 @@ function claimGift(){
 
 // تهيئة كسولة لحالة المجموعة
 function ensureEcon(){
+ /* ٦٫٦٦ — الساحات حُذفت (٦٫٦٢): من اشترى منها تُعاد إليه عملاته مرّةً واحدة (المراجعة) */
+ if(Array.isArray(S.arenas)&&S.arenas.length&&!S.arenasRefund){
+  const P={sahil:1200,mina:1800,marsa:2400,hisn:3000};
+  const back=S.arenas.reduce((a,k)=>a+(P[k]||0),0);
+  S.arenasRefund=1;S.arenas=[];
+  if(back>0){S.coins=(S.coins|0)+back;setTimeout(()=>{try{toast('أُعيدت إليك '+back+' عملة — الساحات حُذفت وبقي لوحٌ واحد للجميع')}catch(e){}},1200)}
+ }
  if(!S.cards)S.cards=defaultCards();
  if(!S.wild)S.wild={common:0,rare:0,epic:0,legendary:0};
  if(S.shards===undefined)S.shards=0;
@@ -23389,7 +23398,11 @@ function shoutFx(text,side,label,peer){
    d.classList.add('anch');
    const W=window.innerWidth||360, w=d.offsetWidth, cx=r.left+r.width/2;
    const left=Math.max(8,Math.min(W-8-w,cx-w/2));
-   d.style.left=left+'px';d.style.top=(r.bottom+10)+'px';
+   /* فقاعتان في وقتٍ واحد (صيحتي وتعليق الخصم) لا تتراكبان: الثانية تحت الأولى (المراجعة) */
+   let top=r.bottom+10;
+   for(const o of document.querySelectorAll('.shfx.anch')){if(o===d)continue;const q=o.getBoundingClientRect();
+    if(q.right>left&&q.left<left+w&&q.bottom>top&&q.top<top+d.offsetHeight)top=q.bottom+6}
+   d.style.left=left+'px';d.style.top=top+'px';
    d.style.setProperty('--ax',(cx-left)+'px');
   }
  }
@@ -24817,7 +24830,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.65';
+const APP_VER='6.66';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25442,6 +25455,7 @@ function rmOn(d,m){
   /* بثّ الضربة لا يحمل حال الملكة ولا النقاط — كانت تُمحى لحظة الضربة (الملكة «على اللوح»، والعدّاد صفر) */
   const keep=(k,v)=>wasShot&&!(k in d)&&RM.ca?RM.ca[k]:(v==null?null:v);
   RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,q:keep('q',d.q),qw:keep('qw',d.qw),M:keep('M',d.M),msg:d.msg||''};
+  if(!wasShot&&_ca.sRet&&_ca.sRet.wait){_ca.sRet.wait=0;_ca.sRet.t0=performance.now()}   // عُرف صاحب الدور: ينزلق الضارب إليه
   if(!wasShot&&_ca.tr){_ca.tr.incl=true;_ca.tr.L={w:0,b:0,q:0}}   // حكم المضيف وصل: العدّ منه، وما يطير بعدُ يُطرح
   RM.phase='carrom';
   /* صاحب الدور الجديد لم يصوّب بعد — إلّا ضربةَ الخصم الواصلة الآن: يبقى تصويبه حتّى caPlay كي تنسحب يده من حيث صوّب */
@@ -27209,7 +27223,7 @@ function caAct(d){
   else if(t===mine){gotMine++;C.got[cur]=(C.got[cur]||0)+1}
   else{const o=owner(t);if(o)C.got[o.peer]=(C.got[o.peer]||0)+1}
  });
- if(RM.solo)setTimeout(()=>caBotReact(cur,{gotMine,foul,gotQ,mine}),650);   // ٦٫٦٢: الآليّ يعلّق بجانب صورته
+ if(RM.solo)setTimeout(()=>{if(!(RM.C&&RM.C.over))caBotReact(cur,{gotMine,foul,gotQ,mine})},650);   // ٦٫٦٢: الآليّ يعلّق بجانب صورته — لا في ضربة النهاية (لها تعليقها)
  // خطأ الضارب: تعود إحدى قطعك المُدخَلة إلى اللوح
  if(foul&&(C.got[cur]||0)>0&&caPutBack(C,mine)){
   C.got[cur]--;notes.push('خطأ الضارب — عادت قطعة إلى اللوح');
@@ -27313,7 +27327,7 @@ function caPlay(shot){
  const S2=CarromPhysics.create(C.pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
  CarromPhysics.shoot(S2,shot);
  S2.by=C.turn;
- _ca.fly=[];_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
+ _ca.fly=[];_ca.drop=null;_ca.sRet=null;_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
  _ca.sim=S2;_ca.acc=0;_ca.last=performance.now();
  cancelAnimationFrame(_ca.anim);
  if(_ca.lastHand)_ca.handOut=Object.assign({t:performance.now()},_ca.lastHand);
@@ -27348,6 +27362,13 @@ function caStep(){
  if(window.SFX&&SFX.slide)SFX.slide(0);
  // استقرّ اللوح: من ضرب يبثّ الوضع النهائي مرجعًا للجميع
  _ca.sim=null;caLoopOn();   // الحلقة الخاملة تعود: اللوحة لم تعد تُستبدل فلا يعيد caInit تشغيلها
+ /* ٦٫٦٦ — «جيس التحكّم لا يختفي… أدخلتُ قطعةً أراه يرجع لعندي، لم أُدخل يرجع لي ثم يختفي ثم يظهر جيس الخصم من
+    بعيد»: ضاربٌ واحد على اللوح. يبقى حيث وقف حتى يُعرف الدور التالي (حكم المضيف)، ثم ينزلق من هناك إلى خطّ
+    صاحب الدور — إليّ إن أدخلتُ، وإلى الخصم إن لم أُدخل. وإن سقط في جيبٍ خرج منه. */
+ {const sp=S2.pcs.find(p=>p.t==='s'), sd=!sp&&S2.drop.find(d=>d.t==='s');
+  const f=sp?{x:sp.x,y:sp.y}:sd?{x:sd.px,y:sd.py}:null;
+  _ca.sRet=f?{fx:f.x,fy:f.y,wait:1,tw:performance.now(),t0:0,sk0:caSkOf(S2.by!=null?S2.by:(RM.ca?RM.ca.turn:RM.me))}:null;}
+ _ca.drop=S2.drop;   // القطع الجالسة في الجيب تبقى ظاهرة حتى تطير — ولو استقرّت الضربة
  const rest=S2.pcs.filter(p=>p.t!=='s').map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,t:p.t}));
  const shooter=RM.ca?RM.ca.turn:null;
  if(shooter===RM.me&&S2.pot&&S2.pot.length){const n=S2.pot.filter(t=>t!=='s').length;if(n){try{const e=EV();e.carromPot=(e.carromPot||0)+n;trk('carrom_pot',n);saveState()}catch(x){}}}
@@ -27817,10 +27838,12 @@ function caHandSprite(w,h){
    على العليا، والملكة عند من أخذها. العدّ من حال المضيف (٩ − الباقي على اللوح)، وأثناء الضربة يُضاف ما
    هبط (L) قبل أن يصل حكمه، وبعده يُطرح ما لم يهبط بعد — فلا تومض قطعةٌ ولا تُعدّ مرّتين. */
 const CA_FLY_MS=720;
+const CA_HOLD_MS=380;   // ٦٫٦٦: القطعة ظاهرةٌ في الجيب قبل أن تطير إلى صاحبها
+const CA_RET_MS=460;    // ٦٫٦٦: انزلاق الضارب من حيث وقف إلى خطّ صاحب الدور
 function caTrayCount(){
  const C=RM.ca;if(!C)return null;
  const tr=_ca.tr||{incl:true,L:{w:0,b:0,q:0}}, fl=_ca.fly||[];
- const sink=(_ca.sim&&_ca.sim.drop)||[];
+ const sink=(_ca.sim&&_ca.sim.drop)||_ca.drop||[];
  /* ما يطير أو ما زال يغوص (إن وصل حكم المضيف قبل انتهاء الضربة على جهازٍ بطيء) — المراجعة */
  const F=t=>fl.filter(f=>f.t===t&&!f.done).length+sink.filter(d=>d.t===t&&!d.flown).length;
  const n=t=>{const base=(t==='q'?1:9)-C.pcs.filter(p=>p.t===t).length;return Math.max(0,base+(tr.incl?-F(t):tr.L[t]))};
@@ -27902,7 +27925,15 @@ function caRender(rest){
    const P=a?V(a.x,a.y):V.apply(null,caL2B(sSeat,CA_R/2,base));
    sPos={x:P[0],y:P[1]};
   }
-  pcs=pcs.concat([{x:sPos.x,y:sPos.y,t:'s',r:CA_SR}]);
+  const R=_ca.sRet;
+  if(R&&!_ca.drag&&!_ca.slide){
+   const nw=performance.now();
+   if(R.wait&&nw-R.tw>1500){R.wait=0;R.t0=nw}   // حكمٌ تأخّر (شبكة): لا يعلق الضارب
+   const e=R.wait?0:Math.min(1,(nw-R.t0)/CA_RET_MS), ee=e<.5?2*e*e:1-Math.pow(-2*e+2,2)/2, F=V(R.fx,R.fy);
+   sPos={x:F[0]+(sPos.x-F[0])*ee,y:F[1]+(sPos.y-F[1])*ee,sk0:R.sk0,mix:ee};   // مظهر الضارب يتحوّل على الطريق من صاحب الضربة إلى صاحب الدور
+   if(e>=1)_ca.sRet=null;
+  }else if(R)_ca.sRet=null;   // لمستُ الشريط أو بدأت التصويب: الضارب عندي فورًا
+  pcs=pcs.concat([{x:sPos.x,y:sPos.y,t:'s',r:CA_SR,sk0:sPos.sk0,mix:sPos.mix}]);
  }
  const handAt=(hx,hy,ang,scale)=>{
   if(!_ca.hand)return;
@@ -27950,7 +27981,8 @@ function caRender(rest){
   const r=(p.r||CA_PR)*sc,X=PX(p.x),Y=PY(p.y);
   const sp=caDisc(p.t==='s'?stT:p.t,r),o=sp._o;
   if(p.t==='s'&&sBad)cx.globalAlpha=.5;
-  cx.drawImage(sp,X-o,Y-o,sp._s,sp._s);
+  if(p.t==='s'&&p.sk0&&p.mix<1&&'s:'+p.sk0!==stT){const s0=caDisc('s:'+p.sk0,r);cx.globalAlpha=1-p.mix;cx.drawImage(s0,X-s0._o,Y-s0._o,s0._s,s0._s);cx.globalAlpha=p.mix}
+  cx.drawImage(sp,X-o,Y-o,sp._s,sp._s);cx.globalAlpha=1;
   if(p.t==='s'&&sBad){cx.globalAlpha=1;cx.beginPath();cx.arc(X,Y,r+1.5*sc,0,7);cx.strokeStyle='rgba(226,75,74,.95)';cx.lineWidth=2.5*sc;cx.stroke()}   // بلا أثر حركة: الاستيفاء يكفي، والصورة المزدوجة كانت تُدوّخ
  }
  if(handLate){
@@ -27976,9 +28008,13 @@ function caRender(rest){
   const ez=1-Math.pow(1-slide,2.4), gz=sz*sz;
   const X=PX(d.x+(d.px-d.x)*ez)+Math.sin(e*11)*(1-e)*2.2;
   const Y=PY(d.y+(d.py-d.y)*ez);
-  const r=(d.r||CA_PR)*sc*(1-.62*gz);
-  const al=d.t==='s'?(e<.86?1:Math.max(0,1-(e-.86)/.14)):(e<.8?1:Math.max(.35,1-(e-.8)/.2*.65));   // القطعة تغوص وتعتم ثمّ تخرج طائرةً (٦٫٥٧)؛ الضارب يخبو كما كان
-  if(d0.f>=1&&!d0.flown&&d0.t!=='s'){d0.flown=1;(_ca.fly=_ca.fly||[]).push({t:d0.t,px:d0.px,py:d0.py,t0:performance.now()})}
+  /* ٦٫٦٦ — «عند دخول قطعةٍ في الحفرة لا يجب أن تختفي بهذه الطريقة، بل تظهر في الحفرة لأجزاءٍ من الثانية ثمّ
+     تذهب إلى صاحبها»: كانت تصغر إلى ثلثها وتعتم حتى تكاد تختفي. الآن تنزلق إلى قلب الجيب وتجلس فيه ظاهرةً
+     (أصغر قليلًا، بظلّ الحفرة)، ثمّ تخرج طائرةً إلى صاحبها بعد CA_HOLD_MS. الضارب وحده يخبو ثم يخرج منزلقًا */
+  const r=(d.r||CA_PR)*sc*(d.t==='s'?(1-.62*gz):(1-.16*gz));
+  const al=d.t==='s'?(e<.86?1:Math.max(0,1-(e-.86)/.14)):1;
+  if(d0.f>=1&&!d0.flown&&d0.t!=='s'){const nw=performance.now();if(!d0.th)d0.th=nw;
+   if(nw-d0.th>=CA_HOLD_MS){d0.flown=1;(_ca.fly=_ca.fly||[]).push({t:d0.t,px:d0.px,py:d0.py,t0:nw})}}
   // حلقة أثر تتسع عند الفوهة لحظة الدخول
   if(e>.30&&e<.72){
    const t=(e-.30)/.42, rr=CA_POCK*sc*(1+t*1.35);
@@ -27986,7 +28022,7 @@ function caRender(rest){
    cx.strokeStyle='rgba(255,233,168,'+((1-t)*.55).toFixed(3)+')';
    cx.lineWidth=3;cx.stroke();
   }
-  disc(X,Y+r*.22*gz,r,d.t==='s'?stT:d.t,al,Math.min(.68,gz*.8),(d.r||CA_PR)*sc);
+  disc(X,Y+r*.22*gz,r,d.t==='s'?stT:d.t,al,d.t==='s'?Math.min(.68,gz*.8):Math.min(.26,gz*.3),(d.r||CA_PR)*sc);
  }
  // القطع الطائرة من الجيب إلى الحافّة: تقفز من الفوهة، تكبر في منتصف الطريق كأنّها تقترب، وتستقرّ في خانتها
  if(_ca.fly&&_ca.fly.length&&RM.ca){
@@ -28190,7 +28226,7 @@ function caLoop(){
  _ca.t=(_ca.t||0)+1;
  /* كلّ إطار ما دام شيءٌ يتحرّك أو هو دوري (نبض سهمَي الشريط)؛ في دور غيري بلا حركةٍ لا يتغيّر شيء — فكلّ رابع */
  const myT=RM.ca.turn===RM.me;
- if(easing||_ca.drag||_ca.slide||myT||(_ca.fly&&_ca.fly.length)||_ca.fpsOn||(_ca.t&3)===0)caRender();
+ if(easing||_ca.drag||_ca.slide||myT||_ca.sRet||(_ca.drop&&_ca.drop.some(d=>!d.flown&&d.t!=='s'))||(_ca.fly&&_ca.fly.length)||_ca.fpsOn||(_ca.t&3)===0)caRender();
  _ca.loop=requestAnimationFrame(caLoop);
 }
 function caLoopOn(){if(!_ca.loop&&!_ca.sim)_ca.loop=requestAnimationFrame(caLoop)}
@@ -28485,7 +28521,11 @@ function caBotReact(cur,e){
   else if(e.gotMine&&mates.length)say(pick(mates),'hype',.35);
  }
  if(!who||!g)return;
- const pool=SHOUTS.filter(x=>x.g===g);if(!pool.length)return;
+ /* ٦٫٦٦ — جملٌ تناسب الموقف لا المجموعة كلّها (المراجعة): الفائز لا يقول «تستاهل الفوز»، ولا يُواسى من يُدخل،
+    ولا «تأكّد من إجابتك» في الكيرم */
+ const OK={near:['n2','n3','n4','n5','n7','n8'],back:['b1','b2','b3','b5','b6','b8','b9'],tease:['t1','t4','t5','t7','t8','t11'],
+  hype:['h1','h2','h3','h5','h8'],nice:['c1','c2','c3','c4','c6'],gg:e.over&&RM.ca.col[cur]!==myCol?['g1','g2','g4']:['g1','g3','g4','g5']};
+ const pool=SHOUTS.filter(x=>x.g===g&&(!OK[g]||OK[g].indexOf(x.i)>=0));if(!pool.length)return;
  _caTalk=now;
  try{shoutOut(pick(pool),'op',who.name,who.peer)}catch(x){}
 }
