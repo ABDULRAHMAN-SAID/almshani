@@ -1711,7 +1711,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 /* ٦٫٥٦ — الشاشة تملأ طولها: اللوح في الوسط بهامشٍ عن حافّتي الشاشة، والأزرار في الأسفل */
 .scr.on.caScr{display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 #app:has(>.scr.on.caScr){padding-bottom:0}   /* شريط التنقّل مخفيٌّ في المباراة: لا فراغ له تحت الشاشة */
-.caScr .caWrap.big{margin-block:auto;width:calc(100vw - 24px);margin-inline:calc(50% - 50vw + 12px);border-radius:0}   /* الزوايا في رسم اللوح (٦٫٧٠) */
+.caScr .caWrap.big{margin-block:auto;width:calc(100vw - 12px);margin-inline:calc(50% - 50vw + 6px);border-radius:0}   /* الزوايا في رسم اللوح (٦٫٧٠) */
 /* رسالة الإدخال: تظهر فوق اللوح لحظةً ثمّ تخفت */
 .caEnd{position:absolute;inset:0;z-index:5;display:flex;overflow:auto;padding:8px;box-sizing:border-box;background:rgba(5,8,16,.62);backdrop-filter:blur(2px)}
 .caEnd.in{animation:fi .25s ease}
@@ -2150,7 +2150,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caSub .caQ.hot{color:#FFC9C7}
 .caStage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,2.6vh,26px);padding-block:clamp(4px,1.6vh,22px) clamp(4px,1.2vh,14px)}
 .caScr .caStage .caWrap.big{margin-block:0}
-.pCard{position:relative;display:flex;align-items:center;gap:12px;margin-inline:calc(50% - 50vw + 12px);padding:clamp(8px,1.9vh,18px) 14px;border-radius:16px;
+.pCard{position:relative;display:flex;align-items:center;gap:12px;margin-inline:calc(50% - 50vw + 6px);padding:clamp(8px,1.9vh,18px) 14px;border-radius:16px;
  background:linear-gradient(180deg,#161C2C,#0B0F1A);border:1px solid rgba(217,183,110,.2);
  box-shadow:inset 0 1px 0 rgba(255,244,214,.06),0 8px 20px rgba(0,0,0,.4);transition:border-color .25s,box-shadow .25s}
 .pCard.on{border-color:rgba(217,183,110,.85);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 0 0 1px rgba(217,183,110,.2),0 0 24px rgba(217,183,110,.16)}
@@ -2182,6 +2182,13 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .pGoal i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#B98C3A,#F6E3AE);transition:width .5s ease}
 .pSlots i.pQw{width:var(--d);height:var(--d);flex-shrink:0}
 .caSub .caPtsT{color:#F6E3AE}
+.segC.m4{flex-wrap:wrap}.segC.m4 button{flex:1 1 calc(50% - 4px)}
+.segC.ptsT{margin-top:8px}.segC.ptsT button{padding:8px}
+/* مؤقّت الضربة: خيطٌ ذهبيّ أسفل بطاقة صاحب الدور يقصر، ويحمرّ في ثوانيه الأخيرة */
+.pTm{position:absolute;inset-inline:16px;bottom:-1px;height:3px;border-radius:2px;transform-origin:left center;
+ background:linear-gradient(90deg,#B98C3A,#F6E3AE);animation:pTm linear forwards;pointer-events:none}
+@keyframes pTm{0%{transform:scaleX(1)}70%{transform:scaleX(.3);filter:none}100%{transform:scaleX(0);filter:hue-rotate(-40deg) saturate(3)}}
+@media (prefers-reduced-motion:reduce){.pTm{animation-timing-function:steps(5)}}
 .caFinS{display:flex;align-items:baseline;justify-content:center;gap:10px;margin:-8px 0 16px;color:#AEB9CF;font-weight:800;font-size:12px}
 .caFinS b{font-size:26px;font-weight:900;color:#F6E3AE;font-variant-numeric:tabular-nums}
 #caHand{position:fixed;left:0;top:0;z-index:40;pointer-events:none;will-change:transform,opacity}
@@ -24873,7 +24880,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.72';
+const APP_VER='6.73';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25501,7 +25508,11 @@ function rmOn(d,m){
   /* بثّ الضربة لا يحمل حال الملكة ولا النقاط — كانت تُمحى لحظة الضربة (الملكة «على اللوح»، والعدّاد صفر) */
   const keep=(k,v)=>wasShot&&!(k in d)&&RM.ca?RM.ca[k]:(v==null?null:v);
   RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,q:keep('q',d.q),qw:keep('qw',d.qw),M:keep('M',d.M),msg:d.msg||'',
-   md:keep('md',d.md),pp:keep('pp',d.pp),ph:keep('ph',d.ph)};
+   md:keep('md',d.md),pp:keep('pp',d.pp),ph:keep('ph',d.ph),pw:keep('pw',d.pw)};
+  /* ٦٫٧٢: مؤقّت الضربة يبدأ مع كلّ حكمٍ جديد (دورٌ جديد أو ضربةٌ أخرى لصاحبه) */
+  if(!wasShot){_ca.tt={peer:d.turn,t0:performance.now()};
+   if(d.turn!==RM.me){_ca.drag=null;_ca.slide=0}   // انتقل الدور (انتهى الوقت) وأنا أسحب: لا ضربة
+   if(RM.host)caTimerArm(d.turn)}
   if(!wasShot&&_ca.sRet&&_ca.sRet.wait){_ca.sRet.wait=0;_ca.sRet.t0=performance.now()}   // عُرف صاحب الدور: ينزلق الضارب إليه
   if(!wasShot&&_ca.tr){_ca.tr.incl=true;_ca.tr.L={w:0,b:0,q:0};_ca.tr.seq=[]}   // حكم المضيف وصل: العدّ منه، وما يطير بعدُ يُطرح
   RM.phase='carrom';
@@ -25732,7 +25743,7 @@ function roomDraw(){
     بما رُسم عليها ومستمعيها إلى الشاشة الجديدة — فلا إطار فارغ ولا انقطاع. */
  const oldCv=document.getElementById('caC');
  const caPlay_=playing&&RM.game==='carrom';   // ونهاية المباراة داخل شاشة الكيرم (٦٫٥٨)   // الكيرم: الوجوه والخروج في شريط أدواته
- go(`<div class="scr on nofi${caPlay_?" caScr":""}" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${emoFab(26)}</button>`:''}${caPlay_?`<div class="tbar caTbar"><button class="bk" onclick="back()">${bkChev()}</button><h2>كيرم<small class="caSub">${caIsPts(RM.ca)?'<span class="caPtsT">حاصد النقاط · ١٦٠</span>':`<span class="caM">${RM.solo?'ضد الذكاء الاصطناعي':'أونلاين'}</span>`}${RM.solo?`<i></i>${({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''}`:''}${RM.ca?`<i></i><span class="caQ${RM.ca.q?' hot':''}">${caQTxt(RM.ca)}</span>`:''}</small></h2><button class="caGear" onclick="caMenu()" aria-label="الإعدادات">${ico('gear',18)}</button></div>`:tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
+ go(`<div class="scr on nofi${caPlay_?" caScr":""}" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${emoFab(26)}</button>`:''}${caPlay_?`<div class="tbar caTbar"><button class="bk" onclick="back()">${bkChev()}</button><h2>كيرم<small class="caSub">${caMdLbl(RM.ca)?`<span class="caPtsT">${caMdLbl(RM.ca)}</span>`:`<span class="caM">${RM.solo?'ضد الذكاء الاصطناعي':'أونلاين'}</span>`}${RM.solo?`<i></i>${({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''}`:''}${RM.ca&&!caIsDisc(RM.ca)?`<i></i><span class="caQ${RM.ca.q?' hot':''}">${caQTxt(RM.ca)}</span>`:''}</small></h2><button class="caGear" onclick="caMenu()" aria-label="الإعدادات">${ico('gear',18)}</button></div>`:tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
  ${caPlay_?'':`<button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button>`}</div>`);
  if(oldCv){const nw=document.getElementById('caC');if(nw&&nw!==oldCv){nw.replaceWith(oldCv);oldCv._pk=null;try{caRender()}catch(e){}try{caLoopOn()}catch(e){}}}
  if(typeof vb3dMountLobby==='function'){if(RM.phase==='lobby')vb3dMountLobby(rmLobbySeats(R),RM.game);else if(typeof VB3!=='undefined'&&VB3.lobby)vb3dDispose()}   // المجلس المجسّم في الردهة (5.52) — ويُفكّ حين تبدأ اللعبة أو تُغادَر الغرفة
@@ -27286,19 +27297,42 @@ const CA_TARGET=25, CA_BOARDS=1, CA_CAP=12, CA_Q=3, CA_QLOCK=22;
    وآخرَ قطعةٍ حسبها صاحبه (وتُخصم قيمتها). والفريق في الرباعيّ لونٌ يجمع رصيدًا واحدًا. */
 const CA_PTS={w:20,b:10,q:50}, CA_PTS_WIN=160;
 function caIsPts(C){return !!(C&&C.md==='pts')}
+/* ٦٫٧٢ — «ابحث عن مودات الكيرم الثانية في مواقعهم وطبّقها» (بحثٌ في Miniclip وCarrom Clash وCarrom Friends وOctro
+   وقوانين الاتحاد الدوليّ):
+   · ديسك بول (Disc Pool) — في كلّ لعبةٍ كبيرة: لكلٍّ لونه، بلا ملكة، ومن أدخل قطعه التسع أوّلًا فاز.
+   · حاصد النقاط (Freestyle): ١٢٠ نقطة في Miniclip وCarrom Clash، و١٦٠ في Octro — والخيار للاعب.
+   · بطولة (قانون الاتحاد الدوليّ): ٢٥ نقطة أو ثمانية ألواح، وحساب اللوح كما في الكلاسيكيّ.
+   · مؤقّت الضربة: الاتحاد ١٥ ثانية؛ Miniclip يجعله صفةً للضارب — هنا ٢٠ ثانية للجميع. */
+const CA_SHOT_SEC=20;
+function caPtsWin(C){return (C&&+C.pw)||CA_PTS_WIN}
+function caIsDisc(C){return !!(C&&C.md==='disc')}
+function caBoardsMax(C){return C&&C.md==='icf'?8:CA_BOARDS}
+const arN=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+/** اسم الطور في رأس الشاشة (والكلاسيكيّ بلا اسم: يبقى «ضد الذكاء الاصطناعي/أونلاين») */
+function caMdLbl(C){
+ if(!C)return '';
+ if(C.md==='pts')return 'حاصد النقاط · '+arN(caPtsWin(C));
+ if(C.md==='disc')return 'ديسك بول';
+ if(C.md==='icf'){const M=C.M||{pts:{w:0,b:0},boards:0}, mc=C.col?C.col[RM.me]:'w', oc=mc==='w'?'b':'w';
+  return 'بطولة · اللوح '+arN((M.boards||0)+1)+' · '+arN(M.pts[mc]||0)+'–'+arN(M.pts[oc]||0)}
+ return '';
+}
 function caDeal(){
  if(!RM.host)return;
  const ps=RM.players;
  RM.C={pcs:caLayout(),turn:0,sc:{},col:{},got:{},q:null,qWin:null,shot:null,
   M:{pts:{w:0,b:0},boards:0,first:0}};
- if(RM.caMd==='pts'){RM.C.md='pts';RM.C.pp={w:0,b:0};RM.C.ph={w:[],b:[]}}
+ const md=RM.caMd;
+ if(md==='pts'){RM.C.md='pts';RM.C.pp={w:0,b:0};RM.C.ph={w:[],b:[]};RM.C.pw=RM.caPtsT===120?120:160}
+ else if(md==='disc'){RM.C.md='disc';RM.C.pcs=RM.C.pcs.filter(p=>p.t!=='q');RM.C.due={w:0,b:0}}   // ديسك بول: بلا ملكة
+ else if(md==='icf')RM.C.md='icf';
  // لاعبان: أبيض ضدّ أسود · أربعة: فريقان متقابلان، فالشريكان يشتركان في اللون
  ps.forEach((p,i)=>{RM.C.sc[p.peer]=0;RM.C.col[p.peer]=(i%2===0)?'w':'b'});
- caPub(RM.C.md==='pts'?'حاصد النقاط — أوّل من يجمع ١٦٠ يفوز':'اللوح ١ — صوّب واضرب!');
+ caPub(RM.C.md==='pts'?'حاصد النقاط — أوّل من يجمع '+arN(RM.C.pw)+' يفوز':RM.C.md==='disc'?'ديسك بول — أدخل قطع لونك التسع أوّلًا':RM.C.md==='icf'?'بطولة — ٢٥ نقطة أو ثمانية ألواح':'اللوح ١ — صوّب واضرب!');
 }
 /** لوحٌ جديد داخل المباراة نفسها: القطع تعود، والنقاط المتراكمة تبقى */
 function caNextBoard(C,msg){
- C.pcs=caLayout();C.got={};C.q=null;C.qWin=null;C.shot=null;
+ C.pcs=caLayout();if(C.md==='disc')C.pcs=C.pcs.filter(p=>p.t!=='q');C.got={};C.q=null;C.qWin=null;C.shot=null;
  C.M.first=(C.M.first+1)%RM.players.length;   // البادئ يتبدّل لوحًا بعد لوح
  C.turn=C.M.first;
  caPub(msg+' · اللوح '+(C.M.boards+1));
@@ -27307,7 +27341,7 @@ function caPub(msg,shot){
  const C=RM.C;
  rmSend({t:'cast',pcs:C.pcs,turn:RM.players[C.turn].peer,sc:C.sc,col:C.col,
   q:C.q||null,qw:C.qWin||null,M:C.M||null,msg:msg||'',shot:shot||null,
-  ...(C.md==='pts'?{md:'pts',pp:C.pp,ph:C.ph}:{})});
+  ...(C.md?{md:C.md}:{}),...(C.md==='pts'?{pp:C.pp,ph:C.ph,pw:C.pw}:{})});
 }
 // يعيد قطعة إلى اللوح قرب المركز في أقرب موضع خالٍ
 function caPutBack(C,t){
@@ -27339,6 +27373,7 @@ function caAct(d){
  if(d.by!==cur||d.a!=='rest')return;
  C.pcs=d.pcs;C.got=C.got||{};
  if(caIsPts(C)){caActPts(d,C,cur);return}
+ if(caIsDisc(C)){caActDisc(d,C,cur);return}
  const mine=C.col[cur], pot=d.pot||[], notes=[];
  const owner=t=>RM.players.find(p=>C.col[p.peer]===t&&p.peer!==cur)
    ||RM.players.find(p=>C.col[p.peer]===t);
@@ -27397,7 +27432,7 @@ function caAct(d){
   const nm2=RM.players.find(p=>p.peer===cur).name;
   const wn=(RM.players.find(p=>C.col[p.peer]===wc)||{}).name||'';
   const line=(lostBy?`${nm2} أدخل آخر قطعةٍ لخصمه — ${wn} كسب اللوح — ${pts} نقطة`:`${nm2} كسب اللوح — ${pts} نقطة`)+(qMine&&before<CA_QLOCK?' (منها ٣ للملكة)':'');
-  const done=C.M.pts[wc]>=CA_TARGET||C.M.boards>=CA_BOARDS;
+  const done=C.M.pts[wc]>=CA_TARGET||C.M.boards>=caBoardsMax(C);
   if(!done){caNextBoard(C,line);return}
   /* نهاية المباراة: الفائز صاحب الرصيد الأعلى، والتعادل لكاسب هذا اللوح — والفريق لونٌ لا شخص.
      (لوحٌ واحد: هو كاسب اللوح نفسه — كان التعادل ٠–٠ يُعطى للأبيض ولو كسب الأسود — المراجعة) */
@@ -27451,9 +27486,9 @@ function caActPts(d,C,cur){
  C.pp[team]+=got;
  if(got)notes.unshift('+'+got);
  const onBoard=C.pcs.some(p=>p.t==='w'||p.t==='b'||p.t==='q');
- if(C.pp[team]>=CA_PTS_WIN||!onBoard){
+ if(C.pp[team]>=caPtsWin(C)||!onBoard){
   /* الفوز: بلغ ١٦٠ — أو خلا اللوح (لا يقع إلّا نادرًا: المجموع ٣٢٠) فالأعلى، والتعادل لصاحب الضربة */
-  const o=team==='w'?'b':'w', wCol=C.pp[team]>=CA_PTS_WIN?team:(C.pp[o]>C.pp[team]?o:team);
+  const o=team==='w'?'b':'w', wCol=C.pp[team]>=caPtsWin(C)?team:(C.pp[o]>C.pp[team]?o:team);
   const champ=RM.players.find(p=>C.col[p.peer]===wCol)||RM.players[0], duo2=N<=2;
   const wn=(RM.players.find(p=>C.col[p.peer]===wCol)||{}).name||'';
   C.over=1;caPub(notes.concat([`${esc(wn)} بلغ ${C.pp[wCol]}`]).join(' · '));
@@ -27466,6 +27501,45 @@ function caActPts(d,C,cur){
  const keep=coins.length>0||gotQ;
  if(!keep)C.turn=(C.turn+1)%N;
  caPub(notes.join(' · ')||(keep?'إصابة! الدور لك مجددًا':''));
+}
+/** ديسك بول: حكم المضيف على ضربة. لكلٍّ لونه ولا ملكة؛ قطعتك تُكمل دورك، وقطعة الخصم له.
+    الضارب في الجيب: تعود قطعك التي دخلت معه، وقطعةٌ أخرى غرامةً (وإن لم تُدخل شيئًا بعدُ بقيت دَينًا تُسدّده بأوّل قطعة) */
+function caActDisc(d,C,cur){
+ const team=C.col[cur], foe=team==='w'?'b':'w', pot=d.pot||[], notes=[], N=RM.players.length;
+ C.due=C.due||{w:0,b:0};
+ const foul=pot.includes('s'), mineN=pot.filter(t=>t===team).length, foeN=pot.filter(t=>t===foe).length;
+ const left=t=>C.pcs.filter(p=>p.t===t).length;
+ if(RM.solo)setTimeout(()=>{if(!(RM.C&&RM.C.over))caBotReact(cur,{gotMine:foul?0:mineN,foul,gotQ:0,mine:team})},650);
+ if(foul){for(let i=0;i<mineN;i++)caPutBack(C,team);C.due[team]++;notes.push('خطأ الضارب — '+(mineN?'عادت قطعك وغرامة':'غرامة قطعة'))}
+ else if(mineN)notes.push('+'+arN(mineN));
+ if(foeN)notes.push('قطعة الخصم له');
+ while(C.due[team]>0&&left(team)<9&&caPutBack(C,team)){C.due[team]--;if(!foul)notes.push('سُدّدت الغرامة')}
+ if(!left(team)||!left(foe)){
+  const wCol=!left(team)?team:foe, champ=RM.players.find(p=>C.col[p.peer]===wCol)||RM.players[0], duo2=N<=2;
+  C.over=1;caPub(notes.join(' · '));
+  if(RM.solo)setTimeout(()=>caBotReact(champ.peer,{over:1}),900);
+  rmSend({t:'over',win:'carrom',by:champ.peer,msg:`فاز ${duo2?'':'فريق '}${esc(champ.name)} — أدخل قطعه التسع`,
+   all:RM.players.map(p=>({n:p.name,r:'أدخل '+(9-left(C.col[p.peer]))}))});
+  return;
+ }
+ const keep=mineN>0&&!foul;
+ if(!keep)C.turn=(C.turn+1)%N;
+ caPub(notes.join(' · ')||(keep?'إصابة! الدور لك مجددًا':''));
+}
+/* ── ٦٫٧٢: مؤقّت الضربة — المضيف وحده يحكم به (الآليّ معفى) ── */
+function caTimerArm(peer){
+ clearTimeout(_ca.tmr);
+ if(!RM.host||!RM.C||RM.C.over||isBot(peer))return;
+ const stamp=_ca.tmrS=(_ca.tmrS||0)+1;
+ _ca.tmr=setTimeout(()=>caTimeout(peer,stamp),CA_SHOT_SEC*1000+400);   // مهلةٌ قصيرة لما في الطريق
+}
+function caTimeout(peer,stamp){
+ const C=RM.C;
+ if(!RM.host||!C||C.over||_ca.sim||stamp!==_ca.tmrS||!RM.players[C.turn]||RM.players[C.turn].peer!==peer||RM.phase==='over')return;
+ if(C.q===peer){C.q=null;caPutBack(C,'q')}
+ C.turn=(C.turn+1)%RM.players.length;
+ const nm2=(RM.players.find(p=>p.peer===peer)||{}).name||'';
+ caPub('انتهى وقت '+(peer===RM.me?'ضربتك':esc(nm2))+' — ينتقل الدور');
 }
 let _ca={sim:null,drag:null,anim:null};
 /** أحداث المحرّك → إحساس. الفيزياء لا ترسم ولا تهتزّ؛ هذه تفعل. */
@@ -27502,7 +27576,7 @@ function caPlay(shot){
  const S2=CarromPhysics.create(C.pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
  CarromPhysics.shoot(S2,shot);
  S2.by=C.turn;
- caHandEnd();_ca.fly=[];_ca.drop=null;_ca.sRet=null;_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
+ caHandEnd();clearTimeout(_ca.tmr);_ca.tt=null;document.querySelectorAll('#rmScr .pTm').forEach(e=>e.remove());_ca.fly=[];_ca.drop=null;_ca.sRet=null;_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
  _ca.sim=S2;_ca.acc=0;_ca.last=performance.now();
  cancelAnimationFrame(_ca.anim);
  _ca.aim=null;_ca.aimV=null;
@@ -27562,6 +27636,7 @@ const CA_TNAME={w:'قطعة بيضاء',b:'قطعة سوداء',q:'الملكة 
 function caPotMsg(pot,who){
  if(!pot||!pot.length)return 'لم تدخل أي قطعة';
  const mine=RM.ca?RM.ca.col[who]:null;
+ if(caIsDisc(RM.ca))return 'دخلت: '+pot.map(t=>(CA_TNAME[t]||t)+(t==='s'?' (خطأ)':t===mine?' (لك)':' (للخصم)')).join(' · ');
  if(caIsPts(RM.ca))return 'دخلت: '+pot.map(t=>(CA_TNAME[t]||t)+(t==='s'?' (خطأ)':t==='q'?' (+٥٠ إن غُطّيت)':' (+'+CA_PTS[t]+')')).join(' · ');
  return 'دخلت: '+pot.map(t=>{
   const n=CA_TNAME[t]||t;
@@ -27576,7 +27651,7 @@ function caPotMsg(pot,who){
    وجيوبه (caPocket)، ولا صورةَ تُنزَّل ولا شيءَ يُبدَّل. الإطار ١٠٪ من كلّ جانب بزواياه النحاسيّة. */
 function caRoyal(){return true}
 function caRailed(){return true}
-function caRW(){const g=0.10;return Math.round(CA_VW*g/(1+2*g))}   // عرض الإطار الخشبيّ (بكسل منطقيّ)
+function caRW(){const g=0.045;return Math.round(CA_VW*g/(1+2*g))}   // عرض الإطار الخشبيّ (بكسل منطقيّ). ٦٫٧٢ — «اللوح يظهر كبيرًا والقطع حجمها ممتاز، قلّده»: في صورة المالك الإطار رفيع (~٢٪) والساحة تملأ العرض — كان ١٠٪
 /* ٦٫٧٠: أصل الإحداثيّات (مركز الجيب الأيسر الأعلى) — داخل الإطار بمقدار rail، فالجيوب دوائر كاملة على الخشب كما في الفيديو */
 function caMG(){const Mr=caRW(), E=CarromPhysics.C.rail;return Mr+E*(CA_VW-2*Mr)/(CA_R+2*E)}
 function caPrefetch(){}
@@ -27621,10 +27696,12 @@ const CA_TONE='rgb(220,180,134)';   // ٦٫٥٦ كان ٢٠٦،١٦٤،١٢٢ ع
 /** حال الملكة في رأس الشاشة. المراجعة (٦٫٦٩): كانت «مع الخصم» لكلّ من ليس أنا — وفي الرباعيّ قد يكون شريكك */
 /** اختيار الطور: كلاسيكيّ (قطع لونك أوّلًا) أو حاصد النقاط */
 function caMdSeg(after){
- return `<div class="segC">${[['classic','كلاسيكيّ','قطع لونك أوّلًا'],['pts','حاصد النقاط','أوّل من يجمع ١٦٠']].map(([k,a,b])=>
-  `<button class="${(RM.caMd||'classic')===k?'on':''}" onclick="RM.caMd='${k}';try{localStorage.setItem('caMd','${k}')}catch(e){};${after}"><b>${a}</b><span>${b}</span></button>`).join('')}</div>`;
+ const md=RM.caMd||'classic', T=RM.caPtsT===120?120:160;
+ return `<div class="segC m4">${[['classic','كلاسيكيّ','قطع لونك ثمّ الملكة'],['disc','ديسك بول','قطع لونك — بلا ملكة'],['pts','حاصد النقاط','أيّ قطعة: ٢٠ · ١٠ · ٥٠'],['icf','بطولة','٢٥ نقطة أو ٨ ألواح']].map(([k,a,b])=>
+  `<button class="${md===k?'on':''}" onclick="RM.caMd='${k}';try{localStorage.setItem('caMd','${k}')}catch(e){};${after}"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
+ ${md==='pts'?`<div class="segC ptsT">${[120,160].map(n=>`<button class="${T===n?'on':''}" onclick="RM.caPtsT=${n};try{localStorage.setItem('caPtsT','${n}')}catch(e){};${after}"><b>${arN(n)} نقطة</b></button>`).join('')}</div>`:''}`;
 }
-try{RM.caMd=localStorage.getItem('caMd')==='pts'?'pts':'classic'}catch(e){}
+try{const m=localStorage.getItem('caMd');RM.caMd=/^(pts|disc|icf)$/.test(m||'')?m:'classic';RM.caPtsT=localStorage.getItem('caPtsT')==='120'?120:160}catch(e){}
 function caQTxt(C){
  if(!C)return '';
  if(!C.q)return (C.pcs||[]).some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت';
@@ -27883,7 +27960,7 @@ function caTrayCount(){
  const sink=(_ca.sim&&_ca.sim.drop)||_ca.drop||[];
  /* ما يطير أو ما زال يغوص (إن وصل حكم المضيف قبل انتهاء الضربة على جهازٍ بطيء) — المراجعة */
  const F=t=>fl.filter(f=>f.t===t&&!f.done).length+sink.filter(d=>d.t===t&&!d.flown).length;
- const n=t=>{const base=(t==='q'?1:9)-C.pcs.filter(p=>p.t===t).length;return Math.max(0,base+(tr.incl?-F(t):tr.L[t]))};
+ const n=t=>{if(t==='q'&&caIsDisc(C))return 0;const base=(t==='q'?1:9)-C.pcs.filter(p=>p.t===t).length;return Math.max(0,base+(tr.incl?-F(t):tr.L[t]))};
  const qCol=C.q?C.col[C.q]:(C.qw?C.col[C.qw]:(tr.by?C.col[tr.by]:null));
  return {w:n('w'),b:n('b'),q:n('q'),qCol};
 }
@@ -27968,9 +28045,17 @@ function caRender(rest){
   if(RM.ca){
    const myT=RM.ca.turn===RM.me&&!_ca.sim;   // ٦٫٥٤: الحوض كحليّ ظاهرٌ دائمًا، والمقبض في دوري
    /* شريط تحريك الضارب: حوضٌ مستدير الطرفين ومقبضٌ على شكل الضارب — كما في اللعبة المرجعيّة */
-   const ty=W+(H-W)*.5, x0=PX(CA_XL), x1=PX(CA_XR), th=Math.min((H-W)*.62,44*sc);
-   caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);{const tg=cx.createLinearGradient(0,ty-th/2,0,ty+th/2);tg.addColorStop(0,'#0A1426');tg.addColorStop(1,'#1A2B4A');cx.fillStyle=tg}cx.fill();
-   cx.strokeStyle='rgba(140,170,220,.45)';cx.lineWidth=1.5;caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.stroke();
+   const ty=W+(H-W)*.5, x0=PX(CA_XL), x1=PX(CA_XR), th=Math.min((H-W)*.58,40*sc);
+   /* ٦٫٧٢ — «مكان تحكّم الجيس مرتّب ولونه نفس اللوح»: حوضٌ من خشب اللوح نفسه، محفورٌ فيه (ظلٌّ في أعلاه
+      وضوءٌ على حافّته السفلى) بإطارٍ من خشب العوارض — كان كحليًّا غريبًا عن اللوح */
+   const ww=x1-x0+th;
+   caRR(cx,x0-th/2-3,ty-th/2-3,ww+6,th+6,th/2+3);{const rg=cx.createLinearGradient(0,ty-th/2,0,ty+th/2);rg.addColorStop(0,'#6A2A12');rg.addColorStop(.5,'#8E3F1C');rg.addColorStop(1,'#4A1C0A');cx.fillStyle=rg}cx.fill();
+   caRR(cx,x0-th/2,ty-th/2,ww,th,th/2);{const tg=cx.createLinearGradient(0,ty-th/2,0,ty+th/2);tg.addColorStop(0,'#9A6230');tg.addColorStop(.35,'#B97C42');tg.addColorStop(1,'#CB8E50');cx.fillStyle=tg}cx.fill();
+   cx.save();caRR(cx,x0-th/2,ty-th/2,ww,th,th/2);cx.clip();
+   {const sh=cx.createLinearGradient(0,ty-th/2,0,ty-th/2+th*.45);sh.addColorStop(0,'rgba(40,14,4,.45)');sh.addColorStop(1,'rgba(40,14,4,0)');cx.fillStyle=sh;cx.fillRect(x0-th,ty-th/2,ww+th,th*.45)}
+   cx.strokeStyle='rgba(120,70,30,.18)';cx.lineWidth=1;for(let k=1;k<5;k++){const yy=ty-th/2+k*th/5;cx.beginPath();cx.moveTo(x0-th/2,yy+Math.sin(k)*1.5);cx.bezierCurveTo(x0+ww*.3,yy-2,x0+ww*.6,yy+2,x1+th/2,yy);cx.stroke()}   // عرقٌ خفيف
+   cx.restore();
+   cx.strokeStyle='rgba(255,222,170,.35)';cx.lineWidth=1.2;cx.beginPath();cx.moveTo(x0,ty+th/2-.6);cx.lineTo(x1,ty+th/2-.6);cx.stroke();
    /* مع اللوح الفاخر لا مقبض: اليد الحقيقيّة فوق المسند هي المقبض — تتبع الإصبع كما في صورة المالك */
    /* ٦٫٥٨ — «الجيس ما أريده يختفي، ويكون عندي»: ضاربي على شريطي دائمًا بمظهري؛ في دور غيري باهتٌ بلا سهمين */
    if(knob){const kx=PX(_ca.drag?_ca.drag.sx:(_ca.sxV!=null?_ca.sxV:(_ca.sx!=null?_ca.sx:CA_R/2))), kr=th*.42, ks=caDisc('s:'+caSkMine(),kr);
@@ -27985,7 +28070,7 @@ function caRender(rest){
  }};
  trough(true);
  // القطع المُدخَلة على الحافّتين (٦٫٥٧)
- const MR=caRW(), TRR=Math.min(MR*.36,CA_PR*sc*.9), PRs=CA_POCK*sc, TC=RM.ca?caTrayCount():null;   // الخانات على الإطار الخشبيّ نفسه (٦٫٧٠: الأصل صار داخله)
+ const MR=caRW(), TRR=Math.min(MR*.46,CA_PR*sc*.85), PRs=CA_POCK*sc, TC=RM.ca?caTrayCount():null;   // الخانات على الإطار الخشبيّ نفسه (٦٫٧٠: الأصل صار داخله)
  if(TC){
   const put=(t,col,i)=>{const [X,Y]=caTraySlot(col,i,W,MR,PRs,TRR);const sp=caDisc(t,TRR);cx.drawImage(sp,X-sp._o,Y-sp._o,sp._s,sp._s)};
   /* القطعة المستقرّة: نقشةٌ واحدةٌ بمقاس الخانة (مخبّأة) — والطائرة تُصغَّر وتُكبَّر منها لا نقشةٌ لكلّ إطار */
@@ -28411,6 +28496,7 @@ function caInit(){
   _ca.mvT=1;caMoveIdle();   // رُفع الإصبع: يسكت حفيف الضارب
   if(_ca.slide){_ca.slide=0;_ca.sx=CACL(_ca.sx);caAimTx(1);caLoopOn();caRender();return}   // يستقرّ في أقرب موضعٍ حرّ — ينزلق إليه
   const d=_ca.drag;if(!d)return;_ca.drag=null;
+  if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim){caAimTx(1);caRender();return}   // ٦٫٧٢: انتهى وقتي أثناء السحب
   caAimTx(1);   // آخر حالٍ للخصم: سهمي يختفي عنده إن أُلغيت الضربة (المراجعة)
   const pw=Math.hypot(d.dx,d.dy);
   if(d.cancel||pw<10){caRender();if(d.cancel)toast('أُلغيت الضربة');return}
@@ -28435,12 +28521,21 @@ function caInit(){
 function caRulesSheet(){
  const ov=document.createElement('div');ov.className='qvov';
  ov.innerHTML=`<div class="qvbox" style="max-width:340px;text-align:start">
-  <div class="qvt" style="text-align:center">قوانين الكيرم${caIsPts(RM.ca)?' — حاصد النقاط':''}</div>
-  <div class="qvd" style="text-align:start;line-height:1.85">${caIsPts(RM.ca)?`
+  <div class="qvt" style="text-align:center">قوانين الكيرم${caMdLbl(RM.ca)?' — '+caMdLbl(RM.ca).split(' · ')[0]:''}</div>
+  <div class="qvd" style="text-align:start;line-height:1.85">${caIsDisc(RM.ca)?`
+   <b style="color:var(--gold)">الفكرة</b><br>
+   لكلٍّ لونه — تسع بيضاء وتسع سوداء، <b>بلا ملكة</b>. من أدخل قطع لونه التسع أوّلًا فاز.<br><br>
+   <b style="color:var(--gold)">الدور</b><br>
+   أدخلتَ قطعةً من لونك ← تضرب مرّةً أخرى. قطعة خصمك تُحسب له وينتهي دورك.<br><br>
+   <b style="color:var(--gold)">خطأ الضارب</b><br>
+   أدخلتَ الضارب ← تعود قطعك التي دخلت معه، وقطعةٌ أخرى غرامة (وإن لم تُدخل شيئًا بعدُ سدّدتها بأوّل قطعة)، وينتقل الدور.<br><br>
+   <b style="color:var(--gold)">الوقت</b><br>
+   ${arN(CA_SHOT_SEC)} ثانية للضربة — وإلّا انتقل الدور.
+  `:caIsPts(RM.ca)?`
    <b style="color:var(--gold)">الفكرة</b><br>
    كلّ قطعةٍ لك إن أدخلتها — لا لون لك. <b>البيضاء ٢٠</b> · <b>السوداء ١٠</b> · <b>الحمراء ٥٠</b>.<br><br>
    <b style="color:var(--gold)">الفوز</b><br>
-   أوّل من يجمع <b>١٦٠ نقطة</b> يفوز. وفي الرباعيّ يجمع الشريكان رصيدًا واحدًا.<br><br>
+   أوّل من يجمع <b>${arN(caPtsWin(RM.ca))} نقطة</b> يفوز. وفي الرباعيّ يجمع الشريكان رصيدًا واحدًا.<br><br>
    <b style="color:var(--gold)">الدور</b><br>
    أدخلتَ قطعةً ← تضرب مرّةً أخرى. لم تُدخل شيئًا ← ينتقل الدور.<br><br>
    <b style="color:var(--gold)">الملكة الحمراء</b><br>
@@ -28464,7 +28559,10 @@ function caRulesSheet(){
    والملكةُ ما زالت على اللوح — تعود القطعة إلى المنتصف وينتقل الدور.
    ومن أدخل <b>آخر قطعةٍ لخصمه</b> خسر اللوح.<br><br>
    <b style="color:var(--gold)">المباراة</b><br>
-   <b>لوحٌ واحد</b>: من أدخل قطعَ لونه كلّها أوّلًا — بالقانون — فاز.<br><br>
+   ${RM.ca&&RM.ca.md==='icf'?`<b>بطولة</b>: أوّل من يبلغ <b>٢٥ نقطة</b> أو الأعلى بعد <b>ثمانية ألواح</b>. كاسب اللوح يأخذ نقطةً عن كلّ قطعةٍ باقيةٍ لخصمه،
+   و٣ للملكة إن غطّاها (ما لم يبلغ ٢٢)، وأقصى اللوح ١٢ نقطة.`:`<b>لوحٌ واحد</b>: من أدخل قطعَ لونه كلّها أوّلًا — بالقانون — فاز.`}<br><br>
+   <b style="color:var(--gold)">الوقت</b><br>
+   ${arN(CA_SHOT_SEC)} ثانية للضربة — وإلّا انتقل الدور.<br><br>
    <b style="color:var(--gold)">خطأ الضارب</b><br>
    أدخلتَ الضارب ← تعود إحدى قطعك المُدخَلة إلى اللوح.
   `}</div>
@@ -28518,13 +28616,14 @@ function rmCarrom(R){
    :(on?'<b>يصوّب…</b>':(RM.solo?'لاعب آلي'+(dTxt?' · '+dTxt:''):'لاعب أونلاين'));
   const pts=caIsPts(C), got=pts?((C.pp||{})[col]||0):9-left(col), qHere=(C.q&&C.col[C.q]===col)||(C.qw&&C.col[C.qw]===col);
   /* حاصد النقاط: الرصيد وشريطٌ إلى ١٦٠ بدل الخانات التسع، والملكة المنتظِرة نقطةٌ حمراء عليه */
-  const slots=pts?`<span class="pGoal"><i style="width:${Math.min(100,got/CA_PTS_WIN*100).toFixed(1)}%"></i></span>${C.q&&C.col[C.q]===col?'<i class="f q pQw"></i>':''}`
+  const slots=pts?`<span class="pGoal"><i style="width:${Math.min(100,got/caPtsWin(C)*100).toFixed(1)}%"></i></span>${C.q&&C.col[C.q]===col?'<i class="f q pQw"></i>':''}`
    :Array.from({length:9},(_,i)=>`<i class="${i<got?'f '+col:''}"></i>`).join('')+(qHere?'<i class="f q"></i>':'');
   return `<div class="pCard ${pos}${me2?' me':''}${on&&RM.phase!=='over'?' on':''}">
    <span class="pAvs${ps.length>1?' two':''}">${avs}</span>
    <span class="pTx"><b class="pNm">${who}</b><span class="pSub">${sub}</span></span>
    <span class="pScore${pts?' pts':''}"><b>${got}</b><span class="pSlots">${slots}</span></span>
    ${me2?`<button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${emoFab(22)}</button>`:''}
+   ${on&&RM.phase!=='over'&&!_ca.sim&&_ca.tt&&_ca.tt.peer===C.turn&&!isBot(C.turn)?`<i class="pTm" style="animation-duration:${CA_SHOT_SEC}s;animation-delay:-${Math.max(0,(performance.now()-_ca.tt.t0)/1000).toFixed(2)}s"></i>`:''}
   </div>`;
  };
  const msg=C.msg&&C.msg!=='الخصم يصوّب…'&&!/^اللوح [\d٠-٩]/.test(C.msg)?C.msg:'';
@@ -28558,7 +28657,7 @@ function caBotReact(cur,e){
  }else if(botShot){
   const me2=RM.players.find(p=>p.peer===cur), left=RM.ca.pcs.filter(p=>p.t===e.mine).length, foe=RM.ca.col[cur]!==myCol;
   if(e.foul)say(me2,'back',.35);
-  else if(e.gotMine&&foe&&(caIsPts(RM.C)?CA_PTS_WIN-((RM.C.pp||{})[e.mine]||0)<=40:left<=2))say(me2,'near',.75);   // حاصد النقاط: القرب بالنقاط
+  else if(e.gotMine&&foe&&(caIsPts(RM.C)?caPtsWin(RM.C)-((RM.C.pp||{})[e.mine]||0)<=40:left<=2))say(me2,'near',.75);   // حاصد النقاط: القرب بالنقاط
   else if(e.gotMine>=2||e.gotQ)say(me2,'hype',.6);
   else if(e.gotMine)say(me2,foe?'tease':'hype',.3);
  }else{   // ضربتي أنا (أو شريكي)
@@ -44649,7 +44748,7 @@ function caProf(peer){
  else if(RM.solo){p=rivalProfile(pl.name||'لاعب');p.bot=1;p.avatar=pl.av?avatarSVG(pl.av,96):personArt(pl.name,96)}
  else p={name:pl.name,avatar:pl.av?avatarSVG(pl.av,96):personArt(pl.name,96),title:'لاعب أونلاين',noStats:1};
  const C=RM.ca, col=C&&C.col?C.col[peer]:null, left=col&&C.pcs?C.pcs.filter(x=>x.t===col).length:null;
- const extra=col&&caIsPts(C)?`<div class="pfNow">حاصد النقاط · ${(C.pp||{})[col]||0} نقطة من ${CA_PTS_WIN}${RM.solo&&p.bot?' · '+(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):''}</div>`
+ const extra=col&&caIsPts(C)?`<div class="pfNow">حاصد النقاط · ${(C.pp||{})[col]||0} نقطة من ${caPtsWin(C)}${RM.solo&&p.bot?' · '+(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):''}</div>`
   :col?`<div class="pfNow"><i class="caDot ${col}"></i> ${col==='w'?'البيضاء':'السوداء'} · أدخل ${9-left} · باقٍ ${left}${RM.solo&&p.bot?' · '+(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):''}</div>`:'';
  const ov=document.createElement('div');ov.className='pfOv';
  ov.innerHTML=`<div class="pfBox">${profHero(p,{sheet:1,extra})}<button class="pfX" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
