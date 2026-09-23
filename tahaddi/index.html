@@ -24715,7 +24715,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.50';
+const APP_VER='6.51';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27074,7 +27074,12 @@ const CA_MGF={c:0.135,m:0.195,r:0.14};      // هامش الإطار نسبةً 
 const CA_ROYAL={q:[[0.02033,0.27621],[0.97557,0.27768],[1.0669,1.11602],[-0.06671,1.11813]]};
 const CA_SKINS=['r','c','m'], CA_SKIN_NAME={r:'الفاخر',c:'الكلاسيكيّ',m:'الحديث'};
 /** هل اللوح مائلٌ بالمنظور؟ — الفاخر وحده، وما لم تُختر ساحة */
-function caPersp(){return _ca.skin==='r'&&!caArena()&&!!(_ca.tex&&_ca.tex.r)}
+/** اللوح الفاخر فعّال (صورته وصلت، ولا ساحة مختارة) */
+function caRoyal(){return _ca.skin==='r'&&!caArena()&&!!(_ca.tex&&_ca.tex.r)}
+/* ٦٫٥١ — «الصورة تكون ٢دي من الأعلى، ما في منطق تكون كذا»: لا ميل. اللوح يُرى من فوق مستويًا
+   كما تفترضه الفيزياء واللمس؛ آلة الميل باقيةٌ معطّلة (caPerspApply يعيد كلّ شيءٍ مستويًا) */
+const CA_TILT=false;
+function caPersp(){return CA_TILT&&caRoyal()}
 /** تحويلٌ منظوريّ من أربع نقاطٍ إلى أربع: مصفوفة ٣×٣ (h33=1) بحلّ نظامٍ خطّيٍّ ٨×٨ */
 function caHomog(src,dst){
  const A=[],B=[];
@@ -27139,14 +27144,15 @@ function caOwns(k){
 /** هامش الإطار في صورة اللوح نفسها (نسبةً إلى مسافة الجيوب) */
 function caTexG(){
  const a=caArena();
- return a?a.mg:(_ca.skin==='r'?(caPersp()?CA_MGF.r:CA_MGF.c):(CA_MGF[_ca.skin]||CA_MGF.c));
+ return a?a.mg:(_ca.skin==='r'?(caRoyal()?CA_MGF.r:CA_MGF.c):(CA_MGF[_ca.skin]||CA_MGF.c));
 }
 /* ٦٫٤٩ — «المساحة صغيرة»: إطار الصورة كان يأكل ١١–١٦٪ من كلّ جانب، وفي اللعبة المرجعيّة
    الإطار شريطٌ رفيع (مسافة الجيوب ٨٤٪ من عرض الشاشة، قِيست من الفيديو). فالإطار المعروض
    يُقصّ إلى CA_MGD على الأكثر ويُكبَّر وجه اللوح ليملأ ما تحرّر — والجيوب تبقى على أركان الساحة. */
 const CA_MGD=0.08;
 function caMG(){
- const g=caPersp()?caTexG():Math.min(caTexG(),CA_MGD);   // الفاخر يُعرض بإطاره كاملًا كما في الصورة
+ /* الفاخر مستويًا: إطاره حتّى ١٠٪ فتبقى زواياه النحاسيّة كاملة، والساحة واسعة (الإطار الخارجيّ عند ١١٫٥٪) */
+ const g=caPersp()?caTexG():Math.min(caTexG(),caRoyal()?0.10:CA_MGD);
  return Math.round(CA_VW*g/(1+2*g));
 }
 /* صورتا اللوح المرجعيتان على خلفية بيضاء حول الإطار المستدير — كانت تظهر حدودًا بيضاء
@@ -27283,7 +27289,7 @@ function caBoardImg(W,H,four){
  const ar=caArena();
  const KQ=caK();
  /* الفاخر لا يُعتمد إلا بعد وصول صورته: قبلها (أو بلا شبكة) يُرسم الكلاسيكيّ بجيوبه وخطوطه — لا مربّعٌ فارغ مائل */
- const k=ar?ar.k:(caPersp()?'r':(four?'m':'c')), key=W+'x'+H+'|'+k+'|'+KQ, roy=k==='r';
+ const k=ar?ar.k:(caRoyal()?'r':(four?'m':'c')), key=W+'x'+H+'|'+k+'|'+KQ, roy=k==='r';
  if(_ca.bg&&_ca.bgKey===key)return _ca.bg;
  const M=caMG(),P=W-M*2,sc=P/CA_R,PR=CA_POCK*sc;
  const c=document.createElement('canvas');c.width=Math.round(W*KQ);c.height=Math.round(H*KQ);
@@ -27398,7 +27404,7 @@ function caRender(rest){
  const md=_ca.skin==='m';
  const M=caMG(),P=W-M*2,sc=P/CA_R;
  const PX=u=>M+u*sc, PY=v=>M+v*sc;
- if(caPersp())cx.clearRect(0,0,W,H);     // الفاخر شفّافٌ خارج إطاره: خلفيّة الغرفة تظهر من ورائه
+ if(caRoyal())cx.clearRect(0,0,W,H);     // الفاخر شفّافٌ خارج إطاره: خشب الطاولة يظهر من ورائه
  cx.drawImage(caBoardImg(W,H,md),0,0,W,H);   // الخلفية بحجم اللوحة كلّها — لا clearRect ولا تدرّج كل إطار
  if(cv.parentElement)cv.parentElement.classList.toggle('caDrag',!_ca.sim&&(!!_ca.drag||(H>W&&!!RM.ca&&RM.ca.turn===RM.me)));   // شارة مقعدي تفسح لشريط التحريك طوال دوري
  const tk=_ca.t||0;
@@ -27445,7 +27451,9 @@ function caRender(rest){
   cx.restore();
  };
  let handLate=null;   // اليد الحقيقيّة تُرسم بعد القطع: إصبعها فوق الضارب كما في الصورة
- if(sPos){
+ /* ٦٫٥١ — «احذف اليد»: لا يدَ مرسومة لأحد. الضارب وحده على خطّه، ودور الخصم يُعرف من شارته وتصويبه */
+ if(!CA_HANDS){}
+ else if(sPos){
   // اليد تأتي من جهة صاحب الدور: أسفل لي، ومن اليمين أو الأعلى أو اليسار لغيري
   const bob=Math.sin(tk*.045)*1.5, tilt=Math.sin(tk*.031)*.014;
   const ox=Math.sin(sSide*Math.PI/2), oy=Math.cos(sSide*Math.PI/2), off=CA_SR*.85+bob;
@@ -27454,7 +27462,7 @@ function caRender(rest){
   else if(caPersp()&&_ca.handR){const o2=CA_SR*.45+bob*.6;handLate={x:sPos.x+ox*o2,y:sPos.y+oy*o2,ang:-sSide*Math.PI/2+tilt}}
   else handAt(sPos.x+ox*off,sPos.y+oy*off,-sSide*Math.PI/2+tilt,1);
   _ca.lastHand=(_ca.drag&&!sSide)?null:{x:sPos.x+ox*off,y:sPos.y+oy*off,ox,oy,ang:-sSide*Math.PI/2+tilt,real:!!handLate,hl:handLate};   // يدي المخفيّة لا تنسحب
- }else if(_ca.sim&&_ca.handOut){
+ }else if(CA_HANDS&&_ca.sim&&_ca.handOut){
   /* بعد الإطلاق تنسحب اليد وتخفت في ثلث ثانية — كانت تختفي في الإطار نفسه («تختفي اليد سريع») */
   const h=_ca.handOut, e=Math.min(1,(performance.now()-h.t)/340);
   if(e<1){
@@ -27681,8 +27689,9 @@ function caSkinLoad(){
  try{const v=localStorage.getItem('caSkin2');if(CA_SKINS.indexOf(v)>=0)_ca.skin=v}catch(e){}
  try{const v=localStorage.getItem('caArena');if(v&&CA_ARENA[v])_ca.arena=v}catch(e){}
 }
+const CA_HANDS=false;   // ٦٫٥١: اليد محذوفة بطلب المالك — والرسم باقٍ لو عادت
 function caHandImg(){
- if(_ca.hand||_ca.handLoad)return;_ca.handLoad=1;
+ if(!CA_HANDS||_ca.hand||_ca.handLoad)return;_ca.handLoad=1;
  const img=new Image();
  img.onload=()=>{_ca.hand=img;caRender()};
  // صورة مستقلة تحتاج xmlns وأبعادًا صريحة وإلا رفضها المتصفح ولم تظهر اليد
