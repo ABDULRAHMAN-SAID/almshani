@@ -48,7 +48,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 #app{max-width:520px;margin:0 auto;min-height:100vh;
  /* الشريط السفليّ ثابت فوق المحتوى: القاع يترك ارتفاعه كاملًا ومعه شريط الهاتف،
     وإلّا جلس آخر زرّ تحته — وهو ما كان يحدث بأربعة بكسلات فقط من الفسحة */
- padding-bottom:calc(104px + env(safe-area-inset-bottom));
+ padding-bottom:calc(88px + env(safe-area-inset-bottom));
  padding-inline:env(safe-area-inset-left) env(safe-area-inset-right)}
 .scr{display:none;padding:14px 14px 20px}
 .scr.on{display:block}
@@ -371,16 +371,17 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .rkBadge{display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:900;border-radius:7px;padding:2px 8px}
 /* شريط سفلي فخم — زجاج داكن وخيط ذهبي وميدالية معدنية */
 .nav{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;
- height:calc(72px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
+ height:calc(58px + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);
  box-sizing:border-box;
- background:linear-gradient(180deg,rgba(21,28,48,.9),rgba(9,13,24,.98));backdrop-filter:blur(16px);
+ /* ٦٫٨٧: بلا backdrop-filter — ضبابيّةٌ حيّة فوق محتوى يتبدّل تومض على WebView أندرويد، والخلفيّة معتمةٌ أصلًا */
+ background:linear-gradient(180deg,#151C30,#090D18);
  display:flex;align-items:center;justify-content:space-around;z-index:40;padding:0 6px;
  border-top:1px solid rgba(232,178,58,.32);box-shadow:0 -10px 30px rgba(0,0,0,.5)}
 .nav::before{content:'';position:absolute;top:-1px;left:0;right:0;height:2px;pointer-events:none;
  background:linear-gradient(90deg,transparent,rgba(232,178,58,.5) 18%,#FFE9A8 50%,rgba(232,178,58,.5) 82%,transparent)}
 .nav::after{content:'';position:absolute;inset:0;pointer-events:none;
  background:radial-gradient(130% 100% at 50% 130%,rgba(123,79,224,.17),transparent 62%)}
-.nvi{flex:1;text-align:center;cursor:pointer;padding:8px 2px 10px;color:var(--mut);
+.nvi{flex:1;text-align:center;cursor:pointer;padding:6px 2px 6px;color:var(--mut);
  transition:color .2s;position:relative;z-index:1}
 .nvi.on{color:var(--gold)}
 .nvi.on::before{content:'';position:absolute;top:3px;left:50%;transform:translateX(-50%);
@@ -388,13 +389,13 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
  box-shadow:0 0 10px rgba(232,178,58,.8)}
 .nvi.on .i{filter:drop-shadow(0 0 8px rgba(232,178,58,.65))}
 .nvi .i{font-size:19px;display:block;transition:filter .25s,opacity .25s}
-.nvi .i svg{width:25px;height:25px;display:block;margin:0 auto}
+.nvi .i svg{width:22px;height:22px;display:block;margin:0 auto}
 .nvi:not(.on) .i{filter:grayscale(.3) brightness(.92);opacity:.92}
-.nvi.mid .cir svg{width:36px;height:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
-.nvi .l{font-size:10px;font-weight:900;margin-top:3px;letter-spacing:.2px;color:#E2E7F4}
+.nvi.mid .cir svg{width:30px;height:30px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.nvi .l{font-size:9.5px;font-weight:900;margin-top:2px;letter-spacing:.2px;color:#E2E7F4}
 .nvi.on .l{color:var(--gold)}
-.nvi.mid{flex:0 0 80px}
-.nvi.mid .cir{width:62px;height:62px;border-radius:50%;margin:-27px auto 0;position:relative;
+.nvi.mid{flex:0 0 70px}
+.nvi.mid .cir{width:50px;height:50px;border-radius:50%;margin:-20px auto 0;position:relative;
  background:radial-gradient(circle at 35% 28%,#2E3A6E,#141B3C 58%,#0A0F22);
  display:flex;align-items:center;justify-content:center;font-size:23px;color:#fff;
  border:3px solid #E2B245;
@@ -406,7 +407,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .nvi.mid.on .cir{border-color:#FFE9A8;
  box-shadow:0 0 0 3px #0B1020,0 0 0 4.5px rgba(232,178,58,.75),0 8px 22px rgba(0,0,0,.6),0 0 32px rgba(232,178,58,.6),
   inset 0 2px 6px rgba(255,255,255,.18),inset 0 -5px 10px rgba(0,0,0,.45)}
-.nvi.mid .l{margin-top:6px;color:var(--tx)}
+.nvi.mid .l{margin-top:3px;color:var(--tx)}
 
 /* عام */
 .tbar{display:flex;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 0 14px}
@@ -19394,7 +19395,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
 (function(){
  const R=Router;
  // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
- ['cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
+ ['toolsScr','cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
   'shopScr','chestScr','oddsScr','bcOddsScr','rewardScr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','gamesScr','dmScr','moreScr','playModesScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
@@ -24897,7 +24898,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.86';
+const APP_VER='6.87';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25133,6 +25134,43 @@ function moreScr(){
  </div>`);
 }
 
+
+/* ═══ ٦٫٨٧ — «احذف البطاقات وأضف الأدوات»: تبويب «الأدوات» مكان «البطاقات» ═══
+   ما تلعب به أنت: جيسك في الكيرم (يراه خصمك كما تراه)، وتعبيراتك وصيحاتك، وصورتك. */
+const TOOLS_CSS=`.tlGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin-bottom:6px}
+.tlSk{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px 10px;border-radius:14px;cursor:pointer;
+ background:linear-gradient(180deg,#18203A,#0E1426);border:1.5px solid rgba(255,255,255,.08);color:var(--tx);font-family:inherit}
+.tlSk.on{border-color:#E8B23A;box-shadow:0 0 0 1px rgba(232,178,58,.35),0 0 18px rgba(232,178,58,.22)}
+.tlSk:active{filter:brightness(1.15)}
+.tlCv{width:72px;height:72px;display:block}
+.tlN{font-size:12.5px;font-weight:900}
+.tlS{font-size:10.5px;font-weight:800;color:var(--tx2);border-radius:9px;padding:2px 10px;background:rgba(255,255,255,.06)}
+.tlSk.on .tlS{color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C)}`;
+function toolsScr(){
+ if(!document.getElementById('toolsCss')){const st=document.createElement('style');st.id='toolsCss';st.textContent=TOOLS_CSS;document.head.appendChild(st)}
+ const mine=caSkMine();
+ go(`<div class="scr on" id="toolsScr">${tb(T('الأدوات'))}
+ <div class="sl">${ico('target',14)} ${T('جيس الكيرم')}</div>
+ <div class="tlGrid">${Object.entries(CA_STRIKERS).map(([k,v])=>`<button class="tlSk${k===mine?' on':''}" onclick="toolsSk('${k}',this)">
+  <canvas class="tlCv" data-sk="${k}" width="144" height="144"></canvas><span class="tlN">${v.n}</span>
+  <span class="tlS">${k===mine?T('مُستخدَم'):T('استخدمه')}</span></button>`).join('')}</div>
+ <div class="dkNote" style="margin-bottom:12px">${T('جيسك يظهر لك ولخصمك في كلّ مباراة كيرم.')}</div>
+ <div class="sl">${ico('user',14)} ${T('أدوات أخرى')}</div>
+ ${[[ico('user',16),T('التعبيرات والصيحات'),"push('emoteScr')"],[ico('user',16),T('صورتي الرمزيّة'),"push('avScr')"]].map(([i,n,f])=>
+ `<div class="li" style="cursor:pointer" onclick="${f}"><div class="lr"><span style="font-size:19px">${i}</span><div class="lb"><div class="lt">${n}</div></div>${chev()}</div></div>`).join('')}
+ </div>`);
+ toolsDraw();
+}
+function toolsDraw(){
+ document.querySelectorAll('.tlCv').forEach(c=>{try{const sp=caDisc('s:'+c.dataset.sk,40),x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);const m=sp.width*.13;x.drawImage(sp,m,m,sp.width-2*m,sp.height-2*m,0,0,c.width,c.height)}catch(e){}});
+}
+function toolsSk(k,el){
+ if(!CA_STRIKERS[k])return;
+ S.caStriker=k;try{saveState()}catch(e){}
+ uiPick(el);
+ document.querySelectorAll('.tlSk').forEach(b=>{const t=b.querySelector('.tlS');if(t)t.textContent=b===el?T('مُستخدَم'):T('استخدمه')});
+ toast(T('صار جيسك')+': '+CA_STRIKERS[k].n);
+}
 
 /** شاشة اختيار وضع اللعب — أقسام مصنّفة لا 12 بطاقة مبعثرة */
 /* شعارات الأوضاع — ميداليات مرسومة بتدرجات معدنية، لكل وضع هويته */
@@ -27971,7 +28009,8 @@ function caSkOf(peer){
  if(!peer||peer===RM.me)return caSkMine();
  const p=(RM.players||[]).find(x=>x.peer===peer);
  if(p&&p.sk)return caSk(p.sk);
- if(typeof isBot==='function'&&isBot(peer)){const i=parseInt(String(peer).replace(/\D/g,''),10)||0;return CA_SK_BOT[i%CA_SK_BOT.length]}
+ /* ٦٫٨٧: الآليّ لا يلبس جيسك نفسه — وإلّا لم يُعرف ضاربه من ضاربك */
+ if(typeof isBot==='function'&&isBot(peer)){const i=parseInt(String(peer).replace(/\D/g,''),10)||0,L=CA_SK_BOT.filter(k=>k!==caSkMine()).concat(caSkMine()===CA_SK_DEF?[]:[CA_SK_DEF]);return L[i%L.length]}
  return 'emerald';
 }
 function caDisc(t,r){
@@ -43936,6 +43975,15 @@ const NAVICO={
   <circle cx="16" cy="4.5" r="2.1" fill="url(#nvA_g)"/><circle cx="27" cy="12.5" r="2.1" fill="url(#nvA_g)"/>
   <circle cx="22.8" cy="25.5" r="2.1" fill="url(#nvA_g)"/><circle cx="9.2" cy="25.5" r="2.1" fill="url(#nvA_g)"/>
   <circle cx="5" cy="12.5" r="2.1" fill="url(#nvA_g)"/></svg>`,
+ tools:`<svg viewBox="0 0 32 32"><defs>
+  <linearGradient id="nvT_g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
+  <linearGradient id="nvT_s" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F5F8FF"/><stop offset="1" stop-color="#8C97AD"/></linearGradient>
+  <radialGradient id="nvT_b" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#5C8FE0"/><stop offset="1" stop-color="#1F4A93"/></radialGradient></defs>
+  <g transform="rotate(-45 16 16)"><rect x="14.4" y="9" width="3.2" height="19" rx="1.4" fill="url(#nvT_g)" stroke="#6E4E12" stroke-width=".7"/>
+  <path d="M10.5 4.5 h11 a1.5 1.5 0 0 1 1.5 1.5 v2.6 a1.5 1.5 0 0 1 -1.5 1.5 h-11 a1.5 1.5 0 0 1 -1.5 -1.5 v-2.6 a1.5 1.5 0 0 1 1.5 -1.5 z" fill="url(#nvT_s)" stroke="#3A4256" stroke-width=".8"/></g>
+  <circle cx="22.5" cy="22.5" r="6.4" fill="url(#nvT_b)" stroke="url(#nvT_g)" stroke-width="1.6"/>
+  <circle cx="22.5" cy="22.5" r="3.4" fill="none" stroke="#E8B23A" stroke-width=".9"/>
+  <circle cx="20.8" cy="20.6" r="1.2" fill="#fff" opacity=".45"/></svg>`,
  cards:`<svg viewBox="0 0 32 32"><defs>
   <linearGradient id="nvB_g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
   <linearGradient id="nvB_p" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8B5CF0"/><stop offset="1" stop-color="#4A2C9B"/></linearGradient>
@@ -43978,9 +44026,9 @@ const NAVICO={
   <circle cx="5.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/><circle cx="14.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/><circle cx="23.6" cy="14.4" r="1.2" fill="#fff" opacity=".7"/></svg>`
 };
 function nav(){
- const items=[['clubs','clubs','النادي'],['cards','cards','البطاقات'],['play','swords','اللعب'],['shop','shop','المتجر'],['more','user','المزيد']].map(a=>[a[0],a[1],T(a[2])]);
+ const items=[['clubs','clubs','النادي'],['tools','tools','الأدوات'],['play','swords','اللعب'],['shop','shop','المتجر'],['more','user','المزيد']].map(a=>[a[0],a[1],T(a[2])]);
  // البند 31 — شارة فقط عند فائدة حقيقية: ترقية جاهزة أو هدية جاهزة
- const badge={cards:(S.cards?readyCount():0),shop:(typeof giftReady==='function'&&giftReady())?1:0};
+ const badge={shop:(typeof giftReady==='function'&&giftReady())?1:0};
  $('nav').innerHTML=items.map(([k,i,l])=>{
   const b=badge[k]||0;
   const dot=b?`<span style="position:absolute;top:4px;left:calc(50% - 20px);
@@ -43993,8 +44041,12 @@ function nav(){
  }).join('');
  try{enPass($('nav'))}catch(e){}
 }
-function tab(k){cur=k;nav();hideArena();
- ({play:()=>resetNav('playScr'),nets:()=>resetNav('netsScr'),cards:()=>resetNav('cardsScr'),
+function tab(k){
+ /* ٦٫٨٧ — «عندما أضغط بشكلٍ متكرّر سريع تختفي الشاشة وتومض»: كلّ ضغطةٍ على التبويب نفسه كانت تهدم الشاشة وتبنيها من جديد.
+    التبويب الحاليّ وأنت في جذره: لا إعادة بناء — يرجع إلى الأعلى فقط */
+ if(k===cur&&typeof Router==='object'&&Router.depth&&Router.depth()<=1&&document.querySelector('#app .scr.on')){try{window.scrollTo({top:0,behavior:'smooth'})}catch(e){window.scrollTo(0,0)}return}
+ cur=k;nav();hideArena();
+ ({play:()=>resetNav('playScr'),nets:()=>resetNav('netsScr'),cards:()=>resetNav('cardsScr'),tools:()=>resetNav('toolsScr'),
    clubs:()=>resetNav(S.clan&&S.clan.c?'clubHome':'clSearchScr'),
    shop:()=>resetNav('shopScr'),more:()=>resetNav('moreScr')})[k]()}
 
