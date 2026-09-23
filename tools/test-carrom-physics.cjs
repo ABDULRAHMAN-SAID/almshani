@@ -17,11 +17,26 @@ const reach=sp=>{let v=sp,d=0;for(let i=0;i<100000&&v>C.stopSpeed;i++){d+=v;v=v*
 const spFor=dist=>{let sp=0.5;while(reach(sp)<dist*1.08&&sp<60)sp+=0.1;return +sp.toFixed(1)};   // أصغر سرعةٍ تبلغ المسافة بهامش ٨٪
 
 console.log('\n── هندسة اللوح ──');
-ck('الجدران مقطوعة عند الجيوب — أربع قطع لا أربعة خطوط ممتدّة',
-   P.walls().length===4 && P.walls()[0].ax===C.mouth && P.walls()[0].bx===C.R-C.mouth,
+ck('الحاجز متّصل خارج مربّع الجيوب بمقدار rail — والجيب دائرةٌ كاملة تمسّه (٦٫٧٠، كالفيديو)',
+   P.walls().length===4 && P.walls()[0].ax===-C.rail && P.walls()[0].bx===C.R+C.rail && Math.abs(C.rail-C.pocketR)<4,
    JSON.stringify(P.walls()[0]));
-ck('مركز القطعة يستطيع بلوغ مركز الجيب — لا حدّ قصّ يمنعه',
-   C.mouth > C.strikerR*Math.SQRT2 && P.walls()[2].ay===C.mouth);
+ck('مركز القطعة يستطيع بلوغ مركز الجيب — لا حاجز يمنعه',
+   C.rail > C.strikerR && C.capR > C.pieceR);
+{
+ /* «في الكيرم الثانية أدخل بكلّ سهولة»: قطعةٌ تزحف على الحاجز نحو الزاوية تسقط — كانت فكّا الجيب يردّانها دائمًا */
+ let ok=0,tot=0;
+ for(const sp of [6,9,12,16])for(const off of [0,1.5,4]){   // سرعاتٌ تبلغ الجيب من ١٦٠ (الأبطأ تقف قبله — ليس عطلًا)
+  tot++;const y=-C.rail+C.pieceR+off;
+  const r=shoot([at(160,y,-sp,0,'w')]);
+  if(r.pot.includes('w'))ok++;
+ }
+ ck('قطعةٌ تزحف على الحاجز نحو الجيب تسقط',ok===tot,ok+' / '+tot);
+}
+{
+ /* ومن فوق الجيب بعيدًا عن مركزه (مرورٌ جانبيّ) لا تُبتلع: من مرّ مركزه خارج الفم يمضي */
+ const r=shoot([at(200,C.capR+C.pieceR+2,-8,0,'w')]);
+ ck('قطعةٌ تمرّ بجانب الجيب لا تسقط',!r.pot.includes('w'),JSON.stringify(r.pot));
+}
 
 console.log('\n── التجربة التي كانت تفشل: الضارب ──');
 {

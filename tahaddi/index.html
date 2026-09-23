@@ -26140,7 +26140,7 @@ function caShotVal(pot,pcs0,mine,qPend){
 function caCands(pcs,targets,o){
  const base=CA_BASE, g=20, pockets=[[g,g],[CA_R-g,g],[g,CA_R-g],[CA_R-g,CA_R-g]];
  const lo=CA_XL+4, hi=CA_XR-4, clampX=v=>Math.max(lo,Math.min(hi,v));
- const e=CarromPhysics.C.wallE, wl=CA_SR+CarromPhysics.C.jawR, wr=CA_R-wl;
+ const e=CarromPhysics.C.wallE, wl=CA_SR-CarromPhysics.C.rail, wr=CA_R-wl;
  /* ممرٌّ مسدود؟ قطعةٌ أخرى أقرب إلى المسار من مجموع نصفي القطرين */
  const clear=(ax,ay,bx,by,rad,skip)=>{const dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy||1;
   for(const p of pcs){if(p===skip)continue;let t=((p.x-ax)*dx+(p.y-ay)*dy)/L2;if(t<=0||t>=1)continue;
@@ -26272,7 +26272,7 @@ function* caBotThink(pcs,mine,P0,rnd,st){
   /* بلا ضربةٍ مثمرة بعد: بحثٌ أوسع في الوقت الباقي — كلّ هدفٍ من أربعة مواضع وبثلاث قوى،
      فتظهر الضربات غير المباشرة (قطعةٌ تدفع قطعة، ارتدادٌ من الجدار) التي لا يراها الحساب الهندسيّ */
   if(P0.fine&&!top.length&&!late()){
-   const wl=CA_SR+CarromPhysics.C.jawR, e=CarromPhysics.C.wallE;
+   const wl=CA_SR-CarromPhysics.C.rail, e=CarromPhysics.C.wallE;
    const XS=t=>t.y>base-10?(P0.seeds>1?Array.from({length:31},(_,i)=>50+i*10):Array.from({length:16},(_,i)=>50+i*20)):[CA_SR+34,CA_R/2,CA_R-CA_SR-34,t.x];   // الارتداد ضيّق: مواضع أكثر
    outer:for(const t of targets)for(const sx0 of XS(t)){
     /* قطعةٌ خلف خطّه أو عليه لا تُضرب مباشرةً (لا ضرب للخلف): بالارتداد من الجدار المقابل — فإن لم تدخل
@@ -26291,7 +26291,7 @@ function* caBotThink(pcs,mine,P0,rnd,st){
  if(pick){sx=pick.sx;ang=pick.ang;pw=pick.pw}
  else{
   /* بلا مرشّح: نحو أقرب هدفٍ أمامه، لا مستقيمًا إلى الأعلى في الفراغ */
-  const wl=CA_SR+CarromPhysics.C.jawR, e=CarromPhysics.C.wallE;
+  const wl=CA_SR-CarromPhysics.C.rail, e=CarromPhysics.C.wallE;
   const tg=targets.slice().sort((a,b)=>(a.y>base-10)-(b.y>base-10)||Math.hypot(a.x-CA_R/2,a.y-base)-Math.hypot(b.x-CA_R/2,b.y-base))[0];
   const fx=caFreeX(pcs,tg?clampX(tg.x):CA_R/2), ty=tg?(tg.y>base-10?wl-(tg.y-wl)/e:tg.y):0;   // خلف خطّه: بالارتداد
   const A=best?aimAt(best):{sx:fx,ang:tg?Math.atan2(ty-base,tg.x-fx):-Math.PI/2};
@@ -26893,14 +26893,14 @@ function rmUno(R){
 
    النموذج:
    • مستوى ثنائي الأبعاد واحد، كل القطع فيه، لا طبقات ولا ارتفاع.
-   • الزاوية مقطوعة بوتر مائل ٤٥° كما في اللوح الحقيقي: الحاجزان ينتهيان
-     على بُعد MOUTH من الزاوية، وبينهما فتحة الجيب. والجيب وراء الوتر.
-     (الحاجزان لو انتهيا على دائرة الجيب لضاقت الفتحة عن الضارب نفسه —
-      وهذا ما يفسّر لماذا كان الضارب لا يسقط أبدًا في النسخة القديمة.)
-   • الجيب مِجَسّ على الوتر: تُلتقط القطعة إن **عبر مركزها** الوتر خلال
-     هذا الإطار — لا إن استقرّ موضعها النهائي خلفه.
-   • طرفا الحاجزين كبسولتان مستديرتان، وهما فكّا الجيب اللذان ترتدّ عنهما
-     القطعة إن «لعقت الحافة» ولم تدخل.
+   • ٦٫٧٠ — الجيوب كما في اللعبة المرجعيّة: دائرةٌ كاملة داخل الساحة تمسّ الحاجزين،
+     مركزها زاوية مربّع الـ٤٠٠ ونصف قطرها ٢٢، والحاجزان مستقيمان متّصلان على بُعد
+     ٢٤٫٥ خارج المربّع (قِيس من الفيديو: بين مراكز الجيوب ٤٥٦ بكسلًا، ونصف قطر الجيب ٢٥،
+     وبين الحاجز ومركز الجيب ٢٨). كان الجيب ربعَ دائرةٍ في الزاوية وراء وترٍ مائل، وطرفا
+     الحاجزين فكّان يردّان كلّ قطعةٍ تزحف على الحافّة — «أحسّ في غلط في دخول القطع إلى
+     الحفرة… في الكيرم الثانية أدخل بكلّ سهولة».
+   • تسقط القطعة إن مرّ مركزها في هذا الإطار فوق فم الجيب (دون capR من مركزه) —
+     يُختبر على المسار كلّه لا على موضعها الأخير، فلا تقفز قطعةٌ سريعة فوق الجيب.
    • خطوات فرعية: لا تتجاوز الإزاحة الواحدة MAX_STEP، فلا قفز فوق جيب
      ولا اختراق قطعة مهما زادت القوّة.
    • المخرجات أحداث: السقوط والاصطدام يُبلَّغ عنهما، والرسم شأن غيرها.
@@ -26917,8 +26917,10 @@ var CarromPhysics=(function(){
      القطعة ١٣٫٥ بكسل ⇒ ١١٫٨ وحدة، والضارب ≈ ١٥٫٤. كانتا ١٣ و١٦٫٥ فبدا اللوح مزدحمًا. */
   pieceR:12,             // نصف قطر القطعة
   strikerR:15.5,         // نصف قطر الضارب
-  mouth:29,              // قطع الحاجز عند الزاوية — عرض الفتحة = mouth·√2
-  jawR:2,                // استدارة فكّ الجيب
+  pocketR:22,            // نصف قطر الجيب (المرسوم) — مقيس من الفيديو
+  capR:21,               // يسقط ما صار مركزه فوق الجيب: دون هذا من مركزه
+  rail:24.5,             // الحاجز خارج مربّع مراكز الجيوب بهذا القدر
+  jawR:0,                // لا فكوك (٦٫٧٠) — يبقى للتوافق مع من يقرؤه
   /* احتكاكان كما في اللوح الحقيقي:
      • هوائي نسبيّ (ضرب) — يخفّف السرعات العالية.
      • احتكاك انزلاق ثابت (طرح) — هو الذي يوقف القطعة وقفةً نظيفة.
@@ -26949,28 +26951,28 @@ var CarromPhysics=(function(){
   return [[0,0],[C.R,0],[0,C.R],[C.R,C.R]];
  }
 
- /** نصف قطر الفم كما يجب أن يُرسم — الوتر يبعد mouth/√2 عن الزاوية */
- function visualR(){return C.mouth/Math.SQRT2}
+ /** نصف قطر الجيب كما يُرسم */
+ function visualR(){return C.pocketR}
 
- /** بُعد القطعة عن وتر أقرب زاوية — سالب يعني أنّها عبرت إلى الجيب */
+ /** بُعد مركز القطعة عن فم أقرب جيب — سالب يعني أنّها فوقه */
  function chordDepth(x,y){
   var R=C.R, best=1e9, which=-1;
-  var uv=[[x,y,0],[R-x,y,1],[x,R-y,2],[R-x,R-y,3]];
+  var P=pockets();
   for(var i=0;i<4;i++){
-   var d=uv[i][0]+uv[i][1]-C.mouth;
-   if(d<best){best=d;which=uv[i][2]}
+   var d=Math.hypot(x-P[i][0],y-P[i][1])-C.capR;
+   if(d<best){best=d;which=i}
   }
   return {d:best,pocket:which};
  }
 
- /** الحاجزان: قطع مستقيمة مقطوعة عند الزوايا — عند الفم فراغ حقيقي */
+ /** الحاجزان: أربعة مستقيمات متّصلة خارج مربّع مراكز الجيوب */
  function walls(){
-  var g=C.mouth, R=C.R;
+  var e=-C.rail, f=C.R+C.rail;
   return [
-   {ax:g,ay:0,  bx:R-g,by:0  },   // سفلي
-   {ax:g,ay:R,  bx:R-g,by:R  },   // علوي
-   {ax:0,ay:g,  bx:0,  by:R-g},   // أيسر
-   {ax:R,ay:g,  bx:R,  by:R-g}    // أيمن
+   {ax:e,ay:e,bx:f,by:e},   // سفلي
+   {ax:e,ay:f,bx:f,by:f},   // علوي
+   {ax:e,ay:e,bx:e,by:f},   // أيسر
+   {ax:f,ay:e,bx:f,by:f}    // أيمن
   ];
  }
 
@@ -27030,10 +27032,9 @@ var CarromPhysics=(function(){
    var x0=p.x, y0=p.y;
    p.x+=p.vx*h; p.y+=p.vy*h;
 
-   // ① عبور الوتر = سقوط. يُختبر على طرفَي المسار لأنّ العمق خطّي عليه،
-   //    فلا يمكن أن تقفز قطعة فوق الفم مهما زادت سرعتها.
-   var c0=chordDepth(x0,y0), c1=chordDepth(p.x,p.y);
-   var cross=(c0.d<0)?c0:((c1.d<0)?c1:null);
+   // ① مركزها مرّ فوق فم جيب = سقوط — على المسار كلّه، فلا تقفز قطعةٌ فوق الجيب مهما أسرعت
+   var cross=null;
+   for(var q=0;q<4&&!cross;q++)if(segPointDist2(x0,y0,p.x,p.y,P[q][0],P[q][1])<C.capR*C.capR)cross={pocket:q};
    if(cross){
     S.pot.push(p.t);
     // ox/oy/fr: موضع القطعة قبل هذه الخطوة ورقمها — يستعملها العرض ليستوفي إطار الدخول
@@ -27046,7 +27047,7 @@ var CarromPhysics=(function(){
     continue;
    }
 
-   // ② الجدران المقطوعة — وطرفاها فكّا الجيب
+   // ② الجدران
    for(var w=0;w<W.length;w++){
     var s=W[w];
     var c=closestOnSeg(p.x,p.y,s.ax,s.ay,s.bx,s.by);
@@ -27504,7 +27505,9 @@ function caPotMsg(pot,who){
    وجيوبه (caPocket)، ولا صورةَ تُنزَّل ولا شيءَ يُبدَّل. الإطار ١٠٪ من كلّ جانب بزواياه النحاسيّة. */
 function caRoyal(){return true}
 function caRailed(){return true}
-function caMG(){const g=0.10;return Math.round(CA_VW*g/(1+2*g))}
+function caRW(){const g=0.10;return Math.round(CA_VW*g/(1+2*g))}   // عرض الإطار الخشبيّ (بكسل منطقيّ)
+/* ٦٫٧٠: أصل الإحداثيّات (مركز الجيب الأيسر الأعلى) — داخل الإطار بمقدار rail، فالجيوب دوائر كاملة على الخشب كما في الفيديو */
+function caMG(){const Mr=caRW(), E=CarromPhysics.C.rail;return Mr+E*(CA_VW-2*Mr)/(CA_R+2*E)}
 function caPrefetch(){}
 /* ٦٫٤٨: «الأصليّ» مقتطعٌ من تسجيل صاحب اللعبة نفسه (tools/cut-orig-sfx.py) وهو الافتراضيّ.
    المفتاح الجديد caSfx2 عمدًا: من جرّب الأنماط قبلُ بقي اختياره القديم محفوظًا فلن يسمع الأصليّ */
@@ -27560,10 +27563,10 @@ function caQTxt(C){
  return (RM.players||[]).length<=2&&mc?'الملكة مع الخصم':'الملكة مع '+n;
 }
 function caSurface(x,M,P){
- const sc=P/CA_R;
+ const sc=P/CA_R, E=CarromPhysics.C.rail;   // ٦٫٧٠: الخشب يمتدّ إلى الإطار خارج مربّع الجيوب
  let sd=20260923;const rnd=()=>((sd=(Math.imul(sd,1664525)+1013904223)>>>0)/4294967296);
  x.save();x.translate(M,M);x.scale(sc,sc);
- x.beginPath();x.rect(-2,-2,CA_R+4,CA_R+4);x.clip();
+ x.beginPath();x.rect(-E-2,-E-2,CA_R+2*E+4,CA_R+2*E+4);x.clip();
  /* ١) الخشب: لونٌ أساس بتفاوتٍ واسع (حقلٌ ناعم صغير يُكبَّر — تفاوتٌ منخفض التردّد لا يحتاج دقّة) */
  const N=64,cv=document.createElement('canvas');cv.width=N;cv.height=N;const nx=cv.getContext('2d'),id=nx.createImageData(N,N);
  for(let j=0;j<N;j++)for(let i=0;i<N;i++){
@@ -27572,17 +27575,17 @@ function caSurface(x,M,P){
   id.data[k]=Math.round(224-24*t);id.data[k+1]=Math.round(178-26*t);id.data[k+2]=Math.round(122-24*t);id.data[k+3]=255;
  }
  nx.putImageData(id,0,0);
- x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cv,-2,-2,CA_R+4,CA_R+4);
+ x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(cv,-E-2,-E-2,CA_R+2*E+4,CA_R+2*E+4);
  /* ٢) العِرق: خطوطٌ طويلة متموّجة بعرض الساحة — متّجهةٌ فتبقى حادّةً بأيّ دقّة. عقدٌ قليلة تلتفّ حولها الخطوط */
  const knots=[[88,132,14],[300,268,11],[214,40,8]];
  const warp=(X,Y)=>{let d=0;for(const[kx,ky,kr] of knots){const dx=X-kx,dy=Y-ky,r2=dx*dx+dy*dy*4;d+=kr*kr*dy/(r2+kr*kr)}return d};
  for(let i=0;i<230;i++){
-  const y0=-4+i*(CA_R+8)/230+(rnd()-.5)*1.6, a1=.6+rnd()*1.8, f1=.004+rnd()*.012, p1=rnd()*6.3, a2=rnd()*.7, f2=.03+rnd()*.05;
+  const y0=-E-4+i*(CA_R+2*E+8)/230+(rnd()-.5)*1.6, a1=.6+rnd()*1.8, f1=.004+rnd()*.012, p1=rnd()*6.3, a2=rnd()*.7, f2=.03+rnd()*.05;
   const dark=rnd()<.78, al=dark?(.035+rnd()*.12):(.05+rnd()*.08);
   x.strokeStyle=dark?'rgba(120,70,30,'+al.toFixed(3)+')':'rgba(255,236,200,'+al.toFixed(3)+')';
   x.lineWidth=.25+rnd()*(dark?1.1:.8);
   x.beginPath();
-  for(let X=-4;X<=CA_R+4;X+=3){const Y=y0+Math.sin(X*f1+p1)*a1+Math.sin(X*f2+p1*2)*a2+warp(X,y0);X===-4?x.moveTo(X,Y):x.lineTo(X,Y)}
+  for(let X=-E-4;X<=CA_R+E+4;X+=3){const Y=y0+Math.sin(X*f1+p1)*a1+Math.sin(X*f2+p1*2)*a2+warp(X,y0);X===-E-4?x.moveTo(X,Y):x.lineTo(X,Y)}
   x.stroke();
  }
  for(const[kx,ky,kr] of knots){   // العقد: بقعةٌ داكنة ناعمة بحلقاتٍ رفيعة
@@ -27591,10 +27594,10 @@ function caSurface(x,M,P){
   for(let r=1;r<4;r++){x.strokeStyle='rgba(120,70,30,'+(.10-.02*r).toFixed(3)+')';x.lineWidth=.35;x.beginPath();x.ellipse(kx,ky,kr*.28*r,kr*.14*r,0,0,7);x.stroke()}
  }
  /* المسام: نقطٌ دقيقة جدًّا */
- for(let i=0;i<2600;i++){x.fillStyle='rgba(90,50,20,'+(.05+rnd()*.08).toFixed(3)+')';x.fillRect(rnd()*CA_R,rnd()*CA_R,.35+rnd()*.9,.18)}
+ for(let i=0;i<2600;i++){x.fillStyle='rgba(90,50,20,'+(.05+rnd()*.08).toFixed(3)+')';x.fillRect(-E+rnd()*(CA_R+2*E),-E+rnd()*(CA_R+2*E),.35+rnd()*.9,.18)}
  /* ٦٫٥٦ — «لون الخشب أغمق» (أقرّه المالك، وسقط سهوًا حين رُسم اللوح متّجهًا في ٦٫٦٧ — أعادته مراجعة «لا ترجع للخلف»):
     طبقة ضربٍ بلون العسل فوق الخشب كلّه قبل الحبر، فيبقى الحبر أسود لا يغمق مرّتين */
- x.globalCompositeOperation='multiply';x.fillStyle=CA_TONE;x.fillRect(-2,-2,CA_R+4,CA_R+4);x.globalCompositeOperation='source-over';
+ x.globalCompositeOperation='multiply';x.fillStyle=CA_TONE;x.fillRect(-E-2,-E-2,CA_R+2*E+4,CA_R+2*E+4);x.globalCompositeOperation='source-over';
  /* ٣) الحبر: كلّ الخطوط تُطبع بضربٍ (multiply) فيظهر العِرق من تحتها كما على لوحٍ حقيقيّ */
  x.globalCompositeOperation='multiply';
  const INK='rgba(26,16,10,.94)', RED='#A3141D', CREAM='rgba(250,232,196,.9)';
@@ -27642,7 +27645,7 @@ function caSurface(x,M,P){
  x.globalCompositeOperation='source-over';
  /* ٤) الورنيش: لمعةٌ عريضة خافتة من أعلى اليسار، وظلٌّ ناعم عند العوارض */
  const sh=x.createLinearGradient(0,0,CA_R,CA_R);sh.addColorStop(0,'rgba(255,248,230,.10)');sh.addColorStop(.45,'rgba(255,248,230,.02)');sh.addColorStop(1,'rgba(0,0,0,.06)');
- x.fillStyle=sh;x.fillRect(-2,-2,CA_R+4,CA_R+4);
+ x.fillStyle=sh;x.fillRect(-E-2,-E-2,CA_R+2*E+4,CA_R+2*E+4);
  x.restore();
 }
 function caRails(x,W,M){
@@ -27706,7 +27709,7 @@ function caBoardImg(W,H){
     (شريط الضارب تحته) — فاستدارت زاويتا الأعلى وبقيت زاويتا الأسفل حادّتين. الآن الاستدارة في رسم اللوح نفسه، واحدةً للأربع */
  x.beginPath();if(x.roundRect)x.roundRect(0,0,W,W,W*.016);else x.rect(0,0,W,W);x.clip();
  caSurface(x,M,P);                // وجه اللوح بدقّة الشاشة — ما خارج الإطار شفّاف
- caRails(x,W,M);                  // العوارض والزوايا النحاسيّة
+ caRails(x,W,caRW());                  // العوارض والزوايا النحاسيّة
  [[0,0],[1,0],[1,1],[0,1]].forEach(([a,b])=>caPocket(x,M+a*P,M+b*P,PR));
  _ca.bg=c;_ca.bgKey=key;return c;
 }
@@ -27909,9 +27912,9 @@ function caRender(rest){
  }};
  trough(true);
  // القطع المُدخَلة على الحافّتين (٦٫٥٧)
- const TRR=Math.min(M*.36,CA_PR*sc*.9), PRs=CA_POCK*sc, TC=RM.ca?caTrayCount():null;
+ const MR=caRW(), TRR=Math.min(MR*.36,CA_PR*sc*.9), PRs=CA_POCK*sc, TC=RM.ca?caTrayCount():null;   // الخانات على الإطار الخشبيّ نفسه (٦٫٧٠: الأصل صار داخله)
  if(TC){
-  const put=(t,col,i)=>{const [X,Y]=caTraySlot(col,i,W,M,PRs,TRR);const sp=caDisc(t,TRR);cx.drawImage(sp,X-sp._o,Y-sp._o,sp._s,sp._s)};
+  const put=(t,col,i)=>{const [X,Y]=caTraySlot(col,i,W,MR,PRs,TRR);const sp=caDisc(t,TRR);cx.drawImage(sp,X-sp._o,Y-sp._o,sp._s,sp._s)};
   /* القطعة المستقرّة: نقشةٌ واحدةٌ بمقاس الخانة (مخبّأة) — والطائرة تُصغَّر وتُكبَّر منها لا نقشةٌ لكلّ إطار */
   const TP=caTrayPts();
   if(TP){for(const c of ['w','b']){const k=caTrayK(TP.L[c].length+((_ca.fly||[]).length));TP.L[c].forEach((t,i)=>put(t,c,i*k))}}
@@ -28020,7 +28023,7 @@ function caRender(rest){
    let col=f.t==='q'?(cnt.qCol||(RM.ca.col[RM.ca.turn])):f.t, idx=f.t==='q'?-1:(cnt[f.t]||0)+seen[f.t];seen[f.t]++;
    /* حاصد النقاط: القطعة لمن أدخلها — تطير إلى حافّة فريق الضارب، بعد ما حسبه */
    if(TPf&&TPf.sc){col=TPf.sc;const n0=TPf.L[col].length;idx=(n0+seenA)*caTrayK(n0+_ca.fly.length);seenA++}
-   const [SX,SY]=caTraySlot(col,idx,W,M,PRs,TRR);
+   const [SX,SY]=caTraySlot(col,idx,W,MR,PRs,TRR);
    const Q=V(f.px,f.py), X0=PX(Q[0]), Y0=PY(Q[1]);
    const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
    const mx=(X0+SX)/2+(W/2-(X0+SX)/2)*.28, my=(Y0+SY)/2+(W/2-(Y0+SY)/2)*.28;   // قوسٌ نحو وسط اللوح
@@ -28162,8 +28165,8 @@ function caGuide(sx,sy,dx,dy,pcs){
   const t=-b-Math.sqrt(disc);
   if(t>0.5&&t<best.t)best={t,kind:'piece',p};
  }
- // الجدران: المحرّك يوقف مركز الضارب على بُعد r+jawR من الحافّة
- const WD=CA_SR+CarromPhysics.C.jawR;
+ // الجدران: المحرّك يوقف مركز الضارب على بُعد r من الحاجز — والحاجز خارج مربّع الجيوب بـrail (٦٫٧٠)
+ const WD=CA_SR-CarromPhysics.C.rail;
  const walls=[[ux<0?(WD-sx)/ux:Infinity,'l'],[ux>0?(CA_R-WD-sx)/ux:Infinity,'r'],[uy<0?(WD-sy)/uy:Infinity,'t'],[uy>0?(CA_R-WD-sy)/uy:Infinity,'b']];
  for(const[t,w]of walls){if(t>0.5&&t<best.t)best={t,kind:'wall',w}}
  const hx=sx+ux*best.t, hy=sy+uy*best.t;

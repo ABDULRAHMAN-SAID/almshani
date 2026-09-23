@@ -40,7 +40,9 @@ for(const k of LV){
 }
 console.log('\n── الأحكام ──');
 ck('الصعب يُدخل في ٨٥٪ من اللوحات العشوائيّة على الأقلّ',res.hard.good>=0.85,(100*res.hard.good).toFixed(0)+'٪');
-ck('كلّ مستوى يُدخل أكثر ممّا تحته',res.easy.good<res.mid.good&&res.mid.good<res.hard.good&&res.hard.good<res.imp.good,LV.map(k=>(100*res[k].good).toFixed(0)).join(' < '));
+/* ٦٫٧٠: الجيوب كالفيديو فصار الصعب والمستحيل يُدخلان كلّ لوحٍ هنا — التساوي عند السقف ليس تراجعًا */
+const up=(a,b)=>a<b||(a>=0.98&&b>=0.98);
+ck('كلّ مستوى يُدخل أكثر ممّا تحته (أو كلاهما عند السقف)',up(res.easy.good,res.mid.good)&&up(res.mid.good,res.hard.good)&&up(res.hard.good,res.imp.good)&&res.easy.good<res.hard.good,LV.map(k=>(100*res[k].good).toFixed(0)).join(' < '));
 ck('«مستحيل» أقوى من الصعب ٢٠٠٪: أخطاؤه ثلثُ أخطاء الصعب أو أقلّ',(1-res.imp.good)*3<=(1-res.hard.good)+1e-9,((1-res.hard.good)*100).toFixed(1)+'٪ ← '+((1-res.imp.good)*100).toFixed(1)+'٪');
 ck('الضارب لا يسقط في أكثر من ٣٪ من ضربات الصعب والمستحيل',res.hard.foul<=0.03&&res.imp.foul<=0.03,[res.hard.foul,res.imp.foul].join(' · '));
 ck('التفكير في حدّه: الصعب دون ٢٫٢ ث والمستحيل دون ٣٫٢ ث (ويجري على دفعاتٍ في اللعبة فلا يجمّد)',res.hard.tMax<=2300&&res.imp.tMax<=3300,res.hard.tMax+' · '+res.imp.tMax);
@@ -81,7 +83,7 @@ for(const k of ['hard','imp']){
   const touch=(sx,a,pw)=>{const S=PH.create(pcs.map(q=>({x:q.x,y:q.y,t:q.t})));PH.shoot(S,{x:sx,y:CA_BASE,vx:Math.cos(a)*pw,vy:Math.sin(a)*pw});
    let h=0;for(let f=0;f<6000&&!PH.settled(S);f++)for(const ev of PH.step(S))if(ev.e==='hit'&&((ev.a==='s'&&ev.b==='w')||(ev.a==='w'&&ev.b==='s')))h=1;return {h,S}};
   /* هل تُصاب أصلًا؟ مسحٌ يدويّ: ٣١ موضعًا × ٣ قوى نحو صورتها في الجدار المقابل */
-  const wl=CA_SR+PH.C.jawR;let can=0;for(let sx=50;sx<=350&&!can;sx+=10)for(const pw of [15,17,19]){const a=Math.atan2(wl-(w.y-wl)/PH.C.wallE-CA_BASE,w.x-sx);if(touch(sx,a,pw).h){can=1;break}}
+  const wl=CA_SR-PH.C.rail;let can=0;for(let sx=50;sx<=350&&!can;sx+=10)for(const pw of [15,17,19]){const a=Math.atan2(wl-(w.y-wl)/PH.C.wallE-CA_BASE,w.x-sx);if(touch(sx,a,pw).h){can=1;break}}
   const p=caBotPick(pcs,'w',DIFF[k],rng,{foeK:2});const R=touch(p.sx,p.ang,p.pw);
   if(can){n++;if(R.h||R.S.pot.includes('w'))ok++}if(R.S.pot.filter(t=>t==='b').length>=nb)lose++}
  ck(`${k}: قطعته خلف خطّه — حيث تُصاب بالارتداد أصابها في ${ok} من ${n}، وخسر اللوح ${lose}`,ok>=n*0.7&&lose===0);
