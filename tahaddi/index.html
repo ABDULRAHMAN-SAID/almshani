@@ -24893,7 +24893,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.78';
+const APP_VER='6.79';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27250,13 +27250,13 @@ function caK(cv){cv=cv||document.getElementById('caC');return cv&&cv.width?cv.wi
    ٧٫٥ وحدةٍ نحو القطع وتحجز قطعةٌ لا تلمس الخطّ مكانه («ما أقدر أحطّه بين الأسود والأبيض» — ٦٫٥٥)،
    وتحت الشريط كلّه في الساحل والميناء. الآن لكلّ لوحٍ منتصفُ شريطه، مقيسًا من صورته (المراجعة):
    والضربة تحمل موضعها (shot.y) فلا يختلف حكم المضيف باختلاف لوح اللاعب */
-const CA_BASES={r:352};   // ٦٫٧٨ — مقيسٌ من صورة المالك (Carrom Pool): منتصف شريط القاعدة على بُعد ٤٨ من خطّ الجيبين
+const CA_BASES={r:351.6};   // ٦٫٧٨ — مقيسٌ من صورة المالك (Carrom Pool): منتصف شريط القاعدة على بُعد ٤٨ من خطّ الجيبين
 /* ٦٫٦٤ — «جيس التحكّم لا يخرج من دائرته الخاصّة يمينًا ويسارًا». قانون الاتحاد الدوليّ: الضارب يلمس خطّي القاعدة،
    وعند طرفه إمّا يغطّي دائرة القاعدة كلّها أو لا يمسّها — لا يتجاوزها. دائرتا القاعدة في صورة اللوح (مقيستان):
    مركزاهما ٥٠٫٨ و٣٤٧٫٣ — فحدّا مركز الضارب ٥١ و٣٤٩ (متناظران؛ عند كلٍّ منهما يغطّي الدائرة، نصف قطره ١٥٫٥
    ونصف قطرها ١١). كانا ٤١٫٥ و٣٥٨٫٥: يخرج الضارب عن دائرته ٩ وحدات */
-const CA_XL=80, CA_XR=400-80;   // ٦٫٧٨: دائرتا الطرفين على بُعد ٨٠ من الزاوية (كانتا ٥١ فتتراكب دوائر الزوايا)
-let CA_BASE=352;
+const CA_XL=79.4, CA_XR=400-79.4;   // ٦٫٧٨: دائرتا الطرفين على بُعد ٨٠ من الزاوية (كانتا ٥١ فتتراكب دوائر الزوايا)
+let CA_BASE=351.6;
 /** يضبط CA_BASE على اللوح المعروض الآن — يُستدعى قبل الرسم وقبل تفكير الآليّ ولمس اللاعب */
 function caBaseSync(){CA_BASE=CA_BASES.r}   // ٦٫٦٦: لوحٌ واحد — منتصف شريطه ٣٧٠
 const CA_ROT=[0,-Math.PI/2,Math.PI,Math.PI/2];   // زاوية الإطار المحلّي لكلّ مقعد نسبةً إلى اللوح
@@ -27799,33 +27799,38 @@ function caSurface(x,M,P){
  /* ٦٫٧٧ — «ركّز في الصورة: الخطّان هما حدود قطعة التحكّم»: في اللعبة المرجعيّة شريط القاعدة بعرض الضارب تمامًا،
     ودائرتا طرفيه بحجمه. كان الشريط ١٨ والضارب ٣١ فيفيض عن الخطّين، فتمسّه قطعةٌ تبدو خارج الخطّ. الآن الخطّان
     مماسّان لحافّة الضارب والدائرتان بمقاسه — ما تراه هو القانون: القطعة تحجز إن كانت على الخطّ فقط */
- const B=CA_BASE, H=CA_SR+0.7, L1=CA_XL, L2=CA_XR, cr=CA_SR, rr=CA_SR-3.6;
+ /* ٦٫٧٩ — «ممكن قياسات الخطوط الداخليّة بالضبط»: قيست بالبكسل من صورة المالك (٩٢٢ بكسلًا بين مركزي جيبين = ٤٠٠)،
+    ومتوسّط الأضلاع الأربعة: منتصف الشريط ٤٨٫٤ من خطّ الجيبين، والخطّان على ±١٥٫٠٥ بسُمك ٢٫٤، ودائرتا الطرفين عند
+    ٧٩٫٤ بحلقةٍ نصف قطرها ١٤٫٧٥ (حافّتها ١٥٫٨٥) وحشوٍ ١٠٫٦، وخيطٌ في الوسط من ١١٥٫٦ إلى ٢٨٤٫٤ بنقطتين (٢٫٦)،
+    والقطريّ من ٣٠٫٢ إلى ١١٤ بنقطتين (٢ و٢٫٦)، ودائرة المركز ٧٥٫٦. الشكل شكلنا والمقاس مقاسهم */
+ const B=CA_BASE, H=15.05, L1=CA_XL, L2=CA_XR, cr=14.75, rr=10.6;
  for(let s=0;s<4;s++){
   x.save();x.translate(200,200);x.rotate(s*Math.PI/2);x.translate(-200,-200);   // الأضلاع الأربعة بهندسةٍ واحدة
   x.strokeStyle=INK;x.lineCap='butt';
-  x.lineWidth=1.5;x.beginPath();x.moveTo(L1+cr-.4,B-H);x.lineTo(L2-cr+.4,B-H);x.stroke();
-  x.lineWidth=2.2;x.beginPath();x.moveTo(L1+cr-.6,B+H);x.lineTo(L2-cr+.6,B+H);x.stroke();
+  x.lineWidth=2.4;x.beginPath();x.moveTo(L1,B-H);x.lineTo(L2,B-H);x.stroke();
+  x.lineWidth=2.4;x.beginPath();x.moveTo(L1,B+H);x.lineTo(L2,B+H);x.stroke();
+  x.lineWidth=0.9;x.beginPath();x.moveTo(115.6,B);x.lineTo(284.4,B);x.stroke();   // خيط الوسط
+  x.globalCompositeOperation='source-over';x.fillStyle=INK;for(const dx of [115.6,284.4]){x.beginPath();x.arc(dx,B,2.6,0,7);x.fill()}x.globalCompositeOperation='multiply';
   for(const cx0 of [L1,L2]){
    x.globalCompositeOperation='source-over';
-   x.fillStyle=CREAM;x.beginPath();x.arc(cx0,B,cr,0,7);x.fill();
+   x.fillStyle=CREAM;x.beginPath();x.arc(cx0,B,13.7,0,7);x.fill();
    const rg=x.createRadialGradient(cx0-2.2,B-2.4,1,cx0,B,rr);rg.addColorStop(0,'#C0222A');rg.addColorStop(.7,RED);rg.addColorStop(1,'#7E0C14');
    x.fillStyle=rg;x.beginPath();x.arc(cx0,B,rr,0,7);x.fill();
    x.globalCompositeOperation='multiply';
-   x.strokeStyle=INK;x.lineWidth=1.6;x.beginPath();x.arc(cx0,B,cr,0,7);x.stroke();
+   x.strokeStyle=INK;x.lineWidth=2.2;x.beginPath();x.arc(cx0,B,cr,0,7);x.stroke();
   }
   /* السهم القطريّ لهذه الزاوية (أسفل يسار قبل التدوير): من قرب الجيب إلى قلب دائرةٍ مفتوحةٍ نحوه */
   /* ٦٫٧٨ — «لا تسرق… خذ المقاييس»: شكلنا كما هو، والمقاسات من صورة المالك: القطريّ من ٣١ إلى ١١٤ على كلّ محور */
-  const u=Math.SQRT1_2, d0=31*Math.SQRT2, d1=114*Math.SQRT2, R=22;
-  const ax=0+u*d0, ay=CA_R-u*d0, bx=u*d1, by=CA_R-u*d1;
-  x.lineWidth=1.3;x.lineCap='round';x.beginPath();x.moveTo(ax,ay);x.lineTo(bx,by);x.stroke();
-  const back=Math.atan2(u,-u);   // الاتّجاه من قلب الدائرة نحو الجيب
-  x.lineWidth=1.4;x.beginPath();x.arc(bx,by,R,back+Math.PI/4,back-Math.PI/4+Math.PI*2);x.stroke();
+  const ax=30.2, ay=CA_R-30.2, bx=114, by=CA_R-114;
+  x.lineWidth=1.1;x.lineCap='round';x.beginPath();x.moveTo(ax,ay);x.lineTo(bx,by);x.stroke();
+  x.globalCompositeOperation='source-over';x.fillStyle=INK;
+  x.beginPath();x.arc(ax,ay,2,0,7);x.fill();x.beginPath();x.arc(bx,by,2.6,0,7);x.fill();
+  x.globalCompositeOperation='multiply';
   x.restore();
  }
  /* المركز: حلقتان دقيقتا الاستدارة، ونجمةٌ ثمانيّة — الأذرع الأربعة الطويلة حمراء بوجهين، والقطريّة سوداء بوجهين */
  /* ٦٫٧٨: دائرة المركز بنصف قطر ٧٦ كما في صورة المالك، والنجمة بنسبتها */
- x.strokeStyle=INK;x.lineWidth=2.4;x.beginPath();x.arc(200,200,71.5,0,7);x.stroke();
- x.lineWidth=1.2;x.beginPath();x.arc(200,200,76,0,7);x.stroke();
+ x.strokeStyle=INK;x.lineWidth=1.8;x.beginPath();x.arc(200,200,75.6,0,7);x.stroke();
  const arm=(ang,len,w,dk,lt)=>{
   const cs=Math.cos(ang),sn=Math.sin(ang), tip=[200+cs*len,200+sn*len], l=[200-sn*w,200+cs*w], r=[200+sn*w,200-cs*w];
   x.globalCompositeOperation='source-over';
