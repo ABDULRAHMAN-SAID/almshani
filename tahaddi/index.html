@@ -2191,7 +2191,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .ptsKey s.b{background:radial-gradient(circle at 38% 35%,#5A606E,#23262E 60%,#0E0F13)}
 .ptsKey s.q{background:radial-gradient(circle at 38% 35%,#FF8E88,#C62B33 60%,#6E1018)}
 .segC.m4{flex-wrap:wrap}.segC.m4 button{flex:1 1 calc(50% - 4px)}
-.segC.ptsT{margin-top:8px}.segC.ptsT button{padding:8px}
+.segC.ptsT{margin-top:8px}.segC.ptsT[hidden]{display:none}.segC.ptsT button{padding:8px}
 /* مؤقّت الضربة: خيطٌ ذهبيّ أسفل بطاقة صاحب الدور يقصر، ويحمرّ في ثوانيه الأخيرة */
 /* عدّاد الضربة: حلقةٌ على حافّة الصورة تنقص مع الوقت (زاويةٌ مخروطيّة تُحرَّك بخاصّيّةٍ مسجّلة) */
 @property --tp{syntax:'<percentage>';inherits:false;initial-value:100%}
@@ -24896,7 +24896,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.82';
+const APP_VER='6.83';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -26041,17 +26041,17 @@ function soloScr(g){
  go(`<div class="scr on">${tb(T('ضد الذكاء الاصطناعي'))}
  <div class="gHero xs">${GAME_ART[g]||''}</div>
  <div class="sl">${T('مستوى الخصم')}</div>
- <div class="dfRow">${diffsFor(g).map(([k,n,e],di)=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
+ <div class="dfRow">${diffsFor(g).map(([k,n,e],di)=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';uiPick(this);soloGoSync()">
   <i class="dfLv">${[0,1,2,3].map(j=>`<em${j<=di?' class="f"':''}></em>`).join('')}</i><b>${T(n)}</b><u>${((DIFF_SAY[g]||{})[k])||''}</u></div>`).join('')}</div>
  ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الذكاء الاصطناعي)</div>
- <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
+ <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};uiPick(this)">${n} لاعبين</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
- <div class="segC">${[[2,'لاعبان','وجهًا لوجه'],[4,'٤ لاعبين','فريقان — شريكك مقابلك']].map(([n,a,b])=>`<button class="${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};soloScr('${g}')"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
+ <div class="segC">${[[2,'لاعبان','وجهًا لوجه'],[4,'٤ لاعبين','فريقان — شريكك مقابلك']].map(([n,a,b])=>`<button class="${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};uiPick(this)"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
  <div class="sl">الطور</div>
- ${caMdSeg("soloScr('carrom')")}
+ ${caMdSeg("uiPick(this);caPtsVis()")}
 `:''}
  ${g==='mafia'?`<div class="sl">عدد اللاعبين (أنت + الذكاء الاصطناعي)</div>
- <div class="cr">${[5,6,7,8].map(n=>`<div class="fc ${(RM.mbN||6)===n?'on':''}" onclick="RM.mbN=${n};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>
+ <div class="cr">${[5,6,7,8].map(n=>`<div class="fc ${(RM.mbN||6)===n?'on':''}" onclick="RM.mbN=${n};uiPick(this)">${n} لاعبين</div>`).join('')}</div>
  <div class="wb" style="text-align:start">تأخذ دورًا سرّيًا بين لاعبين آليين: تقتل أو تنقذ أو تفحص ليلًا، وتتّهم وتصوّت نهارًا — والآليون يفعلون مثلك.</div>
  <div class="note" id="vbAiNote">…</div>`:''}
  ${g==='draw'?`<div class="wb" style="text-align:start">الذكاء الاصطناعي يرسم خطًّا خطًّا وأنت تخمّن الكلمة من الخيارات — كلّما خمّنت أبكر كسبت أكثر. ست لوحات في الجولة.</div>`:''}
@@ -27745,11 +27745,16 @@ function caPocket(x,px,py,PR){
 const CA_TONE='rgb(220,180,134)';   // ٦٫٥٦ كان ٢٠٦،١٦٤،١٢٢ على خشبٍ أفتح؛ قيس على هذا الخشب ليبلغ اللون المُقرّ نفسه (~١٧٥،١١٢،٦٢)
 /** حال الملكة في رأس الشاشة. المراجعة (٦٫٦٩): كانت «مع الخصم» لكلّ من ليس أنا — وفي الرباعيّ قد يكون شريكك */
 /** اختيار الطور: كلاسيكيّ (قطع لونك أوّلًا) أو حاصد النقاط */
+/* ٦٫٨٣ — «الشاشة تهتزّ لمّا أختار… أكون تحت وترجعني فوق… وتومض»: كلّ خيارٍ كان يعيد بناء الشاشة كلّها (فتُعاد
+   الصور وتومض، وتقفز إلى أعلاها). الآن يُحدَّث الزرّ نفسه وأخوته فقط */
+function uiPick(el){const p=el&&el.parentElement;if(!p)return;for(const c of p.children)c.classList.toggle('on',c===el)}
+function soloGoSync(){const e=document.querySelector('.soloGo .goDiff');if(e)e.textContent=T((DIFF_P[RM.diff||'mid']||DIFF_P.mid).n)}
+function caPtsVis(){const r=document.querySelector('.segC.ptsT');if(r)r.hidden=RM.caMd!=='pts'}
 function caMdSeg(after){
  const md=RM.caMd||'classic', T=RM.caPtsT===120?120:160;
  return `<div class="segC m4">${[['classic','كلاسيكيّ','قطع لونك ثمّ الملكة'],['disc','ديسك بول','قطع لونك — بلا ملكة'],['pts','حاصد النقاط','<span class="ptsKey"><i><s class="w"></s>٢٠</i><i><s class="b"></s>١٠</i><i><s class="q"></s>٥٠</i></span>'],['icf','بطولة','٢٥ نقطة أو ٨ ألواح']].map(([k,a,b])=>
   `<button class="${md===k?'on':''}" onclick="RM.caMd='${k}';try{localStorage.setItem('caMd','${k}')}catch(e){};${after}"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
- ${md==='pts'?`<div class="segC ptsT">${[120,160].map(n=>`<button class="${T===n?'on':''}" onclick="RM.caPtsT=${n};try{localStorage.setItem('caPtsT','${n}')}catch(e){};${after}"><b>${arN(n)} نقطة</b></button>`).join('')}</div>`:''}`;
+ <div class="segC ptsT"${md==='pts'?'':' hidden'}>${[120,160].map(n=>`<button class="${T===n?'on':''}" onclick="RM.caPtsT=${n};try{localStorage.setItem('caPtsT','${n}')}catch(e){};${after}"><b>${arN(n)} نقطة</b></button>`).join('')}</div>`;
 }
 try{const m=localStorage.getItem('caMd');RM.caMd=/^(pts|disc|icf)$/.test(m||'')?m:'classic';RM.caPtsT=localStorage.getItem('caPtsT')==='120'?120:160}catch(e){}
 function caQTxt(C){
@@ -43842,6 +43847,7 @@ const go=h=>{
  const eb=document.querySelector('.ebar.fx');
  if(eb&&!(h.indexOf('id="rmScr"')>=0&&document.getElementById('rmScr')))eb.remove();
  const fr=(typeof Router!=='undefined'&&Router.current)?Router.current():null, still=!!fr&&fr===_goFrame;_goFrame=fr;
+ if(still&&_keepY==null&&window.scrollY>0)_keepY=window.scrollY;   // ٦٫٨٣: الشاشة نفسها تُحدَّث — لا قفزة إلى الأعلى
  /* ٦٫٧٠ — «الفريم يقطع»: كلّ إعادة رسمٍ للغرفة (تغيّر الدور، وصول النتيجة، أوّل تصويبٍ للخصم) كانت تهدم لوحة الكيرم
     وتبني غيرها: مساحة رسمٍ جديدة ~١٠٢٠×١١٥٦ تُحجز وتُهيّأ ويُرفع اللوح إليها من جديد — مرّتين أو ثلاثًا في كلّ دور،
     وفي أثناء انزلاق الضارب. الآن تبقى اللوحة الحيّة نفسها (بحجمها ومستمعيها) ويُبنى ما حولها فقط. */
