@@ -20357,6 +20357,7 @@ const EN={
  'سهل':'Easy',
  'متوسط':'Medium',
  'صعب':'Hard',
+ 'مستحيل':'Impossible',
  'يلعب بعشوائية ويخطئ كثيرًا':'Plays randomly and makes many mistakes',
  'يلعب بمنطق سليم ويخطئ أحيانًا':'Plays sensibly and errs sometimes',
  'يحسب أفضل نقلة ولا يسامح':'Calculates the best move and never forgives',
@@ -24760,7 +24761,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.54';
+const APP_VER='6.55';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25557,7 +25558,7 @@ function roomDraw(){
   :playing
   ?`<div class="rmTopMini"><span>${ico('group',11)} ${R.length}</span>
     <span style="color:var(--gold)">${RM.solo?'ضد الذكاء الاصطناعي':'كود '+RM.code}</span>
-    ${RM.solo?`<span>${({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''}</span>`:''}</div>`
+    ${RM.solo?`<span>${({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''}</span>`:''}</div>`
   :`<div class="rmTicket"><div class="rmTkL">كود الغرفة</div><div class="rmTkC" onclick="rmCopyCode()">${RM.code}</div>
   <div class="rmTkD">${RM.host?'أعطِ الكود لمن معك — يفتحون رابط اللعبة نفسه ويدخلون به':'دخلتَ الغرفة — يبدأ المضيف اللعبة حين يكتمل المجلس'}</div>
   ${RM.solo?'':`<div class="rmSeal ${rmCrypto()?'on':'off'}">${ico(rmCrypto()?'lock':'info',11)}
@@ -25861,11 +25862,12 @@ const BOT_NAMES_AR=['سلطان','نورة','ريان','حكيم','أثير'],BO
 const BOT_NAMES=new Proxy({},{get:(o,k)=>{const L=(()=>{try{return S&&S.lang==='en'}catch(e){return false}})()?BOT_NAMES_EN:BOT_NAMES_AR;return k==='length'?L.length:L[k]}});
 function soloScr(g){
  const row=PT_GAMES.find(x=>x[3]===g)||[];
+ if(RM.diff&&!diffsFor(g).some(d=>d[0]===RM.diff))RM.diff='hard';   // «مستحيل» للكيرم وحده
  setArena(vnKind(g),1);
  go(`<div class="scr on">${tb(T('ضد الذكاء الاصطناعي'))}
  <div class="gHero xs">${GAME_ART[g]||''}</div>
  <div class="sl">${T('مستوى الخصم')}</div>
- <div class="dfRow">${DIFFS.map(([k,n,e])=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
+ <div class="dfRow">${diffsFor(g).map(([k,n,e])=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';soloScr('${g}')">
   <i>${e}</i><b>${T(n)}</b><u>${((DIFF_SAY[g]||{})[k])||''}</u></div>`).join('')}</div>
  ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الذكاء الاصطناعي)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};soloScr('${g}')">${n} لاعبين</div>`).join('')}</div>`:''}
@@ -25906,6 +25908,7 @@ function soloBegin(g){
 function soloStart(g,diff){
  if(!/^(uno|carrom)$/.test(g)){toast('لا لعب ضد الذكاء الاصطناعي في هذه اللعبة');return}
  RM.solo=1;RM.diff=diff||'mid';
+ if(!diffsFor(g).some(d=>d[0]===RM.diff))RM.diff='hard';
  const n=g==='carrom'?((RM.caN||2)-1):(RM.bots||1);
  soloTransport(n);
  RM.code='SOLO';RM.host=1;RM.me='me';RM.game=g;RM.phase='lobby';RM.name=S.name||'أنت';
@@ -25958,121 +25961,206 @@ function unoBot(){
  }
  unoAct({by:cur,a:'play',i:pick.i});
 }
-/* كيرم: تصويب الخصم حسب الصعوبة */
-/** اختيار ضربة الآليّ — دالّةٌ نقيّة في إطار الضارب المحلّي (هو أسفل)، تُختبر وحدها:
-    tools/test-carrom-bot.cjs يقيس نسبة إدخالها على المحرّك نفسه.
-    ١) مرشّحون هندسيّون: لكلّ قطعةٍ وجيبٍ نقطةُ «الكرة الشبح»، وتُرفض القطوع المستحيلة.
-    ٢) نقطة التصويب داخل فم الجيب لا في الزاوية: القطعة المصوَّبة إلى الزاوية من زاويةٍ
-       ضيّقة تلمس الجدار قبل الوتر فترتدّ (٢٤ من ٥٤ عند الزاوية، ٥٠ من ٥٢ عند ٢٠ وحدة).
-    ٣) القوّة من المسافة لا من نطاقٍ أعمى.
-    ٤) «متوسّط» و«صعب» يجرّبان أفضل المرشّحين على المحرّك قبل الضربة (P0.sim)، ويختاران
-       ما يُدخل فعلًا — وكان الآليّ قبلها لا يُدخل شيئًا تقريبًا (٣٪ في الصعب). */
-function caBotPick(pcs,mine,P0,rnd){
- rnd=rnd||Math.random;
- const base=CA_BASE, targets=pcs.filter(p=>p.t===mine||p.t==='q');
- const g=20, pockets=[[g,g],[CA_R-g,g],[g,CA_R-g],[CA_R-g,CA_R-g]];
- const clampX=v=>Math.max(CA_SR+30,Math.min(CA_R-CA_SR-30,v));
- const blind=rnd()<(P0.blind||0);          // مستوى سهل: يختار هدفًا رديئًا أحيانًا بدل أفضل هدف
- const cands=[];let best=null;
- targets.forEach(t=>{
-  pockets.forEach(([px,py])=>{
-   const ang=Math.atan2(py-t.y,px-t.x);
-   const hit={x:t.x-Math.cos(ang)*(CA_PR+CA_SR),y:t.y-Math.sin(ang)*(CA_PR+CA_SR)};
-   if(hit.y>base-10)return;                            // خلف الضارب أو على خطّه: لا تُضرب إلّا بالارتداد
-   /* مواضع الضارب: تحت نقطة التماسّ مباشرةً، و(للصعب — ٦٫٥٢) على امتداد خطّ الجيب←القطعة حتّى القاعدة:
+/* كيرم: عقل الخصم (٦٫٥٥) — «غبيّ في القطعة الأخيرة ولا يفهم القواعد»
+   كان يصوّب على قطعته الأخيرة والملكة على اللوح فتعود إلى المركز مرّةً بعد مرّة، ويُدخل قطعة
+   خصمه الأخيرة، ولا يعرف أنّ الملكة المُدخَلة تحتاج تغطية. الآن يسأل القانون قبل أن يصوّب
+   (caLegalTargets)، ويقيّم كلّ ضربةٍ محاكاةً بما تفعله caAct بها فعلًا (caShotVal)،
+   والصعب والمستحيل يزنان أيضًا ما تتركه الضربة: سهولة الضربة التالية له، أو صعوبتها على خصمه. */
+/** ما يجوز التصويب عليه الآن بالقانون:
+    · الملكة معه تنتظر التغطية ← قطع لونه وحدها
+    · بقيت له قطعةٌ واحدة والملكة على اللوح ← الملكة وحدها (قطعته الأخيرة قبلها تعود إلى المركز)
+    · وإلّا قطع لونه والملكة */
+function caLegalTargets(pcs,mine,qPend){
+ const my=pcs.filter(p=>p.t===mine), q=pcs.filter(p=>p.t==='q');
+ if(qPend||!q.length)return my;
+ return my.length<=1?q:my.concat(q);
+}
+/** قيمة نتيجة ضربةٍ كما تحكم بها caAct — لا عدًّا للقطع:
+    keep: هل يُكمل دوره · end: +١ كسب اللوح، −١ خسره */
+function caShotVal(pot,pcs0,mine,qPend){
+ let m=0,f=0,q=0,foul=0;
+ for(const t of pot){if(t==='s')foul=1;else if(t==='q')q=1;else if(t===mine)m++;else f++}
+ const nM=pcs0.filter(p=>p.t===mine).length, nF=pcs0.filter(p=>p.t!==mine&&p.t!=='q').length;
+ const qOn=pcs0.some(p=>p.t==='q');
+ const allMine=m>=nM&&nM>0, qOk=!(qOn&&!q&&!qPend);
+ if(allMine&&qOk&&!foul)return {v:100,keep:0,end:1};   // كسب اللوح
+ if(nF>0&&f>=nF)return {v:-100,keep:0,end:-1};      // أدخل قطعة خصمه الأخيرة: خسر اللوح — ولو مع خطأ الضارب
+ if(foul)return {v:-14+Math.max(0,m-1)*5-f*4-(q?4:0)-(qPend?8:0),keep:0,end:0};   // قطعةٌ تعود والدور يذهب
+ if(allMine)return {v:-30,keep:0,end:0};            // قطعته الأخيرة قبل الملكة: تعود وينتقل الدور
+ let v=m*10-f*4;
+ if(q)v+=m?18:7;                                    // الملكة مُغطّاةً، أو تنتظر التغطية في الضربة التالية
+ if(qPend)v+=m?14:-10;                              // غطّاها، أو عادت إلى المركز
+ return {v,keep:(m>0||q)?1:0,end:0};
+}
+/** مرشّحون هندسيّون لكلّ هدفٍ وجيب: نقطة «الكرة الشبح»، وموضع الضارب، ونوعيّةٌ q (الأصغر أسهل).
+    o.zc: موضعٌ بلا قطع · o.bank: بالارتداد من جدار (للقطع خلف القاعدة أو بزاويةٍ مستحيلة) */
+function caCands(pcs,targets,o){
+ const base=CA_BASE, g=20, pockets=[[g,g],[CA_R-g,g],[g,CA_R-g],[CA_R-g,CA_R-g]];
+ const lo=CA_SR+30, hi=CA_R-CA_SR-30, clampX=v=>Math.max(lo,Math.min(hi,v));
+ const e=CarromPhysics.C.wallE, wl=CA_SR+CarromPhysics.C.jawR, wr=CA_R-wl;
+ /* ممرٌّ مسدود؟ قطعةٌ أخرى أقرب إلى المسار من مجموع نصفي القطرين */
+ const clear=(ax,ay,bx,by,rad,skip)=>{const dx=bx-ax,dy=by-ay,L2=dx*dx+dy*dy||1;
+  for(const p of pcs){if(p===skip)continue;let t=((p.x-ax)*dx+(p.y-ay)*dy)/L2;if(t<=0||t>=1)continue;
+   if(Math.hypot(ax+t*dx-p.x,ay+t*dy-p.y)<rad)return 0}return 1};
+ const out=[];
+ for(const t of targets)for(const [px,py] of pockets){
+  const ang=Math.atan2(py-t.y,px-t.x), pd=Math.hypot(px-t.x,py-t.y);
+  const hit={x:t.x-Math.cos(ang)*(CA_PR+CA_SR),y:t.y-Math.sin(ang)*(CA_PR+CA_SR)};
+  const lane=clear(t.x,t.y,px,py,2*CA_PR-1,t)?0:220;           // القطعة إلى الجيب
+  const add=(sx0,aim,d,dir,extra)=>{
+   const cut=Math.abs(Math.atan2(Math.sin(dir-ang),Math.cos(dir-ang)));
+   if(cut>1.2)return;                                  // فوق ٧٠°: الدفع يذهب عرضًا وتقف القطعة قبل الجيب
+   out.push({q:(t.t==='q'?-40:0)+d+pd*0.8+cut*100+lane+extra,hit,aim,t,cut,pd,d,sx0});
+  };
+  if(hit.y<base-10){
+   /* مواضع الضارب: تحت نقطة التماسّ، و(o.zc) على امتداد خطّ الجيب←القطعة حتّى القاعدة:
       هناك تكون الضربة بلا قطعٍ، فتذهب القطعة إلى الجيب بأقلّ قوّة وأقلّ خطأ */
    const xs=[clampX(hit.x)];
-   if(P0.zc&&Math.abs(t.y-py)>1){const zx=t.x+(base-t.y)*(t.x-px)/(t.y-py);if(zx>CA_SR+30&&zx<CA_R-CA_SR-30)xs.push(zx)}
-   xs.forEach(sx0=>{
-    const d=Math.hypot(hit.x-sx0,hit.y-base);
-    const sa=Math.atan2(hit.y-base,hit.x-sx0);
-    const cut=Math.abs(Math.atan2(Math.sin(sa-ang),Math.cos(sa-ang)));
-    if(cut>1.2)return;                                  // فوق ٧٠°: الدفع يذهب عرضًا وتقف القطعة قبل الجيب
-    const pd=Math.hypot(px-t.x,py-t.y);
-    const c={q:((t.t==='q'?-40:0)+d+pd*0.8+cut*100)*(blind?-1:1),hit,t,cut,pd,d,sx0};
-    cands.push(c);if(!best||c.q<best.q)best=c;
-   });
-  });
- });
+   if(o.zc&&Math.abs(t.y-py)>1){const zx=t.x+(base-t.y)*(t.x-px)/(t.y-py);if(zx>lo&&zx<hi)xs.push(zx)}
+   for(const sx0 of xs){
+    const blk=clear(sx0,base,hit.x,hit.y,CA_PR+CA_SR-1,t)?0:220;
+    add(sx0,hit,Math.hypot(hit.x-sx0,hit.y-base),Math.atan2(hit.y-base,hit.x-sx0),blk);
+   }
+  }
+  if(o.bank){
+   /* بالارتداد: صورة نقطة التماسّ في الجدار، والمسافة العموديّة بعده مقسومةٌ على المرونة
+      (الجدار يُبقي السرعة الموازية ويُنقص العموديّة) — والتصويب الدقيق تصحّحه المحاكاة */
+   const mir=[['L',wl-(hit.x-wl)/e,hit.y],['R',wr+(wr-hit.x)/e,hit.y],['T',hit.x,wl-(hit.y-wl)/e]];
+   for(const [w,mx,my] of mir)for(const sx0 of [lo,CA_R/2,hi]){
+    if(my>=base-20)continue;
+    const a=Math.atan2(my-base,mx-sx0);
+    let bx,by;                                         // نقطة الارتداد
+    if(w==='T'){by=wl;bx=sx0+(by-base)/Math.tan(a)}else{bx=w==='L'?wl:wr;by=base+(bx-sx0)*Math.tan(a)}
+    if(w==='T'?(bx<CA_SR+30||bx>CA_R-CA_SR-30):(by<CA_SR+30||by>base))continue;   // لا ارتداد من فم جيب
+    const dir=Math.atan2(hit.y-by,hit.x-bx);
+    const blk=(clear(sx0,base,bx,by,CA_PR+CA_SR-1,null)&&clear(bx,by,hit.x,hit.y,CA_PR+CA_SR-1,t))?0:220;
+    add(sx0,{x:mx,y:my},Math.hypot(bx-sx0,by-base)+Math.hypot(hit.x-bx,hit.y-by),dir,90+blk);
+   }
+  }
+ }
+ return out.sort((a,b)=>a.q-b.q);
+}
+/** سهولة أفضل ضربةٍ في وضعٍ ما (٠ مستحيلة … ١ في المتناول) — لتقييم ما تتركه الضربة */
+function caEase(pcs,mine,qPend){
+ const t=caLegalTargets(pcs,mine,qPend);if(!t.length)return 0;
+ const c=caCands(pcs,t,{zc:1});
+ return c.length?Math.max(0,Math.min(1,(720-c[0].q)/520)):0;
+}
+/** اختيار ضربة الآليّ — مولِّدٌ يُسلِّم بعد كلّ محاكاة، فيفكّر الصعب والمستحيل على دفعاتٍ
+    لا تجمّد الهاتف (caBot)، والاختبار يشغّله حتى النهاية (caBotPick).
+    في إطار الضارب المحلّي (هو أسفل). st: {qPend: الملكة معه تنتظر التغطية،
+    foeK: كم ربعَ دورةٍ بين إطاره وإطار اللاعب التالي — لتقدير ما يتركه له} */
+function* caBotThink(pcs,mine,P0,rnd,st){
+ rnd=rnd||Math.random;st=st||{};
+ const base=CA_BASE, qPend=!!st.qPend, foe=mine==='w'?'b':'w';
+ const targets=caLegalTargets(pcs,mine,qPend), tset=new Set(targets.map(t=>t.t));
+ const lo=CA_SR+30, hi=CA_R-CA_SR-30, clampX=v=>Math.max(lo,Math.min(hi,v));
+ const blind=rnd()<(P0.blind||0);          // مستوى سهل: يختار هدفًا رديئًا أحيانًا بدل أفضل هدف
+ const cands=caCands(pcs,targets,{zc:P0.zc,bank:P0.bank});
+ if(blind)cands.reverse();
+ const best=cands[0]||null;
  const PC=CarromPhysics.C, tr=PC.strikerMass*(1+PC.pieceE)/(PC.strikerMass+1);
- /* القوّة اللازمة: سرعة القطعة لتبلغ الجيب تحت احتكاك الانزلاق u²=2·roll·s، مقسومةً على
-    ما ينتقل إليها من الضارب (m(1+e)/(m+1))·cos(القطع)، زائد ما يفقده الضارب في طريقه */
- /* نموذج الاحتكاك v←v·drag−roll لا صيغة له مغلقة، فنقلبه بالبحث الثنائيّ: سرعةُ القطعة التي
-    تقطع مسافة الجيب، ثمّ سرعةُ الضارب التي تصل بعد مسافته بتلك السرعة (المراجعة: صيغة كولوم
-    كانت تُنقص القوّة ٢٢–٣٦٪ فيُقصّر الآليّ). */
+ /* القوّة اللازمة: سرعة القطعة لتبلغ الجيب، مقسومةً على ما ينتقل إليها من الضارب
+    (m(1+e)/(m+1))·cos(القطع)، زائد ما يفقده الضارب في طريقه — والارتداد يُفقده (١−e) من العموديّ.
+    نموذج الاحتكاك v←v·drag−roll لا صيغة له مغلقة، فنقلبه بالبحث الثنائيّ. */
  const stopDist=v=>{let x=0;for(let i=0;i<4000&&v>PC.stopSpeed;i++){x+=v;v=v*PC.drag-PC.roll}return x};
  const spFor=s=>{let lo=0,hi=CA_VMAX*2;for(let i=0;i<28;i++){const m=(lo+hi)/2;if(stopDist(m)<s)lo=m;else hi=m}return hi};
- const needPw=c=>{const uS=spFor(c.pd+60)/Math.max(0.25,tr*Math.cos(c.cut));
+ const needPw=c=>{const uS=spFor(c.pd+60)/Math.max(0.25,tr*Math.cos(c.cut))/(c.aim!==c.hit?0.8:1);
   let lo=uS,hi=CA_VMAX*2;
   for(let i=0;i<28;i++){const m=(lo+hi)/2;let v=m,x=0;for(let k=0;k<4000&&x<c.d&&v>PC.stopSpeed;k++){x+=v;v=v*PC.drag-PC.roll}if(v<uS)lo=m;else hi=m}
   return hi};
- const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.sx0!=null?c.sx0:c.hit.x));return {sx,ang:Math.atan2(c.hit.y-base,c.hit.x-sx)}};
+ const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.sx0));return {sx,ang:Math.atan2(c.aim.y-base,c.aim.x-sx)}};
  /* السقف من الصعوبة: السهل محدودٌ بنطاقه فتقف قطعته قبل الجيب كالمبتدئ، والمحاكي يأخذ ما يلزم */
- const capPw=v=>Math.min(P0.sim?Math.min(CA_VMAX*0.85,P0.pw[1]*1.7):P0.pw[1]*1.1,Math.max(P0.pw[0],v));   // pw[1] حيٌّ لكلّ المستويات
+ const capPw=v=>Math.min(P0.sim?Math.min(CA_VMAX*0.85,P0.pw[1]*1.7):P0.pw[1]*1.1,Math.max(P0.pw[0],v));
+ const rot=(k,x,y)=>{switch(k&3){case 1:return [CA_R-y,x];case 2:return [CA_R-x,CA_R-y];case 3:return [y,CA_R-x];default:return [x,y]}};
+ /* تقييم ضربة: القانون أوّلًا، ثمّ (للصعب والمستحيل) ما تتركه — إن بقي دوره فسهولة ضربته التالية،
+    وإلّا فسهولة ضربة خصمه (في إطار الخصم) عقوبةً: لا يترك له قطعةً على فم جيب */
+ const evalShot=(sx,ang,pw)=>{
+  const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
+  CarromPhysics.shoot(S,{x:sx,y:base,vx:Math.cos(ang)*pw,vy:Math.sin(ang)*pw});
+  /* run() بخطواته، لنعرف هل لمس الضارب هدفًا مشروعًا — ضربةٌ لا تلمس شيئًا لا تساوي ضربةً تحرّك قطعته */
+  let touch=0;for(let f=0;f<900&&!CarromPhysics.settled(S);f++)for(const ev of CarromPhysics.step(S))
+   if(ev.e==='hit'&&(ev.a==='s'||ev.b==='s')&&tset.has(ev.a==='s'?ev.b:ev.a))touch=1;
+  const r={pot:S.pot.slice(),rest:S.pcs}, R=caShotVal(r.pot,pcs,mine,qPend);
+  let sc=R.v+(R.keep?0:touch*(P0.look?P0.look*0.4:0.8));
+  if(P0.look&&!R.end){
+   const rest=r.rest.filter(p=>p.t!=='s');
+   if(R.keep){const m=r.pot.filter(t=>t===mine).length, gq=r.pot.includes('q');
+    sc+=P0.look*caEase(rest,mine,gq&&!m)}
+   else{
+    /* لا يكمل دوره: لا يترك لخصمه قطعةً سهلة، ويقرّب قطعه لدوره القادم — وإلّا اكتفى بضربةٍ لا تحرّك
+       شيئًا، فيعلق آليّان على قطعتين خلف قاعدتيهما إلى الأبد (قيس في مباراةٍ كاملة) */
+    sc+=P0.look*0.6*caEase(rest,mine,0);
+    if(st.foeK!=null)sc-=P0.look*caEase(rest.map(p=>{const q=rot(st.foeK,p.x,p.y);return {x:q[0],y:q[1],t:p.t}}),foe,0);
+   }
+  }
+  return {sc,pot:R.v>0};
+ };
  let pick=null;
  const nSim=blind?0:(P0.sim||0);
  if(nSim&&(cands.length||P0.fine)){   // الصعب يبحث حتّى بلا مرشّحٍ هندسيّ
-  cands.sort((a,b)=>a.q-b.q);
-  const t0=(typeof performance!=='undefined'?performance:Date).now();
-  /* ميزانيّةٌ بعدد المحاكاة لا بالزمن: كان سقف ٢٢٠ م.ث يجعل قوّة الصعب تتبع سرعة الهاتف (المراجعة).
+  const now=()=>(typeof performance!=='undefined'?performance:Date).now(), t0=now();
+  /* ميزانيّةٌ بعدد المحاكاة لا بالزمن: كان سقف الزمن يجعل قوّة الصعب تتبع سرعة الهاتف (المراجعة).
      الزمن سقفٌ للأمان فقط */
-  let nRun=0;const BUDGET=P0.fine?80:40;
-  const late=()=>nRun>=BUDGET||((typeof performance!=='undefined'?performance:Date).now()-t0)>1500;
-  let bestSc=-1e9;
-  for(const c of cands.slice(0,nSim)){
+  /* السقف زمنُ الحساب وحده لا زمن الساعة: بين الدفعات يرسم الهاتف إطاراته، فكان المستحيل يبلغ سقفه
+     قبل أن يُتمّ بحثه على هاتفٍ بطيء (المراجعة). busy يُجمع من استئناف المولِّد إلى تسليمه */
+  let nRun=0,busy=0,tR=t0;const BUDGET=P0.budget||(P0.fine?80:40), TMAX=P0.tmax||1500;
+  const late=()=>nRun>=BUDGET||busy+(now()-tR)>TMAX;
+  let bestSc=-1e9;const top=[];
+  const tryShot=(sx,ang,pw)=>{const E=evalShot(sx,ang,pw);nRun++;
+   if(E.sc>bestSc){bestSc=E.sc;pick={sx,ang,pw}}
+   if(E.pot)top.push({sx,ang,pw,sc:E.sc});return E};
+  const PWS=P0.fine?[0.94,1.04,1.16,1.3,1.46]:[0.98,1.12,1.3];   // الصعب يجرّب قوىً أكثر
+  cand:for(const c of cands.slice(0,nSim)){
    const A=aimAt(c), n0=needPw(c);
-   for(const k of (P0.fine?[0.94,1.04,1.16,1.3,1.46]:[0.98,1.12,1.3])){   // الصعب يجرّب قوىً أكثر
-    const pw=capPw(n0*k);
-    const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
-    CarromPhysics.shoot(S,{x:A.sx,y:base,vx:Math.cos(A.ang)*pw,vy:Math.sin(A.ang)*pw});
-    const r=CarromPhysics.run(S,900);nRun++;
-    let sc=0;for(const t of r.pot){if(t==='s')sc-=12;else if(t===mine)sc+=10;else if(t==='q')sc+=6;else sc-=4}
-    sc-=c.q*0.002;                                     // كسر التعادل: الأقرب أوّلًا
-    if(sc>bestSc){bestSc=sc;pick={sx:A.sx,ang:A.ang,pw}}
-    if(late())break;
-   }
-   if(late())break;
+   for(const k of PWS){tryShot(A.sx,A.ang,capPw(n0*k));{busy+=now()-tR;yield nRun;tR=now()}if(late())break cand}
   }
-  /* الصعب (٦٫٥٢): يضبط الزاوية حول أفضل ضربة — كمن يعيد التصويب قبل الإفلات */
+  /* الصعب: يضبط الزاوية حول أفضل ضربة — كمن يعيد التصويب قبل الإفلات.
+     المستحيل: حول أفضل ثلاثٍ مختلفة، وبشبكةٍ أدقّ، ويحرّك الضارب قليلًا أيضًا */
   if(P0.fine&&pick&&!late()){
-   const pk=pick;
-   for(const da of [-0.018,-0.009,-0.004,0.004,0.009,0.018])for(const pm of [0.94,1,1.08]){
-    const ang2=pk.ang+da, pw2=capPw(pk.pw*pm);
-    const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
-    CarromPhysics.shoot(S,{x:pk.sx,y:base,vx:Math.cos(ang2)*pw2,vy:Math.sin(ang2)*pw2});
-    const r=CarromPhysics.run(S,900);nRun++;
-    let sc=0;for(const t of r.pot){if(t==='s')sc-=12;else if(t===mine)sc+=10;else if(t==='q')sc+=6;else sc-=4}
-    if(sc>bestSc+0.5){bestSc=sc;pick={sx:pk.sx,ang:ang2,pw:pw2}}
-    if(late())break;
+   top.sort((a,b)=>b.sc-a.sc);
+   const seeds=[pick];for(const s of top){if(seeds.length>=(P0.seeds||1))break;if(seeds.every(z=>Math.abs(z.ang-s.ang)>0.02||Math.abs(z.sx-s.sx)>8))seeds.push(s)}
+   const DA=P0.seeds>1?[-0.018,-0.012,-0.006,-0.003,0.003,0.006,0.012,0.018]:[-0.018,-0.009,-0.004,0.004,0.009,0.018];
+   ref:for(const pk of seeds){
+    for(const da of DA)for(const pm of [0.94,1,1.08]){tryShot(pk.sx,pk.ang+da,capPw(pk.pw*pm));{busy+=now()-tR;yield nRun;tR=now()}if(late())break ref}
+    if(P0.seeds>1)for(const dx of [-6,6]){const sx=caFreeX(pcs,clampX(pk.sx+dx));tryShot(sx,pk.ang,pk.pw);{busy+=now()-tR;yield nRun;tR=now()}if(late())break ref}
    }
   }
-  /* الصعب بلا ضربةٍ مثمرة بعد: بحثٌ أوسع في الوقت الباقي — كلّ قطعةٍ له من ثلاثة مواضع وبثلاث قوى،
+  /* بلا ضربةٍ مثمرة بعد: بحثٌ أوسع في الوقت الباقي — كلّ هدفٍ من أربعة مواضع وبثلاث قوى،
      فتظهر الضربات غير المباشرة (قطعةٌ تدفع قطعة، ارتدادٌ من الجدار) التي لا يراها الحساب الهندسيّ */
-  if(P0.fine&&bestSc<=0&&!late()){
-   outer:for(const t of targets)for(const sx0 of [CA_SR+34,CA_R/2,CA_R-CA_SR-34,t.x]){
-    const sx=caFreeX(pcs,clampX(sx0)), a0=Math.atan2(t.y-base,t.x-sx);
-    if(t.y>base-10)continue;
-    for(const pw of [P0.pw[0],P0.pw[1],Math.min(CA_VMAX*0.85,P0.pw[1]*1.4)])for(const da of [0,0.03,-0.03]){
-     const S=CarromPhysics.create(pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
-     CarromPhysics.shoot(S,{x:sx,y:base,vx:Math.cos(a0+da)*pw,vy:Math.sin(a0+da)*pw});
-     const r=CarromPhysics.run(S,900);nRun++;
-     let sc=0;for(const q of r.pot){if(q==='s')sc-=12;else if(q===mine)sc+=10;else if(q==='q')sc+=6;else sc-=4}
-     if(sc>bestSc){bestSc=sc;pick={sx,ang:a0+da,pw}}
-     if(late())break outer;
+  if(P0.fine&&!top.length&&!late()){
+   const wl=CA_SR+CarromPhysics.C.jawR, e=CarromPhysics.C.wallE;
+   const XS=t=>t.y>base-10?(P0.seeds>1?Array.from({length:31},(_,i)=>50+i*10):Array.from({length:16},(_,i)=>50+i*20)):[CA_SR+34,CA_R/2,CA_R-CA_SR-34,t.x];   // الارتداد ضيّق: مواضع أكثر
+   outer:for(const t of targets)for(const sx0 of XS(t)){
+    /* قطعةٌ خلف خطّه أو عليه لا تُضرب مباشرةً (لا ضرب للخلف): بالارتداد من الجدار المقابل — فإن لم تدخل
+       أخرجها على الأقلّ إلى حيث تُضرب في دوره القادم (يزنه caEase) */
+    const sx=caFreeX(pcs,clampX(sx0)), ty=t.y>base-10?wl-(t.y-wl)/e:t.y, a0=Math.atan2(ty-base,t.x-sx);
+    const PW=t.y>base-10?[15,17,Math.min(CA_VMAX,19)]:[P0.pw[0],P0.pw[1],Math.min(CA_VMAX*0.85,P0.pw[1]*1.4)];   // الارتداد يقطع اللوح مرّتين
+    for(const pw of PW)for(const da of (t.y>base-10?[0]:[0,0.03,-0.03])){
+     tryShot(sx,a0+da,pw);{busy+=now()-tR;yield nRun;tR=now()}if(late())break outer;
     }
    }
   }
-  if(bestSc<=0)pick=null;                              // لا ضربة مثمرة في المحاكاة: نعود إلى الهندسة
+  /* لا ضربة مثمرة: الصعب والمستحيل يأخذان أقلّها ضررًا (دفاعٌ بلا خطأ)، والمتوسّط يعود إلى الهندسة */
+  if(!top.length&&!(P0.look&&bestSc>-10))pick=null;
  }
  let sx,ang,pw;
  if(pick){sx=pick.sx;ang=pick.ang;pw=pick.pw}
  else{
-  const A=best?aimAt(best):{sx:caFreeX(pcs,CA_R/2),ang:-Math.PI/2};
+  /* بلا مرشّح: نحو أقرب هدفٍ أمامه، لا مستقيمًا إلى الأعلى في الفراغ */
+  const wl=CA_SR+CarromPhysics.C.jawR, e=CarromPhysics.C.wallE;
+  const tg=targets.slice().sort((a,b)=>(a.y>base-10)-(b.y>base-10)||Math.hypot(a.x-CA_R/2,a.y-base)-Math.hypot(b.x-CA_R/2,b.y-base))[0];
+  const fx=caFreeX(pcs,tg?clampX(tg.x):CA_R/2), ty=tg?(tg.y>base-10?wl-(tg.y-wl)/e:tg.y):0;   // خلف خطّه: بالارتداد
+  const A=best?aimAt(best):{sx:fx,ang:tg?Math.atan2(ty-base,tg.x-fx):-Math.PI/2};
   sx=A.sx;ang=A.ang;
   pw=best?capPw(needPw(best)*(1.06+rnd()*0.14)):(P0.pw[0]+rnd()*(P0.pw[1]-P0.pw[0]));
  }
  ang+=(rnd()-.5)*(P0.noise||0)*2;
  return {sx,ang,pw,sim:!!pick};
+}
+/** الاختيار دفعةً واحدة — للاختبار ولمن لا ينتظر */
+function caBotPick(pcs,mine,P0,rnd,st){
+ const it=caBotThink(pcs,mine,P0,rnd,st);let r;do{r=it.next()}while(!r.done);return r.value;
 }
 function caBot(){
  if(!RM.solo||RM.game!=='carrom'||!RM.ca||!RM.C)return;
@@ -26082,23 +26170,45 @@ function caBot(){
  /* يحسب في إطاره المحلّي كما يرى الإنسان لوحه: هو أسفل، وقاعدته CA_BASE،
     واللوح كلّه أمامه — فيضرب من ضلعه هو، لا من أعلى اللوح دائمًا. */
  const pcs=caLocalPcs(bs);
+ caBaseSync();
  const P0=DFP('carrom');
- const pick=caBotPick(pcs,mine,P0,Math.random);
- const sx=pick.sx, sy=CA_BASE, ang=pick.ang, pw=pick.pw;
+ /* القانون يحتاج حال الملكة ومن يلعب بعده: الملكة معه تنتظر التغطية؟ وكم ربعَ دورةٍ إلى إطار التالي */
+ const nxt=RM.players[(RM.players.findIndex(p=>p.peer===cur)+1)%RM.players.length];
+ const st={qPend:RM.ca.q===cur,foeK:nxt?((caSeatOfPeer(nxt.peer)-bs)&3):null};
+ const snap={pcs:RM.ca.pcs,sc:RM.ca.sc,col:RM.ca.col};
+ const sy=CA_BASE, x0=caFreeX(pcs,CA_R/2);
+ const t00=performance.now(), key=cur+':'+t00;
+ if(_ca.botTm)clearInterval(_ca.botTm);
+ _ca.botKey=key;
+ const send=(x,a,ph)=>{const P=caL2B(bs,x,sy);rmSend({t:'aim',by:cur,x:P[0],y:P[1],ang:a+CA_ROT[bs],ph})};
+ const alive=()=>RM.ca&&RM.code&&_ca.botKey===key&&RM.ca.turn===cur;
+ /* يفكّر على دفعاتٍ (~٩ م.ث كلّ مرّة) فلا يتجمّد الهاتف والصعب والمستحيل يحاكيان مئات الضربات؛
+    والضارب يتهادى في وسط قاعدته ما دام يفكّر */
+ const it=caBotThink(pcs,mine,P0,Math.random,st);
+ send(x0,-Math.PI/2,'move');
+ let lastSend=0;
+ const think=()=>{
+  if(!alive())return;
+  const t=performance.now();let r;
+  do{r=it.next()}while(!r.done&&performance.now()-t<9);
+  if(r.done){play(r.value);return}
+  if(t-lastSend>110){lastSend=t;const k=(t-t00)/900;send(caFreeX(pcs,x0+Math.sin(k*2.1)*22),-Math.PI/2+Math.sin(k*1.3)*0.28,'move')}
+  setTimeout(think,0);
+ };
+ setTimeout(think,0);
+ function play(pick){
+ const sx=pick.sx, ang=pick.ang, pw=pick.pw;
  const bp=caL2B(bs,sx,sy), bv=caL2Bv(bs,Math.cos(ang)*pw,Math.sin(ang)*pw);
  const shot={x:bp[0],y:bp[1],vx:bv[0],vy:bv[1]};
  /* مشهد التفكير أمام الجميع: ينزلق الضارب من وسط قاعدته إلى موضعه، ثمّ يدور
     التصويب من زاويةٍ خاطئةٍ حتى يستقرّ على الهدف، ثمّ وقفةٌ قصيرة، ثمّ الضربة.
     كان يبثّ موضعًا ثابتًا وينتظر ٢٫٤ ثانية — «ليش ما يظهر لي وهو يتحرّك
-    ويختار المكان ويغيّر؟». */
- const snap={pcs:RM.ca.pcs,sc:RM.ca.sc,col:RM.ca.col};
- const x0=caFreeX(pcs,CA_R/2), sgn=Math.random()<.5?-1:1, a0=ang+sgn*(0.35+Math.random()*0.45);
- const T1=650+Math.random()*250, T2=T1+800+Math.random()*350, T3=T2+420;
+    ويختار المكان ويغيّر؟». وما فكّر فيه قبلها يُقتطع من المشهد فلا يطول الانتظار. */
+ const spent=performance.now()-t00, sh=Math.max(0.45,1-spent/2600);
+ const sgn=Math.random()<.5?-1:1, a0=ang+sgn*(0.35+Math.random()*0.45);
+ const T1=(650+Math.random()*250)*sh, T2=T1+(800+Math.random()*350)*sh, T3=T2+420;
  const ease=t=>t<=0?0:t>=1?1:(1-Math.cos(t*Math.PI))/2;
- const t0=performance.now(), key=cur+':'+t0;
- if(_ca.botTm)clearInterval(_ca.botTm);
- _ca.botKey=key;
- const send=(x,a,ph)=>{const P=caL2B(bs,x,sy);rmSend({t:'aim',by:cur,x:P[0],y:P[1],ang:a+CA_ROT[bs],ph})};
+ const t0=performance.now();
  send(x0,a0,'move');
  let setSent=0;
  const tm=setInterval(()=>{
@@ -26111,6 +26221,7 @@ function caBot(){
   rmSend({t:'cast',pcs:snap.pcs,turn:cur,sc:snap.sc,col:snap.col,msg:'',shot});
  },100);
  _ca.botTm=tm;
+ }
 }
 
 /* ── مسابقة الرسم عبر الغرفة: تُرسل المسارات لا الصور ── */
@@ -26893,7 +27004,18 @@ function caK(cv){cv=cv||document.getElementById('caC');return cv&&cv.width?cv.wi
    على ضلعه، وكلّ جهازٍ يعرض اللوح مدارًا بحيث يكون صاحبه أسفل — كما يجلس
    على لوحٍ حقيقيّ. الفيزياء والحالة بإحداثيّات اللوح المطلقة؛ والدوران في
    العرض والإدخال فقط. */
-const CA_BASE=CA_R-CA_SR-22;   // خطّ القاعدة في الإطار المحلّي (اللاعب أسفل)
+/* خطّ القاعدة في الإطار المحلّي (اللاعب أسفل) — منتصفُ الشريط بين خطّي القاعدة المرسومين، كما في القانون:
+   الضارب يلمس الخطّين. كان ٣٦٢٫٥ ثابتًا على كلّ لوح: على الخطّ الأعلى في الفاخر والكلاسيكيّ، فيعلو نصفُ دائرته
+   ٧٫٥ وحدةٍ نحو القطع وتحجز قطعةٌ لا تلمس الخطّ مكانه («ما أقدر أحطّه بين الأسود والأبيض» — ٦٫٥٥)،
+   وتحت الشريط كلّه في الساحل والميناء. الآن لكلّ لوحٍ منتصفُ شريطه، مقيسًا من صورته (المراجعة):
+   والضربة تحمل موضعها (shot.y) فلا يختلف حكم المضيف باختلاف لوح اللاعب */
+const CA_BASES={c:370,r:370,m:355,madain:359,sahil:345,mina:347,marsa:359,hisn:357};
+let CA_BASE=370;
+/** يضبط CA_BASE على اللوح المعروض الآن — يُستدعى قبل الرسم وقبل تفكير الآليّ ولمس اللاعب */
+function caBaseSync(){
+ const a=caArena(), k=a?a.k:(_ca.skin==='r'?(caRoyal()?'r':'c'):(_ca.skin||'c'));
+ CA_BASE=CA_BASES[k]||370;
+}
 const CA_ROT=[0,-Math.PI/2,Math.PI,Math.PI/2];   // زاوية الإطار المحلّي لكلّ مقعد نسبةً إلى اللوح
 function caSeatOf(i){const n=(RM.players||[]).length;return n>=4?(i&3):(n===3?Math.min(2,Math.max(0,i)):((i&1)*2))}
 function caMySeat(){const i=(RM.players||[]).findIndex(p=>p.peer===RM.me);return caSeatOf(i<0?0:i)}
@@ -26984,6 +27106,7 @@ function caPutBack(C,t){
    · لا تُدخل قطعتك الأخيرة والملكة على اللوح — تعود إلى المركز وينتقل الدور (الاتحاد الدولي يعدّها خسارة اللوح)
    · تُكمل دورك إن أدخلت قطعة من لونك بلا خطأ
    · الملكة لا تُحتسب حتى تُغطّى بقطعة من لونك — وإلا عادت إلى المركز
+   · من أدخل قطعة خصمه الأخيرة خسر اللوح
    · الضارب في الجيب خطأ: نقطة ناقصة وتعود إحدى قطعك إلى اللوح وينتقل الدور
    · قطعة الخصم تُحتسب له وينتهي دورك */
 function caAct(d){
@@ -27017,30 +27140,38 @@ function caAct(d){
   else{C.q=null;caPutBack(C,'q');notes.push('لم تُغطَّ الملكة — عادت إلى المركز')}
  }
  const left=t=>C.pcs.filter(p=>p.t===t).length;
+ const foe=mine==='w'?'b':'w';
  // القانون: لا تُدخل قطعتك الأخيرة والملكة ما زالت على اللوح — تعود القطعة إلى المركز وينتقل الدور
  const queenIn=!C.pcs.some(p=>p.t==='q')||gotQ||C.q===cur;
- if(!left(mine)&&!queenIn&&caPutBack(C,mine)){
+ /* …إلّا إن أدخل معها قطعة خصمه الأخيرة: هذه خسارة اللوح وتُحسم أدناه — كانت القطعة تعود والدور ينتقل
+    إلى خصمٍ بلا قطعة، فتُولد له قطعةٌ في المركز (المراجعة) */
+ if(!left(mine)&&!queenIn&&left(foe)&&caPutBack(C,mine)){
   C.got[cur]=Math.max(0,(C.got[cur]||0)-1);
   notes.push('قطعتك الأخيرة قبل الملكة — عادت إلى المركز');
   C.turn=(C.turn+1)%RM.players.length;
   caPub([d.msg||''].concat(notes).filter(Boolean).join(' · '));
   return;
  }
- if(!left(mine)){
-  if(C.q===cur){C.qWin=cur;C.q=null}            // آخر قطعةٍ تُغطّي الملكة
+ /* القانون (٦٫٥٥): من أدخل قطعة خصمه الأخيرة خسر اللوح — كان اللوح يعلق بعدها: لا قطعة
+    لخصمه يصوّب عليها. يأخذ الخصم قطع الضارب الباقية، والملكة إن لم يغطّها الضارب */
+ const lostBy=!left(foe)&&!(!left(mine)&&queenIn);   // كسبُه المشروع في الضربة نفسها يسبق
+ if(!left(mine)||lostBy){
+  if(!lostBy&&C.q===cur){C.qWin=cur;C.q=null}   // آخر قطعةٍ تُغطّي الملكة
   /* حساب اللوح كما عند الاتحاد: قطع الخصم الباقية، و٣ للملكة إن غطّاها
      ورصيدُه دون ٢٢، والمجموع لا يتجاوز ١٢. */
-  const foe=mine==='w'?'b':'w';
-  const before=C.M.pts[mine]||0;
-  let pts=left(foe);
-  const qMine=C.qWin&&C.col[C.qWin]===mine;
+  const wc=lostBy?foe:mine, lc=lostBy?mine:foe;
+  const before=C.M.pts[wc]||0;
+  let pts=left(lc);
+  const qMine=lostBy?!(C.qWin&&C.col[C.qWin]===mine):(C.qWin&&C.col[C.qWin]===mine);
   if(qMine&&before<CA_QLOCK)pts+=CA_Q;
   pts=Math.min(CA_CAP,pts);
-  C.M.pts[mine]=before+pts;
+  if(lostBy){C.q=null;C.qWin=null}
+  C.M.pts[wc]=before+pts;
   C.M.boards++;
   const nm2=RM.players.find(p=>p.peer===cur).name;
-  const line=`${nm2} كسب اللوح — ${pts} نقطة`+(qMine?' (منها ٣ للملكة)':'');
-  const done=C.M.pts[mine]>=CA_TARGET||C.M.boards>=CA_BOARDS;
+  const wn=(RM.players.find(p=>C.col[p.peer]===wc)||{}).name||'';
+  const line=(lostBy?`${nm2} أدخل آخر قطعةٍ لخصمه — ${wn} كسب اللوح — ${pts} نقطة`:`${nm2} كسب اللوح — ${pts} نقطة`)+(qMine&&before<CA_QLOCK?' (منها ٣ للملكة)':'');
+  const done=C.M.pts[wc]>=CA_TARGET||C.M.boards>=CA_BOARDS;
   if(!done){caNextBoard(C,line);return}
   /* نهاية المباراة: الفائز صاحب الرصيد الأعلى — والفريق لونٌ لا شخص */
   const wCol=C.M.pts.w>=C.M.pts.b?'w':'b';
@@ -27558,6 +27689,7 @@ function caHandSprite(w,h){
  c._p=p;c._lw=c.width/KQ;c._lh=c.height/KQ;c._img=_ca.hand;CA_SPR[k]=c;return c;
 }
 function caRender(rest){
+ caBaseSync();
  const cv=document.getElementById('caC');if(!cv)return;
  const cx=cv.getContext('2d'),W=CA_VW,H=CA_VH,KQ=caK(cv);
  if(!(cv.width>0&&cv.height>0))return;
@@ -27918,6 +28050,7 @@ function caInit(){
  const CACL=v=>caFreeX(caLocalPcs(caMySeat()),v);   // ضمن الخطّ، وخارج القطع الواقفة عليه
  cv.onpointerdown=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim)return;
+  caBaseSync();
   const[x,y]=pos(e);
   const sy=BASE();
   if(_ca.sx==null)_ca.sx=CACL(CA_R/2);
@@ -28010,7 +28143,8 @@ function caRulesSheet(){
    فإن لم تغطّها عادت إلى المنتصف ولم تُحسب لك.<br><br>
    <b style="color:var(--gold)">الفوز باللوح</b><br>
    من أدخل قطعَ لونه كلّها أوّلًا كسب اللوح. ولا تُدخل قطعتك الأخيرة
-   والملكةُ ما زالت على اللوح — تعود القطعة إلى المنتصف وينتقل الدور.<br><br>
+   والملكةُ ما زالت على اللوح — تعود القطعة إلى المنتصف وينتقل الدور.
+   ومن أدخل <b>آخر قطعةٍ لخصمه</b> خسر اللوح.<br><br>
    <b style="color:var(--gold)">النقاط</b><br>
    كاسب اللوح يأخذ <b>نقطةً عن كلّ قطعةٍ باقيةٍ لخصمه</b>،
    و<b>ثلاثًا</b> للملكة إن غطّاها — ولا تُحسب الملكة إن بلغ رصيدُه ٢٢ فأكثر.
@@ -28065,7 +28199,7 @@ function rmCarrom(R){
  };
  const qTxt=C.q?(C.q===RM.me?'الملكة معك — غطِّها':'الملكة مع '+esc(nm(C.q))):(C.pcs.some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت');
  const modeTxt=RM.solo?'ضد الذكاء الاصطناعي':'أونلاين';
- const dTxt=RM.solo?(({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''):'';
+ const dTxt=RM.solo?(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):'';
  const msg=C.msg&&C.msg!=='الخصم يصوّب…'&&!/^اللوح [\d٠-٩]/.test(C.msg)?C.msg:'';
  return `<div class="caInfo">${ico('group',12)}<b>${RM.players.length}</b><span>${modeTxt}</span>${dTxt?`<i></i><span>${dTxt}</span>`:''}</div>
  <div class="csBar">
@@ -35568,7 +35702,9 @@ const PT_GAMES=[
 let ptWay='pass';
 function ptMode(w){ptWay=w;refresh(partyScr)}
 const SOLO_OK={uno:1,carrom:1};
-const DIFFS=[['easy','سهل',ico('bulb',20)],['mid','متوسط',ico('robot',20)],['hard','صعب',ico('flame',20)]];
+const DIFFS=[['easy','سهل',ico('bulb',20)],['mid','متوسط',ico('robot',20)],['hard','صعب',ico('flame',20)],['imp','مستحيل',ico('crown',20)]];
+/** «مستحيل» للكيرم وحده (٦٫٥٥): في غيره لا فرق يُقاس بينه وبين الصعب */
+const diffsFor=g=>DIFFS.filter(d=>d[0]!=='imp'||g==='carrom');
 
 /* ═══ المستوى فرق حقيقيّ لا اسم (5.99) ═══
    كل رقم هنا سلوك يُقاس في اللعب: المحرّكات تقرأ DFP(g).<الرقم> لا أرقامًا مبعثرة،
@@ -35584,20 +35720,25 @@ const DIFF_P={
  easy:{n:'سهل',  carrom:{noise:0.28,pw:[5.6,9.4],blind:0.45},
        uno:{rand:0.85,hunt:0,say:0.45,catch:0.20,think:1900},
        mafia:{talk:120,bluff:0},draw:{opts:4,ms:14000}},
- mid: {n:'متوسط',carrom:{noise:0.034,pw:[8.8,12.0],blind:0.13,sim:4},
+ mid: {n:'متوسط',carrom:{noise:0.026,pw:[8.8,12.0],blind:0.10,sim:6},
        uno:{rand:0.25,hunt:0.5,say:0.80,catch:0.65,think:1500},
        mafia:{talk:90,bluff:1},draw:{opts:6,ms:11000}},
  /* ٦٫٥٢ — «الصعوبة ارفعها ٥٠٪، والمتوسّط ١٠٪» (مقيسٌ على ٣٠٠ لوحةٍ عشوائيّة):
     الصعب ٥٩٪ ← ٨٦٪ إدخالًا (موضعٌ بلا قطع zc، ضبطُ الزاوية fine، ٨٠ محاكاةً ثابتةً لا زمنًا، خطأ تصويبٍ ٠٫٠٠٠٦)؛ المتوسّط ~١٩٪ ← ٢١٪ */
- hard:{n:'صعب',  carrom:{noise:0.0006,pw:[10.4,13.4],blind:0,sim:20,zc:1,fine:1},
+ hard:{n:'صعب',  carrom:{noise:0.0003,pw:[10.4,13.4],blind:0,sim:24,zc:1,fine:1,bank:1,look:5,budget:140,tmax:2200},
        uno:{rand:0,hunt:1,say:1,catch:1,think:1000},
-       mafia:{talk:75,bluff:1},draw:{opts:8,ms:8500}}
+       mafia:{talk:75,bluff:1},draw:{opts:8,ms:8500}},
+ /* ٦٫٥٥ — «أضف مستوى مستحيل يكون أقوى ٢٠٠٪»: بلا خطأ تصويب، وأربعون مرشّحًا، وضبطٌ حول أفضل ثلاث
+    ضربات، ويزن ما تتركه كلّ ضربة أكثر. المقياس في tools/test-carrom-bot.cjs */
+ imp: {n:'مستحيل',carrom:{noise:0,pw:[10.4,13.4],blind:0,sim:40,zc:1,fine:1,bank:1,look:7,seeds:3,budget:320,tmax:3200},
+       uno:{rand:0,hunt:1,say:1,catch:1,think:900},
+       mafia:{talk:75,bluff:1},draw:{opts:8,ms:8000}}
 };
 /** ملامح المستوى الحاليّ للعبة g — المصدر الوحيد لفروق الصعوبة */
 const DFP=g=>((DIFF_P[RM.diff||'mid']||DIFF_P.mid)[g])||{};
 /** ما الذي يتغيّر فعلًا في هذه اللعبة؟ تُكتب في البطاقة فلا يبقى المستوى اسمًا */
 const DIFF_SAY={
- carrom:{easy:'يطيش كثيرًا ويضرب بخفّة',mid:'يصوّب جيّدًا ويخطئ أحيانًا',hard:'دقيقٌ جدًّا — يُدخل أغلب ضرباته'},
+ carrom:{easy:'يطيش كثيرًا ويضرب بخفّة',mid:'يصوّب جيّدًا ويخطئ أحيانًا',hard:'دقيقٌ جدًّا — يُدخل أغلب ضرباته',imp:'لا يكاد يخطئ — ويخطّط لما بعدها'},
  uno:   {easy:'يرمي ورقة عشوائية وينسى «أونو»',mid:'يحسب ألوانه ويقول «أونو» غالبًا',hard:'يلاحق من قرب ولا ينسى «أونو»'},
  mafia: {easy:'نقاش طويل ولا ينتحل المحقّق',mid:'نقاش أقصر وينتحل المحقّق أحيانًا',hard:'نقاش سريع وكذب متقن'},
  draw:  {easy:'يرسم على مهل وأربعة خيارات',mid:'أسرع وستّة خيارات',hard:'سريع جدًّا وثمانية خيارات'}
