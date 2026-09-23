@@ -24896,7 +24896,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.81';
+const APP_VER='6.82';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27971,29 +27971,7 @@ function caDisc(t,r){
  const isS=t==='s'||t.slice(0,2)==='s:';
  const x=c.getContext('2d'),X=S/2,Y=S/2, P=CA_WOOD[t]||(isS&&CA_STRIKERS[t.slice(2)])||CA_WOOD.s;
  const th=Math.max(1.5,R*.085);                       // سُمك الحافّة الظاهر
- /* ٦٫٨٠ — «سوِّ لمعة على القطع نفس الصورة بالضبط»: القطعة لامعةٌ ملساء كما في صورة المالك — حافّةٌ أفتح من أعلاها
-    وأغمق من أسفلها، وحلقةٌ بارزة حول القلب، وقلبٌ نصفه الأعلى أفتح من الأسفل (انعكاس الضوء)، وقوسُ لمعانٍ على
-    الحافّة العليا اليسرى. بلا ظلّ (٦٫٧٥) */
- if(!isS){
-  const GL={w:['#FFFFFF','#EEE6D8','#D9CFBE','#B8AC98','#8E826F'],b:['#6A6D73','#2D2E31','#1C1D1F','#0B0B0C','#000000'],q:['#FF8A8F','#DE2733','#B8141E','#7C0911','#4E050A']}[t]||['#FFFFFF','#EEE6D8','#D9CFBE','#B8AC98','#8E826F'];
-  const [hi,base,mid,lo,rim]=GL;
-  let g=x.createLinearGradient(X,Y-R,X,Y+R);g.addColorStop(0,base);g.addColorStop(.55,mid);g.addColorStop(1,lo);
-  x.beginPath();x.arc(X,Y,R,0,7);x.fillStyle=g;x.fill();
-  // حلقةٌ بارزة: فاتحةٌ من أعلاها معتمةٌ من أسفلها، وتحتها أخدودٌ رفيع
-  x.beginPath();x.arc(X,Y,R*.80,0,7);x.strokeStyle='rgba(0,0,0,.16)';x.lineWidth=Math.max(1,R*.03);x.stroke();
-  g=x.createLinearGradient(X,Y-R*.72,X,Y+R*.72);g.addColorStop(0,hi);g.addColorStop(.5,mid);g.addColorStop(1,lo);
-  x.beginPath();x.arc(X,Y,R*.71,0,7);x.strokeStyle=g;x.lineWidth=R*.1;x.stroke();
-  // القلب: نصفٌ أعلى أفتح (انعكاس) ونصفٌ أسفل أعمق
-  g=x.createLinearGradient(X,Y-R*.6,X,Y+R*.6);g.addColorStop(0,hi);g.addColorStop(.18,base);g.addColorStop(.5,base);g.addColorStop(.5001,mid);g.addColorStop(1,mid);
-  x.beginPath();x.arc(X,Y,R*.6,0,7);x.fillStyle=g;x.fill();
-  x.beginPath();x.arc(X,Y,R*.6,0,7);x.strokeStyle='rgba(0,0,0,.20)';x.lineWidth=Math.max(.8,R*.025);x.stroke();
-  // قوس اللمعان على الحافّة العليا اليسرى، ولمعةٌ صغيرة في القلب
-  x.lineCap='round';x.beginPath();x.arc(X,Y,R*.89,Math.PI*1.08,Math.PI*1.52);x.strokeStyle='rgba(255,255,255,'+(t==='w'?.9:.55)+')';x.lineWidth=R*.07;x.stroke();
-  x.beginPath();x.arc(X,Y,R*.44,Math.PI*1.12,Math.PI*1.45);x.strokeStyle='rgba(255,255,255,'+(t==='w'?.7:.35)+')';x.lineWidth=R*.045;x.stroke();
-  // حدٌّ خارجيّ حادّ
-  x.beginPath();x.arc(X,Y,R-Q*.45,0,7);x.strokeStyle=rim;x.globalAlpha=.85;x.lineWidth=Q*.9;x.stroke();x.globalAlpha=1;
-  c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c;
- }
+
  /* ٦٫٧٥ — «الوضوح… ولا أريد ظلًّا، القطع تظهر كأنّها فوق بعض»: لا ظلّ تماسٍّ ولا سُمكٍ مزاح تحت الوجه —
     قرصٌ مسطّحٌ واضحٌ بحافّةٍ حادّة، كما في صورة المالك */
  // الوجه: لونٌ مستوٍ، بميلانٍ خطّيٍّ خفيف جدًّا نحو الضوء — سطحٌ مستوٍ لا قبّة
@@ -28031,9 +28009,17 @@ function caDisc(t,r){
  x.restore();
  // شطفة الحافّة العلويّة: خيطٌ مضيء في جهة الضوء وخيطٌ معتم حول الإطار
  x.beginPath();x.arc(X,Y,R-Q*.6,Math.PI*.95,Math.PI*1.8);x.strokeStyle=P.lit;x.lineWidth=Q*1.1;x.stroke();
- /* لمعة الضارب (٦٫٨٠): ضوءٌ على نصفه الأعلى وقوسُ لمعانٍ كالقطع */
- {x.save();x.beginPath();x.arc(X,Y,R,0,7);x.clip();const lg2=x.createLinearGradient(X,Y-R,X,Y);lg2.addColorStop(0,'rgba(255,255,255,.28)');lg2.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=lg2;x.fillRect(X-R,Y-R,R*2,R);x.restore();
-  x.lineCap='round';x.beginPath();x.arc(X,Y,R*.9,Math.PI*1.08,Math.PI*1.52);x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=R*.06;x.stroke()}
+ /* ٦٫٨٢ — «القطع صارت كرتونيّة، أريدها واقعيّة»: خشبٌ حقيقيّ (عرقٌ وأخاديد محفورة) تحت طبقة ورنيشٍ ناعمة —
+    لمعةٌ منتشرة من أعلى اليسار تتلاشى بلا حدود، وانحناءٌ خفيف يعتم نحو أسفل اليمين. لا أشرطة ولا أقواس بيضاء، ولا ظلّ */
+ {x.save();x.beginPath();x.arc(X,Y,R,0,7);x.clip();
+  const dk=t==='b';
+  const hl=x.createRadialGradient(X-R*.38,Y-R*.42,R*.04,X-R*.22,Y-R*.26,R*1.05);
+  hl.addColorStop(0,'rgba(255,255,255,'+(dk?.20:.30)+')');hl.addColorStop(.35,'rgba(255,255,255,'+(dk?.07:.10)+')');hl.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle=hl;x.fillRect(X-R,Y-R,R*2,R*2);
+  const vg=x.createRadialGradient(X-R*.18,Y-R*.22,R*.35,X,Y,R*1.02);
+  vg.addColorStop(.62,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,'+(dk?.30:.18)+')');
+  x.fillStyle=vg;x.fillRect(X-R,Y-R,R*2,R*2);
+  x.restore()}
  x.beginPath();x.arc(X,Y,R-th*.5,0,7);x.strokeStyle=P.edge;x.lineWidth=th;x.stroke();          // حافّةٌ ملوّنةٌ حادّة
  x.beginPath();x.arc(X,Y,R-Q*.45,0,7);x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=Q*.9;x.stroke();   // خيطٌ داكنٌ رفيع يفصلها عن الخشب
  c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c;
@@ -43850,7 +43836,11 @@ let _keepY=null;
 let _lastRestoreAt=0,_goTok=0,_goFrame=null;
 /* ٦٫٦٢ — «عندما أغيّر بين الصعوبات تنبض الشاشة»: كلّ رسمٍ كان يعيد حركة الدخول (انزلاق ٨ بكسل) ولو كانت
    الشاشة نفسها. الآن: الحركة للانتقال إلى شاشةٍ أخرى فقط؛ إعادة رسم الإطار نفسه (اختيار، تبديل) ثابتة */
-const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();
+const go=h=>{
+ /* ٦٫٨٢ — «لمّا أختار كلمات تعبيريّة وهو يلعب يطلّعني»: كلّ إعادة بناءٍ لشاشة اللعب (تصويب الخصم، انتقال الدور) كانت
+    تغلق لوحة التعبير تحت إصبعه، فتقع اللمسة على ما تحتها. تبقى اللوحة ما دامت الشاشة نفسها تُحدَّث */
+ const eb=document.querySelector('.ebar.fx');
+ if(eb&&!(h.indexOf('id="rmScr"')>=0&&document.getElementById('rmScr')))eb.remove();
  const fr=(typeof Router!=='undefined'&&Router.current)?Router.current():null, still=!!fr&&fr===_goFrame;_goFrame=fr;
  /* ٦٫٧٠ — «الفريم يقطع»: كلّ إعادة رسمٍ للغرفة (تغيّر الدور، وصول النتيجة، أوّل تصويبٍ للخصم) كانت تهدم لوحة الكيرم
     وتبني غيرها: مساحة رسمٍ جديدة ~١٠٢٠×١١٥٦ تُحجز وتُهيّأ ويُرفع اللوح إليها من جديد — مرّتين أو ثلاثًا في كلّ دور،
