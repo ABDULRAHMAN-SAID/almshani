@@ -88,8 +88,10 @@ var SFX=(function(){
    return true;
   }
   if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
-  /* ٦٫٤٨ — الأصليّ: حفيف الحركة من التسجيل نفسه، حلقةٌ داخل ملفّ العيّنات (مستواه محفوظٌ فيه) */
-  var rs=STYLE==='orig'&&SPR.carrom&&SPR.carrom.buf&&SPR.carrom.seg.orig_roll, real=!!(rs&&rs.length);
+  /* ٦٫٤٨ — الأصليّ: حفيف الحركة من التسجيل نفسه، حلقةٌ داخل ملفّ العيّنات (مستواه محفوظٌ فيه).
+     ٦٫٦٦: والحلقة وحدها — قبل وصول الملفّ صمتٌ لا حفيفٌ مركَّب («الصوت أبدًا مش مناسب») */
+  var rs=SPR.carrom&&SPR.carrom.buf&&SPR.carrom.seg.orig_roll, real=!!(rs&&rs.length);
+  if(!real){if(SL)slideStop();return false}
   if(SL&&SL.real!==real){var o=SL;SL=null;o.g.gain.setTargetAtTime(0.0001,now,0.03);setTimeout(function(){try{o.src.stop()}catch(e){}},200)}   // تغيّر النمط أو اكتمل تحميل الملفّ أثناء الحركة: خفوتٌ لا قطع
   if(!SL){
    var src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
@@ -107,9 +109,10 @@ var SFX=(function(){
    SL={src:src,f:f,g:g,real:real};
   }
   if(SL.real){
-   /* الحلقة محفوظةٌ بمستوى «كلّ القطع تتحرّك» (−٢٨ dB عن أعلى طقّة) — تخفت كلّما هدأت */
-   SL.g.gain.setTargetAtTime(0.12+0.88*Math.pow(level,0.8),now,0.05);
-   SL.src.playbackRate.setTargetAtTime(0.92+0.16*level,now,0.08);
+   /* الحلقة محفوظةٌ بمستوى «كلّ القطع تتحرّك» (−٢٨ dB عن أعلى طقّة) — تخفت كلّما هدأت حتى الصمت، كما في
+      التسجيل (من −٣٧ إلى −٥٥ dB ثم لا شيء). ٦٫٦٦: بلا أرضيّة ٠٫١٢ كانت تُبقي الحفيف والقطع شبه ساكنة، وبلا تغيير
+      سرعة التشغيل — كانت تغيّر نبرته مع السرعة فيصير صوتًا آخر */
+   SL.g.gain.setTargetAtTime(Math.pow(level,1.1),now,0.06);
    return true;
   }
   /* الشدّة: في التسجيل حفيف الحركة أخفض من ضربة الضارب بنحو ٣٠ dB — كان هنا أعلى بعشرة أضعاف */
@@ -124,7 +127,7 @@ var SFX=(function(){
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
  var STYLE='orig';
- function style(s){if(s)STYLE=String(s);return STYLE}
+ function style(s){return STYLE}   // ٦٫٦٦: نمطٌ واحد — الأصليّ
  var loading={};
  function loadSprite(name,url,seg){
   if(SPR[name]||loading[name]||!W||typeof W.fetch!=='function')return;
@@ -180,15 +183,12 @@ var SFX=(function(){
   /* الأصليّ: صوت الإطلاق في التسجيل بعلوّ الطقّات نفسها — يُشغَّل بمستواه المسجَّل */
   /* يُفحص وجود المقطع لا اسم النمط فقط: ملف JSON قديمٌ من عامل الخدمة بلا orig_flick يعود إلى الهمسة المركَّبة بمستواها.
      قوّة الإطلاق (٠–٢٠ وحدة/إطار) تُترجم إلى ٣–٩ فتخفت همسة الضربة الرقيقة كما في التسجيل */
-  strike:function(t,o){var so=STYLE==='orig'&&SPR.carrom&&SPR.carrom.seg.orig_flick, sv=o&&o.v!=null?Math.max(3,Math.min(9,o.v*0.6)):9;
-          if(!sample('carrom','flick',t,so?{v:sv,gain:0.85}:{v:5,gain:0.45}))
-           {noise(t,0.025,0.08,3400)}},
-  pot:   function(t,o){if(!sample('carrom','pot',t,{v:10}))
-           {tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)}},
-  hit:   function(t,o){if(!sample('carrom','hit',t,o))
-           {var v=o&&o.v||6;noise(t,0.022,Math.min(0.22,0.03*v),5200);tone(1900,t,0.03,'square',Math.min(0.06,0.008*v),1300)}},
-  wall:  function(t,o){if(!sample('carrom','wall',t,o))
-           {var v=o&&o.v||6;noise(t,0.05,Math.min(0.2,0.03*v),1400);tone(420,t,0.05,'sine',Math.min(0.08,0.012*v),300)}},
+  /* ٦٫٦٦ — «الصوت أبدًا مش مناسب»: أصوات الكيرم كلّها من التسجيل (orig_*) — لا بديلٌ مركَّب. قبل وصول الملفّ
+     (جزءٌ من الثانية عند فتح اللوح) صمتٌ أصدق من طقّةٍ صناعيّة */
+  strike:function(t,o){var sv=o&&o.v!=null?Math.max(3,Math.min(9,o.v*0.6)):9;sample('carrom','flick',t,{v:sv,gain:0.85})},
+  pot:   function(t,o){sample('carrom','pot',t,{v:10,gain:0.9})},
+  hit:   function(t,o){sample('carrom','hit',t,o)},
+  wall:  function(t,o){sample('carrom','wall',t,o)},
   coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)},
   /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
   tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},

@@ -16,7 +16,10 @@
     (قطعةٌ سوداء تلمس الحافة السفلى عند ٠٫٤٤ ث، وبيضاء تلمس اليسرى عند ٥٫١٥ ث)
   • القطعة بالقطعة: الطقّات الحادّة القصيرة الباقية أثناء الحركة
   • الزحف: حفيف الحركة بين ٢٫٨٢ و٣٫٣٢ ث حين لا طقّة — مسطَّحًا ليصلح حلقة
-  • السقوط في الجيب: لم يقع في التسجيل، فيبقى المركَّب
+  • السقوط في الجيب: لم يقع في التسجيل ولا في الفيديو — فيُبنى من طقّاته هو (٦٫٦٦): طقّة الحافة العميقة
+    مخفوضةً (الفوهة) ثمّ طقّتان خافتتان (القطعة تستقرّ في الجيب)، مكتومةً قليلًا — لا نغمةٌ مركَّبة
+  • ٦٫٦٦ — «صوت حركة القطع… غير منطقي»: حلقة الزحف كانت ٠٫٥ث تتكرّر مرّتين في الثانية. صارت ست فترات زحفٍ
+    نظيفة من التسجيل (٢٫٦ث، بلا طقّات، بالمستوى نفسه) موصولةً بتساوي القدرة — حلقة ٢٫٣ث لا يُسمع تكرارها
 """
 import numpy as np, subprocess, sys, os, json, tempfile, struct
 from scipy.signal import resample_poly
@@ -69,14 +72,34 @@ for name,lst in CUTS:
     for (t,d,fd,ex) in lst:
         y=cut(t,d,fd,exact=ex); segs[name].append(len(y)); parts.append(y)
 
-# الزحف: ٠٫٥ ث من الحفيف، يُسطَّح غلافه (كان يخبو) ثم تُوصل نهايته ببدايته
-r=x[int(2.82*sr):int(3.32*sr)].copy()
-k=int(0.04*sr); env=np.sqrt(np.convolve(r**2,np.ones(k)/k,mode='same'))+1e-6
-r/=env
-xf=int(0.06*sr); head=r[:xf].copy(); r=r[xf:]; g=np.linspace(0,1,xf)
-r[-xf:]=r[-xf:]*np.sqrt(1-g)+head*np.sqrt(g)                  # تساوي القدرة: ضجيجان غير مترابطين — الخطّيّ يهبط ٣ dB في المنتصف
-r*=0.1/np.sqrt(np.mean(r**2))                               # جذر متوسّط المربّعات ٠٫١ — المستوى الفعليّ يضبطه build-sfx.py
-segs['orig_roll']=[len(r)]; parts.append(r)
+# الزحف: فترات الحفيف النظيفة (بلا طقّة، −٣٣…−٣٧ dB عن القمّة) — كلٌّ يُسطَّح غلافه، ثم توصل بتساوي القدرة
+ROLL=[(2.77,3.38),(4.38,4.74),(9.99,10.41),(18.66,19.08),(24.97,25.39),(31.87,32.26)]
+def flat(t0,t1):
+    r=x[int(t0*sr):int(t1*sr)].copy()
+    k=int(0.04*sr); env=np.sqrt(np.convolve(r**2,np.ones(k)/k,mode='same'))+1e-6
+    r/=env; return r/np.sqrt(np.mean(r**2))
+xf=int(0.05*sr); out=flat(*ROLL[0])
+for (t0,t1) in ROLL[1:]:
+    r=flat(t0,t1); g=np.linspace(0,1,xf)
+    out=np.concatenate([out[:-xf],out[-xf:]*np.sqrt(1-g)+r[:xf]*np.sqrt(g),r[xf:]])
+head=out[:xf].copy(); out=out[xf:]; g=np.linspace(0,1,xf)
+out[-xf:]=out[-xf:]*np.sqrt(1-g)+head*np.sqrt(g)             # الحلقة: آخرها يصل أوّلها بلا فجوة ولا هبوط
+out*=0.1/np.sqrt(np.mean(out**2))
+segs['orig_roll']=[len(out)]; parts.append(out)
+
+# السقوط في الجيب: من طقّات التسجيل نفسها
+from scipy.signal import butter,sosfilt
+def pot(tw,th):
+    w=cut(tw,0.085,0.035); h=cut(th,0.070,0.030)
+    w=resample_poly(w,100,82)                                  # أعمق: فوهةٌ لا حافة
+    n=len(w)+int(0.20*sr); y=np.zeros(n); y[:len(w)]+=w
+    for d,gn in ((0.075,0.30),(0.150,0.12)):
+        i=int(d*sr); y[i:i+len(h)]+=h*gn
+    y=sosfilt(butter(2,2600/(sr/2),output='sos'),y)             # مكتومٌ قليلًا: القطعة داخل الجيب
+    f=int(0.03*sr); y[-f:]*=np.linspace(1,0,f); return y
+segs['orig_pot']=[]
+for tw,th in ((8.113,2.460),(3.396,16.774)):
+    y=pot(tw,th); segs['orig_pot'].append(len(y)); parts.append(y)
 
 # إلى ٣٢ ك.هرتز كبقيّة الملفّ
 parts=[resample_poly(p,2,3) for p in parts]
@@ -88,6 +111,6 @@ data=np.concatenate(parts)
 i16=(np.clip(data,-1,1)*32767).astype(np.int16)
 wavfile.write(os.path.join(OUT,'orig.wav'),32000,i16)
 json.dump({'rate':32000,'order':list(segs.keys()),'len':segs,
-           'src':'تسجيل صاحب اللعبة (6def8aa) — الأزمنة: '+'; '.join('%s@%s'%(n,','.join('%.3f'%c[0] for c in l)) for n,l in CUTS)+'; orig_roll@2.82–3.32'},
+           'src':'تسجيل صاحب اللعبة (6def8aa) — الأزمنة: '+'; '.join('%s@%s'%(n,','.join('%.3f'%c[0] for c in l)) for n,l in CUTS)+'; orig_roll@'+','.join('%.2f–%.2f'%r for r in ROLL)+'; orig_pot=wall(8.113|3.396)↓+hit(2.460|16.774)'},
           open(os.path.join(OUT,'orig.json'),'w'),ensure_ascii=False,indent=1)
 print('✓ tools/sfx-src/orig.wav — %.2f ث · %s'%(len(data)/32000,', '.join('%s×%d'%(k,len(v)) for k,v in segs.items())))

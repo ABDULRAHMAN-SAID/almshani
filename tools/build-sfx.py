@@ -119,9 +119,12 @@ def flick():
 SEG=[('flick',2,flick),('real_hit',4,real_hit),('real_wall',3,real_wall),('real_pot',2,real_pot)]
 for _name,_st in STYLES.items():
     SEG+=[(_name+'_hit',4,hit_of(_st)),(_name+'_wall',3,wall_of(_st)),(_name+'_pot',2,pot_of(_st))]
+# ٦٫٦٦ — «الصوت أبدًا مش مناسب»: الأنماط المركَّبة (real/wood/dry/heavy) لا تُحزم بعد اليوم — الأصوات كلّها من
+# تسجيل صاحب اللعبة (orig_*)، والسقوط في الجيب من طقّاته هو (tools/cut-orig-sfx.py)
+SEG=[]
 GAP=int(0.03*SR)
 parts=[]; sprite={}; pos=0
-OPUS_LAG=0.0072   # MediaRecorder/Opus يترك ٧٫٢ م.ث صمتٍ في أوّل الملفّ (pre_skip=0) — قِيس بالارتباط المتبادل
+OPUS_LAG=0.0   # ٦٫٦٦: الترميز بـffmpeg/libopus (pre-skip مضبوط) — التأخّر المقيس بالارتباط المتبادل صفر (كان ٧٫٢ م.ث بمسجّل المتصفّح)
 
 # ٦٫٤٨: الأصليّ — مقاطع من تسجيل صاحب اللعبة (tools/cut-orig-sfx.py). لا تُسوّى كلٌّ على حدة:
 # عاملٌ واحدٌ للجميع فتبقى النسب بين الإطلاق والطقّة والحافة كما سُجّلت
@@ -175,4 +178,9 @@ i16=(np.clip(data,-1,1)*32767).astype(np.int16).tobytes()
 with open(os.path.join(out,'carrom.wav'),'wb') as fh:
     fh.write(b'RIFF'+struct.pack('<I',36+len(i16))+b'WAVEfmt '+struct.pack('<IHHIIHH',16,1,1,SR,SR*2,2,16)+b'data'+struct.pack('<I',len(i16))+i16)
 json.dump({'rate':SR,'seg':sprite},open(os.path.join(out,'carrom.json'),'w'),ensure_ascii=False,separators=(',',':'))
-print('✓ carrom.wav — %.2f ث · %.0f ك.ب · مقاطع: %s'%(len(data)/SR,len(i16)/1024,', '.join('%s×%d'%(k,len(v)) for k,v in sprite.items())))
+# ٦٫٦٦: الترميز هنا لا يدويًّا — Opus أحاديّ ٦٤ ك.ب/ث، ثم يُحذف الـwav (لا يُشحن)
+import imageio_ffmpeg,subprocess as _sp
+_wav=os.path.join(out,'carrom.wav')
+_sp.check_call([imageio_ffmpeg.get_ffmpeg_exe(),'-hide_banner','-loglevel','error','-y','-i',_wav,'-c:a','libopus','-b:a','64k','-ac','1',os.path.join(out,'carrom.webm')])
+os.remove(_wav)
+print('✓ carrom.webm — %.2f ث · %.0f ك.ب · مقاطع: %s'%(len(data)/SR,len(i16)/1024,', '.join('%s×%d'%(k,len(v)) for k,v in sprite.items())))

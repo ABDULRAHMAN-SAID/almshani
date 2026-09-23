@@ -43,8 +43,6 @@ fs.writeFileSync(path.join(ROOT,'app-android','app','src','main','res','values',
 /* نصف الحزمة كان نسخةً ثانية من اللعبة لا تُفتح إلّا بلا شبكة. فحين يكون لها بيتٌ
    على الويب تُترك صفحةٌ تقول ذلك بوضوح، لا صفحةٌ بيضاء ولا لعبةٌ مكرّرة. */
 if(HOME&&process.env.TAHADDI_FULL!=='1'){
- const arenas=path.join(ASSETS,'arenas');
- if(fs.existsSync(arenas))fs.rmSync(arenas,{recursive:true,force:true});
  fs.writeFileSync(path.join(ASSETS,'index.html'),
 `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">

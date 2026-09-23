@@ -21,14 +21,7 @@ if(SERVER){
 fs.writeFileSync(path.join(OUT,'index.html'),html);
 for(const f of ['sw.js','manifest.webmanifest'])fs.copyFileSync(path.join(SRC,f),path.join(OUT,f));
 for(const f of fs.readdirSync(path.join(SRC,'icons')))fs.copyFileSync(path.join(SRC,'icons',f),path.join(OUT,'icons',f));
-/* ساحات الكيرم: صورٌ إلى جانب اللعبة لا نصوصٌ داخلها — تُنزَّل الواحدة حين
-   تُختار وحدها. ولولا نسخُها هنا لطلبها المتصفّح فلم يجدها، ورجع اللوح إلى
-   الأصليّة صامتًا — عطلٌ لا يشتكي منه أحد ولا يُرى سببه. */
-const AR=path.join(SRC,'arenas');
-if(fs.existsSync(AR)){
- fs.mkdirSync(path.join(OUT,'arenas'),{recursive:true});
- for(const f of fs.readdirSync(AR))fs.copyFileSync(path.join(AR,f),path.join(OUT,'arenas',f));
-}
+/* ٦٫٦٦: لا مجلّد ساحات — اللوح مرسومٌ داخل اللعبة */
 /* الخطّ مضمَّن داخل اللعبة (tools/build-fonts.cjs)؛ نصّ ترخيصه يُنشر بجانبها كما تشترط SIL OFL */
 /* موسيقى القائمة ملفٌّ لا شيفرة (٦٫٣٨) — يُنسخ كما تُنسخ الخطوط والأيقونات */
 const AU=path.join(SRC,'audio');
