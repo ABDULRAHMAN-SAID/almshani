@@ -1738,7 +1738,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .cmRow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;margin-top:8px;border-radius:13px;cursor:pointer;color:#FFE9A8;
  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);font:800 13px var(--font,system-ui);text-align:start}
 .cmRow span{flex:1;color:#F2F4F8}.cmRow em{font-style:normal;font-size:11.5px;color:#E8B23A}
-.caWrap.duo .caSeat{display:none}        /* لاعبان: البطاقتان فوق اللوح وتحته تكفيان */
+.caWrap .caSeat{display:none}        /* البطاقتان فوق اللوح وتحته تكفيان — وفي الرباعيّ كانت شارات المقاعد تغطّي مكان التجميع والقطع عند الحافّة (المراجعة، ٦٫٧٦) */
 /* شاشة الإعداد (٦٫٥٢): اختيارٌ مقسّم بدل الشارات، ومفتاحٌ حقيقيّ بدل «مفعّل/مطفأ» */
 .segC{display:flex;gap:8px}
 .segC button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 8px;border-radius:14px;cursor:pointer;
@@ -24893,7 +24893,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.75';
+const APP_VER='6.76';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25510,6 +25510,9 @@ function rmOn(d,m){
   return}
  else if(d.t==='cast'){
   const wasShot=!!d.shot;
+  /* المراجعة: ضربةٌ من غير صاحب الدور (وصلت بعد أن نقل المضيف الدور بانتهاء الوقت) تُهمل عند الجميع،
+     والمضيف يعيد بثّ حاله فيعود المتأخّر إليها */
+  if(wasShot&&RM.game==='carrom'&&RM.ca&&d.turn!==RM.ca.turn&&d.turn!==RM.me){if(RM.host&&RM.C)caPub('');return}
   if(RM.phase==='over'&&RM.game==='carrom')return;   // بعد النهاية لا بثّ يعيد اللوح إلى اللعب حتى «start»
   /* صدى ضربتي وصل بعد حكم المضيف (شبكةٌ بطيئة): لقطته قبل الضربة، فلا يُرجِع اللوح إلى الوراء (المراجعة) */
   const L0=_ca.lastShot;
@@ -25533,6 +25536,13 @@ function rmOn(d,m){
   if(!(wasShot&&d.turn!==RM.me)){_ca.aim=null;_ca.aimV=null}
   // ضربتي أنا شغّلتُها عند الإفلات؛ ما يصلني بعدها صداها فقط — ولو تأخّر ثانيتين على شبكةٍ بطيئة
   if(wasShot){if(d.turn!==RM.me)setTimeout(()=>caPlay(d.shot),20)}
+  else if(_ca.sim&&d.turn!==(_ca.sim.by)){
+   /* المراجعة: حكمٌ ينقل الدور أثناء محاكاة ضربةٍ لم يحكم فيها (انتهى الوقت ووصلت الضربة متأخّرة): تُلغى
+      المحاكاة ويُؤخذ لوح المضيف كما هو — فلا يعلق اللاعبان ولا تُحسب الضربة لغير صاحبها */
+   cancelAnimationFrame(_ca.anim);_ca.sim=null;_ca.drop=null;_ca.fly=[];_ca.sRet=null;caHandEnd();
+   try{if(window.SFX&&SFX.slide)SFX.slide(0)}catch(e){}
+   caLoopOn();
+  }
   else{
    // دورٌ لي وضاربي واقفٌ حيث تركته: يزاح إن صارت تحته قطعة
    if(d.turn===RM.me&&_ca.sx!=null)_ca.sx=caFreeX(caLocalPcs(caMySeat()),_ca.sx);
@@ -26388,7 +26398,7 @@ function caBot(){
  setTimeout(think,0);
  function play(pick){
  const sx=pick.sx, ang=pick.ang, pw=pick.pw;
- const bp=caL2B(bs,sx,sy), bv=caL2Bv(bs,Math.cos(ang)*pw,Math.sin(ang)*pw);
+ const sy2=caSY(pcs,sx), bp=caL2B(bs,sx,sy2==null?sy:sy2), bv=caL2Bv(bs,Math.cos(ang)*pw,Math.sin(ang)*pw);   // ٦٫٧٦: يتنحّى في الشريط كاللاعب
  const shot={x:bp[0],y:bp[1],vx:bv[0],vy:bv[1]};
  /* مشهد التفكير أمام الجميع: ينزلق الضارب من وسط قاعدته إلى موضعه، ثمّ يدور
     التصويب من زاويةٍ خاطئةٍ حتى يستقرّ على الهدف، ثمّ وقفةٌ قصيرة، ثمّ الضربة.
@@ -27268,12 +27278,31 @@ function caLocalPcs(s){return (RM.ca?RM.ca.pcs:[]).map(p=>{const q=caB2L(s,p.x,p
    (ثم تُزاح عند الضربة) — قرصان فوق بعضهما، وهذا لا يقع على لوحٍ حقيقيّ. رجعت القاعدة الفيزيائيّة: لا يقف
    الضارب حيث يتداخل مع قطعة. والذي طُلب في ٦٫٦١ («أمشي تحتها») صار كما في Carrom Pool: أثناء السحب على
    الشريط يعبر الضارب القطع باهتًا بحلقةٍ حمراء (هنا لا يجوز)، وعند رفع الإصبع يستقرّ في أقرب موضعٍ حرّ. */
+/* ٦٫٧٦ — «ما دام القطعة ليست على الخطّ، من المفترض أقدر ألعب»: الضارب (نصف قطره ١٥٫٥) أعرض من شريط القاعدة
+   (٣٦١–٣٧٩)، فقطعةٌ فوق الخطّ العلويّ كانت تمسّ حافّته وتحجز الموضع. والقانون لا يطلب إلّا أن يلمس الضارب
+   الخطّين — فمركزه يتحرّك في الشريط بين ٣٦٣٫٥ و٣٧٦٫٥. الآن يتنحّى قليلًا عن القطعة داخل هذا المدى،
+   ولا يُحجز الموضع إلّا إن لم يبقَ فيه مكانٌ قانونيّ (القطعة على الخطّ فعلًا). */
+const CA_SYD=6.5;
+/** أقرب ارتفاعٍ لمركز الضارب إلى منتصف الشريط لا يمسّ فيه قطعة — أو null إن لم يوجد */
+function caSY(pcs,x){
+ const R=CA_SR+CA_PR+0.6, B=CA_BASE, bad=[];
+ for(const p of pcs){const dx=Math.abs(p.x-x);if(dx>=R)continue;const h=Math.sqrt(R*R-dx*dx);bad.push([p.y-h,p.y+h])}
+ const ok=y=>y>=B-CA_SYD-1e-9&&y<=B+CA_SYD+1e-9&&!bad.some(b=>y>b[0]+1e-9&&y<b[1]-1e-9);
+ if(ok(B))return B;
+ let best=null;for(const b of bad)for(const y of [b[0],b[1]])if(ok(y)&&(best==null||Math.abs(y-B)<Math.abs(best-B)))best=y;
+ return best;
+}
 function caBlocked(pcs){
- const R=CA_SR+CA_PR+0.6, out=[];
- for(const p of pcs){const dy=Math.abs(p.y-CA_BASE);if(dy>=R)continue;
-  const dx=Math.sqrt(R*R-dy*dy);out.push([p.x-dx,p.x+dx])}
+ const out=[];let st=null;
+ const near=pcs.filter(p=>Math.abs(p.y-CA_BASE)<CA_SR+CA_PR+CA_SYD+1);
+ if(!near.length)return out;
+ for(let x=CA_XL-1;x<=CA_XR+1.01;x+=0.5){const bl=caSY(near,x)==null;
+  if(bl&&st==null)st=x;else if(!bl&&st!=null){out.push([st-0.5,x]);st=null}}
+ if(st!=null)out.push([st-0.5,CA_XR+2]);
  return out;
 }
+/** ارتفاع ضاربي عند x (في إطاري) */
+function caMySY(x){const v=caSY(caLocalPcs(caMySeat()),x);return v==null?CA_BASE:v}
 function caBlockedAt(pcs,x){return caBlocked(pcs).some(b=>x>b[0]&&x<b[1])}
 function caFreeX(pcs,x){
  const lo=CA_XL,hi=CA_XR, B=caBlocked(pcs);
@@ -27324,10 +27353,11 @@ const arN=n=>String(n).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
 /** اسم الطور في رأس الشاشة (والكلاسيكيّ بلا اسم: يبقى «ضد الذكاء الاصطناعي/أونلاين») */
 function caMdLbl(C){
  if(!C)return '';
- if(C.md==='pts')return 'حاصد النقاط · '+arN(caPtsWin(C));
+ if(C.md==='pts')return 'حاصد النقاط ('+arN(caPtsWin(C))+')';   // «·» بجانب الأرقام الهنديّة يُقرأ صفرًا (المراجعة)
  if(C.md==='disc')return 'ديسك بول';
  if(C.md==='icf'){const M=C.M||{pts:{w:0,b:0},boards:0}, mc=C.col?C.col[RM.me]:'w', oc=mc==='w'?'b':'w';
-  return 'بطولة · اللوح '+arN((M.boards||0)+1)+' · '+arN(M.pts[mc]||0)+'–'+arN(M.pts[oc]||0)}
+  const bn=(M.boards||0)+(RM.phase==='over'?0:1);
+  return 'بطولة، اللوح '+arN(Math.max(1,Math.min(8,bn)))+'، '+arN(M.pts[mc]||0)+' – '+arN(M.pts[oc]||0)}
  return '';
 }
 function caDeal(){
@@ -27544,7 +27574,7 @@ function caTimerArm(peer){
  clearTimeout(_ca.tmr);
  if(!RM.host||!RM.C||RM.C.over||isBot(peer))return;
  const stamp=_ca.tmrS=(_ca.tmrS||0)+1;
- _ca.tmr=setTimeout(()=>caTimeout(peer,stamp),CA_SHOT_SEC*1000+400);   // مهلةٌ قصيرة لما في الطريق
+ _ca.tmr=setTimeout(()=>caTimeout(peer,stamp),CA_SHOT_SEC*1000+1500);   // مهلةٌ لما في الطريق — والعميل يُقفل قبلها بثانية (المراجعة)
 }
 function caTimeout(peer,stamp){
  const C=RM.C;
@@ -27552,7 +27582,7 @@ function caTimeout(peer,stamp){
  if(C.q===peer){C.q=null;caPutBack(C,'q')}
  C.turn=(C.turn+1)%RM.players.length;
  const nm2=(RM.players.find(p=>p.peer===peer)||{}).name||'';
- caPub('انتهى وقت '+(peer===RM.me?'ضربتك':esc(nm2))+' — ينتقل الدور');
+ caPub('انتهى وقت '+esc(nm2)+' — ينتقل الدور');   // بالاسم: الرسالة تصل الجميع كما هي (المراجعة)
 }
 let _ca={sim:null,drag:null,anim:null};
 /** أحداث المحرّك → إحساس. الفيزياء لا ترسم ولا تهتزّ؛ هذه تفعل. */
@@ -27637,11 +27667,15 @@ function caStep(){
    if(d<m&&d>0){const ux=(x-px)/d,uy=(y-py)/d;x=px+ux*m;y=py+uy*m;   // والتقريب بعيدًا عن الجيب فلا يعود داخله
     x=ux>0?Math.ceil(x*10)/10:Math.floor(x*10)/10;y=uy>0?Math.ceil(y*10)/10:Math.floor(y*10)/10}}
   return {x,y,t:p.t}});
- const shooter=RM.ca?RM.ca.turn:null;
+ const shooter=S2.by!=null?S2.by:(RM.ca?RM.ca.turn:null);   // صاحب الضربة كما بدأت — لا ما صار الدورُ إليه (المراجعة)
  if(shooter===RM.me&&S2.pot&&S2.pot.length){const n=S2.pot.filter(t=>t!=='s').length;if(n){try{const e=EV();e.carromPot=(e.carromPot||0)+n;trk('carrom_pot',n);saveState()}catch(x){}}}
  if(shooter===RM.me||(RM.solo&&RM.host)){
   rmSend({t:'act',by:shooter,a:'rest',pcs:rest,pot:S2.pot,
    msg:caPotMsg(S2.pot,shooter)});
+ }else if(RM.host&&RM.C&&!RM.solo){
+  /* المراجعة: غادر صاحب الضربة أو أُغلق تطبيقه أثناءها — المضيف يحكم بمحاكاته (هي نفسها عند الجميع) بعد مهلة */
+  const turn0=RM.C.turn, act={by:shooter,a:'rest',pcs:rest,pot:S2.pot.slice(),msg:caPotMsg(S2.pot,shooter)};
+  setTimeout(()=>{const C=RM.C;if(C&&!C.over&&C.turn===turn0&&RM.players[C.turn]&&RM.players[C.turn].peer===shooter&&!_ca.sim)caAct(act)},4000);
  }
  caRender(rest);
 }
@@ -28110,7 +28144,7 @@ function caRender(rest){
   const q=V(ix,iy);return {x:q[0],y:q[1],t:p.t,r:p.r||CA_PR}});
  let sPos=null, sSide=0, sSeat=ms;   // الضارب الساكن: موضعه في إطار العرض، وجهة صاحبه، ومقعده
  if(!_ca.sim&&RM.ca){
-  if(RM.ca.turn===RM.me){sPos={x:_ca.drag?_ca.drag.sx:_ca.sxV,y:base}}
+  if(RM.ca.turn===RM.me){sPos={x:_ca.drag?_ca.drag.sx:_ca.sxV,y:_ca.drag?_ca.drag.sy:(_ca.slide?base:caMySY(_ca.sxV))}}
   else{
    sSeat=caSeatOfPeer(RM.ca.turn);sSide=(sSeat-ms+4)&3;
    const a=_ca.aimV||_ca.aim;
@@ -28282,7 +28316,7 @@ function caRender(rest){
 function caAimTx(force){
  if(RM.solo||!RM.ca||RM.ca.turn!==RM.me)return;
  const now=performance.now();if(!force&&_ca.aimTx&&now-_ca.aimTx<110)return;_ca.aimTx=now;
- const ms=caMySeat(), d=_ca.drag, sx=d?d.sx:_ca.sx, P=caL2B(ms,sx,CA_BASE);
+ const ms=caMySeat(), d=_ca.drag, sx=d?d.sx:_ca.sx, P=caL2B(ms,sx,d?d.sy:caMySY(sx));
  const raw=d?Math.hypot(d.dx,d.dy):0, ok=!!d&&raw>=10&&!d.cancel&&!d.back;
  try{rmSend({t:'aim',by:RM.me,x:P[0],y:P[1],ang:(ok?Math.atan2(-d.dy,-d.dx):-Math.PI/2)+CA_ROT[ms],ph:ok?'aim':'move',pw:ok?Math.round(caPower(raw)*1000)/1000:null})}catch(e){}
 }
@@ -28461,8 +28495,8 @@ function caInit(){
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim||RM.phase==='over')return;
   caBaseSync();
   const[x,y]=pos(e);
-  const sy=BASE();
   if(_ca.sx==null)_ca.sx=CACL(CA_R/2);
+  const sy=caMySY(_ca.sx);
   // اسحب اليد على المسند أو اقبض الضارب نفسه لتحريكه — بلا قفزات
   /* الشريط الأسفل من اللوح (حول خطّ القاعدة) والمسند تحته: كلاهما لتحريك الضارب،
      فلا تبدأ ضربةٌ من هناك. */
@@ -28513,6 +28547,8 @@ function caInit(){
   if(_ca.slide){_ca.slide=0;_ca.sx=CACL(_ca.sx);caAimTx(1);caLoopOn();caRender();return}   // يستقرّ في أقرب موضعٍ حرّ — ينزلق إليه
   const d=_ca.drag;if(!d)return;_ca.drag=null;
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim){caAimTx(1);caRender();return}   // ٦٫٧٢: انتهى وقتي أثناء السحب
+  /* المراجعة: يُقفل الإفلات قبل مهلة المضيف بثانية — فلا تصله ضربةٌ بعد أن نقل الدور */
+  if(!RM.solo&&_ca.tt&&performance.now()-_ca.tt.t0>=(CA_SHOT_SEC-1)*1000){caAimTx(1);caRender();toast('انتهى الوقت');return}
   caAimTx(1);   // آخر حالٍ للخصم: سهمي يختفي عنده إن أُلغيت الضربة (المراجعة)
   const pw=Math.hypot(d.dx,d.dy);
   if(d.cancel||pw<10){caRender();if(d.cancel)toast('أُلغيت الضربة');return}
@@ -28699,7 +28735,8 @@ function caMatchEnd(C){
  const fresh=_ca.endSeen!==RM.mid;_ca.endSeen=RM.mid;   // الدخول المتحرّك مرّةً واحدة لكلّ مباراة
  const r=RM.res||{}, myCol=C.col[RM.me], meWon=!!r.by&&C.col[r.by]===myCol, duo=(RM.players||[]).length<=2;
  const t=meWon?(duo?'فزت':'فاز فريقك'):(duo?'فاز الخصم':'فاز الفريق الخصم');
- const fs=caIsPts(C)&&C.pp?`<div class="caFinS"><b>${C.pp[myCol]||0}</b><span>مقابل</span><b>${C.pp[myCol==='w'?'b':'w']||0}</b></div>`:'';
+ const oc=myCol==='w'?'b':'w', fs=caIsPts(C)&&C.pp?`<div class="caFinS"><b>${C.pp[myCol]||0}</b><span>مقابل</span><b>${C.pp[oc]||0}</b></div>`
+  :C.md==='icf'&&C.M?`<div class="caFinS"><b>${C.M.pts[myCol]||0}</b><span>مقابل</span><b>${C.M.pts[oc]||0}</b></div>`:'';
  return `<div class="caEnd${fresh?' in':''}"><div class="caFinC${meWon?' won':''}"><div class="caFinT">${t}</div>${fs}
   ${RM.host?`<button class="goBtn caEndGo" onclick="rmStart()"><b>العب مرّة أخرى</b></button>`:'<div class="note">بانتظار المضيف…</div>'}
   <button class="btn g caFinX" onclick="rmLeave()">خروج</button></div></div>`;
