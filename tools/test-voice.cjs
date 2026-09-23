@@ -101,6 +101,9 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
  const meta=await page.evaluate(()=>new Promise(res=>{const a=new Audio('audio/laugh.webm');
   a.onloadedmetadata=()=>res({ok:1,d:a.duration});a.onerror=()=>res({ok:0});setTimeout(()=>res({ok:0,to:1}),6000)}));
  chk('ملفّ الضحكة موجود ويُقرأ (ثوانٍ لا صمت)',meta.ok&&meta.d>1&&meta.d<10,JSON.stringify(meta));
+ const meta2=await page.evaluate(()=>new Promise(res=>{const a=new Audio('audio/laugh_s.webm');
+  a.onloadedmetadata=()=>res({ok:1,d:a.duration});a.onerror=()=>res({ok:0});setTimeout(()=>res({ok:0,to:1}),6000)}));
+ chk('الضحكة القصيرة موجودة (أقلّ من ثانيتين)',meta2.ok&&(meta2.d>0.8&&meta2.d<2||meta2.d===Infinity),JSON.stringify(meta2));
  const lg=await page.evaluate(async()=>{
   const A=window.Audio, made=[], said=[];
   window.Audio=function(u){const o={src:u,volume:1,paused:false,play(){made.push(u);return Promise.resolve()},pause(){this.paused=true}};made.el=o;return o};
@@ -116,7 +119,7 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
   window.Audio=A;delete window.TahaddiTTS;VOICE.stop();
   return {r,r2,r3,beforeEnd,said,n,made:made.slice(),rest:VOICE._rest('ههه قربت أفوز، انتبه لنفسك'),plain:VOICE.hasLaugh('انتبه لوجهه')};
  });
- chk('الجملة الضاحكة تبدأ بالتسجيل الحقيقيّ',lg.r==='laugh'&&lg.made[0]==='audio/laugh.webm'&&lg.beforeEnd===0,JSON.stringify(lg));
+ chk('الجملة الضاحكة تبدأ بالضحكة القصيرة المحرَّرة',lg.r==='laugh'&&lg.made[0]==='audio/laugh_s.webm'&&lg.made[1]==='audio/laugh.webm'&&lg.beforeEnd===0,JSON.stringify(lg));
  chk('وبعد الضحكة يُقال باقيها بصوت الجهاز',lg.said[0]==='قربت أفوز، انتبه لنفسك',lg.said[0]);
  chk('ضحكةٌ وحدها لا يتبعها كلام، والمقطوعة لا تقول كلامها القديم',lg.r2==='laugh'&&lg.r3==='laugh'&&lg.n===1,lg.n);
  chk('«وجهه» ليست ضحكة',lg.plain===false,lg.plain);
