@@ -97,31 +97,28 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
  });
  chk('في المتصفّح: يُقال بالصوت العربيّ',viaWeb.r==='tts'&&viaWeb.said[0]==='يلا يلا!|ar-SA',JSON.stringify(viaWeb));
 
- /* ٦٫٦١ — ضحكة المالك المسجّلة: الملفّ حقيقيّ ويُحمَّل، والجملة تبدأ به ثم يُقال باقيها */
+ /* ٦٫٦٤ — ضحكة المالك المسجّلة للضحك وحده: «ما يجوز تستخدم هذا الصوت لكلماتٍ أخرى» */
  const meta=await page.evaluate(()=>new Promise(res=>{const a=new Audio('audio/laugh.webm');
   a.onloadedmetadata=()=>res({ok:1,d:a.duration});a.onerror=()=>res({ok:0});setTimeout(()=>res({ok:0,to:1}),6000)}));
  chk('ملفّ الضحكة موجود ويُقرأ (ثوانٍ لا صمت)',meta.ok&&meta.d>1&&meta.d<10,JSON.stringify(meta));
- const meta2=await page.evaluate(()=>new Promise(res=>{const a=new Audio('audio/laugh_s.webm');
-  a.onloadedmetadata=()=>res({ok:1,d:a.duration});a.onerror=()=>res({ok:0});setTimeout(()=>res({ok:0,to:1}),6000)}));
- chk('الضحكة القصيرة موجودة (أقلّ من ثانيتين)',meta2.ok&&(meta2.d>0.8&&meta2.d<2||meta2.d===Infinity),JSON.stringify(meta2));
  const lg=await page.evaluate(async()=>{
   const A=window.Audio, made=[], said=[];
   window.Audio=function(u){const o={src:u,volume:1,paused:false,play(){made.push(u);return Promise.resolve()},pause(){this.paused=true}};made.el=o;return o};
   window.TahaddiTTS={ready:()=>true,speak:(t)=>{said.push(t);return true},stop(){}};
-  const r=VOICE.say('ههه قربت أفوز، انتبه لنفسك',{seed:3,tone:'brag'});
-  const beforeEnd=said.length;
-  made.el.onended();                              // انتهت الضحكة
-  const r2=VOICE.say('هههههههه',{seed:3});        // ضحكةٌ وحدها
+  const r=VOICE.say('ههه قربت أفوز، انتبه لنفسك',{seed:3,tone:'brag'});   // كلامٌ فيه ضحك: كلامٌ فقط
+  const madeAfterWords=made.length;
+  const r2=VOICE.say('هههههههه',{seed:3});        // ضحكةٌ وحدها: التسجيل
   const el2=made.el;
-  const r3=VOICE.say('ههه قربت أفوز، انتبه لنفسك',{seed:3});   // تقطع الثانية
+  const r3=VOICE.say('هههههه',{seed:5});          // تقطع الأولى
   el2.onended&&el2.onended();                     // صدى الضحكة المقطوعة: لا يُقال شيء
-  const n=said.length;
+  const n=said.length, shouts=SHOUTS.filter(x=>VOICE.hasLaugh(x.t)).map(x=>x.t);
   window.Audio=A;delete window.TahaddiTTS;VOICE.stop();
-  return {r,r2,r3,beforeEnd,said,n,made:made.slice(),rest:VOICE._rest('ههه قربت أفوز، انتبه لنفسك'),plain:VOICE.hasLaugh('انتبه لوجهه')};
+  return {r,r2,r3,madeAfterWords,said,n,made:made.slice(),shouts,plain:VOICE.hasLaugh('انتبه لوجهه')};
  });
- chk('الجملة الضاحكة تبدأ بالضحكة القصيرة المحرَّرة',lg.r==='laugh'&&lg.made[0]==='audio/laugh_s.webm'&&lg.made[1]==='audio/laugh.webm'&&lg.beforeEnd===0,JSON.stringify(lg));
- chk('وبعد الضحكة يُقال باقيها بصوت الجهاز',lg.said[0]==='قربت أفوز، انتبه لنفسك',lg.said[0]);
- chk('ضحكةٌ وحدها لا يتبعها كلام، والمقطوعة لا تقول كلامها القديم',lg.r2==='laugh'&&lg.r3==='laugh'&&lg.n===1,lg.n);
+ chk('جملةٌ فيها كلام لا تُسمع فيها الضحكة المسجّلة',lg.r==='app'&&lg.madeAfterWords===0&&lg.said[0]==='قربت أفوز، انتبه لنفسك',JSON.stringify(lg));
+ chk('صيحة الضحك وحدها تُسمع بالتسجيل',lg.r2==='laugh'&&lg.made[0]==='audio/laugh.webm',JSON.stringify(lg.made));
+ chk('الضحكة المقطوعة لا تقول شيئًا بعدها',lg.r3==='laugh'&&lg.n===1,lg.n);
+ chk('في البنك: الضحك صيحةٌ وحدها لا بادئة جمل',lg.shouts.length>=1&&lg.shouts.every(t=>/^ه+$/.test(t)),JSON.stringify(lg.shouts));
  chk('«وجهه» ليست ضحكة',lg.plain===false,lg.plain);
 
  /* ٦٫٦٢ — صيحةٌ مسجّلة: تُشغَّل كما هي، وإن تعذّر ملفّها قيل نصّها بصوت الجهاز */

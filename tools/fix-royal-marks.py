@@ -7,7 +7,9 @@
     مكانها مقطعٌ من الخطّين نفسيهما من فوقها فيتّصلان
   · الخطّان العابران للمركز ونقاطهما الحمراء الأربع — يُنقل الخشب من جوارٍ موازٍ (العرق أفقيّ)،
     وحيث يعبران حلقة المركز تُرقَّع الحلقة من جوارها على طولها
-  (النقاط الصغيرة عند بداية الأسهم القطريّة زينةٌ من السهم — تبقى؛ محوها يكسر الخطّ تحتها)
+  · ٦٫٦٤ — «في اللوح نقطٌ حمر ما أعرف مصدرها»: النقطة الحمراء الصغيرة على كلّ خطٍّ قطريّ عند دائرتَي
+    القاعدة (أربع). ليست في لوح الاتحاد، وكانت تُترك لأنّ الخطّ يمرّ تحتها. تُملأ الآن بنسخٍ من الخطّ نفسه
+    أبعدَ على امتداده نحو المركز، فيتّصل الخطّ ولا يبقى أثر
 المواضع تُكشف من كلّ صورة (مكوّنات الأحمر، وحلقة المركز بقطعٍ ناقص) لا أرقامٌ ثابتة.
 
   python3 tools/fix-royal-marks.py      → tahaddi/arenas/royal.webp (من 851d53c) و CA_TEX.c في index.html (من 851d53c)
@@ -27,19 +29,20 @@ def fix(bgr,mg,name):
     b,g,r=[bgr[...,i].astype(int) for i in range(3)]
     red=(((r-g)>80)&(g<110)).astype(np.uint8)
     n,lab,st,cen=cv2.connectedComponentsWithStats(red)
-    mids=[];dots=[]
+    mids=[];dots=[];tails=[]
     for i in range(1,n):
         a=st[i][4]; x,y=cen[i]; dx=(x-C)/u; dy=(y-C)/u
         if a<8*u*u*0.5: continue
         if abs(dy)<12 and abs(dx)>150 and a>60*u*u*0.5: mids.append((x,y))
         elif (abs(dx)<10 or abs(dy)<10) and 110<max(abs(dx),abs(dy))<150 and a<60*u*u: dots.append((x,y))
+        elif 135<abs(dx)<165 and 135<abs(dy)<165 and a<90*u*u: tails.append((x,y))
     # حلقة المركز: قطعٌ ناقصٌ يوافق بكسلاتها الداكنة بعيدًا عن المحورين
     g0=cv2.cvtColor(bgr,cv2.COLOR_BGR2GRAY)
     yy,xx=np.mgrid[0:H,0:W]; rr=np.hypot(xx-C,yy-C)/u; th=np.degrees(np.arctan2(yy-C,xx-C))%90
     sel=(g0<95)&(rr>52)&(rr<72)&(th>12)&(th<78)
     (RX,RY),(ew,eh),_=cv2.fitEllipse(np.column_stack([xx[sel],yy[sel]]).astype(np.float32))
     ro=max(np.hypot(xx[sel]-RX,yy[sel]-RY))/u+1.5            # نصف قطر الحافّة الخارجيّة للحلقة
-    print('%s: دائرتان زائدتان %d · نقاط %d · الحلقة (%.1f،%.1f) نصف قطرها %.1f وحدة'%(name,len(mids),len(dots),RX,RY,ro))
+    print('%s: دائرتان زائدتان %d · نقاط %d · نقاط الأسهم %d · الحلقة (%.1f،%.1f) نصف قطرها %.1f وحدة'%(name,len(mids),len(dots),len(tails),RX,RY,ro))
     # ١) الدائرتان الوسطيّتان
     for x,y in mids:
         R=U(13); D=2*R+U(6)
@@ -67,6 +70,11 @@ def fix(bgr,mg,name):
         m=np.zeros((H,W),np.uint8); a,bb=(U(2.5),U(8.5)) if dx else (U(8.5),U(2.5))
         cv2.rectangle(m,(int(px-a),int(py-bb)),(int(px+a),int(py+bb)),255,-1)
         bgr=paste(bgr,sh(bgr,dy,dx),m,0.9)
+    # ٤) نقاط الأسهم القطريّة: رقعةٌ من الخطّ نفسه على امتداده نحو المركز (١٢ وحدة)
+    for x,y in tails:
+        k=12*u/np.sqrt(2); ddx=int(round(np.sign(C-x)*k)); ddy=int(round(np.sign(C-y)*k))
+        m=np.zeros((H,W),np.uint8); cv2.circle(m,(int(x),int(y)),U(5.5),255,-1)
+        bgr=paste(bgr,sh(bgr,-ddy,-ddx),m,1.2)
     return bgr
 
 # الفاخر

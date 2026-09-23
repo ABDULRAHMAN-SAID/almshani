@@ -16,12 +16,12 @@
  *  ٢) المتصفّح: speechSynthesis إن كان فيه صوت عربيّ.
  *  ٣) لا هذا ولا ذاك: الجملة تظهر مكتوبةً في الفقاعة مع نقرةٍ خفيفة، بلا صوتٍ مزيّف.
  *
- * والضحكة ليست نطقًا: ٦٫٦١ — رفع المالك تسجيل ضحكةٍ حقيقيّة (tahaddi/audio/laugh.webm).
- * فالجملة التي فيها «ههه» تبدأ بتلك الضحكة، ثم يُقال باقيها بصوت الجهاز إن وُجد.
+ * والضحكة ليست نطقًا: ٦٫٦١ — رفع المالك تسجيل ضحكةٍ حقيقيّة (tahaddi/audio/laugh.webm)،
+ * وهي لصيحة الضحك وحدها (٦٫٦٤): جملةٌ فيها كلامٌ يُقال كلامها فقط.
  * والضحكة ملفّ، فتُسمع حتى على جهازٍ بلا صوتٍ عربيّ.
  * ٦٫٦٣ — «ليش حطيت الضحكة نفسها بدل ما تعدّلها؟»: التسجيل الخام ٤٫٥ ثوانٍ بصمتٍ في طرفيه ودفعةٍ حادّة
  * أعلى من الباقي بثلاث مرّات. صارت نسختين محرَّرتين (تنقية، ضاغط، تسوية، تلاشٍ): كاملة ٤٫٢ث للضحكة
- * وحدها، وقصيرة ١٫٤ث (أوضح مقطعٍ فيها) قبل الكلام. ولكلّ لاعبٍ طبقةٌ منها (سرعة ٠٫٩٢–١٫٠٨ بلا حفظ الطبقة)
+ * وحدها (والقصيرة التي كانت تسبق الكلام حُذفت في ٦٫٦٤). ولكلّ لاعبٍ طبقةٌ منها (سرعة ٠٫٩٢–١٫٠٨ بلا حفظ الطبقة)
  * فلا يضحك الخصمان بالصوت نفسه.
  * (وإن تعذّر الملفّ، تُكتب «ههه» للمحرّك «هاهاها» فيضحك بها بدل أن يتهجّاها.)
  *
@@ -31,12 +31,11 @@ var VOICE=(function(){
  'use strict';
  var W=(typeof window!=='undefined')?window:null;
  var enabled=function(){return true};
- var voices=null, playing=null, laughUrl='', laughShort='', laughEl=null, laughT=0, laughGen=0, rate=1;
+ var voices=null, playing=null, laughUrl='', laughEl=null, laughT=0, laughGen=0, rate=1;
 
  function init(o){
   if(o&&typeof o.enabled==='function')enabled=o.enabled;
   if(o&&o.laugh)laughUrl=String(o.laugh);
-  if(o&&o.laughShort)laughShort=String(o.laughShort);
   warm();
  }
 
@@ -129,8 +128,10 @@ var VOICE=(function(){
   if(hasLaugh(text)&&laughUrl){
    var r=rest(text);
    rate=0.92+(((o.seed|0)%17)+17)%17/100;   // طبقة اللاعب: ٠٫٩٢–١٫٠٨
-   /* ضحكةٌ وحدها: الكاملة. ضحكةٌ وكلام: القصيرة ثم الكلام — لا ينتظر الخصم خمس ثوانٍ */
-   if(r?laugh(0,function(){speak(r,o)},laughShort||laughUrl):laugh(0,null))return 'laugh';
+   /* ٦٫٦٤ — «ما يجوز تستخدم هذا الصوت لكلماتٍ أخرى»: الضحكة للضحك وحده. جملةٌ فيها كلام تُقال كلامًا
+      (بلا ضحكةٍ قبلها)، والضحكة المسجّلة لا تُسمع إلّا في صيحة الضحك */
+   if(r)return speak(r,o);
+   if(laugh(0,null))return 'laugh';
   }
   return speak(text,o);
  }
