@@ -24893,7 +24893,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.79';
+const APP_VER='6.80';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27968,6 +27968,29 @@ function caDisc(t,r){
  const isS=t==='s'||t.slice(0,2)==='s:';
  const x=c.getContext('2d'),X=S/2,Y=S/2, P=CA_WOOD[t]||(isS&&CA_STRIKERS[t.slice(2)])||CA_WOOD.s;
  const th=Math.max(1.5,R*.085);                       // سُمك الحافّة الظاهر
+ /* ٦٫٨٠ — «سوِّ لمعة على القطع نفس الصورة بالضبط»: القطعة لامعةٌ ملساء كما في صورة المالك — حافّةٌ أفتح من أعلاها
+    وأغمق من أسفلها، وحلقةٌ بارزة حول القلب، وقلبٌ نصفه الأعلى أفتح من الأسفل (انعكاس الضوء)، وقوسُ لمعانٍ على
+    الحافّة العليا اليسرى. بلا ظلّ (٦٫٧٥) */
+ if(!isS){
+  const GL={w:['#FFFFFF','#EEE6D8','#D9CFBE','#B8AC98','#8E826F'],b:['#6A6D73','#2D2E31','#1C1D1F','#0B0B0C','#000000'],q:['#FF8A8F','#DE2733','#B8141E','#7C0911','#4E050A']}[t]||['#FFFFFF','#EEE6D8','#D9CFBE','#B8AC98','#8E826F'];
+  const [hi,base,mid,lo,rim]=GL;
+  let g=x.createLinearGradient(X,Y-R,X,Y+R);g.addColorStop(0,base);g.addColorStop(.55,mid);g.addColorStop(1,lo);
+  x.beginPath();x.arc(X,Y,R,0,7);x.fillStyle=g;x.fill();
+  // حلقةٌ بارزة: فاتحةٌ من أعلاها معتمةٌ من أسفلها، وتحتها أخدودٌ رفيع
+  x.beginPath();x.arc(X,Y,R*.80,0,7);x.strokeStyle='rgba(0,0,0,.16)';x.lineWidth=Math.max(1,R*.03);x.stroke();
+  g=x.createLinearGradient(X,Y-R*.72,X,Y+R*.72);g.addColorStop(0,hi);g.addColorStop(.5,mid);g.addColorStop(1,lo);
+  x.beginPath();x.arc(X,Y,R*.71,0,7);x.strokeStyle=g;x.lineWidth=R*.1;x.stroke();
+  // القلب: نصفٌ أعلى أفتح (انعكاس) ونصفٌ أسفل أعمق
+  g=x.createLinearGradient(X,Y-R*.6,X,Y+R*.6);g.addColorStop(0,hi);g.addColorStop(.18,base);g.addColorStop(.5,base);g.addColorStop(.5001,mid);g.addColorStop(1,mid);
+  x.beginPath();x.arc(X,Y,R*.6,0,7);x.fillStyle=g;x.fill();
+  x.beginPath();x.arc(X,Y,R*.6,0,7);x.strokeStyle='rgba(0,0,0,.20)';x.lineWidth=Math.max(.8,R*.025);x.stroke();
+  // قوس اللمعان على الحافّة العليا اليسرى، ولمعةٌ صغيرة في القلب
+  x.lineCap='round';x.beginPath();x.arc(X,Y,R*.89,Math.PI*1.08,Math.PI*1.52);x.strokeStyle='rgba(255,255,255,'+(t==='w'?.9:.55)+')';x.lineWidth=R*.07;x.stroke();
+  x.beginPath();x.arc(X,Y,R*.44,Math.PI*1.12,Math.PI*1.45);x.strokeStyle='rgba(255,255,255,'+(t==='w'?.7:.35)+')';x.lineWidth=R*.045;x.stroke();
+  // حدٌّ خارجيّ حادّ
+  x.beginPath();x.arc(X,Y,R-Q*.45,0,7);x.strokeStyle=rim;x.globalAlpha=.85;x.lineWidth=Q*.9;x.stroke();x.globalAlpha=1;
+  c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c;
+ }
  /* ٦٫٧٥ — «الوضوح… ولا أريد ظلًّا، القطع تظهر كأنّها فوق بعض»: لا ظلّ تماسٍّ ولا سُمكٍ مزاح تحت الوجه —
     قرصٌ مسطّحٌ واضحٌ بحافّةٍ حادّة، كما في صورة المالك */
  // الوجه: لونٌ مستوٍ، بميلانٍ خطّيٍّ خفيف جدًّا نحو الضوء — سطحٌ مستوٍ لا قبّة
@@ -28005,6 +28028,9 @@ function caDisc(t,r){
  x.restore();
  // شطفة الحافّة العلويّة: خيطٌ مضيء في جهة الضوء وخيطٌ معتم حول الإطار
  x.beginPath();x.arc(X,Y,R-Q*.6,Math.PI*.95,Math.PI*1.8);x.strokeStyle=P.lit;x.lineWidth=Q*1.1;x.stroke();
+ /* لمعة الضارب (٦٫٨٠): ضوءٌ على نصفه الأعلى وقوسُ لمعانٍ كالقطع */
+ {x.save();x.beginPath();x.arc(X,Y,R,0,7);x.clip();const lg2=x.createLinearGradient(X,Y-R,X,Y);lg2.addColorStop(0,'rgba(255,255,255,.28)');lg2.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=lg2;x.fillRect(X-R,Y-R,R*2,R);x.restore();
+  x.lineCap='round';x.beginPath();x.arc(X,Y,R*.9,Math.PI*1.08,Math.PI*1.52);x.strokeStyle='rgba(255,255,255,.6)';x.lineWidth=R*.06;x.stroke()}
  x.beginPath();x.arc(X,Y,R-th*.5,0,7);x.strokeStyle=P.edge;x.lineWidth=th;x.stroke();          // حافّةٌ ملوّنةٌ حادّة
  x.beginPath();x.arc(X,Y,R-Q*.45,0,7);x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=Q*.9;x.stroke();   // خيطٌ داكنٌ رفيع يفصلها عن الخشب
  c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c;
@@ -28195,9 +28221,16 @@ function caRender(rest){
  for(const p of pcs){
   const r=(p.r||CA_PR)*sc,X=PX(p.x),Y=PY(p.y);
   const sp=caDisc(p.t==='s'?stT:p.t,r),o=sp._o;
+  /* ٦٫٨٠ — «عندما ألعب، الجيس يشعّ على أطرافه»: هالةٌ ذهبيّة تنبض حول ضاربي في دوري، وحلقةٌ برتقاليّة على حافّته */
+  if(p.t==='s'&&!_ca.sim&&!sBad&&RM.ca&&RM.ca.turn===RM.me&&!(_ca.sRet&&_ca.sRet.hand)){
+   const pu=.78+.22*Math.sin(tk*.09), gg=cx.createRadialGradient(X,Y,r*.92,X,Y,r*1.62);
+   gg.addColorStop(0,'rgba(255,214,80,'+(.9*pu).toFixed(3)+')');gg.addColorStop(.35,'rgba(255,186,50,'+(.5*pu).toFixed(3)+')');gg.addColorStop(1,'rgba(255,170,40,0)');
+   cx.fillStyle=gg;cx.beginPath();cx.arc(X,Y,r*1.62,0,7);cx.fill();
+  }
   if(p.t==='s'&&sBad)cx.globalAlpha=.5;
   if(p.t==='s'&&p.sk0&&p.mix<1&&'s:'+p.sk0!==stT){const s0=caDisc('s:'+p.sk0,r);cx.globalAlpha=1-p.mix;cx.drawImage(s0,X-s0._o,Y-s0._o,s0._s,s0._s);cx.globalAlpha=p.mix}
   cx.drawImage(sp,X-o,Y-o,sp._s,sp._s);cx.globalAlpha=1;
+  if(p.t==='s'&&!_ca.sim&&!sBad&&RM.ca&&RM.ca.turn===RM.me&&!(_ca.sRet&&_ca.sRet.hand)){cx.beginPath();cx.arc(X,Y,r+1.1*sc,0,7);cx.strokeStyle='rgba(255,168,36,.95)';cx.lineWidth=2.2*sc;cx.stroke()}
   if(p.t==='s'&&sBad){cx.globalAlpha=1;cx.beginPath();cx.arc(X,Y,r+1.5*sc,0,7);cx.strokeStyle='rgba(226,75,74,.95)';cx.lineWidth=2.5*sc;cx.stroke()}   // بلا أثر حركة: الاستيفاء يكفي، والصورة المزدوجة كانت تُدوّخ
  }
  // القطع وهي تسقط في الحفرة: تنزلق إلى الفوهة وتغوص وتَعتِم — لا تختفي فجأة
