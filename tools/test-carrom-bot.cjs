@@ -10,7 +10,7 @@ const phys=fs.readFileSync(path.join(ROOT,'src','games','carrom','physics.js'),'
 function fn(name){const m=html.match(new RegExp('\\nfunction '+name+'\\([^)]*\\)\\{[\\s\\S]*?\\n\\}\\n'));if(!m)throw new Error('لم أجد '+name);return m[0]}
 function cst(re){const m=html.match(re);if(!m)throw new Error('ثابت مفقود '+re);return m[0]}
 const src=[phys,';',
- cst(/const CA_R=400, CA_PR=13, CA_SR=16\.5;/),cst(/const CA_VMAX=\d+;/),cst(/const CA_BASE=CA_R-CA_SR-22;/),
+ cst(/const CA_R=400, CA_PR=CarromPhysics\.C\.pieceR, CA_SR=CarromPhysics\.C\.strikerR;/),cst(/const CA_VMAX=\d+;/),cst(/const CA_BASE=CA_R-CA_SR-22;/),
  fn('caBlocked'),fn('caBlockedAt'),fn('caFreeX'),fn('caBotPick'),
  ';({caBotPick,CarromPhysics,CA_R,CA_PR,CA_SR,CA_BASE})'].join('\n');
 const {caBotPick,CarromPhysics:PH,CA_R,CA_PR,CA_BASE}=(0,eval)(src);
