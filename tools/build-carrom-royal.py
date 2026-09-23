@@ -6,7 +6,7 @@
   python3 tools/build-carrom-royal.py [صورة.png]
       → tahaddi/arenas/royal.webp  (نسيجٌ مستوٍ من فوق بخلفيّةٍ شفّافة، مربّع الجيوب في مكانه)
       → tahaddi/arenas/hand.webp   (اليد الحقيقيّة بكمّها، بخلفيّةٍ شفّافة)
-  ثمّ (٦٫٥٧): python3 tools/clean-royal-lines.py — يستبدل سطح اللعب بخشبٍ بلا خطوط، والعلامات ترسمها اللعبة
+  ثمّ (٦٫٥٨): python3 tools/fix-royal-marks.py — يمحو أخطاء الصورة المولَّدة وحدها من خطوطها
       → يطبع زوايا المنظور (CA_ROYAL.q) ومقاس اليد وطرف إصبعها (CA_HANDR) لـ tahaddi/index.html
 
 بلا وسيط: تُستخرج الصورة من تاريخ git (الإيداع 5ef3c78).
