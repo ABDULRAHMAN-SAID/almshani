@@ -182,6 +182,8 @@ public class MainActivity extends AppCompatActivity {
   root.addView(web);
   setContentView(root);
   preferHighRefresh();
+  /* ٦٫٨٣ — «أثناء اللعب الشاشة تتسكّر»: الشاشة تبقى مضاءة ما دام التطبيق أمامك؛ النظام يرفع العلَم وحده عند الخروج */
+  getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
   /* من أندرويد ١٥ النافذة ممتدّة من حافة إلى حافة؛ نُبعد الصفحة عن الشريطين واللوحة بأنفسنا
      بدل الاعتماد على env(safe-area-inset-*) التي لا يملؤها WebView على كلّ الأجهزة */

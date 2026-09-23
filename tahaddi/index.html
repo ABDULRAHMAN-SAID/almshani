@@ -24896,7 +24896,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.83';
+const APP_VER='6.84';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27747,6 +27747,11 @@ const CA_TONE='rgb(220,180,134)';   // ٦٫٥٦ كان ٢٠٦،١٦٤،١٢٢ ع
 /** اختيار الطور: كلاسيكيّ (قطع لونك أوّلًا) أو حاصد النقاط */
 /* ٦٫٨٣ — «الشاشة تهتزّ لمّا أختار… أكون تحت وترجعني فوق… وتومض»: كلّ خيارٍ كان يعيد بناء الشاشة كلّها (فتُعاد
    الصور وتومض، وتقفز إلى أعلاها). الآن يُحدَّث الزرّ نفسه وأخوته فقط */
+/* ٦٫٨٣ — «أثناء اللعب الشاشة تروح تتسكّر»: لا شيء كان يطلب من الهاتف إبقاء الشاشة مضاءة، فمهلة السكون
+   (٣٠ ثانية عادةً) تطفئها وأنت تفكّر في الضربة. على الويب نطلب Wake Lock، ويسقطه المتصفّح عند الخروج من
+   التبويب فنعيد طلبه عند العودة؛ وفي التطبيق يتولّاه أندرويد نفسه (FLAG_KEEP_SCREEN_ON). */
+const wakeOn=(()=>{let lk=null,busy=false;const want=()=>{if(busy||lk||document.hidden)return;const w=navigator.wakeLock;if(!w||!w.request)return;busy=true;w.request('screen').then(l=>{lk=l;l.addEventListener('release',()=>{lk=null})}).catch(()=>{}).finally(()=>{busy=false})};
+ try{document.addEventListener('visibilitychange',want);addEventListener('pointerdown',want,{passive:true});want()}catch(e){}return want})();
 function uiPick(el){const p=el&&el.parentElement;if(!p)return;for(const c of p.children)c.classList.toggle('on',c===el)}
 function soloGoSync(){const e=document.querySelector('.soloGo .goDiff');if(e)e.textContent=T((DIFF_P[RM.diff||'mid']||DIFF_P.mid).n)}
 function caPtsVis(){const r=document.querySelector('.segC.ptsT');if(r)r.hidden=RM.caMd!=='pts'}
