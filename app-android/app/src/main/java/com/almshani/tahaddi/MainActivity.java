@@ -164,11 +164,7 @@ public class MainActivity extends AppCompatActivity {
   /* الصيحات: WebView لا يملك speechSynthesis، فكانت اللعبة تقولها بصوتٍ مركّبٍ «غريب».
      هنا محرّك النطق في النظام (صوت Google العربيّ) — وإن لم يوجد عربيّ بقي ready() كاذبًا
      فتظهر الصيحة مكتوبةً بلا صوت. */
-  tts = new TextToSpeech(getApplicationContext(), status -> {
-   if (status != TextToSpeech.SUCCESS || tts == null) return;
-   int r = tts.setLanguage(new Locale("ar"));
-   ttsReady = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
-  });
+  ttsStart();
   web.addJavascriptInterface(new Speech(), "TahaddiTTS");
 
   web.setDownloadListener((url, ua, disp, mime, len) -> {
@@ -217,6 +213,27 @@ public class MainActivity extends AppCompatActivity {
 
  private TextToSpeech tts;
  private volatile boolean ttsReady = false;
+ private volatile boolean ttsBound = false;
+ private volatile boolean ttsFailed = false;
+
+ private void ttsStart() {
+  if (tts != null) { tts.shutdown(); tts = null; }
+  ttsBound = false; ttsReady = false; ttsFailed = false;
+  tts = new TextToSpeech(getApplicationContext(), status -> {
+   if (status != TextToSpeech.SUCCESS || tts == null) { ttsFailed = true; return; }
+   ttsBound = true;
+   ttsCheck();
+  });
+ }
+
+ /** العربيّة قد تُثبَّت بعد فتح التطبيق (كما تنصح الإعدادات): يُعاد الفحص عند كلّ عودة — المراجعة */
+ private void ttsCheck() {
+  if (tts == null || !ttsBound) return;
+  Locale ar = new Locale("ar");
+  if (tts.isLanguageAvailable(ar) < TextToSpeech.LANG_AVAILABLE) { ttsReady = false; return; }
+  int r = tts.setLanguage(ar);
+  ttsReady = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
+ }
 
  /** جسر النطق: ready() هل في الجهاز عربيّ، speak() تقول الجملة بطبقة اللاعب وسرعته */
  public class Speech {
@@ -305,11 +322,12 @@ public class MainActivity extends AppCompatActivity {
  protected void onResume() {
   super.onResume();
   if (web != null) { web.resumeTimers(); web.onResume(); }
+  if (tts == null || ttsFailed) ttsStart(); else ttsCheck();   // ما زال يربط: يفحص حين يكتمل
  }
 
  @Override
  protected void onDestroy() {
-  if (tts != null) { tts.shutdown(); tts = null; ttsReady = false; }
+  if (tts != null) { tts.shutdown(); tts = null; ttsReady = false; ttsBound = false; }
   if (web != null) {
    ViewGroup parent = (web.getParent() instanceof ViewGroup) ? (ViewGroup) web.getParent() : null;
    if (parent != null) parent.removeView(web);

@@ -28,8 +28,6 @@ module.exports=[
  ['knBot',R("push('rankedScr');knBot(58)")],
  ['playModesScr',R("push('playModesScr')")],
  ...['carrom','uno','knowledge'].map(g=>[`gameHub-${g}`,R(`push('gameHub','${g}')`)]),
- ['arenaScr',R("push('arenaScr')")],
- ['arenaBuy',R("push('arenaScr');arenaPick('sahil')")],
  ...['knowledge','carrom','uno'].map(g=>[`gameRankScr-${g}`,R(`push('gameRankScr','${g}')`)]),
  ['rankGuideScr-placed',R("const p=rankOf('carrom');p.placed=true;p.tier=5;p.div=1;p.rp=40;push('rankGuideScr','carrom')")],
  ['rankGuideScr-unplaced',R("rankOf('knowledge').placed=false;push('rankGuideScr','knowledge')")],

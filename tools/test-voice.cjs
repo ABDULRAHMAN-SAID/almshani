@@ -121,6 +121,22 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
  chk('ضحكةٌ وحدها لا يتبعها كلام، والمقطوعة لا تقول كلامها القديم',lg.r2==='laugh'&&lg.r3==='laugh'&&lg.n===1,lg.n);
  chk('«وجهه» ليست ضحكة',lg.plain===false,lg.plain);
 
+ /* ٦٫٦٢ — صيحةٌ مسجّلة: تُشغَّل كما هي، وإن تعذّر ملفّها قيل نصّها بصوت الجهاز */
+ const cl=await page.evaluate(async()=>{
+  const A=window.Audio, made=[], said=[];
+  let mode='ok';
+  window.Audio=function(u){const o={src:u,volume:1,play(){made.push(u);if(mode==='bad'){setTimeout(()=>o.onerror(),0)}return Promise.resolve()},pause(){}};return o};
+  window.TahaddiTTS={ready:()=>true,speak:(t)=>{said.push(t);return true},stop(){}};
+  const r=VOICE.say('ما بخليك، الفوز لي',{seed:3,clip:'audio/shouts/n2.webm'});
+  mode='bad';
+  const r2=VOICE.say('ما بخليك، الفوز لي',{seed:3,clip:'audio/shouts/missing.webm'});
+  await new Promise(z=>setTimeout(z,30));
+  window.Audio=A;delete window.TahaddiTTS;VOICE.stop();
+  return {r,r2,made,said};
+ });
+ chk('الصيحة المسجّلة تُشغَّل بصوت صاحبها',cl.r==='clip'&&cl.made[0]==='audio/shouts/n2.webm'&&cl.said.length===1,JSON.stringify(cl));
+ chk('وإن تعذّر ملفّها قيل نصّها بصوت الجهاز',cl.said[0]==='ما بخليك، الفوز لي',cl.said[0]);
+
  /* لحظة اللعب: هل تعرف اللوحة متى قرب اللاعب من الفوز؟ */
  /* M وRM معرّفتان بـlet في نطاق الوحدة لا على window، فتُسنَدان مباشرة لا عبر window.M */
  const mom=await page.evaluate(()=>{

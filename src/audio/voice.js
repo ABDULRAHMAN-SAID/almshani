@@ -2,7 +2,8 @@
  * الصيحات — تُقال بصوتٍ بشريّ حقيقيّ من الجهاز، أو لا تُقال.
  *
  *   VOICE.init({enabled:()=>bool})
- *   VOICE.say('ههه قربت أفوز انتبه', {seed:7, tone:'brag'})   → 'app' | 'tts' | false
+ *   VOICE.say('ههه قربت أفوز انتبه', {seed:7, tone:'brag'})   → 'laugh' | 'app' | 'tts' | false
+ *   VOICE.say(text, {clip:'audio/shouts/n2.webm'})              → 'clip' (تسجيلٌ بصوت المالك)
  *   VOICE.hasSpeech()   هل في الجهاز صوت عربيّ حقيقيّ؟
  *   VOICE.stop()
  *
@@ -39,22 +40,25 @@ var VOICE=(function(){
  function hasLaugh(text){return LAUGH.test(String(text||''))}
  /** الجملة بلا ضحكتها: ما يُقال بعد التسجيل */
  function rest(text){return String(text||'').replace(/ه{3,}/g,' ').replace(/^[\s،,.!؟?]+|[\s،,]+$/g,'').replace(/\s+/g,' ').trim()}
- /** يشغّل الضحكة؛ max بالثواني يقصّها (بخفوتٍ سريع) حين يتبعها كلام. done بعد انتهائها */
- function laugh(max,done){
-  if(!laughUrl||!W||typeof W.Audio!=='function')return false;
+ /** يشغّل تسجيلًا (الضحكة، أو صيحةً بصوت صاحبها — ٦٫٦٢)؛ max بالثواني يقصّه (بخفوتٍ سريع) حين يتبعه كلام.
+    done بعد انتهائه، وfail إن تعذّر الملفّ (فيُقال النصّ بصوت الجهاز بدله) */
+ function laugh(max,done,url,fail){
+  url=url||laughUrl;
+  if(!url||!W||typeof W.Audio!=='function')return false;
   try{
    stopLaugh();
-   var my=laughGen, a=laughEl=new W.Audio(laughUrl), fin=false;
+   var my=laughGen, a=laughEl=new W.Audio(url), fin=false;
    a.volume=1;
    var end=function(){if(fin)return;fin=true;try{a.pause()}catch(e){}
     if(my!==laughGen)return;                 // قُطعت بضحكةٍ أحدث أو بإيقاف: لا يُقال باقيها القديم
     clearTimeout(laughT);laughEl=null;if(done)done()};
-   a.onended=end;a.onerror=end;
+   a.onended=end;
+   a.onerror=function(){if(fail&&!fin&&my===laughGen){fin=true;laughEl=null;clearTimeout(laughT);fail()}else end()};
    if(max>0)laughT=setTimeout(function(){
     var k=0,f=setInterval(function(){k++;try{a.volume=Math.max(0,1-k/6)}catch(e){}if(k>=6||fin){clearInterval(f);end()}},30);
    },max*1000);
    var pr=a.play();
-   if(pr&&typeof pr.catch==='function')pr.catch(end);
+   if(pr&&typeof pr.catch==='function')pr.catch(function(){a.onerror()});
    return true;
   }catch(e){return false}
  }
@@ -113,6 +117,8 @@ var VOICE=(function(){
   var on=false;try{on=!!enabled()}catch(e){}
   if(!on)return false;
   var o=opt||{};
+  /* صيحةٌ مسجّلة بصوت صاحبها: التسجيل كاملًا، وإن تعذّر قيل نصّها بصوت الجهاز */
+  if(o.clip&&laugh(0,null,o.clip,function(){speak(text,o)}))return 'clip';
   if(hasLaugh(text)&&laughUrl){
    var r=rest(text);
    /* ضحكةٌ وحدها: كاملة. ضحكةٌ وكلام: نحو ثانيتين ونصف ثم الكلام — لا ينتظر الخصم خمس ثوانٍ */
