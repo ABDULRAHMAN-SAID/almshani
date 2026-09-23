@@ -56,7 +56,7 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
   window.AudioContext=function(){made++;return new A()};
   const ss=Object.getOwnPropertyDescriptor(window,'speechSynthesis');
   Object.defineProperty(window,'speechSynthesis',{value:{getVoices:()=>[],cancel(){},speak(){made+=100}},configurable:true});
-  const r=VOICE.say('ههه قربت أفوز',{seed:3,tone:'brag'});
+  const r=VOICE.say('ما بخليك، الفوز لي',{seed:3,tone:'brag'});
   const h=VOICE.hasSpeech();
   window.AudioContext=A;
   if(ss)Object.defineProperty(window,'speechSynthesis',ss);else delete window.speechSynthesis;
@@ -68,16 +68,16 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
  const viaApp=await page.evaluate(()=>{
   const got=[];
   window.TahaddiTTS={ready:()=>true,speak:(t,p,r)=>{got.push([t,p,r]);return true},stop(){}};
-  const r=VOICE.say('ههه قربت أفوز',{seed:7,tone:'brag'});
-  const r2=VOICE.say('ههه قربت أفوز',{seed:7,tone:'brag'});
-  const r3=VOICE.say('ههه قربت أفوز',{seed:901,tone:'brag'});
+  const r=VOICE.say('ما بخليك، الفوز لي',{seed:7,tone:'brag'});
+  const r2=VOICE.say('ما بخليك، الفوز لي',{seed:7,tone:'brag'});
+  const r3=VOICE.say('ما بخليك، الفوز لي',{seed:901,tone:'brag'});
   const h=VOICE.hasSpeech();
   window.TahaddiTTS={ready:()=>false,speak:()=>{got.push('x');return true}};
   const h2=VOICE.hasSpeech();
   delete window.TahaddiTTS;
   return {r,h,h2,got};
  });
- chk('في التطبيق: يُقال بصوت أندرويد الحقيقيّ',viaApp.r==='app'&&viaApp.h&&viaApp.got[0][0]==='هاهاها قربت أفوز',JSON.stringify(viaApp.got[0]));
+ chk('في التطبيق: يُقال بصوت أندرويد الحقيقيّ',viaApp.r==='app'&&viaApp.h&&viaApp.got[0][0]==='ما بخليك، الفوز لي',JSON.stringify(viaApp.got[0]));
  chk('اللاعب نفسه بالطبقة نفسها، ولاعبٌ آخر بطبقة أخرى',viaApp.got[0][1]===viaApp.got[1][1]&&viaApp.got[0][1]!==viaApp.got[2][1],viaApp.got.map(g=>g[1]).join(' / '));
  chk('محرّك أندرويد بلا عربيّ لا يُستعمل',viaApp.h2===false&&viaApp.got.indexOf('x')<0,viaApp.h2);
 
@@ -96,6 +96,30 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
   return {r,said};
  });
  chk('في المتصفّح: يُقال بالصوت العربيّ',viaWeb.r==='tts'&&viaWeb.said[0]==='يلا يلا!|ar-SA',JSON.stringify(viaWeb));
+
+ /* ٦٫٦١ — ضحكة المالك المسجّلة: الملفّ حقيقيّ ويُحمَّل، والجملة تبدأ به ثم يُقال باقيها */
+ const meta=await page.evaluate(()=>new Promise(res=>{const a=new Audio('audio/laugh.webm');
+  a.onloadedmetadata=()=>res({ok:1,d:a.duration});a.onerror=()=>res({ok:0});setTimeout(()=>res({ok:0,to:1}),6000)}));
+ chk('ملفّ الضحكة موجود ويُقرأ (ثوانٍ لا صمت)',meta.ok&&meta.d>1&&meta.d<10,JSON.stringify(meta));
+ const lg=await page.evaluate(async()=>{
+  const A=window.Audio, made=[], said=[];
+  window.Audio=function(u){const o={src:u,volume:1,paused:false,play(){made.push(u);return Promise.resolve()},pause(){this.paused=true}};made.el=o;return o};
+  window.TahaddiTTS={ready:()=>true,speak:(t)=>{said.push(t);return true},stop(){}};
+  const r=VOICE.say('ههه قربت أفوز، انتبه لنفسك',{seed:3,tone:'brag'});
+  const beforeEnd=said.length;
+  made.el.onended();                              // انتهت الضحكة
+  const r2=VOICE.say('هههههههه',{seed:3});        // ضحكةٌ وحدها
+  const el2=made.el;
+  const r3=VOICE.say('ههه قربت أفوز، انتبه لنفسك',{seed:3});   // تقطع الثانية
+  el2.onended&&el2.onended();                     // صدى الضحكة المقطوعة: لا يُقال شيء
+  const n=said.length;
+  window.Audio=A;delete window.TahaddiTTS;VOICE.stop();
+  return {r,r2,r3,beforeEnd,said,n,made:made.slice(),rest:VOICE._rest('ههه قربت أفوز، انتبه لنفسك'),plain:VOICE.hasLaugh('انتبه لوجهه')};
+ });
+ chk('الجملة الضاحكة تبدأ بالتسجيل الحقيقيّ',lg.r==='laugh'&&lg.made[0]==='audio/laugh.webm'&&lg.beforeEnd===0,JSON.stringify(lg));
+ chk('وبعد الضحكة يُقال باقيها بصوت الجهاز',lg.said[0]==='قربت أفوز، انتبه لنفسك',lg.said[0]);
+ chk('ضحكةٌ وحدها لا يتبعها كلام، والمقطوعة لا تقول كلامها القديم',lg.r2==='laugh'&&lg.r3==='laugh'&&lg.n===1,lg.n);
+ chk('«وجهه» ليست ضحكة',lg.plain===false,lg.plain);
 
  /* لحظة اللعب: هل تعرف اللوحة متى قرب اللاعب من الفوز؟ */
  /* M وRM معرّفتان بـlet في نطاق الوحدة لا على window، فتُسنَدان مباشرة لا عبر window.M */

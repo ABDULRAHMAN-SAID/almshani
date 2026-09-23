@@ -15,7 +15,10 @@
  *  ٢) المتصفّح: speechSynthesis إن كان فيه صوت عربيّ.
  *  ٣) لا هذا ولا ذاك: الجملة تظهر مكتوبةً في الفقاعة مع نقرةٍ خفيفة، بلا صوتٍ مزيّف.
  *
- * «ههه» يقرؤها محرّك النطق حروفًا («هاء هاء»)، فتُكتب له «هاهاها» فيضحك بها.
+ * والضحكة ليست نطقًا: ٦٫٦١ — رفع المالك تسجيل ضحكةٍ حقيقيّة (tahaddi/audio/laugh.webm).
+ * فالجملة التي فيها «ههه» تبدأ بتلك الضحكة، ثم يُقال باقيها بصوت الجهاز إن وُجد.
+ * والضحكة ملفّ، فتُسمع حتى على جهازٍ بلا صوتٍ عربيّ.
+ * (وإن تعذّر الملفّ، تُكتب «ههه» للمحرّك «هاهاها» فيضحك بها بدل أن يتهجّاها.)
  *
  * لا DOM هنا إلا window. لا يرمي أبدًا.
  */
@@ -23,12 +26,39 @@ var VOICE=(function(){
  'use strict';
  var W=(typeof window!=='undefined')?window:null;
  var enabled=function(){return true};
- var voices=null, playing=null;
+ var voices=null, playing=null, laughUrl='', laughEl=null, laughT=0, laughGen=0;
 
  function init(o){
   if(o&&typeof o.enabled==='function')enabled=o.enabled;
+  if(o&&o.laugh)laughUrl=String(o.laugh);
   warm();
  }
+
+ /* ── الضحكة المسجّلة ── */
+ var LAUGH=/ه{3,}/;
+ function hasLaugh(text){return LAUGH.test(String(text||''))}
+ /** الجملة بلا ضحكتها: ما يُقال بعد التسجيل */
+ function rest(text){return String(text||'').replace(/ه{3,}/g,' ').replace(/^[\s،,.!؟?]+|[\s،,]+$/g,'').replace(/\s+/g,' ').trim()}
+ /** يشغّل الضحكة؛ max بالثواني يقصّها (بخفوتٍ سريع) حين يتبعها كلام. done بعد انتهائها */
+ function laugh(max,done){
+  if(!laughUrl||!W||typeof W.Audio!=='function')return false;
+  try{
+   stopLaugh();
+   var my=laughGen, a=laughEl=new W.Audio(laughUrl), fin=false;
+   a.volume=1;
+   var end=function(){if(fin)return;fin=true;try{a.pause()}catch(e){}
+    if(my!==laughGen)return;                 // قُطعت بضحكةٍ أحدث أو بإيقاف: لا يُقال باقيها القديم
+    clearTimeout(laughT);laughEl=null;if(done)done()};
+   a.onended=end;a.onerror=end;
+   if(max>0)laughT=setTimeout(function(){
+    var k=0,f=setInterval(function(){k++;try{a.volume=Math.max(0,1-k/6)}catch(e){}if(k>=6||fin){clearInterval(f);end()}},30);
+   },max*1000);
+   var pr=a.play();
+   if(pr&&typeof pr.catch==='function')pr.catch(end);
+   return true;
+  }catch(e){return false}
+ }
+ function stopLaugh(){laughGen++;clearTimeout(laughT);if(laughEl){try{laughEl.pause()}catch(e){}laughEl=null}}
 
  /* ── جسر التطبيق: MainActivity يضع window.TahaddiTTS ── */
  function app(){try{return W&&W.TahaddiTTS&&typeof W.TahaddiTTS.speak==='function'?W.TahaddiTTS:null}catch(e){return null}}
@@ -68,7 +98,7 @@ var VOICE=(function(){
  /** ما يُعطى لمحرّك النطق: الضحكة تُكتب بحروف مدّ ليضحك بها لا ليتهجّاها */
  function speakable(text){
   return String(text||'')
-   .replace(/[هـ]{3,}|ه{2,}/g,'هاهاها')
+   .replace(/ه{3,}/g,'هاهاها')
    .replace(/\s+/g,' ').trim();
  }
  /** طبقة وسرعة ثابتتان للاعب: الاسم نفسه يعطي الصوت نفسه */
@@ -78,11 +108,20 @@ var VOICE=(function(){
           rate:Math.max(0.7,Math.min(1.4,T.rate))};
  }
 
- /** ينطق الجملة بصوتٍ حقيقيّ إن وُجد، وإلّا يسكت (الفقاعة تكفي) */
+ /** ينطق الجملة: ضحكتها من التسجيل، وكلامها بصوتٍ حقيقيّ إن وُجد، وإلّا يسكت (الفقاعة تكفي) */
  function say(text,opt){
   var on=false;try{on=!!enabled()}catch(e){}
   if(!on)return false;
-  var o=opt||{}, t=speakable(text);
+  var o=opt||{};
+  if(hasLaugh(text)&&laughUrl){
+   var r=rest(text);
+   /* ضحكةٌ وحدها: كاملة. ضحكةٌ وكلام: نحو ثانيتين ونصف ثم الكلام — لا ينتظر الخصم خمس ثوانٍ */
+   if(laugh(r?2.4:0,r?function(){speak(r,o)}:null))return 'laugh';
+  }
+  return speak(text,o);
+ }
+ function speak(text,o){
+  var t=speakable(text);
   if(!t)return false;
   var p=prosody(o);
   var a=app();
@@ -103,6 +142,7 @@ var VOICE=(function(){
   return false;
  }
  function stop(){
+  stopLaugh();
   var s=synth();
   if(s){try{s.cancel()}catch(e){}}
   var a=app();if(a&&typeof a.stop==='function'){try{a.stop()}catch(e){}}
@@ -112,6 +152,6 @@ var VOICE=(function(){
  function available(){return hasSpeech()}
 
  return {init:init,say:say,stop:stop,unlock:unlock,warm:warm,
-  hasSpeech:hasSpeech,available:available,_speakable:speakable,_prosody:prosody};
+  hasSpeech:hasSpeech,available:available,hasLaugh:hasLaugh,_speakable:speakable,_prosody:prosody,_rest:rest};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=VOICE;

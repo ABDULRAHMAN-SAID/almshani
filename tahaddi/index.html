@@ -16608,7 +16608,10 @@ if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
  *  ٢) المتصفّح: speechSynthesis إن كان فيه صوت عربيّ.
  *  ٣) لا هذا ولا ذاك: الجملة تظهر مكتوبةً في الفقاعة مع نقرةٍ خفيفة، بلا صوتٍ مزيّف.
  *
- * «ههه» يقرؤها محرّك النطق حروفًا («هاء هاء»)، فتُكتب له «هاهاها» فيضحك بها.
+ * والضحكة ليست نطقًا: ٦٫٦١ — رفع المالك تسجيل ضحكةٍ حقيقيّة (tahaddi/audio/laugh.webm).
+ * فالجملة التي فيها «ههه» تبدأ بتلك الضحكة، ثم يُقال باقيها بصوت الجهاز إن وُجد.
+ * والضحكة ملفّ، فتُسمع حتى على جهازٍ بلا صوتٍ عربيّ.
+ * (وإن تعذّر الملفّ، تُكتب «ههه» للمحرّك «هاهاها» فيضحك بها بدل أن يتهجّاها.)
  *
  * لا DOM هنا إلا window. لا يرمي أبدًا.
  */
@@ -16616,12 +16619,39 @@ var VOICE=(function(){
  'use strict';
  var W=(typeof window!=='undefined')?window:null;
  var enabled=function(){return true};
- var voices=null, playing=null;
+ var voices=null, playing=null, laughUrl='', laughEl=null, laughT=0, laughGen=0;
 
  function init(o){
   if(o&&typeof o.enabled==='function')enabled=o.enabled;
+  if(o&&o.laugh)laughUrl=String(o.laugh);
   warm();
  }
+
+ /* ── الضحكة المسجّلة ── */
+ var LAUGH=/ه{3,}/;
+ function hasLaugh(text){return LAUGH.test(String(text||''))}
+ /** الجملة بلا ضحكتها: ما يُقال بعد التسجيل */
+ function rest(text){return String(text||'').replace(/ه{3,}/g,' ').replace(/^[\s،,.!؟?]+|[\s،,]+$/g,'').replace(/\s+/g,' ').trim()}
+ /** يشغّل الضحكة؛ max بالثواني يقصّها (بخفوتٍ سريع) حين يتبعها كلام. done بعد انتهائها */
+ function laugh(max,done){
+  if(!laughUrl||!W||typeof W.Audio!=='function')return false;
+  try{
+   stopLaugh();
+   var my=laughGen, a=laughEl=new W.Audio(laughUrl), fin=false;
+   a.volume=1;
+   var end=function(){if(fin)return;fin=true;try{a.pause()}catch(e){}
+    if(my!==laughGen)return;                 // قُطعت بضحكةٍ أحدث أو بإيقاف: لا يُقال باقيها القديم
+    clearTimeout(laughT);laughEl=null;if(done)done()};
+   a.onended=end;a.onerror=end;
+   if(max>0)laughT=setTimeout(function(){
+    var k=0,f=setInterval(function(){k++;try{a.volume=Math.max(0,1-k/6)}catch(e){}if(k>=6||fin){clearInterval(f);end()}},30);
+   },max*1000);
+   var pr=a.play();
+   if(pr&&typeof pr.catch==='function')pr.catch(end);
+   return true;
+  }catch(e){return false}
+ }
+ function stopLaugh(){laughGen++;clearTimeout(laughT);if(laughEl){try{laughEl.pause()}catch(e){}laughEl=null}}
 
  /* ── جسر التطبيق: MainActivity يضع window.TahaddiTTS ── */
  function app(){try{return W&&W.TahaddiTTS&&typeof W.TahaddiTTS.speak==='function'?W.TahaddiTTS:null}catch(e){return null}}
@@ -16661,7 +16691,7 @@ var VOICE=(function(){
  /** ما يُعطى لمحرّك النطق: الضحكة تُكتب بحروف مدّ ليضحك بها لا ليتهجّاها */
  function speakable(text){
   return String(text||'')
-   .replace(/[هـ]{3,}|ه{2,}/g,'هاهاها')
+   .replace(/ه{3,}/g,'هاهاها')
    .replace(/\s+/g,' ').trim();
  }
  /** طبقة وسرعة ثابتتان للاعب: الاسم نفسه يعطي الصوت نفسه */
@@ -16671,11 +16701,20 @@ var VOICE=(function(){
           rate:Math.max(0.7,Math.min(1.4,T.rate))};
  }
 
- /** ينطق الجملة بصوتٍ حقيقيّ إن وُجد، وإلّا يسكت (الفقاعة تكفي) */
+ /** ينطق الجملة: ضحكتها من التسجيل، وكلامها بصوتٍ حقيقيّ إن وُجد، وإلّا يسكت (الفقاعة تكفي) */
  function say(text,opt){
   var on=false;try{on=!!enabled()}catch(e){}
   if(!on)return false;
-  var o=opt||{}, t=speakable(text);
+  var o=opt||{};
+  if(hasLaugh(text)&&laughUrl){
+   var r=rest(text);
+   /* ضحكةٌ وحدها: كاملة. ضحكةٌ وكلام: نحو ثانيتين ونصف ثم الكلام — لا ينتظر الخصم خمس ثوانٍ */
+   if(laugh(r?2.4:0,r?function(){speak(r,o)}:null))return 'laugh';
+  }
+  return speak(text,o);
+ }
+ function speak(text,o){
+  var t=speakable(text);
   if(!t)return false;
   var p=prosody(o);
   var a=app();
@@ -16696,6 +16735,7 @@ var VOICE=(function(){
   return false;
  }
  function stop(){
+  stopLaugh();
   var s=synth();
   if(s){try{s.cancel()}catch(e){}}
   var a=app();if(a&&typeof a.stop==='function'){try{a.stop()}catch(e){}}
@@ -16705,7 +16745,7 @@ var VOICE=(function(){
  function available(){return hasSpeech()}
 
  return {init:init,say:say,stop:stop,unlock:unlock,warm:warm,
-  hasSpeech:hasSpeech,available:available,_speakable:speakable,_prosody:prosody};
+  hasSpeech:hasSpeech,available:available,hasLaugh:hasLaugh,_speakable:speakable,_prosody:prosody,_rest:rest};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=VOICE;
 /* ⟦/src⟧ */
@@ -21397,7 +21437,7 @@ if(window.MUSIC){
 }
 if(window.VOICE){
  /* الصيحات تتبع مفتاحها وحده: من أغلق المؤثّرات قد يريد سماع خصمه */
- VOICE.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.shout}});
+ VOICE.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.shout},laugh:'audio/laugh.webm'});   // ضحكة المالك المسجّلة (٦٫٦١)
  /* الزرّ ينبض حين تسخن اللحظة — فحص خفيف كلّ ثانية ونصف، ولا يُعاد رسم شاشة */
  setInterval(()=>{const f=document.querySelector('.efab');if(!f)return;
   try{f.classList.toggle('hot',!!(((S&&S.opt)||DEF_OPT).shout)&&shoutHot())}catch(e){}},1500);
@@ -23148,6 +23188,7 @@ const SHOUTS=[
  {i:'t8',g:'tease',t:'ياه، قريبة'},
  {i:'t9',g:'tease',t:'بالتوفيق، تحتاجه'},
  {i:'t10',g:'tease',t:'تكفى ركّز شوي'},
+ {i:'t11',g:'tease',t:'هههههههه'},
  {i:'h1',g:'hype',t:'يلا يلا!'},
  {i:'h2',g:'hype',t:'هذي هي!'},
  {i:'h3',g:'hype',t:'أشوفك!'},
@@ -23268,11 +23309,10 @@ function shoutOut(sh,side,label){
 function shoutTry(){
  const o=(S&&S.opt)||DEF_OPT;
  if(!o.shout){toast('الصيحات مغلقة — افتحها أولًا');return}
- const pool=SHOUTS.filter(x=>x.g==='near');
- const sh=pool[Math.floor(Math.random()*pool.length)];
+ const sh=shoutById('n1');   // الضحكة الحقيقيّة ثم الكلام — أوضح ما يُجرَّب
  _shoutCd=0;
  shoutOut(sh,'me',null);
- toast((window.VOICE&&VOICE.hasSpeech())?'قيلت بصوت جهازك':'جهازك بلا صوت عربيّ — ظهرت مكتوبة');
+ toast((window.VOICE&&VOICE.hasSpeech())?'ضحكة ثم صوت جهازك':'ضحكة — وباقي الجملة مكتوب (جهازك بلا صوت عربيّ)');
 }
 /** الآليّ يردّ أحيانًا — بصوته هو، لا بصوتي */
 function oppShout(kind){
@@ -24665,7 +24705,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.60';
+const APP_VER='6.61';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25298,7 +25338,7 @@ function rmOn(d,m){
   if(wasShot){if(d.turn!==RM.me)setTimeout(()=>caPlay(d.shot),20)}
   else{
    // دورٌ لي وضاربي واقفٌ حيث تركته: يزاح إن صارت تحته قطعة
-   if(d.turn===RM.me&&_ca.sx!=null)_ca.sx=caFreeX(caLocalPcs(caMySeat()),_ca.sx);
+   if(d.turn===RM.me&&_ca.sx!=null)_ca.sx=caFreeX(caLocalPcs(caMySeat()),_ca.sx,1);
    setTimeout(caRender,40);
    /* لوحٌ جديد أو تغيّر حال الملكة: الشريط واللوحة فوق اللوح تُعاد كتابتهما */
    if(boardTurned&&document.getElementById('rmScr'))setTimeout(roomDraw,60);
@@ -26948,20 +26988,38 @@ function caLocalPcs(s){return (RM.ca?RM.ca.pcs:[]).map(p=>{const q=caB2L(s,p.x,p
    «ليش وكيف أقدر أحطّ قطعة الضرب فوق قطع أخرى وهي على خطّ اللعب؟» — كان يجوز،
    فتنفجر القطع من تحته. الآن المقاطع المحجوزة على خطّ القاعدة تُحسب من القطع
    القريبة منه، والضارب يقفز إلى أقرب موضعٍ حرّ. */
-function caBlocked(pcs){
+/* ٦٫٦٠ — «القطعة ليست على الخطّ، كان عادي أمشي تحتها، والنظام يمنعني». كانت كلّ قطعةٍ يمسّها
+   قرص الضارب تحجز مكانها، والضارب أعرض من شريط القاعدة، فتحجز قطعةٌ فوق الخطّ لا عليه.
+   الآن (للاعب): لا يحجز إلا ما يلمس شريط القاعدة المرسوم نفسه (CA_BAND حول منتصفه)؛
+   وما فوق الخطّ يمرّ الضارب تحته، وعند الضربة تُزاح تلك القطعة شعرةً حتى تلامسه (caClearStriker).
+   والآليّ يبقى على القاعدة الصارمة (loose=0): لا تداخل أصلًا، فتصدق محاكاته. */
+const CA_BAND=8.5;   // نصف عرض شريط القاعدة المرسوم (مقيسًا من صورة اللوح: ٣٦٣–٣٨٠ حول ٣٧٠)
+function caBlocked(pcs,loose){
  const R=CA_SR+CA_PR+0.6, out=[];
- for(const p of pcs){const dy=Math.abs(p.y-CA_BASE);if(dy>=R)continue;const dx=Math.sqrt(R*R-dy*dy);out.push([p.x-dx,p.x+dx])}
+ for(const p of pcs){const dy=Math.abs(p.y-CA_BASE);if(dy>=R)continue;if(loose&&dy>=CA_PR+CA_BAND)continue;
+  const dx=Math.sqrt(R*R-dy*dy);out.push([p.x-dx,p.x+dx])}
  return out;
 }
-function caBlockedAt(pcs,x){return caBlocked(pcs).some(b=>x>b[0]&&x<b[1])}
-function caFreeX(pcs,x){
- const lo=CA_SR+26,hi=CA_R-CA_SR-26, B=caBlocked(pcs);
+function caBlockedAt(pcs,x,loose){return caBlocked(pcs,loose).some(b=>x>b[0]&&x<b[1])}
+function caFreeX(pcs,x,loose){
+ const lo=CA_SR+26,hi=CA_R-CA_SR-26, B=caBlocked(pcs,loose);
  const inB=v=>B.some(b=>v>b[0]&&v<b[1]);
  x=Math.max(lo,Math.min(hi,x));
  if(!inB(x))return x;
  let best=null;
  for(const b of B)for(const c of [b[0]-0.5,b[1]+0.5]){if(c<lo||c>hi||inB(c))continue;if(best==null||Math.abs(c-x)<Math.abs(best-x))best=c}
  return best==null?x:best;
+}
+/** قبل ضربة اللاعب: قطعةٌ فوق الخطّ يتداخل معها الضارب تُدفع على امتداد المركزين حتى تلامسه */
+function caClearStriker(seat,sx){
+ const pcs=RM.ca&&RM.ca.pcs;if(!pcs)return;
+ const R=CA_SR+CA_PR+0.3;
+ pcs.forEach(p=>{
+  const q=caB2L(seat,p.x,p.y), dx=q[0]-sx, dy=q[1]-CA_BASE, d=Math.hypot(dx,dy);
+  if(d>=R)return;
+  const ux=d>0.01?dx/d:0, uy=d>0.01?dy/d:-1;
+  const b=caL2B(seat,sx+ux*R,CA_BASE+uy*R);p.x=b[0];p.y=b[1];
+ });
 }
 /** ترتيب القطع التسع عشرة: الملكة في القلب، وحلقتان حولها بالتناوب */
 function caLayout(){
@@ -27224,6 +27282,10 @@ function caRoyal(){return _ca.skin==='r'&&!caArena()&&!!(_ca.tex&&_ca.tex.r)}
    كما تفترضه الفيزياء واللمس؛ آلة الميل باقيةٌ معطّلة (caPerspApply يعيد كلّ شيءٍ مستويًا) */
 const CA_TILT=false;
 function caPersp(){return CA_TILT&&caRoyal()}
+/* ٦٫٦٠ — «الحواف سيّئة وفيها سواد، وحدود اللوح صغيرة»: الكلاسيكيّ (وهو ما يظهر أيضًا حين لا تصل صورة الفاخر)
+   كان إطارَ صورته مقصوصًا إلى ٨٪ فوق خلفيّةٍ سوداء تظهر عند زواياه المستديرة وفي المسند تحته.
+   الآن يأخذ إطار الفاخر نفسه: عوارضُ خشبٍ عريضة (١٠٪) بصفائح نحاسيّة، وما خارجها شفّاف */
+function caRailed(){return !caArena()&&_ca.skin!=='m'}
 /** تحويلٌ منظوريّ من أربع نقاطٍ إلى أربع: مصفوفة ٣×٣ (h33=1) بحلّ نظامٍ خطّيٍّ ٨×٨ */
 function caHomog(src,dst){
  const A=[],B=[];
@@ -27296,7 +27358,7 @@ function caTexG(){
 const CA_MGD=0.08;
 function caMG(){
  /* الفاخر مستويًا: إطاره حتّى ١٠٪ فتبقى زواياه النحاسيّة كاملة، والساحة واسعة (الإطار الخارجيّ عند ١١٫٥٪) */
- const g=caPersp()?caTexG():Math.min(caTexG(),caRoyal()?0.10:CA_MGD);
+ const g=caPersp()?caTexG():(caRailed()?0.10:Math.min(caTexG(),CA_MGD));
  return Math.round(CA_VW*g/(1+2*g));
 }
 /* صورتا اللوح المرجعيتان على خلفية بيضاء حول الإطار المستدير — كانت تظهر حدودًا بيضاء
@@ -27508,7 +27570,7 @@ function caBoardImg(W,H,four){
  const ar=caArena();
  const KQ=caK();
  /* الفاخر لا يُعتمد إلا بعد وصول صورته: قبلها (أو بلا شبكة) يُرسم الكلاسيكيّ بجيوبه وخطوطه — لا مربّعٌ فارغ مائل */
- const k=ar?ar.k:(caRoyal()?'r':(four?'m':'c')), key=W+'x'+H+'|'+k+'|'+KQ, roy=k==='r';
+ const k=ar?ar.k:(caRoyal()?'r':(four?'m':'c')), key=W+'x'+H+'|'+k+'|'+KQ, roy=k==='r'||k==='c';   // roy: بعوارض الفاخر
  if(_ca.bg&&_ca.bgKey===key)return _ca.bg;
  const M=caMG(),P=W-M*2,sc=P/CA_R,PR=CA_POCK*sc;
  const c=document.createElement('canvas');c.width=Math.round(W*KQ);c.height=Math.round(H*KQ);
@@ -27684,7 +27746,7 @@ function caRender(rest){
  const md=_ca.skin==='m';
  const M=caMG(),P=W-M*2,sc=P/CA_R;
  const PX=u=>M+u*sc, PY=v=>M+v*sc;
- if(caRoyal())cx.clearRect(0,0,W,H);     // الفاخر شفّافٌ خارج إطاره: خشب الطاولة يظهر من ورائه
+ if(caRailed())cx.clearRect(0,0,W,H);     // الفاخر شفّافٌ خارج إطاره: خشب الطاولة يظهر من ورائه
  cx.drawImage(caBoardImg(W,H,md),0,0,W,H);   // الخلفية بحجم اللوحة كلّها — لا clearRect ولا تدرّج كل إطار
  if(cv.parentElement)cv.parentElement.classList.toggle('caDrag',!_ca.sim&&(!!_ca.drag||(H>W&&!!RM.ca&&RM.ca.turn===RM.me)));   // شارة مقعدي تفسح لشريط التحريك طوال دوري
  const tk=_ca.t||0;
@@ -27847,7 +27909,7 @@ function caRender(rest){
   cx.beginPath();cx.moveTo(PX(p1[0]),PY(p1[1]));cx.lineTo(PX(p2[0]),PY(p2[1]));cx.stroke();
   cx.setLineDash([]);
   if(!sSide){   // المقاطع المحجوزة بقطعةٍ على خطّي: لا يقف الضارب فوقها
-   const B=caBlocked(caLocalPcs(ms)), by=PY(base);
+   const B=caBlocked(caLocalPcs(ms),1), by=PY(base);
    cx.strokeStyle='rgba(226,75,74,.55)';cx.lineWidth=4;cx.lineCap='round';
    for(const b of B){cx.beginPath();cx.moveTo(PX(Math.max(CA_SR+26,b[0])),by);cx.lineTo(PX(Math.min(CA_R-CA_SR-26,b[1])),by);cx.stroke()}
   }
@@ -28096,7 +28158,7 @@ function caInit(){
   const r=cv.getBoundingClientRect(), k=CA_VW/r.width;
   return [((e.clientX-r.left)*k-M)/sc,((e.clientY-r.top)*k-M)/sc]};
  const BASE=()=>CA_BASE;
- const CACL=v=>caFreeX(caLocalPcs(caMySeat()),v);   // ضمن الخطّ، وخارج القطع الواقفة عليه
+ const CACL=v=>caFreeX(caLocalPcs(caMySeat()),v,1);   // ضمن الخطّ، وخارج القطع الواقفة عليه وحدها
  cv.onpointerdown=e=>{
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim||RM.phase==='over')return;
   caBaseSync();
@@ -28164,7 +28226,8 @@ function caInit(){
   const ms=caMySeat();
   const lp=caLocalPcs(ms);
   // يُرفض فقط إن وُجد موضعٌ حرّ؛ فإن حُجز الخطّ كلّه (نادر) تُضرب من حيث هي بدل أن يُقفل الدور
-  if(caBlockedAt(lp,d.sx)&&!caBlockedAt(lp,caFreeX(lp,d.sx))){caRender();toast('الضارب فوق قطعة — حرّكه على الخطّ أوّلًا');return}
+  if(caBlockedAt(lp,d.sx,1)&&!caBlockedAt(lp,caFreeX(lp,d.sx,1),1)){caRender();toast('الضارب فوق قطعةٍ على الخطّ — حرّكه أوّلًا');return}
+  caClearStriker(ms,d.sx);   // ما فوق الخطّ يُزاح حتى يلامس الضارب، لا يمنع الضربة
   const v=CA_VMAX*caPower(pw);
   // الضربة تُحسب في إطاري (أنا أسفل) ثمّ تُحوَّل إلى إحداثيّات اللوح — فتتّفق الأجهزة كلّها
   const bp=caL2B(ms,d.sx,d.sy), bv=caL2Bv(ms,-d.dx/pw*v,-d.dy/pw*v);
