@@ -2193,10 +2193,15 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .segC.m4{flex-wrap:wrap}.segC.m4 button{flex:1 1 calc(50% - 4px)}
 .segC.ptsT{margin-top:8px}.segC.ptsT button{padding:8px}
 /* مؤقّت الضربة: خيطٌ ذهبيّ أسفل بطاقة صاحب الدور يقصر، ويحمرّ في ثوانيه الأخيرة */
-.pTm{position:absolute;inset-inline:16px;bottom:-1px;height:3px;border-radius:2px;transform-origin:left center;
- background:linear-gradient(90deg,#B98C3A,#F6E3AE);animation:pTm linear forwards;pointer-events:none}
-@keyframes pTm{0%{transform:scaleX(1)}70%{transform:scaleX(.3);filter:none}100%{transform:scaleX(0);filter:hue-rotate(-40deg) saturate(3)}}
-@media (prefers-reduced-motion:reduce){.pTm{animation-timing-function:steps(5)}}
+/* عدّاد الضربة: حلقةٌ على حافّة الصورة تنقص مع الوقت (زاويةٌ مخروطيّة تُحرَّك بخاصّيّةٍ مسجّلة) */
+@property --tp{syntax:'<percentage>';inherits:false;initial-value:100%}
+@property --tc{syntax:'<color>';inherits:false;initial-value:#F6E3AE}
+.pCard .csAv{position:relative}
+.pCard .csAv.tmr::after{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+ background:conic-gradient(var(--tc) var(--tp),rgba(0,0,0,.45) 0);
+ -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4.5px));
+ animation:tpR var(--tpd,20s) linear var(--tpo,0s) forwards}
+@keyframes tpR{0%{--tp:100%;--tc:#F6E3AE}70%{--tc:#F6E3AE}85%{--tc:#FF9A3C}100%{--tp:0%;--tc:#E24B4A}}
 .caFinS{display:flex;align-items:baseline;justify-content:center;gap:10px;margin:-8px 0 16px;color:#AEB9CF;font-weight:800;font-size:12px}
 .caFinS b{font-size:26px;font-weight:900;color:#F6E3AE;font-variant-numeric:tabular-nums}
 #caHand{position:fixed;left:0;top:0;z-index:40;pointer-events:none;will-change:transform,opacity}
@@ -24888,7 +24893,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.74';
+const APP_VER='6.75';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -27584,7 +27589,7 @@ function caPlay(shot){
  const S2=CarromPhysics.create(C.pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
  CarromPhysics.shoot(S2,shot);
  S2.by=C.turn;
- caHandEnd();clearTimeout(_ca.tmr);_ca.tt=null;document.querySelectorAll('#rmScr .pTm').forEach(e=>e.remove());_ca.fly=[];_ca.drop=null;_ca.sRet=null;_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
+ caHandEnd();clearTimeout(_ca.tmr);_ca.tt=null;document.querySelectorAll('#rmScr .csAv.tmr').forEach(e=>e.classList.remove('tmr'));_ca.fly=[];_ca.drop=null;_ca.sRet=null;_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
  _ca.sim=S2;_ca.acc=0;_ca.last=performance.now();
  cancelAnimationFrame(_ca.anim);
  _ca.aim=null;_ca.aimV=null;
@@ -27919,10 +27924,8 @@ function caDisc(t,r){
  const isS=t==='s'||t.slice(0,2)==='s:';
  const x=c.getContext('2d'),X=S/2,Y=S/2, P=CA_WOOD[t]||(isS&&CA_STRIKERS[t.slice(2)])||CA_WOOD.s;
  const th=Math.max(1.5,R*.085);                       // سُمك الحافّة الظاهر
- // ظلّ التماسّ: قصيرٌ ليّن باتجاه أسفل اليمين
- for(let i=3;i>=1;i--){x.beginPath();x.arc(X+R*.05+i*.5*Q,Y+th+R*.06+i*.6*Q,R+i*.55*Q,0,7);x.fillStyle='rgba(0,0,0,'+(.10*i).toFixed(2)+')';x.fill()}
- // الحافّة الجانبيّة: أسطوانةٌ قصيرة تحت الوجه
- x.beginPath();x.arc(X,Y+th,R,0,7);x.fillStyle=P.edge;x.fill();
+ /* ٦٫٧٥ — «الوضوح… ولا أريد ظلًّا، القطع تظهر كأنّها فوق بعض»: لا ظلّ تماسٍّ ولا سُمكٍ مزاح تحت الوجه —
+    قرصٌ مسطّحٌ واضحٌ بحافّةٍ حادّة، كما في صورة المالك */
  // الوجه: لونٌ مستوٍ، بميلانٍ خطّيٍّ خفيف جدًّا نحو الضوء — سطحٌ مستوٍ لا قبّة
  const lg=x.createLinearGradient(X-R,Y-R,X+R,Y+R);lg.addColorStop(0,P.face);lg.addColorStop(1,P.lo);
  x.beginPath();x.arc(X,Y,R,0,7);x.fillStyle=lg;x.fill();
@@ -27958,7 +27961,8 @@ function caDisc(t,r){
  x.restore();
  // شطفة الحافّة العلويّة: خيطٌ مضيء في جهة الضوء وخيطٌ معتم حول الإطار
  x.beginPath();x.arc(X,Y,R-Q*.6,Math.PI*.95,Math.PI*1.8);x.strokeStyle=P.lit;x.lineWidth=Q*1.1;x.stroke();
- x.beginPath();x.arc(X,Y,R,0,7);x.strokeStyle='rgba(0,0,0,.45)';x.lineWidth=Q*.9;x.stroke();
+ x.beginPath();x.arc(X,Y,R-th*.5,0,7);x.strokeStyle=P.edge;x.lineWidth=th;x.stroke();          // حافّةٌ ملوّنةٌ حادّة
+ x.beginPath();x.arc(X,Y,R-Q*.45,0,7);x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=Q*.9;x.stroke();   // خيطٌ داكنٌ رفيع يفصلها عن الخشب
  c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c;
 }
 /* ═══ ٦٫٥٧ — القطع المُدخَلة تُرى: «تطيح وما تختفي، ثمّ نراها تخرج وتروح فوق اللوح عندي أو عند الخصم» ═══
@@ -28200,7 +28204,6 @@ function caRender(rest){
    const mx=(X0+SX)/2+(W/2-(X0+SX)/2)*.28, my=(Y0+SY)/2+(W/2-(Y0+SY)/2)*.28;   // قوسٌ نحو وسط اللوح
    const X=(1-e)*(1-e)*X0+2*(1-e)*e*mx+e*e*SX, Y=(1-e)*(1-e)*Y0+2*(1-e)*e*my+e*e*SY;
    const lift=Math.sin(Math.PI*t), r=TRR*(.42+.58*e)*(1+.45*lift);
-   cx.globalAlpha=.28*lift;cx.beginPath();cx.ellipse(X+r*.35*lift,Y+r*.55*lift+2,r*.95,r*.8,0,0,7);cx.fillStyle='#000';cx.fill();cx.globalAlpha=1;
    const sp=caDisc(f.t,TRR),k=r/TRR;cx.drawImage(sp,X-sp._o*k,Y-sp._o*k,sp._s*k,sp._s*k);   // نقشةٌ واحدة تُحجَّم — كان مقاسٌ جديدٌ كلّ إطار يبني نقشةً جديدة (المراجعة)
    if(t>=1){f.done=1;
     if(_ca.tr&&!_ca.tr.incl){_ca.tr.L[f.t]=(_ca.tr.L[f.t]||0)+1;(_ca.tr.seq=_ca.tr.seq||[]).push(f.t)}
@@ -28622,7 +28625,10 @@ function rmCarrom(R){
  const card=(col,pos)=>{
   const ps=RM.players.filter(p=>C.col[p.peer]===col), on=ps.some(p=>p.peer===C.turn), me2=col===myCol;
   const avOf=p=>p.peer===RM.me?avatarArt(46):(p.av?avatarSVG(p.av,46):personArt(p.name,46));
-  const avs=ps.slice(0,2).map(p=>`<span class="csAv" data-pr="${esc(p.peer)}" onclick="caProf(this.dataset.pr)">${avOf(p)}</span>`).join('');
+  /* ٦٫٧٥ — «على صورة البروفايل يكون عدّاد الوقت دائريًّا»: حلقةٌ تنقص حول صورة صاحب الدور، وتحمرّ في آخرها */
+  const tmOn=RM.phase!=='over'&&!_ca.sim&&_ca.tt&&_ca.tt.peer===C.turn&&!isBot(C.turn);
+  const tmSt=tmOn?` style="--tpd:${CA_SHOT_SEC}s;--tpo:-${Math.max(0,(performance.now()-_ca.tt.t0)/1000).toFixed(2)}s"`:'';
+  const avs=ps.slice(0,2).map(p=>`<span class="csAv${tmOn&&p.peer===C.turn?' tmr':''}"${tmOn&&p.peer===C.turn?tmSt:''} data-pr="${esc(p.peer)}" onclick="caProf(this.dataset.pr)">${avOf(p)}</span>`).join('');
   const who=duo?(me2?'أنت':esc(ps[0]?ps[0].name:'الخصم')):(me2?'فريقك':'الفريق الخصم');
   const sub=RM.phase==='over'?'انتهت المباراة'
    :me2?(mine?'<b>دورك</b> <span class="pH">— اسحب وأفلت</span>':(on?'<b>دور '+esc(nm(C.turn))+'</b> — يصوّب…':'انتظر دورك'))
@@ -28636,7 +28642,6 @@ function rmCarrom(R){
    <span class="pTx"><b class="pNm">${who}</b><span class="pSub">${sub}</span></span>
    <span class="pScore${pts?' pts':''}">${pts?`<b>${arN(got)}<small> من ${arN(caPtsWin(C))}</small></b>`:`<b>${got}</b>`}<span class="pSlots">${slots}</span></span>
    ${me2?`<button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${emoFab(22)}</button>`:''}
-   ${on&&RM.phase!=='over'&&!_ca.sim&&_ca.tt&&_ca.tt.peer===C.turn&&!isBot(C.turn)?`<i class="pTm" style="animation-duration:${CA_SHOT_SEC}s;animation-delay:-${Math.max(0,(performance.now()-_ca.tt.t0)/1000).toFixed(2)}s"></i>`:''}
   </div>`;
  };
  const msg=C.msg&&C.msg!=='الخصم يصوّب…'&&!/^اللوح [\d٠-٩]/.test(C.msg)?C.msg:'';
