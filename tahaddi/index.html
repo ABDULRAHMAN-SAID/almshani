@@ -2186,6 +2186,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caFinS b{font-size:26px;font-weight:900;color:#F6E3AE;font-variant-numeric:tabular-nums}
 #caHand{position:fixed;left:0;top:0;z-index:40;pointer-events:none;will-change:transform,opacity}
 .pCard .csAv.caPop,.pCard.on .csAv.caPop{animation:caPop .34s ease}
+@media (prefers-reduced-motion:reduce){.pCard .csAv.caPop,.pCard.on .csAv.caPop{animation:none}}
 @keyframes caPop{40%{transform:scale(1.12)}}
 /* الشاشات القصيرة (٦٤٠–٧٠٠): بطاقتي تبقى داخل الشاشة (المراجعة) */
 @media (max-height:700px){.caStage{gap:6px;padding-block:2px}.pCard{padding-block:6px}.pCard .csAv{width:40px;height:40px}.pCard .caRnd{width:38px;height:38px}.caScr .caTbar{padding-bottom:6px}}
@@ -24872,7 +24873,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.71';
+const APP_VER='6.72';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -26138,7 +26139,7 @@ function caShotVal(pot,pcs0,mine,qPend){
 /** مرشّحون هندسيّون لكلّ هدفٍ وجيب: نقطة «الكرة الشبح»، وموضع الضارب، ونوعيّةٌ q (الأصغر أسهل).
     o.zc: موضعٌ بلا قطع · o.bank: بالارتداد من جدار (للقطع خلف القاعدة أو بزاويةٍ مستحيلة) */
 function caCands(pcs,targets,o){
- const base=CA_BASE, g=20, pockets=[[g,g],[CA_R-g,g],[g,CA_R-g],[CA_R-g,CA_R-g]];
+ const base=CA_BASE, pockets=CarromPhysics.pockets();   // ٦٫٧١: مراكز الجيوب الدائريّة نفسها (كانت نقاطًا داخل الزاوية للجيب القديم)
  const lo=CA_XL+4, hi=CA_XR-4, clampX=v=>Math.max(lo,Math.min(hi,v));
  const e=CarromPhysics.C.wallE, wl=CA_SR-CarromPhysics.C.rail, wr=CA_R-wl;
  /* ممرٌّ مسدود؟ قطعةٌ أخرى أقرب إلى المسار من مجموع نصفي القطرين */
@@ -26307,20 +26308,21 @@ function* caBotThink(pcs,mine,P0,rnd,st){
 /** زاوية ضربة الارتداد من الحاجز المقابل: الضارب وحده (بلا قطع) يُطلق بزاوية a، فأين يمرّ حين يعود إلى ارتفاع
     القطعة؟ بحثٌ ثنائيّ حول الزاوية المرآتيّة a0 حتّى يمرّ بمركزها. بلا حلٍّ (خارج المدى أو ارتدادٌ جانبيّ) ⇒ a0 */
 function caBankAim(sx,sy,t,pw,a0){
- const miss=a=>{
+ /* أقرب ما يدنو مركز الضارب من مركز القطعة بعد ارتداده من الحاجز البعيد (المراجعة: الحلّ الثنائيّ كان يستسلم كثيرًا) */
+ const near=a=>{
   const S=CarromPhysics.create([]);CarromPhysics.shoot(S,{x:sx,y:sy,vx:Math.cos(a)*pw,vy:Math.sin(a)*pw});
-  let up=0;
+  let up=0,best=1e9;
   for(let f=0;f<420&&!CarromPhysics.settled(S);f++){
-   const ev=CarromPhysics.step(S), p=S.pcs[0];if(!p)return null;
-   for(const e2 of ev)if(e2.e==='wall'){if(p.y<CA_R/2)up=1;else if(!up)return null}
-   if(up&&p.vy>0&&p.y>=t.y)return p.x-t.x;
+   const ev=CarromPhysics.step(S), p=S.pcs[0];if(!p)break;
+   for(const e2 of ev)if(e2.e==='wall'&&p.y<CA_R/2)up=1;
+   if(up)best=Math.min(best,Math.hypot(p.x-t.x,p.y-t.y));
   }
-  return null;
+  return best;
  };
- let lo=a0-0.22, hi=a0+0.22, mlo=miss(lo), mhi=miss(hi);
- if(mlo==null||mhi==null||Math.sign(mlo)===Math.sign(mhi))return a0;
- for(let i=0;i<16;i++){const m=(lo+hi)/2, mm=miss(m);if(mm==null)return a0;if(Math.sign(mm)===Math.sign(mlo)){lo=m;mlo=mm}else{hi=m;mhi=mm}}
- return (lo+hi)/2;
+ let ba=a0,bd=near(a0);
+ for(let i=-12;i<=12;i++){if(!i)continue;const a=a0+i*0.02,d=near(a);if(d<bd){bd=d;ba=a}}
+ for(let st=0.01;st>0.0006;st/=2)for(const a of [ba-st,ba+st]){const d=near(a);if(d<bd){bd=d;ba=a}}
+ return bd<=CA_SR+CA_PR?ba:a0;
 }
 /** الاختيار دفعةً واحدة — للاختبار ولمن لا ينتظر */
 function caBotPick(pcs,mine,P0,rnd,st){
@@ -26959,7 +26961,10 @@ var CarromPhysics=(function(){
   roll:0.0667,           // تباطؤ التدحرج لكل إطار (٢٤٠ وحدة/ث²)
   slide:0.157,           // تباطؤ الانزلاق لكل إطار (٥٦٥ وحدة/ث²) — بعد الإطلاق وكلّ اصطدام حتى يتدحرج
   spinK:2.5,             // قرصٌ يتدحرج كالكرة المصمتة: ٥/٢ — التدحرج يبدأ عند ٥/٧ من السرعة
-  cushSpin:-0.39,        // ما يبقى من دوران التدحرج العموديّ على الحاجز بعد الارتداد
+  /* ما ينعكس من التدحرج العموديّ على الحاجز. ٦٫٧١ — «الجيس ضعيف: أضرب بكامل القوّة للأمام ولا يرجع»: كان −٠٫٣٩
+     (مقيسًا من ارتداد قطعةٍ واحدة) فيبقى التدحرج بعد الحاجز متّجهًا إليه ويكبح الراجع بقوّة — الضارب وحده بكامل
+     قوّته كان يقف عند خطّ القاعدة بالضبط. الآن ينعكس كما تنعكس السرعة: يرجع حيًّا إلى حافّتك ويرتدّ منها */
+  cushSpin:0.77,
   stopSpeed:0.05,        // دون هذا تُعدّ ساكنة
   /* ارتداد الجدار: ٠٫٧٢ تقديرٌ قديم. قِيس ٦٫٥٨ من الفيديو المرجعيّ بمطابقة مسار الضارب كلّه (٧٧ إطارًا، ارتدادٌ واحد):
      ٠٫٨٦ بالاحتكاك الحاليّ، و٠٫٧٦ إن تُرك الاحتكاك حرًّا — فوسطهما */
@@ -26970,7 +26975,7 @@ var CarromPhysics=(function(){
      كانا ٢٫٧ و٠٫٨٦ — فكانت القطعة تنطلق أسرع بـ٣٥٪ وتذهب قرابة ضعف المسافة، والضارب يشقّ
      الكومة ويمضي. ذاك ما وصفه المالك: «السرعة والفيزياء». */
   pieceE:0.97,           // ارتداد بين القطع — ٦٫٧٠: قطعةٌ على قطعة ≈ مرنٌ تمامًا في الفيديو
-  strikerMass:1.71,      // كتلة الضارب نسبةً إلى القطعة — كما في الفيديو المرجعيّ
+  strikerMass:1.45,      // ٦٫٧١: بين قراءتَي الفيديو (١٫٦٣ مباشرةً) والقديم (١٫٣٢) — فلا تطير القطعة أسرع ممّا تُتابَع      // كتلة الضارب نسبةً إلى القطعة — كما في الفيديو المرجعيّ
   maxStep:3.5,           // أقصى إزاحة لكل خطوة فرعية
   maxSub:12              // سقف الخطوات الفرعية في الإطار
  };
@@ -27192,7 +27197,7 @@ var CarromPhysics=(function(){
 /* ⟦/src⟧ */
 
 const CA_R=400, CA_PR=CarromPhysics.C.pieceR, CA_SR=CarromPhysics.C.strikerR;   // مقاسٌ واحد للرسم والفيزياء
-const CA_VMAX=16;   // أقصى سرعة للضارب (وحدة/إطار). ٦٫٧٠ — «القطعة سريعة جدًّا لا ألتقطها بعيني»: في الفيديو ضربةٌ بسهمٍ ٩٨٪ خرجت ≈١٥٫٦ (٩٤٠ وحدة/ث)؛ كانت ٢٠ (١٢٠٠) — أسرع بـ٢٨٪
+const CA_VMAX=18;   // أقصى سرعة للضارب (وحدة/إطار). ٦٫٧٠: كانت ٢٠ فصارت ١٦ (ضربة الفيديو بسهمٍ ٩٨٪ ≈١٥٫٦) — ٦٫٧١ «الجيس ضعيف لا يرجع مع أنّي أضرب بكامل القوّة»: ١٨
 /* فمُ الجيب المرسوم يساوي فمَه الفيزيائي بالضبط — لا رقمَين للشيء نفسه */
 const CA_POCK=CarromPhysics.visualR();
 // نصف السرعة بالضبط: احتكاك أبطأ يعوّض نقص السرعة فتبقى المسافة نفسها
@@ -27538,7 +27543,13 @@ function caStep(){
   const f=sp?{x:sp.x,y:sp.y}:sd?{x:sd.px,y:sd.py}:null;
   _ca.sRet=f?{fx:f.x,fy:f.y,wait:1,tw:performance.now(),t0:0,by:S2.by,sk0:caSkOf(S2.by!=null?S2.by:(RM.ca?RM.ca.turn:RM.me))}:null;}
  _ca.drop=S2.drop;   // القطع الجالسة في الجيب تبقى ظاهرة حتى تطير — ولو استقرّت الضربة
- const rest=S2.pcs.filter(p=>p.t!=='s').map(p=>({x:Math.round(p.x*10)/10,y:Math.round(p.y*10)/10,t:p.t}));
+ /* التقريب إلى ٠٫١ قد يُدخل قطعةً وقفت على حافّة الجيب إلى داخل فمه، فتسقط في أوّل ضربةٍ تالية وتُحسب لغير
+    صاحبها (المراجعة) — تُدفع إلى خارج الفم بقليل */
+ const rest=S2.pcs.filter(p=>p.t!=='s').map(p=>{let x=Math.round(p.x*10)/10,y=Math.round(p.y*10)/10;
+  for(const [px,py] of CarromPhysics.pockets()){const d=Math.hypot(x-px,y-py), m=CarromPhysics.C.capR+0.15;
+   if(d<m&&d>0){const ux=(x-px)/d,uy=(y-py)/d;x=px+ux*m;y=py+uy*m;   // والتقريب بعيدًا عن الجيب فلا يعود داخله
+    x=ux>0?Math.ceil(x*10)/10:Math.floor(x*10)/10;y=uy>0?Math.ceil(y*10)/10:Math.floor(y*10)/10}}
+  return {x,y,t:p.t}});
  const shooter=RM.ca?RM.ca.turn:null;
  if(shooter===RM.me&&S2.pot&&S2.pot.length){const n=S2.pot.filter(t=>t!=='s').length;if(n){try{const e=EV();e.carromPot=(e.carromPot||0)+n;trk('carrom_pot',n);saveState()}catch(x){}}}
  if(shooter===RM.me||(RM.solo&&RM.host)){
@@ -27932,7 +27943,8 @@ function caHandTick(R,F,T,nw,cv,PX,PY,sc){
   el.width=sp.width;el.height=sp.height;const g=el.getContext('2d');g.clearRect(0,0,el.width,el.height);g.drawImage(sp,0,0);
   el._o=sp._o*u;el.style.width=el.style.height=(sp._s*u)+'px';el.style.transformOrigin=el._o+'px '+el._o+'px';el._k=key;
   /* لحظة التسليم (بدء الطور الثاني): صورة صاحبه تتلقّاه وصورة صاحب الدور تُخرجه — بنبضةٍ صغيرة */
-  if(ph)for(const pop of [caHandAv(R.by),av])if(pop){pop.classList.remove('caPop');void pop.offsetWidth;pop.classList.add('caPop')}
+  if(ph)for(const pop of [caHandAv(R.by),av])if(pop){pop.classList.remove('caPop');void pop.offsetWidth;pop.classList.add('caPop');
+   pop.addEventListener('animationend',()=>pop.classList.remove('caPop'),{once:true})}   // تُزال فيعود توهّج الدور (المراجعة)
  }
  el.style.opacity=op.toFixed(3);el.style.transform='translate('+(x-el._o).toFixed(1)+'px,'+(y-el._o).toFixed(1)+'px) scale('+k.toFixed(3)+')';
  return true;
@@ -28176,6 +28188,7 @@ function caAimTx(force){
 /** ٦٫٥٨ — التصويب بفكرة الفيديو المرجعيّ (لا بنسخه): نقاط سحبٍ داكنة خلف الضارب بطول السحب، وسهمٌ ثابت العرض
     يبدأ من حافّة الضارب ويطول بالقوّة حتى حافّة الدائرة، لونه يبدأ ذهبيًّا ويشتدّ إلى البرتقاليّ ثم الأحمر مع القوّة،
     ثمّ خطُّ نقاطٍ بيضاء تصغر أمامه يريك الاتّجاه. (x,y) و(ux,uy) في إطار العرض بوحدات اللوح. */
+const CA_DLO=4-CarromPhysics.C.rail;   // ٦٫٧١: نقاط السهم تمتدّ إلى الحاجز الجديد (المراجعة)
 function caAimDraw(cx,PX,PY,sc,x,y,ux,uy,pw,o){
  o=o||{};const nx=-uy, ny=ux, P=(t,off)=>[PX(x+ux*t+nx*off),PY(y+uy*t+ny*off)];
  // نقاط السحب خلف الضارب
@@ -28199,7 +28212,7 @@ function caAimDraw(cx,PX,PY,sc,x,y,ux,uy,pw,o){
  /* نقاط الاتّجاه أمام السهم (٦٫٥٨، كما في الفيديو): بيضاء تصغر وتخفت، ولا تتجاوز اللوح.
     ٦٫٦٧ — أُعيدت كما كانت: «السهم لمّا أصوّب نفس الفيديو… لا ترجع للخلف» — حذفُها في ٦٫٦٤ كان خطأً */
  for(let k=0;k<12;k++){
-  const t=r1+6+k*8.5, px=x+ux*t, py=y+uy*t;if(px<4||px>CA_R-4||py<4||py>CA_R-4)break;
+  const t=r1+6+k*8.5, px=x+ux*t, py=y+uy*t;if(px<CA_DLO||px>CA_R-CA_DLO||py<CA_DLO||py>CA_R-CA_DLO)break;
   cx.globalAlpha=.95-.05*k;cx.beginPath();cx.arc(PX(px),PY(py),(2.5-.14*k)*sc,0,7);cx.fillStyle='#FFFFFF';cx.fill();
  }
  cx.globalAlpha=1;
@@ -28354,7 +28367,7 @@ function caInit(){
      فلا تبدأ ضربةٌ من هناك. */
   /* كما في Carrom Pool: المسند وحده يحرّك الضارب (مقبضٌ على شريط)، وأيّ ضغطةٍ على اللوح —
      حتى فوق الضارب — تبدأ تصويبًا. والإلغاء بإرجاع الإصبع إلى دائرة الضارب. */
-  if(y>CA_R){
+  if(y>CA_R+CarromPhysics.C.rail){   // ٦٫٧١: الخشب صار يمتدّ إلى الحاجز — الشريط بعده (المراجعة)
    _ca.slide=1;_ca.grab=Math.abs(x-_ca.sx)<38?x-_ca.sx:0;_ca.sx=_ca.sxV=CAIN(x-_ca.grab);
   }else{
    // التصويب: اسحب من أي نقطة على اللوح — المسافة والاتجاه هما القوة
@@ -36077,7 +36090,7 @@ const DIFF_P={
  easy:{n:'سهل',  carrom:{noise:0.28,pw:[5.6,9.4],blind:0.45},
        uno:{rand:0.85,hunt:0,say:0.45,catch:0.20,think:1900},
        mafia:{talk:120,bluff:0},draw:{opts:4,ms:14000}},
- mid: {n:'متوسط',carrom:{noise:0.056,pw:[8.8,12.0],blind:0.10,sim:6},
+ mid: {n:'متوسط',carrom:{noise:0.068,pw:[8.8,12.0],blind:0.10,sim:6},
        uno:{rand:0.25,hunt:0.5,say:0.80,catch:0.65,think:1500},
        mafia:{talk:90,bluff:1},draw:{opts:6,ms:11000}},
  /* ٦٫٥٢ — «الصعوبة ارفعها ٥٠٪، والمتوسّط ١٠٪» (مقيسٌ على ٣٠٠ لوحةٍ عشوائيّة):
