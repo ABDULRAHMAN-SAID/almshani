@@ -1779,6 +1779,8 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
  .csVal{gap:4px}.csVal b{font-size:19px}.csVal .caDot{width:10px;height:10px}
 }
 @media (max-width:362px){.csLw{display:none}}
+/* الرباعيّ: صورتان متراكبتان في كلّ قسم — تضيق اللوحة حتى ٤٢٠ بكسل (قيس: ٣٩٣ يفيض) */
+@media (max-width:420px){.csAvs.two .csAv{width:24px;height:24px}.csAvs.two .csAv+.csAv{margin-inline-start:-10px}.csSeg:has(.csAvs.two){gap:5px;padding-inline:6px}.csSeg:has(.csAvs.two) .csLw{display:none}}
 @media (max-height:680px){.caScr .caInfo{margin-bottom:6px;padding-block:6px}.caScr .csBar{margin-bottom:8px}.caScr .caBot{margin:8px 6px 4px}}
 .caFloat{position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:3;pointer-events:none;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;
  padding:7px 14px;border-radius:999px;background:rgba(10,18,34,.86);border:1px solid rgba(232,178,58,.6);color:#FFE9A8;font-size:12px;font-weight:900;
@@ -24796,7 +24798,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.56';
+const APP_VER='6.57';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25408,13 +25410,19 @@ function rmOn(d,m){
   return}
  else if(d.t==='cast'){
   const wasShot=!!d.shot;
+  /* صدى ضربتي وصل بعد حكم المضيف (شبكةٌ بطيئة): لقطته قبل الضربة، فلا يُرجِع اللوح إلى الوراء (المراجعة) */
+  const L0=_ca.lastShot;
+  if(wasShot&&d.turn===RM.me&&_ca.tr&&_ca.tr.incl&&L0&&d.shot.x===L0.x&&d.shot.y===L0.y&&d.shot.vx===L0.vx&&d.shot.vy===L0.vy)return;
   /* كانت `q` و`M` تُسقطان هنا، فلا يرى اللاعب حال الملكة ولا نقاط المباراة
      مهما بثّهما المضيف. وعطلٌ في المستقبِل لا يظهر في المرسِل — كشفه
      اختبارُ نهاية لوحٍ كامل لا قراءةُ الشيفرة. */
   const boardTurned=!!(RM.ca&&RM.ca.M&&d.M&&d.M.boards!==RM.ca.M.boards);
   /* بثّ الضربة (من اللاعب أو الآليّ) لا يحمل bd — فلا يمحو وقفة نهاية اللوح؛ بثّ المضيف هو الحَكَم (المراجعة) */
   const bd0=wasShot&&!('bd' in d)?((RM.ca&&RM.ca.bd)||null):(d.bd||null);
-  RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,q:d.q||null,M:d.M||null,bd:bd0,msg:d.msg||''};
+  /* بثّ الضربة لا يحمل حال الملكة ولا النقاط — كانت تُمحى لحظة الضربة (الملكة «على اللوح»، والعدّاد صفر) */
+  const keep=(k,v)=>wasShot&&!(k in d)&&RM.ca?RM.ca[k]:(v==null?null:v);
+  RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,q:keep('q',d.q),qw:keep('qw',d.qw),M:keep('M',d.M),bd:bd0,msg:d.msg||''};
+  if(!wasShot&&_ca.tr){_ca.tr.incl=true;_ca.tr.L={w:0,b:0,q:0}}   // حكم المضيف وصل: العدّ منه، وما يطير بعدُ يُطرح
   if(!bd0){_ca.nextSent=null;_ca.bdSeen=null}   // لوحٌ جارٍ: «اللوح التالي» يعود صالحًا للّوح القادم ولمباراةٍ جديدة
   RM.phase='carrom';
   /* صاحب الدور الجديد لم يصوّب بعد — إلّا ضربةَ الخصم الواصلة الآن: يبقى تصويبه حتّى caPlay كي تنسحب يده من حيث صوّب */
@@ -27122,7 +27130,7 @@ function caNextBoard(C,msg){
 function caPub(msg,shot){
  const C=RM.C;
  rmSend({t:'cast',pcs:C.pcs,turn:RM.players[C.turn].peer,sc:C.sc,col:C.col,
-  q:C.q||null,M:C.M||null,bd:C.bd||null,msg:msg||'',shot:shot||null});
+  q:C.q||null,qw:C.qWin||null,M:C.M||null,bd:C.bd||null,msg:msg||'',shot:shot||null});
 }
 // يعيد قطعة إلى اللوح قرب المركز في أقرب موضع خالٍ
 function caPutBack(C,t){
@@ -27206,7 +27214,7 @@ function caAct(d){
   const qMine=lostBy?!(C.qWin&&C.col[C.qWin]===mine):(C.qWin&&C.col[C.qWin]===mine);
   if(qMine&&before<CA_QLOCK)pts+=CA_Q;
   pts=Math.min(CA_CAP,pts);
-  if(lostBy){C.q=null;C.qWin=null}
+  if(lostBy)C.q=null;   // qWin يبقى لعرض الملكة عند من غطّاها حتى اللوح التالي (caNextBoard يمسحها)
   C.M.pts[wc]=before+pts;
   C.M.boards++;
   const nm2=RM.players.find(p=>p.peer===cur).name;
@@ -27270,6 +27278,7 @@ function caPlay(shot){
  const S2=CarromPhysics.create(C.pcs.map(p=>({x:p.x,y:p.y,t:p.t})));
  CarromPhysics.shoot(S2,shot);
  S2.by=C.turn;
+ _ca.fly=[];_ca.tr={incl:false,L:{w:0,b:0,q:0},by:C.turn};   // ما طار من الضربة السابقة استقرّ؛ العدّ من الحال قبل الضربة
  _ca.sim=S2;_ca.acc=0;_ca.last=performance.now();
  cancelAnimationFrame(_ca.anim);
  if(_ca.lastHand)_ca.handOut=Object.assign({t:performance.now()},_ca.lastHand);
@@ -27329,7 +27338,8 @@ const CA_TEX={c:'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQD
    ثم تُرسم أفواه الجيوب برمجيًا بمقاس CA_POCK نفسه فيتطابق المنظر مع الفيزياء. */
 const CA_MGF={c:0.135,m:0.195,r:0.14};      // هامش الإطار نسبةً إلى ساحة اللعب في كل صورة
 /* ═══ اللوح الفاخر (٦٫٥٠) — صورة التصميم التي أرسلها المالك: «أريد بالضبط» ═══
-   tools/build-carrom-royal.py يعيد اللوح المائل في الصورة مربّعًا يُرى من فوق (arenas/royal.webp)،
+   tools/build-carrom-royal.py يعيد اللوح المائل في الصورة مربّعًا يُرى من فوق (arenas/royal.webp)، ثمّ
+   tools/clean-royal-lines.py (٦٫٥٧) يستبدل سطح اللعب بخشبٍ بلا خطوط — والعلامات يرسمها caMarks،
    فيُرسم هنا مستويًا كأيّ لوح — والفيزياء والجيوب كما هي — ثم تُميله الشاشة بالتحويل نفسه
    (CSS matrix3d) فيعود المنظر كما في الصورة: الإطار العميق، الزوايا النحاسيّة، الجيوب الأسطوانيّة.
    q: زوايا النسيج الأربع (أعلى يسار، أعلى يمين، أسفل يمين، أسفل يسار) في الصورة، مطبَّعةً بعرضها.
@@ -27603,7 +27613,59 @@ function caRails(x,W,M){
   x.restore();
  }
 }
-const CA_TONE='rgb(206,164,122)';   // لون التعتيق: يُنقص الإضاءة ~٢٠٪ ويدفئ الخشب
+const CA_TONE='rgb(206,164,122)';
+/* ٦٫٥٧ — «بعض خطوط اللوح خطأ»: علامات اللوح الفاخر مرسومةٌ هنا لا من الصورة (المولَّدة كانت فيها دائرةٌ
+   زائدة في منتصف القاعدتين الجانبيّتين، وخطّان يعبران المركز بنقاطٍ حمراء، وأسهمٌ غير متناظرة).
+   كما في لوح الكيرم الحقيقيّ، متناظرةً على الأضلاع الأربعة، وبوحدات الفيزياء نفسها:
+   · قاعدة كلّ لاعب: خطّان يحدّان شريط الضارب (CA_BASES.r ± ٨) — الخارجيّ أعرض — ودائرةٌ حمراء في كلّ طرف
+   · سهمٌ قطريّ من كلّ جيب يمرّ بين دائرتي القاعدتين، وينتهي بقوسٍ مفتوحٍ نحو الجيب
+   · في الوسط: دائرتان حول القطع، ونجمةٌ ثمانيّة، ومستقرّ الملكة الأحمر */
+function caMarks(x,M,sc){
+ const U=v=>M+v*sc, ink='rgba(26,16,10,.88)', red='#B3222B', redD='#6E1016';
+ const B=CA_BASES.r, yi=B-8, yo=B+8, x0=48, x1=CA_R-48, cr=9.5;
+ x.save();x.lineCap='round';
+ for(let k=0;k<4;k++){
+  x.save();x.translate(U(200),U(200));x.rotate(k*Math.PI/2);x.translate(-U(200),-U(200));
+  // خطّا القاعدة
+  x.strokeStyle=ink;x.lineWidth=.9*sc;x.beginPath();x.moveTo(U(x0),U(yi));x.lineTo(U(x1),U(yi));x.stroke();
+  x.lineWidth=2.1*sc;x.beginPath();x.moveTo(U(x0),U(yo));x.lineTo(U(x1),U(yo));x.stroke();
+  // دائرتا الطرفين: حلقةٌ داكنة ووجهٌ أحمر
+  for(const cx0 of [x0,x1]){
+   x.beginPath();x.arc(U(cx0),U(B),cr*sc,0,7);x.fillStyle='rgba(235,214,176,.9)';x.fill();
+   x.lineWidth=1.3*sc;x.strokeStyle=ink;x.stroke();
+   const g=x.createRadialGradient(U(cx0)-2*sc,U(B)-2*sc,0,U(cx0),U(B),7*sc);g.addColorStop(0,'#D23A42');g.addColorStop(1,red);
+   x.beginPath();x.arc(U(cx0),U(B),7*sc,0,7);x.fillStyle=g;x.fill();x.lineWidth=.6*sc;x.strokeStyle=redD;x.stroke();
+  }
+  // السهم القطريّ من الجيب (أسفل اليسار في هذا الربع) نحو الوسط، وقوسه
+  const d0=40, d1=178, q=Math.SQRT1_2, sx=d0*q, ex=d1*q;
+  x.strokeStyle=ink;x.lineWidth=1.1*sc;
+  x.beginPath();x.moveTo(U(sx),U(CA_R-sx));x.lineTo(U(ex),U(CA_R-ex));x.stroke();
+  const ar=17, toC=-Math.PI/4, gap=Math.PI*.30;   // القوس مفتوحٌ نحو الجيب (جهة القادم)
+  const back=toC+Math.PI, a0=back+gap, a1=back+2*Math.PI-gap;
+  x.beginPath();x.arc(U(ex),U(CA_R-ex),ar*sc,a0,a1);x.stroke();
+  // رأسا سهمٍ صغيران على طرفي القوس
+  for(const [a,sg] of [[a0,1],[a1,-1]]){
+   const px=U(ex)+Math.cos(a)*ar*sc, py=U(CA_R-ex)+Math.sin(a)*ar*sc, t=a+sg*Math.PI/2, h=4.2*sc;
+   x.beginPath();x.moveTo(px+Math.cos(t+2.6)*h,py+Math.sin(t+2.6)*h);x.lineTo(px,py);x.lineTo(px+Math.cos(t-2.6)*h,py+Math.sin(t-2.6)*h);x.stroke();
+  }
+  x.restore();
+ }
+ // الوسط: دائرتان، ونجمةٌ ثمانيّة، ومستقرّ الملكة
+ const C0=U(200);
+ x.strokeStyle=ink;x.lineWidth=1.8*sc;x.beginPath();x.arc(C0,C0,63*sc,0,7);x.stroke();
+ x.lineWidth=.8*sc;x.beginPath();x.arc(C0,C0,59.5*sc,0,7);x.stroke();
+ for(let i=0;i<8;i++){
+  const a=i*Math.PI/4-Math.PI/2, long=i%2===0, R=(long?52:36)*sc, w=(long?7.5:5.5)*sc;
+  for(const sd of [-1,1]){
+   x.beginPath();x.moveTo(C0,C0);x.lineTo(C0+Math.cos(a)*R,C0+Math.sin(a)*R);x.lineTo(C0+Math.cos(a+sd*Math.PI/2)*w,C0+Math.sin(a+sd*Math.PI/2)*w);x.closePath();
+   x.fillStyle=long?(sd<0?red:'rgba(120,20,26,.95)'):(sd<0?'rgba(26,16,10,.85)':'rgba(70,50,36,.8)');x.fill();
+  }
+ }
+ x.beginPath();x.arc(C0,C0,13*sc,0,7);x.fillStyle='rgba(235,214,176,.95)';x.fill();x.lineWidth=1.2*sc;x.strokeStyle=ink;x.stroke();
+ const qg=x.createRadialGradient(C0-2*sc,C0-2*sc,0,C0,C0,10*sc);qg.addColorStop(0,'#D23A42');qg.addColorStop(1,red);
+ x.beginPath();x.arc(C0,C0,10*sc,0,7);x.fillStyle=qg;x.fill();
+ x.restore();
+}   // لون التعتيق: يُنقص الإضاءة ~٢٠٪ ويدفئ الخشب
 /** جيبٌ من فوق: ثقبٌ مستدير عميق، شبكةٌ خافتة في قاعه، وحافّةٌ مصقولة */
 function caPocket(x,px,py,PR){
  // ظلّ الحافّة حول الثقب
@@ -27627,7 +27689,7 @@ function caBoardImg(W,H,four){
  const ar=caArena();
  const KQ=caK();
  /* الفاخر لا يُعتمد إلا بعد وصول صورته: قبلها (أو بلا شبكة) يُرسم الكلاسيكيّ بجيوبه وخطوطه — لا مربّعٌ فارغ مائل */
- const k=ar?ar.k:(caRoyal()?'r':(four?'m':'c')), key=W+'x'+H+'|'+k+'|'+KQ, roy=k==='r';
+ const k=ar?ar.k:(caRoyal()?'r':(four?'m':'c')), key=W+'x'+H+'|'+k+'|'+KQ+'|'+(_ca.tex&&_ca.tex.r?1:0), roy=k==='r';   // الكلاسيكيّ يتغيّر حين يصل خشب الفاخر
  if(_ca.bg&&_ca.bgKey===key)return _ca.bg;
  const M=caMG(),P=W-M*2,sc=P/CA_R,PR=CA_POCK*sc;
  const c=document.createElement('canvas');c.width=Math.round(W*KQ);c.height=Math.round(H*KQ);
@@ -27646,6 +27708,10 @@ function caBoardImg(W,H,four){
      عند العوارض (المراجعة). الحديث والساحات بألوانها المصمّمة — لا تُمسّ */
   if(k==='r'||k==='c'){x.save();x.globalCompositeOperation='multiply';x.fillStyle=CA_TONE;
    if(k==='r')x.fillRect(M,M,P,P);else{caRR(x,0,0,W,W,M*.5);x.fill()}x.restore()}
+  /* الكلاسيكيّ صورته بالخطوط الخاطئة نفسها (المراجعة): يُكسى سطحه بخشب الفاخر النظيف إن وصل، بلا تعتيق،
+     وتُرسم عليه العلامات الصحيحة. قبل وصوله (أوّل فتحٍ بلا شبكة) يبقى كما هو */
+  if(k==='c'&&_ca.tex&&_ca.tex.r){const gr=CA_MGF.r,Tr=P*(1+2*gr),orr=M-gr*P;x.save();x.beginPath();x.rect(M,M,P,P);x.clip();x.drawImage(_ca.tex.r,orr,orr,Tr,Tr);x.restore()}
+  if(k==='r'||(k==='c'&&_ca.tex&&_ca.tex.r))caMarks(x,M,sc);   // ٦٫٥٧: العلامات الصحيحة فوق الخشب النظيف
   // حافّةٌ خارجيّة داكنة رفيعة: نهاية الإطار المقصوص تُقرأ حافّةً لا قطعًا
   x.strokeStyle='rgba(0,0,0,.55)';x.lineWidth=2;caRR(x,1,1,W-2,W-2,M*.5);x.stroke();
  }
@@ -27679,7 +27745,8 @@ const CA_WOOD={
  w:{face:'#F2DEB2',lo:'#E3C690',edge:'#A98352',groove:'rgba(92,58,22,.50)',lit:'rgba(255,248,230,.55)',grain:'rgba(150,104,52,',gA:.10},
  b:{face:'#2A2624',lo:'#1C1918',edge:'#0B0909',groove:'rgba(0,0,0,.62)',lit:'rgba(255,255,255,.13)',grain:'rgba(90,80,72,',gA:.16},
  q:{face:'#BE2A32',lo:'#A21F27',edge:'#5E0E14',groove:'rgba(60,4,8,.55)',lit:'rgba(255,190,180,.30)',grain:'rgba(120,20,26,',gA:.18},
- s:{face:'#F3E7C9',lo:'#E6D3A6',edge:'#9C7A45',groove:'rgba(120,84,30,.50)',lit:'rgba(255,252,240,.6)',grain:'rgba(170,130,70,',gA:.07}
+ /* ٦٫٥٧ — «لون الجيس أريده مختلف»: الضارب كان عاجيًّا كالقطع البيضاء فيختلط بها. الآن أزرق ملكيّ بنقشٍ ذهبيّ */
+ s:{face:'#2F63B8',lo:'#1F4A93',edge:'#0E2550',groove:'rgba(6,18,48,.62)',lit:'rgba(190,220,255,.42)',grain:'rgba(12,30,70,',gA:.10,gold:'#E8B23A'}
 };
 function caDisc(t,r){
  const k=t+'|'+Math.round(r*4)+'|'+caK();
@@ -27715,8 +27782,9 @@ function caDisc(t,r){
  if(t==='s'){
   groove(R*.82,gw);groove(R*.56,gw*.9);
   // نقش الضارب: ثماني بتلاتٍ محفورة حول القلب — يُعرف من بعيد بلا لونٍ صارخ
-  for(let i=0;i<8;i++){const a=i*Math.PI/4;x.beginPath();x.ellipse(X+Math.cos(a)*R*.33,Y+Math.sin(a)*R*.33,R*.15,R*.065,a,0,7);x.strokeStyle=P.groove;x.lineWidth=gw*.7;x.stroke()}
-  x.beginPath();x.arc(X,Y,R*.13,0,7);x.fillStyle='rgba(176,132,52,.55)';x.fill();
+  for(let i=0;i<8;i++){const a=i*Math.PI/4;x.beginPath();x.ellipse(X+Math.cos(a)*R*.33,Y+Math.sin(a)*R*.33,R*.15,R*.065,a,0,7);x.fillStyle='rgba(232,178,58,.85)';x.fill();x.strokeStyle=P.groove;x.lineWidth=gw*.45;x.stroke()}
+  x.beginPath();x.arc(X,Y,R*.13,0,7);x.fillStyle=P.gold||'rgba(176,132,52,.55)';x.fill();
+  x.beginPath();x.arc(X,Y,R*.9,0,7);x.strokeStyle='rgba(232,178,58,.9)';x.lineWidth=gw*.55;x.stroke();   // حلقةٌ ذهبيّة عند الحافّة
  }else{
   groove(R*.76,gw);groove(R*.52,gw*.95);
   // القبّة الوسطى الصغيرة: ضوءٌ على جانبها العلويّ وظلٌّ في أسفلها
@@ -27739,6 +27807,33 @@ function caHandSprite(w,h){
  x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=h*.11*KQ;x.shadowOffsetY=h*.045*KQ;
  x.drawImage(_ca.hand,p,p,w,h);
  c._p=p;c._lw=c.width/KQ;c._lh=c.height/KQ;c._img=_ca.hand;CA_SPR[k]=c;return c;
+}
+/* ═══ ٦٫٥٧ — القطع المُدخَلة تُرى: «تطيح وما تختفي، ثمّ نراها تخرج وتروح فوق اللوح عندي أو عند الخصم» ═══
+   القطعة تغوص في الجيب، ثمّ تقفز منه وتطير إلى حافّة صاحب لونها: لوني على الحافّة السفلى، ولون الخصم
+   على العليا، والملكة عند من أخذها. العدّ من حال المضيف (٩ − الباقي على اللوح)، وأثناء الضربة يُضاف ما
+   هبط (L) قبل أن يصل حكمه، وبعده يُطرح ما لم يهبط بعد — فلا تومض قطعةٌ ولا تُعدّ مرّتين. */
+const CA_FLY_MS=720;
+function caTrayCount(){
+ const C=RM.ca;if(!C)return null;
+ const tr=_ca.tr||{incl:true,L:{w:0,b:0,q:0}}, fl=_ca.fly||[];
+ const sink=(_ca.sim&&_ca.sim.drop)||[];
+ /* ما يطير أو ما زال يغوص (إن وصل حكم المضيف قبل انتهاء الضربة على جهازٍ بطيء) — المراجعة */
+ const F=t=>fl.filter(f=>f.t===t&&!f.done).length+sink.filter(d=>d.t===t&&!d.flown).length;
+ const n=t=>{const base=(t==='q'?1:9)-C.pcs.filter(p=>p.t===t).length;return Math.max(0,base+(tr.incl?-F(t):tr.L[t]))};
+ const qCol=C.q?C.col[C.q]:(C.qw?C.col[C.qw]:(tr.by?C.col[tr.by]:null));
+ return {w:n('w'),b:n('b'),q:n('q'),qCol};
+}
+/** موضع الخانة i على حافّة لونٍ ما — في إحداثيّات اللوحة (أسفل: لوني، أعلى: الخصم) */
+function caTraySlot(col,i,W,M,PR,tr){
+ /* لوني على حافّتي (أسفل). الخصم: مقابلي في الثنائيّ، وعلى يميني في الرباعيّ (شريكي هو المقابل) — المراجعة.
+    القطع من طرف الحافّة، والملكة (i<0) في طرفها الآخر فلا تهبط قطعةٌ فوقها */
+ const my=RM.ca&&RM.ca.col?RM.ca.col[RM.me]:'w', mine=col===my, four=(RM.players||[]).length>2;
+ const a=i<0?W-M-PR-tr*1.35:Math.min(W-M-PR-tr*3.6,M+PR+tr*1.35+i*(tr*2.12));
+ if(mine)return [a,W-M*.5];
+ if(!four)return [W-a,M*.5];
+ /* الرباعيّ: عمودٌ على الحافّة اليمنى من أسفلها، متراكبٌ قليلًا فيبقى تحت بطاقة اللاعب في منتصفها (المراجعة) */
+ const b=i<0?W*.5-M*1.9:W-M-PR-tr*1.35-i*tr*1.3;
+ return [W-M*.5,b];
 }
 function caRender(rest){
  caBaseSync();
@@ -27765,10 +27860,24 @@ function caRender(rest){
    cx.strokeStyle='rgba(140,170,220,.45)';cx.lineWidth=1.5;caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.stroke();
    /* مع اللوح الفاخر لا مقبض: اليد الحقيقيّة فوق المسند هي المقبض — تتبع الإصبع كما في صورة المالك */
    if(knob&&myT){const kx=PX(_ca.drag?_ca.drag.sx:_ca.sxV), kr=th*.42, ks=caDisc('s',kr);
+   /* ٦٫٥٧ — «بيّن أنّه يتحرّك يمينًا ويسارًا»: سهمان ذهبيّان على جانبي المقبض يتنفّسان، ما لم يُسحب */
+   if(!_ca.slide&&!_ca.drag){const pu=.55+.45*Math.sin(tk*.08), gap=kr+th*.22+Math.sin(tk*.08)*th*.06, ch=th*.2;
+    cx.strokeStyle='rgba(255,211,106,'+(.45+.5*pu).toFixed(2)+')';cx.lineWidth=Math.max(2,th*.09);cx.lineCap='round';cx.lineJoin='round';
+    for(const sg of [-1,1])for(const k2 of [0,1]){const ax=kx+sg*(gap+k2*ch*1.1);if(ax<x0-th*.3||ax>x1+th*.3)continue;
+     cx.globalAlpha=k2?.55:1;cx.beginPath();cx.moveTo(ax-sg*ch*.55,ty-ch);cx.lineTo(ax+sg*ch*.45,ty);cx.lineTo(ax-sg*ch*.55,ty+ch);cx.stroke()}
+    cx.globalAlpha=1}
    cx.globalAlpha=_ca.drag?.55:1;cx.drawImage(ks,kx-ks._o,ty-ks._o,ks._s,ks._s);cx.globalAlpha=1}
   }
  }};
  trough(!caPersp());
+ // القطع المُدخَلة على الحافّتين (٦٫٥٧)
+ const TRR=Math.min(M*.36,CA_PR*sc*.9), PRs=CA_POCK*sc, TC=RM.ca?caTrayCount():null;
+ if(TC){
+  const put=(t,col,i)=>{const [X,Y]=caTraySlot(col,i,W,M,PRs,TRR);const sp=caDisc(t,TRR);cx.drawImage(sp,X-sp._o,Y-sp._o,sp._s,sp._s)};
+  /* القطعة المستقرّة: نقشةٌ واحدةٌ بمقاس الخانة (مخبّأة) — والطائرة تُصغَّر وتُكبَّر منها لا نقشةٌ لكلّ إطار */
+  for(const c of ['w','b'])for(let i=0;i<TC[c];i++)put(c,c,i);
+  if(TC.q&&TC.qCol)put('q',TC.qCol,-1);   // الملكة في طرف حافّة صاحبها
+ }
  /* كلّ ما يُرسم يمرّ بإطار مقعدي: أنا أسفل دائمًا، والخصم على ضلعه الحقيقيّ */
  const ms=caMySeat(), V=(x,y)=>caB2L(ms,x,y), Vv=(x,y)=>caB2Lv(ms,x,y), vrot=-CA_ROT[ms];
  if(_ca.sx==null)_ca.sx=caFreeX(caLocalPcs(ms),CA_R/2);
@@ -27850,6 +27959,7 @@ function caRender(rest){
   const fresh=!!(_ca.sim&&d0.ox!=null&&d0.fr===_ca.sim.frame-1);
   const dx0=fresh?d0.ox+(d0.x-d0.ox)*ia:d0.x, dy0=fresh?d0.oy+(d0.y-d0.oy)*ia:d0.y;
   const fi=(_ca.sim&&d0.pf!=null)?d0.pf+(d0.f-d0.pf)*ia:d0.f;
+  if(d0.flown)continue;   // خرجت طائرةً — لا نسخةٌ ثانية تبقى في الفوهة
   const q=V(dx0,dy0),qp=V(d0.px,d0.py), d={f:fi,t:d0.t,r:d0.r,x:q[0],y:q[1],px:qp[0],py:qp[1]};
   const e=Math.min(1,d.f);
   const slide=Math.min(1,e/.42), sz=Math.max(0,(e-.34)/.66);   // تنزلق أولًا ثم تغوص
@@ -27857,7 +27967,8 @@ function caRender(rest){
   const X=PX(d.x+(d.px-d.x)*ez)+Math.sin(e*11)*(1-e)*2.2;
   const Y=PY(d.y+(d.py-d.y)*ez);
   const r=(d.r||CA_PR)*sc*(1-.62*gz);
-  const al=e<.86?1:Math.max(0,1-(e-.86)/.14);
+  const al=d.t==='s'?(e<.86?1:Math.max(0,1-(e-.86)/.14)):(e<.8?1:Math.max(.35,1-(e-.8)/.2*.65));   // القطعة تغوص وتعتم ثمّ تخرج طائرةً (٦٫٥٧)؛ الضارب يخبو كما كان
+  if(d0.f>=1&&!d0.flown&&d0.t!=='s'){d0.flown=1;(_ca.fly=_ca.fly||[]).push({t:d0.t,px:d0.px,py:d0.py,t0:performance.now()})}
   // حلقة أثر تتسع عند الفوهة لحظة الدخول
   if(e>.30&&e<.72){
    const t=(e-.30)/.42, rr=CA_POCK*sc*(1+t*1.35);
@@ -27866,6 +27977,28 @@ function caRender(rest){
    cx.lineWidth=3;cx.stroke();
   }
   disc(X,Y+r*.22*gz,r,d.t,al,Math.min(.68,gz*.8),(d.r||CA_PR)*sc);
+ }
+ // القطع الطائرة من الجيب إلى الحافّة: تقفز من الفوهة، تكبر في منتصف الطريق كأنّها تقترب، وتستقرّ في خانتها
+ if(_ca.fly&&_ca.fly.length&&RM.ca){
+  const now2=performance.now(), cnt=TC||caTrayCount()||{w:0,b:0,q:0,qCol:null};
+  const seen={w:0,b:0,q:0};
+  for(const f of _ca.fly){
+   if(f.done)continue;
+   const t=Math.min(1,(now2-f.t0)/CA_FLY_MS), col=f.t==='q'?(cnt.qCol||(RM.ca.col[RM.ca.turn])):f.t;
+   const idx=f.t==='q'?-1:(cnt[f.t]||0)+seen[f.t];seen[f.t]++;
+   const [SX,SY]=caTraySlot(col,idx,W,M,PRs,TRR);
+   const Q=V(f.px,f.py), X0=PX(Q[0]), Y0=PY(Q[1]);
+   const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+   const mx=(X0+SX)/2+(W/2-(X0+SX)/2)*.28, my=(Y0+SY)/2+(W/2-(Y0+SY)/2)*.28;   // قوسٌ نحو وسط اللوح
+   const X=(1-e)*(1-e)*X0+2*(1-e)*e*mx+e*e*SX, Y=(1-e)*(1-e)*Y0+2*(1-e)*e*my+e*e*SY;
+   const lift=Math.sin(Math.PI*t), r=TRR*(.42+.58*e)*(1+.45*lift);
+   cx.globalAlpha=.28*lift;cx.beginPath();cx.ellipse(X+r*.35*lift,Y+r*.55*lift+2,r*.95,r*.8,0,0,7);cx.fillStyle='#000';cx.fill();cx.globalAlpha=1;
+   const sp=caDisc(f.t,TRR),k=r/TRR;cx.drawImage(sp,X-sp._o*k,Y-sp._o*k,sp._s*k,sp._s*k);   // نقشةٌ واحدة تُحجَّم — كان مقاسٌ جديدٌ كلّ إطار يبني نقشةً جديدة (المراجعة)
+   if(t>=1){f.done=1;
+    if(_ca.tr&&!_ca.tr.incl)_ca.tr.L[f.t]=(_ca.tr.L[f.t]||0)+1;
+    try{if(window.SFX)SFX.play('wall',{v:2.2})}catch(x){}}
+  }
+  _ca.fly=_ca.fly.filter(f=>!f.done);
  }
  if(sPos){
   // خطّ قاعدة صاحب الدور على ضلعه هو — فيُرى من أين يُضرب
@@ -28028,7 +28161,7 @@ function caLoop(){
  }
  _ca.t=(_ca.t||0)+1;
  // في الخمول تكفي 30 لقطة/ث لاهتزازة اليد؛ أثناء السحب والانزلاق كل إطار
- if(easing||_ca.drag||_ca.slide||(_ca.t&1)===0)caRender();
+ if(easing||_ca.drag||_ca.slide||(_ca.fly&&_ca.fly.length)||(_ca.t&1)===0)caRender();
  _ca.loop=requestAnimationFrame(caLoop);
 }
 function caLoopOn(){if(!_ca.loop&&!_ca.sim)_ca.loop=requestAnimationFrame(caLoop)}
