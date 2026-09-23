@@ -2185,7 +2185,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caFinS{display:flex;align-items:baseline;justify-content:center;gap:10px;margin:-8px 0 16px;color:#AEB9CF;font-weight:800;font-size:12px}
 .caFinS b{font-size:26px;font-weight:900;color:#F6E3AE;font-variant-numeric:tabular-nums}
 #caHand{position:fixed;left:0;top:0;z-index:40;pointer-events:none;will-change:transform,opacity}
-.csAv.caPop{animation:caPop .34s ease}
+.pCard .csAv.caPop,.pCard.on .csAv.caPop{animation:caPop .34s ease}
 @keyframes caPop{40%{transform:scale(1.12)}}
 /* الشاشات القصيرة (٦٤٠–٧٠٠): بطاقتي تبقى داخل الشاشة (المراجعة) */
 @media (max-height:700px){.caStage{gap:6px;padding-block:2px}.pCard{padding-block:6px}.pCard .csAv{width:40px;height:40px}.pCard .caRnd{width:38px;height:38px}.caScr .caTbar{padding-bottom:6px}}
@@ -24872,7 +24872,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.70';
+const APP_VER='6.71';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25502,7 +25502,7 @@ function rmOn(d,m){
   RM.ca={pcs:d.pcs,turn:d.turn,sc:d.sc,col:d.col,q:keep('q',d.q),qw:keep('qw',d.qw),M:keep('M',d.M),msg:d.msg||'',
    md:keep('md',d.md),pp:keep('pp',d.pp),ph:keep('ph',d.ph)};
   if(!wasShot&&_ca.sRet&&_ca.sRet.wait){_ca.sRet.wait=0;_ca.sRet.t0=performance.now()}   // عُرف صاحب الدور: ينزلق الضارب إليه
-  if(!wasShot&&_ca.tr){_ca.tr.incl=true;_ca.tr.L={w:0,b:0,q:0}}   // حكم المضيف وصل: العدّ منه، وما يطير بعدُ يُطرح
+  if(!wasShot&&_ca.tr){_ca.tr.incl=true;_ca.tr.L={w:0,b:0,q:0};_ca.tr.seq=[]}   // حكم المضيف وصل: العدّ منه، وما يطير بعدُ يُطرح
   RM.phase='carrom';
   /* صاحب الدور الجديد لم يصوّب بعد — إلّا ضربةَ الخصم الواصلة الآن: يبقى تصويبه حتّى caPlay كي تنسحب يده من حيث صوّب */
   if(!(wasShot&&d.turn!==RM.me)){_ca.aim=null;_ca.aimV=null}
@@ -26206,11 +26206,11 @@ function* caBotThink(pcs,mine,P0,rnd,st){
  /* القوّة اللازمة: سرعة القطعة لتبلغ الجيب، مقسومةً على ما ينتقل إليها من الضارب
     (m(1+e)/(m+1))·cos(القطع)، زائد ما يفقده الضارب في طريقه — والارتداد يُفقده (١−e) من العموديّ.
     نموذج الاحتكاك v←v·drag−roll لا صيغة له مغلقة، فنقلبه بالبحث الثنائيّ. */
- const stopDist=v=>{let x=0;for(let i=0;i<4000&&v>PC.stopSpeed;i++){x+=v;v=v*PC.drag-PC.roll}return x};
+ const stopDist=v=>CarromPhysics.glide(v);   // ٦٫٧٠: الانزلاق ثمّ التدحرج — من المحرّك نفسه
  const spFor=s=>{let lo=0,hi=CA_VMAX*2;for(let i=0;i<28;i++){const m=(lo+hi)/2;if(stopDist(m)<s)lo=m;else hi=m}return hi};
  const needPw=c=>{const uS=spFor(c.pd+60)/Math.max(0.25,tr*Math.cos(c.cut))/(c.aim!==c.hit?0.8:1);
   let lo=uS,hi=CA_VMAX*2;
-  for(let i=0;i<28;i++){const m=(lo+hi)/2;let v=m,x=0;for(let k=0;k<4000&&x<c.d&&v>PC.stopSpeed;k++){x+=v;v=v*PC.drag-PC.roll}if(v<uS)lo=m;else hi=m}
+  for(let i=0;i<28;i++){const m=(lo+hi)/2;if(CarromPhysics.glide(m,c.d)<uS)lo=m;else hi=m}
   return hi};
  const aimAt=c=>{const sx=caFreeX(pcs,clampX(c.sx0));return {sx,ang:Math.atan2(c.aim.y-base,c.aim.x-sx)}};
  /* السقف من الصعوبة: السهل محدودٌ بنطاقه فتقف قطعته قبل الجيب كالمبتدئ، والمحاكي يأخذ ما يلزم */
@@ -26278,9 +26278,12 @@ function* caBotThink(pcs,mine,P0,rnd,st){
     /* قطعةٌ خلف خطّه أو عليه لا تُضرب مباشرةً (لا ضرب للخلف): بالارتداد من الجدار المقابل — فإن لم تدخل
        أخرجها على الأقلّ إلى حيث تُضرب في دوره القادم (يزنه caEase) */
     const sx=caFreeX(pcs,clampX(sx0)), ty=t.y>base-10?wl-(t.y-wl)/e:t.y, a0=Math.atan2(ty-base,t.x-sx);
-    const PW=t.y>base-10?[13,15.5,18]:[P0.pw[0],P0.pw[1],Math.min(CA_VMAX*0.85,P0.pw[1]*1.4)];   // الارتداد يقطع اللوح مرّتين
+    const PW=t.y>base-10?[CA_VMAX*0.9,CA_VMAX*0.96,CA_VMAX]:[P0.pw[0],P0.pw[1],Math.min(CA_VMAX*0.85,P0.pw[1]*1.4)];   // الارتداد يقطع اللوح مرّتين
     for(const pw of PW)for(const da of (t.y>base-10?[0]:[0,0.03,-0.03])){
-     tryShot(sx,a0+da,pw);{busy+=now()-tR;yield nRun;tR=now()}if(late())break outer;
+     /* ٦٫٧٠: بعد الارتداد ينحني المسار قليلًا (التدحرج يحمله — كما في الفيديو)، فالصورة المرآتيّة لا تكفي:
+        تُضبط الزاوية بمحاكاة الضارب وحده حتّى يمرّ بالقطعة بعد ارتداده */
+     const a=t.y>base-10?caBankAim(sx,base,t,pw,a0):a0+da;
+     tryShot(sx,a,pw);{busy+=now()-tR;yield nRun;tR=now()}if(late())break outer;
     }
    }
   }
@@ -26300,6 +26303,24 @@ function* caBotThink(pcs,mine,P0,rnd,st){
  }
  ang+=(rnd()-.5)*(P0.noise||0)*2;
  return {sx,ang,pw,sim:!!pick};
+}
+/** زاوية ضربة الارتداد من الحاجز المقابل: الضارب وحده (بلا قطع) يُطلق بزاوية a، فأين يمرّ حين يعود إلى ارتفاع
+    القطعة؟ بحثٌ ثنائيّ حول الزاوية المرآتيّة a0 حتّى يمرّ بمركزها. بلا حلٍّ (خارج المدى أو ارتدادٌ جانبيّ) ⇒ a0 */
+function caBankAim(sx,sy,t,pw,a0){
+ const miss=a=>{
+  const S=CarromPhysics.create([]);CarromPhysics.shoot(S,{x:sx,y:sy,vx:Math.cos(a)*pw,vy:Math.sin(a)*pw});
+  let up=0;
+  for(let f=0;f<420&&!CarromPhysics.settled(S);f++){
+   const ev=CarromPhysics.step(S), p=S.pcs[0];if(!p)return null;
+   for(const e2 of ev)if(e2.e==='wall'){if(p.y<CA_R/2)up=1;else if(!up)return null}
+   if(up&&p.vy>0&&p.y>=t.y)return p.x-t.x;
+  }
+  return null;
+ };
+ let lo=a0-0.22, hi=a0+0.22, mlo=miss(lo), mhi=miss(hi);
+ if(mlo==null||mhi==null||Math.sign(mlo)===Math.sign(mhi))return a0;
+ for(let i=0;i<16;i++){const m=(lo+hi)/2, mm=miss(m);if(mm==null)return a0;if(Math.sign(mm)===Math.sign(mlo)){lo=m;mlo=mm}else{hi=m;mhi=mm}}
+ return (lo+hi)/2;
 }
 /** الاختيار دفعةً واحدة — للاختبار ولمن لا ينتظر */
 function caBotPick(pcs,mine,P0,rnd,st){
@@ -26929,19 +26950,27 @@ var CarromPhysics=(function(){
   /* ٦٫٤٧: مقيسان من تتبّع القطع في فيديوٍ أرسله المالك (٦٠ إطارًا/ث):
      تباطؤ القطعة ≈ ١٩٠ + ٠٫٣٥·v وحدة/ث² — ثابتٌ (كولوم) مع قليلٍ من السحب النسبيّ.
      كان roll=0.026 (٩٣ وحدة/ث²) فتطفو القطع ثلاثة أضعاف ما ينبغي. */
-  drag:0.994,            // احتكاك نسبيّ لكل إطار (٠٫٣٥/ث)
-  roll:0.053,            // احتكاك انزلاق ثابت لكل إطار (١٩٠ وحدة/ث²)
+  /* ٦٫٧٠ — «الضرب والسرعة ما زالا غير متقنين»: تتبّعٌ كامل لفيديو المالك (١٠٨٠×٢٤٠٠، إطارًا إطارًا) أظهر أنّ
+     القطع في اللعبة المرجعيّة **تنزلق ثمّ تتدحرج** كالكرات: بعد الإطلاق وبعد كلّ اصطدام تنزلق فتكبح بقوّة
+     (≈٠٫١٥٧/إطار²)، ثمّ تتدحرج عند ٥/٧ من سرعتها فتكبح برفق (≈٠٫٠٦٧). ولذلك قطعةٌ اصطدمت بأخرى وجهًا لوجه
+     فوقفت تعود فتتحرّك وحدها وتمضي ٥٥ وحدة (كما في الفيديو). نموذجٌ واحد للكبح لم يكن يستطيع الاثنين:
+     خطأ المسارات ٨٫٠ وحدة ← ٠٫٩٥ بهذا النموذج. */
+  drag:1,                // لا سحب نسبيّ — الفيديو لا يُظهره
+  roll:0.0667,           // تباطؤ التدحرج لكل إطار (٢٤٠ وحدة/ث²)
+  slide:0.157,           // تباطؤ الانزلاق لكل إطار (٥٦٥ وحدة/ث²) — بعد الإطلاق وكلّ اصطدام حتى يتدحرج
+  spinK:2.5,             // قرصٌ يتدحرج كالكرة المصمتة: ٥/٢ — التدحرج يبدأ عند ٥/٧ من السرعة
+  cushSpin:-0.39,        // ما يبقى من دوران التدحرج العموديّ على الحاجز بعد الارتداد
   stopSpeed:0.05,        // دون هذا تُعدّ ساكنة
   /* ارتداد الجدار: ٠٫٧٢ تقديرٌ قديم. قِيس ٦٫٥٨ من الفيديو المرجعيّ بمطابقة مسار الضارب كلّه (٧٧ إطارًا، ارتدادٌ واحد):
      ٠٫٨٦ بالاحتكاك الحاليّ، و٠٫٧٦ إن تُرك الاحتكاك حرًّا — فوسطهما */
-  wallE:0.80,
+  wallE:0.77,             // ٦٫٧٠: ٠٫٧٥ عند ١٣٫٦ و٠٫٧٣ عند ٥ في الفيديو
   /* ٦٫٥٠ — مقيسان من فيديو المالك (ضربة الخصم عند ٤٫٨٣ ث، تتبّع إطارًا إطارًا بـ٦٠ إطارًا/ث):
      الضارب قبل التماسّ ١٦٫٩ وحدة/إطار؛ بعده القطعة ١٤٫٤ في اتّجاه الاصطدام والضارب ٣٫٣٥ فقط.
      حفظ الزخم والارتداد يعطيان: الضارب ≈ ١٫٣ قطعة، والارتداد ≈ ٠٫٧٨.
      كانا ٢٫٧ و٠٫٨٦ — فكانت القطعة تنطلق أسرع بـ٣٥٪ وتذهب قرابة ضعف المسافة، والضارب يشقّ
      الكومة ويمضي. ذاك ما وصفه المالك: «السرعة والفيزياء». */
-  pieceE:0.78,           // ارتداد بين القطع
-  strikerMass:1.32,      // كتلة الضارب نسبةً إلى القطعة — كما في الفيديو المرجعيّ
+  pieceE:0.97,           // ارتداد بين القطع — ٦٫٧٠: قطعةٌ على قطعة ≈ مرنٌ تمامًا في الفيديو
+  strikerMass:1.71,      // كتلة الضارب نسبةً إلى القطعة — كما في الفيديو المرجعيّ
   maxStep:3.5,           // أقصى إزاحة لكل خطوة فرعية
   maxSub:12              // سقف الخطوات الفرعية في الإطار
  };
@@ -27010,7 +27039,7 @@ var CarromPhysics=(function(){
  function create(pieces){
   return {
    pcs:(pieces||[]).map(function(p){
-    return {x:p.x,y:p.y,vx:p.vx||0,vy:p.vy||0,t:p.t,
+    return {x:p.x,y:p.y,vx:p.vx||0,vy:p.vy||0,wx:(p.wx!=null?p.wx:(p.vx||0)),wy:(p.wy!=null?p.wy:(p.vy||0)),t:p.t,
             r:(p.r!=null?p.r:(p.t==='s'?C.strikerR:C.pieceR))};
    }),
    pot:[], drop:[], events:[], frame:0
@@ -27019,7 +27048,7 @@ var CarromPhysics=(function(){
 
  /** يضيف الضارب بسرعته — نقطة الدخول الوحيدة لبدء ضربة */
  function shoot(S,shot){
-  S.pcs.push({x:shot.x,y:shot.y,vx:shot.vx,vy:shot.vy,t:'s',r:C.strikerR});
+  S.pcs.push({x:shot.x,y:shot.y,vx:shot.vx,vy:shot.vy,wx:0,wy:0,t:'s',r:C.strikerR});   // يخرج منزلقًا
   return S;
  }
 
@@ -27060,6 +27089,7 @@ var CarromPhysics=(function(){
      if(vn<0){
       p.vx-=(1+C.wallE)*vn*nx;
       p.vy-=(1+C.wallE)*vn*ny;
+      var wn=(p.wx||0)*nx+(p.wy||0)*ny; p.wx=(p.wx||0)-(1+C.cushSpin)*wn*nx; p.wy=(p.wy||0)-(1+C.cushSpin)*wn*ny;
       S.events.push({e:'wall',t:p.t,speed:Math.abs(vn)});
      }
     }
@@ -27103,23 +27133,47 @@ var CarromPhysics=(function(){
   for(var k=0;k<n;k++)substep(S,h);
 
   // الاحتكاك مرّة واحدة لكل إطار — فلا يتغيّر المدى بتغيّر عدد الخطوات
-  for(var j=0;j<S.pcs.length;j++){
-   var p=S.pcs[j], v=Math.hypot(p.vx,p.vy);
-   if(v===0)continue;
-   var nv=v*C.drag-C.roll;                 // نسبيّ ثمّ ثابت
-   if(nv<=C.stopSpeed){p.vx=0;p.vy=0;continue}
-   p.vx=p.vx/v*nv; p.vy=p.vy/v*nv;
-  }
+  for(var j=0;j<S.pcs.length;j++)friction(S.pcs[j]);
   for(var d=0;d<S.drop.length;d++)
    if(S.drop[d].f<1)S.drop[d].f=Math.min(1,S.drop[d].f+0.021);
   S.frame++;
   return S.events;
  }
 
+ /** كبح إطارٍ واحد: انزلاقٌ يعاكس الفرق بين السرعة وسرعة التدحرج (w) ويولّد التدحرج، ثمّ تدحرجٌ برفق.
+     واحدٌ للمحرّك ولحساب الآليّ (glide) فلا يختلفان أبدًا */
+ function friction(p){
+  var ux=p.vx-(p.wx||0), uy=p.vy-(p.wy||0), u=Math.hypot(ux,uy), rem=1;
+  if(u>1e-9){
+   var tt=Math.min(1,u/(C.slide*(1+C.spinK)));
+   p.vx-=C.slide*tt*ux/u; p.vy-=C.slide*tt*uy/u;
+   if(tt<1){p.wx=p.vx;p.wy=p.vy;rem=1-tt}
+   else{p.wx=(p.wx||0)+C.spinK*C.slide*ux/u; p.wy=(p.wy||0)+C.spinK*C.slide*uy/u; rem=0}
+  }
+  var v=Math.hypot(p.vx,p.vy);
+  if(rem>0&&v>0){
+   var nv=v*Math.pow(C.drag,rem)-C.roll*rem;
+   if(nv<=C.stopSpeed){p.vx=0;p.vy=0;p.wx=0;p.wy=0;return}
+   p.vx=p.vx/v*nv; p.vy=p.vy/v*nv; p.wx=p.vx; p.wy=p.vy;
+  }else if(v<=C.stopSpeed&&Math.hypot(p.wx||0,p.wy||0)<=C.stopSpeed){p.vx=0;p.vy=0;p.wx=0;p.wy=0}
+ }
+
+ /** قطعةٌ وحيدة تنطلق منزلقةً بسرعة v0 (كما بعد الإطلاق أو الاصطدام) في خطٍّ مستقيم:
+     بلا at — المسافة حتى تقف؛ ومع at — سرعتها حين تبلغ at (٠ إن وقفت قبلها). للآليّ والاختبار */
+ function glide(v0,at){
+  var p={vx:v0,vy:0,wx:0,wy:0}, x=0;
+  for(var i=0;i<20000;i++){
+   if(at!=null&&x>=at)return p.vx;
+   if(p.vx<=0&&Math.abs(p.wx)<=C.stopSpeed)break;
+   x+=p.vx; friction(p);
+  }
+  return at!=null?0:x;
+ }
+
  /** هل استقرّ اللوح؟ الحركة والسقوط كلاهما يمنع الاستقرار */
  function settled(S){
   for(var i=0;i<S.pcs.length;i++)
-   if(Math.abs(S.pcs[i].vx)+Math.abs(S.pcs[i].vy)>C.stopSpeed)return false;
+   if(Math.abs(S.pcs[i].vx)+Math.abs(S.pcs[i].vy)+Math.abs(S.pcs[i].wx||0)+Math.abs(S.pcs[i].wy||0)>C.stopSpeed)return false;
   for(var d=0;d<S.drop.length;d++)if(S.drop[d].f<1)return false;
   return true;
  }
@@ -27131,14 +27185,14 @@ var CarromPhysics=(function(){
   return {frames:f,pot:S.pot.slice(),rest:S.pcs};
  }
 
- return {C:C,pockets:pockets,walls:walls,visualR:visualR,chordDepth:chordDepth,
+ return {C:C,pockets:pockets,walls:walls,visualR:visualR,chordDepth:chordDepth,glide:glide,friction:friction,
          deal:deal,create:create,shoot:shoot,step:step,settled:settled,run:run,
          closestOnSeg:closestOnSeg,segPointDist2:segPointDist2};
 })();
 /* ⟦/src⟧ */
 
 const CA_R=400, CA_PR=CarromPhysics.C.pieceR, CA_SR=CarromPhysics.C.strikerR;   // مقاسٌ واحد للرسم والفيزياء
-const CA_VMAX=20;   // أقصى سرعة للضارب (وحدة/إطار) — قِيست من الفيديو: ~١٢٠٠ وحدة/ث عند ضربةٍ عاديّة
+const CA_VMAX=16;   // أقصى سرعة للضارب (وحدة/إطار). ٦٫٧٠ — «القطعة سريعة جدًّا لا ألتقطها بعيني»: في الفيديو ضربةٌ بسهمٍ ٩٨٪ خرجت ≈١٥٫٦ (٩٤٠ وحدة/ث)؛ كانت ٢٠ (١٢٠٠) — أسرع بـ٢٨٪
 /* فمُ الجيب المرسوم يساوي فمَه الفيزيائي بالضبط — لا رقمَين للشيء نفسه */
 const CA_POCK=CarromPhysics.visualR();
 // نصف السرعة بالضبط: احتكاك أبطأ يعوّض نقص السرعة فتبقى المسافة نفسها
@@ -27380,10 +27434,15 @@ function caActPts(d,C,cur){
   caPub(notes.join(' · '));return;
  }
  let got=0;
- coins.forEach(t=>{C.ph[team].push(t);got+=CA_PTS[t]});
- const cover=()=>{C.ph[team].push('q');got+=CA_PTS.q;C.qWin=cur;C.q=null;notes.push('الملكة مُغطّاة +٥٠')};
- if(gotQ){if(coins.length)cover();else{C.q=cur;notes.push('أدخلت الملكة — غطِّها بأيّ قطعة')}}
- else if(C.q===cur){if(coins.length)cover();else{C.q=null;caPutBack(C,'q');notes.push('لم تُغطَّ الملكة — عادت إلى المركز')}}
+ const coinsLeft=C.pcs.some(p=>p.t==='w'||p.t==='b');
+ /* الترتيب في الحافّة ترتيب السقوط (المراجعة): ملكةٌ منتظِرة من ضربةٍ سابقة أوّلًا، ثمّ ما دخل الآن بترتيب دخوله.
+    والملكة آخرُ ما على اللوح لا غطاء لها ممكن — تُحسب فورًا (المراجعة: كانت تُنهي المباراة بلا نقاطها) */
+ const qNow=gotQ&&(coins.length>0||!coinsLeft), qOld=!gotQ&&C.q===cur&&coins.length>0;
+ if(qOld){C.ph[team].push('q');got+=CA_PTS.q}
+ for(const t of pot){if(t==='w'||t==='b'){C.ph[team].push(t);got+=CA_PTS[t]}else if(t==='q'&&qNow){C.ph[team].push('q');got+=CA_PTS.q}}
+ if(qNow||qOld){C.qWin=cur;C.q=null;notes.push('الملكة مُغطّاة +٥٠')}
+ else if(gotQ){C.q=cur;notes.push('أدخلت الملكة — غطِّها بأيّ قطعة')}
+ else if(C.q===cur){C.q=null;caPutBack(C,'q');notes.push('لم تُغطَّ الملكة — عادت إلى المركز')}
  C.pp[team]+=got;
  if(got)notes.unshift('+'+got);
  const onBoard=C.pcs.some(p=>p.t==='w'||p.t==='b'||p.t==='q');
@@ -27391,7 +27450,8 @@ function caActPts(d,C,cur){
   /* الفوز: بلغ ١٦٠ — أو خلا اللوح (لا يقع إلّا نادرًا: المجموع ٣٢٠) فالأعلى، والتعادل لصاحب الضربة */
   const o=team==='w'?'b':'w', wCol=C.pp[team]>=CA_PTS_WIN?team:(C.pp[o]>C.pp[team]?o:team);
   const champ=RM.players.find(p=>C.col[p.peer]===wCol)||RM.players[0], duo2=N<=2;
-  C.over=1;caPub(notes.concat([`${esc(nm2)} بلغ ${C.pp[team]}`]).join(' · '));
+  const wn=(RM.players.find(p=>C.col[p.peer]===wCol)||{}).name||'';
+  C.over=1;caPub(notes.concat([`${esc(wn)} بلغ ${C.pp[wCol]}`]).join(' · '));
   if(RM.solo)setTimeout(()=>caBotReact(champ.peer,{over:1}),900);
   rmSend({t:'over',win:'carrom',by:champ.peer,
    msg:`فاز ${duo2?'':'فريق '}${esc(champ.name)} — ${C.pp[wCol]} مقابل ${C.pp[wCol==='w'?'b':'w']}`,
@@ -27825,12 +27885,13 @@ function caTrayPts(){
  const sc=tr.by!=null&&C.col?C.col[tr.by]:null;
  if(sc&&L[sc]){
   if(tr.incl){for(const t of fl.map(f=>f.t).concat(sink.map(d=>d.t))){const i=L[sc].lastIndexOf(t);if(i>=0)L[sc].splice(i,1)}}
-  else for(const t of ['w','b','q'])for(let k=0;k<(tr.L[t]||0);k++)L[sc].push(t);
  }
- /* الملكة المنتظِرة تغطيتها: عند فريق صاحبها في طرف حافّته (ما لم تكن في الطريق إليه) */
+ /* الملكة المنتظِرة تغطيتها: بعد ما حسبه فريق صاحبها وقبل ما يهبط الآن (ما لم تكن في الطريق إليه) */
  const qc=C.q&&C.col?C.col[C.q]:null;
  if(qc&&L[qc]&&!L[qc].includes('q')&&!fl.some(f=>f.t==='q')&&!sink.some(d=>d.t==='q'))L[qc].push('q');
- return {L,sc};
+ /* ما هبط قبل حكم المضيف: بترتيب هبوطه كما طار (كان مرتّبًا بالنوع فتتبادل القطع أماكنها — المراجعة) */
+ if(sc&&L[sc]&&!tr.incl)for(const t of (tr.seq||[]))L[sc].push(t);
+ return {L,sc,pend:fl.length+sink.length};
 }
 /* خاناتٌ أكثر من الحافّة تتقارب (قد يجمع فريقٌ ستّ عشرة قطعة) */
 function caTrayK(n){return n>11?11/n:1}
@@ -27870,8 +27931,8 @@ function caHandTick(R,F,T,nw,cv,PX,PY,sc){
   const sp=caDisc('s:'+caSkOf(who),CA_SR*sc);
   el.width=sp.width;el.height=sp.height;const g=el.getContext('2d');g.clearRect(0,0,el.width,el.height);g.drawImage(sp,0,0);
   el._o=sp._o*u;el.style.width=el.style.height=(sp._s*u)+'px';el.style.transformOrigin=el._o+'px '+el._o+'px';el._k=key;
-  /* الصورة تتلقّاه وتُخرجه بنبضةٍ صغيرة */
-  const pop=ph?av:caHandAv(R.by);if(pop){pop.classList.remove('caPop');void pop.offsetWidth;pop.classList.add('caPop')}
+  /* لحظة التسليم (بدء الطور الثاني): صورة صاحبه تتلقّاه وصورة صاحب الدور تُخرجه — بنبضةٍ صغيرة */
+  if(ph)for(const pop of [caHandAv(R.by),av])if(pop){pop.classList.remove('caPop');void pop.offsetWidth;pop.classList.add('caPop')}
  }
  el.style.opacity=op.toFixed(3);el.style.transform='translate('+(x-el._o).toFixed(1)+'px,'+(y-el._o).toFixed(1)+'px) scale('+k.toFixed(3)+')';
  return true;
@@ -27917,7 +27978,7 @@ function caRender(rest){
   const put=(t,col,i)=>{const [X,Y]=caTraySlot(col,i,W,MR,PRs,TRR);const sp=caDisc(t,TRR);cx.drawImage(sp,X-sp._o,Y-sp._o,sp._s,sp._s)};
   /* القطعة المستقرّة: نقشةٌ واحدةٌ بمقاس الخانة (مخبّأة) — والطائرة تُصغَّر وتُكبَّر منها لا نقشةٌ لكلّ إطار */
   const TP=caTrayPts();
-  if(TP){for(const c of ['w','b']){const k=caTrayK(TP.L[c].length+((_ca.fly||[]).length));TP.L[c].forEach((t,i)=>put(t,c,i*k))}}
+  if(TP){for(const c of ['w','b']){const k=caTrayK(TP.L[c].length+(c===TP.sc?TP.pend:0));TP.L[c].forEach((t,i)=>put(t,c,i*k))}}
   else{
   for(const c of ['w','b'])for(let i=0;i<TC[c];i++)put(c,c,i);
   if(TC.q&&TC.qCol)put('q',TC.qCol,-1);   // الملكة في طرف حافّة صاحبها
@@ -28022,7 +28083,7 @@ function caRender(rest){
    const t=Math.min(1,(now2-f.t0)/CA_FLY_MS);
    let col=f.t==='q'?(cnt.qCol||(RM.ca.col[RM.ca.turn])):f.t, idx=f.t==='q'?-1:(cnt[f.t]||0)+seen[f.t];seen[f.t]++;
    /* حاصد النقاط: القطعة لمن أدخلها — تطير إلى حافّة فريق الضارب، بعد ما حسبه */
-   if(TPf&&TPf.sc){col=TPf.sc;const n0=TPf.L[col].length;idx=(n0+seenA)*caTrayK(n0+_ca.fly.length);seenA++}
+   if(TPf&&TPf.sc){col=TPf.sc;const n0=TPf.L[col].length;idx=(n0+seenA)*caTrayK(n0+TPf.pend);seenA++}
    const [SX,SY]=caTraySlot(col,idx,W,MR,PRs,TRR);
    const Q=V(f.px,f.py), X0=PX(Q[0]), Y0=PY(Q[1]);
    const e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
@@ -28032,7 +28093,7 @@ function caRender(rest){
    cx.globalAlpha=.28*lift;cx.beginPath();cx.ellipse(X+r*.35*lift,Y+r*.55*lift+2,r*.95,r*.8,0,0,7);cx.fillStyle='#000';cx.fill();cx.globalAlpha=1;
    const sp=caDisc(f.t,TRR),k=r/TRR;cx.drawImage(sp,X-sp._o*k,Y-sp._o*k,sp._s*k,sp._s*k);   // نقشةٌ واحدة تُحجَّم — كان مقاسٌ جديدٌ كلّ إطار يبني نقشةً جديدة (المراجعة)
    if(t>=1){f.done=1;
-    if(_ca.tr&&!_ca.tr.incl)_ca.tr.L[f.t]=(_ca.tr.L[f.t]||0)+1;
+    if(_ca.tr&&!_ca.tr.incl){_ca.tr.L[f.t]=(_ca.tr.L[f.t]||0)+1;(_ca.tr.seq=_ca.tr.seq||[]).push(f.t)}
     try{if(window.SFX)SFX.play('hit',{v:2,s:false,gain:.55})}catch(x){}}   // ٦٫٦٦: طقّة قطعةٍ على قطعةٍ خافتة لا دويّ حافة
   }
   _ca.fly=_ca.fly.filter(f=>!f.done);
@@ -28040,7 +28101,7 @@ function caRender(rest){
  /* ٦٫٦٤ — «في اللوح نقطٌ حمر ما أعرف مصدرها»: كان يُرسم فوق خطّ القاعدة خطٌّ متقطّع (أحمر في دور الخصم)
     ومقاطعُ حمراء حيث تحجز القطع — نقطٌ ليست من اللوح. حُذفت: الخطّ المرسوم في اللوح يكفي، والضارب يقفز
     وحده عن الموضع المحجوز */
- if(_ca.aim&&!_ca.sim&&RM.ca&&RM.ca.turn!==RM.me){
+ if(_ca.aim&&!_ca.sim&&RM.ca&&RM.ca.turn!==RM.me&&!(_ca.sRet&&_ca.sRet.hand)){   // لا سهم بلا ضارب تحته أثناء التسليم (المراجعة)
   /* ٦٫٥٨ — تصويب الخصم بالفكرة نفسها التي أراها في تصويبي (كما في الفيديو المرجعيّ): دائرةٌ ونقاط سحبٍ
      وسهمٌ يطول ويحمرّ بقوّته ونقاطٌ أمامه — لا خطٌّ أحمر متقطّع. وهو يحرّك ضاربه (move) لا تصويب */
   const a0=_ca.aimV||_ca.aim, A=V(a0.x,a0.y), ang=a0.ang+vrot;
@@ -28484,7 +28545,7 @@ function caBotReact(cur,e){
  }else if(botShot){
   const me2=RM.players.find(p=>p.peer===cur), left=RM.ca.pcs.filter(p=>p.t===e.mine).length, foe=RM.ca.col[cur]!==myCol;
   if(e.foul)say(me2,'back',.35);
-  else if(e.gotMine&&foe&&left<=2)say(me2,'near',.75);
+  else if(e.gotMine&&foe&&(caIsPts(RM.C)?CA_PTS_WIN-((RM.C.pp||{})[e.mine]||0)<=40:left<=2))say(me2,'near',.75);   // حاصد النقاط: القرب بالنقاط
   else if(e.gotMine>=2||e.gotQ)say(me2,'hype',.6);
   else if(e.gotMine)say(me2,foe?'tease':'hype',.3);
  }else{   // ضربتي أنا (أو شريكي)
@@ -36016,7 +36077,7 @@ const DIFF_P={
  easy:{n:'سهل',  carrom:{noise:0.28,pw:[5.6,9.4],blind:0.45},
        uno:{rand:0.85,hunt:0,say:0.45,catch:0.20,think:1900},
        mafia:{talk:120,bluff:0},draw:{opts:4,ms:14000}},
- mid: {n:'متوسط',carrom:{noise:0.026,pw:[8.8,12.0],blind:0.10,sim:6},
+ mid: {n:'متوسط',carrom:{noise:0.056,pw:[8.8,12.0],blind:0.10,sim:6},
        uno:{rand:0.25,hunt:0.5,say:0.80,catch:0.65,think:1500},
        mafia:{talk:90,bluff:1},draw:{opts:6,ms:11000}},
  /* ٦٫٥٢ — «الصعوبة ارفعها ٥٠٪، والمتوسّط ١٠٪» (مقيسٌ على ٣٠٠ لوحةٍ عشوائيّة):
@@ -43585,7 +43646,7 @@ const go=h=>{const eb=document.querySelector('.ebar.fx');if(eb)eb.remove();
  if(liveCv&&liveCv._on){
   const t=document.createElement('template');t.innerHTML=h;
   const nc=t.content.getElementById('caC');
-  if(nc){nc.replaceWith(liveCv);app.replaceChildren(t.content)}else app.innerHTML=h;
+  if(nc){nc.replaceWith(liveCv);app.replaceChildren(t.content);try{caRender()}catch(e){}}else app.innerHTML=h;   // الغلاف جديد: أصنافه (caDrag) تُطبَّق الآن لا في الإطار التالي (المراجعة)
  }else app.innerHTML=h;
  if(still)for(const e of app.children)if(e.classList.contains('scr'))e.classList.add('still');
  try{enPass(app)}catch(e){}
@@ -44575,7 +44636,8 @@ function caProf(peer){
  else if(RM.solo){p=rivalProfile(pl.name||'لاعب');p.bot=1;p.avatar=pl.av?avatarSVG(pl.av,96):personArt(pl.name,96)}
  else p={name:pl.name,avatar:pl.av?avatarSVG(pl.av,96):personArt(pl.name,96),title:'لاعب أونلاين',noStats:1};
  const C=RM.ca, col=C&&C.col?C.col[peer]:null, left=col&&C.pcs?C.pcs.filter(x=>x.t===col).length:null;
- const extra=col?`<div class="pfNow"><i class="caDot ${col}"></i> ${col==='w'?'البيضاء':'السوداء'} · أدخل ${9-left} · باقٍ ${left}${RM.solo&&p.bot?' · '+(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):''}</div>`:'';
+ const extra=col&&caIsPts(C)?`<div class="pfNow">حاصد النقاط · ${(C.pp||{})[col]||0} نقطة من ${CA_PTS_WIN}${RM.solo&&p.bot?' · '+(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):''}</div>`
+  :col?`<div class="pfNow"><i class="caDot ${col}"></i> ${col==='w'?'البيضاء':'السوداء'} · أدخل ${9-left} · باقٍ ${left}${RM.solo&&p.bot?' · '+(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):''}</div>`:'';
  const ov=document.createElement('div');ov.className='pfOv';
  ov.innerHTML=`<div class="pfBox">${profHero(p,{sheet:1,extra})}<button class="pfX" aria-label="إغلاق"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>`;
  ov.addEventListener('click',e=>{if(e.target===ov||e.target.closest('.pfX'))ov.remove()});

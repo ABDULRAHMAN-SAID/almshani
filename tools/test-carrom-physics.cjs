@@ -13,7 +13,7 @@ const at=(x,y,vx,vy,t)=>({x,y,vx,vy,t:t||'w'});
 const shoot=(pieces)=>{const S=P.create(pieces);return P.run(S)};
 const near=p=>{let m=1e9;for(const[px,py]of P.pockets())m=Math.min(m,Math.hypot(p.x-px,p.y-py));return m};
 // مدى الضربة بنموذج الاحتكاك نفسه (ثابتٌ + نسبيّ منذ ٦٫٤٧): مجموع السرعات حتى السكون
-const reach=sp=>{let v=sp,d=0;for(let i=0;i<100000&&v>C.stopSpeed;i++){d+=v;v=v*C.drag-C.roll}return d};
+const reach=sp=>P.glide(sp);   // ٦٫٧٠: الانزلاق ثمّ التدحرج — من المحرّك نفسه
 const spFor=dist=>{let sp=0.5;while(reach(sp)<dist*1.08&&sp<60)sp+=0.1;return +sp.toFixed(1)};   // أصغر سرعةٍ تبلغ المسافة بهامش ٨٪
 
 console.log('\n── هندسة اللوح ──');
@@ -138,7 +138,7 @@ console.log('\n── لا اختراق مهما زادت القوّة ──');
  for(let a=0;a<360;a+=7){
   const r=shoot([at(200,200,Math.cos(a*Math.PI/180)*60,Math.sin(a*Math.PI/180)*60)]);
   for(const p of r.rest)
-   if(p.x<-1||p.y<-1||p.x>C.R+1||p.y>C.R+1)out++;
+   {const lo=-C.rail+p.r-1, hi=C.R+C.rail-p.r+1;if(p.x<lo||p.y<lo||p.x>hi||p.y>hi)out++}   // ٦٫٧٠: الحاجز خارج مربّع الجيوب
  }
  ck('لا قطعة تخرج من اللوح ولا تختفي بلا جيب',out===0,out+' خرجت');
 }

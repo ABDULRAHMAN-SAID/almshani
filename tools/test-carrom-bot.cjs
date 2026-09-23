@@ -11,9 +11,9 @@ function fn(name){const m=html.match(new RegExp('\\nfunction\\*? ?'+name+'\\([^)
 function cst(re){const m=html.match(re);if(!m)throw new Error('ثابت مفقود '+re);return m[0]}
 const src=[phys,';',
  cst(/const CA_R=400, CA_PR=CarromPhysics\.C\.pieceR, CA_SR=CarromPhysics\.C\.strikerR;/),cst(/const CA_VMAX=\d+;/),cst(/let CA_BASE=\d+;/),cst(/const CA_XL=\d+, CA_XR=400-\d+;/),
- fn('caBlocked'),fn('caBlockedAt'),fn('caFreeX'),fn('caLegalTargets'),fn('caShotVal'),fn('caCands'),fn('caEase'),fn('caBotThink'),fn('caBotPick'),
- ';({caBotPick,caShotVal,caLegalTargets,CarromPhysics,CA_R,CA_PR,CA_SR,CA_BASE})'].join('\n');
-const {caBotPick,caShotVal,caLegalTargets,CarromPhysics:PH,CA_R,CA_PR,CA_SR,CA_BASE}=(0,eval)(src);
+ fn('caBlocked'),fn('caBlockedAt'),fn('caFreeX'),fn('caLegalTargets'),fn('caShotVal'),fn('caCands'),fn('caEase'),fn('caBankAim'),fn('caBotThink'),fn('caBotPick'),
+ ';({caBotPick,caShotVal,caLegalTargets,caBankAim,CarromPhysics,CA_R,CA_PR,CA_SR,CA_BASE,CA_VMAX})'].join('\n');
+const {caBotPick,caShotVal,caLegalTargets,caBankAim,CarromPhysics:PH,CA_R,CA_PR,CA_SR,CA_BASE,CA_VMAX}=(0,eval)(src);
 // جدول الصعوبة يُقرأ من اللعبة نفسها — فما يُقاس هو ما يُشحن
 const DIFF_P=(0,eval)('('+html.match(/const DIFF_P=(\{[\s\S]*?\n\});/)[1]+')');
 const LV=['easy','mid','hard','imp'], DIFF={};LV.forEach(k=>DIFF[k]=DIFF_P[k].carrom);
@@ -83,7 +83,7 @@ for(const k of ['hard','imp']){
   const touch=(sx,a,pw)=>{const S=PH.create(pcs.map(q=>({x:q.x,y:q.y,t:q.t})));PH.shoot(S,{x:sx,y:CA_BASE,vx:Math.cos(a)*pw,vy:Math.sin(a)*pw});
    let h=0;for(let f=0;f<6000&&!PH.settled(S);f++)for(const ev of PH.step(S))if(ev.e==='hit'&&((ev.a==='s'&&ev.b==='w')||(ev.a==='w'&&ev.b==='s')))h=1;return {h,S}};
   /* هل تُصاب أصلًا؟ مسحٌ يدويّ: ٣١ موضعًا × ٣ قوى نحو صورتها في الجدار المقابل */
-  const wl=CA_SR-PH.C.rail;let can=0;for(let sx=50;sx<=350&&!can;sx+=10)for(const pw of [15,17,19]){const a=Math.atan2(wl-(w.y-wl)/PH.C.wallE-CA_BASE,w.x-sx);if(touch(sx,a,pw).h){can=1;break}}
+  const wl=CA_SR-PH.C.rail;let can=0;for(let sx=50;sx<=350&&!can;sx+=10)for(const pw of [CA_VMAX*0.9,CA_VMAX*0.96,CA_VMAX]){const a=caBankAim(sx,CA_BASE,w,pw,Math.atan2(wl-(w.y-wl)/PH.C.wallE-CA_BASE,w.x-sx));if(touch(sx,a,pw).h){can=1;break}}
   const p=caBotPick(pcs,'w',DIFF[k],rng,{foeK:2});const R=touch(p.sx,p.ang,p.pw);
   if(can){n++;if(R.h||R.S.pot.includes('w'))ok++}if(R.S.pot.filter(t=>t==='b').length>=nb)lose++}
  ck(`${k}: قطعته خلف خطّه — حيث تُصاب بالارتداد أصابها في ${ok} من ${n}، وخسر اللوح ${lose}`,ok>=n*0.7&&lose===0);

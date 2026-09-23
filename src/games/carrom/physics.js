@@ -42,19 +42,27 @@ var CarromPhysics=(function(){
   /* ٦٫٤٧: مقيسان من تتبّع القطع في فيديوٍ أرسله المالك (٦٠ إطارًا/ث):
      تباطؤ القطعة ≈ ١٩٠ + ٠٫٣٥·v وحدة/ث² — ثابتٌ (كولوم) مع قليلٍ من السحب النسبيّ.
      كان roll=0.026 (٩٣ وحدة/ث²) فتطفو القطع ثلاثة أضعاف ما ينبغي. */
-  drag:0.994,            // احتكاك نسبيّ لكل إطار (٠٫٣٥/ث)
-  roll:0.053,            // احتكاك انزلاق ثابت لكل إطار (١٩٠ وحدة/ث²)
+  /* ٦٫٧٠ — «الضرب والسرعة ما زالا غير متقنين»: تتبّعٌ كامل لفيديو المالك (١٠٨٠×٢٤٠٠، إطارًا إطارًا) أظهر أنّ
+     القطع في اللعبة المرجعيّة **تنزلق ثمّ تتدحرج** كالكرات: بعد الإطلاق وبعد كلّ اصطدام تنزلق فتكبح بقوّة
+     (≈٠٫١٥٧/إطار²)، ثمّ تتدحرج عند ٥/٧ من سرعتها فتكبح برفق (≈٠٫٠٦٧). ولذلك قطعةٌ اصطدمت بأخرى وجهًا لوجه
+     فوقفت تعود فتتحرّك وحدها وتمضي ٥٥ وحدة (كما في الفيديو). نموذجٌ واحد للكبح لم يكن يستطيع الاثنين:
+     خطأ المسارات ٨٫٠ وحدة ← ٠٫٩٥ بهذا النموذج. */
+  drag:1,                // لا سحب نسبيّ — الفيديو لا يُظهره
+  roll:0.0667,           // تباطؤ التدحرج لكل إطار (٢٤٠ وحدة/ث²)
+  slide:0.157,           // تباطؤ الانزلاق لكل إطار (٥٦٥ وحدة/ث²) — بعد الإطلاق وكلّ اصطدام حتى يتدحرج
+  spinK:2.5,             // قرصٌ يتدحرج كالكرة المصمتة: ٥/٢ — التدحرج يبدأ عند ٥/٧ من السرعة
+  cushSpin:-0.39,        // ما يبقى من دوران التدحرج العموديّ على الحاجز بعد الارتداد
   stopSpeed:0.05,        // دون هذا تُعدّ ساكنة
   /* ارتداد الجدار: ٠٫٧٢ تقديرٌ قديم. قِيس ٦٫٥٨ من الفيديو المرجعيّ بمطابقة مسار الضارب كلّه (٧٧ إطارًا، ارتدادٌ واحد):
      ٠٫٨٦ بالاحتكاك الحاليّ، و٠٫٧٦ إن تُرك الاحتكاك حرًّا — فوسطهما */
-  wallE:0.80,
+  wallE:0.77,             // ٦٫٧٠: ٠٫٧٥ عند ١٣٫٦ و٠٫٧٣ عند ٥ في الفيديو
   /* ٦٫٥٠ — مقيسان من فيديو المالك (ضربة الخصم عند ٤٫٨٣ ث، تتبّع إطارًا إطارًا بـ٦٠ إطارًا/ث):
      الضارب قبل التماسّ ١٦٫٩ وحدة/إطار؛ بعده القطعة ١٤٫٤ في اتّجاه الاصطدام والضارب ٣٫٣٥ فقط.
      حفظ الزخم والارتداد يعطيان: الضارب ≈ ١٫٣ قطعة، والارتداد ≈ ٠٫٧٨.
      كانا ٢٫٧ و٠٫٨٦ — فكانت القطعة تنطلق أسرع بـ٣٥٪ وتذهب قرابة ضعف المسافة، والضارب يشقّ
      الكومة ويمضي. ذاك ما وصفه المالك: «السرعة والفيزياء». */
-  pieceE:0.78,           // ارتداد بين القطع
-  strikerMass:1.32,      // كتلة الضارب نسبةً إلى القطعة — كما في الفيديو المرجعيّ
+  pieceE:0.97,           // ارتداد بين القطع — ٦٫٧٠: قطعةٌ على قطعة ≈ مرنٌ تمامًا في الفيديو
+  strikerMass:1.71,      // كتلة الضارب نسبةً إلى القطعة — كما في الفيديو المرجعيّ
   maxStep:3.5,           // أقصى إزاحة لكل خطوة فرعية
   maxSub:12              // سقف الخطوات الفرعية في الإطار
  };
@@ -123,7 +131,7 @@ var CarromPhysics=(function(){
  function create(pieces){
   return {
    pcs:(pieces||[]).map(function(p){
-    return {x:p.x,y:p.y,vx:p.vx||0,vy:p.vy||0,t:p.t,
+    return {x:p.x,y:p.y,vx:p.vx||0,vy:p.vy||0,wx:(p.wx!=null?p.wx:(p.vx||0)),wy:(p.wy!=null?p.wy:(p.vy||0)),t:p.t,
             r:(p.r!=null?p.r:(p.t==='s'?C.strikerR:C.pieceR))};
    }),
    pot:[], drop:[], events:[], frame:0
@@ -132,7 +140,7 @@ var CarromPhysics=(function(){
 
  /** يضيف الضارب بسرعته — نقطة الدخول الوحيدة لبدء ضربة */
  function shoot(S,shot){
-  S.pcs.push({x:shot.x,y:shot.y,vx:shot.vx,vy:shot.vy,t:'s',r:C.strikerR});
+  S.pcs.push({x:shot.x,y:shot.y,vx:shot.vx,vy:shot.vy,wx:0,wy:0,t:'s',r:C.strikerR});   // يخرج منزلقًا
   return S;
  }
 
@@ -173,6 +181,7 @@ var CarromPhysics=(function(){
      if(vn<0){
       p.vx-=(1+C.wallE)*vn*nx;
       p.vy-=(1+C.wallE)*vn*ny;
+      var wn=(p.wx||0)*nx+(p.wy||0)*ny; p.wx=(p.wx||0)-(1+C.cushSpin)*wn*nx; p.wy=(p.wy||0)-(1+C.cushSpin)*wn*ny;
       S.events.push({e:'wall',t:p.t,speed:Math.abs(vn)});
      }
     }
@@ -216,23 +225,47 @@ var CarromPhysics=(function(){
   for(var k=0;k<n;k++)substep(S,h);
 
   // الاحتكاك مرّة واحدة لكل إطار — فلا يتغيّر المدى بتغيّر عدد الخطوات
-  for(var j=0;j<S.pcs.length;j++){
-   var p=S.pcs[j], v=Math.hypot(p.vx,p.vy);
-   if(v===0)continue;
-   var nv=v*C.drag-C.roll;                 // نسبيّ ثمّ ثابت
-   if(nv<=C.stopSpeed){p.vx=0;p.vy=0;continue}
-   p.vx=p.vx/v*nv; p.vy=p.vy/v*nv;
-  }
+  for(var j=0;j<S.pcs.length;j++)friction(S.pcs[j]);
   for(var d=0;d<S.drop.length;d++)
    if(S.drop[d].f<1)S.drop[d].f=Math.min(1,S.drop[d].f+0.021);
   S.frame++;
   return S.events;
  }
 
+ /** كبح إطارٍ واحد: انزلاقٌ يعاكس الفرق بين السرعة وسرعة التدحرج (w) ويولّد التدحرج، ثمّ تدحرجٌ برفق.
+     واحدٌ للمحرّك ولحساب الآليّ (glide) فلا يختلفان أبدًا */
+ function friction(p){
+  var ux=p.vx-(p.wx||0), uy=p.vy-(p.wy||0), u=Math.hypot(ux,uy), rem=1;
+  if(u>1e-9){
+   var tt=Math.min(1,u/(C.slide*(1+C.spinK)));
+   p.vx-=C.slide*tt*ux/u; p.vy-=C.slide*tt*uy/u;
+   if(tt<1){p.wx=p.vx;p.wy=p.vy;rem=1-tt}
+   else{p.wx=(p.wx||0)+C.spinK*C.slide*ux/u; p.wy=(p.wy||0)+C.spinK*C.slide*uy/u; rem=0}
+  }
+  var v=Math.hypot(p.vx,p.vy);
+  if(rem>0&&v>0){
+   var nv=v*Math.pow(C.drag,rem)-C.roll*rem;
+   if(nv<=C.stopSpeed){p.vx=0;p.vy=0;p.wx=0;p.wy=0;return}
+   p.vx=p.vx/v*nv; p.vy=p.vy/v*nv; p.wx=p.vx; p.wy=p.vy;
+  }else if(v<=C.stopSpeed&&Math.hypot(p.wx||0,p.wy||0)<=C.stopSpeed){p.vx=0;p.vy=0;p.wx=0;p.wy=0}
+ }
+
+ /** قطعةٌ وحيدة تنطلق منزلقةً بسرعة v0 (كما بعد الإطلاق أو الاصطدام) في خطٍّ مستقيم:
+     بلا at — المسافة حتى تقف؛ ومع at — سرعتها حين تبلغ at (٠ إن وقفت قبلها). للآليّ والاختبار */
+ function glide(v0,at){
+  var p={vx:v0,vy:0,wx:0,wy:0}, x=0;
+  for(var i=0;i<20000;i++){
+   if(at!=null&&x>=at)return p.vx;
+   if(p.vx<=0&&Math.abs(p.wx)<=C.stopSpeed)break;
+   x+=p.vx; friction(p);
+  }
+  return at!=null?0:x;
+ }
+
  /** هل استقرّ اللوح؟ الحركة والسقوط كلاهما يمنع الاستقرار */
  function settled(S){
   for(var i=0;i<S.pcs.length;i++)
-   if(Math.abs(S.pcs[i].vx)+Math.abs(S.pcs[i].vy)>C.stopSpeed)return false;
+   if(Math.abs(S.pcs[i].vx)+Math.abs(S.pcs[i].vy)+Math.abs(S.pcs[i].wx||0)+Math.abs(S.pcs[i].wy||0)>C.stopSpeed)return false;
   for(var d=0;d<S.drop.length;d++)if(S.drop[d].f<1)return false;
   return true;
  }
@@ -244,7 +277,7 @@ var CarromPhysics=(function(){
   return {frames:f,pot:S.pot.slice(),rest:S.pcs};
  }
 
- return {C:C,pockets:pockets,walls:walls,visualR:visualR,chordDepth:chordDepth,
+ return {C:C,pockets:pockets,walls:walls,visualR:visualR,chordDepth:chordDepth,glide:glide,friction:friction,
          deal:deal,create:create,shoot:shoot,step:step,settled:settled,run:run,
          closestOnSeg:closestOnSeg,segPointDist2:segPointDist2};
 })();
