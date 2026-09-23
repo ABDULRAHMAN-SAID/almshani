@@ -23345,6 +23345,7 @@ const SHOUTS=[
  {i:'b8',g:'back',t:'الجولة الجاية لي'},
  {i:'b9',g:'back',t:'أنا بس أسخّن'},
  {i:'b10',g:'back',t:'خلّنا نشوف آخرها'},
+ {i:'b11',g:'back',t:'طيب طيب، أنا أوريك'},   // ٦٫٨١ — من كلام المالك
  {i:'t1',g:'tease',t:'وش صار؟'},
  {i:'t2',g:'tease',t:'تأكّد من إجابتك'},
  {i:'t3',g:'tease',t:'إيه، شكلك نسيت'},
@@ -23356,6 +23357,8 @@ const SHOUTS=[
  {i:'t9',g:'tease',t:'بالتوفيق، تحتاجه'},
  {i:'t10',g:'tease',t:'تكفى ركّز شوي'},
  {i:'t11',g:'tease',t:'هههههههه'},
+ {i:'t12',g:'tease',t:'تعال تعال'},   // ٦٫٨١ — من كلام المالك
+ {i:'t13',g:'tease',t:'تبي تفوز ها؟'},
  {i:'h1',g:'hype',t:'يلا يلا!'},
  {i:'h2',g:'hype',t:'هذي هي!'},
  {i:'h3',g:'hype',t:'أشوفك!'},
@@ -24893,7 +24896,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.80';
+const APP_VER='6.81';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -28766,7 +28769,7 @@ function caBotReact(cur,e){
  if(!who||!g)return;
  /* ٦٫٦٦ — جملٌ تناسب الموقف لا المجموعة كلّها (المراجعة): الفائز لا يقول «تستاهل الفوز»، ولا يُواسى من يُدخل،
     ولا «تأكّد من إجابتك» في الكيرم */
- const OK={near:['n2','n3','n4','n5','n7','n8'],back:['b1','b2','b3','b5','b6','b8','b9'],tease:['t1','t4','t5','t7','t8','t11'],
+ const OK={near:['n2','n3','n4','n5','n7','n8'],back:['b1','b2','b3','b5','b6','b8','b9','b11'],tease:['t1','t4','t5','t7','t8','t11','t12','t13'],
   hype:['h1','h2','h3','h5','h8'],nice:['c1','c2','c3','c4','c6'],gg:e.over&&RM.ca.col[cur]!==myCol?['g1','g2','g4']:['g1','g3','g4','g5']};
  const pool=SHOUTS.filter(x=>x.g===g&&(!OK[g]||OK[g].indexOf(x.i)>=0));if(!pool.length)return;
  _caTalk=now;
