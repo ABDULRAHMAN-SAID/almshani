@@ -88,14 +88,29 @@ var SFX=(function(){
    return true;
   }
   if(c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
+  /* ٦٫٤٨ — الأصليّ: حفيف الحركة من التسجيل نفسه، حلقةٌ داخل ملفّ العيّنات (مستواه محفوظٌ فيه) */
+  var rs=STYLE==='orig'&&SPR.carrom&&SPR.carrom.buf&&SPR.carrom.seg.orig_roll, real=!!(rs&&rs.length);
+  if(SL&&SL.real!==real){var o=SL;SL=null;o.g.gain.setTargetAtTime(0.0001,now,0.03);setTimeout(function(){try{o.src.stop()}catch(e){}},200)}   // تغيّر النمط أو اكتمل تحميل الملفّ أثناء الحركة: خفوتٌ لا قطع
   if(!SL){
    var src=c.createBufferSource(),f=c.createBiquadFilter(),g=c.createGain();
-   src.buffer=slideBuf(c);src.loop=true;
-   f.type='bandpass';f.frequency.value=2400;f.Q.value=0.6;   // التسجيل الحقيقيّ: طاقة الانزلاق بين ١٫٤ و٥٫٥ ك.هرتز
+   if(real){
+    src.buffer=SPR.carrom.buf;src.loop=true;
+    src.loopStart=rs[0][0];src.loopEnd=rs[0][0]+rs[0][1]-0.002;
+    f.type='highpass';f.frequency.value=150;f.Q.value=0.5;   // التسجيل بطيفه كما هو — حراسةٌ من الهدير فقط
+   }else{
+    src.buffer=slideBuf(c);src.loop=true;
+    f.type='bandpass';f.frequency.value=2400;f.Q.value=0.6;   // التسجيل الحقيقيّ: طاقة الانزلاق بين ١٫٤ و٥٫٥ ك.هرتز
+   }
    g.gain.value=0.0001;
    src.connect(f);f.connect(g);g.connect(c.destination);
-   try{src.start()}catch(e){return false}
-   SL={src:src,f:f,g:g};
+   try{real?src.start(0,rs[0][0]):src.start()}catch(e){return false}
+   SL={src:src,f:f,g:g,real:real};
+  }
+  if(SL.real){
+   /* الحلقة محفوظةٌ بمستوى «كلّ القطع تتحرّك» (−٢٨ dB عن أعلى طقّة) — تخفت كلّما هدأت */
+   SL.g.gain.setTargetAtTime(0.12+0.88*Math.pow(level,0.8),now,0.05);
+   SL.src.playbackRate.setTargetAtTime(0.92+0.16*level,now,0.08);
+   return true;
   }
   /* الشدّة: في التسجيل حفيف الحركة أخفض من ضربة الضارب بنحو ٣٠ dB — كان هنا أعلى بعشرة أضعاف */
   var gain=0.006+0.034*Math.pow(level,0.7);
@@ -108,7 +123,7 @@ var SFX=(function(){
  /* ── العيّنات ── */
  var SPR={};                                   // name → {buf, seg:{key:[[offset,dur],…]}}
  /* نمط الطقّات (٦٫٤٥): المفتاح يُبحث عنه أوّلًا باسم النمط ('wood_hit') ثمّ عاريًا */
- var STYLE='real';
+ var STYLE='orig';
  function style(s){if(s)STYLE=String(s);return STYLE}
  var loading={};
  function loadSprite(name,url,seg){
@@ -126,7 +141,7 @@ var SFX=(function(){
  /** يعزف مقطعًا من عيّنة: يختار صيغةً عشوائيّة، ويضبط الشدّة والنبرة بالسرعة */
  function sample(name,key,t0,opt){
   var s=SPR[name];if(!s||!s.buf)return false;
-  var list=s.seg[STYLE+'_'+key]||s.seg[key]||s.seg['wood_'+key];if(!list||!list.length)return false;   // ملفٌّ قديم من عامل خدمةٍ سابق: عيّنةٌ أفضل من تركيب
+  var list=s.seg[STYLE+'_'+key]||s.seg[key]||s.seg['real_'+key]||s.seg['wood_'+key];if(!list||!list.length)return false;   // ملفٌّ قديم من عامل خدمةٍ سابق: عيّنةٌ أفضل من تركيب
   var c=ac();if(!c)return false;
   var v=opt&&opt.v!=null?opt.v:8;
   /* أربع صيغٍ للطقّة: الأوليان ضربةُ الضارب (قويّة، عريضة الطيف) والأخريان قطعةٌ بقطعة
@@ -134,12 +149,13 @@ var SFX=(function(){
   /* من اصطدم؟ المحرّك يعرف (opt.s = الضارب طرفٌ في الاصطدام) — السرعة وحدها كانت تُخطئ:
      معظم ضربات الضارب أبطأ من ٦٫٥ عند التماسّ فتُسمَع طقّة قطعة. السرعة تُبقى احتياطًا. */
   var pool=list, coin=false;
-  if(key==='hit'&&list.length>=4&&STYLE==='real'){var st=(opt&&opt.s!=null)?!!opt.s:v>=6.5;pool=st?list.slice(0,2):list.slice(2);coin=!st}
+  if(key==='hit'&&list.length>=4&&(STYLE==='real'||STYLE==='orig')){var st=(opt&&opt.s!=null)?!!opt.s:v>=6.5;pool=st?list.slice(0,2):list.slice(2);coin=!st}
   var seg=pool[(Math.random()*pool.length)|0];
   /* الشدّة تتبع السرعة بمنحنىً هادئ: اللمسة تُهمَس والضربة تُقرَع.
-     صيغ القطعة بقطعة مخفَّضةٌ في الملفّ أصلًا (−٧٫٥ dB) فمنحناها شبه مستوٍ — وإلّا هبطت ٢٥ dB */
+     صيغ القطعة بقطعة مخفَّضةٌ في الملفّ أصلًا (−٧٫٥ dB، في real وorig كليهما — build-sfx.py) فمنحناها شبه مستوٍ — وإلّا هبطت ٢٥ dB */
   var g=(coin?0.6+0.4*Math.min(1,v/6.5):Math.max(0.10,Math.min(1,Math.pow(v/9,1.15))))*(opt&&opt.gain!=null?opt.gain:1);
-  var rate=0.94+Math.random()*0.10+Math.min(0.06,v/200);
+  /* الأصليّ تسجيلٌ حقيقيّ: تفاوتٌ ضئيلٌ في الطبقة يكفي لئلّا يتكرّر حرفيًّا — أكثر منه يغيّر الصوت */
+  var rate=STYLE==='orig'?0.98+Math.random()*0.04:0.94+Math.random()*0.10+Math.min(0.06,v/200);
   var src=c.createBufferSource(),vol=c.createGain();
   src.buffer=s.buf;src.playbackRate.value=rate;
   /* النهاية بمنحدرٍ لا بقطع: ترميز Opus يؤخّر المحتوى بضع مللي ثوانٍ عن مواضع JSON،
@@ -161,7 +177,11 @@ var SFX=(function(){
   lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
   /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
   /* الإطلاق: نقرة الإصبع تكاد لا تُسمع في الواقع — همسةٌ خافتة، والطقّة الحقيقيّة عند أوّل اصطدام */
-  strike:function(t,o){if(!sample('carrom','flick',t,{v:5,gain:0.45}))
+  /* الأصليّ: صوت الإطلاق في التسجيل بعلوّ الطقّات نفسها — يُشغَّل بمستواه المسجَّل */
+  /* يُفحص وجود المقطع لا اسم النمط فقط: ملف JSON قديمٌ من عامل الخدمة بلا orig_flick يعود إلى الهمسة المركَّبة بمستواها.
+     قوّة الإطلاق (٠–٢٠ وحدة/إطار) تُترجم إلى ٣–٩ فتخفت همسة الضربة الرقيقة كما في التسجيل */
+  strike:function(t,o){var so=STYLE==='orig'&&SPR.carrom&&SPR.carrom.seg.orig_flick, sv=o&&o.v!=null?Math.max(3,Math.min(9,o.v*0.6)):9;
+          if(!sample('carrom','flick',t,so?{v:sv,gain:0.85}:{v:5,gain:0.45}))
            {noise(t,0.025,0.08,3400)}},
   pot:   function(t,o){if(!sample('carrom','pot',t,{v:10}))
            {tone(520,t,0.09,'sine',0.12,300);noise(t+0.02,0.1,0.14,900)}},

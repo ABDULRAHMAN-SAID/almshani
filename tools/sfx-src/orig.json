@@ -1,0 +1,30 @@
+{
+ "rate": 32000,
+ "order": [
+  "orig_flick",
+  "orig_hit",
+  "orig_wall",
+  "orig_roll"
+ ],
+ "len": {
+  "orig_flick": [
+   3840,
+   3840
+  ],
+  "orig_hit": [
+   2400,
+   2400,
+   2240,
+   2240
+  ],
+  "orig_wall": [
+   2720,
+   2720,
+   2720
+  ],
+  "orig_roll": [
+   14080
+  ]
+ },
+ "src": "تسجيل صاحب اللعبة (6def8aa) — الأزمنة: orig_flick@7.788,16.404; orig_hit@7.940,22.511,2.460,16.774; orig_wall@8.113,22.784,3.396; orig_roll@2.82–3.32"
+}

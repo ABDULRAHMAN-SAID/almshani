@@ -18,6 +18,7 @@
 كل شيءٍ فوق ٢٠٠ هرتز — سمّاعة الهاتف لا تُصدر ما دونها فيصير ارتجاجًا.
 """
 import numpy as np, struct, os, json
+import scipy.io.wavfile as wavfile
 from scipy.signal import butter, sosfilt
 
 SR=32000
@@ -120,6 +121,40 @@ for _name,_st in STYLES.items():
     SEG+=[(_name+'_hit',4,hit_of(_st)),(_name+'_wall',3,wall_of(_st)),(_name+'_pot',2,pot_of(_st))]
 GAP=int(0.03*SR)
 parts=[]; sprite={}; pos=0
+OPUS_LAG=0.0072   # MediaRecorder/Opus يترك ٧٫٢ م.ث صمتٍ في أوّل الملفّ (pre_skip=0) — قِيس بالارتباط المتبادل
+
+# ٦٫٤٨: الأصليّ — مقاطع من تسجيل صاحب اللعبة (tools/cut-orig-sfx.py). لا تُسوّى كلٌّ على حدة:
+# عاملٌ واحدٌ للجميع فتبقى النسب بين الإطلاق والطقّة والحافة كما سُجّلت
+_src=os.path.join(os.path.dirname(__file__),'sfx-src')
+_oj=json.load(open(os.path.join(_src,'orig.json')))
+_sr,_ow=wavfile.read(os.path.join(_src,'orig.wav')); assert _sr==SR
+_ow=_ow.astype(np.float64)/32768
+_oc={}; _i=0
+for _name in _oj['order']:
+    _oc[_name]=[]
+    for _n in _oj['len'][_name]: _oc[_name].append(_ow[_i:_i+_n].copy()); _i+=_n
+_pk=max(np.max(np.abs(y)) for k,l in _oc.items() if k!='orig_roll' for y in l)
+_k=0.9/_pk
+def _rms20(y):
+    n=int(0.02*SR); return max(np.sqrt(np.mean(y[i:i+n]**2)) for i in range(0,max(1,len(y)-n),n//4))
+_loud=max(_rms20(y*_k) for k,l in _oc.items() if k!='orig_roll' for y in l)
+for _name in _oc:
+    if _name=='orig_roll':
+        # الزحف في التسجيل أخفض من أعلى طقّةٍ بنحو ٣٠ dB (جذر متوسّط ٢٠ م.ث) — يُحفظ عند −٢٨ dB
+        # فيكون هذا مستواه حين تتحرّك القطع كلّها (slide(1))، وأخفض كلّما هدأت
+        _r=_oc[_name][0]; _r*=(_loud*10**(-28/20))/np.sqrt(np.mean(_r**2)); _oc[_name]=[_r]
+    else:
+        _oc[_name]=[y*_k for y in _oc[_name]]
+        if _name=='orig_hit':
+            # الطقّات الأربع إلى علوٍّ واحد (مستوى صيغتَي الضارب) ثم صيغتا القطعة بقطعة −٧٫٥ dB كما في «real»:
+            # في التسجيل كانت طقّتا القطعة المختارتان أعلى من طقّتَي الضارب بـ٦ dB لأنّهما سُجِّلتا في ضرباتٍ أقوى —
+            # والعلوّ عند اللعب تحدّده السرعة في sfx.js، فلا يُترك لصدفة التسجيل
+            _t=np.mean([_rms20(y) for y in _oc[_name][:2]])
+            _oc[_name]=[y*(_t/_rms20(y))*(0.42 if i>=2 else 1) for i,y in enumerate(_oc[_name])]
+    sprite[_name]=[]
+    for y in _oc[_name]:
+        sprite[_name].append([round(pos/SR+OPUS_LAG,4),round(len(y)/SR+0.002,4)])
+        parts.append(y); parts.append(np.zeros(GAP)); pos+=len(y)+GAP
 for name,count,fn in SEG:
     sprite[name]=[]
     for i in range(count):
@@ -130,7 +165,6 @@ for name,count,fn in SEG:
         y/=pk; y*=0.9
         if name=='real_hit' and i>=2: y*=0.42   # قطعةٌ بقطعة: −٧٫٥ dB عن ضربة الضارب كما في التسجيل
         f=int(0.004*SR); y[-f:]*=np.linspace(1,0,f)
-        OPUS_LAG=0.0072   # MediaRecorder/Opus يترك ٧٫٢ م.ث صمتٍ في أوّل الملفّ (pre_skip=0) — قِيس بالارتباط المتبادل
         sprite[name].append([round(pos/SR+OPUS_LAG,4),round(len(y)/SR+0.002,4)])
         parts.append(y); parts.append(np.zeros(GAP)); pos+=len(y)+GAP
 parts.append(np.zeros(int(0.30*SR)))   # ذيلُ صمتٍ: مسجّل المتصفّح يقصّ آخر الملفّ فلا يُقصّ آخر مقطع
