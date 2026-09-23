@@ -20,8 +20,8 @@
     • اليد فوق الإطار السفليّ ← خشب الإطار نفسه منقولًا على طول عرقه
     • بطاقة الاسم فوق الإطار العلويّ ← كذلك
     الدمج بمعادلة بواسون (seamlessClone) فيتّصل الضوء واللون بلا حدود.
- ٣. في اللعبة يُرسم النسيج مستويًا ثم يُمال على الشاشة بالتحويل نفسه (CSS matrix3d) —
-    فيعود المنظر كما في الصورة، والجيوب والحواف حيث تحسبها الفيزياء.
+ ٣. في اللعبة يُرسم النسيج مستويًا من فوق (الميل عُطّل ٦٫٥١ بطلب المالك)، وفوقه إطارٌ وجيوبٌ مرسومةٌ
+    برمجيًّا من فوق (٦٫٥٢) — فالمأخوذ من الصورة هو سطح اللعب وخطوطه.
 """
 import cv2, numpy as np, subprocess, sys, os, base64, re, json
 
@@ -137,6 +137,22 @@ ann = np.zeros((N, N), np.uint8)
 cv2.ellipse(ann, (int(mx), int(my)), (int(mrx + 30 * u), int(mry + 30 * u)), 0, 0, 360, 255, -1)
 cv2.ellipse(ann, (int(mx), int(my)), (int(mrx + 12 * u), int(mry + 12 * u)), 0, 0, 360, 0, -1)
 rect = paste(rect, ours_fit, mask, feather=4, match=ann)
+
+# ٢و (٦٫٥٢) — الجيوب الأسطوانيّة تُمحى من سطح اللعب: اللعبة ترسم فوقها ثقوبًا من فوق (caPocket)،
+#     وما يطلّ من الأسطوانة المائلة خارج الثقب الجديد كان هلالًا داكنًا تحته. البقعة السوداء المتّصلة
+#     بمركز الجيب (بعد فتحٍ يزيل الخطوط الرفيعة) تُرمَّم من الخشب حولها
+Gr = cv2.cvtColor(rect, cv2.COLOR_BGR2GRAY)
+hole = np.zeros((N, N), np.uint8)
+for (px, py) in ((o, o), (oP, o), (o, oP), (oP, oP)):
+    dark = ((Gr < 70).astype(np.uint8) * 255)
+    win = np.zeros_like(dark); cv2.circle(win, (int(px), int(py)), int(40 * u), 255, -1)
+    dark = cv2.bitwise_and(dark, win)
+    dark = cv2.morphologyEx(dark, cv2.MORPH_OPEN, np.ones((9, 9), np.uint8))
+    n_, lab, st, _ = cv2.connectedComponentsWithStats(dark)
+    if n_ > 1:
+        k = 1 + int(np.argmax(st[1:, 4])); hole |= np.where(lab == k, 255, 0).astype(np.uint8)
+hole = cv2.dilate(hole, np.ones((13, 13), np.uint8))
+rect = cv2.inpaint(rect, hole, 9, cv2.INPAINT_TELEA)
 
 # ٢هـ — ما خارج الإطار (خلفيّة الصورة وشرائطها) شفّاف: اللوح يطفو على خلفيّة الشاشة
 OUTER = (20, 33, 1004, 1000)                      # حوافّ الإطار الخارجيّة في النسيج (مقيسة)
