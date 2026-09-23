@@ -5,6 +5,11 @@
  <uses-permission android:name="android.permission.INTERNET"/>
  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 
+ <!-- الصيحات بصوت الجهاز: من أندرويد ١١ لا يُرى محرّك النطق إلا إن أُعلن عنه هنا -->
+ <queries>
+  <intent><action android:name="android.intent.action.TTS_SERVICE"/></intent>
+ </queries>
+
  <application
   android:label="@string/app_name"
   android:icon="@mipmap/ic_launcher"

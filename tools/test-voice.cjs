@@ -2,9 +2,9 @@
 /**
  * سويت الصيحات: الجملة تُقال فعلًا، والزرّ يعرفها قبل أن يطلبها اللاعب.
  *
- * الصوت مركَّب لا ملفّ، فلا يكفي أن نرى الفقاعة: نسجّل خرج WebAudio نفسه
- * في OfflineAudioContext ونقيس طاقته — صمتٌ هنا يعني أنّ اللاعب لن يسمع شيئًا
- * على هاتف بلا محرّك نطق عربيّ، وهو حال أكثر الهواتف.
+ * الصوت صوتُ الجهاز الحقيقيّ (جسر أندرويد أو speechSynthesis) أو لا صوت:
+ * نتحقّق أنّ الجملة تذهب إلى المحرّك الصحيح، وأنّ الجهاز الذي بلا صوتٍ عربيّ
+ * لا يسمع صفّارةً مركّبة — ذلك الصوت «الغريب» الذي حُذف في ٦٫٦٠.
  *
  *   NODE_PATH=$(npm root -g) node tools/test-voice.cjs
  */
@@ -40,65 +40,62 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
  chk('لا معرّف مكرّر ولا جملة مكرّرة',bank.dupIds===0&&bank.dupTx===0,bank.dupIds+'/'+bank.dupTx);
  chk('كلّ الجمل عربية وقصيرة',bank.latin===0&&bank.long===0,bank.latin+'/'+bank.long);
 
- /* التقطيع: الجملة تتحوّل إلى مقاطع بإيقاعها، والطويلة تُقتطع فلا تصير هذيانًا */
- const syl=await page.evaluate(()=>({
-  a:VOICE._syllables('ههه قربت أفوز انتبه',7).length,
-  b:VOICE._syllables('ما بخليك',7).length,
-  cap:VOICE._syllables('كلمة '.repeat(40),7).length,
-  empty:VOICE._syllables('',7).length,
-  junk:VOICE._syllables('12345 !!!',7).length
+ /* الضحكة: «ههه» لا تُعطى لمحرّك النطق حروفًا فيتهجّاها «هاء هاء» */
+ const sp=await page.evaluate(()=>({
+  a:VOICE._speakable('ههه قربت أفوز، انتبه لنفسك'),
+  b:VOICE._speakable('هههههههه'),
+  c:VOICE._speakable('  ما   بخليك '),
+  d:VOICE._speakable('انتبه')
  }));
- chk('الجملة الطويلة مقاطعها أكثر من القصيرة',syl.a>syl.b,syl.a+' > '+syl.b);
- chk('الجملة المفرطة تُقتطع',syl.cap<=14,syl.cap);
- chk('نصّ فارغ أو بلا حروف عربية لا يكسر شيئًا',syl.empty>=1&&syl.junk>=1,syl.empty+'/'+syl.junk);
+ chk('«ههه» تصير ضحكةً تُنطق',sp.a.startsWith('هاهاها ')&&sp.b==='هاهاها',sp.a+' | '+sp.b);
+ chk('الكلمات التي فيها هاء لا تُمسّ',sp.d==='انتبه'&&sp.c==='ما بخليك',sp.d+' | '+sp.c);
 
- /* الصوت نفسه: نعيد تركيبه في سياق غير متصل ونقيس طاقته */
- const wav=await page.evaluate(async()=>{
-  const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
-  if(!OC)return {no:1};
-  const oc=new OC(1,44100*2,44100);
-  const real=window.AudioContext;
-  // نجعل VOICE يركّب داخل السياق غير المتصل بدل مكبّر الصوت
-  const saved=Object.getOwnPropertyDescriptor(window,'AudioContext');
-  window.AudioContext=function(){return oc};
-  const V=window.VOICE;
-  // نفرّغ السياق المخبّأ داخل الوحدة بإعادة بنائها ليست ممكنة، فنركّب يدويًّا بالمنطق نفسه
-  if(saved)Object.defineProperty(window,'AudioContext',saved);else window.AudioContext=real;
-  return {no:0};
+ /* بلا صوتٍ حقيقيّ: صمتٌ لا صفّارة — لا AudioContext يُنشأ ولا يُقال شيء */
+ const none=await page.evaluate(()=>{
+  let made=0;const A=window.AudioContext;
+  window.AudioContext=function(){made++;return new A()};
+  const ss=Object.getOwnPropertyDescriptor(window,'speechSynthesis');
+  Object.defineProperty(window,'speechSynthesis',{value:{getVoices:()=>[],cancel(){},speak(){made+=100}},configurable:true});
+  const r=VOICE.say('ههه قربت أفوز',{seed:3,tone:'brag'});
+  const h=VOICE.hasSpeech();
+  window.AudioContext=A;
+  if(ss)Object.defineProperty(window,'speechSynthesis',ss);else delete window.speechSynthesis;
+  return {r,h,made};
  });
+ chk('جهاز بلا صوت عربيّ: لا صوت مركَّب غريب',none.r===false&&none.h===false&&none.made===0,JSON.stringify(none));
 
- /* التركيب يُقاس عبر سياق غير متصل مستقلّ يعيد خطوات emit نفسها */
- const energy=await page.evaluate(async()=>{
-  const OC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
-  if(!OC)return -1;
-  const sr=44100, oc=new OC(1,sr*1.2,sr);
-  const sy=VOICE._syllables('ههه قربت أفوز انتبه',7);
-  let t=0.02;
-  const VOW={a:[700,1220,2600],aa:[730,1090,2440],i:[330,2200,3000],ii:[290,2350,3100],u:[350,850,2500],uu:[320,760,2400]};
-  for(const s of sy){
-   const F=VOW[s.v]||VOW.a, d=0.11;
-   const g=oc.createGain();
-   g.gain.setValueAtTime(0.0001,t);
-   g.gain.exponentialRampToValueAtTime(0.22,t+0.03);
-   g.gain.exponentialRampToValueAtTime(0.0001,t+d);
-   g.connect(oc.destination);
-   const o=oc.createOscillator();o.type='sawtooth';o.frequency.setValueAtTime(140,t);
-   for(let i=0;i<3;i++){
-    const bp=oc.createBiquadFilter();bp.type='bandpass';bp.frequency.value=F[i];bp.Q.value=i===0?7:10;
-    const vg=oc.createGain();vg.gain.value=[1,0.55,0.22][i];
-    o.connect(bp);bp.connect(vg);vg.connect(g);
-   }
-   o.start(t);o.stop(t+d+0.05);
-   t+=d*0.82+0.012;
-  }
-  const buf=await oc.startRendering();
-  const d=buf.getChannelData(0);
-  let sum=0,peak=0;
-  for(let i=0;i<d.length;i++){const v=Math.abs(d[i]);sum+=v*v;if(v>peak)peak=v}
-  return {rms:Math.sqrt(sum/d.length),peak:peak};
+ /* تطبيق أندرويد: الجسر يأخذ الجملة بطبقة اللاعب */
+ const viaApp=await page.evaluate(()=>{
+  const got=[];
+  window.TahaddiTTS={ready:()=>true,speak:(t,p,r)=>{got.push([t,p,r]);return true},stop(){}};
+  const r=VOICE.say('ههه قربت أفوز',{seed:7,tone:'brag'});
+  const r2=VOICE.say('ههه قربت أفوز',{seed:7,tone:'brag'});
+  const r3=VOICE.say('ههه قربت أفوز',{seed:901,tone:'brag'});
+  const h=VOICE.hasSpeech();
+  window.TahaddiTTS={ready:()=>false,speak:()=>{got.push('x');return true}};
+  const h2=VOICE.hasSpeech();
+  delete window.TahaddiTTS;
+  return {r,h,h2,got};
  });
- chk('الصوت المركَّب يخرج موجة مسموعة لا صمتًا',energy&&energy.rms>0.002,energy&&('rms='+energy.rms.toFixed(4)+' peak='+energy.peak.toFixed(3)));
- chk('الموجة لا تقصّ (ذروتها تحت الواحد)',energy&&energy.peak<1,energy&&energy.peak.toFixed(3));
+ chk('في التطبيق: يُقال بصوت أندرويد الحقيقيّ',viaApp.r==='app'&&viaApp.h&&viaApp.got[0][0]==='هاهاها قربت أفوز',JSON.stringify(viaApp.got[0]));
+ chk('اللاعب نفسه بالطبقة نفسها، ولاعبٌ آخر بطبقة أخرى',viaApp.got[0][1]===viaApp.got[1][1]&&viaApp.got[0][1]!==viaApp.got[2][1],viaApp.got.map(g=>g[1]).join(' / '));
+ chk('محرّك أندرويد بلا عربيّ لا يُستعمل',viaApp.h2===false&&viaApp.got.indexOf('x')<0,viaApp.h2);
+
+ /* المتصفّح: صوتٌ عربيّ في speechSynthesis */
+ const viaWeb=await page.evaluate(()=>{
+  const said=[];
+  const ss=Object.getOwnPropertyDescriptor(window,'speechSynthesis');
+  const U=window.SpeechSynthesisUtterance;
+  window.SpeechSynthesisUtterance=function(t){this.text=t};   // الحقيقيّ يرفض صوتًا مزيّفًا
+  Object.defineProperty(window,'speechSynthesis',{value:{getVoices:()=>[{lang:'en-US'},{lang:'ar-SA',name:'ar'}],cancel(){},speak(u){said.push(u.text+'|'+u.lang)}},configurable:true});
+  VOICE.warm();
+  const r=VOICE.say('يلا يلا!',{seed:3,tone:'cheer'});
+  if(ss)Object.defineProperty(window,'speechSynthesis',ss);else delete window.speechSynthesis;
+  window.SpeechSynthesisUtterance=U;
+  VOICE.warm();
+  return {r,said};
+ });
+ chk('في المتصفّح: يُقال بالصوت العربيّ',viaWeb.r==='tts'&&viaWeb.said[0]==='يلا يلا!|ar-SA',JSON.stringify(viaWeb));
 
  /* لحظة اللعب: هل تعرف اللوحة متى قرب اللاعب من الفوز؟ */
  /* M وRM معرّفتان بـlet في نطاق الوحدة لا على window، فتُسنَدان مباشرة لا عبر window.M */
@@ -135,7 +132,7 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
   const on=p&&p.querySelector('.shCh.on');
   const r={chips:p?p.querySelectorAll('.shCh').length:0,
    pills:p?p.querySelectorAll('.shPl').length:0,
-   faces:p?p.querySelectorAll('.ebi').length:0,
+   faces:p?p.querySelectorAll('.ebi').length:0, emo:EMOTES_ON,
    open:on?on.textContent.trim():'',
    w:p?Math.round(p.getBoundingClientRect().width):0,
    right:p?Math.round(p.getBoundingClientRect().right):0,
@@ -146,7 +143,7 @@ const chk=(n,c,d)=>{c?(ok++,console.log('  ✓ '+n)):(bad++,console.log('  ✗ '
  chk('اللوحة فيها كلّ المجموعات',panel.chips===7,panel.chips);
  chk('اللوحة تُفتح على مجموعة اللحظة',panel.open==='قربت أفوز',panel.open);
  chk('جمل المجموعة ظاهرة',panel.pills>=8,panel.pills);
- chk('التعابير باقية في اللوحة نفسها',panel.faces>=1,panel.faces);
+ chk('التعابير في اللوحة نفسها متى فُعّلت',panel.emo?panel.faces>=1:panel.faces===0,panel.faces);
  chk('اللوحة داخل الشاشة',panel.w>0&&panel.right<=390&&panel.top>=0,panel.w+'w right='+panel.right+' top='+panel.top);
 
  /* القول: فقاعة تظهر، ومهلة تمنع الرشّ */

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
@@ -160,6 +161,16 @@ public class MainActivity extends AppCompatActivity {
      فكان الزرّ يقول «نُزّل» ولا شيء يُنزَّل. هنا نقرأ الـblob في الصفحة ونسلّمه إلى أندرويد. */
   web.addJavascriptInterface(new Bridge(), "TahaddiSave");
 
+  /* الصيحات: WebView لا يملك speechSynthesis، فكانت اللعبة تقولها بصوتٍ مركّبٍ «غريب».
+     هنا محرّك النطق في النظام (صوت Google العربيّ) — وإن لم يوجد عربيّ بقي ready() كاذبًا
+     فتظهر الصيحة مكتوبةً بلا صوت. */
+  tts = new TextToSpeech(getApplicationContext(), status -> {
+   if (status != TextToSpeech.SUCCESS || tts == null) return;
+   int r = tts.setLanguage(new Locale("ar"));
+   ttsReady = r != TextToSpeech.LANG_MISSING_DATA && r != TextToSpeech.LANG_NOT_SUPPORTED;
+  });
+  web.addJavascriptInterface(new Speech(), "TahaddiTTS");
+
   web.setDownloadListener((url, ua, disp, mime, len) -> {
    if (url == null) return;
    if (url.startsWith("blob:")) { web.evaluateJavascript(blobReader(url, mime), null); return; }
@@ -202,6 +213,31 @@ public class MainActivity extends AppCompatActivity {
   public void take(final String b64, final String mime) {
    runOnUiThread(() -> handOver(b64, mime));
   }
+ }
+
+ private TextToSpeech tts;
+ private volatile boolean ttsReady = false;
+
+ /** جسر النطق: ready() هل في الجهاز عربيّ، speak() تقول الجملة بطبقة اللاعب وسرعته */
+ public class Speech {
+  @JavascriptInterface
+  public boolean ready() { return ttsReady; }
+
+  @JavascriptInterface
+  public boolean speak(final String text, final float pitch, final float rate) {
+   if (!ttsReady || tts == null || text == null) return false;
+   final String t = text.length() > 120 ? text.substring(0, 120) : text;
+   runOnUiThread(() -> {
+    if (tts == null) return;
+    tts.setPitch(Math.max(0.5f, Math.min(2f, pitch)));
+    tts.setSpeechRate(Math.max(0.5f, Math.min(2f, rate)));
+    tts.speak(t, TextToSpeech.QUEUE_FLUSH, null, "shout");
+   });
+   return true;
+  }
+
+  @JavascriptInterface
+  public void stop() { runOnUiThread(() -> { if (tts != null) tts.stop(); }); }
  }
 
  /** سكربت يقرأ الـblob داخل الصفحة ويعيده مرمّزًا — الـblob لا يُقرأ من جانب أندرويد */
@@ -261,6 +297,7 @@ public class MainActivity extends AppCompatActivity {
  @Override
  protected void onPause() {
   super.onPause();
+  if (tts != null) tts.stop();
   if (web != null) { web.onPause(); web.pauseTimers(); }
  }
 
@@ -272,6 +309,7 @@ public class MainActivity extends AppCompatActivity {
 
  @Override
  protected void onDestroy() {
+  if (tts != null) { tts.shutdown(); tts = null; ttsReady = false; }
   if (web != null) {
    ViewGroup parent = (web.getParent() instanceof ViewGroup) ? (ViewGroup) web.getParent() : null;
    if (parent != null) parent.removeView(web);
