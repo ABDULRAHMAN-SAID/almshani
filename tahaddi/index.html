@@ -1703,41 +1703,15 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caSeat.lft{left:0;top:44%;transform:translate(calc(-50% + 10px),-50%) rotate(90deg)}
 /* ٦٫٥٤ — شاشة المباراة كما في صورة المالك */
 .caTbar h2{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:19px;font-weight:900;color:#F4E3B5;letter-spacing:.3px}
-.caOrn{display:block;width:120px;height:10px}
 .caGear{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFE9A8;
  background:linear-gradient(180deg,#1B2A47,#0F1A2E);border:1px solid rgba(140,170,220,.35);box-shadow:0 4px 12px rgba(0,0,0,.35)}
-.caInfo{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 22px 10px;padding:8px 14px;border-radius:999px;
- background:linear-gradient(180deg,rgba(24,40,70,.92),rgba(14,24,44,.92));border:1px solid rgba(140,170,220,.30);
- color:#CFD8EA;font-size:12px;font-weight:800}
-.caInfo b{color:#F2F4F8}.caInfo span:first-of-type{color:#E8B23A}
-.caInfo i{width:4px;height:4px;border-radius:50%;background:rgba(207,216,234,.5)}
-.csBar{display:grid;grid-template-columns:1fr .92fr 1fr;align-items:stretch;margin:0 4px 12px;border-radius:18px;overflow:hidden;
- background:linear-gradient(180deg,#172845,#0E1A30);border:1px solid rgba(140,170,220,.35);box-shadow:0 8px 22px rgba(0,0,0,.4)}
-.csSeg{display:flex;align-items:center;gap:7px;padding:9px 8px;position:relative;transition:background .25s;min-width:0}
-.csTx{display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0}
-.csAvs{display:flex;flex-shrink:0}.csAvs.two .csAv+.csAv{margin-inline-start:-14px}
 .csAv{width:30px;height:30px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;
  box-shadow:0 0 0 2px rgba(10,16,32,.9),0 0 0 3px rgba(232,178,58,.45);background:#1A2342}
-.csSeg.on .csAv{box-shadow:0 0 0 2px rgba(10,16,32,.9),0 0 0 3.5px #E8B23A}
 .csAv svg,.csAv img{width:100%;height:100%;display:block}
 /* ٦٫٥٦ — الشاشة تملأ طولها: اللوح في الوسط بهامشٍ عن حافّتي الشاشة، والأزرار في الأسفل */
 .scr.on.caScr{display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding-bottom:max(12px,env(safe-area-inset-bottom))}
 #app:has(>.scr.on.caScr){padding-bottom:0}   /* شريط التنقّل مخفيٌّ في المباراة: لا فراغ له تحت الشاشة */
 .caScr .caWrap.big{margin-block:auto;width:calc(100vw - 24px);margin-inline:calc(50% - 50vw + 12px);border-radius:10px}
-.csSeg.on{background:linear-gradient(180deg,rgba(232,178,58,.22),rgba(232,178,58,.06));box-shadow:inset 0 0 0 1.5px rgba(232,178,58,.7)}
-.csWho{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#AEB9CF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.csWho em{font-style:normal;font-size:9.5px;font-weight:900;color:#1A1204;background:#E8B23A;border-radius:6px;padding:1px 6px}
-.csVal{display:flex;align-items:center;gap:6px}.csVal b{font-size:22px;font-weight:900;color:#F2F4F8;line-height:1;font-variant-numeric:tabular-nums}
-.csSeg.me .csVal b{color:#FFD36A}
-.csVal .caDot{width:12px;height:12px;flex-shrink:0}.csVal small{font-size:9.5px;font-weight:800;color:#8E9AB3;white-space:nowrap}
-.csMid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:6px 4px;min-width:0;
- background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.05));border-inline:1px solid rgba(140,170,220,.22)}
-.csMid b{font-size:11px;font-weight:900;color:#E3E9F5;text-align:center;white-space:nowrap}
-.csMid span{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;color:#AEB9CF;white-space:nowrap}
-.csMid span i{width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FF8E88,#C62B33 60%,#6E1018)}
-.csMid span.hot{color:#FFC9C7}
-.csMid small{font-size:9.5px;font-weight:800;color:#8E9AB3;margin-top:-3px}
-@media (max-width:380px){.csSeg{padding:8px 9px}.csMid b{font-size:10px}.csVal b{font-size:19px}}
 /* رسالة الإدخال: تظهر فوق اللوح لحظةً ثمّ تخفت */
 .caEnd{position:absolute;inset:0;z-index:5;display:flex;overflow:auto;padding:8px;box-sizing:border-box;background:rgba(5,8,16,.62);backdrop-filter:blur(2px)}
 .caEnd.in{animation:fi .25s ease}
@@ -1751,30 +1725,20 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 /* الهواتف الضيّقة: البطاقة أقصر من اللوح، ولوحة النتيجة تتّسع (المراجعة: ٣٢٠–٣٦٠ بكسل) */
 @media (max-width:380px){
  .caFinT{font-size:28px}.caEndGo{min-height:44px}
- .csSeg{gap:5px;padding:8px 5px}.csAv{width:24px;height:24px}.csAvs.two .csAv+.csAv{margin-inline-start:-10px}
- .csVal{gap:4px}.csVal b{font-size:19px}.csVal .caDot{width:10px;height:10px}
 }
-@media (max-width:362px){.csLw{display:none}}
-/* الرباعيّ: صورتان متراكبتان في كلّ قسم — تضيق اللوحة حتى ٤٢٠ بكسل (قيس: ٣٩٣ يفيض) */
-@media (max-width:420px){.csAvs.two .csAv{width:24px;height:24px}.csAvs.two .csAv+.csAv{margin-inline-start:-10px}.csSeg:has(.csAvs.two){gap:5px;padding-inline:6px}.csSeg:has(.csAvs.two) .csLw{display:none}}
-@media (max-height:680px){.caScr .caInfo{margin-bottom:6px;padding-block:6px}.caScr .csBar{margin-bottom:8px}.caScr .caBot{margin:8px 6px 4px}}
 .caFloat{position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:3;pointer-events:none;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;
  padding:7px 14px;border-radius:999px;background:rgba(10,18,34,.86);border:1px solid rgba(232,178,58,.6);color:#FFE9A8;font-size:12px;font-weight:900;
  box-shadow:0 6px 18px rgba(0,0,0,.45);animation:caFloat 3.2s ease forwards}
 @keyframes caFloat{0%{opacity:0;transform:translate(-50%,8px)}10%,72%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
-/* الزرّان المستديران وبينهما سطر الدور */
-.caBot{display:flex;align-items:center;gap:10px;margin:12px 6px 18px}
 .caRnd{width:48px;height:48px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFE9A8;
  background:radial-gradient(circle at 35% 30%,#233A63,#0F1B31);border:1.5px solid rgba(140,170,220,.45);box-shadow:0 6px 14px rgba(0,0,0,.45)}
 .caRnd:active{transform:scale(.94)}
-.caBot .caStat{flex:1;margin:0;font-size:12px}
-.caSp{width:48px;flex-shrink:0}   /* يوازن زرّ التفاعل فيبقى سطر الدور في الوسط */
 /* قائمة الإعدادات */
 .cmBox{max-width:330px}
 .cmRow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;margin-top:8px;border-radius:13px;cursor:pointer;color:#FFE9A8;
  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);font:800 13px var(--font,system-ui);text-align:start}
 .cmRow span{flex:1;color:#F2F4F8}.cmRow em{font-style:normal;font-size:11.5px;color:#E8B23A}
-.caWrap.duo .caSeat{display:none}        /* لاعبان: البطاقتان في الرأس تكفيان */
+.caWrap.duo .caSeat{display:none}        /* لاعبان: البطاقتان فوق اللوح وتحته تكفيان */
 /* شاشة الإعداد (٦٫٥٢): اختيارٌ مقسّم بدل الشارات، ومفتاحٌ حقيقيّ بدل «مفعّل/مطفأ» */
 .segC{display:flex;gap:8px}
 .segC button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:11px 8px;border-radius:14px;cursor:pointer;
@@ -1789,8 +1753,6 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .sw::after{content:'';position:absolute;top:3px;inset-inline-start:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:inset-inline-start .2s}
 .sw.on{background:var(--gold)}.sw.on::after{inset-inline-start:22px}
 .soloNote{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:14px}
-.caStat{text-align:center;font-size:12.5px;font-weight:800;color:var(--tx2);margin-top:10px}
-.caStat b{color:#F2F4F8}.caStat.me b{color:var(--gold)}
 /* شريط التحديث: يخبر ولا يقاطع، والضغط عليه يطبّق */
 #verBar{position:fixed;inset-inline:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;
  display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
@@ -2176,6 +2138,51 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .efab,.caRnd{background:radial-gradient(circle at 50% 30%,#1D2436,#0A0E18);border:1px solid var(--lxLine);color:var(--lxG);
  box-shadow:0 0 0 3px rgba(8,11,20,.85),0 0 0 4px rgba(217,183,110,.2),0 8px 18px rgba(0,0,0,.5)}
 .emoFab{display:block;width:52%;height:52%}
+/* ٦٫٦٩ — ترتيب شاشة الكيرم: كتلةٌ واحدة في الوسط، بطاقتا اللاعبَين ملاصقتان للوح */
+.caTbar h2{gap:4px;min-width:0}
+.caTbar .bk,.caTbar .caGear{flex-shrink:0}   /* العنوان الطويل لا يسحق زرّ الإعدادات (المراجعة: ٣٢٠ بكسل) */
+.caSub{display:flex;align-items:center;justify-content:center;gap:clamp(4px,1.6vw,7px);font-size:clamp(9.5px,2.75vw,11px);font-weight:800;color:#AEB9CF;letter-spacing:0;flex-wrap:nowrap;white-space:nowrap;max-width:100%;min-width:0;overflow:hidden}
+.caSub .caQ{min-width:0;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:360px){.caSub .caM,.caSub .caM+i{display:none}}   /* الضيّق: الطور تقوله بطاقة الخصم، فتبقى الصعوبة والملكة كاملتين */
+.caSub i{width:3px;height:3px;border-radius:50%;background:var(--lxG);opacity:.8}
+.caSub .caQ{display:inline-flex;align-items:center;gap:4px}
+.caSub .caQ::before{content:'';width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FF8E88,#C62B33 60%,#6E1018)}
+.caSub .caQ.hot{color:#FFC9C7}
+.caStage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,2.6vh,26px);padding-block:clamp(4px,1.6vh,22px) clamp(4px,1.2vh,14px)}
+.caScr .caStage .caWrap.big{margin-block:0}
+.pCard{position:relative;display:flex;align-items:center;gap:12px;margin-inline:calc(50% - 50vw + 12px);padding:clamp(8px,1.9vh,18px) 14px;border-radius:16px;
+ background:linear-gradient(180deg,#161C2C,#0B0F1A);border:1px solid rgba(217,183,110,.2);
+ box-shadow:inset 0 1px 0 rgba(255,244,214,.06),0 8px 20px rgba(0,0,0,.4);transition:border-color .25s,box-shadow .25s}
+.pCard.on{border-color:rgba(217,183,110,.85);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 0 0 1px rgba(217,183,110,.2),0 0 24px rgba(217,183,110,.16)}
+.pCard.on::before{content:'';position:absolute;top:-1px;left:28%;right:28%;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--lxG),transparent)}
+.pAvs{display:flex;flex-shrink:0}
+.pAvs.two .csAv+.csAv{margin-inline-start:-16px}
+.pCard .csAv{width:clamp(44px,7.4vh,68px);height:clamp(44px,7.4vh,68px);border-radius:50%;overflow:hidden;display:flex;box-shadow:0 0 0 2px #0B0F1A,0 0 0 3.5px rgba(217,183,110,.45)}
+.pCard.on .csAv{box-shadow:0 0 0 2px #0B0F1A,0 0 0 3.5px #E3BF6E,0 0 16px rgba(227,191,110,.55);animation:pOn 1.6s ease-in-out infinite}
+@keyframes pOn{50%{box-shadow:0 0 0 2px #0B0F1A,0 0 0 3.5px #F6E3AE,0 0 26px rgba(227,191,110,.75)}}
+@media (prefers-reduced-motion:reduce){.pCard.on .csAv{animation:none}}
+.pTx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pNm{font-size:clamp(14px,2vh,17px);font-weight:900;color:#F6E9C6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pSub{font-size:clamp(11px,1.45vh,12.5px);font-weight:700;color:#8E97B1;line-height:1.35;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.pSub .pH{white-space:nowrap}   /* إن ضاق السطر نزل التلميح كلّه لا نصفه */
+.pSub b{color:#F2F4F8}.pCard.me .pSub b{color:var(--lxG)}
+.pScore{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.pScore>b{font-size:clamp(19px,2.7vh,24px);font-weight:900;color:#F6E3AE;line-height:1;font-variant-numeric:tabular-nums}
+.pSlots{--d:clamp(11px,1.55vh,13px);display:grid;grid-template-columns:repeat(5,var(--d));gap:3px;direction:ltr}
+.pSlots i{width:var(--d);height:var(--d);border-radius:50%;box-sizing:border-box;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.25)}
+.pSlots i.f{border:0;box-shadow:0 1px 2px rgba(0,0,0,.5)}
+.pSlots i.f.w{background:radial-gradient(circle at 38% 35%,#FFF8E6,#E4D2A8 60%,#B59E70)}
+.pSlots i.f.b{background:radial-gradient(circle at 38% 35%,#5A606E,#23262E 60%,#0E0F13)}
+.pSlots i.f.q{background:radial-gradient(circle at 38% 35%,#FF8E88,#C62B33 60%,#6E1018);box-shadow:0 0 0 1px #E3BF6E}
+.pCard .caRnd{width:clamp(40px,5.6vh,48px);height:clamp(40px,5.6vh,48px)}
+.shfx.anch.up{flex-direction:column-reverse}
+/* الشاشات القصيرة (٦٤٠–٧٠٠): بطاقتي تبقى داخل الشاشة (المراجعة) */
+@media (max-height:700px){.caStage{gap:6px;padding-block:2px}.pCard{padding-block:6px}.pCard .csAv{width:40px;height:40px}.pCard .caRnd{width:38px;height:38px}.caScr .caTbar{padding-bottom:6px}}
+/* الرباعيّ: صورتان متراكبتان أصغر فيبقى للاسم والحال مكان */
+.pAvs.two .csAv{width:clamp(34px,5.2vh,46px);height:clamp(34px,5.2vh,46px)}
+.pAvs.two .csAv+.csAv{margin-inline-start:-18px}
+.pCard:has(.pAvs.two){gap:9px;padding-inline:10px}
+.shfx.anch.up .shtx::before{top:auto;bottom:-6px;border-top:0;border-left:0;border-bottom:1px solid var(--lxLine);border-right:1px solid var(--lxLine)}
 .btn.dbOpt.ok{border-color:var(--ok);color:var(--ok);background:rgba(46,204,113,.14)}
 @media (max-width:380px){.goBtn.caEndGo{min-height:44px}}
 #caFps{position:fixed;top:calc(6px + env(safe-area-inset-top));left:8px;z-index:90;pointer-events:none;
@@ -23417,14 +23424,16 @@ function shoutFx(text,side,label,peer){
  if(av){
   const r=av.getBoundingClientRect();
   if(r.width>0){
-   d.classList.add('anch');
+   d.classList.add('anch');d.style.bottom='auto';   // .shfx.me{bottom:27%} مع top يمطّ الصندوق فتطفو الفقاعة (المراجعة)
    const W=window.innerWidth||360, w=d.offsetWidth, cx=r.left+r.width/2;
    const left=Math.max(8,Math.min(W-8-w,cx-w/2));
    /* فقاعتان في وقتٍ واحد (صيحتي وتعليق الخصم) لا تتراكبان: الثانية تحت الأولى (المراجعة) */
-   let top=r.bottom+10;
+   /* صورةٌ في النصف السفليّ (بطاقتي تحت اللوح): الفقاعة فوقها وسهمها إلى أسفل — ٦٫٦٩ */
+   const up=r.top>(window.innerHeight||800)*.6;if(up)d.classList.add('up');
+   let top=up?r.top-10-d.offsetHeight:r.bottom+10;
    for(const o of document.querySelectorAll('.shfx.anch')){if(o===d)continue;const q=o.getBoundingClientRect();
-    if(q.right>left&&q.left<left+w&&q.bottom>top&&q.top<top+d.offsetHeight)top=q.bottom+6}
-   d.style.left=left+'px';d.style.top=top+'px';
+    if(q.right>left&&q.left<left+w&&q.bottom>top&&q.top<top+d.offsetHeight)top=up?q.top-6-d.offsetHeight:q.bottom+6}
+   d.style.bottom='auto';d.style.left=left+'px';d.style.top=top+'px';
    d.style.setProperty('--ax',(cx-left)+'px');
   }
  }
@@ -24852,7 +24861,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.68';
+const APP_VER='6.69';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25457,8 +25466,11 @@ function rmOn(d,m){
   if(!_ca.aimV)_ca.aimV={x:d.x,y:d.y,ang:d.ang,pw:_ca.aim.pw,ph:_ca.aim.ph};
   const p=(RM.players||[]).find(x=>x.peer===d.by), who=(p&&p.name)||'الخصم';
   const ph=d.ph||'aim', txt=ph==='move'?'يحرّك الضارب على قاعدته…':ph==='set'?'ثبّت التصويب — يضرب!':'يصوّب…';
-  const el=document.querySelector('#rmScr .caStat');
-  if(el)el.innerHTML='دور <b>'+esc(who)+'</b> — '+txt;
+  /* ٦٫٦٩: حال الخصم في بطاقته (فوق اللوح) لا في سطرٍ أسفل الشاشة */
+  /* المراجعة: في الرباعيّ قد يصوّب شريكي — فالحال في بطاقة فريق المصوِّب، وباسمه حين تجمع البطاقة لاعبين */
+  const mate=RM.ca&&RM.ca.col&&RM.ca.col[d.by]===RM.ca.col[RM.me];
+  const el=document.querySelector('#rmScr .pCard.'+(mate?'bot':'top')+' .pSub');
+  if(el)el.innerHTML=(RM.players||[]).length>2?'<b>'+esc(who)+'</b> — '+txt:'<b>'+txt+'</b>';
   const first=RM.ca&&RM.ca.msg!=='الخصم يصوّب…';
   if(RM.ca)RM.ca.msg='الخصم يصوّب…';
   caLoopOn();setTimeout(caRender,0);
@@ -25699,7 +25711,7 @@ function roomDraw(){
     بما رُسم عليها ومستمعيها إلى الشاشة الجديدة — فلا إطار فارغ ولا انقطاع. */
  const oldCv=document.getElementById('caC');
  const caPlay_=playing&&RM.game==='carrom';   // ونهاية المباراة داخل شاشة الكيرم (٦٫٥٨)   // الكيرم: الوجوه والخروج في شريط أدواته
- go(`<div class="scr on nofi${caPlay_?" caScr":""}" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${emoFab(26)}</button>`:''}${caPlay_?`<div class="tbar caTbar"><button class="bk" onclick="back()">${bkChev()}</button><h2>كيرم<svg class="caOrn" viewBox="0 0 120 10" aria-hidden="true"><path d="M4 5H50M70 5H116" stroke="#E8B23A" stroke-opacity=".75" stroke-width="1.2"/><path d="M60 1L64 5L60 9L56 5Z" fill="#E8B23A"/></svg></h2><button class="caGear" onclick="caMenu()" aria-label="الإعدادات">${ico('gear',18)}</button></div>`:tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
+ go(`<div class="scr on nofi${caPlay_?" caScr":""}" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${emoFab(26)}</button>`:''}${caPlay_?`<div class="tbar caTbar"><button class="bk" onclick="back()">${bkChev()}</button><h2>كيرم<small class="caSub"><span class="caM">${RM.solo?'ضد الذكاء الاصطناعي':'أونلاين'}</span>${RM.solo?`<i></i>${({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''}`:''}${RM.ca?`<i></i><span class="caQ${RM.ca.q?' hot':''}">${caQTxt(RM.ca)}</span>`:''}</small></h2><button class="caGear" onclick="caMenu()" aria-label="الإعدادات">${ico('gear',18)}</button></div>`:tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
  ${caPlay_?'':`<button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button>`}</div>`);
  if(oldCv){const nw=document.getElementById('caC');if(nw&&nw!==oldCv){nw.replaceWith(oldCv);oldCv._pk=null;try{caRender()}catch(e){}try{caLoopOn()}catch(e){}}}
  if(typeof vb3dMountLobby==='function'){if(RM.phase==='lobby')vb3dMountLobby(rmLobbySeats(R),RM.game);else if(typeof VB3!=='undefined'&&VB3.lobby)vb3dDispose()}   // المجلس المجسّم في الردهة (5.52) — ويُفكّ حين تبدأ اللعبة أو تُغادَر الغرفة
@@ -27452,6 +27464,16 @@ function caPocket(x,px,py,PR){
    الأربعة بلا خطأ — وبمظهر الأصليّ نفسه (خشب قيقبٍ حقيقيّ الملمس وحبرٌ مطبوعٌ عليه، لا رسمٌ مسطّح).
    الأبعاد بوحدات اللوح (٤٠٠ بين الجيوب) كما في الأصليّ: شريط القاعدة ٣٦١–٣٧٩ (CA_BASE ± ٩)، دائرتاه على
    CA_XL وCA_XR، السهم القطريّ ينتهي في قلب دائرةٍ مفتوحة، وفي المركز نجمةٌ ثمانيّة داخل حلقتين. */
+const CA_TONE='rgb(220,180,134)';   // ٦٫٥٦ كان ٢٠٦،١٦٤،١٢٢ على خشبٍ أفتح؛ قيس على هذا الخشب ليبلغ اللون المُقرّ نفسه (~١٧٥،١١٢،٦٢)
+/** حال الملكة في رأس الشاشة. المراجعة (٦٫٦٩): كانت «مع الخصم» لكلّ من ليس أنا — وفي الرباعيّ قد يكون شريكك */
+function caQTxt(C){
+ if(!C)return '';
+ if(!C.q)return (C.pcs||[]).some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت';
+ if(C.q===RM.me)return 'الملكة معك — غطِّها';
+ const n=esc(((RM.players||[]).find(x=>x.peer===C.q)||{}).name||'لاعب'), mc=C.col&&C.col[RM.me];
+ if(mc&&C.col[C.q]===mc)return 'الملكة مع شريكك '+n;
+ return (RM.players||[]).length<=2&&mc?'الملكة مع الخصم':'الملكة مع '+n;
+}
 function caSurface(x,M,P){
  const sc=P/CA_R;
  let sd=20260923;const rnd=()=>((sd=(Math.imul(sd,1664525)+1013904223)>>>0)/4294967296);
@@ -27485,6 +27507,9 @@ function caSurface(x,M,P){
  }
  /* المسام: نقطٌ دقيقة جدًّا */
  for(let i=0;i<2600;i++){x.fillStyle='rgba(90,50,20,'+(.05+rnd()*.08).toFixed(3)+')';x.fillRect(rnd()*CA_R,rnd()*CA_R,.35+rnd()*.9,.18)}
+ /* ٦٫٥٦ — «لون الخشب أغمق» (أقرّه المالك، وسقط سهوًا حين رُسم اللوح متّجهًا في ٦٫٦٧ — أعادته مراجعة «لا ترجع للخلف»):
+    طبقة ضربٍ بلون العسل فوق الخشب كلّه قبل الحبر، فيبقى الحبر أسود لا يغمق مرّتين */
+ x.globalCompositeOperation='multiply';x.fillStyle=CA_TONE;x.fillRect(-2,-2,CA_R+4,CA_R+4);x.globalCompositeOperation='source-over';
  /* ٣) الحبر: كلّ الخطوط تُطبع بضربٍ (multiply) فيظهر العِرق من تحتها كما على لوحٍ حقيقيّ */
  x.globalCompositeOperation='multiply';
  const INK='rgba(26,16,10,.94)', RED='#A3141D', CREAM='rgba(250,232,196,.9)';
@@ -28237,42 +28262,38 @@ function rmCarrom(R){
    <span class="nm">${me2?'أنت':esc(o.p.name)}</span>
    <b>${left(C.col[o.p.peer])}</b></div>`;
  };
- /* ٦٫٥٤ — «شوف شكل المكان مرتّب أرجوك كذا» (صورة المالك): رأسٌ بزخرفة وزرّ إعدادات، شارةُ الطور،
-    لوحةُ نتيجةٍ واحدة بثلاثة أقسام، اللوح، شريط التحريك بصورتك، ثمّ زرّان مستديران وبينهما سطر الدور.
-    لا نصوص طويلة ولا صفوف أزرار — والباقي في قائمة الإعدادات. */
+ /* ٦٫٦٩ — «رتّب المساحة الفاضية… أماكن صور الملفّات الشخصيّة، حدودها، ترتيب المكان في الأسفل وفي الأعلى — أفضل
+    تصميم». كانت لوحة نتيجةٍ بثلاثة أقسام فوق، ثمّ فراغ، ثمّ اللوح، ثمّ فراغ، ثمّ سطر الدور وزرّ التفاعل في أسفل الشاشة.
+    الآن كما يجلس اللاعبون: بطاقة الخصم ملاصقةٌ لأعلى اللوح، وبطاقتي تحت شريط التحريك، والكلّ كتلةٌ واحدة في وسط
+    الشاشة (لا فراغ بين أجزائها). في كلّ بطاقة: صورةٌ كبيرة بحلقةٍ ذهبيّة تتوهّج في دور صاحبها، الاسم وحاله، وتسع
+    خاناتٍ تمتلئ بما أدخل (والملكة إن كانت معه). الطور والصعوبة والملكة في رأس الشاشة تحت العنوان. */
  const duo=RM.players.length<=2;
- const seg=col=>{
-  const ps=RM.players.filter(p=>C.col[p.peer]===col), on=ps.some(p=>p.peer===C.turn), me2=col===myCol;
-  const who=duo?(me2?'أنت':esc(ps[0]?ps[0].name:'الخصم')):(me2?'فريقك':'الخصم');
-  /* ٦٫٥٦ — «صورة البروفايل مكانه، وأظهر صورة بروفايله»: صورة كلّ لاعبٍ في قسمه من لوحة النتيجة
-     (الفريق: صورتا اللاعبين متراكبتين) */
-  const avOf=p=>p.peer===RM.me?avatarArt(30):(p.av?avatarSVG(p.av,30):personArt(p.name,30));
-  /* ٦٫٦٢: الصورة تفتح بطاقة اللاعب (caProf)، وعندها تخرج فقاعة كلامه */
-  const avs=ps.slice(0,2).map(p=>`<span class="csAv" data-pr="${esc(p.peer)}" onclick="caProf(this.dataset.pr)">${avOf(p)}</span>`).join('');
-  return `<div class="csSeg${me2?' me':''}${on?' on':''}">
-   <span class="csAvs${ps.length>1?' two':''}">${avs}</span>
-   <span class="csTx"><span class="csWho">${who}</span>
-   <span class="csVal"><i class="caDot ${col}"></i><b>${9-left(col)}</b><small>${left(col)}<span class="csLw"> باقية</span></small></span></span></div>`;
- };
- const qTxt=C.q?(C.q===RM.me?'الملكة معك — غطِّها':'الملكة مع '+esc(nm(C.q))):(C.pcs.some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت');
- const modeTxt=RM.solo?'ضد الذكاء الاصطناعي':'أونلاين';
  const dTxt=RM.solo?(({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''):'';
+ const card=(col,pos)=>{
+  const ps=RM.players.filter(p=>C.col[p.peer]===col), on=ps.some(p=>p.peer===C.turn), me2=col===myCol;
+  const avOf=p=>p.peer===RM.me?avatarArt(46):(p.av?avatarSVG(p.av,46):personArt(p.name,46));
+  const avs=ps.slice(0,2).map(p=>`<span class="csAv" data-pr="${esc(p.peer)}" onclick="caProf(this.dataset.pr)">${avOf(p)}</span>`).join('');
+  const who=duo?(me2?'أنت':esc(ps[0]?ps[0].name:'الخصم')):(me2?'فريقك':'الفريق الخصم');
+  const sub=RM.phase==='over'?'انتهت المباراة'
+   :me2?(mine?'<b>دورك</b> <span class="pH">— اسحب وأفلت</span>':(on?'<b>دور '+esc(nm(C.turn))+'</b> — يصوّب…':'انتظر دورك'))
+   :(on?'<b>يصوّب…</b>':(RM.solo?'لاعب آلي'+(dTxt?' · '+dTxt:''):'لاعب أونلاين'));
+  const got=9-left(col), qHere=(C.q&&C.col[C.q]===col)||(C.qw&&C.col[C.qw]===col);
+  const slots=Array.from({length:9},(_,i)=>`<i class="${i<got?'f '+col:''}"></i>`).join('')+(qHere?'<i class="f q"></i>':'');
+  return `<div class="pCard ${pos}${me2?' me':''}${on&&RM.phase!=='over'?' on':''}">
+   <span class="pAvs${ps.length>1?' two':''}">${avs}</span>
+   <span class="pTx"><b class="pNm">${who}</b><span class="pSub">${sub}</span></span>
+   <span class="pScore"><b>${got}</b><span class="pSlots">${slots}</span></span>
+   ${me2?`<button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${emoFab(22)}</button>`:''}
+  </div>`;
+ };
  const msg=C.msg&&C.msg!=='الخصم يصوّب…'&&!/^اللوح [\d٠-٩]/.test(C.msg)?C.msg:'';
- return `<div class="caInfo">${ico('group',12)}<b>${RM.players.length}</b><span>${modeTxt}</span>${dTxt?`<i></i><span>${dTxt}</span>`:''}</div>
- <div class="csBar">
-  ${seg(myCol)}
-  <div class="csMid"><b>كيرم</b><small>من يُدخل قطعه أوّلًا</small><span class="${C.q?'hot':''}"><i></i>${qTxt}</span></div>
-  ${seg(foeCol)}
- </div>
+ return `<div class="caStage">
+ ${card(foeCol,'top')}
  <div class="caWrap big${duo?' duo':''}"><canvas id="caC" width="720" height="816"></canvas>
   ${seat.map(chip).join('')}
   ${msg&&RM.phase!=='over'?`<div class="caFloat" key="${esc(msg).length}">${msg}</div>`:''}
   ${RM.phase==='over'?caMatchEnd(C):''}</div>
- <div class="caBot">
-  <!-- ٦٫٥٩: زرّ القوانين وصورتي على الشريط أُزيلا («يحجب السفلي») — القوانين في قائمة الترس، وصورتي في لوحة النتيجة -->
-  <i class="caSp"></i>
-  <div class="caStat${mine?' me':''}">${RM.phase==='over'?'<b>انتهت المباراة</b>':mine?'<b>دورك</b> — اسحب على اللوح وأفلت':'دور <b>'+esc(nm(C.turn))+'</b> — يصوّب…'}</div>
-  <button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${emoFab(22)}</button>
+ ${card(myCol,'bot')}
  </div>`;
 }
 /* ═══ ٦٫٦٢ — «يجب الخصم يرسل تعبيرات أثناء اللعب، ومكانها جنب صورته» ═══
