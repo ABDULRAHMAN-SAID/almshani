@@ -49,7 +49,11 @@ console.log('\n── هل تُكافأ التسديدة الصحيحة؟ ──
 {
  // قطعة على القطر أمام زاوية، والضارب خلفها على الخطّ نفسه: هذه أوضح تسديدة في الكيرم
  let ok=0,tot=0;
- for(let d=60;d<=200;d+=20)for(const sp of [4,6,8]){
+ /* السرعة من المسافة لا ثابتة: ما يلزم القطعة لتبلغ الجيب مقسومًا على ما ينقله الضارب إليها
+    (٦٫٥٠: الضارب ١٫٣٢ قطعة والارتداد ٠٫٧٨ كما في فيديو المالك)، ثمّ ×١ و×١٫٢٥ و×١٫٥ */
+ const tr=C.strikerMass*(1+C.pieceE)/(C.strikerMass+1);
+ for(let d=60;d<=200;d+=20)for(const k of [1,1.25,1.5]){
+  const sp=Math.max(4,spFor(d)/tr*k+0.4);
   tot++;
   const px=d/Math.SQRT2, py=d/Math.SQRT2;
   const sx=px+40/Math.SQRT2, sy=py+40/Math.SQRT2;
@@ -62,7 +66,7 @@ console.log('\n── هل تُكافأ التسديدة الصحيحة؟ ──
 {
  // كسرة الافتتاح: المطلوب أن تتبعثر الحزمة ولا تضيع قطعة — لا أن تُسقط شيئًا
  let scattered=0,lost=0,shots=0,pots=0;
- for(let a=262;a<=278;a+=4)for(const sp of [5,6,7]){
+ for(let a=262;a<=278;a+=4)for(const sp of [8,10,12]){   // ٦٫٥٠: الكسرة ضربةٌ قويّة (٤٨٠–٧٢٠ وحدة/ث) — الضارب الأخفّ لا يبعثر بلمسة
   const base=P.deal();
   const pcs=base.map(p=>({...p,vx:0,vy:0}));
   pcs.push(at(200,360,Math.cos(a*Math.PI/180)*sp,Math.sin(a*Math.PI/180)*sp,'s'));
