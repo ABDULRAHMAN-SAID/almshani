@@ -228,7 +228,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 .caWrap{position:relative;width:100%;border-radius:9px;overflow:hidden;
  box-shadow:0 0 0 5px #5A3616,0 0 0 6px rgba(232,178,58,.25),0 12px 30px rgba(0,0,0,.6)}
 .caWrap.big{width:100vw;margin-inline:calc(50% - 50vw);border-radius:0}
-.caWrap.persp{box-shadow:none;background:transparent}
+.caWrap.persp,.caWrap.big{box-shadow:none;background:transparent}   /* الإطار في الرسم نفسه — لا حلقةٌ بنّيّة حوله */
 /* زرّ الوجوه ثابتٌ أسفل اليسار (٤٨ بكسلًا): النصّ تحته يُفسح له فلا يمرّ تحته ولا يُقرأ نصفه */
 .caNote{padding-left:64px;padding-bottom:10px}
 .caWrap.persp canvas{will-change:transform}
@@ -1714,29 +1714,52 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .caSeat.rgt,.caSeat.lft{padding-top:2px;padding-bottom:2px}
 .caSeat.rgt{right:0;top:44%;transform:translate(calc(50% - 10px),-50%) rotate(-90deg)}
 .caSeat.lft{left:0;top:44%;transform:translate(calc(-50% + 10px),-50%) rotate(90deg)}
-/* ٦٫٥٢ — رأس المباراة: بطاقتا اللاعبين وبينهما حال اللوح */
-.caHud{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:8px;margin:2px 0 10px}
-.caPl{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;min-width:0;
- background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.10);
- box-shadow:0 6px 16px rgba(0,0,0,.28);transition:box-shadow .25s,border-color .25s}
-.caPl.on{border-color:rgba(232,178,58,.85);box-shadow:0 0 0 2px rgba(232,178,58,.25),0 0 18px rgba(232,178,58,.35)}
-.caHavs{display:flex;flex-shrink:0}
-.caHav{width:34px;height:34px;border-radius:50%;overflow:hidden;display:inline-block;border:2px solid rgba(255,233,168,.55);background:#1B1410}
-.caHav+.caHav{margin-inline-start:-12px}
-.caHav svg{width:100%;height:100%;display:block}
-.caPi{display:flex;flex-direction:column;min-width:0;gap:2px}
-.caPi b{font-size:12.5px;font-weight:900;color:#F2F4F8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.caPi span{display:flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:var(--tx2);white-space:nowrap}
-.caPi .caDot{width:10px;height:10px;flex-shrink:0}
-.caPs{margin-inline-start:auto;font-size:22px;font-weight:900;color:var(--tx2);font-variant-numeric:tabular-nums}
-.caPl.me .caPs{color:var(--gold)}
-@media (max-width:430px){.caPl{flex-wrap:wrap;row-gap:4px;padding:8px}.caPi{order:3;flex-basis:100%}}   /* الاسم في سطرٍ كامل على الهواتف */
-.caMid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:0 2px;min-width:74px}
-.caBd{font-size:13px;font-weight:900;color:#FFE9A8}.caBd em{font-style:normal;color:var(--mut);font-size:11px}
-.caTg{font-size:9.5px;font-weight:800;color:var(--mut)}
-.caQn{display:flex;align-items:center;gap:4px;font-size:9.5px;font-weight:900;color:var(--tx2);white-space:nowrap}
-.caQn i{width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FF8E88,#C62B33 60%,#6E1018);display:inline-block}
-.caQn.hot{color:#FFC9C7}
+/* ٦٫٥٤ — شاشة المباراة كما في صورة المالك */
+.caTbar h2{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:19px;font-weight:900;color:#F4E3B5;letter-spacing:.3px}
+.caOrn{display:block;width:120px;height:10px}
+.caGear{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFE9A8;
+ background:linear-gradient(180deg,#1B2A47,#0F1A2E);border:1px solid rgba(140,170,220,.35);box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.caInfo{display:flex;align-items:center;justify-content:center;gap:7px;margin:0 22px 10px;padding:8px 14px;border-radius:999px;
+ background:linear-gradient(180deg,rgba(24,40,70,.92),rgba(14,24,44,.92));border:1px solid rgba(140,170,220,.30);
+ color:#CFD8EA;font-size:12px;font-weight:800}
+.caInfo b{color:#F2F4F8}.caInfo span:first-of-type{color:#E8B23A}
+.caInfo i{width:4px;height:4px;border-radius:50%;background:rgba(207,216,234,.5)}
+.csBar{display:grid;grid-template-columns:1fr 1.25fr 1fr;align-items:stretch;margin:0 4px 12px;border-radius:18px;overflow:hidden;
+ background:linear-gradient(180deg,#172845,#0E1A30);border:1px solid rgba(140,170,220,.35);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+.csSeg{display:flex;flex-direction:column;justify-content:center;gap:4px;padding:9px 14px;position:relative;transition:background .25s;min-width:0}
+.csSeg.on{background:linear-gradient(180deg,rgba(232,178,58,.22),rgba(232,178,58,.06));box-shadow:inset 0 0 0 1.5px rgba(232,178,58,.7)}
+.csWho{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:#AEB9CF;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.csWho em{font-style:normal;font-size:9.5px;font-weight:900;color:#1A1204;background:#E8B23A;border-radius:6px;padding:1px 6px}
+.csVal{display:flex;align-items:center;gap:6px}.csVal b{font-size:22px;font-weight:900;color:#F2F4F8;line-height:1;font-variant-numeric:tabular-nums}
+.csSeg.me .csVal b{color:#FFD36A}
+.csVal .caDot{width:12px;height:12px;flex-shrink:0}.csVal small{font-size:9.5px;font-weight:800;color:#8E9AB3;white-space:nowrap}
+.csMid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:6px 4px;min-width:0;
+ background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.05));border-inline:1px solid rgba(140,170,220,.22)}
+.csMid b{font-size:11px;font-weight:900;color:#E3E9F5;text-align:center;white-space:nowrap}
+.csMid span{display:flex;align-items:center;gap:5px;font-size:9.5px;font-weight:800;color:#AEB9CF;white-space:nowrap}
+.csMid span i{width:9px;height:9px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#FF8E88,#C62B33 60%,#6E1018)}
+.csMid span.hot{color:#FFC9C7}
+@media (max-width:380px){.csSeg{padding:8px 9px}.csMid b{font-size:10px}.csVal b{font-size:19px}}
+/* صورة اللاعب عند طرف شريط التحريك */
+.caSlAv{position:absolute;left:calc(12% - 22px);top:94.1%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;overflow:hidden;z-index:2;pointer-events:none;
+ border:2.5px solid #E8B23A;box-shadow:0 0 0 3px rgba(14,26,48,.9),0 6px 14px rgba(0,0,0,.5);background:#16233D}
+.caSlAv svg{width:100%;height:100%;display:block}
+/* رسالة الإدخال: تظهر فوق اللوح لحظةً ثمّ تخفت */
+.caFloat{position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:3;pointer-events:none;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;
+ padding:7px 14px;border-radius:999px;background:rgba(10,18,34,.86);border:1px solid rgba(232,178,58,.6);color:#FFE9A8;font-size:12px;font-weight:900;
+ box-shadow:0 6px 18px rgba(0,0,0,.45);animation:caFloat 3.2s ease forwards}
+@keyframes caFloat{0%{opacity:0;transform:translate(-50%,8px)}10%,72%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-6px)}}
+/* الزرّان المستديران وبينهما سطر الدور */
+.caBot{display:flex;align-items:center;gap:10px;margin:12px 6px 18px}
+.caRnd{width:48px;height:48px;flex-shrink:0;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFE9A8;
+ background:radial-gradient(circle at 35% 30%,#233A63,#0F1B31);border:1.5px solid rgba(140,170,220,.45);box-shadow:0 6px 14px rgba(0,0,0,.45)}
+.caRnd:active{transform:scale(.94)}
+.caBot .caStat{flex:1;margin:0;font-size:12px}
+/* قائمة الإعدادات */
+.cmBox{max-width:330px}
+.cmRow{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;margin-top:8px;border-radius:13px;cursor:pointer;color:#FFE9A8;
+ background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);font:800 13px var(--font,system-ui);text-align:start}
+.cmRow span{flex:1;color:#F2F4F8}.cmRow em{font-style:normal;font-size:11.5px;color:#E8B23A}
 .caWrap.duo .caSeat{display:none}        /* لاعبان: البطاقتان في الرأس تكفيان */
 /* شاشة الإعداد (٦٫٥٢): اختيارٌ مقسّم بدل الشارات، ومفتاحٌ حقيقيّ بدل «مفعّل/مطفأ» */
 .segC{display:flex;gap:8px}
@@ -1752,17 +1775,8 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .sw::after{content:'';position:absolute;top:3px;inset-inline-start:3px;width:19px;height:19px;border-radius:50%;background:#fff;transition:inset-inline-start .2s}
 .sw.on{background:var(--gold)}.sw.on::after{inset-inline-start:22px}
 .soloNote{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:14px}
-/* سطر الدور تحت اللوح — واحدٌ قصير */
 .caStat{text-align:center;font-size:12.5px;font-weight:800;color:var(--tx2);margin-top:10px}
 .caStat b{color:#F2F4F8}.caStat.me b{color:var(--gold)}
-/* شريط الأدوات: أيقونةٌ فوق كلمة، كأزرار الألعاب لا كأزرار النماذج */
-.caTools{display:flex;justify-content:center;gap:8px;margin:14px 0 18px}
-.caTool.out{color:#FF9A94}
-.caTool{flex:1 1 0;max-width:92px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px 9px;border-radius:14px;cursor:pointer;
- background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.12);
- color:#FFE9A8;font:800 10.5px var(--font,system-ui);box-shadow:0 4px 12px rgba(0,0,0,.25)}
-.caTool:active{transform:scale(.96)}
-.caTool span{color:var(--tx2);white-space:nowrap}
 /* شريط التحديث: يخبر ولا يقاطع، والضغط عليه يطبّق */
 #verBar{position:fixed;inset-inline:10px;top:calc(env(safe-area-inset-top,0px) + 8px);z-index:90;
  display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;
@@ -15062,14 +15076,15 @@ const VENUES={
     على خشب الطاولة — ألوانٌ مأخوذةٌ من صورة المالك نفسها */
  /* «حول اللوح أسود لون غريب»: صارت طاولةً خشبيّةً مضاءة تحت اللوح — ألواحٌ بعروقٍ خفيفة، وضوءٌ دافئٌ في وسطها
     يخفت نحو الأطراف، كما يظهر الخشب حول اللوح في صورة المالك */
+ /* ٦٫٥٤: غرفةٌ كحليّة بضوء مصباحٍ دافئ في زاويتها — كما في صورة المالك الثانية */
  carromR:()=>`<div style="position:absolute;inset:0;background:
-  radial-gradient(75% 38% at 50% 46%,rgba(255,196,120,.34),transparent 74%),
-  radial-gradient(40% 30% at -4% 44%,rgba(214,176,128,.22),transparent 72%),
-  radial-gradient(36% 28% at 104% 50%,rgba(190,140,90,.18),transparent 72%),
-  repeating-linear-gradient(90deg,rgba(40,18,6,.30) 0 2px,transparent 2px 3px,rgba(255,210,150,.04) 3px 34px,rgba(40,18,6,.22) 34px 35px,transparent 35px 76px),
-  repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 1px,transparent 1px 9px),
-  linear-gradient(180deg,#2A1A0E 0%,#4A2E18 28%,#5C3A1F 48%,#4A2D17 70%,#24160B 100%)"></div>
-  <div style="position:absolute;inset:0;background:radial-gradient(130% 90% at 50% 46%,transparent 58%,rgba(10,5,2,.62))"></div>`,
+  radial-gradient(38% 26% at 96% 20%,rgba(255,196,120,.34),transparent 70%),
+  radial-gradient(22% 14% at 96% 18%,rgba(255,226,170,.30),transparent 70%),
+  radial-gradient(60% 34% at 50% 50%,rgba(70,96,140,.22),transparent 72%),
+  radial-gradient(30% 40% at 0% 42%,rgba(40,70,60,.28),transparent 70%),
+  linear-gradient(180deg,#0B1322 0%,#101C31 34%,#132139 56%,#0E1829 80%,#080D17 100%)"></div>
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 2px,transparent 2px 64px)"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(125% 90% at 50% 46%,transparent 58%,rgba(2,4,10,.66))"></div>`,
  /* مجلس الكيرم: بساطٌ وأربع جلسات حول موضع اللوح.
     كانت الخلفية جدارًا ومصباحًا معلّقًا وطاولةً تبتعد — مشهدُ غرفةٍ لا علاقة
     له باللعبة، قال عنه صاحبها: «خلفية بلا معنى، كان يجب أن تكون طاولة وأربعة
@@ -24745,7 +24760,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.53';
+const APP_VER='6.54';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25581,7 +25596,7 @@ function roomDraw(){
     بما رُسم عليها ومستمعيها إلى الشاشة الجديدة — فلا إطار فارغ ولا انقطاع. */
  const oldCv=document.getElementById('caC');
  const caPlay_=playing&&RM.game==='carrom'&&RM.phase!=='over';   // الكيرم: الوجوه والخروج في شريط أدواته
- go(`<div class="scr on nofi" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>`:''}${tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
+ go(`<div class="scr on nofi" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${face(myEmoteDeck()[0]||'laugh',26)}</button>`:''}${caPlay_?`<div class="tbar caTbar"><button class="bk" onclick="back()">${bkChev()}</button><h2>كيرم<svg class="caOrn" viewBox="0 0 120 10" aria-hidden="true"><path d="M4 5H50M70 5H116" stroke="#E8B23A" stroke-opacity=".75" stroke-width="1.2"/><path d="M60 1L64 5L60 9L56 5Z" fill="#E8B23A"/></svg></h2><button class="caGear" onclick="caMenu()" aria-label="الإعدادات">${ico('gear',18)}</button></div>`:tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
  ${caPlay_?'':`<button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button>`}</div>`);
  if(oldCv){const nw=document.getElementById('caC');if(nw&&nw!==oldCv){nw.replaceWith(oldCv);oldCv._pk=null;try{caPerspApply(oldCv);caRender()}catch(e){}try{caLoopOn()}catch(e){}}}
  if(typeof vb3dMountLobby==='function'){if(RM.phase==='lobby')vb3dMountLobby(rmLobbySeats(R),RM.game);else if(typeof VB3!=='undefined'&&VB3.lobby)vb3dDispose()}   // المجلس المجسّم في الردهة (5.52) — ويُفكّ حين تبدأ اللعبة أو تُغادَر الغرفة
@@ -27558,13 +27573,14 @@ function caRender(rest){
  const tk=_ca.t||0;
  /* شريط تحريك الضارب — مع اللوح الفاخر بلا مقبض، واليد فوقه */
  const trough=knob=>{if(H>W){
-  if(RM.ca&&RM.ca.turn===RM.me&&!_ca.sim){
+  if(RM.ca){
+   const myT=RM.ca.turn===RM.me&&!_ca.sim;   // ٦٫٥٤: الحوض كحليّ ظاهرٌ دائمًا، والمقبض في دوري
    /* شريط تحريك الضارب: حوضٌ مستدير الطرفين ومقبضٌ على شكل الضارب — كما في اللعبة المرجعيّة */
    const ty=W+(H-W)*.5, x0=PX(CA_SR+26), x1=PX(CA_R-CA_SR-26), th=Math.min((H-W)*.62,44*sc);
-   caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.fillStyle=knob?'rgba(20,10,4,.72)':'rgba(20,10,4,.42)';cx.fill();
-   cx.strokeStyle='rgba(255,214,138,.28)';cx.lineWidth=1.5;caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.stroke();
+   caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);{const tg=cx.createLinearGradient(0,ty-th/2,0,ty+th/2);tg.addColorStop(0,'#0A1426');tg.addColorStop(1,'#1A2B4A');cx.fillStyle=tg}cx.fill();
+   cx.strokeStyle='rgba(140,170,220,.45)';cx.lineWidth=1.5;caRR(cx,x0-th/2,ty-th/2,x1-x0+th,th,th/2);cx.stroke();
    /* مع اللوح الفاخر لا مقبض: اليد الحقيقيّة فوق المسند هي المقبض — تتبع الإصبع كما في صورة المالك */
-   if(knob){const kx=PX(_ca.drag?_ca.drag.sx:_ca.sxV), kr=th*.42, ks=caDisc('s',kr);
+   if(knob&&myT){const kx=PX(_ca.drag?_ca.drag.sx:_ca.sxV), kr=th*.42, ks=caDisc('s',kr);
    cx.globalAlpha=_ca.drag?.55:1;cx.drawImage(ks,kx-ks._o,ty-ks._o,ks._s,ks._s);cx.globalAlpha=1}
   }
  }};
@@ -28036,40 +28052,52 @@ function rmCarrom(R){
    <span class="nm">${me2?'أنت':esc(o.p.name)}</span>
    <b>${left(C.col[o.p.peer])}</b></div>`;
  };
- /* ٦٫٥٢ — «الأزرار كلّها غير احترافيّة»: كان فوق اللوح أربعة صفوف من الشارات والنصوص وتحته أزرارٌ
-    ونصوصٌ طويلة. الآن كما في الألعاب المحترفة: بطاقتا اللاعبين (صورة، اسم، ما بقي من قطعه، رصيده)
-    وبينهما اللوح والملكة؛ تحت اللوح سطرُ الدور وحده؛ ثمّ شريط أدواتٍ بأيقونات. والشرح في «القوانين». */
+ /* ٦٫٥٤ — «شوف شكل المكان مرتّب أرجوك كذا» (صورة المالك): رأسٌ بزخرفة وزرّ إعدادات، شارةُ الطور،
+    لوحةُ نتيجةٍ واحدة بثلاثة أقسام، اللوح، شريط التحريك بصورتك، ثمّ زرّان مستديران وبينهما سطر الدور.
+    لا نصوص طويلة ولا صفوف أزرار — والباقي في قائمة الإعدادات. */
  const duo=RM.players.length<=2;
- const side=col=>{
+ const seg=col=>{
   const ps=RM.players.filter(p=>C.col[p.peer]===col), on=ps.some(p=>p.peer===C.turn), me2=col===myCol;
-  const avs=ps.map(p=>`<span class="caHav">${p.peer===RM.me?avatarArt(30):(p.av?avatarSVG(p.av,30):personArt(p.name,30))}</span>`).join('');
   const who=duo?(me2?'أنت':esc(ps[0]?ps[0].name:'الخصم')):(me2?'فريقك':'الخصم');
-  return `<div class="caPl${me2?' me':''}${on?' on':''}">
-   <div class="caHavs">${avs}</div>
-   <div class="caPi"><b>${who}</b><span><i class="caDot ${col}"></i>${left(col)} باقية</span></div>
-   <div class="caPs">${M.pts[col]||0}</div>
-  </div>`;
+  return `<div class="csSeg${me2?' me':''}${on?' on':''}">
+   <span class="csWho">${who}${on?`<em>${me2?'دورك':'دوره'}</em>`:''}</span>
+   <span class="csVal"><i class="caDot ${col}"></i><b>${M.pts[col]||0}</b><small>${left(col)} باقية</small></span></div>`;
  };
- const qTxt=C.q?(C.q===RM.me?'معك — غطِّها':'مع '+esc(nm(C.q))):(C.pcs.some(x=>x.t==='q')?'على اللوح':'أُخذت');
- return `<div class="caHud">
-   ${side(myCol)}
-   <div class="caMid"><div class="caBd">اللوح ${(M.boards||0)+1} <em>من ${CA_BOARDS}</em></div>
-    <div class="caTg">إلى ${CA_TARGET}</div>
-    <div class="caQn${C.q?' hot':''}"><i></i>${qTxt}</div></div>
-   ${side(foeCol)}
-  </div>
+ const qTxt=C.q?(C.q===RM.me?'الملكة معك — غطِّها':'الملكة مع '+esc(nm(C.q))):(C.pcs.some(x=>x.t==='q')?'الملكة على اللوح':'الملكة أُخذت');
+ const modeTxt=RM.solo?'ضد الذكاء الاصطناعي':'أونلاين';
+ const dTxt=RM.solo?(({easy:'سهل',mid:'متوسط',hard:'صعب'})[RM.diff]||''):'';
+ const msg=C.msg&&C.msg!=='الخصم يصوّب…'&&!/^اللوح [\d٠-٩]/.test(C.msg)?C.msg:'';
+ return `<div class="caInfo">${ico('group',12)}<b>${RM.players.length}</b><span>${modeTxt}</span>${dTxt?`<i></i><span>${dTxt}</span>`:''}</div>
+ <div class="csBar">
+  ${seg(myCol)}
+  <div class="csMid"><b>اللوح ${(M.boards||0)+1} من ${CA_BOARDS} · حتى ${CA_TARGET}</b><span class="${C.q?'hot':''}"><i></i>${qTxt}</span></div>
+  ${seg(foeCol)}
+ </div>
  <div class="caWrap big${duo?' duo':''}"><canvas id="caC" width="720" height="816"></canvas>
-  ${seat.map(chip).join('')}</div>
- <div class="caStat${mine?' me':''}">${mine?'<b>دورك</b> · حرّك الضارب من الشريط ثم اسحب وأفلت':'دور <b>'+esc(nm(C.turn))+'</b> — يصوّب…'}</div>
- ${C.msg?`<div class="caMsg"${C.msg==='الخصم يصوّب…'?' style="visibility:hidden"':''}>${C.msg}</div>`:''}   <!-- يبقى مكانه: لا يقفز الشريط تحت الإصبع -->
- <div class="caTools">
-  <button class="caTool" onclick="caRulesSheet()">${ico('book',20)}<span>القوانين</span></button>
-  <button class="caTool" onclick="caSkinTog();caToolLbl('skin')">${ico('palette',20)}<span>اللوح</span></button>
-  <button class="caTool" onclick="caSfxTog(null);caToolLbl('sfx')">${ico('sound',20)}<span>الصوت</span></button>
-  <button class="caTool" onclick="rmEmoteBar()">${face(myEmoteDeck()[0]||'laugh',22)}<span>تفاعل</span></button>
-  <button class="caTool out" onclick="confirmSheet('الخروج من المباراة؟','${RM.solo?'تنتهي المباراة ولا تُحفظ نتيجتها':'المباراة جارية — إن غادرت الآن فلن تعود إليها'}','خروج',()=>rmLeave())">${ico('door',20)}<span>خروج</span></button>
+  ${seat.map(chip).join('')}
+  <span class="caSlAv">${avatarArt(38)}</span>
+  ${msg?`<div class="caFloat" key="${esc(msg).length}">${msg}</div>`:''}</div>
+ <div class="caBot">
+  <button class="caRnd" onclick="caRulesSheet()" aria-label="القوانين">${ico('book',20)}</button>
+  <div class="caStat${mine?' me':''}">${mine?'<b>دورك</b> — اسحب على اللوح وأفلت':'دور <b>'+esc(nm(C.turn))+'</b> — يصوّب…'}</div>
+  <button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${face(myEmoteDeck()[0]||'laugh',22)}</button>
  </div>`;
 }
+/** قائمة الإعدادات (زرّ الترس): القوانين، شكل اللوح، صوت الطقّات، الخروج */
+function caMenu(){
+ const ov=document.createElement('div');ov.className='qvov';
+ const row=(ic,t,v,fn)=>`<button class="cmRow" onclick="${fn}">${ico(ic,18)}<span>${t}</span>${v?`<em>${v}</em>`:''}</button>`;
+ const draw=()=>{ov.innerHTML=`<div class="qvbox cmBox"><div class="qvt">الإعدادات</div>
+  ${row('book','القوانين','',"this.closest('.qvov').remove();caRulesSheet()")}
+  ${row('palette','شكل اللوح',CA_SKIN_NAME[_ca.skin||'r'],"caSkinTog();caMenuRe()")}
+  ${row('sound','صوت الطقّات',CA_SFX_NAME[caSfxStyle()],"caSfxTog(null);caMenuRe()")}
+  ${row('door','الخروج من المباراة','',"this.closest('.qvov').remove();caExit()")}
+  <button class="btn g" style="margin-top:10px" onclick="this.closest('.qvov').remove()">إغلاق</button></div>`};
+ ov._draw=draw;draw();ov.onclick=e=>{if(e.target===ov)ov.remove()};
+ document.body.appendChild(ov);
+}
+function caMenuRe(){const ov=document.querySelector('.qvov');if(ov&&ov._draw)ov._draw()}
+function caExit(){confirmSheet('الخروج من المباراة؟',RM.solo?'تنتهي المباراة ولا تُحفظ نتيجتها':'المباراة جارية — إن غادرت الآن فلن تعود إليها','خروج',()=>rmLeave())}
 /** بعد تبديل اللوح أو الصوت: إشعارٌ قصير بالاختيار الجديد — بلا إعادة بناء الشاشة */
 function caToolLbl(k){
  try{toast(k==='skin'?'اللوح: '+(CA_SKIN_NAME[_ca.skin]||''):'صوت الطقّات: '+CA_SFX_NAME[caSfxStyle()])}catch(e){}
