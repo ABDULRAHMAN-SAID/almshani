@@ -18,3 +18,4 @@ art/scenes/vn-*.png
 .s-*.png
 .icons-*.png
 .art-*.png
+__pycache__/
