@@ -161,7 +161,7 @@
   <path d="M406 144C398 132 392 122 392 108C392 90 405 78 422 78C439 78 452 90 452 108C452 122 446 132 438 144Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="7"/>
   <path d="M438 144C446 132 452 122 452 108C452 96 446 86 436 82C442 94 444 108 440 122C436 132 430 140 426 144Z" fill="#E8B23A"/>
   <ellipse cx="410" cy="96" rx="6" ry="9" fill="#FFFFFF" opacity=".85" transform="rotate(-30 410 96)"/>
-  <path d="M414 138L416 118L422 126L428 118L430 138" fill="none" stroke="#B07E1E" stroke-width="3.5"/>
+  <path d="M416 138V128a6 6 0 1 1 12 0V138" fill="none" stroke="#B07E1E" stroke-width="3.5"/>
   <rect x="406" y="142" width="32" height="20" rx="5" fill="#B8BEC8" stroke="#1A1230" stroke-width="6"/>
   <path d="M408 150H436M408 156H436" fill="none" stroke="#7E8794" stroke-width="3"/>
   <rect x="412" y="160" width="20" height="8" rx="4" fill="#7E8794" stroke="#1A1230" stroke-width="5"/>

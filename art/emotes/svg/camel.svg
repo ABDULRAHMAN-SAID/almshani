@@ -7,71 +7,97 @@
    <stop offset="1" stop-color="#E8B23A" stop-opacity="0"/>
   </radialGradient>
   <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
-  <clipPath id="clipHead"><path d="M-152 -10C-160 -40 -146 -66 -116 -76C-60 -96 20 -92 80 -66C122 -48 144 -14 136 22C128 56 94 78 52 82C8 86 -40 80 -70 80C-114 84 -150 60 -152 -10Z"/></clipPath>
-  <clipPath id="clipMouth"><path d="M-146 0C-120 6 -92 8 -60 6C-64 44 -86 70 -114 68C-140 64 -150 32 -146 0Z"/></clipPath>
-  <clipPath id="clipNeck"><path d="M232 292C262 340 286 398 294 462L428 462C412 400 386 330 392 268Z"/></clipPath>
+  <!-- hump dome (behind the neck) -->
+  <path id="humpP" d="M300 462C296 380 330 284 402 266C446 256 464 316 464 462Z"/>
+  <clipPath id="clipHump"><use href="#humpP"/></clipPath>
+  <!-- tapered S-curve neck, base 106 wide, 90 near the head -->
+  <path id="neckP" d="M262 462C261.4 457.3 259.7 443 258.8 433.5C257.8 424.1 257.2 414.7 256.4 405.4C255.6 396.2 254.9 387.1 254 378.1C253 369.1 252.2 360.6 250.8 351.4C249.4 342.3 247.6 332 245.6 323.1C243.6 314.1 241.5 306.1 238.7 297.7C235.9 289.3 232.8 280.9 228.9 272.6C225.1 264.2 220.8 255.8 215.5 247.4C210.3 239 200.6 226.2 197.6 222L266.4 164C271.1 170.1 286.2 188.4 294.3 200.7C302.5 213.1 309.4 225.6 315.5 238C321.7 250.4 326.6 262.9 331 275.2C335.3 287.4 338.6 299.1 341.7 311.4C344.7 323.7 347.3 337.3 349.4 349C351.6 360.8 352.9 371.2 354.4 381.7C355.9 392.2 357.1 402.3 358.5 412C359.9 421.6 361.3 431.1 362.8 439.4C364.3 447.8 366.8 458.2 367.6 462Z"/>
+  <clipPath id="clipNeck"><use href="#neckP"/></clipPath>
+  <!-- head egg in the head group's local space: muzzle at -x, poll at +x -->
+  <path id="headP" d="M-102 -2C-104 -24 -88 -40 -62 -44C-20 -54 30 -68 60 -60C82 -54 90 -30 88 4C86 40 60 60 20 60C-20 60 -70 50 -92 32C-100 26 -102 12 -102 -2Z"/>
+  <clipPath id="clipHead"><use href="#headP"/></clipPath>
+  <path id="mouthP" d="M-104 6C-82 4 -56 8 -30 18C-36 46 -58 64 -82 60C-100 56 -108 32 -104 6Z"/>
+  <clipPath id="clipMouth"><use href="#mouthP"/></clipPath>
+  <path id="lipP" d="M-34 28C-30 58 -54 88 -86 82C-112 78 -120 48 -110 16C-100 30 -84 40 -66 42C-52 44 -42 38 -34 28Z"/>
+  <clipPath id="clipLip"><use href="#lipP"/></clipPath>
  </defs>
  <g id="glow">
   <ellipse cx="256" cy="262" rx="200" ry="196" fill="url(#glowG)" opacity=".18" filter="url(#soft)"/>
  </g>
- <g id="neck">
-  <path d="M232 292C262 340 286 398 294 462L428 462C412 400 386 330 392 268Z" fill="#D9A86C" stroke="#1A1230" stroke-width="8"/>
-  <g clip-path="url(#clipNeck)">
-   <path d="M244 300C274 350 296 410 302 470L364 470C346 400 316 340 276 280Z" fill="#B8874A" opacity=".9"/>
-   <path d="M396 300C404 350 412 400 420 456" fill="none" stroke="#F0CC98" stroke-width="9" opacity=".9"/>
+ <g id="hump">
+  <use href="#humpP" fill="#D9A86C" stroke="#1A1230" stroke-width="8"/>
+  <g clip-path="url(#clipHump)">
+   <path d="M404 276C438 304 444 400 436 470L480 470L480 270Z" fill="#B8874A" opacity=".9"/>
+   <path d="M330 470C328 400 346 330 380 300L290 300L290 470Z" fill="#B8874A" opacity=".55"/>
+   <path d="M362 300C376 284 392 274 410 272" fill="none" stroke="#F0CC98" stroke-width="9" opacity=".95"/>
   </g>
-  <path d="M392 274C398 290 394 306 402 320C410 334 406 350 414 364C422 378 418 394 426 408" fill="none" stroke="#1A1230" stroke-width="12"/>
-  <path d="M392 274C398 290 394 306 402 320C410 334 406 350 414 364C422 378 418 394 426 408" fill="none" stroke="#B8874A" stroke-width="5"/>
+  <!-- hair tuft on the apex -->
+  <path d="M392 276C394 260 406 254 412 264C414 250 430 250 430 264C438 256 448 264 442 276Z" fill="#D9A86C" stroke="#1A1230" stroke-width="7"/>
  </g>
- <g id="head" transform="translate(252 192) rotate(22) scale(1.15)">
-  <!-- ear (behind head) -->
-  <path d="M92 -66C96 -94 118 -106 130 -92C138 -78 126 -60 106 -54Z" fill="#D9A86C" stroke="#1A1230" stroke-width="7"/>
-  <path d="M104 -70C110 -86 120 -92 124 -84C126 -76 118 -66 108 -62Z" fill="#C97E6E"/>
-  <path d="M-152 -10C-160 -40 -146 -66 -116 -76C-60 -96 20 -92 80 -66C122 -48 144 -14 136 22C128 56 94 78 52 82C8 86 -40 80 -70 80C-114 84 -150 60 -152 -10Z" fill="#D9A86C" stroke="#1A1230" stroke-width="8"/>
+ <g id="neck">
+  <use href="#neckP" fill="#D9A86C" stroke="#1A1230" stroke-width="8"/>
+  <g clip-path="url(#clipNeck)">
+   <path d="M332.4 462C331.6 457.5 329.1 444 327.8 435C326.5 426.1 325.6 417.8 324.4 408.2C323.2 398.7 322.1 388 320.7 377.6C319.4 367.2 317.9 356.1 316.1 345.7C314.3 335.4 312.6 326.2 310 315.6C307.3 305 304.2 293.3 300.3 282.1C296.3 270.8 291.5 258.9 286.3 248.1C281 237.2 275.9 227.7 268.8 216.9C261.7 206.1 247.9 188.8 243.7 183.2L266.4 164C271.1 170.1 286.2 188.4 294.3 200.7C302.5 213.1 309.4 225.6 315.5 238C321.7 250.4 326.6 262.9 331 275.2C335.3 287.4 338.6 299.1 341.7 311.4C344.7 323.7 347.3 337.3 349.4 349C351.6 360.8 352.9 371.2 354.4 381.7C355.9 392.2 357.1 402.3 358.5 412C359.9 421.6 361.3 431.1 362.8 439.4C364.3 447.8 366.8 458.2 367.6 462Z" fill="#B8874A" opacity=".9"/>
+   <path d="M279.7 462C279.1 457.3 277.2 443.4 276.2 434C275.2 424.7 274.5 415.8 273.6 406.1C272.6 396.4 271.7 385.5 270.6 376C269.6 366.4 268.5 357.7 267.1 348.6C265.7 339.5 264.1 330.5 262 321.5C259.9 312.5 257.8 304 254.6 294.7C251.5 285.4 247.5 274.9 243.1 265.6C238.8 256.3 234.2 247.9 228.6 239C222.9 230 212.5 216.6 209.3 212.1" fill="none" stroke="#F0CC98" stroke-width="6" opacity=".6"/>
+  </g>
+ </g>
+ <g id="head" transform="translate(188 190) rotate(-20)">
+  <!-- ear: tall leaf at the poll (behind the skull) -->
+  <path d="M60 -46C58 -70 74 -94 86 -90C98 -86 94 -60 80 -40Z" fill="#D9A86C" stroke="#1A1230" stroke-width="7"/>
+  <path d="M68 -52C68 -68 78 -84 84 -82C90 -78 86 -62 78 -48Z" fill="#C97E6E"/>
+  <!-- skull: base, shade lower/right, highlight along the nose bridge, outline -->
+  <use href="#headP" fill="#D9A86C"/>
   <g clip-path="url(#clipHead)">
-   <path d="M-60 34C-20 62 40 76 100 62C130 52 150 30 160 0L170 120L-80 120Z" fill="#B8874A" opacity=".85"/>
-   <path d="M-150 20C-140 50 -120 70 -80 80" fill="none" stroke="#B8874A" stroke-width="12"/>
-   <path d="M-124 -66C-80 -84 -20 -88 30 -78" fill="none" stroke="#F0CC98" stroke-width="10" opacity=".95"/>
+   <path d="M-104 22C-40 40 20 50 60 30C80 20 84 -20 66 -66L110 -70L110 90L-110 90Z" fill="#B8874A" opacity=".85"/>
+   <path d="M-76 -36C-40 -48 10 -60 50 -58" fill="none" stroke="#F0CC98" stroke-width="9" opacity=".95"/>
+  </g>
+  <use href="#headP" fill="none" stroke="#1A1230" stroke-width="8"/>
+  <!-- cheek blush -->
+  <ellipse cx="-12" cy="10" rx="26" ry="15" fill="#E86A55" opacity=".3"/>
+  <!-- heavy drooping lower lip -->
+  <use href="#lipP" fill="#D9A86C" stroke="#1A1230" stroke-width="8"/>
+  <g clip-path="url(#clipLip)">
+   <path d="M-120 60C-100 78 -70 86 -30 70L-20 100L-130 100Z" fill="#B8874A" opacity=".9"/>
+   <ellipse cx="-96" cy="52" rx="9" ry="5" fill="#F0CC98" opacity=".9"/>
+  </g>
+  <!-- big laughing mouth -->
+  <use href="#mouthP" fill="#5E1F1F"/>
+  <g clip-path="url(#clipMouth)">
+   <path d="M-112 2L-36 8L-38 28L-112 26Z" fill="#FFFFFF"/>
+   <path d="M-94 2V28M-76 4V28M-58 6V28" fill="none" stroke="#1A1230" stroke-width="3"/>
+   <path d="M-112 26L-38 28" fill="none" stroke="#1A1230" stroke-width="3"/>
+   <ellipse cx="-72" cy="58" rx="26" ry="15" fill="#D9564F"/>
+   <ellipse cx="-80" cy="50" rx="8" ry="3.5" fill="#F0837A" opacity=".8"/>
+  </g>
+  <use href="#mouthP" fill="none" stroke="#1A1230" stroke-width="5"/>
+  <!-- split upper lip: far lobe then near lobe, each with a shade crescent + specular -->
+  <ellipse cx="-70" cy="-6" rx="22" ry="14" fill="#B8874A"/>
+  <ellipse cx="-73" cy="-10" rx="19" ry="10" fill="#D9A86C"/>
+  <ellipse cx="-70" cy="-6" rx="22" ry="14" fill="none" stroke="#1A1230" stroke-width="5"/>
+  <ellipse cx="-94" cy="-4" rx="22" ry="14" fill="#B8874A"/>
+  <ellipse cx="-97" cy="-8" rx="19" ry="10" fill="#D9A86C"/>
+  <ellipse cx="-94" cy="-4" rx="22" ry="14" fill="none" stroke="#1A1230" stroke-width="5"/>
+  <ellipse cx="-102" cy="-10" rx="6" ry="3" fill="#F3D3A8" opacity=".9"/>
+  <!-- nostril slit -->
+  <path d="M-90 -26C-86 -36 -72 -36 -68 -28C-72 -22 -84 -20 -90 -26Z" fill="#5A3A22"/>
+  <!-- eye: closed laughing arc + three lashes -->
+  <path d="M0 -4Q20 14 40 -4" fill="none" stroke="#B8874A" stroke-width="4" opacity=".7"/>
+  <path d="M-2 -14Q20 -40 42 -14" fill="none" stroke="#1A1230" stroke-width="6"/>
+  <path d="M-2 -14L-13 -23M9 -24.5L1.5 -36.5M20 -28L20 -42" fill="none" stroke="#1A1230" stroke-width="5"/>
+  <!-- bridle: noseband + cheek strap + rosette -->
+  <path d="M-12 -54C-24 -14 -26 26 -10 62" fill="none" stroke="#1A1230" stroke-width="15"/>
+  <path d="M-12 -54C-24 -14 -26 26 -10 62" fill="none" stroke="#E8B23A" stroke-width="8"/>
+  <path d="M-18 10L86 -2" fill="none" stroke="#1A1230" stroke-width="13"/>
+  <path d="M-18 10L86 -2" fill="none" stroke="#E8B23A" stroke-width="6"/>
+  <path d="M-14 6L82 -5" fill="none" stroke="#FFE9A8" stroke-width="2" opacity=".8"/>
+  <circle cx="-18" cy="10" r="9" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
+  <!-- tassel under the jaw -->
+  <g transform="translate(-10 62)">
+   <path d="M0 0L-16 46M0 0L-2 52M0 0L14 48" fill="none" stroke="#1A1230" stroke-width="12"/>
+   <path d="M0 0L-16 46M0 0L-2 52M0 0L14 48" fill="none" stroke="#E8B23A" stroke-width="6"/>
+   <circle cx="0" cy="4" r="9" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
   </g>
   <!-- tuft on the poll -->
-  <path d="M40 -76C44 -96 60 -100 66 -90C70 -104 88 -104 88 -90C96 -98 108 -92 102 -80Z" fill="#D9A86C" stroke="#1A1230" stroke-width="7"/>
-  <!-- upper lip crease + nostril -->
-  <path d="M-154 -12C-146 -4 -134 -2 -122 0" fill="none" stroke="#1A1230" stroke-width="4"/>
-  <path d="M-140 -54C-132 -64 -116 -60 -114 -48C-112 -40 -128 -38 -136 -44Z" fill="#5A3A22"/>
-  <path d="M-132 -56C-128 -60 -122 -58 -120 -54" fill="none" stroke="#8A6242" stroke-width="2.5"/>
-  <!-- eye: closed laughing, long lashes -->
-  <path d="M6 -50Q34 -18 62 -50" fill="none" stroke="#1A1230" stroke-width="9"/>
-  <path d="M8 -48L-6 -62M22 -36L14 -54M46 -36L54 -54M60 -48L74 -62" fill="none" stroke="#1A1230" stroke-width="6"/>
-  <path d="M4 -34C18 -12 50 -12 64 -34" fill="none" stroke="#B8874A" stroke-width="4" opacity=".8"/>
-  <!-- cheek blush -->
-  <ellipse cx="-8" cy="6" rx="30" ry="18" fill="#E86A55" opacity=".3"/>
-  <!-- mouth: big laugh -->
-  <path d="M-146 0C-120 6 -92 8 -60 6C-64 44 -86 70 -114 68C-140 64 -150 32 -146 0Z" fill="#5E1F1F"/>
-  <g clip-path="url(#clipMouth)">
-   <path d="M-152 -6L-50 2L-50 26L-152 22Z" fill="#FFFFFF"/>
-   <path d="M-126 -4V26M-104 -2V28M-82 0V28M-64 2V28" fill="none" stroke="#1A1230" stroke-width="3"/>
-   <path d="M-152 22L-50 26" fill="none" stroke="#1A1230" stroke-width="3"/>
-   <ellipse cx="-104" cy="70" rx="36" ry="24" fill="#D9564F"/>
-   <ellipse cx="-114" cy="60" rx="9" ry="4" fill="#F0837A" opacity=".8"/>
-   <rect x="-126" y="50" width="15" height="17" rx="3" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
-   <rect x="-103" y="52" width="15" height="17" rx="3" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
-  </g>
-  <path d="M-146 0C-120 6 -92 8 -60 6C-64 44 -86 70 -114 68C-140 64 -150 32 -146 0Z" fill="none" stroke="#1A1230" stroke-width="5"/>
-  <!-- bridle: noseband + cheek strap + rosette + tassel -->
-  <path d="M-70 -86C-84 -50 -84 30 -66 82" fill="none" stroke="#1A1230" stroke-width="16"/>
-  <path d="M-70 -86C-84 -50 -84 30 -66 82" fill="none" stroke="#E8B23A" stroke-width="9"/>
-  <path d="M-80 -20L96 -56" fill="none" stroke="#1A1230" stroke-width="13"/>
-  <path d="M-80 -20L96 -56" fill="none" stroke="#E8B23A" stroke-width="6"/>
-  <path d="M-78 -14L92 -50" fill="none" stroke="#FFE9A8" stroke-width="2" opacity=".8"/>
-  <g transform="translate(-80 -20)">
-   <path d="M0 0L-12 30M0 0L2 32" fill="none" stroke="#1A1230" stroke-width="10"/>
-   <path d="M0 0L-12 30M0 0L2 32" fill="none" stroke="#E8B23A" stroke-width="5"/>
-  </g>
-  <circle cx="-80" cy="-20" r="9" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <g transform="translate(-64 80)">
-   <path d="M0 0L-18 44M0 0L-2 50M0 0L14 46" fill="none" stroke="#1A1230" stroke-width="12"/>
-   <path d="M0 0L-18 44M0 0L-2 50M0 0L14 46" fill="none" stroke="#E8B23A" stroke-width="6"/>
-   <circle cx="0" cy="4" r="10" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  </g>
+  <path d="M36 -58C40 -76 54 -80 58 -70C62 -84 78 -82 76 -68C84 -74 92 -66 86 -56Z" fill="#D9A86C" stroke="#1A1230" stroke-width="7"/>
  </g>
 </svg>

@@ -65,7 +65,6 @@
  </g>
 
  <g id="head">
-
   <!-- ears (tucked under the ghutra; only their outline bump shows) -->
   <ellipse cx="156" cy="226" rx="16" ry="22" fill="#E3A97C" stroke="#1A1230" stroke-width="7"/>
   <ellipse cx="356" cy="226" rx="16" ry="22" fill="#E3A97C" stroke="#1A1230" stroke-width="7"/>
@@ -74,8 +73,8 @@
    <rect x="140" y="80" width="240" height="250" fill="#C9885B"/>
    <use href="#faceP" fill="url(#skinG)" transform="translate(-5 -12)"/>
    <!-- short beard / stubble along the jaw -->
-   <path d="M158 196C158 264 196 318 256 318C316 318 354 264 354 196L354 224C354 266 312 292 256 292C200 292 158 266 158 224Z" fill="#A9A39B" opacity=".96"/>
-   <path d="M196 284C214 296 234 302 256 302C278 302 298 296 316 284" fill="none" stroke="#D9D4CC" stroke-width="3" opacity=".9"/>
+   <path d="M158 196C158 264 196 318 256 318C316 318 354 264 354 196L354 224C354 266 312 292 256 292C200 292 158 266 158 224Z" fill="#3A2A22" opacity=".94"/>
+   <path d="M196 284C214 296 234 302 256 302C278 302 298 296 316 284" fill="none" stroke="#5A463A" stroke-width="3" opacity=".7"/>
    <!-- cheeks -->
    <circle cx="198" cy="244" r="30" fill="url(#blushG)"/>
    <circle cx="314" cy="244" r="30" fill="url(#blushG)"/>
@@ -84,12 +83,10 @@
   <!-- nose -->
   <ellipse cx="259" cy="248" rx="12" ry="8" fill="#C9885B" opacity=".55"/>
   <path d="M251 224C247 238 241 250 248 256C254 260 263 258 267 252" fill="none" stroke="#1A1230" stroke-width="4.5"/>
-  <!-- age lines: crow's feet + cheek folds -->
-  <path d="M188 190L176 184M187 212L175 217M324 190L336 184M325 212L337 217" fill="none" stroke="#1A1230" stroke-width="3" opacity=".55"/>
-  <path d="M242 250C232 258 228 266 228 276M270 250C280 258 284 266 284 276" fill="none" stroke="#A86E45" stroke-width="3.5" opacity=".7"/>
  </g>
 
  <g id="eyes">
+  <!-- half-lidded eyes: sclera, iris, then skin-toned lids clipped to the eye shape -->
   <clipPath id="clipEyeL"><ellipse cx="218" cy="202" rx="27" ry="31"/></clipPath>
   <clipPath id="clipEyeR"><ellipse cx="294" cy="202" rx="27" ry="31"/></clipPath>
   <ellipse cx="218" cy="202" rx="27" ry="31" fill="#FFFFFF"/>
@@ -117,12 +114,13 @@
  </g>
 
  <g id="brows">
-  <path d="M180 178C188 156 224 148 248 160C253 163 253 171 248 176C228 166 204 170 190 188C184 191 178 184 180 178Z" fill="#A9A39B" stroke="#1A1230" stroke-width="3.5"/>
-  <path d="M332 170C324 146 288 138 264 150C259 153 259 161 264 166C284 156 308 160 322 180C328 183 334 176 332 170Z" fill="#A9A39B" stroke="#1A1230" stroke-width="3.5"/>
+  <path d="M184 166C202 160 226 162 246 167C251 169 251 179 246 181C226 179 204 178 190 176C185 176 182 170 184 166Z" fill="#15110F" stroke="#1A1230" stroke-width="3"/>
+  <path d="M328 166C310 160 286 162 266 167C261 169 261 179 266 181C286 179 308 178 322 176C327 176 330 170 328 166Z" fill="#15110F" stroke="#1A1230" stroke-width="3"/>
  </g>
 
  <g id="mouth">
-  <path d="M226 272Q256 288 286 272" fill="none" stroke="#1A1230" stroke-width="6"/>
+  <!-- short closed lip line; the finger covers its right half so a lip edge peeks out beside it -->
+  <path d="M240 276Q256 282 272 276" fill="none" stroke="#1A1230" stroke-width="6"/>
  </g>
 
  <g id="ghutra-front">
@@ -154,21 +152,24 @@
  </g>
 
  <g id="props">
+  <!-- sleeve rising from the shoulder -->
   <path d="M312 372C350 396 386 416 418 440" fill="none" stroke="#1A1230" stroke-width="72"/>
   <path d="M312 372C350 396 386 416 418 440" fill="none" stroke="#FBF8F2" stroke-width="56"/>
+  <!-- cuff -->
   <g transform="translate(322 380) rotate(123)">
    <rect x="-32" y="-14" width="64" height="30" rx="8" fill="#FBF8F2" stroke="#1A1230" stroke-width="8"/>
    <rect x="-28" y="3" width="56" height="9" fill="#DDD6C8"/>
   </g>
+  <!-- fist -->
   <clipPath id="clipShFist"><rect x="268" y="316" width="64" height="56" rx="22"/></clipPath>
   <rect x="268" y="316" width="64" height="56" rx="22" fill="#E3A97C" stroke="#1A1230" stroke-width="8"/>
   <g clip-path="url(#clipShFist)"><ellipse cx="318" cy="362" rx="36" ry="24" fill="#C9885B" opacity=".85"/></g>
   <path d="M278 334Q300 331 320 334M278 348Q300 345 322 348M280 361Q300 358 318 361" fill="none" stroke="#1A1230" stroke-width="4"/>
-  <clipPath id="clipShFinger"><rect x="252" y="240" width="27" height="104" rx="13.5"/></clipPath>
-  <rect x="252" y="240" width="27" height="104" rx="13.5" fill="#E3A97C" stroke="#1A1230" stroke-width="8"/>
-  <g clip-path="url(#clipShFinger)"><rect x="268" y="236" width="14" height="112" fill="#C9885B" opacity=".8"/></g>
-  <path d="M258 292Q265 289 273 292M258 316Q265 313 273 316" fill="none" stroke="#1A1230" stroke-width="3.5" opacity=".9"/>
-  <ellipse cx="260" cy="256" rx="3" ry="9" fill="#F3C9A6" opacity=".9"/>
+  <!-- index finger: tip rests on the upper lip (y≈268), nose untouched -->
+  <clipPath id="clipShFinger"><rect x="252" y="268" width="28" height="78" rx="14"/></clipPath>
+  <rect x="252" y="268" width="28" height="78" rx="14" fill="#E3A97C" stroke="#1A1230" stroke-width="8"/>
+  <g clip-path="url(#clipShFinger)"><rect x="269" y="264" width="14" height="86" fill="#C9885B" opacity=".8"/></g>
+  <path d="M259 310Q266 307 274 310M259 332Q266 329 274 332" fill="none" stroke="#1A1230" stroke-width="3.5" opacity=".9"/>
+  <ellipse cx="260" cy="284" rx="3" ry="9" fill="#F3C9A6" opacity=".9"/>
  </g>
-
 </svg>

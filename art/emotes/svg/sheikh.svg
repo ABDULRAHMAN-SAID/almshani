@@ -56,12 +56,13 @@
   <clipPath id="clipBishtR"><use href="#bishtR"/></clipPath>
   <g clip-path="url(#clipBishtL)"><path d="M60 470L60 420C120 400 160 420 232 440L232 470Z" fill="#27212E"/><path d="M96 372C130 352 170 344 218 338" fill="none" stroke="#4E4658" stroke-width="6"/></g>
   <g clip-path="url(#clipBishtR)"><path d="M452 470L452 420C392 400 352 420 280 440L280 470Z" fill="#27212E"/></g>
-  <path d="M222 336C224 378 226 418 230 458" fill="none" stroke="#1A1230" stroke-width="16"/>
-  <path d="M290 336C288 378 286 418 282 458" fill="none" stroke="#1A1230" stroke-width="16"/>
-  <path d="M222 336C224 378 226 418 230 458" fill="none" stroke="#E8B23A" stroke-width="9"/>
-  <path d="M290 336C288 378 286 418 282 458" fill="none" stroke="#E8B23A" stroke-width="9"/>
-  <path d="M84 388C122 362 160 348 206 340M428 388C390 362 352 348 306 340" fill="none" stroke="#1A1230" stroke-width="11"/>
-  <path d="M84 388C122 362 160 348 206 340M428 388C390 362 352 348 306 340" fill="none" stroke="#E8B23A" stroke-width="5"/>
+  <!-- gold zari trim: outlines first, then gold, then light core, so the joins stay clean -->
+  <path d="M84 388C122 362 160 348 222 337M428 388C390 362 352 348 290 337" fill="none" stroke="#1A1230" stroke-width="13"/>
+  <path d="M222 336C224 378 226 418 230 458M290 336C288 378 286 418 282 458" fill="none" stroke="#1A1230" stroke-width="18"/>
+  <path d="M84 388C122 362 160 348 222 337M428 388C390 362 352 348 290 337" fill="none" stroke="#E8B23A" stroke-width="7"/>
+  <path d="M222 336C224 378 226 418 230 458M290 336C288 378 286 418 282 458" fill="none" stroke="#E8B23A" stroke-width="10"/>
+  <path d="M90 385C126 360 162 348 220 338M422 385C386 360 350 348 292 338" fill="none" stroke="#FFE9A8" stroke-width="2" opacity=".9"/>
+  <path d="M222 340C224 380 226 418 230 454M290 340C288 380 286 418 282 454" fill="none" stroke="#FFE9A8" stroke-width="3" opacity=".95"/>
  </g>
 
  <g id="ghutra-back">
@@ -74,7 +75,6 @@
  </g>
 
  <g id="head">
-
   <!-- ears (tucked under the ghutra; only their outline bump shows) -->
   <ellipse cx="156" cy="226" rx="16" ry="22" fill="#E3A97C" stroke="#1A1230" stroke-width="7"/>
   <ellipse cx="356" cy="226" rx="16" ry="22" fill="#E3A97C" stroke="#1A1230" stroke-width="7"/>
@@ -94,13 +94,13 @@
   <path d="M188 188L175 181M187 212L174 217M324 188L337 181M325 212L338 217" fill="none" stroke="#1A1230" stroke-width="3" opacity=".55"/>
   <path d="M244 250C234 258 230 266 230 276M268 250C278 258 282 266 282 276" fill="none" stroke="#A86E45" stroke-width="3.5" opacity=".7"/>
   <!-- full grey beard -->
-  <path id="beardP" d="M166 210C158 268 148 326 166 370C186 402 224 410 256 410C288 410 326 402 346 370C364 326 354 268 346 210C338 262 316 288 292 296L220 296C196 288 174 262 166 210Z"/>
+  <path id="beardP" d="M166 210C158 268 148 326 166 370C186 402 224 410 256 410C288 410 326 402 346 370C364 326 354 268 346 210C338 266 316 298 292 308L220 308C196 298 174 266 166 210Z"/>
   <clipPath id="clipBeard"><use href="#beardP"/></clipPath>
-  <use href="#beardP" fill="#BDB8B1"/>
+  <use href="#beardP" fill="#A39D95"/>
   <g clip-path="url(#clipBeard)">
-   <path d="M300 300C330 330 330 380 300 420L380 420L380 240Z" fill="#8E8880" opacity=".85"/>
-   <path d="M180 260C176 300 176 340 190 372" fill="none" stroke="#ECE8E2" stroke-width="8" opacity=".9"/>
-   <path d="M212 320C214 350 222 376 236 394M256 316V400M300 320C298 350 290 376 276 394" fill="none" stroke="#6E6862" stroke-width="3.5" opacity=".6"/>
+   <path d="M300 300C330 330 330 380 300 420L380 420L380 240Z" fill="#767069" opacity=".85"/>
+   <path d="M180 260C176 300 176 340 190 372" fill="none" stroke="#D3CEC7" stroke-width="8" opacity=".9"/>
+   <path d="M212 326C214 352 222 378 236 396M256 322V402M300 326C298 352 290 378 276 396" fill="none" stroke="#5E5852" stroke-width="3.5" opacity=".6"/>
   </g>
   <use href="#beardP" fill="none" stroke="#1A1230" stroke-width="8"/>
  </g>
@@ -127,20 +127,20 @@
  </g>
 
  <g id="brows">
-  <path d="M180 156C186 130 226 122 248 136C253 140 253 148 248 152C228 142 204 146 190 166C185 170 178 162 180 156Z" fill="#BDB8B1" stroke="#1A1230" stroke-width="3.5"/>
-  <path d="M332 176C326 160 292 152 268 164C263 167 263 175 268 180C288 172 308 174 322 190C328 193 334 184 332 176Z" fill="#BDB8B1" stroke="#1A1230" stroke-width="3.5"/>
+  <path d="M180 156C186 130 226 122 248 136C253 140 253 148 248 152C228 142 204 146 190 166C185 170 178 162 180 156Z" fill="#A39D95" stroke="#1A1230" stroke-width="3.5"/>
+  <path d="M332 176C326 160 292 152 268 164C263 167 263 175 268 180C288 172 308 174 322 190C328 193 334 184 332 176Z" fill="#A39D95" stroke="#1A1230" stroke-width="3.5"/>
  </g>
 
  <g id="mouth">
-  <path d="M228 278Q262 294 294 268" fill="none" stroke="#1A1230" stroke-width="6"/>
-  <path d="M294 268Q302 262 300 254" fill="none" stroke="#1A1230" stroke-width="4"/>
-  <path id="mustP" d="M222 260C238 248 250 254 256 262C262 254 274 248 290 260C292 272 280 280 264 272C260 270 252 270 248 272C232 280 220 272 222 260Z"/>
-  <use href="#mustP" fill="#BDB8B1" stroke="#1A1230" stroke-width="5"/>
-  <path d="M258 268C262 262 272 258 284 264" fill="none" stroke="#8E8880" stroke-width="3.5" opacity=".8"/>
+  <path d="M226 284Q262 302 298 276" fill="none" stroke="#1A1230" stroke-width="6"/>
+  <path d="M298 276Q306 270 304 262" fill="none" stroke="#1A1230" stroke-width="4"/>
+  <path id="mustP" d="M220 262C236 252 248 258 256 266C264 258 276 252 292 262C294 274 280 280 266 274C262 272 250 272 246 274C232 280 218 274 220 262Z"/>
+  <use href="#mustP" fill="#A39D95" stroke="#1A1230" stroke-width="5"/>
+  <path d="M260 270C266 264 276 262 288 266" fill="none" stroke="#767069" stroke-width="3.5" opacity=".8"/>
+  <path d="M228 264C236 258 244 260 250 264" fill="none" stroke="#D3CEC7" stroke-width="3" opacity=".9"/>
  </g>
 
  <g id="ghutra-front">
-
   <use href="#ghfP" fill="#FBF8F2" stroke="#1A1230" stroke-width="8"/>
   <g clip-path="url(#clipGhf)">
    <!-- shadow along the inner (face-side) edge of each drape -->
@@ -158,49 +158,60 @@
  </g>
 
  <g id="agal">
-  <path d="M134 102L146 56L184 90L216 48L244 86L256 46L268 86L296 48L328 90L366 56L378 102C322 124 190 124 134 102Z" fill="#E8B23A" stroke="#1A1230" stroke-width="7"/>
-  <path d="M150 96L162 68L182 88" fill="none" stroke="#FFE9A8" stroke-width="4" opacity=".9"/>
-  <path d="M232 92L256 60L268 82" fill="none" stroke="#FFE9A8" stroke-width="4" opacity=".9"/>
-  <path d="M310 70C318 74 326 80 330 90M212 60C216 66 224 74 230 82" fill="none" stroke="#B07E1E" stroke-width="4" opacity=".7"/>
-  <path d="M130 100C190 122 322 122 382 100L382 124C322 146 190 146 130 124Z" fill="#B07E1E" stroke="#1A1230" stroke-width="7"/>
-  <path d="M138 106C190 126 322 126 374 106" fill="none" stroke="#E8B23A" stroke-width="5" opacity=".9"/>
-  <circle cx="146" cy="58" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4"/>
-  <circle cx="216" cy="50" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4"/>
-  <circle cx="256" cy="48" r="8" fill="#C8352E" stroke="#1A1230" stroke-width="4"/>
-  <circle cx="296" cy="50" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4"/>
-  <circle cx="366" cy="58" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4"/>
-  <ellipse cx="256" cy="124" rx="13" ry="9" fill="#2A63C9" stroke="#1A1230" stroke-width="4"/>
-  <ellipse cx="252" cy="121" rx="4" ry="2.5" fill="#FFFFFF" opacity=".85"/>
-  <circle cx="196" cy="118" r="5" fill="#C8352E" stroke="#1A1230" stroke-width="3"/>
-  <circle cx="316" cy="118" r="5" fill="#C8352E" stroke="#1A1230" stroke-width="3"/>
+  <!-- crown scaled .85 about (256,124): top ball centre y≈59, band bottom stays on y=124 -->
+  <g transform="translate(256 124) scale(.85) translate(-256 -124)">
+   <path d="M134 102L146 56L184 90L216 48L244 86L256 46L268 86L296 48L328 90L366 56L378 102C322 124 190 124 134 102Z" fill="#E8B23A" stroke="#1A1230" stroke-width="8"/>
+   <path d="M150 96L162 68L182 88" fill="none" stroke="#FFE9A8" stroke-width="4" opacity=".9"/>
+   <path d="M232 92L256 60L268 82" fill="none" stroke="#FFE9A8" stroke-width="4" opacity=".9"/>
+   <path d="M310 70C318 74 326 80 330 90M212 60C216 66 224 74 230 82" fill="none" stroke="#B07E1E" stroke-width="4" opacity=".7"/>
+   <path d="M130 100C190 122 322 122 382 100L382 124C322 146 190 146 130 124Z" fill="#B07E1E" stroke="#1A1230" stroke-width="8"/>
+   <path d="M138 106C190 126 322 126 374 106" fill="none" stroke="#E8B23A" stroke-width="5" opacity=".9"/>
+   <circle cx="146" cy="58" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4.5"/>
+   <circle cx="216" cy="50" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4.5"/>
+   <circle cx="256" cy="48" r="8" fill="#C8352E" stroke="#1A1230" stroke-width="4.5"/>
+   <circle cx="296" cy="50" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4.5"/>
+   <circle cx="366" cy="58" r="7" fill="#C8352E" stroke="#1A1230" stroke-width="4.5"/>
+   <ellipse cx="256" cy="124" rx="13" ry="9" fill="#2A63C9" stroke="#1A1230" stroke-width="4.5"/>
+   <ellipse cx="252" cy="121" rx="4" ry="2.5" fill="#FFFFFF" opacity=".85"/>
+   <circle cx="196" cy="118" r="5" fill="#C8352E" stroke="#1A1230" stroke-width="3"/>
+   <circle cx="316" cy="118" r="5" fill="#C8352E" stroke="#1A1230" stroke-width="3"/>
+  </g>
  </g>
 
  <g id="props">
-  <path d="M106 448C200 436 300 428 400 428" fill="none" stroke="#1A1230" stroke-width="74"/>
-  <path d="M106 448C200 436 300 428 400 428" fill="none" stroke="#3A3340" stroke-width="58"/>
-  <g transform="translate(374 400) rotate(-12) scale(-1 1)">
-   <clipPath id="clipHandSh1"><rect x="-30" y="-22" width="60" height="44" rx="18"/></clipPath>
-   <rect x="-30" y="-22" width="60" height="44" rx="18" fill="#E3A97C" stroke="#1A1230" stroke-width="8"/>
-   <g clip-path="url(#clipHandSh1)"><ellipse cx="10" cy="20" rx="34" ry="20" fill="#C9885B" opacity=".85"/></g>
-   <path d="M-30 -8H-6M-30 3H-4M-28 14H-6" fill="none" stroke="#1A1230" stroke-width="4"/>
-   <ellipse cx="6" cy="-13" rx="7" ry="3.5" fill="#F3C9A6" opacity=".9"/>
+  <!-- dishdasha cuff peeking at the wrist -->
+  <g transform="translate(374 390) rotate(-20)">
+   <rect x="-20" y="-14" width="40" height="28" rx="6" fill="#FBF8F2" stroke="#1A1230" stroke-width="7"/>
+   <rect x="-16" y="3" width="32" height="7" fill="#DDD6C8"/>
   </g>
-  <path d="M424 402C330 414 240 424 176 430" fill="none" stroke="#1A1230" stroke-width="78"/>
-  <path d="M424 402C330 414 240 424 176 430" fill="none" stroke="#3A3340" stroke-width="62"/>
-  <path d="M424 418C330 430 250 438 190 444" fill="none" stroke="#27212E" stroke-width="14"/>
-  <path d="M418 388C340 396 268 404 208 410" fill="none" stroke="#4E4658" stroke-width="4" opacity=".8"/>
-  <path d="M206 400C202 420 204 440 210 458" fill="none" stroke="#1A1230" stroke-width="16"/>
-  <path d="M206 400C202 420 204 440 210 458" fill="none" stroke="#E8B23A" stroke-width="8"/>
-  <g transform="translate(184 428) rotate(-80)">
-   <rect x="-28" y="-13" width="56" height="26" rx="7" fill="#FBF8F2" stroke="#1A1230" stroke-width="7"/>
-   <rect x="-24" y="3" width="48" height="8" fill="#DDD6C8"/>
+  <!-- misbaha: string + 11 gold beads on a U that hangs out of the fist -->
+  <path d="M314 404C312 462 366 464 364 406" fill="none" stroke="#1A1230" stroke-width="3"/>
+  <g fill="#E8B23A" stroke="#1A1230" stroke-width="3">
+   <circle cx="314" cy="404" r="7"/>
+   <circle cx="314.4" cy="415.4" r="7"/>
+   <circle cx="316.5" cy="426.3" r="7"/>
+   <circle cx="320.8" cy="436.3" r="7"/>
+   <circle cx="328.2" cy="444.6" r="7"/>
+   <circle cx="338.4" cy="448.5" r="7"/>
+   <circle cx="349.1" cy="445.8" r="7"/>
+   <circle cx="356.9" cy="438.1" r="7"/>
+   <circle cx="361.6" cy="427.8" r="7"/>
+   <circle cx="363.7" cy="416.9" r="7"/>
+   <circle cx="364" cy="406" r="7"/>
   </g>
-  <g transform="translate(146 424) rotate(10) scale(1 1)">
-   <clipPath id="clipHandSh2"><rect x="-30" y="-22" width="60" height="44" rx="18"/></clipPath>
+  <g fill="#FFE9A8" opacity=".9">
+   <circle cx="318.5" cy="434" r="2"/><circle cx="336" cy="446" r="2"/><circle cx="354.5" cy="435.5" r="2"/><circle cx="359.5" cy="425.5" r="2"/>
+  </g>
+  <!-- small tassel under the bottom bead -->
+  <path d="M334 455H343L345 465C340 468 337 468 332 465Z" fill="#B07E1E" stroke="#1A1230" stroke-width="3"/>
+  <path d="M336.5 459V465M340.5 459V465" fill="none" stroke="#E8B23A" stroke-width="1.5" opacity=".9"/>
+  <!-- right hand (fist) at chest level -->
+  <g transform="translate(336 400) rotate(-20)">
+   <clipPath id="clipHandSh"><rect x="-30" y="-22" width="60" height="44" rx="18"/></clipPath>
    <rect x="-30" y="-22" width="60" height="44" rx="18" fill="#E3A97C" stroke="#1A1230" stroke-width="8"/>
-   <g clip-path="url(#clipHandSh2)"><ellipse cx="10" cy="20" rx="34" ry="20" fill="#C9885B" opacity=".85"/></g>
+   <g clip-path="url(#clipHandSh)"><ellipse cx="-4" cy="22" rx="36" ry="16" fill="#C9885B" opacity=".85"/></g>
    <path d="M-30 -8H-6M-30 3H-4M-28 14H-6" fill="none" stroke="#1A1230" stroke-width="4"/>
-   <ellipse cx="6" cy="-13" rx="7" ry="3.5" fill="#F3C9A6" opacity=".9"/>
+   <ellipse cx="8" cy="-13" rx="7" ry="3.5" fill="#F3C9A6" opacity=".9"/>
   </g>
  </g>
 

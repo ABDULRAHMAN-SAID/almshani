@@ -12,80 +12,74 @@
    <stop offset=".6" stop-color="#1E4EA6"/>
    <stop offset="1" stop-color="#123478"/>
   </radialGradient>
-  <ellipse id="faceE" cx="256" cy="300" rx="152" ry="132"/>
+  <!-- top face of the striker (3/4 view); side band is the same ellipse 26px lower -->
+  <ellipse id="faceE" cx="256" cy="286" rx="160" ry="135"/>
   <clipPath id="clipFaceE"><use href="#faceE"/></clipPath>
+  <ellipse id="sideE" cx="256" cy="312" rx="160" ry="135"/>
+  <clipPath id="clipSideE"><use href="#sideE"/></clipPath>
  </defs>
 
  <g id="glow">
-  <ellipse cx="256" cy="280" rx="210" ry="200" fill="url(#glowG)" opacity=".18" filter="url(#soft)"/>
+  <ellipse cx="256" cy="290" rx="206" ry="200" fill="url(#glowG)" opacity=".18" filter="url(#soft)"/>
  </g>
 
- <g id="rays">
-  <path d="M253.5 312.8L458 340.2L258.5 287.2Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M248.8 310.8L399 395.6L263.2 289.2Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M245.2 307.2L370.4 471.3L266.8 292.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M243.2 302.5L289.6 468.7L268.8 297.5Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M243.2 297.5L215.8 502L268.8 302.5Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M245.2 292.8L160.4 443L266.8 307.2Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M248.8 289.2L84.7 414.4L263.2 310.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M253.5 287.2L87.3 333.6L258.5 312.8Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M258.5 287.2L54 259.8L253.5 312.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M263.2 289.2L113 204.4L248.8 310.8Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M266.8 292.8L141.6 128.7L245.2 307.2Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M268.8 297.5L222.4 131.3L243.2 302.5Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M268.8 302.5L296.2 98L243.2 297.5Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M266.8 307.2L351.6 157L245.2 292.8Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
-  <path d="M263.2 310.8L427.3 185.6L248.8 289.2Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M258.5 312.8L424.7 266.4L253.5 287.2Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="4"/>
+ <!-- speed lines: the striker is flying to the right, the lines trail off to the left and pass behind the coin -->
+ <g id="motion">
+  <path d="M60 250H118" fill="none" stroke="#FFE9A8" stroke-width="9"/>
+  <path d="M46 300H118" fill="none" stroke="#FFE9A8" stroke-width="9"/>
+  <path d="M60 350H118" fill="none" stroke="#FFE9A8" stroke-width="9"/>
  </g>
 
  <g id="disc">
-  <ellipse cx="256" cy="322" rx="152" ry="132" fill="#B07E1E" stroke="#1A1230" stroke-width="8"/>
-  <path d="M120 322C160 420 352 420 392 322" fill="none" stroke="#8A6014" stroke-width="5" opacity=".6"/>
+  <!-- side band (thickness) -->
+  <use href="#sideE" fill="#B07E1E" stroke="#1A1230" stroke-width="8"/>
+  <g clip-path="url(#clipSideE)">
+   <ellipse cx="256" cy="312" rx="146" ry="121" fill="none" stroke="#8A6014" stroke-width="7" opacity=".6"/>
+  </g>
+  <!-- top face: base, shade crescent bottom-right, then rings -->
   <use href="#faceE" fill="#E8B23A"/>
   <g clip-path="url(#clipFaceE)">
-   <ellipse cx="274" cy="320" rx="152" ry="132" fill="#B07E1E" opacity=".55"/>
-   <ellipse cx="244" cy="286" rx="146" ry="126" fill="#E8B23A"/>
+   <ellipse cx="275" cy="308" rx="160" ry="135" fill="#B07E1E" opacity=".55"/>
+   <ellipse cx="242" cy="270" rx="153" ry="128" fill="#E8B23A"/>
   </g>
   <use href="#faceE" fill="none" stroke="#1A1230" stroke-width="8"/>
-  <ellipse cx="256" cy="300" rx="132" ry="113" fill="none" stroke="#FFE9A8" stroke-width="5"/>
-  <ellipse cx="256" cy="300" rx="118" ry="100" fill="none" stroke="#B07E1E" stroke-width="8"/>
-  <ellipse cx="256" cy="300" rx="118" ry="100" fill="none" stroke="#1A1230" stroke-width="2" opacity=".6"/>
-  <ellipse cx="256" cy="300" rx="102" ry="86" fill="none" stroke="#FFE9A8" stroke-width="4"/>
-  <path d="M136 250A140 120 0 0 1 200 190" fill="none" stroke="#FFFFFF" stroke-width="9" opacity=".8"/>
+  <ellipse cx="256" cy="286" rx="138" ry="116" fill="none" stroke="#FFE9A8" stroke-width="5"/>
+  <ellipse cx="256" cy="286" rx="122" ry="101" fill="none" stroke="#B07E1E" stroke-width="7"/>
+  <ellipse cx="256" cy="286" rx="122" ry="101" fill="none" stroke="#1A1230" stroke-width="2" opacity=".6"/>
+  <ellipse cx="256" cy="286" rx="105" ry="86" fill="none" stroke="#FFE9A8" stroke-width="4"/>
+  <!-- specular top-left -->
+  <path d="M129 235A146 124 0 0 1 194 170" fill="none" stroke="#FFFFFF" stroke-width="9" opacity=".8"/>
  </g>
 
  <g id="gem">
-  <ellipse cx="256" cy="296" rx="72" ry="62" fill="url(#gemG)" stroke="#1A1230" stroke-width="6"/>
-  <ellipse cx="256" cy="296" rx="60" ry="50" fill="none" stroke="#0F2A66" stroke-width="5" opacity=".8"/>
-  <path d="M212 268L256 246L300 268L256 336Z" fill="#3B76E0" opacity=".45"/>
-  <ellipse cx="230" cy="268" rx="17" ry="9" fill="#FFFFFF" opacity=".95" transform="rotate(-32 230 268)"/>
-  <circle cx="284" cy="318" r="5" fill="#FFFFFF" opacity=".8"/>
-  <path d="M292 254A60 50 0 0 1 312 300" fill="none" stroke="#7FB0FF" stroke-width="4" opacity=".7"/>
+  <ellipse cx="256" cy="285" rx="40" ry="34" fill="url(#gemG)" stroke="#1A1230" stroke-width="6"/>
+  <ellipse cx="256" cy="285" rx="33" ry="27" fill="none" stroke="#0F2A66" stroke-width="5" opacity=".8"/>
+  <path d="M231.7 269.3L256 257.9L280.3 269.3L256 307.9Z" fill="#3B76E0" opacity=".45"/>
+  <ellipse cx="241.7" cy="270.7" rx="9.3" ry="5" fill="#FFFFFF" opacity=".95" transform="rotate(-32 241.7 270.7)"/>
+  <circle cx="271.7" cy="299.3" r="3" fill="#FFFFFF" opacity=".8"/>
+  <path d="M276 263.6A33 27 0 0 1 287.4 287.9" fill="none" stroke="#7FB0FF" stroke-width="4" opacity=".7"/>
  </g>
 
- <g id="crown">
-  <path d="M214 176L218 124L240 148L256 104L272 148L294 124L298 176Z" fill="#E8B23A" stroke="#1A1230" stroke-width="6"/>
-  <path d="M226 166L228 136L238 146" fill="none" stroke="#FFE9A8" stroke-width="3.5" opacity=".9"/>
-  <path d="M250 160L256 118L262 138" fill="none" stroke="#FFE9A8" stroke-width="3.5" opacity=".9"/>
-  <path d="M272 150L286 134L290 166" fill="none" stroke="#B07E1E" stroke-width="3.5" opacity=".8"/>
-  <rect x="210" y="170" width="92" height="20" rx="5" fill="#B07E1E" stroke="#1A1230" stroke-width="6"/>
-  <rect x="216" y="174" width="80" height="5" rx="2" fill="#E8B23A" opacity=".9"/>
-  <circle cx="218" cy="124" r="5.5" fill="#C8352E" stroke="#1A1230" stroke-width="3.5"/>
-  <circle cx="256" cy="106" r="6" fill="#C8352E" stroke="#1A1230" stroke-width="3.5"/>
-  <circle cx="294" cy="124" r="5.5" fill="#C8352E" stroke="#1A1230" stroke-width="3.5"/>
-  <ellipse cx="256" cy="180" rx="8" ry="6" fill="#2A63C9" stroke="#1A1230" stroke-width="3"/>
+ <!-- the black carrom man being knocked away at top-right, with impact ticks at the contact point -->
+ <g id="props">
+  <circle cx="428" cy="150" r="30" fill="#1A1230" stroke="#4A403A" stroke-width="5"/>
+  <path d="M410 136A24 24 0 0 1 428 126" fill="none" stroke="#6B5F58" stroke-width="4" opacity=".7"/>
+  <circle cx="428" cy="150" r="7" fill="#E8B23A"/>
+  <circle cx="425.5" cy="147.5" r="2.2" fill="#FFE9A8"/>
+  <path d="M385 189L372.3 176.3" fill="none" stroke="#FFE9A8" stroke-width="6"/>
+  <path d="M392 186V168" fill="none" stroke="#FFE9A8" stroke-width="6"/>
+  <path d="M401 201L416.6 210" fill="none" stroke="#FFE9A8" stroke-width="6"/>
  </g>
 
  <g id="sparks">
   <path d="M104 132L107.8 146.2L122 150L107.8 153.8L104 168L100.2 153.8L86 150L100.2 146.2Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
-  <path d="M412 115L414.8 125.2L425 128L414.8 130.8L412 141L409.2 130.8L399 128L409.2 125.2Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
-  <path d="M78 329L80.3 337.7L89 340L80.3 342.3L78 351L75.7 342.3L67 340L75.7 337.7Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
+  <path d="M336 95L338.8 105.2L349 108L338.8 110.8L336 121L333.2 110.8L323 108L333.2 105.2Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
+  <path d="M72 401L74.3 409.7L83 412L74.3 414.3L72 423L69.7 414.3L61 412L69.7 409.7Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
   <path d="M440 357L443.2 368.8L455 372L443.2 375.2L440 387L436.8 375.2L425 372L436.8 368.8Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
   <path d="M150 442L152.1 449.9L160 452L152.1 454.1L150 462L147.9 454.1L140 452L147.9 449.9Z" fill="#FFFFFF" stroke="#1A1230" stroke-width="3"/>
-  <circle cx="60" cy="236" r="5" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="64" cy="206" r="5" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
   <circle cx="454" cy="250" r="5" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
-  <circle cx="380" cy="90" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="386" cy="88" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
   <circle cx="140" cy="100" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
  </g>
 </svg>

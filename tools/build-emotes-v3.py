@@ -49,7 +49,10 @@ ROSTER = [
  ('medal',   B, 3, 4, 'legendary', 'الميداليّة',     'بطل الأبطال'),
 ]
 FREE = {'laugh', 'sad', 'wink', 'clap', 'think', 'shock', 'thumbs', 'salute'}
-SOURCES = ['المتجر', 'الصناديق', 'الإنجازات', 'تذكرة الموسم', 'طريق الكؤوس', 'تحدّي الاثني عشر']
+# من أين يأتي كلّ تعبيرٍ فعلًا: الطريق (٢٥٠ و٧٥٠ كأسًا)، تذكرة الموسم (٥٠ و٩٠)، الإنجازات (المرتبة الذهبيّة)، والباقي من الصفقات والصناديق وإسقاط الحظّ
+SRC = {'angry': 'طريق الكؤوس', 'coffee': 'طريق الكؤوس', 'nervous': 'تذكرة الموسم', 'medal': 'تذكرة الموسم',
+       'fire': 'الإنجازات', 'trophy': 'الإنجازات', 'sheikh': 'الإنجازات', 'striker': 'الإنجازات'}
+SRC_DEFAULT = 'المتجر والصناديق'
 
 def to_uri(im, q=QUALITY):
     buf = io.BytesIO(); im.save(buf, 'WEBP', quality=q, method=6)
@@ -140,7 +143,7 @@ def main():
         for k, sh, r, c, rr, name, msg in ROSTER:
             if rr != rar: continue
             if k in FREE: ro.append(" {k:'%s',n:'%s',m:'%s',r:'%s',free:1}," % (k, name, msg, rar))
-            else: ro.append(" {k:'%s',n:'%s',m:'%s',r:'%s',src:'%s'}," % (k, name, msg, rar, SOURCES[i % len(SOURCES)])); i += 1
+            else: ro.append(" {k:'%s',n:'%s',m:'%s',r:'%s',src:'%s'}," % (k, name, msg, rar, SRC.get(k, SRC_DEFAULT)))
     ro[-1] = ro[-1].rstrip(','); ro.append('];')
     src = src[:m_ro.start()] + '\n'.join(ro) + src[m_ro.end():]
     open(GAME, 'w', encoding='utf-8').write(src)

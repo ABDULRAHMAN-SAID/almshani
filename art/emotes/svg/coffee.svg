@@ -147,16 +147,17 @@
   <!-- back of hand + wrist -->
   <g fill="#1A1230" stroke="#1A1230" stroke-width="16"><ellipse cx="422" cy="300" rx="34" ry="30"/><rect x="390" y="306" width="52" height="34" rx="10" transform="rotate(-16 416 323)"/></g><g fill="#E3A97C"><ellipse cx="422" cy="300" rx="34" ry="30"/><rect x="390" y="306" width="52" height="34" rx="10" transform="rotate(-16 416 323)"/></g>
   <ellipse cx="436" cy="314" rx="16" ry="18" fill="#C9885B" opacity=".8"/>
-  <!-- finjan (small Arabic coffee cup) -->
-  <g transform="translate(400 226)">
-   <path d="M-26 -30C-32 -4 -24 22 -15 34L15 34C24 22 32 -4 26 -30Z" fill="#E8B23A" stroke="#1A1230" stroke-width="7"/>
-   <path d="M8 -28C12 -4 10 18 3 34L15 34C24 22 32 -4 26 -30Z" fill="#B07E1E"/>
-   <path d="M-18 -20C-19 -4 -16 12 -11 26" fill="none" stroke="#FFE9A8" stroke-width="6" opacity=".95"/>
-   <path d="M-28 -6C-14 -2 14 -2 28 -6" fill="none" stroke="#B07E1E" stroke-width="3.5"/>
-   <path d="M-27 -12C-14 -8 14 -8 27 -12" fill="none" stroke="#FFE9A8" stroke-width="2.5" opacity=".8"/>
-   <ellipse cx="0" cy="-30" rx="29" ry="11" fill="#E8B23A" stroke="#1A1230" stroke-width="6"/>
-   <ellipse cx="0" cy="-30" rx="20" ry="6.5" fill="#3B2314"/>
-   <ellipse cx="-6" cy="-31" rx="7" ry="2.4" fill="#6B4A2E"/>
+  <!-- finjan (small Arabic coffee cup): 76px wide, rim y 192, base y 268, right edge x 453 -->
+  <g transform="translate(412 205)">
+   <path d="M-34 0C-40 26 -32 50 -20 63L20 63C32 50 40 26 34 0Z" fill="#E8B23A" stroke="#1A1230" stroke-width="7"/>
+   <path d="M10 2C15 26 13 46 6 63L20 63C32 50 40 26 34 0Z" fill="#B07E1E"/>
+   <path d="M-24 12C-25 28 -22 42 -16 56" fill="none" stroke="#FFE9A8" stroke-width="6" opacity=".95"/>
+   <path d="M-35 27C-18 32 18 32 35 27" fill="none" stroke="#B07E1E" stroke-width="3.5"/>
+   <path d="M-35 20C-18 25 18 25 35 20" fill="none" stroke="#FFE9A8" stroke-width="2.5" opacity=".8"/>
+   <ellipse cx="0" cy="0" rx="38" ry="13" fill="#E8B23A" stroke="#1A1230" stroke-width="6"/>
+   <ellipse cx="0" cy="0" rx="27" ry="8" fill="#3A2A22"/>
+   <ellipse cx="-8" cy="-1" rx="9" ry="3" fill="#6B4A2E"/>
+   <path d="M-32.5 -1.8A33 10.5 0 0 1 -16.5 -9.1" fill="none" stroke="#FFE9A8" stroke-width="3" opacity=".9"/>
   </g>
   <!-- fingers cradling the cup from below + thumb on the near side -->
   <g fill="#1A1230" stroke="#1A1230" stroke-width="16"><rect x="376" y="252" width="56" height="20" rx="10"/><rect x="380" y="272" width="54" height="20" rx="10"/><rect x="388" y="292" width="46" height="18" rx="9"/><rect x="362" y="222" width="22" height="46" rx="11" transform="rotate(-24 373 245)"/></g><g fill="#E3A97C"><rect x="376" y="252" width="56" height="20" rx="10"/><rect x="380" y="272" width="54" height="20" rx="10"/><rect x="388" y="292" width="46" height="18" rx="9"/><rect x="362" y="222" width="22" height="46" rx="11" transform="rotate(-24 373 245)"/></g>
@@ -164,8 +165,8 @@
   <path d="M382 284C394 288 420 288 428 284M388 304C398 307 418 307 426 304" fill="none" stroke="#C9885B" stroke-width="4" opacity=".7"/>
   <ellipse cx="370" cy="234" rx="4" ry="8" fill="#F3C9A6" opacity=".9" transform="rotate(-24 370 234)"/>
   <ellipse cx="392" cy="260" rx="7" ry="3.5" fill="#F3C9A6" opacity=".85"/>
-  <!-- steam -->
-  <path d="M388 182C374 166 398 156 386 140C374 126 392 114 388 100M412 178C400 164 420 156 410 140C400 128 414 118 410 106" fill="none" stroke="#FFE9A8" stroke-width="13" opacity=".35"/>
-  <path d="M388 182C374 166 398 156 386 140C374 126 392 114 388 100M412 178C400 164 420 156 410 140C400 128 414 118 410 106" fill="none" stroke="#FFFFFF" stroke-width="6" opacity=".95"/>
+  <!-- steam: two curls rising from the rim, y 116-190, kept right of the ghutra crown edge -->
+  <path d="M406 190C394 176 418 164 406 150C394 136 414 128 408 118M430 186C442 172 420 160 430 146C440 132 424 126 428 116" fill="none" stroke="#FFE9A8" stroke-width="15" opacity=".4"/>
+  <path d="M406 190C394 176 418 164 406 150C394 136 414 128 408 118M430 186C442 172 420 160 430 146C440 132 424 126 428 116" fill="none" stroke="#FFFFFF" stroke-width="7" opacity=".95"/>
  </g>
 </svg>

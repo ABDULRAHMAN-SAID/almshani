@@ -42,6 +42,12 @@
   <ellipse cx="256" cy="262" rx="200" ry="196" fill="url(#glowG)" opacity=".18" filter="url(#soft)"/>
  </g>
 
+ <g id="props-back">
+  <!-- one bold 12-point burst behind the head, centred on the crown (256,112); flattened so the top tip stays inside the 8% margin -->
+  <path d="M256.0 47.0L294.6 64.7L354.0 55.7L361.4 77.4L425.7 79.5L399.9 99.3L452.0 112.0L399.9 124.7L425.7 144.5L361.4 146.6L354.0 168.3L294.6 159.3L256.0 177.0L217.4 159.3L158.0 168.3L150.6 146.6L86.3 144.5L112.1 124.7L60.0 112.0L112.1 99.3L86.3 79.5L150.6 77.4L158.0 55.7L217.4 64.7Z" fill="#E8B23A" stroke="#1A1230" stroke-width="8"/>
+  <path d="M256.0 60.0L286.9 74.1L334.4 67.0L340.3 84.3L391.8 86.0L371.1 101.9L412.8 112.0L371.1 122.1L391.8 138.0L340.3 139.7L334.4 157.0L286.9 149.9L256.0 164.0L225.1 149.9L177.6 157.0L171.7 139.7L120.2 138.0L140.9 122.1L99.2 112.0L140.9 101.9L120.2 86.0L171.7 84.3L177.6 67.0L225.1 74.1Z" fill="#FFE9A8"/>
+ </g>
+
  <g id="body">
   <!-- neck (shade tone: it sits in the chin's shadow) -->
   <path d="M224 262H288V372H224Z" fill="#C9885B" stroke="#1A1230" stroke-width="8"/>
@@ -134,36 +140,7 @@
   <path d="M206 80C222 70 250 66 276 68" fill="none" stroke="#FFFFFF" stroke-width="6" opacity=".9"/>
  </g>
 
- <g id="props">
-  <clipPath id="clipTop"><rect x="0" y="0" width="512" height="126"/></clipPath>
-  <g clip-path="url(#clipTop)">
-   <path d="M189.5 97.9L103.4 79.6M198.3 76L147.4 44.2M214.1 58.4L160 -10.9M235 47.3L216.4 -9.7M256 44L256 -44M277 47.3L295.6 -9.7M297.9 58.4L352 -10.9M313.7 76L364.6 44.2M322.5 97.9L408.6 79.6" fill="none" stroke="#1A1230" stroke-width="15"/>
-   <path d="M189.5 97.9L103.4 79.6M198.3 76L147.4 44.2M214.1 58.4L160 -10.9M235 47.3L216.4 -9.7M256 44L256 -44M277 47.3L295.6 -9.7M297.9 58.4L352 -10.9M313.7 76L364.6 44.2M322.5 97.9L408.6 79.6" fill="none" stroke="#E8B23A" stroke-width="7"/>
-   <path d="M256 46L265.3 77.2L289 54.8L281.5 86.5L313.2 79L290.8 102.7L322 112L290.8 121.3L313.2 145L281.5 137.5L289 169.2L265.3 146.8L256 178L246.7 146.8L223 169.2L230.5 137.5L198.8 145L221.2 121.3L190 112L221.2 102.7L198.8 79L230.5 86.5L223 54.8L246.7 77.2Z" fill="#E8B23A" stroke="#1A1230" stroke-width="7"/>
-   <path d="M266.9 73.4L266 96.7L285.7 84.3L273.3 104L296.6 103.1L276 114L296.6 124.9L273.3 124L285.7 143.7L266 131.3L266.9 154.6L256 134L245.1 154.6L246 131.3L226.3 143.7L238.7 124L215.4 124.9L236 114L215.4 103.1L238.7 104L226.3 84.3L246 96.7L245.1 73.4L256 94Z" fill="#FFE9A8"/>
-  </g>
-  <path d="M84 76L89 89.1L103 89.8L92.1 98.6L95.8 112.2L84 104.5L72.2 112.2L75.9 98.6L65 89.8L79 89.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M428 72L433 85.1L447 85.8L436.1 94.6L439.8 108.2L428 100.5L416.2 108.2L419.9 94.6L409 85.8L423 85.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M110 157L112.8 164.1L120.5 164.6L114.6 169.5L116.5 176.9L110 172.8L103.5 176.9L105.4 169.5L99.5 164.6L107.2 164.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M402 155L404.8 162.1L412.5 162.6L406.6 167.5L408.5 174.9L402 170.8L395.5 174.9L397.4 167.5L391.5 162.6L399.2 162.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M192 49L194.4 54.8L200.6 55.2L195.8 59.2L197.3 65.3L192 62L186.7 65.3L188.2 59.2L183.4 55.2L189.6 54.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M326 45L328.4 50.8L334.6 51.2L329.8 55.2L331.3 61.3L326 58L320.7 61.3L322.2 55.2L317.4 51.2L323.6 50.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
-  <path d="M150 48L153 59L164 62L153 65L150 76L147 65L136 62L147 59Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
-  <path d="M364 46L367 57L378 60L367 63L364 74L361 63L350 60L361 57Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
-  <path d="M62 140L64.1 147.9L72 150L64.1 152.1L62 160L59.9 152.1L52 150L59.9 147.9Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
-  <path d="M450 138L452.1 145.9L460 148L452.1 150.1L450 158L447.9 150.1L440 148L447.9 145.9Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
-  <path d="M66 50L67.7 56.3L74 58L67.7 59.7L66 66L64.3 59.7L58 58L64.3 56.3Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
-  <path d="M446 48L447.7 54.3L454 56L447.7 57.7L446 64L444.3 57.7L438 56L444.3 54.3Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
-  <circle cx="124" cy="60" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
-  <circle cx="388" cy="62" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
-  <circle cx="76" cy="200" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
-  <circle cx="436" cy="200" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
-  <circle cx="100" cy="132" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
-  <circle cx="412" cy="130" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
- </g>
-
- <g id="agal" transform="translate(0 -40)">
-
+ <g id="agal" transform="translate(0 -14) rotate(-6 256 105)">
   <path d="M138 114C190 132 322 132 374 114" fill="none" stroke="#1A1230" stroke-width="21"/>
   <path d="M138 114C190 132 322 132 374 114" fill="none" stroke="#15110F" stroke-width="15"/>
   <path d="M144 111C190 127 322 127 368 111" fill="none" stroke="#4A403A" stroke-width="3"/>
@@ -172,4 +149,16 @@
   <path d="M148 92C190 108 322 108 364 92" fill="none" stroke="#4A403A" stroke-width="3"/>
  </g>
 
+ <g id="props">
+  <!-- two big 5-point stars beside the drapes, clear of the burst -->
+  <path d="M68.0 181.0L73.4 196.6L89.9 196.9L76.7 206.8L81.5 222.6L68.0 213.2L54.5 222.6L59.3 206.8L46.1 196.9L62.6 196.6Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M444.0 181.0L449.4 196.6L465.9 196.9L452.7 206.8L457.5 222.6L444.0 213.2L430.5 222.6L435.3 206.8L422.1 196.9L438.6 196.6Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <!-- six dots -->
+  <circle cx="100" cy="56" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="412" cy="56" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="56" cy="158" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="456" cy="158" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="72" cy="252" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="440" cy="252" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+ </g>
 </svg>
