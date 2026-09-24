@@ -4,39 +4,66 @@
   "board": {
    "historyId": "nfxR3y8rUf8OGBvgxf9B",
    "res": "4K",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221083035_6e0cff16_1790221084355_0c94d618.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221083035_6e0cff16_1790221084355_0c94d618.png",
+   "kind": "tex",
+   "size": 2048,
+   "q": 84
   },
   "rail": {
    "historyId": "jpCy1k1h1eBLmb2F4tAq",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221144983_143fa98a_1790221146602_dfaa2635.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221144983_143fa98a_1790221146602_dfaa2635.png",
+   "kind": "tex",
+   "size": 1024,
+   "q": 84
   },
   "coin_w": {
    "historyId": "3lS0QJVtDhfSyCvsTpXC",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221086822_fbe7766f_1790221087349_94f10e7e.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221086822_fbe7766f_1790221087349_94f10e7e.png",
+   "kind": "disc",
+   "size": 192,
+   "q": 88
   },
   "coin_b": {
    "historyId": "P2RuqqlFBEmSfETILuR5",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221092452_50b442ca_1790221092964_c7884873.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221092452_50b442ca_1790221092964_c7884873.png",
+   "kind": "disc",
+   "size": 192,
+   "q": 88
   },
   "coin_q": {
    "historyId": "aBzO5bJQ13eSGF8bR2gA",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221247447_a4431306_1790221248047_576154e7.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221247447_a4431306_1790221248047_576154e7.png",
+   "kind": "disc",
+   "size": 192,
+   "q": 88
   },
   "chest_knowledge": {
    "historyId": "amzG6t0oWQPmh0VHuL8z",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221270472_dd4d9984_1790221271155_598d44b5.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221270472_dd4d9984_1790221271155_598d44b5.png",
+   "kind": "key",
+   "size": 384,
+   "q": 88
   },
   "chest_rival": {
    "historyId": "H6rHxuy4hCjlh5UKERdB",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221294344_a0966d26_1790221294471_df549cbf.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221294344_a0966d26_1790221294471_df549cbf.png",
+   "kind": "key",
+   "size": 384,
+   "q": 88
   },
   "chest_elite": {
    "historyId": "2FfZZsyLzgkZzIBr1tcu",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221156723_b695fc44_1790221158424_d96d4f3e.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221156723_b695fc44_1790221158424_d96d4f3e.png",
+   "kind": "key",
+   "size": 384,
+   "q": 88
   },
   "chest_legend": {
    "historyId": "uVsrBvB93uAN9F50ys0Z",
-   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221148617_f7a96216_1790221149061_a93cf6f8.png"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221148617_f7a96216_1790221149061_a93cf6f8.png",
+   "kind": "key",
+   "size": 384,
+   "q": 88
   }
  }
 }

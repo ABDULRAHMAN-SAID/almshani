@@ -1,0 +1,43 @@
+name: جلب صور الفنّ (OpenArt)
+
+# جلسة العمل لا تصل إلى cdn.openart.ai، فالتنزيل هنا: يقرأ art-src/**/openart.json،
+# ينزّل كلّ صورة ويقصّها ويضغطها (art-src/process.py)، ويرفع art-src/out/*.webp إلى الفرع نفسه.
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/3d-game-design-c59zac]
+    paths:
+      - 'art-src/**/openart.json'
+      - 'art-src/process.py'
+      - '.github/workflows/art-fetch.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: art-fetch
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: الأدوات
+        run: pip install --quiet pillow numpy
+      - name: تنزيل الصور وتجهيزها
+        run: python3 art-src/process.py
+      - name: رفع الناتج
+        run: |
+          set -eu
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add art-src/out
+          if git diff --cached --quiet; then echo "لا جديد"; exit 0; fi
+          git commit -q -m "art: fetch and process OpenArt renders"
+          for i in 1 2 3; do git pull -q --rebase origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0; sleep 5; done
+          exit 1
