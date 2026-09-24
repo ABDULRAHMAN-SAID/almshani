@@ -1715,7 +1715,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .csAv svg,.csAv img{width:100%;height:100%;display:block}
 /* ٦٫٥٦ — الشاشة تملأ طولها: اللوح في الوسط بهامشٍ عن حافّتي الشاشة، والأزرار في الأسفل */
 .scr.on.caScr{display:flex;flex-direction:column;min-height:100dvh;box-sizing:border-box;padding-bottom:max(12px,env(safe-area-inset-bottom))}
-#app:has(>.scr.on.caScr){padding-bottom:0}   /* شريط التنقّل مخفيٌّ في المباراة: لا فراغ له تحت الشاشة */
+#app:has(>.scr.on.caScr),#app:has(>.scr.on.rvScr){padding-bottom:0}   /* شريط التنقّل مخفيٌّ في المباراة: لا فراغ له تحت الشاشة */
 .caScr .caWrap.big{margin-block:auto;width:calc(100vw - 12px);margin-inline:calc(50% - 50vw + 6px);border-radius:0}   /* الزوايا في رسم اللوح (٦٫٧٠) */
 /* رسالة الإدخال: تظهر فوق اللوح لحظةً ثمّ تخفت */
 .caEnd{position:absolute;inset:0;z-index:5;display:flex;overflow:auto;padding:8px;box-sizing:border-box;background:rgba(5,8,16,.62);backdrop-filter:blur(2px)}
@@ -18533,7 +18533,7 @@ function quitMatch(force){
  clearInterval(M.tm);clearInterval(M.autoTm);
  if(M.st&&M.st.timer)clearInterval(M.st.timer);
  const res=M.casual?{applied:false,rpGain:0}:resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,   // ٦٫٩٤: الودّيّة ضدّ الآليّ لا تُحتسب خسارةً ولا كؤوسًا
-  result:{won:false},opponents:[{mmr:M.oppMmr}]});
+  result:{won:false},opponents:[{mmr:M.oppMmr,tr:Math.max(0,Math.round(((M.oppMmr||1000)-800)*2.1))}]});
  const wasCasual=!!M.casual;M=null;
  toast(wasCasual?'انسحبت — مباراة ودّيّة بلا أثر':'انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} نقطة تصنيف)`:''));
  Router.settle('rankedScr');
@@ -19042,7 +19042,7 @@ function mEnd(){
  const won=M.me>M.opp;   // Best of 7
  const res=M.casual?{applied:false,reason:'ضدّ الذكاء الاصطناعي — بلا نقاط تصنيف'}
   :resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
-   result:{won:won},opponents:[{mmr:M.oppMmr}]});
+   result:{won:won},opponents:[{mmr:M.oppMmr,tr:Math.max(0,Math.round(((M.oppMmr||1000)-800)*2.1))}]});
  // مكافآت
  const coins=(won?120:45)+(M.chaseBonus?80:0),xp=Math.round((M.correct||0)*12+(won?60:20));
  S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;dropBattleChest()} saveState();
@@ -22196,7 +22196,7 @@ const RV_CSS=`
 body .scr.rvScr{position:relative;padding:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#05070E}
 .rvBg{position:absolute;inset:0;background:#05070E center/cover no-repeat;opacity:.5;filter:saturate(.85)}
 .rvVig{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,205,90,.10),rgba(5,7,14,.5) 52%,rgba(5,7,14,.97) 100%)}
-.rvRays{position:absolute;left:50%;top:40%;width:180vmax;height:180vmax;transform:translate(-50%,-50%);pointer-events:none;
+.rvRays{position:absolute;left:50%;top:40%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;
  background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.09) 0 5deg,transparent 5deg 16deg);
  -webkit-mask:radial-gradient(circle,#000 0,transparent 36%);mask:radial-gradient(circle,#000 0,transparent 36%);animation:rvSpin 34s linear infinite}
 @keyframes rvSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
@@ -22207,7 +22207,7 @@ body .scr.rvScr{position:relative;padding:0;min-height:100vh;min-height:100dvh;d
 .rvDots i{width:6px;height:6px;border-radius:50%;background:rgba(217,183,110,.25)}.rvDots i.done{background:#D9B76E}.rvDots i.now{background:#FFF1C4;box-shadow:0 0 8px #FFE9A8;transform:scale(1.3)}
 .rvStage{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:0 14px 6px;cursor:pointer;min-height:430px}
 .rvItem{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%) scale(.55);opacity:0;text-align:center;width:min(86vw,340px);transition:transform .6s cubic-bezier(.2,1.45,.4,1),opacity .35s}
-.rvItem.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.rvItem{pointer-events:none}.rvItem.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
 .rvHalo{position:absolute;left:50%;top:34%;width:320px;height:320px;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none;
  background:radial-gradient(circle,rgba(var(--gc),.45),rgba(var(--gc),.12) 40%,transparent 68%);filter:blur(4px);animation:rvHalo 3s ease-in-out infinite}
 @keyframes rvHalo{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
@@ -22218,7 +22218,8 @@ body .scr.rvScr{position:relative;padding:0;min-height:100vh;min-height:100dvh;d
 @keyframes rvSpk{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
 .rvArt{position:relative;display:flex;justify-content:center;margin:0 auto 8px;filter:drop-shadow(0 18px 22px rgba(0,0,0,.6)) drop-shadow(0 0 18px rgba(var(--gc),.55))}
 .rvArt .rico,.rvArt img{width:124px;height:124px}.rvArt.card{width:130px}
-.rvNum{font-size:46px;font-weight:700;line-height:1.05;font-variant-numeric:tabular-nums;color:#FFF1C4;text-shadow:0 2px 0 #6A3606,0 0 22px rgba(255,210,100,.55)}
+.rvNum i,.rvSumV i{font-style:normal;display:inline-block;width:.6em;text-align:center}
+.rvNum{font-size:46px;font-weight:700;line-height:1.05;color:#FFF1C4;text-shadow:0 2px 0 #6A3606,0 0 22px rgba(255,210,100,.55)}
 .rvLbl{font-size:13px;font-weight:800;color:#D9B76E;margin-top:2px}
 .rvNm{font-size:17px;font-weight:700;color:#F6E7C6;margin-top:4px}
 .rvTag{font-size:11.5px;font-weight:900;letter-spacing:.04em;margin-bottom:4px}
@@ -22242,6 +22243,7 @@ body .scr.rvScr{position:relative;padding:0;min-height:100vh;min-height:100dvh;d
 .rvSumA{position:relative;display:flex;justify-content:center;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}.rvSumA .rico,.rvSumA img{width:40px;height:40px}
 .rvSumV{position:relative;font-size:15px;font-weight:700;color:#FFF1C4;margin-top:4px;font-variant-numeric:tabular-nums}
 .rvSumL{position:relative;font-size:10px;font-weight:800;color:#D9B76E;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-height:700px){.rvItem{top:31%}.rvChest{width:min(44vw,170px)}.rvArt .rico,.rvArt img{width:92px;height:92px}.rvNum{font-size:36px}.rvHalo{width:240px;height:240px}}
 @media (prefers-reduced-motion:reduce){.rvRays,.rvHalo,.rvHint,.rvChest.shake,.show .rvSpk i{animation:none!important}}`;
 function rvRGB(h){h=String(h||'#E8B23A').replace('#','');if(h.length===3)h=h.replace(/./g,c=>c+c);const n=parseInt(h.slice(0,6),16)||0;return ((n>>16)&255)+','+((n>>8)&255)+','+(n&255)}
 /** لون الهالة ودرجة الندرة (٠–٣) لكلّ نوع مكافأة */
@@ -22294,19 +22296,20 @@ function rvAfterDraw(a,cur){
   rvCount(it.querySelector('.rvNum'))};
  if(a.chest&&!a.opened){
   const ch=document.querySelector('.rvChest');if(ch)ch.classList.add('shake');
-  if(!a._opT){   // مؤقّتٌ واحد مهما أُعيد الرسم — والعناصر تُقرأ لحظة الفتح لا لحظة الجدولة
-   try{if(window.SFX)SFX.fx('chest')}catch(e){}
-   a._opT=setTimeout(()=>{a._opT=0;a.opened=1;const c2=document.querySelector('.rvChest');if(c2){c2.classList.remove('shake');c2.classList.add('open')}_rvT=setTimeout(show,260)},720);
+  if(!a._opT){   // مؤقّتٌ واحد مهما أُعيد الرسم — والعناصر تُقرأ لحظة الفتح لا لحظة الجدولة، ولا يعمل إن غادرتَ الشاشة
+   setTimeout(()=>{try{if(_rvA===a&&window.SFX)SFX.fx('chest')}catch(e){}},380);   // الارتطام والمزلاج مع لحظة الفتح لا قبلها
+   a._opT=setTimeout(()=>{a._opT=0;if(_rvA!==a)return;a.opened=1;const c2=document.querySelector('.rvChest');if(c2){c2.classList.remove('shake');c2.classList.add('open')}_rvT=setTimeout(show,260)},720);
   }
  }else _rvT=setTimeout(show,40);
 }
 /** العدّاد الصاعد: يبطئ في نهايته، ويطقّ كلّ سبعين مللي ثانية */
+function rvDig(n){return String((+n||0).toLocaleString('en-US')).replace(/\d/g,d=>'<i>'+d+'</i>')}   // كلّ رقمٍ في خليّةٍ ثابتة العرض
 function rvCount(el){
  if(!el)return;const v=+el.dataset.v||0;
- if(v<10){el.textContent=v.toLocaleString('en-US');return}
+ if(v<10){el.innerHTML=rvDig(v);return}
  const t0=performance.now(),D=Math.min(900,320+v*1.5);let last=0;
  const step=now=>{if(!el.isConnected)return;const p=Math.min(1,(now-t0)/D),e=1-Math.pow(1-p,3);
-  el.textContent=Math.round(v*e).toLocaleString('en-US');
+  el.innerHTML=rvDig(Math.round(v*e));
   if(p<1&&now-last>70){last=now;try{if(window.SFX)SFX.play('tally')}catch(x){}}
   if(p<1)requestAnimationFrame(step)};
  requestAnimationFrame(step);
@@ -22603,6 +22606,9 @@ function buyCoins(id){
 
 /** رأس المتجر الخاص بتحدي — قوس بوابة ذهبية بدل عنوان نصي بسيط */
 function shopHeader(){
+ return `<div class="tbar"><span class="sp" style="width:42px"></span><h2>المتجر</h2><span class="sp" style="width:42px"></span></div>`;
+}
+function shopHeaderOld(){
  return `<div style="position:relative;height:64px;margin-bottom:2px">
  <svg viewBox="0 0 300 64" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
  <defs><linearGradient id="shHd" x1="0" y1="0" x2="0" y2="1">
@@ -24958,7 +24964,7 @@ function playScr(){
  </div></div>`);
  bcTick();plDots();
  verAnnounce();          // الرئيسية رُسمت، فالنافذة تجد شاشةً تظهر فوقها
- setTimeout(()=>{try{lvUpCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد
+ setTimeout(()=>{try{if(!lvUpCheck())trSeasonRwCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد، أو إعلان الموسم
 }
 
 /* ═══ ٦٫٩٤ — إتقان الجيس (Card Mastery في كلاش رويال) ═══
@@ -25040,6 +25046,21 @@ function mgBuy(i){
   try{buyFx(m.t==='skbook'?ico('book',42,'#FFE9A8'):mgWildImg(m.r,42),m.n)}catch(e){toast(m.n)}
   refresh(shopScr);
  });
+}
+/** ٦٫٩٤ — إعلان مكافأة الموسم مرّةً واحدة عند أوّل فتحٍ للرئيسيّة بعد التصفير */
+function trSeasonRwCheck(){
+ const t=TR(),r=t.sRw;if(!r||r.seen)return false;
+ if(document.querySelector('.vchOv,.aruOv,.qvov'))return false;
+ r.seen=1;try{saveState()}catch(e){}
+ const A=ARENAS[r.arena|0]||ARENAS[0];
+ const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
+ ov.classList.add('sea');
+ ov.innerHTML=`<div class="aruRays"></div><div class="aruT">انتهى الموسم — مكافأتك</div><div class="aruEm">${tierEmblem(r.arena|0,140)}</div><div class="aruN">${esc(A.n)}</div>
+  <div class="aruS">مكافأة الموسم على أعلى ساحةٍ بلغتها: <b>${(r.coins|0).toLocaleString('en-US')}</b> عملة و<b>${r.gems|0}</b> جوهرة أُضيفت إلى حسابك.${r.from>r.to?`<br>كؤوسك فوق القمّة أُعيدت من ${r.from.toLocaleString('en-US')} إلى ${r.to.toLocaleString('en-US')} — الموسم الجديد يبدأ.`:''}</div>
+  <div class="aruB"><button class="rbtn" onclick="this.closest('.aruOv').remove();push('arenaScr')"><span>طريق الكؤوس</span></button><button class="btn g" onclick="this.closest('.aruOv').remove()">رائع</button></div>`;
+ document.body.appendChild(ov);try{enPass(ov)}catch(e){}
+ try{if(window.SFX)SFX.fx('arena')}catch(e){}
+ return true;
 }
 /* ═══ ٦٫٩٤ — مكافأة المستوى (مستوى الملك في كلاش رويال يعطي ذهبًا وجواهر عند كلّ ارتفاع) ═══
    يُفحص عند رسم الرئيسيّة: كلّ مستوًى جديد يمنح 100×المستوى عملة و(5+المستوى) جوهرة، بشاشةٍ كشاشة الساحة الجديدة — مرّةً لكلّ مستوى */
@@ -25152,10 +25173,10 @@ function TR(){
  const t=S.tro;if(!Array.isArray(t.claimed))t.claimed=[];
  const key=trSeasonKey();
  if(t.season!==key&&trSeasonN(key)>trSeasonN(t.season)){   // موسمٌ جديد (شهرٌ لاحق فقط — إرجاع ساعة الجهاز لا يصنع موسمًا، ولا أقلّ من عشرين يومًا بين موسمين)
-  if(!t.sAt||Date.now()-t.sAt>20*864e5){
-   const a=trArenaIx(t.tr);
+  if((!t.sAt||Date.now()-t.sAt>20*864e5)&&((t.w|0)+(t.l|0))>0){   // حسابٌ لعب في الموسم الماضي
+   const a=trArenaIx(t.tr),before=t.tr;
    if(t.tr>TR_LEG)t.tr=TR_LEG+Math.floor((t.tr-TR_LEG)/2);
-   t.sRw={arena:a,coins:150*(a+1),gems:4*(a+1),at:Date.now()};S.coins+=t.sRw.coins;S.gems+=t.sRw.gems;
+   t.sRw={arena:a,coins:150*(a+1),gems:4*(a+1),at:Date.now(),from:before,to:t.tr,seen:0};S.coins+=t.sRw.coins;S.gems+=t.sRw.gems;
   }
   t.season=key;t.sAt=Date.now();try{saveState()}catch(e){}
  }
@@ -25196,7 +25217,7 @@ function trApply(o){
  t.tr=after;if(after>t.best)t.best=after;
  const aAfter=trArenaIx(after);
  if(aAfter>(t.gate|0))t.gate=aAfter;
- if(why!=='room'&&why!=='none'){if(won===true)t.w=(t.w|0)+1;else if(won===false)t.l=(t.l|0)+1}
+ if(why!=='room'&&why!=='none'&&why!=='botcap'){if(won===true)t.w=(t.w|0)+1;else if(won===false)t.l=(t.l|0)+1}
  const out={d:after-before,raw,tr:after,before,arena:aAfter,arenaUp:aAfter>aBefore?aAfter:-1,why,won};
  t.last=out;try{saveState()}catch(e){}
  return out;
@@ -25338,7 +25359,8 @@ function arenaScr(){
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز ${TR_LEG.toLocaleString('en-US')} يعود إلى ${TR_LEG.toLocaleString('en-US')} ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.</div>
  </div>`);
  requestAnimationFrame(trRoadFill);
- setTimeout(()=>{try{const el=document.querySelector('.arRoad .arM.ready')||document.querySelector('.arRoad .arM.next');if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest',inline:'center'})}catch(e){}},60);
+ setTimeout(()=>{try{const el=document.querySelector('.arRoad .arM.ready')||document.querySelector('.arRoad .arM.next'),rd=el&&el.parentElement;
+  if(el&&rd){const a=el.getBoundingClientRect(),b=rd.getBoundingClientRect();rd.scrollBy({left:(a.left+a.width/2)-(b.left+b.width/2)})}}catch(e){}},60);   // أفقيًّا فقط
 }
 
 /* ═══ صناديق المعارك — نظام كلاش رويال: الفوز أونلاين يُسقط صندوقًا بحظ معلَن ═══ */
@@ -25853,7 +25875,7 @@ function caMatchReward(won){
  S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(won&&typeof dropBattleChest==='function')dropBattleChest();
  try{saveState()}catch(e){}
  const lv1=lvl(S.xp);
- setTimeout(()=>toast(`+${xp} ${T('خبرة')} · ${n}× ${T('جيس')} «${tlNm('sk',k)}»${lv1>lv0?' · '+T('المستوى')+' '+lv1+'!':''}`,'ok'),700);
+ setTimeout(()=>toast(`+${xp} ${T('خبرة')} · ${n}× ${T('جيس')} «${tlNm('sk',k)}»${lv1>lv0?' · '+T('المستوى')+' '+lv1+'!':''}`),700);   // بلا رنّة: صوت الصندوق يليه
 }
 /* حلقة القدرة حول الضارب — لكلّ قدرةٍ شكلها */
 function caPwRing(cx,X,Y,r,k,tm){
@@ -26007,7 +26029,6 @@ body .btn.g,body .btn{font-weight:700;font-size:14.5px}
 body .qvt{font-size:19px;font-weight:700}
 body .mtl{font-weight:700}
 body .stc .v{font-size:17px;font-variant-numeric:tabular-nums}
-body .hmCur u{font-size:14px}
 /* الإشعار: لوحةٌ ذهبيّة تصعد ستّة بكسلات وتذوب — لا فقّاعة رماديّة */
 body #fxc{z-index:400}
 body .tst{background:linear-gradient(180deg,#161E33,#0B101D);border:1px solid var(--lxHair);border-radius:14px;padding:11px 18px;color:#F6E7C6;font-weight:800;font-size:12.5px;
@@ -26073,7 +26094,7 @@ body .pfTr .rico{width:16px!important;height:16px!important}
 body .ghArena{margin-top:8px}
 /* تحدّي الاثني عشر */
 body .chHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,#3A2A0E,#0C1222 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
-body .chHeroRays{position:absolute;left:50%;top:30%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.10) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 30%);mask:radial-gradient(circle,#000 0,transparent 30%);animation:arSpin 40s linear infinite}
+body .chHeroRays{position:absolute;left:50%;top:30%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.10) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 30%);mask:radial-gradient(circle,#000 0,transparent 30%);animation:arSpin 40s linear infinite}
 body .chHeroT{position:relative;font-family:var(--fd);font-size:19px;font-weight:700;color:#F6E7C6}
 body .chHeroN{position:relative;display:inline-flex;align-items:baseline;gap:6px;margin-top:6px}
 body .chHeroN .rico{width:26px!important;height:26px!important;align-self:center}
@@ -26120,7 +26141,7 @@ body .mgW b{position:absolute;right:-6%;bottom:-6%;width:40%;height:40%;border-r
 body .mgW b .ico{width:70%;height:70%}
 /* شاشة الساحات */
 body .arHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,var(--s1),var(--s2) 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
-body .arHeroRays{position:absolute;left:50%;top:40%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 32%);mask:radial-gradient(circle,#000 0,transparent 32%);animation:arSpin 40s linear infinite}
+body .arHeroRays{position:absolute;left:50%;top:40%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 32%);mask:radial-gradient(circle,#000 0,transparent 32%);animation:arSpin 40s linear infinite}
 @keyframes arSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 body .arHeroEm{position:relative;display:flex;justify-content:center;filter:drop-shadow(0 12px 18px rgba(0,0,0,.6))}
 body .arHeroN{position:relative;font-size:23px;font-weight:700;color:var(--g);margin-top:8px;text-shadow:0 2px 10px rgba(0,0,0,.6)}
@@ -26148,9 +26169,10 @@ body .arMSt{margin-top:6px;font-size:10px;color:#8B96B6;height:20px;display:flex
 body .arRow.now{border-color:var(--lxHair);background:linear-gradient(180deg,rgba(255,233,168,.08),transparent),var(--lxCard)}
 body .arRowEm{flex-shrink:0;display:flex}
 /* إعلان الساحة الجديدة */
-body .aruOv{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;background:radial-gradient(circle at 50% 42%,rgba(var(--f),.34),rgba(6,8,16,.95) 62%);animation:aruIn .25s ease both}
+body .aruOv{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;background:radial-gradient(circle at 50% 42%,rgba(var(--f),.28),rgba(var(--f),0) 46%),#05070E;animation:aruIn .25s ease both}   /* معتمٌ فعلًا: الرئيسيّة لا تُقرأ من خلفه */
 @keyframes aruIn{from{opacity:0}to{opacity:1}}@keyframes aruPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
-body .aruRays{position:absolute;left:50%;top:42%;width:180vmax;height:180vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.2) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 42%);mask:radial-gradient(circle,#000 0,transparent 42%);animation:arSpin 26s linear infinite}
+body .aruRays{position:absolute;left:50%;top:42%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.2) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 42%);mask:radial-gradient(circle,#000 0,transparent 42%);animation:arSpin 26s linear infinite}
+body .aruOv.sea .aruT{font-size:18px;color:#FFE9A8}
 body .aruT{position:relative;font-size:15px;font-weight:700;letter-spacing:.08em;color:#F6E7C6;animation:aruPop .4s .1s ease both}
 body .aruEm{position:relative;animation:aruDrop .8s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 18px 24px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(var(--f),.6))}
 @keyframes aruDrop{from{opacity:0;transform:scale(.3) translateY(-40px)}to{opacity:1;transform:none}}
@@ -26454,7 +26476,61 @@ function metSeen(id,name,av){
  if(S.met.length>40)S.met.length=40;
  clearTimeout(metSeen._t);metSeen._t=setTimeout(()=>saveState(),1200);
 }
+/** ٦٫٩٤ — مغادرة مباراةٍ أونلاين جارية تُحتسب خسارةً (كما في كلاش رويال): تصنيفًا وكؤوسًا وتحدّيًا. الآليّ والودّيّات لا.
+    تُنادى قبل مسح الغرفة، ودورة التصنيف تمنع الاحتساب مرّتين إن كانت النتيجة قد وصلت */
+function rmForfeit(){
+ try{
+  if(RM.solo||!RM.mid||!RM.game)return null;
+  if(!RM.phase||/^(idle|lobby|over|end)$/.test(RM.phase))return null;
+  const gid=gameIdOfRoom(RM.game);if(!gid)return null;
+  const def=gameDef(gid),n=Math.max(2,(RM.players||[]).length);
+  const res=def&&def.scoreModel==='placement'?{place:n,total:n}:def&&def.scoreModel==='teamResult'?{teamWon:false,completed:false,left:true}:{won:false};
+  const others=(RM.players||[]).filter(x=>x&&x.peer!==RM.me);
+  const opp=others.map(x=>({mmr:1000,tr:typeof x.tr==='number'?x.tr:null}));
+  const out=resolveMatch({gameId:gid,mode:rmMode(),matchId:RM.mid,result:res,opponents:opp});
+  try{const m=rmLeftMsg(gid,RM.me,'انسحب');if(m)rmSend(m)}catch(e){}   // الخصم يستلم فوزه الآن — صدى الرسالة يصلني بعد المسح فلا يُحتسب مرّتين
+  if(out&&out.applied&&gid==='carrom')try{ch12Match(false,rmMode())}catch(e){}
+  if(out&&out.applied&&out.tro&&out.tro.d)setTimeout(()=>{try{toast(ico('trophy',13)+' انسحبت — خسرت '+Math.abs(out.tro.d)+' كأس','bad')}catch(e){}},300);
+  return out;
+ }catch(e){return null}
+}
+/** رسالة «انتهت» حين يغادر لاعبٌ مباراةً جارية: الفائز خصمُه (في الكيرم: من الفريق المقابل؛ في أونو: ترتيبٌ يضعه أخيرًا) */
+function rmLeftMsg(gid,peer,verb){
+ const ps=RM.players||[],gone=ps.find(x=>x&&x.peer===peer)||{peer,name:'لاعب'},others=ps.filter(x=>x&&x.peer!==peer);
+ let by=(others[0]||{}).peer||null;
+ if(gid==='carrom'&&RM.ca&&RM.ca.col){const c=RM.ca.col[peer];const o=others.find(x=>RM.ca.col[x.peer]&&RM.ca.col[x.peer]!==c);if(o)by=o.peer}
+ if(!by)return null;
+ const winner=others.find(x=>x.peer===by)||{};
+ const m={t:'over',win:gid,by,left:peer,msg:`${verb} ${esc(gone.name||'لاعب')} المباراة — فاز ${esc(winner.name||'الخصم')}`,
+  all:ps.map(q=>({n:q.name,r:q.peer===peer?verb:'أكمل'}))};
+ if(gid==='uno'&&RM.uno&&RM.uno.hands)m.rank=others.map(q=>({p:q.peer,c:(RM.uno.hands[q.peer]||[]).length})).sort((a,b)=>a.c-b.c).concat([{p:peer,c:99}]);
+ return m;
+}
+/** ٦٫٩٤ — رصد المنقطع: من اختفى من الحضور أثناء مباراةٍ جارية اثنتي عشرة ثانية يُعدّ مغادرًا، ويبثّ المضيفُ
+    (أو أوّل الباقين إن كان المضيف هو المنقطع) رسالة النهاية فيُسوّي الباقون فوزهم. الآليّون لا يُرصَدون */
+function rmDropWatch(){
+ try{
+  if(RM.solo||!RM.code||!RM.mid||!/^(carrom|uno)$/.test(RM.phase||''))return;
+  const gid=gameIdOfRoom(RM.game);if(!gid)return;
+  const here=new Set(rmRoster().map(x=>x.peer)),ps=RM.players||[];
+  RM._drop=RM._drop||{};
+  for(const k in RM._drop)if(here.has(k)){clearTimeout(RM._drop[k]);delete RM._drop[k]}
+  const hostPeer=(ps.find(p=>p&&p.host)||{}).peer,remaining=ps.filter(p=>p&&here.has(p.peer)).map(p=>p.peer).sort();
+  const lead=RM.host||(hostPeer&&!here.has(hostPeer)&&remaining[0]===RM.me);
+  if(!lead)return;
+  ps.filter(p=>p&&!here.has(p.peer)&&!/^bot/.test(p.peer)&&p.peer!==RM.me).forEach(p=>{
+   if(RM._drop[p.peer])return;
+   RM._drop[p.peer]=setTimeout(()=>{delete RM._drop[p.peer];
+    try{
+     if(RM.solo||!RM.code||!/^(carrom|uno)$/.test(RM.phase||''))return;
+     if(rmRoster().some(x=>x.peer===p.peer))return;   // عاد قبل انقضاء المهلة
+     const m=rmLeftMsg(gid,p.peer,'غادر');if(m)rmSend(m);
+    }catch(e){}},12000)});
+ }catch(e){}
+}
 function rmLeave(silent){
+ try{rmForfeit()}catch(e){}
+ try{for(const k in RM._drop||{})clearTimeout(RM._drop[k]);RM._drop={}}catch(e){}
  try{rmAutoClear()}catch(e){}
  if(typeof VB3!=='undefined'&&VB3.lobby&&typeof vb3dDispose==='function')vb3dDispose();
  const c=RMcap;
@@ -26478,7 +26554,7 @@ function rmLeave(silent){
 function rmBack(){
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
  if(!playing)return rmLeave();
- confirmSheet('مغادرة الغرفة','المباراة جارية — إن غادرت الآن فلن تعود إليها.','مغادرة',()=>rmLeave());
+ confirmSheet('مغادرة الغرفة',RM.solo||rmMode()==='room'?'المباراة جارية — إن غادرت الآن فلن تعود إليها.':'المباراة جارية — الانسحاب يُحتسب خسارةً في الكؤوس والتصنيف.','مغادرة',()=>rmLeave());
 }
 /** «رجوع» داخل جولة أسئلة: سؤال ثم إنهاء بلا احتساب */
 function quizExit(){
@@ -26573,7 +26649,7 @@ function rmBind(){
  const c=RMcap;if(!c)return;
  RM.unsub.forEach(u=>{try{u()}catch(e){}});
  RM.unsub=[
-  c.onPeers(()=>{if(RM.code&&document.getElementById('rmScr'))roomDraw()}),
+  c.onPeers(()=>{try{rmDropWatch()}catch(e){}if(RM.code&&document.getElementById('rmScr'))roomDraw()}),
   c.on(RM_TOPIC,m=>{
    const d=m.data;if(!d||d.c!==RM.code)return;
    rmOn(d,m);
@@ -26639,7 +26715,7 @@ function rmSettle(d){
 function rmOn(d,m){
  const me=RM.me;
  if(d.t==='start'){RM.game=d.g;RM.phase=d.g==='draw'?'paint':d.g==='uno'?'uno':d.g==='carrom'?'carrom':'deal';
-  RM.mid=d.mid||rmNewMid();RM.rank=null;RM.ch12=null;RM.szG=0;
+  RM.mid=d.mid||rmNewMid();RM.rank=null;RM.ch12=null;RM.szG=0;try{for(const k in RM._drop||{})clearTimeout(RM._drop[k]);RM._drop={}}catch(e){}
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
  else if(d.t==='seal'){if(d.to===me)rmSealOpen(d,m)}   // غلاف مُعمّى: لا يفكّه إلا صاحبه
@@ -30136,7 +30212,7 @@ function caMenu(){
  document.body.appendChild(ov);
 }
 function caMenuRe(){const ov=document.querySelector('.qvov');if(ov&&ov._draw)ov._draw()}
-function caExit(){confirmSheet('الخروج من المباراة؟',RM.solo?'تنتهي المباراة ولا تُحفظ نتيجتها':'المباراة جارية — إن غادرت الآن فلن تعود إليها','خروج',()=>rmLeave())}
+function caExit(){confirmSheet('الخروج من المباراة؟',RM.solo?'تنتهي المباراة ولا تُحفظ نتيجتها':rmMode()==='room'?'المباراة جارية — إن غادرت الآن فلن تعود إليها':'المباراة جارية — الانسحاب يُحتسب خسارةً في الكؤوس والتصنيف','خروج',()=>rmLeave())}
 /** بعد تبديل اللوح أو الصوت: إشعارٌ قصير بالاختيار الجديد — بلا إعادة بناء الشاشة */
 function caToolLbl(k){
  try{toast(k==='skin'?'اللوح: '+(CA_SKIN_NAME[_ca.skin]||''):'صوت الطقّات: '+CA_SFX_NAME[caSfxStyle()])}catch(e){}
@@ -46443,6 +46519,10 @@ splash();
  }
  function flash(x,y,R){P.push({t:'f',x,y,R,life:1,dl:.022})}
  function streaks(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2;P.push({t:'k',x,y,a,L:120+Math.random()*220,life:1,dl:.016+Math.random()*.01,w:.6+Math.random()*1.2})}}
+ let moteSpr=null;
+ function moteSprite(){if(moteSpr)return moteSpr;const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');
+  const rg=g.createRadialGradient(16,16,0,16,16,16);rg.addColorStop(0,'rgba(255,241,196,1)');rg.addColorStop(.35,'rgba(255,233,168,.75)');rg.addColorStop(1,'rgba(255,220,140,0)');
+  g.fillStyle=rg;g.fillRect(0,0,32,32);return moteSpr=c}
  function motes(n){for(let i=0;i<n;i++)P.push({t:'m',x:Math.random()*innerWidth,y:innerHeight*.55+Math.random()*innerHeight*.5,vx:(Math.random()-.5)*.25,vy:-(.35+Math.random()*.9),
   life:1,dl:.0035+Math.random()*.004,w:.9+Math.random()*2.2,c:GOLD[(Math.random()*GOLD.length)|0],ph:Math.random()*6.28})}
  function floop(){requestAnimationFrame(floop);
@@ -46464,7 +46544,7 @@ splash();
    }else if(p.t==='m'){ // غبار ذهبيّ صاعد يومض بهدوء
     p.x+=p.vx+Math.sin(now*1.3+p.ph)*.18;p.y+=p.vy;
     fx.globalCompositeOperation='lighter';fx.globalAlpha=Math.max(0,p.life)*(.45+.55*Math.abs(Math.sin(now*2.2+p.ph)));
-    fx.fillStyle=p.c;fx.shadowColor=p.c;fx.shadowBlur=8;fx.beginPath();fx.arc(p.x,p.y,p.w,0,7);fx.fill();fx.shadowBlur=0;
+    const d=p.w*5;fx.drawImage(moteSprite(),p.x-d/2,p.y-d/2,d,d);
    }else{ // شرارة ذهبيّة صغيرة بذيل
     const px=p.x,py=p.y;p.vx*=.985;p.vy=p.vy*.985+.1;p.x+=p.vx;p.y+=p.vy;
     fx.globalCompositeOperation='lighter';fx.globalAlpha=Math.max(0,p.life);fx.strokeStyle=p.c;fx.lineWidth=p.w;fx.lineCap='round';
