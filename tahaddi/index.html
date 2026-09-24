@@ -17845,7 +17845,8 @@ function addColXP(n){
 /** البند 9 — فتح صندوق */
 /* ٦٫٩٤ — كما في كلاش رويال: الصندوق نفسه يحمل ذهبًا ونسخًا أكثر كلّما ارتفعت ساحتك (أعلى ساحةٍ بلغتها) —
    +12% لكلّ ساحة، فصندوق ساحة القمّة يحمل ضعفَي صندوق ساحة الرمال */
-function trChestMul(){try{return 1+.12*trArenaIx(TR().best|0)}catch(e){return 1}}
+const ARENA_MUL=[1,1.12,1.24,1.36,1.5,1.65,1.8,2,2.2,2.4];   // ٦٫٩٤: مضاعف الساحة الواحد — للعملات والنسخ والصفقات (صناديق كلاش رويال تكبر بالساحة)
+function trChestMul(){try{return ARENA_MUL[trArenaIx(TR().best|0)]||1}catch(e){return 1}}
 function openChest(key){
  const ch=ECON.chests[key];
  const out=[];
@@ -18033,14 +18034,15 @@ function todayDeals(){
  const rnd=(n)=>{let x=Math.sin(seed*9301+n*49297)*233280;return x-Math.floor(x)};
  const pick=(i,r)=>{const p=CARDS.filter(c=>c.r===r);return p[Math.floor(rnd(i)*p.length)]};
  /* ٦٫٩٢ — «احذف البطاقات من المتجر»: صفقات اليوم نسخُ جيسٍ (تُرقّيه وتفتحه) وتعبير — لا بطاقات */
- const sk=(i,rr)=>{const L=(typeof TL_ITEMS!=='undefined'?TL_ITEMS.sk:[]).filter(x=>x[1]===rr);return L.length?L[Math.floor(rnd(i)*L.length)][0]:'blue'};
- return [
-  {t:'skc',k:sk(1,'c'),n:10,cost:600,cur:'coins'},
-  {t:'skc',k:sk(2,'r'),n:6,cost:1200,cur:'coins'},
-  {t:'skc',k:sk(3,tlArenaOk('e')?'e':tlArenaOk('r')?'r':'c'),n:4,cost:70,cur:'gems'},   // ٦٫٩٤: أعلى ندرةٍ فتحتها ساحتك
-  (()=>{const p=EMOTES.filter(x=>!x.free);const e=p[Math.floor(rnd(4)*p.length)];
-   return {t:'emote',e:e,cost:EMO_TIER[e.r].cost,cur:'gems'}})()
- ];
+ /* ٦٫٩٤ — كصفقات كلاش رويال: أسعارٌ تكبر بالساحة، ما فتحته ساحتك وحده، والأسطوريّ بالعملات (الندرة لا تحجب، الذهب يحجب) */
+ const sk=(i,rr)=>{const L=(typeof TL_ITEMS!=='undefined'?TL_ITEMS.sk:[]).filter(x=>x[1]===rr&&tlArenaOkItem('sk',x[0]));return L.length?L[Math.floor(rnd(i)*L.length)][0]:null};
+ const mul=trChestMul(),r10=v=>Math.round(v*mul/10)*10,ix=trArenaIx(TR().best|0),D=[];
+ D.push({t:'skc',k:sk(1,'c')||'blue',n:20,cost:r10(300),cur:'coins'});
+ if(sk(2,'r'))D.push({t:'skc',k:sk(2,'r'),n:6,cost:r10(900),cur:'coins'});else D.push({t:'skc',k:sk(2,'c')||'emerald',n:10,cost:r10(150),cur:'coins'});
+ if(ix>=4&&sk(3,'e'))D.push({t:'skc',k:sk(3,'e'),n:2,cost:r10(2500),cur:'coins'});else D.push({t:'skc',k:sk(3,tlArenaOk('r')?'r':'c')||'blue',n:4,cost:70,cur:'gems'});
+ if(ix>=6&&sk(5,'l'))D.push({t:'skc',k:sk(5,'l'),n:1,cost:40000,cur:'coins'});
+ D.push((()=>{const p=EMOTES.filter(x=>!x.free);const e=p[Math.floor(rnd(4)*p.length)];return {t:'emote',e:e,cost:EMO_TIER[e.r].cost,cur:'gems'}})());
+ return D;
 }
 function dealsResetIn(){
  const ms=86400000-(Date.now()%86400000);
@@ -22044,7 +22046,7 @@ function shopScr(){
    <div class="shChestArt">${chestArt(k)}</div>
    <div class="shChestN">${c.n}</div>
    <div class="shChestS">${c.slots} ${T('مكافآت')} · ${T('نسخ جيس')}</div>
-   <div class="shChestP">${c.price?`${c.price} ${ico('gem',16)}`:T('مجاني')}</div>
+   <div class="shChestP">${c.price?`${c.price} ${ico('gem',16)}`:(fcN()?T('مجاني')+' · '+fcN():'بعد '+fcIn())}</div>
   </div>`).join('')}</div>
 
  ${banner('الأدوات السحريّة')}
@@ -22100,8 +22102,8 @@ function buyDeal(i){
 
 // ═══════════ البند 10+11 — الصندوق ونسبه ═══════════
 function chestScr(key){
- const c=ECON.chests[key];
- const inv=S.chestInv[key]||0;
+ const c=ECON.chests[key];try{ensureEcon()}catch(e){}
+ const inv=(S.chestInv||{})[key]||0;
  go(`<div class="scr on">${tbar(c.n)}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="text-align:center;padding:6px 0">
@@ -22124,7 +22126,8 @@ function chestScr(key){
   <span>افتح (${inv} لديك)</span></button></div>`:
  c.price?`<div style="margin-top:11px"><button class="rbtn" onclick="buyChest('${key}')">
   <span>شراء — ${c.price} ${ico('gem',15)}</span></button></div>`:
- `<div style="margin-top:11px"><button class="rbtn" onclick="doOpen('${key}')"><span>افتح مجانًا</span></button></div>`}
+ fcN()?`<div style="margin-top:11px"><button class="rbtn" onclick="doOpen('${key}')"><span>افتح مجانًا (${fcN()} متاح)</span></button><div class="note" style="text-align:center;margin-top:6px">صندوقٌ مجانيّ كلّ 4 ساعات — يتراكم منه اثنان</div></div>`
+ :`<div style="margin-top:11px"><button class="rbtn" disabled style="opacity:.55"><span>المجانيّ التالي بعد ${fcIn()}</span></button><div class="note" style="text-align:center;margin-top:6px">صندوقٌ مجانيّ كلّ 4 ساعات — يتراكم منه اثنان</div></div>`}
  <div class="note">النسب معروضة بالكامل — لا نخفي احتمالات الصناديق المدفوعة</div></div>`);
 }
 /** احتمالات صناديق المعارك: أيّ صندوق يسقط بعد الفوز، ثم رابط لنسب بطاقات كلّ صندوق */
@@ -22178,9 +22181,16 @@ function buyChest(key){
   refresh(()=>chestScr(key));
  });
 }
+/* ٦٫٩٤ — الصندوق المجانيّ مؤقّتٌ كما كان في كلاش رويال: واحدٌ كلّ أربع ساعات ويتراكم اثنان — لا حنفيّةَ عملاتٍ بلا حدّ */
+const FC_MS=4*3600e3,FC_MAX=2;
+function fcN(){if(!S.fcAt)S.fcAt=Date.now()-FC_MS;return Math.max(0,Math.min(FC_MAX,Math.floor((Date.now()-S.fcAt)/FC_MS)))}
+function fcIn(){fcN();if(fcN()>=FC_MAX)return '';const ms=Math.max(0,FC_MS-((Date.now()-S.fcAt)%FC_MS)),mn=Math.max(1,Math.ceil(ms/60e3)),h=Math.floor(mn/60),m=mn%60;return h?`${h} س ${m} د`:`${m} د`}
+function fcTake(){const n=fcN();if(!n)return false;if(n>=FC_MAX)S.fcAt=Date.now()-(FC_MAX-1)*FC_MS;else S.fcAt+=FC_MS;return true}
 function doOpen(key){
- const c=ECON.chests[key];
+ const c=ECON.chests[key];if(!c)return;
+ try{ensureEcon()}catch(e){}if(!S.chestInv||typeof S.chestInv!=='object')S.chestInv={};
  if(S.chestInv[key])S.chestInv[key]--;
+ else if(!(c.price>0)){if(!fcTake()){toast('الصندوق المجانيّ التالي بعد '+fcIn());return}}
  const list=openChest(key);
  grantRewards(list); saveState();
  push('rewardScr',{list,title:c.n,chest:key});
@@ -25084,8 +25094,8 @@ function lvUpCheck(){
    جائزةً إلى السلّم (عملات، نسخ جيس، جواهر، وصناديق عند 3 و9 و12)، وتستلم ما بلغته في أيّ وقتٍ — فينتهي التحدّي.
    تُحتسب المباريات أونلاين، وضدّ الآليّ في الصعب والمستحيل فقط (لا ودّيّات ولا سهل). كلّ الحساب في ch12Match وحدها. */
 const CHL={entry:10,wins:12,losses:3,
- rw:[{w:1,coins:80},{w:2,coins:140},{w:3,chest:'rival'},{w:4,coins:220},{w:5,skc:6},{w:6,gems:15},
-     {w:7,coins:380},{w:8,skc:10},{w:9,chest:'elite'},{w:10,coins:650},{w:11,gems:30},{w:12,chest:'legend',gems:60}]};
+ rw:[{w:1,coins:40},{w:2,skc:3},{w:3,chest:'rival'},{w:4,coins:160},{w:5,skc:5},{w:6,gems:15},
+     {w:7,coins:320},{w:8,skc:8},{w:9,chest:'elite'},{w:10,coins:700},{w:11,gems:30,skc:12},{w:12,chest:'legend',gems:60,coins:1200}]};   // ٦٫٩٤: سلّمٌ يتصاعد — والعملات × مضاعف الساحة
 function CH12(){if(!S.ch12||typeof S.ch12!=='object')S.ch12={act:0,w:0,l:0,claimed:0,best:0,runs:0,free:1};return S.ch12}
 function ch12Cost(){return CH12().free?0:CHL.entry}
 function ch12Start(){
@@ -25110,8 +25120,8 @@ function ch12Match(won,mode){
  try{saveState()}catch(e){}
  return {w:c.w,l:c.l,done,won,win12:c.w>=CHL.wins};
 }
-function ch12Rw(r){return (r.coins?[{t:'coins',v:r.coins}]:[]).concat(r.gems?[{t:'gems',v:r.gems}]:[]).concat(r.skc?[{t:'skc',k:tlRandSk(),v:r.skc}]:[])}
-function ch12RwLbl(r){const p=[];if(r.chest)p.push((ECON.chests[r.chest]||{}).n||'صندوق');if(r.coins)p.push(r.coins.toLocaleString('en-US')+' عملة');if(r.gems)p.push(r.gems+' جوهرة');if(r.skc)p.push(r.skc+' نسخ جيس');return p.join(' + ')}
+function ch12Rw(r){return (r.coins?[{t:'coins',v:Math.round(r.coins*trChestMul())}]:[]).concat(r.gems?[{t:'gems',v:r.gems}]:[]).concat(r.skc?[{t:'skc',k:tlRandSk(),v:r.skc}]:[])}
+function ch12RwLbl(r){const p=[];if(r.chest)p.push((ECON.chests[r.chest]||{}).n||'صندوق');if(r.coins)p.push(Math.round(r.coins*trChestMul()).toLocaleString('en-US')+' عملة');if(r.gems)p.push(r.gems+' جوهرة');if(r.skc)p.push(r.skc+' نسخ جيس');return p.join(' + ')}
 /** يستلم كلّ ما بلغه — وينهي التحدّي (كزرّ Claim في كلاش رويال) */
 function ch12Claim(){
  const c=CH12();if(!c.act)return;
@@ -25325,6 +25335,7 @@ function arenaUpFx(ix){
  const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
  ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${tierEmblem(ix,150)}</div><div class="aruN">${esc(A.n)}</div>
   <div class="aruS">بلغت ${TR_ARENA[ix].toLocaleString('en-US')} كأس — ومن الآن لا تهبط تحتها.<br>${ix<ARENAS.length-1?'الساحة التالية عند '+TR_ARENA[ix+1].toLocaleString('en-US')+' كأس':'أنت في القمّة'}</div>
+  ${(()=>{const L=tlArenaUnlocks(ix);return L.length?`<div class="aruUn"><span>فُتح في هذه الساحة</span><div class="aruUnL">${L.map(x=>`<span class="aruUnI">${x.c==='sk'?skImg(x.k,36):ico(x.c==='cs'?'star':x.c==='tr'?'sparkle':'target',24)}<i>${esc(x.n)}</i></span>`).join('')}</div></div>`:''})()}
   <div class="aruB"><button class="rbtn" onclick="this.closest('.aruOv').remove();push('arenaScr')"><span>طريق الكؤوس</span></button><button class="btn g" onclick="this.closest('.aruOv').remove()">رائع</button></div>`;
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
  try{if(window.SFX)SFX.fx('arena')}catch(e){}
@@ -25353,7 +25364,7 @@ function arenaScr(){
  ${ARENAS.map((a,i)=>`<div class="li arRow${i===ix?' now':''}"><div class="lr">
    <span class="arRowEm">${tierEmblem(i,40)}</span>
    <div class="lb"><div class="lt" style="color:${i<=ix?a.g:'var(--tx2)'}">${esc(a.n)}</div>
-   <div class="ls">${TR_ARENA[i].toLocaleString('en-US')} كأس${i===ix?' · ساحتك الآن':i<ix?' · بلغتها':''}${({2:' · تفتح الجيس النادر',4:' · تفتح الجيس الملحميّ',6:' · تفتح الجيس الأسطوريّ'})[i]||''}</div></div>
+   <div class="ls">${TR_ARENA[i].toLocaleString('en-US')} كأس${i===ix?' · ساحتك الآن':i<ix?' · بلغتها':''}${tlArenaUnlockTxt(i)?' · تفتح '+tlArenaUnlockTxt(i):''}</div></div>
    ${i<=ix?ico('check',16,a.g):ico('lock',14)}</div></div>`).join('')}
  <div class="sl">كيف تُحسب الكؤوس؟</div>
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز ${TR_LEG.toLocaleString('en-US')} يعود إلى ${TR_LEG.toLocaleString('en-US')} ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.</div>
@@ -25805,8 +25816,16 @@ const TL_XP={c:20,r:40,e:80,l:160};                                 // خبرة 
 /* ٦٫٩٤ — كما تفتح ساحات كلاش رويال بطاقاتٍ جديدة: النادر من الساحة الذهبيّة، والملحميّ من كهف الماس، والأسطوريّ من
    قلعة الجراند (بأعلى ساحةٍ بلغتها). قبلها: لا شراءٌ ولا فتحٌ بالنسخ ولا نسخٌ في الصناديق — ويبقى الجيس ظاهرًا مقفلًا باسم ساحته */
 const TR_UNL={c:0,r:2,e:4,l:6};
-function tlArenaOk(rr){try{return trArenaIx(TR().best|0)>=(TR_UNL[rr]||0)}catch(e){return true}}
-function tlArenaNm(rr){return (ARENAS[TR_UNL[rr]||0]||ARENAS[0]).n}                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
+/* ٦٫٩٤ — كلّ ساحةٍ تفتح شيئًا (كما تفتح كلّ ساحةٍ في كلاش رويال بطاقاتها): ساحةُ الفتح لكلّ عنصرٍ لا لكلّ ندرة */
+const TL_AR={sk:{blue:0,emerald:0,onyx:1,violet:1,ruby:2,teal:3,amber:4,ice:5,moon:6,sun:7},cs:{classic:0,sandal:3,pearl:5,royal:8},tr:{none:0,gold:1,fire:4,ice:5,aurora:7},pk:{gold:0,emerald:3,fire:4,star:8}};
+function tlArenaOf(c,k){return ((TL_AR[c]||{})[k])|0}
+function tlArenaOkItem(c,k){try{return trArenaIx(TR().best|0)>=tlArenaOf(c,k)}catch(e){return true}}
+function tlArenaNmItem(c,k){return (ARENAS[tlArenaOf(c,k)]||ARENAS[0]).n}
+function tlArenaOk(rr){try{return TL_ITEMS.sk.some(x=>x[1]===rr&&tlArenaOkItem('sk',x[0]))}catch(e){return true}}   // هل لهذه الندرة جيسٌ مفتوح؟
+function tlArenaNm(rr){const L=TL_ITEMS.sk.filter(x=>x[1]===rr).map(x=>tlArenaOf('sk',x[0]));return (ARENAS[L.length?Math.min.apply(null,L):0]||ARENAS[0]).n}
+/** ما تفتحه الساحة i */
+function tlArenaUnlocks(i){const L=[];for(const c of ['sk','cs','tr','pk'])for(const it of (TL_ITEMS[c]||[]))if(tlArenaOf(c,it[0])===i&&!(c==='tr'&&it[0]==='none'))L.push({c,k:it[0],n:tlNm(c,it[0])});return L}
+function tlArenaUnlockTxt(i){return tlArenaUnlocks(i).map(x=>(x.c==='sk'?'جيس ':x.c==='cs'?'مجموعة ':x.c==='tr'?'أثر ':'جيب ')+'«'+x.n+'»').join('، ')}                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
 const TL_PWPTS=20;                                                  // نقاطٌ تفتح القدرة التالية
 const TL_PWR=[{k:'def',n:'الأساسيّة',st:[0,0,0],col:'232,178,58'},{k:'halo',n:'الهالة',st:[1,0,0],col:'255,205,90'},
  {k:'thorn',n:'الأشواك',st:[0,1,0],col:'80,200,255'},{k:'venom',n:'السمّ',st:[0,0,1],col:'120,230,90'},
@@ -25823,9 +25842,14 @@ function skCp(k){return (S.skCp||{})[k]||0}
 function tlPwUnl(){return Math.min(TL_PWR.length,1+Math.floor((S.tlCP||0)/TL_PWPTS))}
 function tlPwMine(){const i=TL_PWR.findIndex(x=>x.k===S.tlPw);return i>0&&i<tlPwUnl()?S.tlPw:'def'}
 function skStats(k,lv,pw){const b=TL_SKST[k]||[5,5,5],B=TL_LVB[(lv||1)-1]||TL_LVB[0],P=(TL_PWR.find(x=>x.k===pw)||TL_PWR[0]).st;return b.map((v,i)=>Math.min(10,v+B[i]+P[i]))}
-function caMyStats(){const k=caSkMine();return skStats(k,skLv(k),tlPwMine())}
+const CA_STD=[6,6,6];   // ٦٫٩٤: المستوى الموحّد — نحو جيسٍ نادر في المستوى الثالث
+function ch12Std(){try{return !!CH12().act}catch(e){return false}}
+/** هل هذه المباراة على المستوى الموحّد؟ تحدّي الاثني عشر عندي أو عند أحد اللاعبين (يُعلنه في حضوره) — والغرف لا */
+function caTourney(){try{if(RM.solo)return ch12Std()&&/^(hard|imp)$/.test(RM.diff||'');if(rmMode()==='room')return false;return ch12Std()||(RM.players||[]).some(p=>p&&p.std)}catch(e){return false}}
+function caMyStats(){if(caTourney())return CA_STD.slice();const k=caSkMine();return skStats(k,skLv(k),tlPwMine())}
 /** قدرات جيس لاعبٍ في المباراة: أنا من حسابي، والبشر من حضورهم (مقيّدةٌ ١…١٠)، والآليّ من جيسه في المستوى ١ */
 function caStatsOf(peer){
+ if(caTourney())return CA_STD.slice();
  if(!peer||peer===RM.me)return caMyStats();
  const p=(RM.players||[]).find(x=>x.peer===peer);
  if(p&&Array.isArray(p.ss)&&p.ss.length===3)return p.ss.map(v=>Math.max(1,Math.min(10,Math.round(+v)||5)));
@@ -25846,14 +25870,14 @@ function plLvOf(p){
 function tlAddCopies(k,v){
  const it=tlItem('sk',k);if(!it||!v)return;
  S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+v;
- if(!tlOwn('sk',k)&&tlArenaOk(it[1])&&S.skCp[k]>=TL_UNL[it[1]]){S.skCp[k]-=TL_UNL[it[1]];S.tlOwn=S.tlOwn||[];S.tlOwn.push('sk:'+k);tlAddCP(TL_CPP[it[1]]);
+ if(!tlOwn('sk',k)&&tlArenaOkItem('sk',k)&&S.skCp[k]>=TL_UNL[it[1]]){S.skCp[k]-=TL_UNL[it[1]];S.tlOwn=S.tlOwn||[];S.tlOwn.push('sk:'+k);tlAddCP(TL_CPP[it[1]]);
   setTimeout(()=>toast(ico('sparkle',13)+' '+T('فُتح جيس')+' «'+tlNm('sk',k)+'»'),1200)}
 }
 function tlAddCP(n){const u0=tlPwUnl();S.tlCP=(S.tlCP||0)+n;const u1=tlPwUnl();
  if(u1>u0)setTimeout(()=>toast(ico('energy',13)+' '+T('فُتحت قدرة جديدة')+': '+TL_PWR[u1-1].n),1600)}
 /** جيسٌ عشوائيّ بوزن ندرته — العاديّ أكثر، والأسطوريّ نادر */
-function tlRandSk(){const W={c:45,r:30,e:18,l:7},L=TL_ITEMS.sk.filter(x=>tlArenaOk(x[1]));let t=Math.random()*L.reduce((a,x)=>a+W[x[1]],0);for(const x of L){t-=W[x[1]];if(t<=0)return x[0]}return L[0][0]}
-function tlChestCopies(ck){const n=Math.round(({knowledge:4,rival:6,elite:10,legend:16}[ck]||4)*(1+.1*trArenaIx(TR().best|0))), a=tlRandSk(), b=tlRandSk();   // ٦٫٩٤: نسخٌ أكثر في الساحات العليا
+function tlRandSk(){const W={c:45,r:30,e:18,l:7},L=TL_ITEMS.sk.filter(x=>tlArenaOkItem('sk',x[0]));let t=Math.random()*L.reduce((a,x)=>a+W[x[1]],0);for(const x of L){t-=W[x[1]];if(t<=0)return x[0]}return L[0][0]}
+function tlChestCopies(ck){const n=Math.round(({knowledge:4,rival:6,elite:10,legend:16}[ck]||4)*trChestMul()), a=tlRandSk(), b=tlRandSk();   // ٦٫٩٤: نسخٌ أكثر في الساحات العليا
  return a===b?[{t:'skc',k:a,v:n}]:[{t:'skc',k:a,v:Math.ceil(n*.6)},{t:'skc',k:b,v:Math.floor(n*.4)}]}
 /* ٦٫٩٣ — صورة الجيس كانت تُرمَّز PNG في كلّ نداء (نصف ثانية للواحدة!) فتأخّر المتجر والأدوات وطريق الكؤوس.
    الآن: WebP حيث يُرمَّز (أندرويد وكروم؛ سفاري يعود إلى PNG)، والنتيجة تُحفظ بعد وصول صورة الجيس الحقيقيّة */
@@ -25868,18 +25892,20 @@ function skImg(k,sz){
   return html}catch(e){return ''}
 }
 /** مكافأة مباراة الكيرم: خبرة ونسخ جيس — مرّةً واحدة لكلّ مباراة */
+function bcDropOk(){try{const m=rmMode();if(m==='room')return false;if(m==='bot')return (TR().tr|0)<TR_BOT_CAP&&/^(mid|hard|imp)$/.test(RM.diff||'mid');return true}catch(e){return true}}
 function caMatchReward(won){
  if(!RM.mid||S.caRw===RM.mid)return;S.caRw=RM.mid;
+ RM.bcDrop=!!won&&bcDropOk();   // ٦٫٩٤: صندوق النصر من الأونلاين، أو من الآليّ المتوسّط فما فوق تحت سقف الكؤوس — لا الودّيّات ولا السهل
  const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0);
  try{skMastAdd(caSkMine(),{m:1,win:won?1:0})}catch(e){}   // ٦٫٩٤: إتقان الجيس المجهَّز
- S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(won&&typeof dropBattleChest==='function')dropBattleChest();
+ S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(RM.bcDrop&&typeof dropBattleChest==='function')dropBattleChest();
  try{saveState()}catch(e){}
  const lv1=lvl(S.xp);
  setTimeout(()=>toast(`+${xp} ${T('خبرة')} · ${n}× ${T('جيس')} «${tlNm('sk',k)}»${lv1>lv0?' · '+T('المستوى')+' '+lv1+'!':''}`),700);   // بلا رنّة: صوت الصندوق يليه
 }
 /* حلقة القدرة حول الضارب — لكلّ قدرةٍ شكلها */
 function caPwRing(cx,X,Y,r,k,tm){
- const P=TL_PWR.find(x=>x.k===k);if(!P||k==='def')return;
+ const P=TL_PWR.find(x=>x.k===k);if(!P||k==='def'||caTourney())return;
  const c=P.col, t=(tm||performance.now())/1000;
  cx.save();cx.lineCap='round';
  const ring=(rr,w,a)=>{cx.beginPath();cx.arc(X,Y,rr,0,7);cx.strokeStyle='rgba('+c+','+a+')';cx.lineWidth=w;cx.stroke()};
@@ -26081,6 +26107,10 @@ body .hmArB .go{flex-shrink:0;display:flex}
 body .finTr{margin:0 auto 12px;max-width:340px;padding:10px 14px 9px;border-radius:16px;cursor:pointer;background:linear-gradient(180deg,rgba(22,30,51,.92),rgba(11,16,29,.92));border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 12px 26px -12px rgba(0,0,0,.9)}
 body .finTrRow{display:flex;align-items:center;justify-content:center;gap:10px}
 body .finTrRow .rico{width:30px!important;height:30px!important;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+body .caCrn{display:inline-flex;gap:2px;align-items:center;margin-inline-end:4px}
+body .caCrn .crn{display:inline-flex;opacity:.22;filter:grayscale(1)}
+body .caCrn .crn.on{opacity:1;filter:drop-shadow(0 0 6px rgba(255,216,107,.7))}
+body .caNoBc{text-align:center;margin-top:4px;font-size:10.5px}
 body .finTrRow b{font-size:32px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;color:#DCE3F2;text-shadow:0 2px 6px rgba(0,0,0,.6);direction:ltr}
 body .finTrRow b.up{color:#FFF1C4;text-shadow:0 2px 0 #6A3606,0 0 18px rgba(255,210,100,.55)}body .finTrRow b.dn{color:#F08A8A}
 body .finTrRow span{font-size:11.5px;font-weight:800;color:#C9B37A;text-align:start;line-height:1.3}body .finTrRow span i{display:block;font-style:normal;font-size:14px;color:#F6E7C6;font-variant-numeric:tabular-nums;font-family:var(--fd)}
@@ -26178,6 +26208,10 @@ body .aruEm{position:relative;animation:aruDrop .8s cubic-bezier(.2,1.4,.4,1) bo
 @keyframes aruDrop{from{opacity:0;transform:scale(.3) translateY(-40px)}to{opacity:1;transform:none}}
 body .aruN{position:relative;font-size:32px;font-weight:700;color:var(--g);text-shadow:0 2px 0 rgba(0,0,0,.5),0 0 22px rgba(var(--f),.6);animation:aruPop .5s .45s cubic-bezier(.2,1.5,.4,1) both}
 body .aruS{position:relative;font-size:12.5px;color:#DDE3F2;line-height:1.7;animation:aruPop .4s .7s ease both}
+body .aruUn{position:relative;margin-top:4px;font-size:11.5px;color:#C9B37A;animation:aruPop .4s .75s ease both}
+body .aruUnL{display:flex;gap:12px;justify-content:center;margin-top:7px;flex-wrap:wrap}
+body .aruUnI{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:#F1F4FA;min-width:52px}
+body .aruUnI i{font-style:normal;font-weight:800}
 body .aruB{position:relative;margin-top:8px;display:flex;flex-direction:column;gap:9px;width:min(80vw,300px);animation:aruPop .4s .85s ease both}
 body .lvBig{position:static;width:120px;height:120px;min-width:0;border-radius:50%;font-size:52px;font-family:var(--fd);font-weight:700;display:grid;place-items:center;padding:0}
 @media (prefers-reduced-motion:reduce){.arHeroRays,.aruRays,.aruEm,.hmRoadDot,.arM.ready{animation:none!important}}
@@ -26226,10 +26260,10 @@ function tlBody(){
   if(c==='sk'){const L=skLv(k), n=skCp(k);
    foot=tlStats(skStats(k,o?L:1,'def'))+(o?(L>=5?`<span class="tlCp rd"><i style="width:100%"></i><span>${T('أقصى مستوى')}</span></span>`
      :`<span class="tlCp${n>=TL_UPC[L-1]?' rd':''}"><i style="width:${Math.min(100,Math.round(n/TL_UPC[L-1]*100))}%"></i><span>${n}/${TL_UPC[L-1]}</span></span>`)
-    :!tlArenaOk(rr)?`<span class="tlLock">${ico('lock',12)} ${T('يُفتح في')} ${tlArenaNm(rr)}</span>`
+    :!tlArenaOkItem(c,k)?`<span class="tlLock">${ico('lock',12)} ${T('يُفتح في')} ${tlArenaNmItem(c,k)}</span>`
     :`<span class="tlCp"><i style="width:${Math.min(100,Math.round(n/TL_UNL[rr]*100))}%"></i><span>${n}/${TL_UNL[rr]}</span></span>`);
   }
-  const arLk=c==='sk'&&!o&&!tlArenaOk(rr);
+  const arLk=!o&&!tlArenaOkItem(c,k);
   const bt=e?T('قيد الاستخدام'):o?(c==='sk'&&skLv(k)<5&&skCp(k)>=TL_UPC[skLv(k)-1]?T('ترقية!'):T('استخدم')):arLk?`${ico('lock',12)} ${T('مقفل')}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlTap('${c}','${k}')">
    ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o?`<span class="tlLvB">${skLv(k)}</span>`:''}${c==='sk'&&o&&skMastReady(k)?`<span class="tlMst">${ico('gift',12)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
@@ -26250,7 +26284,7 @@ function tlTap(c,k){
 }
 function tlBuy(c,k){
  const it=tlItem(c,k), pr=it[2], gm=!!it[3], have=gm?S.gems:S.coins;
- if(c==='sk'&&!tlArenaOk(it[1])){toast(ico('lock',13)+' '+T('يُفتح هذا الجيس في')+' '+tlArenaNm(it[1])+' — '+TR_ARENA[TR_UNL[it[1]]].toLocaleString('en-US')+' '+T('كأس'),'bad');return}   // ٦٫٩٤
+ if(!tlArenaOkItem(c,k)){toast(ico('lock',13)+' '+T('يُفتح في')+' '+tlArenaNmItem(c,k)+' — '+TR_ARENA[tlArenaOf(c,k)].toLocaleString('en-US')+' '+T('كأس'),'bad');return}   // ٦٫٩٤
  if(have<pr){toast(gm?T('جواهر غير كافية'):T('عملات غير كافية'));return}
  confirmSheet(T('شراء أداة'),`${tlNm(c,k)} — ${T(TL_RAR[it[1]].n)}<br>${T('ستدفع')} <b style="color:${gm?'var(--gem)':'var(--gold)'}">${pr} ${gm?T('جوهرة'):T('عملة')}</b>`,T('اشترِ وجهّز'),()=>{
   if((gm?S.gems:S.coins)<pr){toast(gm?T('جواهر غير كافية'):T('عملات غير كافية'));return}
@@ -26461,7 +26495,7 @@ function rmRoster(){
     sk:typeof p.presence.sk==='string'&&CA_STRIKERS[p.presence.sk]?p.presence.sk:null,
     ss:Array.isArray(p.presence.ss)&&p.presence.ss.length===3?p.presence.ss.map(v=>Math.max(1,Math.min(10,Math.round(+v)||5))):null,
     lv:Math.max(1,Math.min(999,Math.round(+p.presence.lv)||1)),
-    tr:(typeof p.presence.tr==='number'&&isFinite(p.presence.tr))?Math.max(0,Math.min(30000,Math.round(p.presence.tr))):null};   // ٦٫٩٣: كؤوسه
+    tr:(typeof p.presence.tr==='number'&&isFinite(p.presence.tr))?Math.max(0,Math.min(30000,Math.round(p.presence.tr))):null,std:!!p.presence.std};   // ٦٫٩٣: كؤوسه · ٦٫٩٤: مستوًى موحّد
    if(!o.me)metSeen(o.id,o.name,o.av);   // قابلته في غرفة: يدخل «لاعبون قابلتهم» فتضيفه صديقًا بلمسة
    return o})
   .sort((a,b)=>(b.host?1:0)-(a.host?1:0)||a.peer.localeCompare(b.peer));
@@ -26539,7 +26573,7 @@ function rmLeave(silent){
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  RM.U=null;RM.C=null;RM.uno=null;RM.ca=null;RM.hand=[];
  if(RM.solo){RM.solo=0;RMcap=undefined;_ca.sim=null}   // يُعاد حلّ الناقل الحقيقي في الغرفة التالية
- RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;RM.szG=0;
+ RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;RM.szG=0;RM.crowns=0;RM.bcDrop=false;
  RM.mm=0;clearInterval(_mmTm);
  // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
  try{cancelAnimationFrame(_ca.anim)}catch(e){}
@@ -26695,10 +26729,19 @@ function rmResultFor(gid,d){
  return null;
 }
 /** تُنادى عند وصول نهاية المباراة — لكل مباراة مرّة واحدة */
+/** ٦٫٩٤ — التيجان (كتيجان كلاش رويال): في الكلاسيكيّ تاجٌ لكلّ ثلاث قطعٍ من لونك أدخلتها، في حاصد النقاط تاجٌ لكلّ ٥٠ نقطة،
+    وفي المباراة المتعدّدة اللوحات بحسب النتيجة؛ خصمُ المنسحب ينال الثلاثة، والمنسحب لا شيء */
+function caCrownsOf(peer,d){try{const C=RM.ca;if(!C||!C.col)return 0;const col=C.col[peer];if(!col)return 0;
+ if(d&&d.left){return d.left===peer?0:3}
+ if(caIsPts(C))return Math.min(3,Math.floor(((C.pp||{})[col]||0)/50));
+ if(C.md==='icf'&&C.M){const m=C.M.pts[col]||0,o=C.M.pts[col==='w'?'b':'w']||0;return m>o?3:m===o?1:(m>0?1:0)}
+ const potted=Math.max(0,9-(C.pcs||[]).filter(p=>p&&p.t===col).length);return Math.min(3,Math.floor(potted/3))}catch(e){return 0}}
+function caCrownHTML(n){return `<span class="caCrn">${[0,1,2].map(i=>`<i class="crn${i<(n|0)?' on':''}">${ico('crown',17)}</i>`).join('')}</span>`}
 function rmSettle(d){
  try{
   const gid=gameIdOfRoom(RM.game);if(!gid)return null;
   const res=rmResultFor(gid,d);if(!res)return null;
+  RM.crowns=gid==='carrom'?caCrownsOf(RM.me,d):0;
   if(gid==='carrom')try{caMatchReward(!!res.won)}catch(e){}   // ٦٫٨٩: خبرة ونسخ جيس وصندوق للفائز
   const opp=(RM.players||[]).filter(x=>x&&x.peer!==RM.me).map(x=>({mmr:1000,tr:RM.solo?trBotOf(RM.diff,trMine()):(typeof x.tr==='number'?x.tr:null)}));   // ٦٫٩٣: كؤوس الخصم
   if(!RM.mid)RM.mid=rmNewMid();
@@ -26706,7 +26749,7 @@ function rmSettle(d){
    result:res,opponents:opp});
   if(out&&out.applied){RM.rank=out;saveState()}
   if(out&&out.applied&&gid==='carrom')try{RM.ch12=ch12Match(trResult(res),rmMode())}catch(e){}   // ٦٫٩٤: تحدّي الاثني عشر
-  if(out&&out.applied&&rmMode()!=='room')try{const w=trResult(res);RM.szG=szAdd(w===true?80:w===false?30:50)}catch(e){}   // ٦٫٩٤: تذكرة الموسم تتقدّم بكلّ مباراة (التيجان في كلاش رويال) — لا الودّيّات
+  if(out&&out.applied&&rmMode()!=='room')try{const w=trResult(res);RM.szG=szAdd(gid==='carrom'?20+30*(RM.crowns|0):(w===true?80:w===false?30:50))}catch(e){}   // ٦٫٩٤: بالتيجان   // ٦٫٩٤: تذكرة الموسم تتقدّم بكلّ مباراة (التيجان في كلاش رويال) — لا الودّيّات
   return out;
  }catch(e){return null}
 }
@@ -26717,7 +26760,8 @@ function rmOn(d,m){
  if(d.t==='start'){RM.game=d.g;RM.phase=d.g==='draw'?'paint':d.g==='uno'?'uno':d.g==='carrom'?'carrom':'deal';
   RM.mid=d.mid||rmNewMid();RM.rank=null;RM.ch12=null;RM.szG=0;try{for(const k in RM._drop||{})clearTimeout(RM._drop[k]);RM._drop={}}catch(e){}
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
-  RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
+  RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null;RM.crowns=0;
+  if(d.g==='carrom'&&caTourney())setTimeout(()=>{try{toast(ico('crown',13)+' مستوًى موحّد — في تحدّي الاثني عشر لا يمنح الجيس أفضليّة')}catch(e){}},1200)}
  else if(d.t==='seal'){if(d.to===me)rmSealOpen(d,m)}   // غلاف مُعمّى: لا يفكّه إلا صاحبه
  else if(d.t==='role'&&d.to===me){RM.role=d.r;RM.word=d.w||'';RM.cat=d.cat||RM.cat}
  else if(d.t==='sync'){if(RM.host&&d.by!==me)rmResync()}
@@ -26872,7 +26916,7 @@ function mmTick(){
  const code=(grp[0].peer.replace(/[^A-Za-z0-9]/g,'').slice(0,4).toUpperCase()+'XXXX').slice(0,4);
  RM.mm=0;clearInterval(_mmTm);
  RM.code=code;RM.host=!!(grp[0].isMe&&grp[0].sameTab);RM.phase='lobby';
- rmKeys().then(k=>{try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby',av:S.av||null,sk:caSkMine(),ss:caMyStats(),lv:lvl(S.xp||0),tr:trMine(),pk:k?k.pub:null})}catch(e){}});
+ rmKeys().then(k=>{try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby',av:S.av||null,sk:caSkMine(),ss:caMyStats(),std:ch12Std()?1:null,lv:lvl(S.xp||0),tr:trMine(),pk:k?k.pub:null})}catch(e){}});
  rmBind();
  toast('وُجد لاعبون!');if(window.FX)FX.correct(3);
  setTimeout(roomDraw,120);
@@ -26946,7 +26990,7 @@ async function rmCreate(){
  RM.code=rmCode();RM.host=1;RM.phase='lobby';RM.players=[];RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
  const kC=await rmKeys();   // المفتاح العامّ يُنشر مع الحضور — به وحده تُعمّى الأدوار إليّ
- try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),ss:caMyStats(),lv:lvl(S.xp||0),tr:trMine(),pk:kC?kC.pub:null})}catch(e){}
+ try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),ss:caMyStats(),std:ch12Std()?1:null,lv:lvl(S.xp||0),tr:trMine(),pk:kC?kC.pub:null})}catch(e){}
  rmBind();roomDraw();
 }
 async function rmJoin(){
@@ -26959,7 +27003,7 @@ async function rmJoin(){
  RM.code=code;RM.host=0;RM.phase='lobby';RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
  const kJ=await rmKeys();
- try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),ss:caMyStats(),lv:lvl(S.xp||0),tr:trMine(),pk:kJ?kJ.pub:null})}catch(e){}
+ try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),ss:caMyStats(),std:ch12Std()?1:null,lv:lvl(S.xp||0),tr:trMine(),pk:kJ?kJ.pub:null})}catch(e){}
  rmBind();roomDraw();
  setTimeout(()=>{if(RM.code&&rmRoster().length<2)toast('بانتظار بقية اللاعبين… تأكد من الكود')},2500);
 }
@@ -27098,7 +27142,7 @@ function rmStart(){
  const lim=RM_MIN[RM.game]||[2,12];
  if(R.length<lim[0]){toast(`تحتاج ${lim[0]} لاعبين على الأقل`);return}
  if(R.length>lim[1]){toast(`الحد الأقصى ${lim[1]} لاعبين لهذه اللعبة`);return}
- const ps=R.map(p=>({peer:p.peer,name:p.name,id:p.id||null,av:p.av||null,sk:p.sk||null,ss:p.ss||null,lv:p.lv||1,tr:typeof p.tr==='number'?p.tr:null}));   // ٦٫٨٩: وقدرات جيسه ومستواه   // ٦٫٥٨: ومظهر الضارب   // 5.82: الصورة والمعرّف يرافقان اللاعب داخل اللعبة
+ const ps=R.map(p=>({peer:p.peer,name:p.name,id:p.id||null,av:p.av||null,sk:p.sk||null,ss:p.ss||null,lv:p.lv||1,tr:typeof p.tr==='number'?p.tr:null,std:!!p.std}));   // ٦٫٨٩: وقدرات جيسه ومستواه   // ٦٫٥٨: ومظهر الضارب   // 5.82: الصورة والمعرّف يرافقان اللاعب داخل اللعبة
  // 5.90: لعبة مجهولة لا تسقط في فرعٍ صامت — تُرفض بوضوح
  if(!/^(uno|carrom)$/.test(RM.game)){
   toast('هذه اللعبة لا تُلعب في غرفة');
@@ -30194,7 +30238,7 @@ function caMatchEnd(C){
  return `<div class="caEnd${fresh?' in':''}${meWon?' won':''}" ${bg}>${meWon?'<div class="caRays"></div>':''}<div class="caFinC${meWon?' won':''}">
   ${meWon?`<div class="caFinCup">${ico('trophy',104)}</div>`:`<div class="caFinCup lose">${ico('swords',84)}</div>`}
   <div class="caFinT">${t}</div>${fs}${trFinHTML(RM.rank&&RM.rank.tro)}${ch12FinHTML(RM.ch12)}
-  ${meWon?`<div class="caFinRw"><span>${ico('coin',18)} +40 ${T('خبرة')}</span><span>${ico('chest',18)} ${T('صندوق نصر')}</span>${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>`:`<div class="caFinRw"><span>${ico('coin',18)} +15 ${T('خبرة')}</span>${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>`}
+  ${meWon?`<div class="caFinRw">${caCrownHTML(RM.crowns)}<span>${ico('coin',18)} +40 ${T('خبرة')}</span>${RM.bcDrop?`<span>${ico('chest',18)} ${T('صندوق نصر')}</span>`:''}${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>${!RM.bcDrop&&RM.solo?`<div class="note caNoBc">${(TR().tr|0)>=TR_BOT_CAP?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' كأس: صناديق النصر من الأونلاين':'صندوق النصر من الآليّ المتوسّط فما فوق'}</div>`:''}`:`<div class="caFinRw"><span>${ico('coin',18)} +15 ${T('خبرة')}</span>${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>`}
   ${RM.host?`<button class="rbtn caEndGo" onclick="rmStart()"><span>${T('العب مرّة أخرى')}</span></button>`:'<div class="note">بانتظار المضيف…</div>'}
   <button class="btn g caFinX" onclick="rmLeave()">${T('خروج')}</button></div></div>`;
 }
