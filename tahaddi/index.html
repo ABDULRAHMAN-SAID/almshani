@@ -17843,10 +17843,13 @@ function addColXP(n){
 }
 
 /** البند 9 — فتح صندوق */
+/* ٦٫٩٤ — كما في كلاش رويال: الصندوق نفسه يحمل ذهبًا ونسخًا أكثر كلّما ارتفعت ساحتك (أعلى ساحةٍ بلغتها) —
+   +12% لكلّ ساحة، فصندوق ساحة القمّة يحمل ضعفَي صندوق ساحة الرمال */
+function trChestMul(){try{return 1+.12*trArenaIx(TR().best|0)}catch(e){return 1}}
 function openChest(key){
  const ch=ECON.chests[key];
  const out=[];
- out.push({t:'coins',v:rndInt(ch.coins[0],ch.coins[1])});
+ out.push({t:'coins',v:Math.round(rndInt(ch.coins[0],ch.coins[1])*trChestMul())});
  if(ch.gems[1]>0){const g=rndInt(ch.gems[0],ch.gems[1]);if(g)out.push({t:'gems',v:g})}
  for(let i=0;i<ch.slots;i++){
   const r=rollRarity(ch.odds);
@@ -22094,7 +22097,7 @@ function chestScr(key){
  <div class="mtl" style="font-size:19px;margin-top:8px">${c.n}</div>
  <div style="font-size:12px;color:var(--tx2);margin-top:4px">${c.slots} مكافآت</div>
  <div style="display:flex;gap:7px;margin-top:13px">
- ${[[`${ico('coin',15)}`,`${c.coins[0]}–${c.coins[1]}`],
+ ${[[`${ico('coin',15)}`,`${Math.round(c.coins[0]*trChestMul())}–${Math.round(c.coins[1]*trChestMul())}`],
     ...(c.gems[1]?[[`${ico('gem',15)}`,`${c.gems[0]}–${c.gems[1]}`]]:[]),
     ...(c.wild?[[`${ico('wild',16)}`,c.wild+'%']]:[]),
     ...(c.shard?[[`${ico('energy',15)}`,c.shard+'%']]:[])].map(([i,v])=>
@@ -25543,7 +25546,8 @@ const TL_SKST={blue:[5,5,5],emerald:[6,4,5],onyx:[4,6,5],violet:[5,4,6],ruby:[7,
 const TL_LVB=[[0,0,0],[1,0,0],[1,1,0],[1,1,1],[2,2,1]];            // ما يضيفه كلّ مستوى (١…٥)
 const TL_UPC=[5,10,20,40], TL_UPG=[500,1500,4000,10000];          // نسخ وعملات الترقية من المستوى ١ إلى ٥ (× ندرة الجيس في العملات)
 const TL_UNL={r:10,e:15,l:20};                                     // نسخٌ تفتح الجيس المقفل بلا شراء
-const TL_CPP={c:4,r:6,e:9,l:14};                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
+const TL_CPP={c:4,r:6,e:9,l:14};
+const TL_XP={c:20,r:40,e:80,l:160};                                 // خبرة اللاعب لكلّ ترقية (× المستوى الحاليّ) — ٦٫٩٤                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
 const TL_PWPTS=20;                                                  // نقاطٌ تفتح القدرة التالية
 const TL_PWR=[{k:'def',n:'الأساسيّة',st:[0,0,0],col:'232,178,58'},{k:'halo',n:'الهالة',st:[1,0,0],col:'255,205,90'},
  {k:'thorn',n:'الأشواك',st:[0,1,0],col:'80,200,255'},{k:'venom',n:'السمّ',st:[0,0,1],col:'120,230,90'},
@@ -25590,7 +25594,7 @@ function tlAddCP(n){const u0=tlPwUnl();S.tlCP=(S.tlCP||0)+n;const u1=tlPwUnl();
  if(u1>u0)setTimeout(()=>toast(ico('energy',13)+' '+T('فُتحت قدرة جديدة')+': '+TL_PWR[u1-1].n),1600)}
 /** جيسٌ عشوائيّ بوزن ندرته — العاديّ أكثر، والأسطوريّ نادر */
 function tlRandSk(){const W={c:45,r:30,e:18,l:7},L=TL_ITEMS.sk;let t=Math.random()*L.reduce((a,x)=>a+W[x[1]],0);for(const x of L){t-=W[x[1]];if(t<=0)return x[0]}return L[0][0]}
-function tlChestCopies(ck){const n={knowledge:4,rival:6,elite:10,legend:16}[ck]||4, a=tlRandSk(), b=tlRandSk();
+function tlChestCopies(ck){const n=Math.round(({knowledge:4,rival:6,elite:10,legend:16}[ck]||4)*(1+.1*trArenaIx(TR().best|0))), a=tlRandSk(), b=tlRandSk();   // ٦٫٩٤: نسخٌ أكثر في الساحات العليا
  return a===b?[{t:'skc',k:a,v:n}]:[{t:'skc',k:a,v:Math.ceil(n*.6)},{t:'skc',k:b,v:Math.floor(n*.4)}]}
 /* ٦٫٩٣ — صورة الجيس كانت تُرمَّز PNG في كلّ نداء (نصف ثانية للواحدة!) فتأخّر المتجر والأدوات وطريق الكؤوس.
    الآن: WebP حيث يُرمَّز (أندرويد وكروم؛ سفاري يعود إلى PNG)، والنتيجة تُحفظ بعد وصول صورة الجيس الحقيقيّة */
@@ -25979,9 +25983,10 @@ function tlUpgrade(k){
  const need=TL_UPC[L-1], cost=Math.round(TL_UPG[L-1]*TL_RAR[it[1]].m);
  if(skCp(k)<need){toast(T('نسخٌ غير كافية'));return}
  if(S.coins<cost){toast(T('عملات غير كافية'));return}
- S.coins-=cost;S.skCp[k]-=need;S.skLv=S.skLv||{};S.skLv[k]=L+1;tlAddCP(TL_CPP[it[1]]);
+ const xp=TL_XP[it[1]]*L;   // ٦٫٩٤: كلّ ترقيةٍ ترفع خبرة اللاعب (مستوى الملك في كلاش رويال) — أكثر للندرة الأعلى والمستوى الأعلى
+ S.coins-=cost;S.skCp[k]-=need;S.skLv=S.skLv||{};S.skLv[k]=L+1;tlAddCP(TL_CPP[it[1]]);S.xp=(S.xp||0)+xp;
  try{saveState()}catch(e){}
- try{buyFx(ico('up',15),tlNm('sk',k)+' — '+T('المستوى')+' '+(L+1))}catch(e){toast(T('المستوى')+' '+(L+1))}
+ try{buyFx(ico('up',15),tlNm('sk',k)+' — '+T('المستوى')+' '+(L+1),'+'+xp+' '+T('خبرة'))}catch(e){toast(T('المستوى')+' '+(L+1))}
  if(window.FX)try{FX.win()}catch(e){}
  refresh(toolsScr);
 }
