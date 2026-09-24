@@ -24940,8 +24940,26 @@ function playScr(){
  </div></div>`);
  bcTick();plDots();
  verAnnounce();          // الرئيسية رُسمت، فالنافذة تجد شاشةً تظهر فوقها
+ setTimeout(()=>{try{lvUpCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد
 }
 
+/* ═══ ٦٫٩٤ — مكافأة المستوى (مستوى الملك في كلاش رويال يعطي ذهبًا وجواهر عند كلّ ارتفاع) ═══
+   يُفحص عند رسم الرئيسيّة: كلّ مستوًى جديد يمنح 100×المستوى عملة و(5+المستوى) جوهرة، بشاشةٍ كشاشة الساحة الجديدة — مرّةً لكلّ مستوى */
+function lvUpCheck(){
+ const L=lvl(S.xp||0);if(S.lvSeen==null){S.lvSeen=L;return false}
+ if(L<=S.lvSeen)return false;
+ if(document.querySelector('.vchOv,.aruOv,.qvov'))return false;
+ let coins=0,gems=0;for(let k=S.lvSeen+1;k<=L;k++){coins+=100*k;gems+=5+k}
+ S.lvSeen=L;S.coins+=coins;S.gems+=gems;try{saveState()}catch(e){}
+ const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f','255,205,90');ov.style.setProperty('--g','#FFE9A8');
+ ov.innerHTML=`<div class="aruRays"></div><div class="aruT">مستوى جديد</div><div class="aruEm"><span class="lvB lvBig">${L}</span></div><div class="aruN">المستوى ${L}</div>
+  <div class="aruS">مكافأة المستوى: <b>${coins.toLocaleString('en-US')}</b> عملة و<b>${gems}</b> جوهرة أُضيفت إلى حسابك.</div>
+  <div class="aruB"><button class="rbtn" onclick="this.closest('.aruOv').remove();try{refresh(playScr)}catch(e){}"><span>رائع</span></button></div>`;
+ document.body.appendChild(ov);try{enPass(ov)}catch(e){}
+ try{if(window.SFX)SFX.fx('arena')}catch(e){}
+ try{if(window.FX&&FX.win)setTimeout(()=>FX.win(),300)}catch(e){}
+ return true;
+}
 /* ═══ ٦٫٩٤ — تحدّي الاثني عشر (على مثال Classic Challenge في كلاش رويال) ═══
    تدخل بعشر جواهر (والأولى مجّانًا)، وتلعب مباريات كيرم حتّى تجمع اثني عشر فوزًا أو تخسر ثلاثًا. كلّ فوزٍ يضيف
    جائزةً إلى السلّم (عملات، نسخ جيس، جواهر، وصناديق عند 3 و9 و12)، وتستلم ما بلغته في أيّ وقتٍ — فينتهي التحدّي.
@@ -25983,6 +26001,7 @@ body .aruEm{position:relative;animation:aruDrop .8s cubic-bezier(.2,1.4,.4,1) bo
 body .aruN{position:relative;font-size:32px;font-weight:700;color:var(--g);text-shadow:0 2px 0 rgba(0,0,0,.5),0 0 22px rgba(var(--f),.6);animation:aruPop .5s .45s cubic-bezier(.2,1.5,.4,1) both}
 body .aruS{position:relative;font-size:12.5px;color:#DDE3F2;line-height:1.7;animation:aruPop .4s .7s ease both}
 body .aruB{position:relative;margin-top:8px;display:flex;flex-direction:column;gap:9px;width:min(80vw,300px);animation:aruPop .4s .85s ease both}
+body .lvBig{position:static;width:120px;height:120px;min-width:0;border-radius:50%;font-size:52px;font-family:var(--fd);font-weight:700;display:grid;place-items:center;padding:0}
 @media (prefers-reduced-motion:reduce){.arHeroRays,.aruRays,.aruEm,.hmRoadDot,.arM.ready{animation:none!important}}
 `;
 (function(){try{const st=document.createElement('style');st.id='luxCss';st.textContent=LUX_CSS;document.head.appendChild(st)}catch(e){}})();
