@@ -6,20 +6,32 @@
  "q": 88,
  "items": {
   "gift": {
-   "historyId": "cTUJDXrQKH34o7wieIUL"
+   "historyId": "cTUJDXrQKH34o7wieIUL",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222922662_bc5688f0_1790222923748_1eeb5705.png"
   },
   "missions": {
-   "historyId": "cfPNX9qIwrUNI927iKOP"
+   "historyId": "cfPNX9qIwrUNI927iKOP",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222926414_7540ad6d_1790222926569_081f4689.png"
   },
   "challenge": {
-   "historyId": "LrNVa9tIaoNY7ES5WN0h"
+   "historyId": "LrNVa9tIaoNY7ES5WN0h",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222930865_e79cc9cc_1790222931068_c700f1f7.png"
   },
   "trophy": {
-   "historyId": "R3R9K0OEZLDjQ3pFPC3i"
+   "historyId": "R3R9K0OEZLDjQ3pFPC3i",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222933531_dbe3ff9e_1790222933669_3f9b67ea.png"
   },
   "friends": {
-   "historyId": "",
-   "todo": "أعِد الإرسال: رُفض لتجاوز حدّ التوليد المتزامن"
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223579988_85d77fc7_1790223580121_b5eda7e1.png"
+  },
+  "bell": {
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223582408_bccaa672_1790223582565_a4ce2052.png"
+  },
+  "coin": {
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223586185_7b7f9a10_1790223586674_f222a657.png"
+  },
+  "gem": {
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223592072_e94d660f_1790223592704_3f22999e.png"
   }
  }
 }
