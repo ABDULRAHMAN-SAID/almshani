@@ -402,7 +402,8 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
  border:3px solid #E2B245;
  box-shadow:0 0 0 3px #0B1020,0 0 0 4.5px rgba(232,178,58,.45),0 8px 22px rgba(0,0,0,.6),0 0 24px rgba(232,178,58,.4),
   inset 0 2px 6px rgba(255,255,255,.18),inset 0 -5px 10px rgba(0,0,0,.45)}
-.nvi.mid .cir::before{content:'';position:absolute;inset:-7px;border-radius:50%;pointer-events:none;animation:glow 2.6s ease-in-out infinite}
+.nvi.mid .cir::before{content:'';position:absolute;inset:-7px;border-radius:50%;pointer-events:none;border:2px solid rgba(232,178,58,.42);will-change:transform,opacity;animation:nvPulse 2.6s ease-in-out infinite}   /* ٦٫٩٦ */
+@keyframes nvPulse{0%{transform:scale(.86);opacity:.8}60%,100%{transform:scale(1.18);opacity:0}}
 .nvi.mid .cir::after{content:'';position:absolute;inset:3px;border-radius:50%;pointer-events:none;
  background:radial-gradient(circle at 30% 20%,rgba(255,255,255,.3),transparent 45%)}
 .nvi.mid.on .cir{border-color:#FFE9A8;
@@ -442,8 +443,8 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .rkEmb.big{animation:rkFloat 4.2s ease-in-out infinite}
 .rkEmb.big::after{content:'';position:absolute;inset:0;pointer-events:none;
  background:linear-gradient(115deg,transparent 38%,rgba(255,255,255,.55) 50%,transparent 62%);background-size:250% 100%;
- -webkit-mask:var(--ranks) no-repeat;mask:var(--ranks) no-repeat;-webkit-mask-size:1000% 100%;mask-size:1000% 100%;-webkit-mask-position:var(--rx) 0;mask-position:var(--rx) 0;
- mix-blend-mode:screen;animation:rkShine 3.6s ease-in-out infinite}
+ -webkit-mask:radial-gradient(circle at 50% 50%,#000 36%,rgba(0,0,0,.4) 45%,transparent 52%);mask:radial-gradient(circle at 50% 50%,#000 36%,rgba(0,0,0,.4) 45%,transparent 52%);
+ mix-blend-mode:screen;animation:rkShine 3.6s ease-in-out 4}   /* ٦٫٩٦: كان القناع لوحة الرتب (٢٦٢ ك.ب) فتُعاد قراءتها كلّ إطار من الحركة */
 @keyframes rkFloat{0%,100%{transform:translateY(0) rotate(-1.2deg)}50%{transform:translateY(-3px) rotate(1.2deg)}}
 @keyframes rkShine{0%,55%{background-position:120% 0}100%{background-position:-40% 0}}
 @media (prefers-reduced-motion:reduce){.rkEmb.big{animation:none}.rkEmb.big::after{display:none}}
@@ -1528,10 +1529,10 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .ncd{transition:transform .18s;box-shadow:0 8px 22px rgba(0,0,0,.3)}
 .ncd:active{filter:brightness(1.15)}
 .btn{position:relative;overflow:hidden}
-.btn:not(:disabled)::after{content:'';position:absolute;top:0;bottom:0;width:46px;left:-70px;
- background:linear-gradient(100deg,transparent,rgba(255,255,255,.32),transparent);
- animation:sheen 3.4s ease-in-out infinite}
-@keyframes sheen{0%,55%{left:-70px}85%,100%{left:120%}}
+.btn:not(:disabled)::after{content:'';position:absolute;top:0;bottom:0;left:0;width:100%;will-change:transform;transform:translateX(-100%);
+ background:linear-gradient(100deg,transparent 34%,rgba(255,255,255,.32) 50%,transparent 66%);
+ animation:sheen 3.4s ease-in-out 3}   /* ٦٫٩٦: تحويلٌ يديره المركّب بعرض الزرّ نفسه (كان left يعيد التخطيط والرسم كلّ إطار) */
+@keyframes sheen{0%,55%{transform:translateX(-100%)}85%,100%{transform:translateX(100%)}}
 .rsc{animation:rspop .6s cubic-bezier(.2,1.5,.4,1)}
 @keyframes rspop{0%{transform:scale(.2) rotate(-14deg);opacity:0}70%{transform:scale(1.12) rotate(3deg)}100%{transform:scale(1);opacity:1}}
 
@@ -1668,28 +1669,107 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .qvt{font-size:17px;font-weight:900;margin-bottom:6px}
 .qvd{font-size:12.5px;color:var(--tx2);margin-bottom:16px}
 
-/* ═══ تذكرة الموسم ═══ */
-.szhead{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:8px;margin:14px 0 8px;position:sticky;top:0;
- z-index:5;background:linear-gradient(180deg,var(--bg) 78%,transparent);padding:6px 0}
-.szht{text-align:center;font-size:12px;font-weight:900;color:var(--tx2);background:var(--card);
- border:1px solid var(--bd);border-radius:10px;padding:6px 0}
-.szht.p{color:var(--gold);border-color:rgba(232,178,58,.45);background:rgba(232,178,58,.07)}
-.szrow{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr);gap:8px;margin-bottom:8px;align-items:stretch}
-.szrow.ms .szchip{border-width:1.5px;box-shadow:0 0 14px rgba(232,178,58,.12),0 4px 0 #0A0F1D}
-.szlv{display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:900;color:var(--mut);
- background:var(--surf);border:1px solid var(--bd);border-radius:10px}
-.szlv.on{color:#15100A;background:linear-gradient(145deg,#F0C25A,#C08C18);border-color:transparent}
-.szchip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--bd);
- border-radius:12px;padding:8px 9px;min-height:46px;box-shadow:0 3px 0 #0A0F1D}
-.szchip .szi{flex-shrink:0}
-.szchip .szn2{flex:1;font-size:10.5px;font-weight:700;line-height:1.35}
-.szchip .szst{font-size:12px;color:var(--mut)}
-.szchip.ready{border-color:var(--gold);cursor:pointer;animation:glow 2.2s ease-in-out infinite}
-.szchip.ready .szst{color:var(--gold);font-weight:900}
-.szchip.ready:active{filter:brightness(1.15)}
-.szchip.done{opacity:.42}
-.szchip.lock{opacity:.62}
-.szchip.p.lock{background:rgba(232,178,58,.04)}
+/* ═══ تذكرة الموسم — سلّم المسارين (٦٫٩٧): رأسٌ، لوحةُ تقدّم، رايةُ الترقية، مسارٌ مجّانيّ كحليّ ومسارٌ مميّز ذهبيّ ═══ */
+body .szScr{padding-bottom:84px}
+body .szHd{position:relative;border-radius:18px 18px 0 0;padding:13px 14px 12px;background:radial-gradient(120% 100% at 88% 0%,rgba(232,178,58,.22),transparent 56%),var(--lxCard);border:1px solid var(--lxHair);border-bottom:0;box-shadow:inset 0 1px 0 rgba(255,244,214,.08)}
+body .szHd::before{content:'';position:absolute;left:12%;right:12%;top:0;height:2px;background:linear-gradient(90deg,transparent,#FFE9A8,transparent)}
+body .szHdR{display:flex;align-items:center;gap:12px}
+body .szTk{width:58px;height:58px;border-radius:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#E8B23A;background:radial-gradient(circle at 50% 35%,#1E2A4A,#0A0F1E 75%);border:1px solid var(--lxHair);box-shadow:inset 0 0 14px rgba(0,0,0,.7),0 0 18px rgba(232,178,58,.16)}
+body .szTk .ico{filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+body .szHdT{flex:1;min-width:0}
+body .szHdK{font-size:10.5px;font-weight:800;color:#D9B76E;letter-spacing:.03em}
+body .szHdN{font-family:var(--fd);font-size:19px;font-weight:700;line-height:1.2;margin-top:1px}
+body .szHdB{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+body .szHdS{display:inline-flex;align-items:center;gap:5px;font:inherit;font-size:11px;font-weight:800;line-height:1.4;color:#E8DCC0;background:rgba(6,10,20,.55);border:1px solid var(--lxHair2);border-radius:999px;padding:3px 9px}
+body .szHdS.act{cursor:pointer;color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C 55%,#B98A2E);border-color:#FFE9A8;box-shadow:0 2px 0 #6E4E12}
+body .szHdS.act b{background:rgba(26,18,6,.18);border-radius:999px;padding:0 6px}
+body .szHdS.act:active{filter:brightness(1.1)}
+/* السلّم: عمودان متّصلان — المميّز يمينًا على حقلٍ ذهبيّ، والمجّانيّ يسارًا على حقلٍ كحليّ */
+body .szLad{position:relative;border:1px solid var(--lxHair);border-top:0;border-radius:0 0 18px 18px;box-shadow:0 14px 30px -14px rgba(0,0,0,.9)}
+body .szT{position:relative;display:grid;grid-template-columns:1fr 1fr;direction:rtl;gap:0}   /* ٦٫٩٦: قاعدة .cur العامّة كانت تفتح فاصلًا ٥ بكسل */
+body .szLad.all .szCell.ready .szC::after{animation:none;will-change:auto;display:none}   /* ٦٫٩٦: لا ٢٠٠ نبضة حين يُعرض السلّم كلّه */
+body .szCell.ch{justify-content:flex-start}   /* ٦٫٩٦: لسان «استلم» فوق بطاقات الاختيار مباشرةً */
+body .szMore span{text-align:center;line-height:1.5}
+body:has(.szOkW) .tst,body:has(.trvOkW) .tst{bottom:calc(150px + env(safe-area-inset-bottom,0px))}   /* ٦٫٩٦: الإشعار فوق زرّ «موافق» */
+body .trvNm,body .arBarL{overflow-wrap:anywhere}
+.rkEmb.big{will-change:transform}   /* ٦٫٩٦: الشعار العائم في طبقته — لا إعادة رسم للظلّ والصورة كلّ إطار */
+body .szCell{position:relative;min-height:118px;padding:26px 8px 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 -1px 0 rgba(0,0,0,.38)}
+body .szCell.p{background:repeating-linear-gradient(45deg,rgba(255,236,170,.05) 0 1px,transparent 1px 12px),repeating-linear-gradient(-45deg,rgba(255,236,170,.05) 0 1px,transparent 1px 12px),linear-gradient(180deg,#5A3F10,#3F2C0B);border-inline-end:1px solid rgba(255,225,150,.32)}
+body .szCell.f{background:linear-gradient(180deg,#152551,#101B3B)}
+body .szCell.ready,body .szCell.lockp{cursor:pointer}
+body .szCell.ready:active .szC{filter:brightness(1.15)}
+body .szC{position:relative;width:100%;max-width:132px;border-radius:14px;padding:8px 6px;text-align:center;background:var(--lxCard);border:1px solid var(--lxHair2);box-shadow:inset 0 1px 0 rgba(255,244,214,.06),0 8px 16px -8px rgba(0,0,0,.85)}
+body .szA{height:40px;display:flex;align-items:center;justify-content:center}
+body .szA .ico,body .szA img,body .szA .mgW{filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+body .szV{font-family:var(--fd);font-size:15px;font-weight:700;color:#F6E7C6;margin-top:4px;line-height:1.1;font-variant-numeric:tabular-nums}
+body .szV:empty{display:block;min-height:1.1em;visibility:hidden}   /* ٦٫٩٦: بطاقة التعبير بمحاذاة أخواتها */
+body .szN{font-size:9.5px;font-weight:800;color:#AEB8D0;line-height:1.3;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+body .szCell.ready .szC{border-color:#FFE9A8;box-shadow:0 0 0 2px rgba(232,178,58,.22),0 0 18px rgba(232,178,58,.35),inset 0 1px 0 rgba(255,244,214,.06)}
+body .szCell.ready .szC::after{content:'';position:absolute;inset:-6px;border-radius:19px;border:2px solid rgba(255,233,168,.7);pointer-events:none;will-change:transform,opacity;animation:nvPulse 2.2s ease-in-out infinite}
+body .szCell.done .szC{opacity:.42}body .szCell.done .szA{filter:grayscale(.7)}
+body .szCell.far .szC{opacity:.9}
+body .szCell.lockp .szA{filter:saturate(.75) brightness(.8)}
+/* اللسان فوق البطاقة: أخضر للاستلام، ذهبيّ بقفلٍ للمميّز المقفل، وعلامةٌ للمستلَم */
+body .szBg{position:absolute;top:5px;left:50%;transform:translateX(-50%);z-index:4;display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:48px;height:21px;padding:0 10px;border-radius:8px;font-family:var(--fd);font-size:12.5px;font-weight:700;color:#fff;white-space:nowrap;line-height:1}
+body .szBg::after{content:'';position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);border:6px solid transparent;border-bottom:0;border-top-width:5px}
+body .szBg.go{background:linear-gradient(180deg,#6BE69A,#2ECC71 48%,#1D8A4E);box-shadow:0 2px 0 #12603A;text-shadow:0 1px 1px rgba(0,60,20,.5)}body .szBg.go::after{border-top-color:#1D8A4E}
+body .szBg.lk{background:linear-gradient(180deg,#FFE9A8,#D9A93C 55%,#B98A2E);box-shadow:0 2px 0 #6E4E12;color:#1A1206;min-width:38px}body .szBg.lk::after{border-top-color:#B98A2E}
+body .szBg.ok{background:linear-gradient(180deg,#2ECC71,#1D8A4E);min-width:28px;padding:0 6px;height:18px;top:7px}body .szBg.ok::after{display:none}
+/* المعيّن: رقم المستوى في وسط الدرز */
+body .szD{position:absolute;left:50%;top:50%;width:34px;height:34px;transform:translate(-50%,-50%) rotate(45deg);border-radius:8px;z-index:3;background:linear-gradient(180deg,#161E33,#0B101D);border:1px solid var(--lxHair);box-shadow:0 3px 0 rgba(0,0,0,.5),0 6px 14px rgba(0,0,0,.45)}
+body .szD b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(-45deg);font-family:var(--fd);font-size:13px;font-weight:700;color:#D9B76E;font-variant-numeric:tabular-nums}
+body .szD.on{background:linear-gradient(180deg,#FFF3D0 0%,#F0CF7A 22%,#D9AE4E 50%,#B98A2E 78%,#D6B05C 100%);border-color:#FFE9A8;box-shadow:0 3px 0 #6E4E12,0 6px 14px rgba(0,0,0,.45)}
+body .szD.on b{color:#1A1206;text-shadow:0 1px 0 rgba(255,246,220,.6)}
+body .szD.st{position:relative;left:auto;top:auto;transform:rotate(45deg);flex-shrink:0;margin:3px 7px 3px 5px}
+body .szT.cur .szD{width:40px;height:40px;box-shadow:0 0 0 3px rgba(255,233,168,.35),0 0 22px rgba(232,178,58,.75),0 3px 0 #6E4E12}
+body .szT.cur .szD b{font-size:15px}
+body .szT.cur::before{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 0 1.5px rgba(255,233,168,.6),inset 0 0 30px rgba(232,178,58,.2)}
+/* مستوى «اختر مكافأة»: لوحةٌ ذهبيّة وشبكة ٢×٢ */
+body .szCell.ch{padding-inline:6px}
+body .szChT{position:relative;z-index:1;display:inline-flex;align-items:center;gap:6px;font-family:var(--fd);font-size:12.5px;font-weight:700;color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C 55%,#B98A2E);border-radius:9px;padding:3px 12px;box-shadow:0 2px 0 #6E4E12;margin-bottom:7px;white-space:nowrap}
+body .szCh{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:150px}
+body .szC.mini{max-width:none;padding:6px 3px;border-radius:12px}
+body .szC.mini .szA{height:32px}body .szC.mini .szV{font-size:12px;margin-top:2px}body .szC.mini .szN{font-size:8.5px;margin-top:2px}
+body .szC.mini.pk{border-color:#6BE69A;box-shadow:0 0 0 1px rgba(107,230,154,.5)}
+body .szCell.done .szC.mini:not(.pk){opacity:.35}body .szCell.done .szC.mini.pk{opacity:1}body .szCell.done .szC.mini.pk .szA{filter:none}
+/* الشريط العلويّ للسلّم: لوحةُ التقدّم على الحقل الكحليّ، ورايةُ الترقية على الحقل الذهبيّ — يلتصق أعلى الشاشة */
+body .szTop{z-index:6;box-shadow:0 10px 20px -10px rgba(0,0,0,.85)}
+body .szLad.fx{padding-top:var(--szTopH,0px)}
+body .szLad.fx .szTop{position:fixed;top:env(safe-area-inset-top,0px);left:50%;transform:translateX(-50%);width:var(--szW,calc(100% - 28px));z-index:35;border-inline:1px solid var(--lxHair);border-bottom:1px solid var(--lxHair);box-shadow:0 14px 26px -10px rgba(0,0,0,.9)}
+body .szTop .szCell{min-height:0;padding:12px 10px}
+body .szTop .szCell.p{padding:0 10px 8px;justify-content:flex-start}
+body .szPen{position:relative;width:min(100%,156px);padding:8px 10px 17px;text-align:center;color:#1A1206;background:repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 1px,transparent 1px 10px),repeating-linear-gradient(-45deg,rgba(255,255,255,.09) 0 1px,transparent 1px 10px),linear-gradient(180deg,#FFF3D0 0%,#F0CF7A 16%,#D9AE4E 52%,#B98A2E 84%,#D6B05C 100%);clip-path:polygon(0 0,100% 0,100% calc(100% - 11px),50% 100%,0 calc(100% - 11px))}
+body .szPen>div:first-child{margin:0 auto;box-shadow:0 2px 0 #6E4E12,inset 0 1px 0 rgba(255,244,214,.1)}
+body .szPenT{font-family:var(--fd);font-size:12.5px;font-weight:700;margin-top:3px;text-shadow:0 1px 0 rgba(255,246,220,.6)}
+body .szUp{display:block;width:100%;margin-top:6px;border:0;border-radius:12px;padding:7px 10px;font-family:var(--fd);font-size:16px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(180deg,#6BE69A,#2ECC71 45%,#1D8A4E);box-shadow:0 3px 0 #12603A,0 8px 16px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45);text-shadow:0 1px 1px rgba(0,60,20,.5)}
+body .szUp:active{box-shadow:0 1px 0 #12603A,0 4px 10px rgba(0,0,0,.35);transform:translateY(2px)}
+body .szPenP{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;font-size:10px;font-weight:800;margin-top:5px;color:#4A3208}
+body .szPenP .usd{font-size:10px}
+body .szPenOn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-family:var(--fd);font-size:13px;font-weight:700;color:#F6E7C6;background:linear-gradient(180deg,#161E33,#0B101D);border:1px solid rgba(255,233,168,.6);border-radius:10px;padding:5px 12px}
+body .szPenOn .ico{color:#6BE69A}
+body .szLn{font-size:10px;font-weight:800;color:#9FB3E6;margin-bottom:8px;letter-spacing:.02em}
+body .szPgR{display:flex;align-items:center;justify-content:center;gap:4px;width:100%}
+body .szPlq{display:inline-flex;align-items:center;gap:5px;font-family:var(--fd);font-size:15px;font-weight:700;color:#FFE9A8;background:linear-gradient(180deg,#161E33,#0B101D);border:1px solid var(--lxHair);border-radius:10px;padding:4px 10px;font-variant-numeric:tabular-nums;box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 3px 0 rgba(0,0,0,.45)}
+body .szPlq .ico{color:#E8B23A}
+body .szPb{width:100%;max-width:150px;height:6px;margin-top:9px;border-radius:999px;background:#070B16;border:1px solid rgba(255,255,255,.06);overflow:hidden}
+body .szPb i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#B8871E,#FFE9A8)}
+body .szPl{font-size:10px;font-weight:800;color:#AEB8D0;margin-top:5px;text-align:center}
+/* صفّا «الكلّ»: ما قبل النافذة وما بعدها */
+body .szMore{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:11px 10px;font-size:12px;font-weight:800;color:#D9B76E;background:linear-gradient(180deg,#0E1526,#0A0F1D);cursor:pointer;box-shadow:inset 0 1px 0 rgba(217,183,110,.25)}
+body .szMore b{color:#FFE9A8}
+body .szMore:last-child{border-radius:0 0 17px 17px}
+body .szMore:active{filter:brightness(1.15)}
+/* زرّ «موافق» ثابتٌ فوق شريط التنقّل */
+body .szOkW{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom));max-width:520px;margin:0 auto;padding:18px 14px 10px;z-index:30;pointer-events:none;background:linear-gradient(to top,rgba(8,11,20,.94) 55%,transparent)}
+body .szOk{pointer-events:auto}
+body .szOk>span{padding:12px}
+/* ورقة الاختيار */
+body .szChG{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:2px 0 14px}
+body .szOpt{border-radius:14px;padding:10px 6px 9px;text-align:center;cursor:pointer;background:var(--lxCard);border:1px solid var(--lxHair2);box-shadow:inset 0 1px 0 rgba(255,244,214,.06)}
+body .szOpt .szA{height:50px}body .szOpt .szN{font-size:10.5px;-webkit-line-clamp:3}
+body .szOpt.on{border-color:#6BE69A;box-shadow:0 0 0 1px rgba(107,230,154,.55),0 0 16px rgba(46,204,113,.35)}
+body .szOpt.own{opacity:.45}
+body .rbtn:disabled{opacity:.5;cursor:default}
 
 /* ═══ المتجر الدولاري التجريبي ═══ */
 .gpkg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-bottom:6px}
@@ -2179,7 +2259,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 #ld .ldMotes i{position:absolute;bottom:-12px;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle,#FFF6DC 0,rgba(255,233,168,.9) 35%,rgba(255,220,140,0) 70%);opacity:0;animation:ldRise 9s linear infinite}
 #ld .ldMotes i:nth-child(1){left:8%;animation-delay:0s;animation-duration:10s}#ld .ldMotes i:nth-child(2){left:19%;animation-delay:2.1s;width:4px;height:4px}#ld .ldMotes i:nth-child(3){left:31%;animation-delay:4.4s;animation-duration:12s}#ld .ldMotes i:nth-child(4){left:44%;animation-delay:1.2s;width:3px;height:3px;animation-duration:8s}#ld .ldMotes i:nth-child(5){left:56%;animation-delay:3.3s}#ld .ldMotes i:nth-child(6){left:67%;animation-delay:5.6s;width:4px;height:4px;animation-duration:11s}#ld .ldMotes i:nth-child(7){left:78%;animation-delay:.7s;animation-duration:9.5s}#ld .ldMotes i:nth-child(8){left:88%;animation-delay:6.2s;width:3px;height:3px}#ld .ldMotes i:nth-child(9){left:50%;animation-delay:7.4s;animation-duration:13s}#ld .ldMotes i:nth-child(10){left:25%;animation-delay:8.1s;width:5px;height:5px}
 #ld .ldLogo{position:absolute;top:calc(7% + env(safe-area-inset-top));left:50%;width:min(56vw,250px);aspect-ratio:1;transform:translateX(-50%);animation:ldFloat 4.2s ease-in-out infinite;background:var(--logo) center/contain no-repeat;filter:drop-shadow(0 14px 34px rgba(0,0,0,.65)) drop-shadow(0 0 22px rgba(232,178,58,.28));animation:ldIn 1s cubic-bezier(.2,1.3,.4,1) both}
-#ld .ldLogo::after{content:'';position:absolute;inset:0;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat;background:linear-gradient(115deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 62%) no-repeat;background-size:260% 100%;animation:ldShine 4.2s ease-in-out 1.2s infinite}
+#ld .ldLogo::after{content:'';position:absolute;inset:0;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat;background:linear-gradient(115deg,rgba(255,255,255,0) 38%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 62%) no-repeat;background-size:260% 100%;animation:ldShine 4.2s ease-in-out 1.2s 3}
 #ld .ldBox{position:absolute;left:50%;bottom:calc(8% + env(safe-area-inset-bottom));width:min(80vw,350px);transform:translateX(-50%);text-align:center;animation:ldIn .9s .25s cubic-bezier(.2,1.3,.4,1) both}
 #ld .ldTip{min-height:38px;font-size:12.5px;line-height:1.55;color:#DDE3F2;text-shadow:0 1px 3px #000;margin-bottom:12px;padding:0 6px;transition:opacity .35s}
 #ld .ldTip.f{opacity:0}
@@ -2204,7 +2284,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 </style>
 </head>
 <body>
-<div id="ld" data-total="0007840113" data-head="0001060985" aria-hidden="true">
+<div id="ld" data-total="0007879998" data-head="0001072403" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -15602,6 +15682,19 @@ const AV={
 };
 
 // الحالة الافتراضية
+/* ═══ ٦٫٩٦ — الشخصيّات المرسومة: ١٦ بورتريهًا من OpenArt (لوحتان ٤×٢)؛ tools/build-avatars.py يملأ AV_PIC_IMG ═══ */
+const AV_PIC_IMG={/*AVPIC-BEGIN*//*AVPIC-END*/};
+const AV_PICS=[
+ {k:'a1',n:'الشابّ'},{k:'a2',n:'الحكيم',tr:1000},{k:'a3',n:'المنافس'},{k:'a4',n:'الفتى'},{k:'a5',n:'المفكّر'},{k:'a6',n:'الضحوك'},{k:'a7',n:'الصقّار',tr:600},{k:'a8',n:'الرياضيّ',tr:300},
+ {k:'b1',n:'المبتسمة'},{k:'b2',n:'الأنيقة'},{k:'b3',n:'الجدّة'},{k:'b4',n:'الصغيرة'},{k:'b5',n:'الصغير'},{k:'b6',n:'الرياضيّة',tr:300},{k:'b7',n:'الأسطورة',tr:3000},{k:'b8',n:'الشيخ',tr:2300}
+];
+const AV_PICS_ON=Object.keys(AV_PIC_IMG).length>=AV_PICS.length;
+function avPicOk(k){return AV_PICS_ON&&typeof k==='string'&&Object.prototype.hasOwnProperty.call(AV_PIC_IMG,k)}
+function avPicUnlocked(p){if(!p.tr)return true;try{const t=TR();return Math.max(t.tr|0,t.best|0)>=p.tr}catch(e){return false}}
+function avPicFree(){return AV_PICS.filter(p=>!p.tr).map(p=>p.k)}
+function avPicHTML(k,bg,size){return `<span class="avPic" style="width:${size}px;height:${size}px;background:radial-gradient(circle at 50% 28%,${bg} 0%,#0B1530 100%)"><img src="${AV_PIC_IMG[k]}" alt="" draggable="false"></span>`}
+function avPick(k){if(k){const p=AV_PICS.find(x=>x.k===k);if(!avPicOk(k)||!p||!avPicUnlocked(p))return;avEdit.pic=k}else delete avEdit.pic;drawAv()}
+function avPicLockMsg(p){try{const a=ARENAS[trArenaIx(p.tr)];return 'يُفتح عند '+p.tr+' كأس — '+(typeof a==='string'?a:(a&&a.n)||'')}catch(e){return 'يُفتح عند '+p.tr+' كأس'}}
 const AV_DEFAULT={skin:0,hair:1,hairStyle:0,eyes:0,mouth:0,acc:0,beard:0,bg:0};
 
 function avUnlocked(a){
@@ -15614,6 +15707,7 @@ let AV_SEQ=0;
 /** يرسم الأفاتار بحجم معيّن — بورتريه مرسوم، لا ملصق */
 function avatarSVG(cfg,size){
  const c=(cfg&&typeof cfg==='object')?cfg:(S.av||AV_DEFAULT);
+ if(avPicOk(c.pic)){const bi=(Number.isInteger(c.bg)&&c.bg>=0&&c.bg<AV.bg.length)?c.bg:0;return avPicHTML(c.pic,AV.bg[bi],size)}   // ٦٫٩٦: الشخصيّة المرسومة
  /* الإعدادات قد تأتي من حضور لاعبٍ بعيد (غير موثوق): فهرسٌ صحيحٌ ضمن المدى وإلّا الأوّل.
     كان 'length' أو 'map' يمرّ فينهار الرسم للغرفة كلّها، ونصٌّ يُحقن في id السمة. */
  const ix=(arr,i)=>(Number.isInteger(i)&&i>=0&&i<arr.length)?i:0;
@@ -15782,8 +15876,10 @@ const FRAMES=[
 function avFromSeed(seed){
  var h=hashStr(String(seed||'لاعب'));
  var nx=function(k){h=Math.imul(h^(h>>>15),2246822507)>>>0;return h%k};
- return {skin:nx(AV.skin.length),hair:nx(AV.hair.length),hairStyle:nx(AV.hairStyle.length),
+ var o={skin:nx(AV.skin.length),hair:nx(AV.hair.length),hairStyle:nx(AV.hairStyle.length),
   eyes:nx(AV.eyes.length),mouth:nx(AV.mouth.length),beard:nx(AV.beard.length),bg:nx(AV.bg.length),acc:0};
+ if(AV_PICS_ON){var fr=avPicFree();o.pic=fr[nx(fr.length)]}   // ٦٫٩٦
+ return o;
 }
 function personArt(seed,size){
  try{return avatarSVG(avFromSeed(seed),size||34)}
@@ -15836,6 +15932,13 @@ function drawAv(){
   background:linear-gradient(145deg,#FFE9A8,#A87518)">${(EMOTES_ON&&S.avatarEmote)?face(S.avatarEmote,104):avatarSVG(avEdit,104)}</div>
  <div class="mtl" style="font-size:16px;margin-top:9px">${S.name}</div></div>
  </div></div>
+ ${AV_PICS_ON?`<div style="margin:14px 0">
+ <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">الشخصيّة — بورتريهٌ مرسوم، أو وجهٌ تصنعه بنفسك</div>
+ <div class="avPk">
+  <div class="avPkC cu ${!avEdit.pic?'on':''}" onclick="avPick(null)">${avatarSVG(Object.assign({},avEdit,{pic:null}),48)}<span>وجهٌ تصنعه بنفسك<small>بشرة وشعر وعينان ولحية وإكسسوار</small></span></div>
+  ${AV_PICS.map(p=>{const un=avPicUnlocked(p),bg=AV.bg[(avEdit.bg|0)<AV.bg.length?(avEdit.bg|0):0];
+   return `<div class="avPkC ${avEdit.pic===p.k?'on':''}${un?'':' lk'}" onclick="${un?`avPick('${p.k}')`:`toast('${avPicLockMsg(p)}')`}">${avPicHTML(p.k,bg,56)}${un?'':`<i class="lk">${ico('lock',11)} ${p.tr}</i>`}<span>${p.n}</span></div>`}).join('')}
+ </div></div>`:''}
  <div style="margin:14px 0">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">صورة الملف الشخصي — شخصيتك المرسومة أو ميدالية من تعبيراتك</div>
  <div class="cr">
@@ -15850,7 +15953,7 @@ function drawAv(){
    return `<div class="fc ${S.frame===f.k?'on':''}" style="${un?'':'opacity:.42'}"
     onclick="${un?`setFrame('${f.k}')`:`toast('يُفتح من مسار الموسم المميّز')`}">${un?'':ico('lock',12)+' '}${f.n}</div>`}).join('')}
  </div></div>
- ${rows.map(r=>`<div style="margin-bottom:14px">
+ ${rows.filter(r=>!(avEdit.pic&&r.k!=='bg')).map(r=>`<div style="margin-bottom:14px">
  <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:7px">${r.n}</div>
  <div class="cr">${r.list.map((it,i)=>{
    if(r.type==='color')return `<div onclick="avSet('${r.k}',${i})" style="width:34px;height:34px;border-radius:9px;
@@ -15873,6 +15976,7 @@ function avRandom(){
  avEdit={skin:rnd(AV.skin.length),hair:rnd(AV.hair.length),hairStyle:rnd(AV.hairStyle.length),
   eyes:rnd(AV.eyes.length),mouth:rnd(AV.mouth.length),beard:rnd(AV.beard.length),
   bg:rnd(AV.bg.length),acc:0};
+ if(AV_PICS_ON&&Math.random()<.6){const f=avPicFree();avEdit.pic=f[rnd(f.length)]}   // ٦٫٩٦
  drawAv();
 }
 const rnd=n=>Math.floor(Math.random()*n);
@@ -19060,6 +19164,12 @@ function friendsScr(keep){
 }
 /* ═══ اللغة: العربية أصل، والإنجليزية طبقة فوقها — ما لم يُترجَم يظهر بالعربية ═══ */
 const EN={
+ 'استلام الجاهز':'Claim ready','كيف تتقدّم التذكرة؟':'How does the pass progress?','ماذا يضيف المميّز؟':'What does premium add?',
+ 'المسار المجّانيّ':'Free track','المسار المميّز':'Premium track','مفعَّل':'Active','ترقية!':'Upgrade!','اختر مكافأة':'Pick a reward',
+ 'اختر مكافأة واحدة':'Pick one reward','تأكيد الاختيار':'Confirm choice','تملك هذا التعبير — اختر غيره':'You own this emote — pick another',
+ 'لم تصل لهذا المستوى بعد':'You have not reached this level yet','طيّ السلّم — حول مستواي':'Collapse — around my level','عرض الكلّ':'Show all',
+ 'استلمت المكافأة':'Reward claimed','ليس الآن':'Not now','تذكرة المكافآت':'Reward pass','موافق':'OK','أنت هنا':'You are here',
+ 'المكافأة التالية':'Next reward','جاهزة للاستلام':'Ready to claim','مُستلَمة':'Claimed','طريق الكؤوس':'Trophy road',
  'تبدأ تلقائيًّا خلال':'Starts automatically in',
  'ثانية':'seconds',
  '__EN_STYLE__':'en',
@@ -20983,11 +21093,11 @@ function doOpen(key){
 let revIdx=0,_rvA=null,_rvT=null;
 const RV_CSS=`
 body .scr.rvScr{position:relative;padding:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#05070E}
-.rvBg{position:absolute;inset:0;background:#05070E center/cover no-repeat;opacity:.5;filter:saturate(.85)}
+.rvBg{position:absolute;inset:0;background:#05070E center/cover no-repeat;opacity:.46;will-change:transform}   /* ٦٫٩٦: بلا saturate (كان يعيد ترشيح صورة الشاشة كلّها كلّ إطار) وفي طبقةٍ ثابتة */
 .rvVig{position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,205,90,.10),rgba(5,7,14,.5) 52%,rgba(5,7,14,.97) 100%)}
-.rvRays{position:absolute;left:50%;top:40%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;
+.rvRays{position:absolute;left:50%;top:40%;width:64vmax;height:64vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;contain:strict;
  background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.09) 0 5deg,transparent 5deg 16deg);
- -webkit-mask:radial-gradient(circle,#000 0,transparent 36%);mask:radial-gradient(circle,#000 0,transparent 36%);animation:rvSpin 34s linear infinite}
+ -webkit-mask:radial-gradient(circle closest-side,#000 0,transparent 95%);mask:radial-gradient(circle closest-side,#000 0,transparent 95%);animation:rvSpin 34s linear infinite}   /* ٦٫٩٦: نفس الدائرة المرئيّة بطبقةٍ أصغر */
 @keyframes rvSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .rvTop{position:relative;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 4px}
 .rvTitle{flex:1;text-align:center;font-size:18px;font-weight:700;color:#F6E7C6;text-shadow:0 1px 8px rgba(0,0,0,.6)}
@@ -21051,6 +21161,7 @@ function rewardScr(a){
  renderReward(_rvA);
 }
 function renderReward(a){
+ _rvShownAt=Date.now();
  const L=a.list||[],n=L.length,left=n-revIdx,cur=L[revIdx];
  let bg='';try{if(REAL_ART.ui_win_bg)bg=`style="background-image:url(${REAL_ART.ui_win_bg})"`}catch(e){}
  let openImg=null;try{openImg=a.chest?REAL_ART.ui_chest_open||null:null}catch(e){}
@@ -21122,7 +21233,8 @@ function miniReward(x){
  if(x.t==='skbook')return one(ico('book',40,'#FFE9A8'),'','كتاب الجيس');
  return '';
 }
-function nextRev(){if(!_rvA)return;revIdx++;renderReward(_rvA)}
+let _rvShownAt=0;
+function nextRev(){if(!_rvA)return;if(Date.now()-_rvShownAt<400)return;revIdx++;renderReward(_rvA)}   // ٦٫٩٦: اللمسة الثانية من نقرةٍ مزدوجة لا تتخطّى الكشف
 function revealAll(){if(!_rvA)return;revIdx=_rvA.list.length;renderReward(_rvA)}
 
 // ═══════════ البند 21 — مجموعة التعبيرات: أربع رتب ═══════════
@@ -23626,19 +23738,59 @@ function trRoadArt(r){
 }
 /** صور الجيس في الطريق: واحدةٌ في كلّ إطار بعد أن تُرسم الشاشة — أوّل رسمٍ لكلّ جيسٍ يفكّ صورته (~٥٠ مللي ثانية) */
 function trRoadFill(){
- const el=document.querySelector('.arRoad .arMArt[data-sk]');if(!el)return;
+ const el=document.querySelector('.trv .arMArt[data-sk]');if(!el)return;
  try{el.innerHTML=skImg(el.dataset.sk,48)}catch(e){}el.removeAttribute('data-sk');
  requestAnimationFrame(trRoadFill);
 }
 function trRoadLbl(r){return r.t==='emote'?'تعبير «'+(((typeof EMOTES!=='undefined'&&EMOTES.find(e=>e.k===r.k))||{}).n||'')+'»':r.t==='skbook'?'كتاب الجيس':r.t==='chest'?((ECON.chests[r.k]||{}).n||'صندوق'):r.t==='coins'?r.v.toLocaleString('en-US')+' عملة':r.t==='gems'?r.v+' جوهرة':r.t==='skc'?tlNm('sk',r.k)+' ×'+r.v:''}
-function trRoadHTML(){
- let nextSeen=false;
- return trRoad().map(m=>{let st=trRoadState(m);if(st==='lock'&&!nextSeen){nextSeen=true;st='next'}
-  return `<div class="arM ${st}${m.r.t==='chest'?' big':''}"${st==='ready'?` onclick="trClaim(${m.tr})"`:''}>
-   <div class="arMTr">${ico('trophy',12)} ${m.tr.toLocaleString('en-US')}</div>${trRoadArt(m.r)}
-   <div class="arMN">${trRoadLbl(m.r)}</div>
-   ${st==='ready'?`<div class="arMBtn">استلم</div>`:st==='done'?`<div class="arMSt">${ico('check',12)}</div>`:`<div class="arMSt">${ico('lock',11)}</div>`}
-  </div>`}).join('');
+/* ٦٫٩٦ — طريق الكؤوس عموديًّا كطريق كلاش رويال (تسجيل المالك): أعلى ساحةٍ في القمّة وأدناها في القاع، وكلّ ساحةٍ قسمٌ
+   بلوحته (الاسم ورقم الساحة وعتبتها وما تفتحه) ومنصّاته؛ الجوائز مرصوفةٌ على الطريق ورقم الكؤوس في الجانب، والمُستلَم
+   باهتٌ بعلامة، والجاهز بزرٍّ ذهبيّ، والمقفل بقفل، ودبّوس «أنت هنا» عند موضع اللاعب. ساحتك مفتوحة وكلّ ساحةٍ فيها جائزةٌ
+   جاهزة مفتوحة، والباقي مطويٌّ في لوحته ويُفتح بلمسة. اللوحة تلتصق بأعلى الشاشة ما دمت داخل ساحتها (sticky) — بلا
+   backdrop-filter ولا blur: تدرّجاتٌ وتحويلاتٌ فقط. يبقى trRoad/trRoadState/trClaim كما هي (المنطق لم يُمسّ) */
+function trvCups(n){n=n|0;const r=n%100;if(n===1)return 'كأس واحد';if(n===2)return 'كأسان';return n.toLocaleString('en-US')+' '+(r<=2?'كأس':r<=10?'كؤوس':'كأسًا')}
+const _trvOpen=new Set();
+/** ٦٫٩٦: خلفيّات الساحات فئاتُ CSS تُحقن مرّةً واحدة (كانت data-URI بنحو ٢٠٠ ك.ب تُنسخ في كلّ رسم) */
+function arBgCls(a){try{if(typeof ARENA_BG==='undefined'||!ARENA_BG[a])return '';if(!document.getElementById('arBgCss')){const st=document.createElement('style');st.id='arBgCss';
+  st.textContent=Object.keys(ARENA_BG).map(k=>`.arBg${k}{background-image:linear-gradient(180deg,rgba(5,8,16,.62),rgba(5,8,16,.9)),url(${ARENA_BG[k]})!important;background-size:cover!important;background-position:center 40%!important}`).join('\n');document.head.appendChild(st)}return 'arBg'+a}catch(e){return ''}}
+function trvTog(i){const el=document.getElementById('trvA'+i);if(!el)return;const pl=el.querySelector('.trvPl');const stuck=pl&&pl.getBoundingClientRect().top<=Math.max(8,parseFloat(getComputedStyle(pl).top)||0)+1&&el.getBoundingClientRect().top<0;
+ const on=el.classList.toggle('open');if(on)_trvOpen.add(i);else _trvOpen.delete(i);if(pl)pl.setAttribute('aria-expanded',on?'true':'false');
+ if(!on&&stuck)window.scrollTo(0,Math.max(0,window.scrollY+el.getBoundingClientRect().top-8))}   // ٦٫٩٦: طيّ اللوحة الملتصقة يعيد القسم إلى الشاشة
+function trRoadV(ix){
+ const t=TR(),tr=t.tr|0,road=trRoad(),gate=TR_ARENA[t.gate|0]||0;
+ let nextTr=null,youTr=null;
+ for(const m of road){if(nextTr==null&&trRoadState(m)==='lock')nextTr=m.tr;if(m.tr<=tr)youTr=m.tr}
+ const pin=`<div class="trvYou"><i></i><span class="trvYouP">${ico('trophy',15)}<bdi dir="ltr">${tr.toLocaleString('en-US')}</bdi><s>أنت هنا</s></span>${nextTr!=null?`<em>بقي ${trvCups(Math.max(0,nextTr-tr))} للمكافأة التالية</em>`:'<em>بلغت آخر الطريق</em>'}</div>`;
+ const N=ARENAS.length,out=[];
+ for(let a=N-1;a>=0;a--){
+  const A=ARENAS[a],lo=TR_ARENA[a],hi=a<N-1?TR_ARENA[a+1]:Infinity;
+  const ms=road.filter(m=>m.tr>=lo&&m.tr<hi).sort((x,y)=>y.tr-x.tr);
+  const sts=ms.map(m=>{const st=trRoadState(m);return st==='lock'&&m.tr===nextTr?'next':st});
+  const nReady=sts.filter(x=>x==='ready').length,nDone=sts.filter(x=>x==='done').length;
+  const rel=a===ix?'cur':a<ix?'past':'fut',open=rel==='cur'||nReady>0||sts.indexOf('next')>=0||(_keepY!=null&&_trvOpen.has(a)),un=tlArenaUnlockTxt(a);   // ٦٫٩٦: قسم المكافأة التالية مفتوح، وما فتحه اللاعب يبقى مفتوحًا بعد الاستلام
+  const bg=arBgCls(a)?` data-bg="1"`:'';   // ٦٫٩٦: فئة CSS تُحقن مرّة — لا نسخ data-URI في كلّ رسم   // لوحة الساحة إن رفعها المالك، وإلّا تدرّج ألوانها
+  const sum=rel==='fut'?`${ico('lock',11)} تُفتح عند ${lo.toLocaleString('en-US')} كأس`
+   :rel==='cur'?`ساحتك الآن${gate?` · لا تهبط تحت ${gate.toLocaleString('en-US')}`:''}`
+   :`${ico('check',11,A.g)} بلغتها · ${nDone}/${ms.length} مُستلَمة`;
+  const rows=ms.map((m,k)=>{const st=sts[k],r=m.r;
+   const act=st==='ready'?`<button class="trvBtn" onclick="trClaim(${m.tr})"><span>استلم</span></button>`
+    :st==='done'?`<span class="trvSt ok">${ico('check',14,'#9FE7B5')}</span>`
+    :`<span class="trvSt${st==='next'?' nx':''}">${ico('lock',13,st==='next'?'#FFE9A8':'#8B96B6')}</span>`;
+   return `${m.tr===youTr?pin:''}<div class="trvM ${st}${r.t==='chest'?' big':''}" data-tr="${m.tr}">
+    <div class="trvPlat"><span class="trvArt">${trRoadArt(r)}</span><span class="trvLbl">${trRoadLbl(r)}${st==='next'?'<s>المكافأة التالية</s>':st==='ready'?'<s>جاهزة للاستلام</s>':st==='done'?'<s>مُستلَمة</s>':''}</span>${act}</div>
+    <bdi class="trvTr" dir="ltr">${m.tr.toLocaleString('en-US')}</bdi></div>`}).join('');
+  out.push(`<section class="trvA ${rel}${open?' open':''}" id="trvA${a}" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
+   <div class="trvBg ${arBgCls(a)}"${bg}></div>
+   <div class="trvPl" role="button" aria-expanded="${open?'true':'false'}" onclick="trvTog(${a})">
+    <span class="trvNo"><b>${a+1}</b><s>الساحة</s></span>
+    <div class="trvPlB"><b class="trvNm">${esc(A.n)}</b><span class="trvSum">${sum}${nReady?`<i class="arReady">${nReady} جاهزة</i>`:''}</span>${un?`<span class="trvUn">${ico('sparkle',11,A.g)} تفتح ${esc(un)}</span>`:''}</div>
+    <span class="trvTh">${ico('trophy',16)}<bdi dir="ltr">${lo.toLocaleString('en-US')}</bdi></span>
+    <span class="trvChev">${chev(A.g,15)}</span>
+   </div>
+   <div class="trvL">${rows}${a===0&&youTr==null?pin:''}</div>
+  </section>`);
+ }
+ return `<div class="trv">${out.join('')}</div>`;
 }
 /** صفّ الكؤوس في شاشات النتيجة: الفرق كبيرًا، ثمّ المجموع، ثمّ الساحة وشريطها إلى التالية */
 function trFinHTML(tro){
@@ -23695,34 +23847,36 @@ function arenaUpFx(ix){
 function arenaScr(){
  trChestCss();
  const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix];
- const pct=nx?Math.round((tr-lo)/(nx-lo)*100):100,ready=trRoadReady();
- go(`<div class="scr on">${tbar('الكؤوس والساحات')}
- <div class="arHero" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
+ const pct=nx?Math.round((tr-lo)/(nx-lo)*100):100,ready=trRoadReady(),keep=_keepY!=null;   // ٦٫٩٦: عودةٌ من شاشة المكافأة (أو refresh) → الموجّه يعيد موضع التمرير ولا نقفز
+ go(`<div class="scr on arV">${tbar('الكؤوس والساحات')}
+ <div class="arHero arHv" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
   <div class="arHeroRays"></div>
-  <div class="arHeroEm">${tierEmblem(ix,92)}</div>
-  <div class="arHeroN">${esc(A.n)}</div>
-  <div class="arHeroTr">${ico('trophy',30)}<b>${tr.toLocaleString('en-US')}</b><span>كأس</span></div>
+  <div class="arHvRow"><div class="arHeroEm">${tierEmblem(ix,68)}</div>
+   <div class="arHvB"><div class="arHeroN">${esc(A.n)}</div>
+    <div class="arHeroTr">${ico('trophy',24)}<b>${tr.toLocaleString('en-US')}</b><span>كأس</span></div></div></div>
   <div class="arBarW"><div class="arBar"><i style="width:${pct}%"></i></div>
    <div class="arBarL"><span>${lo.toLocaleString('en-US')}</span><span>${nx?nx.toLocaleString('en-US')+' — '+esc(ARENAS[ix+1].n):'القمّة'}</span></div></div>
-  <div class="arGate">${ico('shield',13)} بوابة الساحة: لا تهبط تحت ${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')} كأس</div>
- </div>
- <div class="stg" style="margin-top:12px;grid-template-columns:repeat(3,minmax(0,1fr))">
-  ${[[t.w|0,'انتصار'],[t.l|0,'خسارة'],[t.best|0,'أعلى كؤوس']].map(([v,l])=>`<div class="stc" style="grid-template-columns:1fr;text-align:center"><div class="v">${(+v).toLocaleString('en-US')}</div><div class="l">${l}</div></div>`).join('')}
+  <div class="arHvSt"><span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
  </div>
  <div class="sl" style="display:flex;align-items:center">طريق الكؤوس${ready?`<span class="arReady">${ready} جاهزة</span>`:''}</div>
- <div class="arRoad">${trRoadHTML()}</div>
- <div class="sl">الساحات العشر</div>
- ${ARENAS.map((a,i)=>`<div class="li arRow${i===ix?' now':''}"><div class="lr">
-   <span class="arRowEm">${tierEmblem(i,40)}</span>
-   <div class="lb"><div class="lt" style="color:${i<=ix?a.g:'var(--tx2)'}">${esc(a.n)}</div>
-   <div class="ls">${TR_ARENA[i].toLocaleString('en-US')} كأس${i===ix?' · ساحتك الآن':i<ix?' · بلغتها':''}${tlArenaUnlockTxt(i)?' · تفتح '+tlArenaUnlockTxt(i):''}</div></div>
-   ${i<=ix?ico('check',16,a.g):ico('lock',14)}</div></div>`).join('')}
+ ${trRoadV(ix)}
  <div class="sl">كيف تُحسب الكؤوس؟</div>
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز ${TR_LEG.toLocaleString('en-US')} يعود إلى ${TR_LEG.toLocaleString('en-US')} ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.</div>
+ <div class="trvOkW"><button class="rbtn" onclick="back()"><span>موافق</span></button></div>
  </div>`);
  requestAnimationFrame(trRoadFill);
- setTimeout(()=>{try{const el=document.querySelector('.arRoad .arM.ready')||document.querySelector('.arRoad .arM.next'),rd=el&&el.parentElement;
-  if(el&&rd){const a=el.getBoundingClientRect(),b=rd.getBoundingClientRect();rd.scrollBy({left:(a.left+a.width/2)-(b.left+b.width/2)})}}catch(e){}},60);   // أفقيًّا فقط
+ trvAfterDraw(keep);
+}
+/** بعد الرسم: التمرير عموديًّا إلى أقرب جائزةٍ جاهزة (وإلّا التالية، وإلّا دبّوس موضعك) — إلّا إن كان الموجّه يعيد موضعًا
+    محفوظًا (عودةٌ من شاشة المكافأة بعد الاستلام: الشاشة تبقى مكانها). النبض على زرٍّ واحد فقط لا على كلّ الجاهز */
+function trvAfterDraw(keep){
+ const vis=q=>[...document.querySelectorAll(q)].find(x=>x.offsetParent!==null);   // ٦٫٩٦: الظاهر فقط — لا عنصر داخل ساحةٍ مطويّة
+ const el=vis('.trv .trvM.ready')||vis('.trv .trvM.next')||vis('.trv .trvYou');
+ if(!el)return;el.classList.add('hot');
+ document.querySelectorAll('.trv .trvA.open').forEach(x=>{const i=+x.id.replace('trvA','');if(i>=0)_trvOpen.add(i)});
+ if(keep)return;
+ const y=window.scrollY+el.getBoundingClientRect().top-Math.round(window.innerHeight*.42)+56;
+ window.scrollTo(0,Math.max(0,y));
 }
 
 /* ═══ صناديق المعارك — نظام كلاش رويال: الفوز أونلاين يُسقط صندوقًا بحظ معلَن ═══ */
@@ -24001,7 +24155,8 @@ function evtScr(){
  <div class="note">تُحتسب كل الجولات: التدريب والمستويات والمنافسة</div></div>`);
 }
 // ── الموسم: تذكرة معركة كاملة — 100 مستوى بمسارين مجاني ومميز ──
-function SZ(){if(!S.szn)S.szn={xp:0,cf:[],cp:[],prem:false};return S.szn}
+function SZ(){if(!S.szn||typeof S.szn!=='object')S.szn={xp:0,cf:[],cp:[],prem:false};const z=S.szn;   // ٦٫٩٦: حفظٌ ناقص لا يعطي NaN ولا يكسر الشاشة
+ if(!(+z.xp>=0))z.xp=0;else z.xp=+z.xp;if(!Array.isArray(z.cf))z.cf=[];if(!Array.isArray(z.cp))z.cp=[];return z}
 const SZ_MAX=100,SZ_STEP=100,SZ_PASS_COST=950,SZ_END=new Date('2026-10-12T00:00:00Z');
 function szLv(){return Math.min(SZ_MAX,Math.floor(SZ().xp/SZ_STEP))}
 /** ٦٫٩٤ — تقدّم التذكرة من أيّ مباراة: يعيد ما أُضيف فعلًا (صفرٌ عند السقف) */
@@ -24009,6 +24164,7 @@ function szAdd(n){const z=SZ(),b=z.xp;z.xp=Math.min(SZ_MAX*SZ_STEP,z.xp+(n|0));r
 // مكافأة كل مستوى — حتمية وواضحة، والمميز أكرم دائماً
 function szReward(lv,prem){
  if(prem){
+  if(lv===25||lv===75)return{t:'choice',i:'gift',n:'اختر مكافأة',c:'#E8B23A',opts:szChoice(lv)};   // ٦٫٩٧: واحدةٌ من أربع
   if(lv===100)return{t:'skw',r:'l',v:2,i:'trophy',n:'جوكر جيس أسطوري ×2',c:'#B8860F'};
   if(lv===90)return{t:'emote',k:'medal',i:'sparkle',n:'تعبير أسطوري «الميداليّة»',c:'#B8860F'};
   if(lv===80)return{t:'gems',v:200,i:'gem',n:'200 جوهرة',c:'#B76CF0'};
@@ -24035,8 +24191,10 @@ function szClaim(lane,lv){
  if(lane==='p'&&!z.prem){buyPassAsk();return}
  const arr=lane==='p'?z.cp:z.cf;
  if(arr.includes(lv))return;
+ const r=szReward(lv,lane==='p');
+ if(r.t==='choice'){szChooseAsk(lv);return}   // ٦٫٩٧: مستوى الاختيار — ورقةُ اختيارٍ لا استلامٌ مباشر
  arr.push(lv);
- grantRewards([szReward(lv,lane==='p')]);
+ grantRewards([r]);
  saveState();toast('استلمت المكافأة','ok');if(window.FX)FX.correct(3);
  refresh(()=>seasonScr(1));
 }
@@ -24044,10 +24202,11 @@ function szClaimAll(){
  const z=SZ();let n=0;
  for(let lv=1;lv<=szLv();lv++){
   if(!z.cf.includes(lv)){z.cf.push(lv);grantRewards([szReward(lv,false)]);n++}
-  if(z.prem&&!z.cp.includes(lv)){z.cp.push(lv);grantRewards([szReward(lv,true)]);n++}
+  if(z.prem&&!z.cp.includes(lv)&&szReward(lv,true).t!=='choice'){z.cp.push(lv);grantRewards([szReward(lv,true)]);n++}   // ٦٫٩٧: مستويا الاختيار يُستلمان بالاختيار
  }
- if(!n){toast('لا مكافآت جاهزة للاستلام');return}
- saveState();toast('استلمت '+n+' مكافأة','ok');if(window.FX)FX.win();
+ const pend=szPendChoice();
+ if(!n){toast(pend?'بقي لك اختيار مكافأة المستوى '+pend+' من السلّم':'لا مكافآت جاهزة للاستلام');return}
+ saveState();toast('استلمت '+szNum(n,'مكافأة واحدة','مكافأتين','مكافآت','مكافأةً')+(pend?' — وبقيت مكافأة تختارها في المستوى '+pend:''),'ok');if(window.FX)FX.win();
  refresh(()=>seasonScr(1));
 }
 function buyPassAsk(){
@@ -24065,54 +24224,135 @@ function buyPassAsk(){
  ov.querySelector('#qvy').onclick=()=>{ov.remove();
   if(S.gems<SZ_PASS_COST){toast('تحتاج '+SZ_PASS_COST+' جوهرة — اجمعها من الصناديق والمستويات');return}
   S.gems-=SZ_PASS_COST;SZ().prem=true;saveState();
-  toast('فُتحت التذكرة المميزة '+ico('crown',12));if(window.FX)FX.win();refresh(()=>seasonScr(1))};
+  toast('فُتحت التذكرة المميزة '+ico('crown',12));if(window.FX)FX.win();if(document.getElementById('szScr'))refresh(()=>seasonScr(1))};
 }
-function szChip(lane,lv){
- const z=SZ(),r=szReward(lv,lane==='p'),reached=lv<=szLv();
- const claimed=(lane==='p'?z.cp:z.cf).includes(lv);
- const lockedPrem=lane==='p'&&!z.prem;
- const st=claimed?'done':(reached&&!lockedPrem?'ready':'lock');
- return `<div class="szchip ${st} ${lane}" onclick="${claimed?'':(reached?`szClaim('${lane}',${lv})`:'')}">
-  <span class="szi" style="color:${r.c}">${ico(r.i,20)}</span>
-  <span class="szn2">${r.n}</span>
-  <span class="szst">${claimed?ico('check',13):(reached?(lockedPrem?ico('lock',13):ico('down',20)):ico('lock',12))}</span></div>`;
+/* ٦٫٩٧ — مستويا الاختيار (٢٥ و٧٥ للمميّز): واحدةٌ من أربع — نسخُ جيس، تعبير، جواهر، عملات */
+function szChoice(lv){const ok=k=>{try{return tlArenaOkItem('sk',k)}catch(e){return true}};   // ٦٫٩٦: لا نسخ جيسٍ قبل ساحته — جوكرٌ من رتبته بدلها
+ return lv===75?[ok('amber')?{t:'skc',k:'amber',v:6}:{t:'skw',r:'e',v:2},{t:'emote',k:'falcon'},{t:'gems',v:220},{t:'coins',v:5000}]:[ok('ruby')?{t:'skc',k:'ruby',v:12}:{t:'skw',r:'r',v:3},{t:'emote',k:'cool'},{t:'gems',v:120},{t:'coins',v:2500}]}
+function szChooseAsk(lv){
+ const r=szReward(lv,true);if(!r.opts)return;let sel=-1;
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox szChBox"><div class="qvt">اختر مكافأة واحدة</div>
+  <div class="qvd">المستوى ${lv} من المسار المميّز — تُمنح مكافأة واحدة فقط ولا تُبدَّل بعد التأكيد</div>
+  <div class="szChG">${r.opts.map((o,i)=>{const own=o.t==='emote'&&(S.emotes||[]).includes(o.k);
+   return `<div class="szOpt${own?' own':''}" data-i="${i}"><div class="szA">${szArt(o,46)}</div><div class="szV">${szVal(o)}</div><div class="szN">${szLbl(o)}${own?' · تملكه':''}</div></div>`}).join('')}</div>
+  <button class="rbtn" id="szChOk" disabled><span>تأكيد الاختيار</span></button>
+  <button class="btn g" id="szChNo" style="margin-top:9px">ليس الآن</button></div>`;
+ document.body.appendChild(ov);
+ ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
+ ov.querySelector('#szChNo').onclick=()=>ov.remove();
+ ov.querySelectorAll('.szOpt').forEach(el=>el.onclick=()=>{if(el.classList.contains('own')){toast('تملك هذا التعبير — اختر غيره');return}
+  sel=+el.dataset.i;ov.querySelectorAll('.szOpt').forEach(x=>x.classList.toggle('on',x===el));ov.querySelector('#szChOk').disabled=false});
+ ov.querySelector('#szChOk').onclick=()=>{if(sel<0)return;ov.remove();szPick(lv,sel)};
+}
+function szPick(lv,i){
+ const z=SZ(),r=szReward(lv,true),o=r.opts&&r.opts[i];
+ if(!o||!z.prem||lv>szLv()||z.cp.includes(lv))return;
+ z.cp.push(lv);z.pick=z.pick||{};z.pick[lv]=i;
+ grantRewards([o]);saveState();toast('استلمت المكافأة','ok');if(window.FX)FX.correct(3);
+ if(document.getElementById('szScr'))refresh(()=>seasonScr(1));
+}
+/* صورةُ المكافأة وقيمتُها واسمُها — للبطاقات وورقة الاختيار معًا */
+function szArt(r,sz){
+ if(r.t==='skw')return mgWildImg(r.r,sz);
+ if(r.t==='skc')return skImg(r.k,sz);
+ if(r.t==='emote')return face(r.k,sz);
+ return ico(r.i||(r.t==='gems'?'gem':r.t==='coins'?'coin':'gift'),sz,r.c);
+}
+function szVal(r){
+ if(r.t==='coins'||r.t==='gems')return (+r.v).toLocaleString('en-US');
+ if(r.t==='skw'||r.t==='skc')return '×'+(r.v|0);
+ return '';
+}
+function szLbl(r){
+ if(r.t==='coins')return 'عملة';
+ if(r.t==='gems')return /^صندوق/.test(r.n||'')?'جوهرة · صندوق':'جوهرة';
+ if(r.t==='skc')return 'نسخ جيس «'+tlNm('sk',r.k)+'»';
+ if(r.t==='skw')return 'جوكر جيس '+(TL_RAR[r.r]||TL_RAR.c).n;
+ if(r.t==='emote')return 'تعبير «'+((EMOTES.find(e=>e.k===r.k)||{}).n||'')+'»';
+ return r.n||'';
+}
+/* عدٌّ عربيٌّ سليم: مفرد، مثنًّى، ٣…١٠ جمعٌ، ١١ فأكثر مفردٌ منصوب */
+function szNum(n,one,two,few,many){return n===1?one:n===2?two:n<=10?n+' '+few:n+' '+many}
+/* أدنى مستوى اختيارٍ بلغته ولم تختر مكافأته بعد (للمميّز)، أو صفر */
+function szPendChoice(){const z=SZ();if(!z.prem)return 0;return [25,75].find(l=>l<=szLv()&&!z.cp.includes(l))||0}
+function szReadyCount(){const z=SZ(),lv=szLv();let n=0;for(let i=1;i<=lv;i++){if(!z.cf.includes(i))n++;if(z.prem&&!z.cp.includes(i)&&szReward(i,true).t!=='choice')n++}return n}
+let _szAll=false;
+/* الشريط العلويّ (التقدّم والترقية) يثبت أعلى الشاشة حين يمرّ: html وbody كلاهما overflow-x:hidden فلا ينفع sticky — تثبيتٌ بالتمرير،
+   وحاملٌ بارتفاعه حتّى لا يقفز المحتوى؛ على الشاشات القصيرة (<700) يبقى في مكانه */
+function szOnScroll(){
+ const lad=document.querySelector('.szLad'),t=lad&&lad.querySelector('.szTop');if(!t)return;
+ const b=lad.getBoundingClientRect(),h=t.offsetHeight,on=window.innerHeight>=700&&b.top<0&&b.bottom>h+40;
+ if(on){lad.style.setProperty('--szTopH',h+'px');lad.style.setProperty('--szW',b.width+'px')}
+ lad.classList.toggle('fx',on);
+}
+function szToggleAll(){
+ const c=document.getElementById('szcur'),y0=c?c.getBoundingClientRect().top:null;
+ _szAll=!_szAll;refresh(()=>seasonScr(1));
+ const n=document.getElementById('szcur');if(n&&y0!=null)window.scrollTo(0,Math.max(0,window.scrollY+n.getBoundingClientRect().top-y0));   // الصفّ الحاليّ يبقى مكانه على الشاشة
+ szOnScroll();
+}
+/* خليّةُ مكافأةٍ في السلّم: بطاقةٌ وفوقها لسانٌ أخضر «استلم» أو قفلٌ ذهبيّ أو علامةُ استلام */
+function szCard(lane,lv){
+ const z=SZ(),prem=lane==='p',r=szReward(lv,prem),reached=lv<=szLv();
+ const claimed=(prem?z.cp:z.cf).includes(lv),lockP=prem&&!z.prem;
+ const st=claimed?'done':lockP?'lockp':reached?'ready':'far';
+ const badge=claimed?`<span class="szBg ok">${ico('check',12)}</span>`:lockP?(r.t==='choice'?'':`<span class="szBg lk">${ico('lock',12,'#1A1206')}</span>`):reached?`<span class="szBg go">استلم</span>`:'';
+ const on=claimed?'':lockP?' onclick="buyPassAsk()"':reached?` onclick="szClaim('${lane}',${lv})"`:'';
+ if(r.t==='choice'){
+  const pk=claimed&&z.pick?z.pick[lv]:-1;
+  return `<div class="szCell ${lane} ${st} ch"${on}>${badge}<div class="szChT">${lockP?ico('lock',11,'#1A1206'):''}<span>اختر مكافأة</span>${lockP?ico('lock',11,'#1A1206'):''}</div>
+   <div class="szCh">${r.opts.map((o,i)=>`<div class="szC mini${i===pk?' pk':''}"><div class="szA">${szArt(o,30)}</div><div class="szV">${szVal(o)}</div><div class="szN">${szLbl(o)}</div></div>`).join('')}</div></div>`;
+ }
+ return `<div class="szCell ${lane} ${st}"${on}>${badge}<div class="szC"><div class="szA">${szArt(r,40)}</div><div class="szV">${szVal(r)}</div><div class="szN">${szLbl(r)}</div></div></div>`;
+}
+function szRow(lv,cur){
+ return `<div class="szT${cur?' cur':''}"${cur?' id="szcur"':''}>${szCard('p',lv)}${szCard('f',lv)}<div class="szD${lv<=szLv()?' on':''}"><b>${lv}</b></div></div>`;
 }
 function seasonScr(keep){
- const z=SZ(),lv=szLv();
- const prog=lv>=SZ_MAX?SZ_STEP:z.xp-lv*SZ_STEP;
+ const z=SZ(),lv=szLv(),full=lv>=SZ_MAX;
+ const prog=full?SZ_STEP:z.xp-lv*SZ_STEP;
  const days=Math.max(0,Math.ceil((SZ_END-Date.now())/86400000));
- let rows='';
- for(let i=1;i<=SZ_MAX;i++){
-  const ms=i%25===0||i===100;
-  rows+=`<div class="szrow ${ms?'ms':''}" ${i===Math.min(SZ_MAX,lv+1)?'id="szcur"':''}>
-   <div class="szlv ${i<=lv?'on':''}">${i}</div>${szChip('f',i)}${szChip('p',i)}</div>`;
- }
- go(`<div class="scr on">${tb('الموسم')}
- <div class="orn"><div class="in">${ornCorners()}
- <div style="text-align:center">
- <div style="font-size:30px">${ico('ticket',26)}</div>
- <div class="mtl" style="font-size:19px;margin-top:4px">أرشيف الزمن — الموسم 4</div>
- <div style="font-size:12px;color:var(--tx2);margin-top:4px">ينتهي بعد ${days} يوماً</div>
- <div style="display:flex;align-items:center;gap:10px;margin-top:12px">
-  <span class="qop2n" style="width:34px;height:34px;font-size:13px">${lv}</span>
-  <div style="flex:1"><div class="pbf"><div class="pbi"><i style="width:${prog}%"></i></div></div>
-   <div style="font-size:10px;color:var(--tx2);margin-top:3px">المستوى ${lv} من ${SZ_MAX} · ${prog}/${SZ_STEP} نقطة للمستوى التالي</div></div>
+ const ready=szReadyCount(),pend=szPendChoice();
+ if(!keep&&_keepY==null)_szAll=false;   // ٦٫٩٦: الرجوع إلى التذكرة يحفظ «عرض الكلّ»
+ const curLv=Math.max(1,lv);   // الصفّ المضاء: أعلى مستوًى بلغته (الأوّل قبل أيّ تقدّم)
+ const lo=_szAll?1:Math.max(1,Math.min(curLv-1,SZ_MAX-11)),hi=_szAll?SZ_MAX:lo+11;   // مستوًى سابق ثمّ الحاليّ ثمّ عشرة قادمة
+ let rows='';for(let i=lo;i<=hi;i++)rows+=szRow(i,i===curLv);
+ go(`<div class="scr on szScr" id="szScr">${tb('تذكرة الموسم')}
+ <div class="szHd"><div class="szHdR">
+  <div class="szTk">${ico('ticket',34)}</div>
+  <div class="szHdT"><div class="szHdK">تذكرة المكافآت — ${SZ_MAX} مستوى بمسارين</div><div class="szHdN mtl">أرشيف الزمن — الموسم 4</div>
+   <div class="szHdB"><span class="szHdS">${ico('timer',12)} ${days===0?'ينتهي اليوم':'ينتهي بعد '+szNum(days,'يوم واحد','يومين','أيام','يومًا')}</span>
+   ${ready?`<button class="szHdS act" onclick="szClaimAll()">${ico('gift',12)} استلام الجاهز <b>${ready}</b></button>`:''}</div></div>
+ </div></div>
+ <div class="szLad${_szAll?' all':''}">
+  <div class="szT szTop">
+   <div class="szCell p"><div class="szPen">${icoCircle('crown',32,'linear-gradient(180deg,#161E33,#0B101D)','#FFE9A8')}<div class="szPenT">المسار المميّز</div>
+    ${z.prem?`<div class="szPenOn">${ico('check',13)} مفعَّل</div>`:`<button class="szUp" onclick="buyPassAsk()">ترقية!</button><div class="szPenP">${SZ_PASS_COST} ${ico('gem',11)} أو ${usdTxt(CATALOG.get('season_pass').usd)}</div>`}</div></div>
+   <div class="szCell f"><div class="szLn">المسار المجّانيّ</div>
+    <div class="szPgR"><div class="szD st on"><b>${lv}</b></div><div class="szPlq">${ico('crown',15)}<span>${prog}/${SZ_STEP}</span></div></div>
+    <div class="szPb"><i style="width:${prog/SZ_STEP*100}%"></i></div>
+    <div class="szPl">${full?'اكتملت التذكرة — المستوى الأخير':'نقطة إلى المستوى '+(lv+1)}</div></div>
+  </div>
+  ${lo>1?`<div class="szMore top" onclick="szToggleAll()">${ico('up',13)} <span>${szNum(lo-1,'مستوى سابق واحد','مستويان سابقان','مستويات سابقة','مستوًى سابقًا')}${pend&&pend<lo?` · مكافأة تختارها في المستوى ${pend}`:''} — <b>الكلّ</b></span></div>`:''}
+  ${rows}
+  <div class="szMore" onclick="szToggleAll()">${_szAll?`${ico('up',13)} طيّ السلّم — حول مستواي`:`${ico('down',13)} ${hi<SZ_MAX?szNum(SZ_MAX-hi,'مستوى لاحق واحد','مستويان لاحقان','مستويات لاحقة','مستوًى لاحقًا')+' — ':''}<b>عرض الكلّ</b> (${SZ_MAX} مستوى)`}</div>
  </div>
- ${z.prem?`<div class="cch" style="display:inline-flex;margin-top:11px;color:var(--gold)">${ico('ticket',13)} التذكرة المميزة مفعّلة ${ico('crown',13)}</div>`
-  :`<button class="btn gd" style="margin-top:12px" onclick="buyPassAsk()">${ico('gem',14)} التذكرة المميزة — ${SZ_PASS_COST} جوهرة <span class="prctag">أو ${usdTxt(CATALOG.get('season_pass').usd)}</span></button>`}
- <button class="btn g" style="margin-top:9px" onclick="szClaimAll()">${ico('gift',15)} استلام كل الجاهز</button>
- </div></div></div>
- <div class="wb" style="text-align:start;margin-top:12px">${ico('info',13)} <b>كيف يتقدم الباس؟</b>
- بالأداء لا بالفوز فقط: نقاط كل جولة تلعبها تتحول نقاطَ موسم — كل إجابة صحيحة وسرعتُها وصعوبةُ سؤالها وسلاسلُك المتتالية.
- الفوز يضيف <b>+30</b> والخسارة تمنحك <b>+10</b> على الأقل. كل <b>100 نقطة = مستوى</b>، حتى المستوى 100.</div>
- <div class="wb" style="text-align:start;margin-top:8px">${ico('ticket',13)} <b>ماذا يضيف المميز؟ ${ico('crown',13)}</b>
- جواهر مضاعفة (60 بدل 15 كل 5 مستويات + دفعتا 150 و200)، إطاران حصريان لصورتك،
- تعبيران حصريان («توتّر» و«الميداليّة»)، وجوكرات أندر حتى جوكرين أسطوريين في المستوى 100.</div>
- <div class="szhead"><span class="szlv" style="visibility:hidden">0</span>
-  <span class="szht">${ico('user',13)} مجاني</span><span class="szht p">${ico('ticket',13)} مميز ${ico('crown',13)}</span></div>
- <div class="szlist">${rows}</div>
- <div class="note">تكسب نقاط الموسم من كل جولة تلعبها — والفوز يمنحك أكثر. كل ${SZ_STEP} نقطة = مستوى.</div></div>`);
- if(!keep)setTimeout(()=>{if(Date.now()-_lastRestoreAt<500)return;const c=document.getElementById('szcur');if(c)c.scrollIntoView({block:'center',behavior:'instant'})},60);
+ <div class="wb" style="text-align:start;margin-top:14px">${ico('info',13)} <b>كيف تتقدّم التذكرة؟</b>
+ بالأداء لا بالفوز فقط: نقاط كلّ جولة تلعبها تتحوّل نقاطَ موسم — كلّ إجابة صحيحة وسرعتُها وصعوبةُ سؤالها وسلاسلُك المتتالية.
+ الفوز يضيف <b>+30</b> والخسارة تمنحك <b>+10</b> على الأقلّ. كلّ <b>${SZ_STEP} نقطة = مستوى</b>، حتّى المستوى ${SZ_MAX}.</div>
+ <div class="wb" style="text-align:start;margin-top:8px">${ico('ticket',13)} <b>ماذا يضيف المميّز؟ ${ico('crown',13)}</b>
+ جواهر مضاعفة (60 بدل 15 كلّ 5 مستويات + دفعتا 150 و200)، إطاران حصريّان لصورتك، تعبيران حصريّان («توتّر» و«الميداليّة»)،
+ مكافأة تختارها بنفسك في المستويين 25 و75، وجوكرات أندر حتّى جوكرين أسطوريّين في المستوى ${SZ_MAX}.</div>
+ <div class="szOkW"><button class="rbtn szOk" onclick="back()"><span>موافق</span></button></div></div>`);
+ if(!window._szScrollOn){window._szScrollOn=1;addEventListener('scroll',szOnScroll,{passive:true});addEventListener('resize',szOnScroll)}
+ szOnScroll();
+ if(!keep)setTimeout(()=>{if(Date.now()-_lastRestoreAt<500)return;const c=document.getElementById('szcur'),t=document.querySelector('.szTop');if(!c)return;
+  const sh=t&&window.innerHeight>=700?t.offsetHeight:0,r=c.getBoundingClientRect();   // الصفّ الحاليّ تحت الشريط المثبَّت إن كان خارج المرئيّ
+  const lim=window.innerHeight-130;   // فوق زرّ «موافق» وشريط التنقّل
+  if(r.bottom>lim)window.scrollTo(0,Math.max(0,window.scrollY+Math.min(r.bottom-lim,r.top-sh-8)));
+  else if(r.top<sh)window.scrollTo(0,Math.max(0,window.scrollY+r.top-sh-8));
+  szOnScroll()},60);
 }
 
 // ── المزيد ──
@@ -24405,6 +24645,22 @@ body .arHeroN,body .arHeroTr b,body .finTrRow b,body .aruN,body .aruT,body .prcb
 body .tlTab,body .fc,body .segC button b,body .stc .v,body .pfNm,body .pfRk,body .pfTr,body .hmCur u,body .hmArena u,body .sl,body .ghHero .nm,body .plRow .t,body .hmDay .hd .t b,
 body .rs h2,body .cfp,body .usd,body .pkPr,body .pkNm,body .shChestN,body .shChestP,body .tlHd .tlT,body .tlHd .tlLv,body .lvB,body .csLv,body .hmLv,body .ghRank .rt,body .arMBtn,body .arReady{font-family:var(--fd)}
 body .tbar h2{font-size:19px;font-weight:700}
+/* ═══ ٦٫٩٦ — زرّ الرجوع المصمَّم وعناوين الصفحات ═══ */
+body .bk{position:relative;width:44px;height:44px;padding:0;border-radius:50%;border:2px solid transparent;color:#FFE9A8;cursor:pointer;
+ background:radial-gradient(circle at 50% 36%,#27335F 0%,#141C3B 56%,#0A1026 100%) padding-box,linear-gradient(160deg,#FFF3C9 0%,#E8B23A 32%,#8A5E14 60%,#F2CF72 100%) border-box;
+ box-shadow:0 3px 0 #5A3E0C,0 8px 16px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,244,214,.2),inset 0 -6px 10px rgba(0,0,0,.38);
+ display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .08s ease,box-shadow .08s ease;-webkit-tap-highlight-color:transparent}
+body .bk::before{content:'';position:absolute;left:7px;right:7px;top:3px;height:40%;border-radius:50% 50% 42% 42%/62% 62% 38% 38%;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0));pointer-events:none}
+body .bk svg{position:relative;width:22px;height:22px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.65)) drop-shadow(0 0 5px rgba(232,178,58,.4))}
+body .bk:active{transform:translateY(2px) scale(.96);box-shadow:0 1px 0 #5A3E0C,0 4px 10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,244,214,.14),inset 0 -4px 8px rgba(0,0,0,.42)}
+body .tbar{position:relative}
+body .tbar::after{content:'';position:absolute;left:16%;right:16%;bottom:6px;height:1px;background:linear-gradient(90deg,rgba(232,178,58,0),rgba(232,178,58,.42),rgba(232,178,58,0));pointer-events:none}
+body .tbar h2{font-family:var(--fd);color:#F8E9C2;text-shadow:0 2px 0 rgba(0,0,0,.55),0 0 14px rgba(232,178,58,.22);line-height:1.25}
+body .tbar h2::before,body .tbar h2::after{content:'';display:inline-block;vertical-align:middle;width:40px;height:12px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='12'%3E%3Cdefs%3E%3ClinearGradient id='g' gradientUnits='userSpaceOnUse' x1='0' y1='0' x2='28' y2='0'%3E%3Cstop offset='0' stop-color='%23E8B23A' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23F2CF72'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='5.3' width='28' height='1.4' rx='.7' fill='url(%23g)'/%3E%3Ccircle cx='23' cy='6' r='1.3' fill='%23F2CF72'/%3E%3Cpath d='M34 1.2L38.8 6L34 10.8L29.2 6Z' fill='%23FFE9A8'/%3E%3Cpath d='M34 3.6L36.4 6L34 8.4L31.6 6Z' fill='%23B9841E'/%3E%3C/svg%3E") no-repeat center/contain;opacity:.9}
+body .tbar h2::before{margin-inline-end:9px;transform:scaleX(-1)}
+body .tbar h2::after{margin-inline-start:9px}
+[dir=ltr] body .tbar h2::before{transform:none}[dir=ltr] body .tbar h2::after{transform:scaleX(-1)}
+@media (max-width:359px){body .tbar h2::before,body .tbar h2::after{display:none}}
 body .sl{font-size:13.5px;font-weight:700;letter-spacing:.02em}
 body .lt{font-size:14px;font-weight:700;color:#F1F4FA}
 body .ls{font-size:11px;line-height:1.55}
@@ -24492,7 +24748,7 @@ body .ghSk .skIm img,body .ghSk .skIm svg{width:36px;height:36px;border-radius:5
 .nav .nvSk img,.nav .nvSk svg{width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(232,178,58,.6)}
 /* تحدّي الاثني عشر */
 body .chHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,#3A2A0E,#0C1222 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
-body .chHeroRays{position:absolute;left:50%;top:30%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.10) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 30%);mask:radial-gradient(circle,#000 0,transparent 30%);animation:arSpin 40s linear infinite}
+body .chHeroRays{position:absolute;left:50%;top:30%;width:54vmax;height:54vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;contain:strict;background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.10) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle closest-side,#000 0,transparent 95%);mask:radial-gradient(circle closest-side,#000 0,transparent 95%);animation:arSpin 40s linear infinite}
 body .chHeroT{position:relative;font-family:var(--fd);font-size:19px;font-weight:700;color:#F6E7C6}
 body .chHeroN{position:relative;display:inline-flex;align-items:baseline;gap:6px;margin-top:6px}
 body .chHeroN .rico{width:26px!important;height:26px!important;align-self:center}
@@ -24522,6 +24778,19 @@ body .arOfW{flex-shrink:0;display:flex;flex-direction:column;align-items:center;
 body .arOfW .rico{width:16px!important;height:16px!important;vertical-align:-3px}
 body .arOfB{display:flex;gap:8px;margin:12px 0}body .arOfI{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;border-radius:12px;background:rgba(6,10,20,.55);border:1px solid var(--lxHair2)}
 body .arOfI .arMArt,body .arOfI img,body .arOfI .rico{width:44px;height:44px}body .arOfI s{text-decoration:none;font-size:10px;font-weight:800;color:#F6E7C6;text-align:center}
+body .avPic{display:inline-flex;border-radius:50%;overflow:hidden;position:relative;vertical-align:middle;box-shadow:inset 0 0 0 1px rgba(255,233,168,.32),inset 0 -8px 14px rgba(0,0,0,.38)}
+body .avPic img{width:100%;height:100%;object-fit:cover;object-position:50% 8%;display:block;transform:scale(1.08);transform-origin:50% 22%}
+body .avPk{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+body .avPkC{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px 7px;border-radius:14px;background:linear-gradient(180deg,#161E33,#0B101D);border:1px solid var(--lxHair2);cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,244,214,.06)}
+body .avPkC.on{border-color:#FFE9A8;box-shadow:inset 0 0 0 1px #FFE9A8,0 0 18px rgba(232,178,58,.35)}
+body .avPkC span{font-size:11px;font-weight:800;color:#DCE3F2;line-height:1.2;text-align:center}
+body .avPkC.on span{color:#FFE9A8}
+body .avPkC.cu{grid-column:1/-1;flex-direction:row;justify-content:flex-start;gap:12px;padding:8px 12px}
+body .avPkC.cu span{text-align:start;font-size:12.5px}
+body .avPkC.cu small{display:block;font-size:10.5px;font-weight:700;color:#9AA6C2;margin-top:2px}
+body .avPkC.cu.on small{color:#D9C08A}
+body .avPkC.lk .avPic{filter:grayscale(.85) brightness(.5)}
+body .avPkC i.lk{position:absolute;top:7px;inset-inline-end:7px;display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:800;color:#FFE9A8;background:rgba(0,0,0,.6);border-radius:8px;padding:2px 5px;font-style:normal}
 body .lkRail{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:9px;font-size:10.5px;font-weight:800;color:#F6E7C6}
 body .lkRail i{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14)}
 body .lkRail i.on{background:linear-gradient(180deg,#FFE9A8,#D9A93C);border-color:#FFE9A8;box-shadow:0 0 6px rgba(255,233,168,.6)}
@@ -24578,7 +24847,7 @@ body .mgW b{position:absolute;right:-6%;bottom:-6%;width:40%;height:40%;border-r
 body .mgW b .ico{width:70%;height:70%}
 /* شاشة الساحات */
 body .arHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,var(--s1),var(--s2) 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
-body .arHeroRays{position:absolute;left:50%;top:40%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 32%);mask:radial-gradient(circle,#000 0,transparent 32%);animation:arSpin 40s linear infinite}
+body .arHeroRays{position:absolute;left:50%;top:40%;width:57vmax;height:57vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;contain:strict;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle closest-side,#000 0,transparent 95%);mask:radial-gradient(circle closest-side,#000 0,transparent 95%);animation:arSpin 40s linear infinite}
 @keyframes arSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 body .arHeroEm{position:relative;display:flex;justify-content:center;filter:drop-shadow(0 12px 18px rgba(0,0,0,.6))}
 body .arHeroN{position:relative;font-size:23px;font-weight:700;color:var(--g);margin-top:8px;text-shadow:0 2px 10px rgba(0,0,0,.6)}
@@ -24590,25 +24859,86 @@ body .arBarW{position:relative;margin-top:14px}
 body .arBarL{display:flex;justify-content:space-between;font-size:10.5px;font-weight:800;color:#C9D2E8;margin-top:5px}
 body .arGate{position:relative;margin-top:10px;font-size:11px;font-weight:800;color:#E8D9B0;display:inline-flex;align-items:center;gap:5px}
 body .arReady{margin-inline-start:8px;font-size:10px;font-weight:700;color:#1A1206;padding:2px 9px;border-radius:9px;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 0 10px rgba(255,233,168,.5)}
-body .arRoad{display:flex;gap:8px;overflow-x:auto;padding:6px 2px 12px;scroll-snap-type:x proximity}
-body .arM{flex:0 0 100px;scroll-snap-align:center;border-radius:14px;padding:9px 6px 8px;text-align:center;position:relative;background:var(--lxCard);border:1px solid var(--lxHair2);box-shadow:inset 0 1px 0 rgba(255,244,214,.06)}
-body .arM.big{flex-basis:112px}
-body .arM.done{opacity:.55}body .arM.lock{opacity:.72}body .arM.lock .arMArt{filter:grayscale(.7) brightness(.6)}
-body .arM.next{border-color:var(--lxHair)}
-body .arM.ready{border-color:#FFE9A8;box-shadow:0 0 0 1px rgba(255,233,168,.4),0 0 18px rgba(232,178,58,.45);cursor:pointer;animation:puls 1.6s ease-in-out infinite}
-body .arMTr{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:900;color:#D9B76E;font-variant-numeric:tabular-nums}
-body .arMTr .rico{width:12px!important;height:12px!important}
 body .arMArt{display:flex;justify-content:center;align-items:center;height:54px;margin:4px auto 2px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6))}
 body .arMArt img,body .arMArt .rico{width:48px;height:48px;object-fit:contain}body .arMArt>div{width:48px}
-body .arMN{font-size:10px;font-weight:800;color:#F6E7C6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-body .arMBtn{margin-top:6px;font-size:12px;font-weight:700;color:#1A1206;padding:4px 0;border-radius:9px;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 2px 0 #6E4E12}
-body .arMSt{margin-top:6px;font-size:10px;color:#8B96B6;height:20px;display:flex;align-items:center;justify-content:center}
-body .arRow.now{border-color:var(--lxHair);background:linear-gradient(180deg,rgba(255,233,168,.08),transparent),var(--lxCard)}
-body .arRowEm{flex-shrink:0;display:flex}
+/* ٦٫٩٦ — طريق الكؤوس العموديّ (كلاش رويال): أقسام الساحات ولوحاتها اللاصقة ومنصّات الجوائز — تدرّجاتٌ وتحويلاتٌ فقط، بلا backdrop-filter ولا blur */
+body .scr.arV{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+/* html وbody كلاهما overflow-x:hidden فيصير body حاويةَ تمريرٍ خاصّةً به ولا يلتصق أيّ sticky بأعلى النافذة؛ clip يقصّ الأفقيّ
+   بلا حاوية تمرير — على هذه الشاشة فقط (المتصفّحات التي لا تعرف :has أو clip تبقى كما كانت: بلا التصاق) */
+body:has(.scr.arV){overflow-x:clip}
+body .arHero.arHv{padding:14px 14px 12px;text-align:start}
+body .arHvRow{position:relative;display:flex;align-items:center;gap:12px}
+body .arHvB{min-width:0;flex:1}
+body .arHv .arHeroEm{flex:0 0 auto}
+body .arHv .arHeroN{margin-top:0;font-size:20px;line-height:1.2}
+body .arHv .arHeroTr{margin-top:6px;padding:4px 12px;gap:6px}
+body .arHv .arHeroTr .rico{width:24px!important;height:24px!important}
+body .arHv .arHeroTr b{font-size:26px}
+body .arHv .arBarW{margin-top:12px}
+body .arHvSt{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+body .arHvSt span{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:#E8D9B0;padding:3px 9px;border-radius:9px;background:rgba(6,10,20,.5);border:1px solid var(--lxHair2);font-variant-numeric:tabular-nums}
+body .trv{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+body .trvA{position:relative;padding:8px 8px 10px}
+body .trvA:not(.open){padding-bottom:8px}
+body .trvBg{position:absolute;inset:0;border-radius:20px;overflow:hidden;background:radial-gradient(70% 46% at 50% 0%,rgba(var(--f),.32),transparent 70%),linear-gradient(180deg,var(--s1),var(--s2) 62%);background-size:cover;background-position:center;border:1px solid rgba(var(--f),.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px -18px rgba(0,0,0,.9)}
+body .trvBg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px),repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px)}
+body .trvA.fut .trvBg{opacity:.5}
+body .trvA.fut .trvPl{opacity:.86}
+body .trvPl{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:3;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:9px;padding:8px 10px;border-radius:15px;cursor:pointer;-webkit-tap-highlight-color:transparent;background:linear-gradient(180deg,rgba(var(--f),.28),rgba(var(--f),.05) 60%),linear-gradient(180deg,#151D34,#0A0F1E);border:1px solid rgba(var(--f),.55);box-shadow:0 4px 0 #060912,0 10px 24px -8px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.14)}
+body .trvNo{display:flex;flex-direction:column;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:radial-gradient(circle at 50% 30%,rgba(var(--f),.55),rgba(6,9,18,.8) 78%);border:1px solid rgba(var(--f),.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
+body .trvNo b{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1;color:#FFF1C4;text-shadow:0 1px 0 rgba(0,0,0,.6)}
+body .trvNo s{text-decoration:none;font-size:8.5px;font-weight:800;color:#E9DDBC;margin-top:2px;line-height:1}
+body .trvPlB{min-width:0}
+body .trvNm{display:block;font-family:var(--fd);font-size:16px;font-weight:700;color:var(--g);line-height:1.25;text-shadow:0 1px 0 rgba(0,0,0,.7),0 0 14px rgba(var(--f),.35)}
+body .trvSum{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;font-size:10.5px;font-weight:800;color:#CFD7EA;margin-top:2px;line-height:1.5}
+body .trvSum .arReady{margin:0;font-style:normal}
+body .trvUn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:10px;color:#D9C9A0;margin-top:3px;line-height:1.5}
+body .trvTh{display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border-radius:11px;background:rgba(6,9,18,.62);border:1px solid rgba(217,183,110,.32);font-family:var(--fd);font-weight:700;font-size:13px;color:#FFF1C4;font-variant-numeric:tabular-nums;white-space:nowrap}
+body .trvTh .rico{width:16px!important;height:16px!important}
+body .trvChev{display:flex;opacity:.85;transform:rotate(-90deg);transition:transform .25s ease}
+body .trvA.open .trvChev{transform:rotate(90deg)}
+body .trvL{position:relative;padding:6px 2px 2px}
+body .trvA:not(.open) .trvL{display:none}
+body .trvL::before{content:'';position:absolute;top:8px;bottom:8px;left:24px;border-left:2px dashed rgba(217,183,110,.26)}
+body .trvM{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 46px;align-items:center;gap:6px;margin:10px 0 14px}
+body .trvTr{justify-self:center;font-family:var(--fd);font-size:11.5px;font-weight:700;line-height:1;color:#E9C97A;font-variant-numeric:tabular-nums;padding:4px 6px;border-radius:8px;background:#0A0F1E;border:1px solid rgba(217,183,110,.3);unicode-bidi:isolate;direction:ltr}
+body .trvPlat{position:relative;display:flex;align-items:center;gap:10px;min-height:66px;padding:7px 9px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(255,255,255,0) 42%),linear-gradient(180deg,#1B2542,#0E1529);border:1px solid rgba(217,183,110,.34);box-shadow:0 6px 0 #070B16,0 7px 0 rgba(217,183,110,.22),0 16px 22px -10px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,244,214,.12)}
+body .trvArt{flex:0 0 auto;width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:13px;background:radial-gradient(circle at 50% 38%,rgba(var(--f),.3),rgba(6,9,18,.25) 72%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+body .trvArt .arMArt{margin:0;filter:none}
+body .trvM.big .trvArt{width:64px;height:64px}
+body .trvM.big .trvArt .arMArt{transform:scale(1.14)}
+body .trvLbl{flex:1;min-width:0;font-size:12.5px;font-weight:800;color:#F6E7C6;line-height:1.35;overflow-wrap:anywhere}
+body .trvLbl s{display:block;text-decoration:none;font-size:10px;font-weight:700;color:#BFAE7E;margin-top:2px}
+body .trvSt{flex:0 0 auto;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(6,9,18,.6);border:1px solid rgba(255,255,255,.08)}
+body .trvSt.ok{background:rgba(60,160,90,.18);border-color:rgba(159,231,181,.45)}
+body .trvSt.nx{border-color:rgba(255,233,168,.5);background:rgba(232,178,58,.14)}
+body .trvBtn{flex:0 0 auto;border:0;padding:0;border-radius:11px;font-family:var(--fd);cursor:pointer;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 3px 0 #6E4E12,0 0 16px rgba(232,178,58,.45);-webkit-tap-highlight-color:transparent}
+body .trvBtn>span{display:block;padding:8px 14px;font-size:13px;font-weight:700;color:#1A1206;text-shadow:0 1px 0 rgba(255,246,220,.6)}
+body .trvBtn:active{transform:translateY(2px);box-shadow:0 1px 0 #6E4E12}
+body .trvM.done .trvPlat{opacity:.55}
+body .trvM.done .trvLbl{color:#CFD7EA}
+body .trvM.lock .trvPlat{opacity:.82}
+body .trvM.lock .trvArt .arMArt{opacity:.5}
+body .trvM.next .trvPlat{opacity:1;border-color:rgba(255,233,168,.75);box-shadow:0 6px 0 #070B16,0 7px 0 rgba(232,178,58,.4),0 0 0 1px rgba(255,233,168,.22),0 0 20px rgba(232,178,58,.25),inset 0 1px 0 rgba(255,244,214,.14)}
+body .trvM.next .trvTr,body .trvM.ready .trvTr{color:#FFF1C4;border-color:rgba(255,233,168,.6)}
+body .trvM.ready .trvPlat{border-color:#FFE9A8;background:linear-gradient(180deg,rgba(255,233,168,.16),rgba(255,233,168,0) 45%),linear-gradient(180deg,#22305A,#101A36);box-shadow:0 6px 0 #070B16,0 7px 0 rgba(232,178,58,.5),0 0 0 1px rgba(255,233,168,.35),0 0 22px rgba(232,178,58,.35),inset 0 1px 0 rgba(255,244,214,.16)}
+body .trvM.hot .trvBtn{animation:trvPulse 1.6s ease-in-out infinite}
+@keyframes trvPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+body .trvYou{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;margin:4px 0 14px;margin-inline-end:52px}
+body .trvYou i{position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,transparent,rgba(255,233,168,.9) 18%,rgba(255,233,168,.9) 82%,transparent)}
+body .trvYouP{position:relative;display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:14px;background:linear-gradient(180deg,#FFE9A8,#D9A93C);color:#1A1206;font-family:var(--fd);font-weight:700;font-size:12px;box-shadow:0 3px 0 #6E4E12,0 0 18px rgba(232,178,58,.5)}
+body .trvYouP bdi{font-size:15px;font-variant-numeric:tabular-nums;line-height:1}
+body .trvYouP s{text-decoration:none;font-size:11px;font-weight:800}
+body .trvYouP .rico{width:15px!important;height:15px!important}
+body .trvYou em{position:relative;font-style:normal;font-size:10.5px;font-weight:800;color:#F6E7C6;background:rgba(6,9,18,.72);border:1px solid rgba(217,183,110,.25);padding:2px 9px;border-radius:8px}
+body .trvOkW{position:fixed;left:50%;transform:translateX(-50%);width:100%;max-width:520px;bottom:calc(58px + env(safe-area-inset-bottom,0px));z-index:30;display:flex;justify-content:center;padding:14px 14px 10px;box-sizing:border-box;pointer-events:none;background:linear-gradient(to top,rgba(8,11,20,.96) 55%,rgba(8,11,20,0))}
+body .trvOkW .rbtn{pointer-events:auto;min-width:210px;min-height:44px}
+@media (max-width:359px){body .trvPl{gap:6px;padding:8px}body .trvTh{font-size:11.5px;padding:4px 6px}body .trvNo{width:38px;height:38px}body .trvNm{font-size:14.5px}body .trvM{grid-template-columns:minmax(0,1fr) 42px}body .trvL::before{left:22px}body .trvYou{margin-inline-end:48px}body .trvArt{width:50px;height:50px}body .trvPlat{gap:8px;padding:7px 8px}body .trvLbl{font-size:12px}body .trvBtn>span{padding:7px 11px;font-size:12px}}
+@media (prefers-reduced-motion:reduce){body .trvM.hot .trvBtn{animation:none}}
 /* إعلان الساحة الجديدة */
 body .aruOv{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:24px;text-align:center;background:radial-gradient(circle at 50% 42%,rgba(var(--f),.28),rgba(var(--f),0) 46%),#05070E;animation:aruIn .25s ease both}   /* معتمٌ فعلًا: الرئيسيّة لا تُقرأ من خلفه */
 @keyframes aruIn{from{opacity:0}to{opacity:1}}@keyframes aruPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
-body .aruRays{position:absolute;left:50%;top:42%;width:120vmax;height:120vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.2) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 42%);mask:radial-gradient(circle,#000 0,transparent 42%);animation:arSpin 26s linear infinite}
+body .aruRays{position:absolute;left:50%;top:42%;width:75vmax;height:75vmax;transform:translate(-50%,-50%);pointer-events:none;will-change:transform;contain:strict;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.2) 0 6deg,transparent 6deg 18deg);-webkit-mask:radial-gradient(circle closest-side,#000 0,transparent 95%);mask:radial-gradient(circle closest-side,#000 0,transparent 95%);animation:arSpin 26s linear infinite}
 body .aruOv.sea .aruT{font-size:18px;color:#FFE9A8}
 body .aruT{position:relative;font-size:15px;font-weight:700;letter-spacing:.08em;color:#F6E7C6;animation:aruPop .4s .1s ease both}
 body .aruEm{position:relative;animation:aruDrop .8s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 18px 24px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(var(--f),.6))}
@@ -44988,9 +45318,12 @@ splash();
  // إيقاف كامل حين لا تُرى الصفحة أو حين تعمل ساحة لعب — إطارات اللعبة أهمّ من الزينة
  try{document.addEventListener('visibilitychange',function(){_bgPaused=document.hidden?1:0})}catch(e){}
  var _slow=false;try{_slow=matchMedia('(prefers-reduced-motion:reduce)').matches}catch(e){}
+ let _bgHid=null;
  function frame(ts){
+  if(_bgHid==null){try{_bgHid=getComputedStyle(cv).display==='none'}catch(e){_bgHid=false}}
+  if(_bgHid)return;   // ٦٫٩٦: الخلفيّة الفنّيّة تخفي هذا القماش — لا رسم تحت طبقةٍ مخفيّة (كان يرسم ٦٠ جوهرة/ثانية بلا فائدة)
   requestAnimationFrame(frame);
-  if(_slow){cv.style.opacity='.55';return}
+  if(_slow){if(cv.style.opacity!=='0.55')cv.style.opacity='0.55';return}
   if(_bgPaused||document.querySelector('#arena.on')||document.querySelector('.unoBoard,#caCv')){   // الساحة تبقى في الصفحة مخفيّة — نسأل عن ظهورها لا وجودها
    if(cv.style.opacity!=='0.35')cv.style.opacity='0.35';
    return;
@@ -44999,7 +45332,7 @@ splash();
   // خفوت أثناء السؤال — الجمال لا يزاحم التركيز — مع أرضية الساحة المنظورية
   const quiz=!!document.querySelector('.qtx,.qbox');
   floor.classList.toggle('on',quiz);
-  dim+=((quiz?.3:.66)-dim)*.06;cv.style.opacity=dim.toFixed(2);
+  dim+=((quiz?.3:.66)-dim)*.06;{const dv=dim.toFixed(2);if(cv.style.opacity!==dv)cv.style.opacity=dv}
   cx.clearRect(0,0,W,H);
   for(const d of DUST){d.y-=d.v;if(d.y<-.02)d.y=1.02;const dx=d.x*W+Math.sin(ts/1600+d.ph)*7,dy=d.y*H;
    cx.globalAlpha=.22+.28*Math.abs(Math.sin(ts/900+d.ph));cx.fillStyle=d.g?'#FFE9A8':'#D9C8FF';cx.beginPath();cx.arc(dx,dy,d.s,0,6.283);cx.fill()}
@@ -45026,8 +45359,9 @@ splash();
 
  // قصاصات احتفال خفيفة
  const fc=document.createElement('canvas');fc.id='fxc';document.body.appendChild(fc);
- const fx=fc.getContext('2d');let P=[];
- function frs(){fc.width=innerWidth*DPR;fc.height=innerHeight*DPR;fc.style.width=innerWidth+'px';fc.style.height=innerHeight+'px';fx.setTransform(DPR,0,0,DPR,0,0)}
+ const fx=fc.getContext('2d');let P=[],_fxOn=false;const FD=Math.min(DPR,1.5);   // ٦٫٩٦
+ function fxKick(){if(!_fxOn){_fxOn=true;requestAnimationFrame(floop)}}
+ function frs(){fc.width=innerWidth*FD;fc.height=innerHeight*FD;fc.style.width=innerWidth+'px';fc.style.height=innerHeight+'px';fx.setTransform(FD,0,0,FD,0,0)}
  frs();addEventListener('resize',frs);
  /* ٦٫٩٣ — «الألعاب الناريّة شيء طفوليّ»: لا صواريخ ولا قصاصات ملوّنة. الاحتفال ضوء: وميضٌ ذهبيّ ناعم من المنتصف،
     خيوط ضوءٍ رفيعة تمتدّ كأشعّة عدسة، وغبارٌ ذهبيّ يصعد ببطء ويخفت — لمسة الألعاب الفاخرة لا المهرجان */
@@ -45035,17 +45369,19 @@ splash();
  function burst(x,y,n,pow){ // شرارٌ ذهبيّ صغير — للإجابة الصحيحة
   for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=(.3+Math.random()*.7)*pow;
    P.push({t:'s',x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-pow*.25,c:GOLD[(Math.random()*GOLD.length)|0],life:1,dl:.014+Math.random()*.01,w:1.2+Math.random()*1.4})}
+  fxKick();
  }
- function flash(x,y,R){P.push({t:'f',x,y,R,life:1,dl:.022})}
- function streaks(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2;P.push({t:'k',x,y,a,L:120+Math.random()*220,life:1,dl:.016+Math.random()*.01,w:.6+Math.random()*1.2})}}
+ function flash(x,y,R){P.push({t:'f',x,y,R,life:1,dl:.022});fxKick()}
+ function streaks(x,y,n){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2;P.push({t:'k',x,y,a,L:120+Math.random()*220,life:1,dl:.016+Math.random()*.01,w:.6+Math.random()*1.2})}fxKick()}
  let moteSpr=null;
  function moteSprite(){if(moteSpr)return moteSpr;const c=document.createElement('canvas');c.width=c.height=32;const g=c.getContext('2d');
   const rg=g.createRadialGradient(16,16,0,16,16,16);rg.addColorStop(0,'rgba(255,241,196,1)');rg.addColorStop(.35,'rgba(255,233,168,.75)');rg.addColorStop(1,'rgba(255,220,140,0)');
   g.fillStyle=rg;g.fillRect(0,0,32,32);return moteSpr=c}
  function motes(n){for(let i=0;i<n;i++)P.push({t:'m',x:Math.random()*innerWidth,y:innerHeight*.55+Math.random()*innerHeight*.5,vx:(Math.random()-.5)*.25,vy:-(.35+Math.random()*.9),
-  life:1,dl:.0035+Math.random()*.004,w:.9+Math.random()*2.2,c:GOLD[(Math.random()*GOLD.length)|0],ph:Math.random()*6.28})}
- function floop(){requestAnimationFrame(floop);
-  if(!P.length){fx.clearRect(0,0,innerWidth,innerHeight);return}
+  life:1,dl:.0035+Math.random()*.004,w:.9+Math.random()*2.2,c:GOLD[(Math.random()*GOLD.length)|0],ph:Math.random()*6.28});fxKick()}
+ function floop(){
+  if(!P.length){fx.clearRect(0,0,innerWidth,innerHeight);_fxOn=false;return}   // ٦٫٩٦: تنام الحلقة حين لا جسيمات — كان يمسح قماشًا بحجم الشاشة كلّ إطار إلى الأبد
+  requestAnimationFrame(floop);
   fx.clearRect(0,0,innerWidth,innerHeight);
   P=P.filter(p=>p.life>0);
   const now=performance.now()/1000;
@@ -45071,7 +45407,6 @@ splash();
    }
   }
   fx.globalCompositeOperation='source-over';fx.globalAlpha=1}
- requestAnimationFrame(floop);
  const reduced=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}};
  window.FX={
   correct(st){if(reduced())return;const q=document.querySelector('.qtx,.qbox');
