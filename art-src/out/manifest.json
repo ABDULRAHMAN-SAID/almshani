@@ -23,5 +23,13 @@
  "ui_hero_carrom": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222034510_d5a19a62_1790222035018_0cd05536.png|bg|1100|2",
  "ui_mode_knowledge": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222035888_93cba4cd_1790222036388_a55f3c14.png|bg|720|2",
  "ui_mode_uno": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222202401_214e5dd0_1790222202833_fc96f893.png|bg|720|2",
- "ui_chest_open": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222207283_1ed62169_1790222207856_da7033ec.png|key|512|2"
+ "ui_chest_open": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222207283_1ed62169_1790222207856_da7033ec.png|key|512|2",
+ "ic_gift": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222922662_bc5688f0_1790222923748_1eeb5705.png|key|256|2",
+ "ic_missions": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222926414_7540ad6d_1790222926569_081f4689.png|key|256|2",
+ "ic_challenge": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222930865_e79cc9cc_1790222931068_c700f1f7.png|key|256|2",
+ "ic_trophy": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222933531_dbe3ff9e_1790222933669_3f9b67ea.png|key|256|2",
+ "ic_friends": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223579988_85d77fc7_1790223580121_b5eda7e1.png|key|256|2",
+ "ic_bell": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223582408_bccaa672_1790223582565_a4ce2052.png|key|256|2",
+ "ic_coin": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223586185_7b7f9a10_1790223586674_f222a657.png|key|256|2",
+ "ic_gem": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790223592072_e94d660f_1790223592704_3f22999e.png|key|256|2"
 }
