@@ -24794,13 +24794,63 @@ function rollBattleChest(){
  for(const[k,p]of BC_ODDS){if((r-=p)<0)return k}
  return 'knowledge';
 }
+/* ═══ ٦٫٩٠ — «لمّا تفوز يسقط على الشاشة صندوق بتصميمٍ جيّد، بدل رسالة "سقط صندوق" — نفس الألعاب» ═══
+   كما في Clash Royale وCarrom Pool: صندوق النصر لحظةٌ لا سطر. شاشةٌ معتمة بأشعّةٍ تدور بلون رتبة الصندوق، يسقط الصندوق
+   من الأعلى فيرتطم وينضغط ويرتدّ، وتتطاير شراراتٌ لحظة الارتطام، ثمّ اسمه ورتبته وخانته ومدّة فتحه. والخانات الممتلئة
+   تُقال بالطريقة نفسها: الصندوق يظهر باهتًا ويُقال لماذا لم يُحفظ. الصور الواقعيّة من OpenArt متى وصلت، وإلّا الرسم */
+const CHEST_IMG_SRC={};
+const VCH_COL={knowledge:'93,202,165',rival:'80,160,240',elite:'183,108,240',legend:'255,205,90'};
+const VCH_CSS=`.vchOv{position:fixed;inset:0;z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;
+ background:radial-gradient(circle at 50% 46%,rgba(var(--vc),.30),rgba(6,8,16,.94) 58%);animation:vchIn .25s ease both;overflow:hidden}
+.vchOv.out{animation:vchOut .22s ease both}
+@keyframes vchIn{from{opacity:0}to{opacity:1}}@keyframes vchOut{to{opacity:0}}
+.vchRays{position:absolute;left:50%;top:46%;width:180vmax;height:180vmax;transform:translate(-50%,-50%);pointer-events:none;
+ background:repeating-conic-gradient(from 0deg,rgba(var(--vc),.22) 0 6deg,transparent 6deg 18deg);
+ -webkit-mask:radial-gradient(circle,#000 0,transparent 42%);mask:radial-gradient(circle,#000 0,transparent 42%);animation:vchSpin 22s linear infinite}
+@keyframes vchSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.vchT{position:relative;font-size:26px;font-weight:900;color:#FFE9A8;text-shadow:0 2px 0 #6A3606,0 0 18px rgba(255,210,100,.5);animation:vchPop .5s .75s cubic-bezier(.2,1.5,.4,1) both}
+.vchBox{position:relative;width:min(62vw,250px);aspect-ratio:1;animation:vchDrop .9s cubic-bezier(.3,.05,.4,1) both;transform-origin:50% 90%}
+.vchBox img,.vchBox>div{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55)) drop-shadow(0 0 26px rgba(var(--vc),.55))}
+.vchBox.dim img,.vchBox.dim>div{filter:grayscale(.8) brightness(.6)}
+@keyframes vchDrop{0%{transform:translateY(-120vh) rotate(-10deg) scale(.7)}62%{transform:translateY(0) rotate(0) scale(1.02,.98)}
+ 72%{transform:translateY(0) scale(1.12,.84)}84%{transform:translateY(-18px) scale(.96,1.06)}100%{transform:translateY(0) scale(1)}}
+.vchGlow{position:absolute;left:50%;bottom:4%;width:80%;height:18%;transform:translateX(-50%);border-radius:50%;
+ background:radial-gradient(closest-side,rgba(var(--vc),.75),transparent);filter:blur(6px);animation:vchPop .4s .6s ease both}
+.vchSp{position:absolute;left:50%;top:78%;width:8px;height:8px;border-radius:50%;background:rgb(var(--vc));box-shadow:0 0 10px rgb(var(--vc));opacity:0;
+ animation:vchSpark .8s .62s ease-out both}
+@keyframes vchSpark{0%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(.3)}}
+@keyframes vchPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.vchN{position:relative;font-size:19px;font-weight:900;color:rgb(var(--vc));animation:vchPop .4s .9s ease both}
+.vchS{position:relative;font-size:12.5px;color:#DDE3F2;text-align:center;line-height:1.7;animation:vchPop .4s 1s ease both}
+.vchB{position:relative;margin-top:10px;min-width:180px;border:0;border-radius:14px;padding:13px 26px;font-family:inherit;font-weight:900;font-size:15px;color:#1A1206;
+ background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 4px 0 #8A6210,0 8px 22px rgba(0,0,0,.4);animation:vchPop .4s 1.1s ease both;cursor:pointer}
+.vchB:active{filter:brightness(1.15)}
+@media (prefers-reduced-motion:reduce){.vchRays,.vchBox,.vchSp{animation:none!important}.vchSp{display:none}}`;
+function chestPic(k){const s=CHEST_IMG_SRC[k];return s?`<img src="${s}" alt="">`:`<div>${chestArt(k)}</div>`}
+function chestDropFx(k,slot,full){
+ if(!document.getElementById('vchCss')){const st=document.createElement('style');st.id='vchCss';st.textContent=VCH_CSS;document.head.appendChild(st)}
+ document.querySelectorAll('.vchOv').forEach(x=>x.remove());
+ const ch=ECON.chests[k]||{n:'صندوق'}, col=VCH_COL[k]||VCH_COL.knowledge;
+ const sp=Array.from({length:14},(_,i)=>{const a=i/14*Math.PI*2, d=90+(i%3)*40;return `<i class="vchSp" style="--dx:${Math.round(Math.cos(a)*d)}px;--dy:${Math.round(Math.sin(a)*d*.7)}px"></i>`}).join('');
+ const ov=document.createElement('div');ov.className='vchOv';ov.style.setProperty('--vc',col);
+ const tier=k==='legend'?T('حظٌّ أسطوريّ!'):k==='elite'?T('حظٌّ ممتاز!'):'';
+ ov.innerHTML=`<div class="vchRays"></div><div class="vchT">${full?T('الخانات ممتلئة'):T('صندوق نصر!')}</div>
+  <div class="vchBox${full?' dim':''}"><span class="vchGlow"></span>${chestPic(k)}${full?'':sp}</div>
+  <div class="vchN">${ch.n}${tier?' · '+tier:''}</div>
+  <div class="vchS">${full?T('افتح صندوقًا من صناديقك لتستقبل غيره في المرّة القادمة.')
+   :T('وُضع في الخانة')+' '+(slot+1)+' · '+T('يُفتح خلال')+' '+bcFmt(BC_TIME[k]||60)+'<br>'+T('فيه عملات ونسخ جيس ومفاجآت')}</div>
+  <button class="vchB">${T('رائع!')}</button>`;
+ document.body.appendChild(ov);try{enPass(ov)}catch(e){}
+ const close=()=>{ov.classList.add('out');setTimeout(()=>ov.remove(),230)};
+ ov.querySelector('.vchB').onclick=close;
+ setTimeout(()=>{try{if(window.SFX)SFX.fx(full?'bad':'ok')}catch(e){}},620);   // صوتٌ واهتزازٌ بحسب إعدادات اللاعب
+}
 function dropBattleChest(){
  const bc=BC(),i=bc.findIndex(x=>!x);
- if(i<0){setTimeout(()=>toast(`${ico('chest',14)} خانات الصناديق ممتلئة — افتح صندوقًا لتستقبل غيره`),900);return}
  const k=rollBattleChest();
+ if(i<0){setTimeout(()=>chestDropFx(k,-1,true),1400);return}
  bc[i]={k,st:'idle'};saveState();
- const ch=ECON.chests[k];
- setTimeout(()=>toast(`${ico('gift',13)} سقط ${ch.n}${k==='legend'?' — حظ أسطوري! '+ico('crown',12):k==='elite'?' — حظ ممتاز!':''}`),900);
+ setTimeout(()=>chestDropFx(k,i,false),1400);   // بعد لحظة النتيجة — لا فوقها
 }
 function bcFmt(s){
  if(s>=3600)return Math.floor(s/3600)+'س '+Math.ceil(s%3600/60)+'د';
@@ -24902,7 +24952,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.89';
+const APP_VER='6.90';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,

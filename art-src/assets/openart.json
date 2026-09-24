@@ -1,0 +1,42 @@
+{
+ "_": "صور OpenArt (Nano Banana Pro): سطح اللوح 4K، خشب الإطار، القطع الثلاث، والصناديق الأربعة. القطع والصناديق على خلفيّة خضراء للقصّ (key.py).",
+ "items": {
+  "board": {
+   "historyId": "nfxR3y8rUf8OGBvgxf9B",
+   "res": "4K",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221083035_6e0cff16_1790221084355_0c94d618.png"
+  },
+  "rail": {
+   "historyId": "jpCy1k1h1eBLmb2F4tAq",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221144983_143fa98a_1790221146602_dfaa2635.png"
+  },
+  "coin_w": {
+   "historyId": "3lS0QJVtDhfSyCvsTpXC",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221086822_fbe7766f_1790221087349_94f10e7e.png"
+  },
+  "coin_b": {
+   "historyId": "P2RuqqlFBEmSfETILuR5",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221092452_50b442ca_1790221092964_c7884873.png"
+  },
+  "coin_q": {
+   "historyId": "aBzO5bJQ13eSGF8bR2gA",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221247447_a4431306_1790221248047_576154e7.png"
+  },
+  "chest_knowledge": {
+   "historyId": "amzG6t0oWQPmh0VHuL8z",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221270472_dd4d9984_1790221271155_598d44b5.png"
+  },
+  "chest_rival": {
+   "historyId": "H6rHxuy4hCjlh5UKERdB",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221294344_a0966d26_1790221294471_df549cbf.png"
+  },
+  "chest_elite": {
+   "historyId": "2FfZZsyLzgkZzIBr1tcu",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221156723_b695fc44_1790221158424_d96d4f3e.png"
+  },
+  "chest_legend": {
+   "historyId": "uVsrBvB93uAN9F50ys0Z",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790221148617_f7a96216_1790221149061_a93cf6f8.png"
+  }
+ }
+}
