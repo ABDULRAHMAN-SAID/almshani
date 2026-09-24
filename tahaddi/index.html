@@ -2573,7 +2573,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0007806188" data-head="0000964672" aria-hidden="true">
+<div id="ld" data-total="0007853569" data-head="0000964672" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -27543,6 +27543,7 @@ function unoIntroDone(){
 function unoIntroSkip(){unoIntroDone()}
 /** بطاقة مقلوبة تطير من كومة السحب إلى مقعد اللاعب أثناء التوزيع */
 function unoDealFly(p){
+ if(UNO3D.on&&UNO3D.deal(p))return;   // ٦٫٩٦: التوزيع يُستنتج من الحالة في الطاولة المجسّمة
  const from=document.querySelector('.unoDrawS');
  const to=p===RM.me?document.querySelector('.unoZ.me .unoZn'):document.querySelector(`.unoZ[data-p="${p}"] .unoZf`);
  if(!from||!to)return;
@@ -27838,6 +27839,7 @@ function unoHint(i){
 }
 /* البطاقة تطير من مقعد اللاعب إلى كومة الرمي — ومعها يد */
 function unoFly(fromPeer,card){
+ if(UNO3D.on&&UNO3D.fly(fromPeer,card))return;   // ٦٫٩٦: الطاولة المجسّمة ترمي البطاقة بنفسها
  const seat=document.querySelector(`.unoZ[data-p="${fromPeer}"] .unoZf`)||document.querySelector('.unoHand');
  const pile=document.querySelector('.unoTopWrap');
  if(!seat||!pile)return;
@@ -27927,13 +27929,584 @@ const UNO_TBL=`<svg class="unoTbl" viewBox="0 0 400 400" aria-hidden="true"><def
 <ellipse cx="200" cy="130" rx="140" ry="56" fill="#FFFFFF" opacity=".045"/></svg>`;
 /* حلقة الاتّجاه حول الكومتين: بلون اللون المطلوب، وتدور ببطءٍ في اتّجاه اللعب (تحويلٌ مركّب — لا رسم) */
 const UNO_RING=`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46" fill="none" stroke="var(--rc)" stroke-opacity=".5" stroke-width="1.6" stroke-dasharray="20 9.2"/>${[0,120,240].map(a=>`<path transform="rotate(${a} 50 50)" d="M50 1.6 L56 4 L50 6.4 Z" fill="var(--rc)"/>`).join('')}</svg>`;
+/* ═══ ٦٫٩٦ — طاولة أونو المجسّمة (WebGL عبر Three.js) ═══
+   المالك: «ليست نسخةً من أونو! للجوّال — بل أفضل، وثلاثيّ الأبعاد يعمل كما يجب». طاولةٌ مستديرة حقيقيّة بزاوية ثلاثة أرباع:
+   جوخٌ كحليّ بنجمةٍ ثمانيّة، إطارٌ ذهبيّ مصقول يعكس الضوء، وحزامٌ كحليّ لامع له سُمك. البطاقات رقائق مجسّمة: تُرمى من المقعد فتعلو
+   وتدور وتنقلب وتستقرّ على الكومة بزاويةٍ عشوائيّة، ومراوح الخصوم ممدودةٌ على الطاولة بعددها الحقيقيّ، وكومة السحب يظهر سُمكها.
+   • اللوحات والأسماء وأهداف اللمس تبقى DOM فوق اللوحة (فاللمس كما كان)، واللوحة تمتدّ تحت اليد فتطير بطاقتك منها إلى الطاولة.
+   • رسمٌ عند الحاجة فقط: لا حلقة رسمٍ إلّا أثناء حركة، وتتوقّف فورًا إن غابت الشاشة أو الصفحة؛ ولا حلقة خاملة أبدًا.
+   • إن غاب WebGL أو فُقد سياقه أو ثقُل الجهاز (يُقاس زمن الإطار أثناء الحركة) تعود الطاولة المتّجهيّة UNO_TBL كما هي. */
+/* لوحات OpenArt لأونو — يملؤها tools/build-uno-art.py من art/uno/: scene (خلفيّة المجلس خلف الطاولة)، sheet (ظهر البطاقة، وجه زرّ
+   «أونو!»، ميدالية اللون)، fronts (خمسة وجوهٍ فارغة: أحمر، أزرق، أصفر، أخضر، جوكر — يُطبع عليها الرقم والرمز)، hero (صورة أونو في
+   الواجهة). الفارغ يبقى رسمًا إجرائيًّا كما هو */
+/*UNOART-BEGIN*/const UNO_ART={bg:null,back:null,btn:null,medal:null,fronts:null,hero:null};/*UNOART-END*/
+const UNO3D={on:false,dead:false};
+(function(){try{
+ const A=UNO_ART,css=[];
+ if(A.bg&&typeof VN_SCENE_IMG!=='undefined'){VN_SCENE_IMG.unoArt=A.bg;VENUES.unoArt=VENUES.majlis;VENUE_NAMES.unoArt=VENUE_NAMES.majlis;VN_KIND.uno='unoArt'}
+ if(A.back)css.push('.unoBk{background:url('+A.back+') center/100% 100% no-repeat!important}');
+ if(A.btn)css.push('.unoBig.say{background:url('+A.btn+') center/cover no-repeat!important;border-color:transparent!important}');
+ if(A.medal)css.push('.unoMedal{display:inline-block;width:18px;height:18px;margin-inline-end:5px;vertical-align:-4px;border-radius:50%;background:url('+A.medal+') center/cover no-repeat,var(--mc,#E8B23A)}');
+ if(A.fronts&&A.fronts.length>=5){const k={r:0,b:1,y:2,g:3};   // بطاقات اليد (DOM) بالوجوه نفسها: اللون من تدرّج البطاقة المضمّن
+  for(const c in k)css.push('.unoC[style*="'+UNO_COL[c][0]+'"]{background:url('+A.fronts[k[c]]+') center/100% 100% no-repeat!important;border-color:transparent!important}');
+  css.push('.unoC.wild{background:url('+A.fronts[4]+') center/100% 100% no-repeat!important;border-color:transparent!important}','.unoC .unoIn{background:none!important;box-shadow:none!important}','.unoC .unoQuad,.unoC::before{display:none}')}
+ if(A.hero)queueMicrotask(()=>{try{GAME_ART.uno='<img src="'+A.hero+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block">'}catch(e){}});   // صورة أونو في شاشة البدء والردهة
+ if(css.length){const st=document.createElement('style');st.textContent=css.join('\n');document.head.appendChild(st)}
+}catch(e){}})();
+/* المقاسات بوحدة نصف قطر الطاولة: بطاقةٌ بنسبة بطاقة اللعبة (٥٢×٧٦) وسُمكٌ يُرى في الكومة، وخلايا الأطلس بالبكسل */
+const U3C={W:.22,H:.3215,T:.005,R:.036,STEP:.0054,PSTEP:.0064,FAN:.62,CW:128,CH:187,PAD:4,COLS:8,FOV:40};
+const U3={R:null,cv:null,sc:null,cam:null,camD:null,W:0,ext:0,raf:0,anims:[],disc:[],fans:{},seat:{},pile:[],geo:{},recent:[],prev:null,key:null,dirty:false,q:0,pendU:null,
+ atlasCv:null,cell:null,discFly:0,lastT:0,syncAt:0,samp:[],tilt:{x:0,y:0,tx:0,ty:0,at:0},rm:false};
+function u3Ok(){
+ if(UNO3D.dead||typeof THREE==='undefined'||window.__unoNo3d)return false;
+ if(window.__vbFast&&!window.__uno3d)return false;
+ try{if(S&&S.opt&&S.opt.uno3d===0)return false}catch(e){}
+ try{const t=+localStorage.getItem('uno3dOff')||0;if(t&&Date.now()-t<7*864e5&&!window.__uno3d)return false}catch(e){}
+ return true;
+}
+const U3_CSS=`.unoBoard .uno3d{position:absolute;left:0;top:0;z-index:auto;pointer-events:none;display:block}
+.unoBoard .uno3d canvas{position:absolute;left:0;top:0;display:block;z-index:1}
+.unoBoard .uno3d.up .u3gl{z-index:31}
+.unoBoard.is3d .unoTbl{visibility:hidden}
+.unoBoard.is3d::before{content:'';position:absolute;left:0;right:0;top:-6%;bottom:0;z-index:0;pointer-events:none;background:radial-gradient(62% 48% at 50% 52%,rgba(5,9,22,0) 58%,rgba(5,9,22,.42) 82%,rgba(5,9,22,.62))}
+:where(.unoBoard.is3d>:not(.uno3d)){z-index:2}
+.unoBoard.is3d .unoFan,.unoBoard.is3d .unoDiscS .unoTopWrap{visibility:hidden}
+.unoBoard.is3d .unoDrawS{animation:none}
+.unoBoard.is3d .unoDrawS .unoBk{background:none!important;border-color:transparent;box-shadow:none}`;
+/** يُستدعى من قالب الطاولة: خانةٌ تحلّ فيها اللوحة الحيّة نفسها بعد الرسم (مهمّةٌ صغرى قبل أن يُرسم الإطار — فلا ومضة) */
+UNO3D.slot=function(U){
+ U3.pendU=U;if(!U3.q){U3.q=1;queueMicrotask(u3Mount)}
+ return u3Ok()?'<i class="uno3dSlot" hidden></i>':'';
+};
+function u3Live(){return !!(U3.R&&U3.cv&&U3.cv.isConnected&&!document.hidden)}
+/** بطاقة ترميها أنت (من يدك) أو يرميها خصم: تتولّاها الطاولة المجسّمة — false = الرسم القديم */
+UNO3D.fly=function(p,card){
+ if(!u3Live()||!card)return false;
+ const now=performance.now();
+ if(U3.recent.some(r=>r.p===(p||'')&&r.card===card&&now-r.t<1600))return true;   // بدأت رميتها من قبل (الحالة أو نداءٌ سابق)
+ let rect=null;
+ if(p===RM.me){const h=U3.touch;if(h&&now-h.t<12000&&h.r)rect=h.r}
+ u3Throw(p,card,rect,false);return true;
+};
+UNO3D.deal=function(p){return u3Live()};   // التوزيع يُستنتج من الحالة (العدّ) فتطير البطاقة من الكومة إلى المقعد
+/* آخر بطاقةٍ لمستَها في يدك: منها تنطلق الرمية (حتّى بعد نافذة اختيار اللون) */
+try{document.addEventListener('pointerdown',e=>{const sl=e.target&&e.target.closest&&e.target.closest('.unoHand .unoSlot');
+ if(sl){const r=sl.getBoundingClientRect();U3.touch={t:performance.now(),r:{left:r.left,top:r.top,width:r.width,height:r.height}}}},{capture:true,passive:true})}catch(e){}
+
+/* ── الأطلس: وجوه البطاقات الأربع والخمسين وظهرها وحافّتها، تُرسم مرّةً واحدة بأسلوب unoCard نفسه ── */
+function u3RR(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+function u3Sym(g,v,sz,col){   // ⊘ ⇄ ★ مرسومةً بالمسار لا بخطٍّ قد يغيب، و+2/+4 من اليسار إلى اليمين دائمًا
+ g.fillStyle=col;g.strokeStyle=col;g.lineCap='round';g.lineJoin='round';
+ if(v==='S'){g.lineWidth=sz*.15;g.beginPath();g.arc(0,0,sz*.36,0,Math.PI*2);g.stroke();g.beginPath();g.moveTo(-sz*.25,sz*.25);g.lineTo(sz*.25,-sz*.25);g.stroke();return}
+ if(v==='R'){g.lineWidth=sz*.15;const a=sz*.42,b=sz*.17,hh=sz*.2;
+  g.beginPath();g.moveTo(-a,-b);g.lineTo(a-hh*.6,-b);g.stroke();g.beginPath();g.moveTo(a,-b);g.lineTo(a-hh*1.3,-b-hh);g.lineTo(a-hh*1.3,-b+hh);g.closePath();g.fill();
+  g.beginPath();g.moveTo(a,b);g.lineTo(-a+hh*.6,b);g.stroke();g.beginPath();g.moveTo(-a,b);g.lineTo(-a+hh*1.3,b-hh);g.lineTo(-a+hh*1.3,b+hh);g.closePath();g.fill();return}
+ if(v==='W'){g.beginPath();for(let i=0;i<10;i++){const r=i%2?sz*.19:sz*.45,a=-Math.PI/2+i*Math.PI/5;g.lineTo(Math.cos(a)*r,Math.sin(a)*r)}g.closePath();g.fill();return}
+ const t=v==='D'?'+2':v==='F'?'+4':v;
+ g.direction='ltr';g.textAlign='center';g.textBaseline='middle';g.font=`800 ${Math.round(sz*(t.length>1?.78:1))}px 'Baloo Bhaijaan 2','Cairo',sans-serif`;g.fillText(t,0,sz*.07);
+}
+function u3Face(g,c,x,y){
+ const w=U3C.CW,h=U3C.CH,p=U3C.PAD,col=UNO_COL[c[0]]||UNO_COL.w,wild=c[0]==='w',v=c[1];
+ const fi=U3.frontImg&&U3.frontImg[{r:0,b:1,y:2,g:3,w:4}[c[0]]];
+ if(fi){   // وجه OpenArt الفارغ أساسًا، والرقم أو الرمز يُطبع في بيضاويّه
+  g.save();g.translate(x,y);g.fillStyle='#EEF1F6';g.fillRect(-p,-p,w+2*p,h+2*p);g.drawImage(fi,0,0,w,h);
+  g.save();g.translate(w/2,h/2);g.rotate(-20*Math.PI/180);g.shadowColor='rgba(255,255,255,.9)';g.shadowOffsetY=2;u3Sym(g,v,h*.3,'#0E1A30');g.restore();
+  g.save();g.shadowColor='rgba(0,0,0,.65)';g.shadowBlur=3;g.shadowOffsetY=1.5;[[21,25,0],[w-21,h-25,Math.PI]].forEach(([cx,cy,r])=>{g.save();g.translate(cx,cy);g.rotate(r);u3Sym(g,v,21,'#FFFFFF');g.restore()});g.restore();
+  g.restore();return}
+ g.save();g.translate(x,y);
+ g.fillStyle='#F2F4F8';g.fillRect(-p,-p,w+2*p,h+2*p);                          // الحافّة البيضاء، وحشوةٌ حولها كي لا تنزف الخرائط المصغّرة
+ const b=6;u3RR(g,b,b,w-2*b,h-2*b,15);
+ if(wild)g.fillStyle='#1B2030';else{const gr=g.createLinearGradient(w*.2,0,w*.8,h);gr.addColorStop(0,col[0]);gr.addColorStop(1,col[1]);g.fillStyle=gr}
+ g.fill();
+ if(wild){g.save();u3RR(g,b+7,b+7,w-2*b-14,h-2*b-14,11);g.clip();const q=[['#E24B4A',1,0],['#2ECC71',0,0],['#378ADD',1,1],['#E8B23A',0,1]];
+  q.forEach(([cc,i,j])=>{g.fillStyle=cc;g.fillRect(i*w/2,j*h/2,w/2,h/2)});g.restore()}
+ g.save();u3RR(g,b,b,w-2*b,h-2*b,15);g.clip();const gl=g.createLinearGradient(w*.35,0,w*.6,h*.55);gl.addColorStop(0,'rgba(255,255,255,.34)');gl.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gl;g.fillRect(0,0,w,h);g.restore();
+ // البيضاويّ الأبيض المائل ورمزه
+ g.save();g.translate(w/2,h/2);g.rotate(-20*Math.PI/180);
+ g.shadowColor='rgba(0,0,0,.32)';g.shadowBlur=6;g.shadowOffsetY=2;
+ const og=g.createLinearGradient(-30,-50,30,50);og.addColorStop(0,'#FFFFFF');og.addColorStop(1,'#E7ECF7');g.fillStyle=og;
+ g.beginPath();g.ellipse(0,0,w*.35,h*.29,0,0,Math.PI*2);g.fill();g.shadowColor='transparent';
+ g.shadowColor='rgba(255,255,255,.9)';g.shadowOffsetY=2;g.shadowBlur=0;
+ u3Sym(g,v,h*.3,'#0E1A30');g.restore();
+ // الزاويتان
+ g.save();g.shadowColor='rgba(0,0,0,.6)';g.shadowBlur=3;g.shadowOffsetY=1.5;
+ [[20,24,0],[w-20,h-24,Math.PI]].forEach(([cx,cy,r])=>{g.save();g.translate(cx,cy);g.rotate(r);u3Sym(g,v,23,'#FFFFFF');g.restore()});
+ g.restore();g.restore();
+}
+function u3BackDraw(g,x,y){
+ const w=U3C.CW,h=U3C.CH,p=U3C.PAD;g.save();g.translate(x,y);
+ g.fillStyle='#E8B23A';g.fillRect(-p,-p,w+2*p,h+2*p);
+ u3RR(g,4,4,w-8,h-8,13);const rg=g.createRadialGradient(w/2,h*.42,4,w/2,h*.42,h*.62);rg.addColorStop(0,'#26407F');rg.addColorStop(1,'#0E1A42');g.fillStyle=rg;g.fill();
+ const img=U3.backImg;
+ if(img){g.save();u3RR(g,4,4,w-8,h-8,13);g.clip();const r=Math.max((w-8)/img.width,(h-8)/img.height);g.drawImage(img,w/2-img.width*r/2,h/2-img.height*r/2,img.width*r,img.height*r);g.restore()}
+ else{
+  g.save();u3RR(g,4,4,w-8,h-8,13);g.clip();g.strokeStyle='rgba(232,178,58,.08)';g.lineWidth=1.5;   // نقشٌ هندسيّ خافت
+  for(let yy=10;yy<h;yy+=22)for(let xx=(yy/22%2)*12;xx<w;xx+=24){g.beginPath();g.moveTo(xx,yy-6);g.lineTo(xx+6,yy);g.lineTo(xx,yy+6);g.lineTo(xx-6,yy);g.closePath();g.stroke()}g.restore();
+  const sx=w/40,sy=h/60;g.save();g.scale(sx,sy);
+  g.strokeStyle='rgba(232,178,58,.55)';g.lineWidth=.9;u3RR(g,3.5,3.5,33,53,4);g.stroke();
+  g.fillStyle='#E8B23A';g.fill(new Path2D('M20 17 L23.6 26.4 L33 30 L23.6 33.6 L20 43 L16.4 33.6 L7 30 L16.4 26.4Z'));
+  g.fillStyle='rgba(255,233,168,.55)';g.fill(new Path2D('M27.8 22.2 L24.2 30 L27.8 37.8 L20 34.2 L12.2 37.8 L15.8 30 L12.2 22.2 L20 25.8Z'));
+  g.fillStyle='#0B1530';g.beginPath();g.arc(20,30,3.2,0,Math.PI*2);g.fill();g.restore()}
+ g.restore();
+}
+function u3Atlas(){
+ if(U3.atlasCv)return U3.atlasCv;
+ const {CW,CH,PAD,COLS}=U3C,cw=CW+PAD*2,ch=CH+PAD*2,keys=[];
+ 'rgby'.split('').forEach(c=>'0123456789SRD'.split('').forEach(v=>keys.push(c+v)));keys.push('wW','wF','back','edge');
+ const cv=document.createElement('canvas');cv.width=cw*COLS;cv.height=ch*Math.ceil(keys.length/COLS);
+ U3.cell={};keys.forEach((k,i)=>U3.cell[k]=[(i%COLS)*cw+PAD,Math.floor(i/COLS)*ch+PAD]);
+ U3.atlasCv=cv;u3AtlasPaint();return cv;
+}
+function u3AtlasPaint(){
+ const cv=U3.atlasCv,g=cv.getContext('2d');g.clearRect(0,0,cv.width,cv.height);
+ for(const k in U3.cell){const [x,y]=U3.cell[k];
+  if(k==='back')u3BackDraw(g,x,y);
+  else if(k==='edge'){g.fillStyle='#EEF1F6';g.fillRect(x-U3C.PAD,y-U3C.PAD,U3C.CW+2*U3C.PAD,U3C.CH+2*U3C.PAD)}
+  else u3Face(g,k,x,y)}
+ if(U3.tex){U3.tex.needsUpdate=true;U3.dirty=true}
+}
+/* ── بطاقةٌ مجسّمة: وجهٌ وظهرٌ وحافّة في شكلٍ واحد ومادّةٍ واحدة (الأطلس) — رسمةٌ واحدة لكلّ بطاقة ── */
+function u3Geo(f,b){
+ const k=f+'|'+b;if(U3.geo[k])return U3.geo[k];
+ const w=U3C.W,h=U3C.H,t=U3C.T/2,r=U3C.R,S=5,pts=[],AW=U3.atlasCv.width,AH=U3.atlasCv.height;
+ [[w/2-r,h/2-r],[-w/2+r,h/2-r],[-w/2+r,-h/2+r],[w/2-r,-h/2+r]].forEach(([cx,cy],q)=>{for(let i=0;i<=S;i++){const a=(q+i/S)*Math.PI/2;pts.push([cx+Math.cos(a)*r,cy+Math.sin(a)*r])}});
+ const uv=(key,x,y,mir)=>{const c=U3.cell[key],u=mir?.5-x/w:x/w+.5,v=y/h+.5;return [(c[0]+u*U3C.CW)/AW,1-(c[1]+(1-v)*U3C.CH)/AH]};
+ const E=uv('edge',0,0),P=[],N=[],UV=[],n=pts.length;
+ for(let i=0;i<n;i++){const a=pts[i],c=pts[(i+1)%n];
+  P.push(0,0,t,a[0],a[1],t,c[0],c[1],t);N.push(0,0,1,0,0,1,0,0,1);UV.push(...uv(f,0,0),...uv(f,a[0],a[1]),...uv(f,c[0],c[1]));
+  P.push(0,0,-t,c[0],c[1],-t,a[0],a[1],-t);N.push(0,0,-1,0,0,-1,0,0,-1);UV.push(...uv(b,0,0,1),...uv(b,c[0],c[1],1),...uv(b,a[0],a[1],1));
+  const dx=c[0]-a[0],dy=c[1]-a[1],l=Math.hypot(dx,dy)||1,nx=dy/l,ny=-dx/l;
+  P.push(a[0],a[1],t,a[0],a[1],-t,c[0],c[1],-t,a[0],a[1],t,c[0],c[1],-t,c[0],c[1],t);
+  for(let j=0;j<6;j++){N.push(nx,ny,0);UV.push(E[0],E[1])}}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(UV,2));
+ g.computeBoundingSphere();U3.geo[k]=g;return g;
+}
+function u3Card(card){const m=new THREE.Mesh(u3Geo(card||'back','back'),U3.mat);U3.sc.add(m);return m}
+function u3Drop(m){if(m&&m.parent)m.parent.remove(m)}
+/** اتّجاه بطاقةٍ ممدودة: yaw حول المحور الرأسيّ، flip حول طولها (π = ظهرها إلى أعلى)، tilt ميلٌ في الهواء */
+function u3Qf(out,yaw,flip,tilt){
+ const T=THREE,A=U3._qa||(U3._qa=[new T.Quaternion(),new T.Quaternion(),new T.Quaternion(),new T.Quaternion()]),X=U3._X||(U3._X=new T.Vector3(1,0,0)),Y=U3._Y||(U3._Y=new T.Vector3(0,1,0));
+ A[0].setFromAxisAngle(Y,yaw);A[1].setFromAxisAngle(X,-Math.PI/2);A[2].setFromAxisAngle(Y,flip||0);A[3].setFromAxisAngle(X,tilt||0);
+ return out.copy(A[0]).multiply(A[1]).multiply(A[2]).multiply(A[3]);
+}
+/* ── قوامٌ مرسوم: الجوخ بميداليته، وبقع الظلّ والتوهّج ── */
+function u3CvTex(w,h,draw,lin){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);if(!lin)t.colorSpace=THREE.SRGBColorSpace;return t}
+function u3FeltTex(){return u3CvTex(1024,1024,(g,w,h)=>{
+ const rg=g.createRadialGradient(512,450,20,512,512,560);rg.addColorStop(0,'#2B4A98');rg.addColorStop(.4,'#193176');rg.addColorStop(.78,'#0E1E50');rg.addColorStop(1,'#081230');
+ g.fillStyle=rg;g.fillRect(0,0,w,h);
+ g.globalAlpha=.05;for(let i=0;i<26000;i++){g.fillStyle=Math.random()<.5?'#000':'#9DB4FF';g.fillRect(Math.random()*w,Math.random()*h,1.4,1.4)}g.globalAlpha=1;
+ g.strokeStyle='rgba(232,178,58,.075)';g.lineWidth=1.3;
+ for(let y=0,r=0;y<h+30;y+=29,r++)for(let x=(r%2)*18;x<w+36;x+=36){g.beginPath();g.moveTo(x,y-9);g.lineTo(x+3.6,y-3.6);g.lineTo(x+9.6,y);g.lineTo(x+3.6,y+3.6);g.lineTo(x,y+9);g.lineTo(x-3.6,y+3.6);g.lineTo(x-9.6,y);g.lineTo(x-3.6,y-3.6);g.closePath();g.stroke()}
+ g.save();g.translate(512,512);const k=3.06;
+ g.strokeStyle='rgba(232,178,58,.2)';g.lineWidth=4;g.beginPath();g.arc(0,0,92*k,0,Math.PI*2);g.stroke();
+ g.setLineDash([6,18]);g.strokeStyle='rgba(232,178,58,.16)';g.lineWidth=2.6;g.beginPath();g.arc(0,0,86*k,0,Math.PI*2);g.stroke();g.setLineDash([]);
+ g.strokeStyle='rgba(232,178,58,.13)';g.lineWidth=3.2;g.scale(k,k);
+ g.stroke(new Path2D('M0 -76 L22 -22 L76 0 L22 22 L0 76 L-22 22 L-76 0 L-22 -22 Z'));g.stroke(new Path2D('M54 -54 L23 0 L54 54 L0 23 L-54 54 L-23 0 L-54 -54 L0 -23 Z'));
+ g.restore();
+ g.strokeStyle='rgba(255,220,140,.3)';g.lineWidth=5;g.beginPath();g.arc(512,512,500,0,Math.PI*2);g.stroke();
+ const wm=g.createRadialGradient(512,440,10,512,470,330);wm.addColorStop(0,'rgba(255,214,150,.10)');wm.addColorStop(1,'rgba(255,214,150,0)');g.fillStyle=wm;g.fillRect(0,0,w,h);
+ const vg=g.createRadialGradient(512,512,340,512,512,512);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');g.fillStyle=vg;g.fillRect(0,0,w,h);
+})}
+/** نسيج الجوخ الدقيق: ضجيج أليافٍ مكرّر يلتقط ضوء المصباح (خريطة نتوء) */
+function u3Fiber(){const t=u3CvTex(128,128,(g,W,H)=>{const d=g.createImageData(W,H);for(let i=0;i<d.data.length;i+=4){const v=118+Math.random()*20+(((i>>2)%W)%3===0?8:0);d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}g.putImageData(d,0,0)},1);
+ t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(14,14);return t}
+/** حلقة غبارٍ خفيفة تنداح حيث تهبط البطاقة */
+function u3RingTex(){return u3CvTex(128,128,(g,W,H)=>{const r=g.createRadialGradient(64,64,20,64,64,62);r.addColorStop(0,'rgba(255,240,210,0)');r.addColorStop(.72,'rgba(255,240,210,.55)');r.addColorStop(1,'rgba(255,240,210,0)');g.fillStyle=r;g.fillRect(0,0,W,H)},1)}
+function u3Blob(w,h,rr,a){return u3CvTex(128,Math.round(128*h/w),(g,W,H)=>{g.filter='blur('+Math.round(W*.09)+'px)';g.fillStyle='rgba(0,0,0,'+a+')';u3RR(g,W*.17,H*.17,W*.66,H*.66,rr*W);g.fill()},1)}
+function u3Glow(){return u3CvTex(128,160,(g,W,H)=>{g.filter='blur(12px)';g.fillStyle='#fff';u3RR(g,24,24,W-48,H-48,18);g.fill()},1)}
+function u3Radial(a){return u3CvTex(128,128,(g,W,H)=>{const r=g.createRadialGradient(64,64,2,64,64,64);r.addColorStop(0,'rgba(0,0,0,'+a+')');r.addColorStop(.55,'rgba(0,0,0,'+(a*.6)+')');r.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=r;g.fillRect(0,0,W,H)},1)}
+function u3Plane(w,h,mat,y){const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);m.rotation.x=-Math.PI/2;m.position.y=y;return m}
+/** بيئة الانعكاس: مجلسٌ كحليّ معتم، فوانيس دافئة حوله، ولوح ضوءٍ فوق الطاولة، وضوءٌ باردٌ خافت خلفها — تُخبز مرّةً (PMREM) */
+function u3EnvScene(){
+ const T=THREE,sc=new T.Scene();
+ const tex=u3CvTex(16,256,(g,w,h)=>{const gr=g.createLinearGradient(0,0,0,h);gr.addColorStop(0,'#3A2E1A');gr.addColorStop(.3,'#1C2448');gr.addColorStop(.55,'#0D1430');gr.addColorStop(1,'#04060E');g.fillStyle=gr;g.fillRect(0,0,w,h)});
+ sc.add(new T.Mesh(new T.SphereGeometry(10,24,16),new T.MeshBasicMaterial({map:tex,side:T.BackSide})));
+ const lamp=(x,y,z,w,h,c,k)=>{const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({side:T.DoubleSide}));m.material.color.set(c).multiplyScalar(k);m.position.set(x,y,z);m.lookAt(0,0,0);sc.add(m)};
+ lamp(0,8,0,7,5,'#FFE4B8',2.4);
+ for(let i=0;i<7;i++){const a=i/7*Math.PI*2+.3;lamp(Math.cos(a)*7.5,2.2,Math.sin(a)*7.5,1.1,1.8,'#FFC46A',6)}
+ lamp(-5,4,-7,4,2,'#9DB6FF',1.6);
+ lamp(0,4.2,-8,15,4.5,'#FFCB80',1.5);lamp(-8,3.5,0,4,10,'#FFC878',.9);lamp(8,3.5,0,4,10,'#FFC878',.9);lamp(0,1.4,8,16,3,'#E6B46C',1.1);
+ return sc;
+}
+/* ── بناء المشهد مرّةً واحدة ── */
+function u3Init(){
+ const T=THREE;let R;
+ try{
+  /* طبقتان في غلافٍ واحد: الطاولة الثابتة تُخبز مرّةً في لوحةٍ ثنائيّة (u3bg)، واللوحة الحيّة (u3gl) لا ترسم إلّا البطاقات
+     وظلالها — كلفة الإطار أثناء الحركة بطاقاتٌ صغيرة لا طاولةٌ كاملة بمعادنها */
+  const gl=document.createElement('canvas');gl.className='u3gl';const bgc=document.createElement('canvas');bgc.className='u3bg';
+  const cv=document.createElement('div');cv.className='uno3d';cv.append(bgc,gl);U3.bg=bgc;U3.gl=gl;
+  R=new T.WebGLRenderer({canvas:gl,antialias:true,alpha:true,premultipliedAlpha:true,powerPreference:'default'});
+  if(!R.getContext())throw new Error('no gl');
+  gl.addEventListener('webglcontextlost',e=>{if(U3.bye)return;try{e.preventDefault()}catch(x){}u3Kill('lost')});
+  R.setClearColor(0x000000,0);R.outputColorSpace=T.SRGBColorSpace;R.toneMapping=T.NoToneMapping;
+  const dm=navigator.deviceMemory||4,hc=navigator.hardwareConcurrency||4;
+  U3.dpr=Math.min(window.devicePixelRatio||1,(dm<=3||hc<=4)?1.5:1.75);
+  U3.rm=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
+  U3.R=R;U3.cv=cv;
+  const sc=new T.Scene();U3.sc=sc;
+  const cam=new T.PerspectiveCamera(U3C.FOV,1,.1,30),camD=new T.PerspectiveCamera(U3C.FOV,1,.1,30);U3.cam=cam;U3.camD=camD;
+  try{const pm=new T.PMREMGenerator(R),env=u3EnvScene();U3.env=pm.fromScene(env,.035).texture;pm.dispose();env.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose()}});sc.environment=U3.env;sc.environmentIntensity=1}catch(e){}
+  // الأضواء: مصباحٌ دافئ فوق الوسط، سماءٌ كحليّة خافتة، وضوءُ حافّةٍ باردٌ من خلف الطاولة يلمع على الذهب
+  const hemi=new T.HemisphereLight('#C9D6FF','#2A1C08',.22);sc.add(hemi);
+  const key=new T.SpotLight('#FFF0DA',50,14,.54,.95,1.5);key.position.set(0,4.4,1.5);key.target.position.set(0,0,.05);sc.add(key,key.target);
+  const rim=new T.DirectionalLight('#A9C0FF',.9);rim.position.set(-1.6,2.4,-3.2);sc.add(rim);
+  const fill=new T.DirectionalLight('#FFD8A0',.45);fill.position.set(2.4,3,3.2);sc.add(fill);
+  [hemi,key,rim,fill].forEach(l=>l.layers.enableAll());
+  const tbl=new T.Group();sc.add(tbl);U3.tbl=tbl;   // الطاولة كلّها في الطبقة ١ (تُخبز)، والبطاقات في الطبقة ٠ (تُرسم حيّة)
+  // الطاولة: جوخٌ ثمّ حلقةٌ كحليّة لامعة ثمّ خرزةٌ ذهبيّة ثمّ الإطار الذهبيّ المخروط، وتحته حزامٌ كحليّ له سُمك وحافّةٌ ذهبيّة سفلى
+  const gold=new T.MeshPhysicalMaterial({color:'#D9A23A',metalness:1,roughness:.26,clearcoat:.6,clearcoatRoughness:.07}),goldHi=new T.MeshStandardMaterial({color:'#F2C764',metalness:1,roughness:.2});
+  const lac=new T.MeshPhysicalMaterial({color:'#182C6C',metalness:.1,roughness:.38,clearcoat:1,clearcoatRoughness:.05}),lac2=new T.MeshPhysicalMaterial({color:'#0E1B46',metalness:.1,roughness:.4,clearcoat:.8,clearcoatRoughness:.08});
+  const felt=new T.Mesh(new T.CircleGeometry(.868,96),new T.MeshLambertMaterial({map:u3FeltTex(),bumpMap:u3Fiber(),bumpScale:1.2}));felt.rotation.x=-Math.PI/2;tbl.add(felt);
+  felt.material.map.anisotropy=Math.min(8,R.capabilities.getMaxAnisotropy());
+  const ring=new T.Mesh(new T.RingGeometry(.866,.884,96),lac2);ring.rotation.x=-Math.PI/2;ring.position.y=.0015;tbl.add(ring);
+  const bead=new T.Mesh(new T.TorusGeometry(.869,.0075,8,120),goldHi);bead.rotation.x=Math.PI/2;bead.position.y=.004;tbl.add(bead);
+  const prof=[[.88,.003],[.883,.032],[.895,.06],[.92,.082],[.95,.09],[.976,.083],[.993,.063],[1.002,.034],[1.004,.002],[1.001,-.022]].map(q=>new T.Vector2(q[0],q[1]));
+  const rimM=new T.Mesh(new T.LatheGeometry(prof,128),gold);tbl.add(rimM);
+  const stud=new T.SphereGeometry(.011,10,8);for(let i=0;i<16;i++){const a=(i+.5)/16*Math.PI*2,m=new T.Mesh(stud,goldHi);m.position.set(Math.cos(a)*.95,.092,Math.sin(a)*.95);tbl.add(m)}
+  const apron=new T.Mesh(new T.CylinderGeometry(.998,.95,.2,128,1,true),lac);apron.position.y=-.12;tbl.add(apron);
+  const band=new T.Mesh(new T.TorusGeometry(.956,.015,8,128),gold);band.rotation.x=Math.PI/2;band.position.y=-.214;tbl.add(band);
+  const band2=new T.Mesh(new T.TorusGeometry(.993,.008,6,128),goldHi);band2.rotation.x=Math.PI/2;band2.position.y=-.042;tbl.add(band2);
+  const sh=u3Plane(3.1,2.7,new T.MeshBasicMaterial({map:u3Radial(.66),transparent:true,depthWrite:false}),-.36);sh.position.z=.22;sh.renderOrder=-2;tbl.add(sh);
+  tbl.traverse(o=>o.layers.set(1));U3.bake=true;
+  // البطاقات: مادّةٌ واحدة على الأطلس
+  u3Atlas();
+  const tex=new T.CanvasTexture(U3.atlasCv);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=Math.min(4,R.capabilities.getMaxAnisotropy());U3.tex=tex;
+  U3.mat=new T.MeshStandardMaterial({map:tex,roughness:.55,metalness:0,envMapIntensity:.3});
+  U3.shMat=new T.MeshBasicMaterial({map:u3Blob(1,1.46,.12,.75),transparent:true,depthWrite:false});
+  U3.fanShMat=new T.MeshBasicMaterial({map:u3Radial(.55),transparent:true,depthWrite:false,opacity:.75});
+  const gt=u3Glow();
+  U3.discGlow=u3Plane(U3C.W*1.9,U3C.H*1.7,new T.MeshBasicMaterial({map:gt,color:'#E8B23A',transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.55}),.0012);U3.discGlow.renderOrder=-1;sc.add(U3.discGlow);
+  U3.drawGlow=u3Plane(U3C.W*1.9,U3C.H*1.7,new T.MeshBasicMaterial({map:gt,color:'#FFE9A8',transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.5}),.0012);U3.drawGlow.renderOrder=-1;U3.drawGlow.visible=false;sc.add(U3.drawGlow);
+  U3.pileSh=u3Plane(U3C.W*1.5,U3C.H*1.4,U3.shMat,.001);U3.pileSh.renderOrder=-1;sc.add(U3.pileSh);
+  U3.discSh=u3Plane(U3C.W*1.5,U3C.H*1.4,U3.shMat,.001);U3.discSh.renderOrder=-1;sc.add(U3.discSh);
+  u3Fit();
+  try{const w1=u3DustMesh(),w2=new T.Mesh(u3Geo('back','back'),u3FadeMat()),w3=new T.Mesh(u3Geo('back','back'),U3.mat);w1.visible=true;sc.add(w2,w3);U3.cam.layers.enableAll();R.compile(sc,U3.cam);U3.cam.layers.set(0);w1.visible=false;sc.remove(w2,w3);U3.fade[0].userData.busy=0}catch(e){}
+  // الخلفيّة اللطيفة ولوحة ظهر البطاقة إن ضُمّنت
+  if(UNO_ART.back&&!U3.backImg){const im=new Image();im.onload=()=>{U3.backImg=im;u3AtlasPaint();u3Kick()};im.src=UNO_ART.back}
+  if(UNO_ART.fronts&&UNO_ART.fronts.length>=5&&!U3.frontImg){let left=5;const L=[];UNO_ART.fronts.slice(0,5).forEach((u,i)=>{const im=new Image();im.onload=()=>{L[i]=im;if(!--left){U3.frontImg=L;u3AtlasPaint();if(u3Live()){U3.dirty=true;u3Draw()}}};im.src=u})}
+  if(document.fonts&&document.fonts.load&&!U3.fontOk){document.fonts.load("800 56px 'Baloo Bhaijaan 2'").then(()=>{if(!U3.fontOk){U3.fontOk=1;if(U3.atlasCv){u3AtlasPaint();u3Kick()}}}).catch(()=>{})}
+  document.addEventListener('visibilitychange',u3Vis);
+  window.addEventListener('resize',u3OnResize,{passive:true});
+  if(!U3.rm&&window.DeviceOrientationEvent)window.addEventListener('deviceorientation',u3Tilt,{passive:true});
+  const app=document.getElementById('app');if(app&&window.MutationObserver){U3.mo=new MutationObserver(u3Watch);U3.mo.observe(app,{childList:true})}
+  UNO3D.on=true;
+  const st=document.getElementById('u3css');if(!st){const e=document.createElement('style');e.id='u3css';e.textContent=U3_CSS;document.head.appendChild(e)}
+  return true;
+ }catch(e){try{console.warn('[uno3d]',e)}catch(x){}try{if(R)R.dispose()}catch(x){}U3.R=null;U3.cv=null;UNO3D.dead=true;UNO3D.on=false;return false}
+}
+/** الكاميرا: زاوية ثلاثة أرباع تُطابق الطاولة المتّجهيّة (الإطار ٢٪–٩٨٪ عرضًا، ١٠٪ أعلاه و٩٣٫٥٪ أسفل حزامه) فتبقى اللوحات فوقها في أماكنها */
+function u3Fit(){
+ const T=THREE,c=U3.camD,v=new T.Vector3();let th=.98,D=3.9,tz=.05;
+ const put=()=>{c.position.set(0,Math.sin(th)*D,tz+Math.cos(th)*D);c.lookAt(0,0,tz);c.updateMatrixWorld();c.updateProjectionMatrix()};
+ for(let it=0;it<8;it++){
+  put();let x0=9,x1=-9,y0=9,y1=-9;
+  for(let i=0;i<64;i++){const a=i/64*Math.PI*2;v.set(Math.cos(a),.058,Math.sin(a)).project(c);x0=Math.min(x0,v.x);x1=Math.max(x1,v.x);y1=Math.max(y1,v.y);
+   v.set(Math.cos(a)*.99,-.17,Math.sin(a)*.99).project(c);y0=Math.min(y0,v.y)}
+  D*=(x1-x0)/(2*.955);
+  th=Math.max(.7,Math.min(1.3,th+((y1-y0)-1.67)*-.35));
+  tz-=((y1+y0)/2-(-.035))*1.2;
+ }
+ put();U3.base={th,D,tz};u3CamSync();
+}
+function u3CamSync(){
+ const b=U3.base,t=U3.tilt,c=U3.camD,th=b.th+t.y*.03,ph=t.x*.045;
+ c.position.set(Math.sin(ph)*Math.cos(th)*b.D,Math.sin(th)*b.D,b.tz+Math.cos(ph)*Math.cos(th)*b.D);c.lookAt(0,0,b.tz);c.updateMatrixWorld();
+ U3.cam.position.copy(c.position);U3.cam.quaternion.copy(c.quaternion);U3.cam.updateMatrixWorld();
+}
+/** مقاس اللوحة: عرض الرقعة، وتمتدّ تحتها حتّى أسفل اليد (تكبر ولا تصغر كي لا يُعاد حجزها كلّ دور) */
+function u3Size(board){
+ const W=board.clientWidth||board.getBoundingClientRect().width;if(!W)return;
+ let ext=U3.ext;
+ try{const h=document.querySelector('#rmScr .unoHand'),br=board.getBoundingClientRect();if(h){const hr=h.getBoundingClientRect();ext=Math.max(0,Math.min(W*1.35,hr.bottom-br.top-W+16))}}catch(e){}
+ if(W===U3.W&&ext<=U3.ext+24&&U3.sized)return;
+ if(W!==U3.W)U3.ext=0;
+ U3.W=W;U3.ext=Math.max(U3.ext,Math.round(ext));U3.sized=1;
+ const R=U3.R,Ht=W+U3.ext;R.setPixelRatio(U3.dpr);R.setSize(W,Ht,true);
+ U3.cam.aspect=1;U3.cam.setViewOffset(W,W,0,0,W,Ht);U3.cam.updateProjectionMatrix();
+ U3.fpx=(W/2)/Math.tan(U3C.FOV*Math.PI/360);U3.bake=true;U3.cv.style.width=W+'px';U3.cv.style.height=Ht+'px';
+ // الكومتان في أماكن أهدافهما (DOM) بالضبط: يُسقَط مركز كلٍّ على سطح الطاولة
+ const at=(sel,dx)=>{const e=board.querySelector(sel);if(!e)return {x:dx,z:.02};const r=e.getBoundingClientRect(),br=board.getBoundingClientRect();const p=u3OnPlane(r.left+r.width/2-br.left,r.top+r.height/2-br.top,0);return {x:p.x,z:p.z}};
+ U3.drawP=at('.unoDrawS',-.17);U3.discP=at('.unoDiscS',.17);
+ U3.pileSh.position.set(U3.drawP.x,.001,U3.drawP.z+.012);U3.discSh.position.set(U3.discP.x,.001,U3.discP.z+.012);
+ U3.drawGlow.position.set(U3.drawP.x,.0012,U3.drawP.z);U3.discGlow.position.set(U3.discP.x,.0012,U3.discP.z);
+ u3PileLay(true);u3DiscLay();for(const p in U3.fans)u3FanSet(p,false,true);
+ U3.dirty=true;
+}
+function u3OnResize(){if(!U3.R)return;clearTimeout(U3.rzT);U3.rzT=setTimeout(()=>{if(!u3Live())return;const b=U3.cv.parentNode;if(b){U3.sized=0;u3Size(b);u3Draw()}},120)}
+/* من بكسل الرقعة إلى الفضاء: شعاعٌ من الكاميرا */
+function u3Ray(bx,by){const v=U3._r||(U3._r=new THREE.Vector3());return v.set(bx/U3.W*2-1,1-by/U3.W*2,.5).unproject(U3.camD).sub(U3.camD.position).normalize()}
+function u3OnPlane(bx,by,h){const d=u3Ray(bx,by),o=U3.camD.position,t=(h-o.y)/(d.y||-1e-6);return new THREE.Vector3(o.x+d.x*t,h,o.z+d.z*t)}
+function u3AtScreen(bx,by,wpx){const d=u3Ray(bx,by),k=U3C.W*U3.fpx/Math.max(18,wpx);return U3.camD.position.clone().addScaledVector(d,k)}
+function u3BoardRect(){return U3.cv.getBoundingClientRect()}
+function u3HandPt(){const b=u3BoardRect(),h=document.querySelector('#rmScr .unoHand');let x=b.width/2,y=U3.W+U3.ext*.6;
+ if(h){const r=h.getBoundingClientRect();if(r.width){x=r.left+r.width/2-b.left;y=r.top+r.height*.55-b.top}}
+ return {x,y,w:62*1.2}}
+/* ── الكومتان والمراوح ── */
+function u3Rnd(i){const x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x)}
+function u3PileN(dk){return dk>0?Math.max(1,Math.min(14,Math.ceil(dk/6))):0}
+function u3PileLay(force){
+ const n=u3PileN(U3.dk||0);if(!force&&n===U3.pile.length)return;
+ while(U3.pile.length<n)U3.pile.push(u3Card('back'));
+ while(U3.pile.length>n)u3Drop(U3.pile.pop());
+ const q=U3._pq||(U3._pq=new THREE.Quaternion());
+ U3.pile.forEach((m,i)=>{m.position.set(U3.drawP.x+(u3Rnd(i)-.5)*.008,.002+U3C.T/2+i*U3C.PSTEP,U3.drawP.z+(u3Rnd(i+40)-.5)*.008);u3Qf(q,(u3Rnd(i+80)-.5)*.07,Math.PI,0);m.quaternion.copy(q);m.scale.setScalar(1)});
+ U3.pileSh.visible=n>0;U3.dirty=true;
+}
+function u3PileTop(){const m=U3.pile[U3.pile.length-1];if(m)return {pos:m.position.clone().add(new THREE.Vector3(0,U3C.PSTEP,0)),q:m.quaternion.clone()};
+ const q=u3Qf(new THREE.Quaternion(),0,Math.PI,0);return {pos:new THREE.Vector3(U3.drawP.x,.004,U3.drawP.z),q}}
+function u3DiscLay(){U3.disc.forEach((d,i)=>{d.m.position.set(U3.discP.x+d.dx,.002+U3C.T/2+i*U3C.STEP,U3.discP.z+d.dz)});U3.discSh.visible=U3.disc.length>0;U3.discSh.scale.setScalar(1+Math.min(6,U3.disc.length)*.03);U3.dirty=true}
+function u3DiscPush(card,m,dx,dz,yaw){
+ if(!m){m=u3Card(card);u3Qf(m.quaternion,yaw,0,0)}
+ m.scale.setScalar(1);U3.disc.push({card,m,dx,dz,yaw});
+ while(U3.disc.length>7)u3Drop(U3.disc.shift().m);
+ u3DiscLay();
+}
+/** اتّجاهات المقاعد كما في unoSeats: خصمٌ واحد أعلى، اثنان يسارًا ويمينًا، ثلاثة يسارًا وأعلى ويمينًا، وأكثر على قوسٍ بينها */
+function u3Seats(others){
+ const k=others.length,out={};
+ others.forEach((p,i)=>{let a;
+  if(k===1)a=-Math.PI/2;else if(k===2)a=i?0:Math.PI;else if(k===3)a=[Math.PI,-Math.PI/2,0][i];else a=Math.PI+i/(k-1)*Math.PI;
+  out[p]={x:Math.cos(a),z:Math.sin(a)}});
+ return out;
+}
+function u3FanLay(p,n){
+ const s=U3.seat[p];if(!s)return [];
+ const rf=.6,Rp=.3,d=n>1?Math.min(.2,1.12/(n-1)):0,px=s.x*(rf+Rp),pz=s.z*(rf+Rp),L=[];
+ for(let i=0;i<n;i++){const a=(i-(n-1)/2)*d,ux=-s.x*Math.cos(a)+s.z*Math.sin(a),uz=-s.z*Math.cos(a)-s.x*Math.sin(a);
+  L.push({x:px+ux*Rp,z:pz+uz*Rp,y:.002+U3C.T*U3C.FAN/2+i*U3C.STEP*.8,yaw:Math.atan2(-ux,-uz)})}
+ return L;
+}
+function u3FanSet(p,anim,force){
+ const f=U3.fans[p];if(!f)return;
+ const n=Math.max(0,Math.min(20,(f.n||0)-(f.inb||0)));if(n===f.shown&&!force)return;
+ const L=u3FanLay(p,n),T=THREE,q=U3._fq||(U3._fq=new T.Quaternion());
+ while(f.meshes.length<n){const m=u3Card('back');m.scale.setScalar(U3C.FAN);m.visible=false;f.meshes.push(m)}
+ const tw=[];
+ f.meshes.forEach((m,i)=>{if(i>=n){m.visible=false;return}const t=L[i];u3Qf(q,t.yaw,0,0);
+  if(anim&&m.visible)tw.push({m,p0:m.position.clone(),q0:m.quaternion.clone(),p1:new T.Vector3(t.x,t.y,t.z),q1:q.clone()});
+  else{m.position.set(t.x,t.y,t.z);m.quaternion.copy(q);m.visible=true}});
+ if(tw.length)u3Anim({dur:U3.rm?90:180,step(k){const e=1-Math.pow(1-k,3);tw.forEach(o=>{o.m.position.lerpVectors(o.p0,o.p1,e);o.m.quaternion.slerpQuaternions(o.q0,o.q1,e)})}});
+ f.shown=n;
+ const s=U3.seat[p];if(f.sh&&s){f.sh.visible=n>0;f.sh.position.set(s.x*.66,.0011,s.z*.66);const sp=.3+Math.min(1,n/8)*.35;f.sh.scale.set(Math.abs(s.x)>.5?.7:sp*2.1,Math.abs(s.x)>.5?sp*2.1:.7,1)}
+ U3.dirty=true;
+}
+function u3FanTop(p){const f=U3.fans[p];if(!f||!f.shown)return null;const m=f.meshes[f.shown-1];return m?{pos:m.position.clone(),q:m.quaternion.clone()}:null}
+/* ── الحركة ── */
+/** بطاقةٌ تطير من يدك أو إليها: الطبقة الحيّة ترتفع فوق حوض اليد الثابت (z ٣٠) طوال رحلتها فقط */
+function u3Up(d){U3.upN=Math.max(0,(U3.upN||0)+d);if(U3.cv)U3.cv.classList.toggle('up',U3.upN>0)}
+function u3Anim(o){o.t0=o.t0||performance.now();U3.anims.push(o);u3Kick();return o}
+function u3Kick(){if(!U3.raf&&u3Live())U3.raf=requestAnimationFrame(u3Frame)}
+function u3Ease(k){return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2}
+/* المؤقّت يُعاد استعماله ولا يُتلف: إتلاف مادّةٍ يحرّر برنامجها، فتُترجَم ظلاليّتها من جديد عند الرمية التالية (تقطيعٌ على الهاتف) */
+function u3DustMesh(){if(!U3.dustTex)U3.dustTex=u3RingTex();const T=THREE,d=u3Plane(.34,.34,new T.MeshBasicMaterial({map:U3.dustTex,color:'#FFE9A8',transparent:true,depthWrite:false,blending:T.AdditiveBlending,opacity:.5}),.0016);d.renderOrder=-1;d.visible=false;U3.sc.add(d);(U3.dust||(U3.dust=[])).push(d);return d}
+function u3Dust(p){
+ const d=(U3.dust||[]).find(x=>!x.visible)||u3DustMesh();
+ d.position.x=p.x;d.position.z=p.z;d.visible=true;
+ u3Anim({dur:U3.rm?160:300,step(k){const e=1-Math.pow(1-k,2);d.scale.setScalar(.7+e*1.1);d.material.opacity=.5*(1-k)},end(){d.visible=false}});
+}
+function u3FadeMat(){const f=(U3.fade||(U3.fade=[])).find(m=>!m.userData.busy);if(f){f.userData.busy=1;f.opacity=1;return f}const m=U3.mat.clone();m.transparent=true;m.userData.busy=1;U3.fade.push(m);return m}
+function u3FlyShadow(m){if(!U3.flySh)U3.flySh=[];let s=U3.flySh.find(x=>!x.visible);if(!s){s=u3Plane(U3C.W*1.5,U3C.H*1.4,U3.shMat.clone(),.0011);s.renderOrder=-1;U3.sc.add(s);U3.flySh.push(s)}s.visible=true;return s}
+function u3ShadowAt(s,pos,sc){const h=Math.max(0,pos.y),off=Math.hypot(pos.x,pos.z)>.84;s.visible=!off;s.position.set(pos.x+h*.08,.0011,pos.z+h*.18);const k=(sc||1)*(1+h*1.2);s.scale.set(k,k,1);s.material.opacity=Math.max(0,.8-h*1.1)}
+/** رمية بطاقة إلى كومة الرمي: من يدك (تبدأ بحجمها ومكانها على الشاشة مواجهةً لك) أو من مروحة الخصم (مقلوبة ثمّ تنقلب) أو من كومة السحب */
+function u3Throw(p,card,rect,fromSync){
+ const T=THREE,now=performance.now(),me=p&&p===RM.me;
+ U3.recent.push({p:p||'',card,t:now,used:!!fromSync});if(U3.recent.length>12)U3.recent.shift();
+ const m=u3Card(card);let p0,q0=new T.Quaternion(),s0=1,face=false,yaw0=0;
+ if(me){const b=u3BoardRect();let x,y,w;if(rect&&rect.width){x=rect.left+rect.width/2-b.left;y=rect.top+rect.height/2-b.top;w=rect.width}else{const h=u3HandPt();x=h.x;y=h.y;w=h.w}
+  p0=u3AtScreen(x,y,w);q0.copy(U3.camD.quaternion);face=true}
+ else if(p&&U3.fans[p]&&U3.fans[p].shown){const f=U3.fans[p],t=u3FanTop(p);
+  // البطاقة ترتفع من أعلى المروحة نفسها: تُطفأ منها واحدةٌ الآن (العدد في الحالة نقص فعلًا)
+  p0=t.pos.clone();p0.y+=.012;q0.copy(t.q);s0=U3C.FAN;const e=new T.Euler().setFromQuaternion(t.q,'YXZ');yaw0=e.y}
+ else{const t=u3PileTop();p0=t.pos;q0.copy(t.q);yaw0=0}
+ m.position.copy(p0);m.quaternion.copy(q0);m.scale.setScalar(s0);if(me)u3Up(1);
+ const idx=U3.disc.length+U3.discFly;U3.discFly++;
+ const dx=(Math.random()-.5)*.07,dz=(Math.random()-.5)*.055,sg=Math.random()<.5?-1:1,yaw1=(Math.random()-.5)*1.05,extra=sg*(.55+Math.random()*.6)*Math.PI*.5;
+ const p1=new T.Vector3(U3.discP.x+dx,.002+U3C.T/2+idx*U3C.STEP,U3.discP.z+dz);
+ const slide=new T.Vector3(p1.x-p0.x,0,p1.z-p0.z);if(slide.lengthSq()<1e-6)slide.set(0,0,-1);slide.normalize().multiplyScalar(.028);
+ const q1=u3Qf(new T.Quaternion(),yaw1,0,0),qs=new T.Quaternion(),qy=new T.Quaternion(),Zc=new T.Vector3(0,0,1),c=p0.clone().add(p1).multiplyScalar(.5);c.y=Math.max(p0.y,p1.y)+(face?.24:.3);
+ const sh=u3FlyShadow(),dur=(face?520:600)*(U3.rm?.55:1),h=face?0:.3;let landed=0,under=null,u0=null;
+ u3Anim({m,dur,step(k){
+  const s=Math.min(1,k/.84),e=face?1-Math.pow(1-s,3):1-Math.pow(1-s,2),pos=m.position;
+  if(k<.84){
+   if(face){const a=(1-e)*(1-e),b2=2*(1-e)*e,c2=e*e;pos.set(p0.x*a+c.x*b2+p1.x*c2,p0.y*a+c.y*b2+p1.y*c2,p0.z*a+c.z*b2+p1.z*c2);
+    qs.slerpQuaternions(q0,q1,u3Ease(Math.min(1,s*1.15)));qy.setFromAxisAngle(Zc,extra*(1-e));m.quaternion.multiplyQuaternions(qs,qy)}   // الدوران في مستوى البطاقة نفسها (كقرصٍ مرميّ) — لا تنقلب على حرفها
+   else{pos.lerpVectors(p0,p1,e);pos.y=p0.y+(p1.y-p0.y)*s+h*4*s*(1-s);
+    u3Qf(m.quaternion,yaw0+(yaw1+extra-yaw0)*e,Math.PI*(1-u3Ease(Math.min(1,s*1.3))),.32*Math.sin(Math.PI*s))}
+   m.scale.setScalar(s0+(1-s0)*Math.min(1,s*1.6));
+  }else{const s2=(k-.84)/.16,e2=1-Math.pow(1-s2,2),sq=s2<.45?Math.sin(Math.PI*s2/.45):0;
+   if(!landed){landed=1;u3Dust(p1);const u=U3.disc[U3.disc.length-1];if(u){under=u;u0=u.m.position.clone()}}
+   pos.copy(p1).addScaledVector(slide,e2);pos.y=p1.y+.006*Math.sin(Math.PI*s2)*(1-s2);u3Qf(m.quaternion,yaw1+sg*.07*e2,0,0);
+   m.scale.set(1+.05*sq,1+.05*sq,1-.4*sq);   // «ثَد» على الجوخ: انضغاطٌ خاطف ثمّ تعود
+   if(under)under.m.position.set(u0.x+slide.x*.18*e2,u0.y,u0.z+slide.z*.18*e2)}
+  u3ShadowAt(sh,pos,m.scale.x);
+ },end(){sh.visible=false;U3.discFly--;if(me)u3Up(-1);m.scale.setScalar(1);if(under){under.dx+=slide.x*.18;under.dz+=slide.z*.18}u3DiscPush(card,m,dx+slide.x,dz+slide.z,yaw1+sg*.07);u3Fix()}});
+ return m;
+}
+/** سحبٌ أو توزيع: من أعلى كومة السحب إلى مروحة المقعد (تستقرّ مكان بطاقتها الجديدة) أو إلى يدك (تنقلب وجهًا لك وتذوب فيها) */
+function u3Draws(p,n,cards){
+ const T=THREE,me=p===RM.me,k=Math.min(n,6),gap=U3.rm?50:105,f=U3.fans[p];
+ if(!me&&f){f.inb=(f.inb||0)+k;u3FanSet(p,true)}
+ for(let i=0;i<k;i++){
+  const t0=performance.now()+i*gap,card=cards&&cards[i]||null,m=u3Card(me&&card?card:'back');m.visible=false;
+  let st=null,p1=null,q1=new T.Quaternion(),s1=1,idx=0;const q0=new T.Quaternion(),mat=me?u3FadeMat():null;
+  if(mat){m.material=mat;u3Up(1)}
+  const sh=u3FlyShadow();sh.visible=false;
+  u3Anim({m,t0,dur:(me?430:380)*(U3.rm?.55:1),step(kk){
+   if(!st){st=u3PileTop();q0.copy(st.q);m.visible=true;U3.dk=Math.max(0,(U3.dk||0));
+    if(me){const h=u3HandPt();p1=u3AtScreen(h.x+(i-(k-1)/2)*18,h.y,h.w);q1.copy(U3.camD.quaternion)}
+    else{const ff=U3.fans[p];idx=(ff?ff.shown:0);const L=u3FanLay(p,idx+1),t=L[idx]||{x:0,y:.01,z:0,yaw:0};p1=new T.Vector3(t.x,t.y,t.z);u3Qf(q1,t.yaw,0,0);s1=U3C.FAN}}
+   const e=1-Math.pow(1-kk,3),pos=m.position;pos.lerpVectors(st.pos,p1,e);
+   if(me){pos.y+=Math.sin(Math.PI*kk)*.18;m.quaternion.slerpQuaternions(q0,q1,u3Ease(kk));mat.opacity=kk<.72?1:Math.max(0,1-(kk-.72)/.28)}
+   else{pos.y+=Math.sin(Math.PI*kk)*.16;m.quaternion.slerpQuaternions(q0,q1,e)}
+   m.scale.setScalar(1+(s1-1)*e);u3ShadowAt(sh,pos,m.scale.x);
+  },end(){sh.visible=false;u3Drop(m);if(mat){mat.userData.busy=0;u3Up(-1)}
+   if(!me){const ff=U3.fans[p];if(ff){ff.inb=Math.max(0,(ff.inb||0)-1);u3FanSet(p,true)}}}});
+ }
+}
+/** الكومة تطابق الحالة: إن رُفضت رميةٌ (نادرًا) تُزال، وإن فات شيءٌ يوضع مكانه */
+function u3Fix(){
+ const P=U3.prev;if(!P||U3.discFly)return;
+ const top=P.top;if(!top){if(U3.disc.length){U3.disc.splice(0).forEach(d=>u3Drop(d.m));u3DiscLay()}return}
+ let g=0;while(U3.disc.length&&U3.disc[U3.disc.length-1].card!==top&&g++<2)u3Drop(U3.disc.pop().m);
+ if(!U3.disc.length||U3.disc[U3.disc.length-1].card!==top)u3DiscPush(top,null,(Math.random()-.5)*.05,(Math.random()-.5)*.04,(Math.random()-.5)*.9);
+ u3DiscLay();
+}
+function u3Mset(a){const o={};a.forEach(c=>o[c]=(o[c]||0)+1);return o}
+function u3Reset(){
+ U3.upN=0;if(U3.cv)U3.cv.classList.remove('up');
+ U3.anims.splice(0).forEach(a=>{if(a.m)u3Drop(a.m)});(U3.flySh||[]).forEach(s=>s.visible=false);U3.discFly=0;
+ U3.disc.splice(0).forEach(d=>u3Drop(d.m));
+ for(const p in U3.fans){U3.fans[p].meshes.forEach(u3Drop);u3Drop(U3.fans[p].sh)}U3.fans={};U3.seat={};U3.prev=null;U3.recent=[];U3.dirty=true;
+}
+/** الحالة المرسومة ← المشهد: الفرق عن الحالة السابقة يصير حركة (رمية، سحب، توزيع)، والأوّل يوضع كما هو */
+function u3Sync(U){
+ const me=RM.me,key=RM.mid||'x';
+ if(U3.key!==key){u3Reset();U3.key=key}
+ const cnt={};(U.cnt||[]).forEach(c=>cnt[c.p]=c.n|0);
+ const hand=(U.intro?(RM.hand||[]).slice(0,cnt[me]||0):(RM.hand||[])).slice();
+ const others=(U.cnt||[]).map(c=>c.p).filter(p=>p!==me);
+ const seats=u3Seats(others),sig=others.join('|');
+ if(U3.seatSig!==sig){for(const p in U3.fans){if(!seats[p]){U3.fans[p].meshes.forEach(u3Drop);u3Drop(U3.fans[p].sh);delete U3.fans[p]}}U3.seatSig=sig}
+ U3.seat=seats;
+ others.forEach(p=>{if(!U3.fans[p]){const sh=u3Plane(.5,.5,U3.fanShMat,.0011);sh.renderOrder=-1;U3.sc.add(sh);U3.fans[p]={meshes:[],shown:-1,n:0,inb:0,sh}}});
+ const P=U3.prev;
+ U3.dk=U.dk|0;
+ if(!P){
+  others.forEach(p=>{U3.fans[p].n=cnt[p]||0;u3FanSet(p,false,true)});
+  U3.disc.splice(0).forEach(d=>u3Drop(d.m));if(U.top)u3DiscPush(U.top,null,0,0,(Math.random()-.5)*.5);
+ }else{
+  const played=!!U.top&&(U.top!==P.top||(!!U.by&&U.by!==me&&(cnt[U.by]|0)<(P.cnt[U.by]|0)));
+  if(played){const who=U.by||null,i=U3.recent.findIndex(r=>!r.used&&r.p===(who||'')&&r.card===U.top);
+   if(i>=0)U3.recent[i].used=true;
+   else{const f=who&&U3.fans[who];if(f){f.n=cnt[who]|0}u3Throw(who,U.top,null,true)}}
+  others.forEach(p=>{const f=U3.fans[p],d=(cnt[p]|0)-(P.cnt[p]|0)+(played&&U.by===p?1:0);f.n=cnt[p]|0;
+   if(d>0)u3Draws(p,d,null);u3FanSet(p,true)});
+  const was=u3Mset(P.hand),add=[];hand.forEach(c=>{if(was[c])was[c]--;else add.push(c)});
+  if(add.length)u3Draws(me,add.length,add);
+ }
+ u3PileLay();
+ const col=U.col&&UNO_COL[U.col]?UNO_COL[U.col][0]:'#E8B23A';U3.discGlow.material.color.set(col);U3.discGlow.visible=!!U.top;
+ U3.drawGlow.visible=!U.intro&&U.turn===me&&U.drew!==me;
+ U3.prev={top:U.top||null,cnt,hand,intro:!!U.intro};
+ if(!U3.discFly)u3Fix();
+ U3.dirty=true;
+}
+function u3Medal(U){
+ if(!UNO_ART.medal||!U||U.intro)return;
+ const e=document.querySelector('.unoBoard .unoInfo');if(!e||e.querySelector('.unoMedal'))return;
+ const i=document.createElement('i');i.className='unoMedal';i.style.setProperty('--mc',U.col&&UNO_COL[U.col]?UNO_COL[U.col][0]:'#E8B23A');e.prepend(i);
+}
+/** بعد كلّ رسمٍ للغرفة (مهمّةٌ صغرى): اللوحة الحيّة نفسها تُنقل إلى الرقعة الجديدة بما رُسم عليها، ثمّ تُطابَق الحالة */
+function u3Mount(){
+ U3.q=0;const U=U3.pendU;U3.pendU=null;
+ try{u3Medal(U)}catch(e){}
+ const slot=document.querySelector('.unoBoard .uno3dSlot');if(!slot||!U)return;
+ const board=slot.parentNode;
+ if(!U3.R&&!u3Init()){slot.remove();return}
+ slot.replaceWith(U3.cv);board.classList.add('is3d');clearTimeout(U3.byeT);U3.byeT=0;clearTimeout(U3.wT);U3.wT=0;
+ try{u3Size(board);u3Sync(U)}catch(e){try{console.warn('[uno3d]',e)}catch(x){}}
+ U3.syncAt=performance.now();
+ if(!U3.raf&&U3.dirty&&!document.hidden)u3Draw();
+}
+function u3Draw(){
+ if(!U3.R)return;const R=U3.R,cam=U3.cam,tl=U3.tiltOn;
+ if(U3.bake&&!tl){   // الطاولة الثابتة: تُرسم وحدها ثمّ تُنسخ إلى اللوحة الثنائيّة — مرّةً لكلّ مقاسٍ أو ميل
+  U3.bake=false;cam.layers.set(1);R.render(U3.sc,cam);
+  const b=U3.bg,w=U3.gl.width,h=Math.min(U3.gl.height,Math.round(U3.W*1.12*U3.dpr));
+  if(b.width!==w||b.height!==h){b.width=w;b.height=h}b.style.width=U3.W+'px';b.style.height=Math.round(h/U3.dpr)+'px';
+  const g=b.getContext('2d');g.clearRect(0,0,w,h);g.drawImage(U3.gl,0,0,w,h,0,0,w,h)}
+ if(tl)cam.layers.enableAll();else cam.layers.set(0);
+ U3.bg.style.visibility=tl?'hidden':'';
+ R.render(U3.sc,cam);U3.dirty=false;
+}
+function u3Frame(now){
+ U3.raf=0;
+ if(!u3Live()){u3Flush();return}
+ // قياس زمن الإطار أثناء الحركة (لا بعد إعادة بناء الغرفة مباشرةً) — ثقيلٌ باستمرار ⇒ دقّةٌ أقلّ، ثمّ الطاولة المتّجهيّة
+ if(U3.lastT&&now-U3.syncAt>90&&!window.__uno3dNoAuto){U3.samp.push(now-U3.lastT);if(U3.samp.length>=48){const a=U3.samp.sort((x,y)=>x-y),md=a[a.length>>1];U3.samp=[];U3.lastMed=md;
+  if(md>26){if(U3.dpr>1.01){U3.dpr=Math.max(1,U3.dpr-.5);U3.sized=0;const b=U3.cv.parentNode;if(b)u3Size(b)}else if(md>34){try{localStorage.setItem('uno3dOff',String(Date.now()))}catch(e){}u3Kill('slow');return}}}}
+ U3.lastT=now;
+ let busy=false;
+ for(const a of U3.anims.slice()){
+  if(now<a.t0){busy=true;continue}
+  const k=Math.min(1,(now-a.t0)/a.dur);a.step(k);
+  if(k>=1){U3.anims.splice(U3.anims.indexOf(a),1);if(a.end)a.end()}else busy=true;
+ }
+ const t=U3.tilt;if(Math.abs(t.x-t.tx)>.004||Math.abs(t.y-t.ty)>.004){t.x+=(t.tx-t.x)*.18;t.y+=(t.ty-t.y)*.18;u3CamSync();U3.tiltOn=true;busy=true}
+ else if(U3.tiltOn){U3.tiltOn=false;U3.bake=true}
+ u3Draw();
+ if(busy||U3.anims.length)U3.raf=requestAnimationFrame(u3Frame);else U3.lastT=0;
+}
+/** كلّ حركةٍ جارية تُكمَل فورًا (الشاشة أو الصفحة غابت) — ولا يبقى طلب إطار */
+function u3Flush(){
+ if(U3.raf){cancelAnimationFrame(U3.raf);U3.raf=0}U3.lastT=0;
+ let g=0;while(U3.anims.length&&g++<60){const a=U3.anims.shift();try{a.step(1);if(a.end)a.end()}catch(e){}}
+ U3.dirty=true;
+}
+function u3Vis(){if(!U3.R)return;if(document.hidden)u3Flush();else if(u3Live()&&U3.dirty)u3Draw()}
+/* ميلٌ خفيف مع الجهاز: الهدف يُكمَّم بدرجاتٍ صغيرة فلا يرسم ارتعاش اليد إطارًا بعد إطار، وأقلّ من عشرة تحديثاتٍ في الثانية */
+function u3Tilt(e){
+ if(e.gamma==null||!u3Live())return;const now=performance.now(),t=U3.tilt;if(now-t.at<100)return;t.at=now;
+ const q=v=>Math.round(Math.max(-1,Math.min(1,v))*6)/6,x=q(e.gamma/28),y=q((e.beta-50)/28);
+ if(x!==t.tx||y!==t.ty){t.tx=x;t.ty=y;u3Kick()}
+}
+/** غابت شاشة الغرفة: لا رسم؛ وإن لم تعد خلال ١٥ ثانية تُحرَّر ذاكرة الرسم كلّها */
+function u3Watch(){
+ if(!U3.cv||U3.cv.isConnected||U3.wT)return;
+ // يُتحقَّق بعد أن تكتمل المهامّ الصغرى: إعادة رسم الغرفة تنزع اللوحة ثمّ تعيدها في اللحظة نفسها — ذاك ليس مغادرة
+ U3.wT=setTimeout(()=>{U3.wT=0;if(!U3.cv||U3.cv.isConnected)return;
+  u3Flush();U3.prev=null;
+  if(!U3.byeT)U3.byeT=setTimeout(()=>{U3.byeT=0;if(U3.cv&&!U3.cv.isConnected)u3Dispose()},15000)},60);
+}
+function u3Dispose(){
+ if(!U3.R)return;
+ u3Flush();u3Reset();
+ try{if(U3.mo)U3.mo.disconnect()}catch(e){}U3.mo=null;
+ document.removeEventListener('visibilitychange',u3Vis);window.removeEventListener('resize',u3OnResize);window.removeEventListener('deviceorientation',u3Tilt);
+ try{U3.sc.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(o.material.map&&o.material.map!==U3.tex)o.material.map.dispose();o.material.dispose()}})}catch(e){}
+ for(const k in U3.geo){try{U3.geo[k].dispose()}catch(e){}}U3.geo={};
+ try{U3.tex.dispose();if(U3.env)U3.env.dispose();(U3.fade||[]).forEach(m=>m.dispose());if(U3.dustTex)U3.dustTex.dispose()}catch(e){}U3.fade=[];U3.dust=[];U3.dustTex=null;
+ U3.bye=1;try{U3.R.dispose();U3.R.forceContextLoss()}catch(e){}U3.bye=0;
+ try{if(U3.cv)U3.cv.remove()}catch(e){}
+ Object.assign(U3,{R:null,cv:null,gl:null,bg:null,tbl:null,sc:null,cam:null,camD:null,tex:null,mat:null,env:null,W:0,ext:0,sized:0,pile:[],flySh:[],seatSig:null,key:null,samp:[]});
+ UNO3D.on=false;
+}
+/** عودةٌ إلى الطاولة المتّجهيّة كما هي: السياق فُقد، أو الجهاز أبطأ من أن يحمل المجسّم */
+function u3Kill(why){
+ try{console.warn('[uno3d] off:',why)}catch(e){}
+ UNO3D.dead=true;const b=U3.cv&&U3.cv.parentNode;
+ try{u3Dispose()}catch(e){}
+ if(b&&b.classList)b.classList.remove('is3d');
+ UNO3D.on=false;
+}
 function rmUnoTable(U,mine){
  const dirIco=U.dir===1?'↻':'↺', col=U.col?UNO_COL[U.col][0]:'#E8B23A', hand=RM.hand||[];
  const M=RM._unoMsg,msg=!U.intro&&M&&(U.msg||Date.now()-M.at<2600)?unoMsgH(M.h):'';   // ٦٫٩٦: آخر حدثٍ يبقى لحظةً ليُقرأ
  const myN=U.intro?(((U.cnt||[]).find(c=>c.p===RM.me)||{}).n||0):hand.length;
  const myLot=U.lot&&U.lot[RM.me], hl=U.intro&&U.turn===RM.me;
  return `<div class="unoBoard ${U.intro?'intro':''}" data-p="${RM.me}"${U.intro?' onclick="unoIntroSkip()"':''}>
-  ${UNO_TBL}
+  ${UNO_TBL}${UNO3D.slot(U)}
   ${U.intro?'':`<div class="unoRing ${U.dir===1?'cw':'ccw'}" style="--rc:${col}">${UNO_RING}</div>`}
   ${unoSeats(U)}
   <div class="unoZ me ${mine||hl?'on':''}">
