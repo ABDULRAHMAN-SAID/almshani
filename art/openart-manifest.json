@@ -190,5 +190,17 @@
   "historyId": "CmKomblTzDoes3nxkYvl",
   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790275113996_9ac10963.png",
   "prompt": "magenta sheet: card back, red UNO button, colour medallion"
+ },
+ {
+  "path": "art/uno/fronts",
+  "historyId": "UZhZZMFS26krr0znFhHG",
+  "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790277193599_ffe2c9c2.png",
+  "prompt": "magenta sheet: 5 blank card fronts red/blue/yellow/green/wild"
+ },
+ {
+  "path": "art/uno/hero",
+  "historyId": "LDbhvQc8EdO5ypGu0R6l",
+  "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790277208115_a732d0fb.png",
+  "prompt": "Uno hub key art: fan of cards over navy/gold table in majlis"
  }
 ]
