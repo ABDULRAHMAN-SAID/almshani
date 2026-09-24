@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: الأدوات
-        run: pip install --quiet pillow numpy
+        run: pip install --quiet pillow numpy scipy
       - name: تنزيل الصور وتجهيزها
         run: python3 art-src/process.py
       - name: رفع الناتج

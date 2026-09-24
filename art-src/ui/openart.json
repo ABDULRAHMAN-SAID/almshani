@@ -1,0 +1,30 @@
+{
+ "_": "خلفيّات الشاشات وصور الأوضاع (OpenArt · Nano Banana Pro). تُصغَّر عرضًا (bg) وتُضغط WebP.",
+ "prefix": "ui_",
+ "kind": "bg",
+ "q": 80,
+ "items": {
+  "app_bg": {
+   "historyId": "edxYyNYeG3Zj3yqL0Gj7",
+   "size": 900,
+   "q": 74,
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222024220_d6aff7dd_1790222024587_88a01ca9.png"
+  },
+  "win_bg": {
+   "historyId": "aJkgJeLpSHHCh7yIu5Yz",
+   "size": 900,
+   "q": 76,
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222029005_882c3820_1790222029620_0815c3cf.png"
+  },
+  "hero_carrom": {
+   "historyId": "Yzhbg8H8YqZQssktX1rF",
+   "size": 1100,
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222034510_d5a19a62_1790222035018_0cd05536.png"
+  },
+  "mode_knowledge": {
+   "historyId": "j5YY1lz6gQhjKHo6Mb2W",
+   "size": 720,
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790222035888_93cba4cd_1790222036388_a55f3c14.png"
+  }
+ }
+}
