@@ -19,6 +19,7 @@ if(SERVER){
  html=html.replace(META,`<meta name="tahaddi-server" content="${SERVER}">`);
 }
 fs.writeFileSync(path.join(OUT,'index.html'),html);
+require('child_process').execFileSync(process.execPath,[path.join(__dirname,'splash-total.cjs'),path.join(OUT,'index.html')],{stdio:'inherit'});   // ٦٫٩٥: نسخة الويب تحمل حجمها الحقيقيّ لشاشة الدخول
 for(const f of ['sw.js','manifest.webmanifest'])fs.copyFileSync(path.join(SRC,f),path.join(OUT,f));
 for(const f of fs.readdirSync(path.join(SRC,'icons')))fs.copyFileSync(path.join(SRC,'icons',f),path.join(OUT,'icons',f));
 /* ٦٫٦٦: لا مجلّد ساحات — اللوح مرسومٌ داخل اللعبة */

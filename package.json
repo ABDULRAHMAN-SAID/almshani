@@ -18,7 +18,7 @@
     "start:tahaddi": "node server/dist/tahaddi.js",
     "test:tahaddi": "node tools/check-emoji.cjs && node tools/test-rank-core.cjs && node tools/test-router.cjs && node tools/test-carrom-physics.cjs && node tools/test-carrom-bot.cjs 120 && npm run build:tahaddi && node tools/test-tahaddi-server.cjs",
     "game:build": "node tools/build.mjs",
-    "game:check": "node tools/build.mjs --check",
+    "game:check": "node tools/build.mjs --check && node tools/splash-total.cjs --check",
     "web:build": "node tools/build-www.cjs",
     "game:fonts": "node tools/build-fonts.cjs",
     "android:sync": "node tools/android-sync.cjs",

@@ -30,6 +30,7 @@ if(next===cur)throw new Error('الرقم نفسه: '+cur+' — الرفع بل�
 const out=src.replace(RE,"const APP_VER='"+next+"';");
 if(out===src)throw new Error('الاستبدال لم يغيّر شيئًا');
 fs.writeFileSync(P,out);
+try{require('child_process').execFileSync(process.execPath,[require('path').join(__dirname,'splash-total.cjs')],{stdio:'inherit'})}catch(e){}   // ٦٫٩٥: أرقام شاشة الدخول بعد تغيير الإصدار
 const back=fs.readFileSync(P,'utf8').match(RE)[1];
 if(back!==next)throw new Error('كُتب '+back+' لا '+next);
 console.log('✓ الإصدار '+cur+' ← '+next);

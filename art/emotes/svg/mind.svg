@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill-rule="evenodd" stroke-linejoin="round" stroke-linecap="round">
+ <defs>
+  <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+   <stop offset="0" stop-color="#FFE9A8"/>
+   <stop offset=".55" stop-color="#E8B23A"/>
+   <stop offset="1" stop-color="#E8B23A" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="14"/></filter>
+  <radialGradient id="skinG" cx="42%" cy="34%" r="72%">
+   <stop offset="0" stop-color="#EDBB93"/>
+   <stop offset=".55" stop-color="#E3A97C"/>
+   <stop offset="1" stop-color="#D89B6C"/>
+  </radialGradient>
+  <radialGradient id="blushG">
+   <stop offset="0" stop-color="#E86A55" stop-opacity=".55"/>
+   <stop offset="1" stop-color="#E86A55" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="clothG" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#FBF8F2"/>
+   <stop offset="1" stop-color="#ECE6DA"/>
+  </linearGradient>
+  <pattern id="chk" width="22" height="22" patternUnits="userSpaceOnUse">
+   <rect width="22" height="22" fill="#FBF8F2"/>
+   <rect width="11" height="11" fill="#C8352E"/>
+   <rect x="11" y="11" width="11" height="11" fill="#C8352E"/>
+  </pattern>
+  <!-- face silhouette (reused for fill, clip and outline) -->
+  <path id="faceP" d="M256 94C322 94 354 144 354 208C354 268 318 310 256 310C194 310 158 268 158 208C158 144 190 94 256 94Z"/>
+  <clipPath id="clipFace"><use href="#faceP"/></clipPath>
+  <!-- ghutra back: behind the head, its bottom edge rides the shoulder line with a notch behind the neck -->
+  <path id="ghbP" d="M256 64C340 64 406 112 406 184C406 250 408 314 410 378C380 366 350 350 324 344L290 338V280H222V338L188 344C162 350 132 366 102 378C104 314 106 250 106 184C106 112 172 64 256 64Z"/>
+  <clipPath id="clipGhb"><use href="#ghbP"/></clipPath>
+  <!-- ghutra front: crown + two drapes, one closed path (outer contour, then inner edge back up over the forehead) -->
+  <path id="ghfP" d="M104 450C112 380 120 300 118 224C118 150 176 62 256 62C336 62 394 150 394 224C392 300 400 380 408 450C384 456 330 456 306 450C300 390 356 340 352 280C350 250 350 228 350 206C350 180 348 160 344 144C316 122 196 122 168 144C164 160 162 180 162 206C162 228 162 250 160 280C156 340 212 390 206 450C182 456 128 456 104 450Z"/>
+  <clipPath id="clipGhf"><use href="#ghfP"/></clipPath>
+  <path id="mouthP" d="M226 262Q256 294 286 262Q256 272 226 262Z"/>
+  <clipPath id="clipMouth"><use href="#mouthP"/></clipPath>
+ </defs>
+
+ <g id="glow">
+  <ellipse cx="256" cy="262" rx="200" ry="196" fill="url(#glowG)" opacity=".18" filter="url(#soft)"/>
+ </g>
+
+ <g id="body">
+  <!-- neck (shade tone: it sits in the chin's shadow) -->
+  <path d="M224 262H288V372H224Z" fill="#C9885B" stroke="#1A1230" stroke-width="8"/>
+  <!-- dishdasha with round neckline -->
+  <path d="M62 448C62 398 116 356 188 338L222 332C222 368 290 368 290 332L324 338C396 356 450 398 450 448C400 462 112 462 62 448Z" fill="url(#clothG)" stroke="#1A1230" stroke-width="8"/>
+  <!-- placket + collar band + gold button -->
+  <path d="M256 372V456" stroke="#DDD6C8" stroke-width="5"/>
+  <path d="M218 330C218 376 294 376 294 330" fill="none" stroke="#1A1230" stroke-width="20"/>
+  <path d="M218 330C218 376 294 376 294 330" fill="none" stroke="#FBF8F2" stroke-width="12"/>
+  <circle cx="256" cy="384" r="7.5" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <circle cx="253.5" cy="381.5" r="2.4" fill="#FFE9A8"/>
+ </g>
+
+ <g id="ghutra-back">
+  <use href="#ghbP" fill="#E4DDD0" stroke="#1A1230" stroke-width="8"/>
+  <!-- cast shadow of the jaw on the cloth behind -->
+  <g clip-path="url(#clipGhb)">
+   <ellipse cx="196" cy="318" rx="40" ry="20" fill="#D2CABA"/>
+   <ellipse cx="316" cy="318" rx="40" ry="20" fill="#D2CABA"/>
+  </g>
+ </g>
+
+ <g id="head">
+  <!-- ears (tucked under the ghutra; only their outline bump shows) -->
+  <ellipse cx="156" cy="226" rx="16" ry="22" fill="#E3A97C" stroke="#1A1230" stroke-width="7"/>
+  <ellipse cx="356" cy="226" rx="16" ry="22" fill="#E3A97C" stroke="#1A1230" stroke-width="7"/>
+  <!-- face: shade sliver bottom-right, then skin, then details, then outline -->
+  <g clip-path="url(#clipFace)">
+   <rect x="140" y="80" width="240" height="250" fill="#C9885B"/>
+   <use href="#faceP" fill="url(#skinG)" transform="translate(-5 -12)"/>
+   <!-- short beard / stubble along the jaw -->
+   <path d="M158 196C158 264 196 318 256 318C316 318 354 264 354 196L354 224C354 266 312 292 256 292C200 292 158 266 158 224Z" fill="#3A2A22" opacity=".94"/>
+   <path d="M196 284C214 296 234 302 256 302C278 302 298 296 316 284" fill="none" stroke="#5A463A" stroke-width="3" opacity=".7"/>
+   <!-- cheeks -->
+   <circle cx="198" cy="244" r="30" fill="url(#blushG)"/>
+   <circle cx="314" cy="244" r="30" fill="url(#blushG)"/>
+  </g>
+  <use href="#faceP" fill="none" stroke="#1A1230" stroke-width="8"/>
+  <!-- nose -->
+  <ellipse cx="259" cy="248" rx="12" ry="8" fill="#C9885B" opacity=".55"/>
+  <path d="M251 224C247 238 241 250 248 256C254 260 263 258 267 252" fill="none" stroke="#1A1230" stroke-width="4.5"/>
+ </g>
+
+ <g id="eyes">
+  <circle cx="216" cy="200" r="35" fill="#FFFFFF" stroke="#1A1230" stroke-width="4.5"/>
+  <circle cx="296" cy="200" r="35" fill="#FFFFFF" stroke="#1A1230" stroke-width="4.5"/>
+  <path d="M190 180A35 35 0 0 1 242 180" fill="none" stroke="#E4DDD0" stroke-width="5" opacity=".9"/>
+  <path d="M270 180A35 35 0 0 1 322 180" fill="none" stroke="#E4DDD0" stroke-width="5" opacity=".9"/>
+  <circle cx="216" cy="204" r="11" fill="#4A2C12"/>
+  <circle cx="296" cy="204" r="11" fill="#4A2C12"/>
+  <circle cx="216" cy="204" r="5.5" fill="#0E0A08"/>
+  <circle cx="296" cy="204" r="5.5" fill="#0E0A08"/>
+  <circle cx="212.5" cy="200" r="3.4" fill="#FFFFFF"/>
+  <circle cx="292.5" cy="200" r="3.4" fill="#FFFFFF"/>
+  <circle cx="220" cy="208" r="1.8" fill="#FFFFFF"/>
+  <circle cx="300" cy="208" r="1.8" fill="#FFFFFF"/>
+ </g>
+
+ <g id="brows">
+  <path d="M180 154C184 128 224 118 248 132C253 136 253 144 248 148C228 136 204 140 190 160C185 164 178 160 180 154Z" transform="translate(0 -8)" fill="#15110F" stroke="#1A1230" stroke-width="3"/>
+  <path d="M332 154C328 128 288 118 264 132C259 136 259 144 264 148C284 136 308 140 322 160C327 164 334 160 332 154Z" transform="translate(0 -8)" fill="#15110F" stroke="#1A1230" stroke-width="3"/>
+ </g>
+
+ <g id="mouth">
+  <path id="mJaw" d="M232 262C242 259 270 259 280 262C286 292 276 308 256 308C236 308 226 292 232 262Z" fill="#5E1F1F"/>
+  <clipPath id="clipMJaw"><use href="#mJaw"/></clipPath>
+  <g clip-path="url(#clipMJaw)">
+   <rect x="226" y="252" width="60" height="16" fill="#FFFFFF"/>
+   <ellipse cx="256" cy="310" rx="16" ry="12" fill="#D9564F"/>
+  </g>
+  <use href="#mJaw" fill="none" stroke="#1A1230" stroke-width="5"/>
+ </g>
+
+ <g id="ghutra-front">
+  <use href="#ghfP" fill="#FBF8F2" stroke="#1A1230" stroke-width="8"/>
+  <g clip-path="url(#clipGhf)">
+   <!-- shadow along the inner (face-side) edge of each drape -->
+   <path d="M162 206C162 228 162 250 160 280C156 340 212 390 206 450" fill="none" stroke="#E4DDD0" stroke-width="58"/>
+   <path d="M350 206C350 228 350 250 352 280C356 340 300 390 306 450" fill="none" stroke="#E4DDD0" stroke-width="58"/>
+   <!-- fold lines -->
+   <path d="M148 220C144 300 164 380 156 446" fill="none" stroke="#DDD6C8" stroke-width="4"/>
+   <path d="M364 220C368 300 348 380 356 446" fill="none" stroke="#DDD6C8" stroke-width="4"/>
+   <!-- red-and-white checkered hem: 2 rows of squares along the hanging edge and the bottom -->
+   <path d="M160 250C156 340 212 390 206 450L104 450" fill="none" stroke="url(#chk)" stroke-width="44"/>
+   <path d="M352 250C356 340 300 390 306 450L408 450" fill="none" stroke="url(#chk)" stroke-width="44"/>
+   <!-- shadow under the agal on the crown -->
+   <path d="M132 124C190 144 322 144 380 124" fill="none" stroke="#DDD6C8" stroke-width="10"/>
+  </g>
+  <!-- crown highlight -->
+  <path d="M206 80C222 70 250 66 276 68" fill="none" stroke="#FFFFFF" stroke-width="6" opacity=".9"/>
+ </g>
+
+ <g id="props">
+  <clipPath id="clipTop"><rect x="0" y="0" width="512" height="126"/></clipPath>
+  <g clip-path="url(#clipTop)">
+   <path d="M189.5 97.9L103.4 79.6M198.3 76L147.4 44.2M214.1 58.4L160 -10.9M235 47.3L216.4 -9.7M256 44L256 -44M277 47.3L295.6 -9.7M297.9 58.4L352 -10.9M313.7 76L364.6 44.2M322.5 97.9L408.6 79.6" fill="none" stroke="#1A1230" stroke-width="15"/>
+   <path d="M189.5 97.9L103.4 79.6M198.3 76L147.4 44.2M214.1 58.4L160 -10.9M235 47.3L216.4 -9.7M256 44L256 -44M277 47.3L295.6 -9.7M297.9 58.4L352 -10.9M313.7 76L364.6 44.2M322.5 97.9L408.6 79.6" fill="none" stroke="#E8B23A" stroke-width="7"/>
+   <path d="M256 46L265.3 77.2L289 54.8L281.5 86.5L313.2 79L290.8 102.7L322 112L290.8 121.3L313.2 145L281.5 137.5L289 169.2L265.3 146.8L256 178L246.7 146.8L223 169.2L230.5 137.5L198.8 145L221.2 121.3L190 112L221.2 102.7L198.8 79L230.5 86.5L223 54.8L246.7 77.2Z" fill="#E8B23A" stroke="#1A1230" stroke-width="7"/>
+   <path d="M266.9 73.4L266 96.7L285.7 84.3L273.3 104L296.6 103.1L276 114L296.6 124.9L273.3 124L285.7 143.7L266 131.3L266.9 154.6L256 134L245.1 154.6L246 131.3L226.3 143.7L238.7 124L215.4 124.9L236 114L215.4 103.1L238.7 104L226.3 84.3L246 96.7L245.1 73.4L256 94Z" fill="#FFE9A8"/>
+  </g>
+  <path d="M84 76L89 89.1L103 89.8L92.1 98.6L95.8 112.2L84 104.5L72.2 112.2L75.9 98.6L65 89.8L79 89.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M428 72L433 85.1L447 85.8L436.1 94.6L439.8 108.2L428 100.5L416.2 108.2L419.9 94.6L409 85.8L423 85.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M110 157L112.8 164.1L120.5 164.6L114.6 169.5L116.5 176.9L110 172.8L103.5 176.9L105.4 169.5L99.5 164.6L107.2 164.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M402 155L404.8 162.1L412.5 162.6L406.6 167.5L408.5 174.9L402 170.8L395.5 174.9L397.4 167.5L391.5 162.6L399.2 162.1Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M192 49L194.4 54.8L200.6 55.2L195.8 59.2L197.3 65.3L192 62L186.7 65.3L188.2 59.2L183.4 55.2L189.6 54.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M326 45L328.4 50.8L334.6 51.2L329.8 55.2L331.3 61.3L326 58L320.7 61.3L322.2 55.2L317.4 51.2L323.6 50.8Z" fill="#E8B23A" stroke="#1A1230" stroke-width="4"/>
+  <path d="M150 48L153 59L164 62L153 65L150 76L147 65L136 62L147 59Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
+  <path d="M364 46L367 57L378 60L367 63L364 74L361 63L350 60L361 57Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
+  <path d="M62 140L64.1 147.9L72 150L64.1 152.1L62 160L59.9 152.1L52 150L59.9 147.9Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
+  <path d="M450 138L452.1 145.9L460 148L452.1 150.1L450 158L447.9 150.1L440 148L447.9 145.9Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
+  <path d="M66 50L67.7 56.3L74 58L67.7 59.7L66 66L64.3 59.7L58 58L64.3 56.3Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
+  <path d="M446 48L447.7 54.3L454 56L447.7 57.7L446 64L444.3 57.7L438 56L444.3 54.3Z" fill="#FFE9A8" stroke="#1A1230" stroke-width="3"/>
+  <circle cx="124" cy="60" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="388" cy="62" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="76" cy="200" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="436" cy="200" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="100" cy="132" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+  <circle cx="412" cy="130" r="4" fill="#FFE9A8" stroke="#1A1230" stroke-width="2.5"/>
+ </g>
+
+ <g id="agal" transform="translate(0 -40)">
+
+  <path d="M138 114C190 132 322 132 374 114" fill="none" stroke="#1A1230" stroke-width="21"/>
+  <path d="M138 114C190 132 322 132 374 114" fill="none" stroke="#15110F" stroke-width="15"/>
+  <path d="M144 111C190 127 322 127 368 111" fill="none" stroke="#4A403A" stroke-width="3"/>
+  <path d="M142 95C190 113 322 113 370 95" fill="none" stroke="#1A1230" stroke-width="21"/>
+  <path d="M142 95C190 113 322 113 370 95" fill="none" stroke="#15110F" stroke-width="15"/>
+  <path d="M148 92C190 108 322 108 364 92" fill="none" stroke="#4A403A" stroke-width="3"/>
+ </g>
+
+</svg>

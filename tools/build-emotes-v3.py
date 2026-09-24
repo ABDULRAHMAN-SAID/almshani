@@ -5,6 +5,7 @@
 #   sheet-v3-b.png   4×3 — قهوة، يا خيبة، دعاء، على نار، الصقر، الجمل، الشيخ، البطل، صه، انفجار، الضارب الذهبيّ، الميداليّة
 #
 #   python3 tools/build-emotes-v3.py            ← يقصّ ويضمّن
+#   python3 tools/build-emotes-v3.py --svg      ← من الرسوم المتّجهة المرسومة بالكود: art/emotes/render/<key>.png (يولّدها tools/render-emotes-svg.cjs)
 #   python3 tools/build-emotes-v3.py --fake     ← يولّد ورقتين اصطناعيّتين للاختبار ثمّ يضمّنهما (لا يمسّ الورقتين الحقيقيّتين)
 #
 # يكتب في index.html: EMO_IMG (بلاطات 200 بكسل على خلفيّة اللوحة الكحليّة)، EMO_BIG (الممتازة والأسطوريّة بحجم 300 للفقاعات)،
@@ -91,22 +92,35 @@ def fake_sheets():
 
 def js_str(s): return "'" + s.replace('\\', '\\\\').replace("'", "\\'") + "'"
 
+def svg_cells():
+    """الوضع --svg: كلّ تعبيرٍ صورةٌ مستقلّة 600×600 على الكحليّ من art/emotes/render — لا ورقة تُقصّ"""
+    rend = os.path.join(ART, 'render'); out = {}
+    for key, *_ in ROSTER:
+        p = os.path.join(rend, key + '.png')
+        if not os.path.exists(p): sys.exit('الرسم غير موجود: %s — شغّل node tools/render-emotes-svg.cjs أوّلًا' % p)
+        out[key] = Image.open(p).convert('RGB')
+    return out
+
 def main():
-    fake = '--fake' in sys.argv
-    paths = fake_sheets() if fake else {A: os.path.join(ART, 'sheet-v3-a.png'), B: os.path.join(ART, 'sheet-v3-b.png')}
-    for p in paths.values():
-        if not os.path.exists(p): sys.exit('الورقة غير موجودة: %s — ضعها في art/emotes ثمّ أعد التشغيل' % p)
-    sheets = {k: cells(Image.open(p)) for k, p in paths.items()}
+    fake = '--fake' in sys.argv; svg = '--svg' in sys.argv
+    if svg:
+        singles = svg_cells(); sheets = None
+    else:
+        paths = fake_sheets() if fake else {A: os.path.join(ART, 'sheet-v3-a.png'), B: os.path.join(ART, 'sheet-v3-b.png')}
+        for p in paths.values():
+            if not os.path.exists(p): sys.exit('الورقة غير موجودة: %s — ضعها في art/emotes ثمّ أعد التشغيل' % p)
+        sheets = {k: cells(Image.open(p)) for k, p in paths.items()}
     src = open(GAME, encoding='utf-8').read()
     m_img = re.search(r'const EMO_IMG=\{(.*?)\};', src, re.S)
     if not m_img: sys.exit('لم أجد EMO_IMG')
     img, big, shape, total = {}, {}, {}, 0
     for key, sh, r, c, rar, name, msg in ROSTER:
-        cell = sheets[sh][r - 1][c - 1]
+        cell = singles[key] if svg else sheets[sh][r - 1][c - 1]
         img[key], n = to_uri(tile(cell, TILE)); total += n; shape[key] = 'tile'
         if rar in ('epic', 'legendary'): big[key], n2 = to_uri(tile(cell, BIG), 84); total += n2
     keys = [k for k, *_ in ROSTER]
-    lines = ['const EMO_IMG={', ' // ⟦emotes-v3⟧ لوحتا المالك sheet-v3-a/b (4×3) — بلاطاتٌ مرسومة بأسلوب البطاقات؛ تولّدها tools/build-emotes-v3.py']
+    src_note = 'رسومٌ متّجهة مرسومة بالكود (art/emotes/svg) — مؤقّتة حتّى تصل لوحتا المالك' if svg else 'لوحتا المالك sheet-v3-a/b (4×3) — بلاطاتٌ مرسومة بأسلوب البطاقات'
+    lines = ['const EMO_IMG={', ' // ⟦emotes-v3⟧ ' + src_note + '؛ تولّدها tools/build-emotes-v3.py']
     lines += [' %s:%s,' % (k, js_str(img[k])) for k in keys]; lines.append('};')
     lines.append('/** الملصقات الكبيرة للممتازة والأسطوريّة — فقاعة المباراة والمعاينة والشراء */')
     lines.append('const EMO_BIG={'); lines += [' %s:%s,' % (k, js_str(big[k])) for k in big]; lines.append('};')
@@ -130,7 +144,7 @@ def main():
     ro[-1] = ro[-1].rstrip(','); ro.append('];')
     src = src[:m_ro.start()] + '\n'.join(ro) + src[m_ro.end():]
     open(GAME, 'w', encoding='utf-8').write(src)
-    print('✓ %d تعبيرًا جديدًا (%d ملصقًا كبيرًا) — %.0f ك.ب مضمّنة%s' % (len(keys), len(big), total / 1024, ' (اصطناعيّة للاختبار)' if fake else ''))
+    print('✓ %d تعبيرًا جديدًا (%d ملصقًا كبيرًا) — %.0f ك.ب مضمّنة%s' % (len(keys), len(big), total / 1024, ' (اصطناعيّة للاختبار)' if fake else (' (رسوم متّجهة مؤقّتة)' if svg else '')))
 
 if __name__ == '__main__':
     main()
