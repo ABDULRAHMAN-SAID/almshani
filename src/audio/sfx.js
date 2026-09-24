@@ -47,6 +47,20 @@ var SFX=(function(){
   o.connect(v);v.connect(c.destination);
   o.start(t0);o.stop(t0+d+0.03);
  }
+ /* ٦٫٩٧ — نغمةٌ دافئة: مذبذبٌ عبر مرشّحٍ منخفضٍ ليّن، هجومٌ ناعم (٣٠ مللي ثانية) وذيلٌ طويل — لنداءَي الفوز والخسارة */
+ function pad(f,t0,d,type,g,rel,cut){
+  var c=ac();if(!c)return;
+  var o=c.createOscillator(),v=c.createGain(),lp=c.createBiquadFilter();
+  o.type=type||'triangle';o.frequency.setValueAtTime(f,t0);
+  lp.type='lowpass';lp.frequency.setValueAtTime(cut||2400,t0);lp.Q.value=0.5;
+  rel=rel||0.3;g=g||0.1;
+  v.gain.setValueAtTime(0.0001,t0);
+  v.gain.linearRampToValueAtTime(g,t0+0.03);
+  v.gain.setValueAtTime(g,t0+Math.max(0.03,d-rel));
+  v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  o.connect(lp);lp.connect(v);v.connect(c.destination);
+  o.start(t0);o.stop(t0+d+0.05);
+ }
  var noiseBuf=null;
  /* ضجيج قصير مرشَّح — لطقّة الضارب وسقوط القطعة */
  function noise(t0,d,g,cut){
@@ -198,8 +212,10 @@ var SFX=(function(){
   tap:   function(t){tone(880,t,0.045,'sine',0.07)},
   ok:    function(t){tone(660,t,0.09,'triangle',0.15);tone(990,t+0.08,0.15,'triangle',0.15)},
   bad:   function(t){tone(230,t,0.2,'sawtooth',0.10,150)},
-  win:   function(t){[523,659,784,1047].forEach(function(f,i){tone(f,t+i*0.11,0.24,'triangle',0.15)})},
-  lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
+  /* ٦٫٩٧ — «صوتٌ غبيّ على شاشة الفوز»: الفوز وترٌ دافئ من أربع نغماتٍ (مثلّث + جيبٍ أخفض بثُمانية) تتفتّح في ٢٠٠ مللي ثانية
+     بذيلِ ٣٠٠ ومرشّحٍ ناعم، وبريقٌ عالٍ خافت. الخسارة نغمتان جيبيّتان هابطتان بهدوءٍ وذيلٍ طويل. لا سلّم ألعاب الثمانية بت */
+  win:   function(t){noise(t,0.35,0.025,700);[[523,0],[659,0.06],[784,0.12],[1047,0.2]].forEach(function(n){pad(n[0],t+n[1],1.0-n[1],'triangle',0.065,0.3,2600);pad(n[0]/2,t+n[1],1.0-n[1],'sine',0.045,0.3,1600)});pad(2093,t+0.32,0.7,'sine',0.022,0.35,3400)},
+  lose:  function(t){pad(330,t,0.75,'sine',0.085,0.55,1400);pad(262,t+0.24,1.05,'sine',0.08,0.75,1200);pad(131,t+0.24,1.05,'sine',0.03,0.75,900)},
   /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
   /* الإطلاق: نقرة الإصبع تكاد لا تُسمع في الواقع — همسةٌ خافتة، والطقّة الحقيقيّة عند أوّل اصطدام */
   /* الأصليّ: صوت الإطلاق في التسجيل بعلوّ الطقّات نفسها — يُشغَّل بمستواه المسجَّل */
@@ -219,19 +235,24 @@ var SFX=(function(){
   /* ٦٫٩٣ — «حتّى الصوت لمّا تحصل على صندوق ما يحسّسك إنّها لعبة»: أصوات لعبةٍ فاخرة لا صفّارات —
      صندوقٌ يرتطم وينفتح ويلمع، مكافأةٌ تُكشف بنغمةٍ زجاجيّة ترتفع مع الندرة، عدّادٌ يطقّ، إشعارٌ يرنّ رنّتين،
      كأسٌ تُحتسب، وساحةٌ تُفتح بجملةٍ صاعدة. كلّها من tone/noise فلا ملفّات تُنتظر */
-  chest: function(t){noise(t,0.16,0.05,900);tone(140,t,0.14,'sine',0.12,90);tone(1900,t+0.16,0.03,'square',0.05);tone(2400,t+0.20,0.03,'square',0.05);
-   [880,1175,1568,2093].forEach(function(f,i){tone(f,t+0.28+i*0.06,0.22,'triangle',0.07)})},
+  chest: function(t){noise(t,0.16,0.05,900);tone(140,t,0.14,'sine',0.12,90);   // ٦٫٩٧: ارتطامٌ ثمّ لمعانٌ هادئ — بلا صفّارتَي موجةٍ مربّعة
+   [880,1175,1568,2093].forEach(function(f,i){pad(f,t+0.3+i*0.09,0.34,'triangle',0.055,0.22,3600)});pad(2093,t+0.62,0.6,'sine',0.035,0.4,4200)},
   reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[1047,1319,1568,2093][Math.min(3,r)];noise(t,0.05,0.012,6000);tone(f,t,0.18,'triangle',0.09);tone(f*2,t+0.02,0.25,'sine',0.045)},
   rare:  function(t){[523,659,784,1047,1319].forEach(function(f,i){tone(f,t+i*0.07,0.5,'triangle',0.09)});tone(2093,t+0.35,0.6,'sine',0.05)},
-  tally: function(t){tone(2400,t,0.02,'square',0.03,2000)},
+  tally: function(t){tone(1400*(0.95+Math.random()*0.1),t,0.02,'sine',0.03)},   // ٦٫٩٧: طقّةٌ جيبيّة ناعمة لا صفّارة
   notif: function(t){tone(1568,t,0.09,'sine',0.08);tone(2093,t+0.09,0.16,'sine',0.07)},
   trophy:function(t){tone(1319,t,0.08,'triangle',0.08);tone(1760,t+0.08,0.2,'triangle',0.08)},
   arena: function(t){[392,523,659,784].forEach(function(f,i){tone(f,t+i*0.12,0.42,'triangle',0.11)});[784,1047,1319].forEach(function(f,i){tone(f,t+0.5+i*0.1,0.5,'sine',0.06)})}
  };
  var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],hit:[7],chest:[18,30,18],reveal:[10],rare:[20,40,60],arena:[30,40,30,40,80],notif:[12],trophy:[15]};
 
- function play(k,opt){
+ /* ٦٫٩٧: المفتاح نفسه مرّتين في ٨٠ مللي ثانية = مرّةٌ واحدة (رنّات الإنجازات الثلاث كانت تُسمع رنّةً واحدةً عالية) —
+    إلّا أصوات اللوح الحقيقيّة: الاصطدامات والإدخال والإطلاق تتزامن فعلًا */
+ var lastAt={},NODUP={hit:1,wall:1,pot:1,strike:1,tally:1};
+ function dup(k){if(NODUP[k])return false;var n=Date.now();if(lastAt[k]&&n-lastAt[k]<80)return true;lastAt[k]=n;return false}
+ function play(k,opt,_nd){
   var f=LIB[k];if(!f)return false;
+  if(!_nd&&dup(k))return false;
   var on=false;try{on=!!enabled()}catch(e){}
   if(!on)return false;
   var c=ac();if(!c)return false;
@@ -245,7 +266,7 @@ var SFX=(function(){
   if(!on||!W||!W.navigator||typeof W.navigator.vibrate!=='function')return false;
   try{return !!W.navigator.vibrate(pat)}catch(e){return false}
  }
- function fx(k,opt){var a=play(k,opt),b=vibe(k);return a||b}
+ function fx(k,opt){if(dup(k))return false;var a=play(k,opt,1),b=vibe(k);return a||b}
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 

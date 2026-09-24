@@ -1396,6 +1396,7 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
  border:2px solid var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.55);cursor:pointer;
  display:flex;align-items:center;justify-content:center;padding:0}
 .efab:active{filter:brightness(1.15)}
+body.caOver .ebar.fx,body.caOver .ebubfx,body.caOver .shfx{display:none!important}   /* ٦٫٩٦: لا شيء فوق شاشة النتيجة */
 .ebar.fx{position:fixed;left:10px;bottom:calc(134px + env(safe-area-inset-bottom));z-index:42;
  width:min(332px,calc(100vw - 20px));max-width:calc(100vw - 20px);flex-direction:column;align-items:stretch;
  gap:8px;overflow:visible;box-shadow:0 8px 24px rgba(0,0,0,.55);margin:0}
@@ -1595,31 +1596,128 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 #app:has(>.scr.on.caScr),#app:has(>.scr.on.rvScr){padding-bottom:0}   /* شريط التنقّل مخفيٌّ في المباراة: لا فراغ له تحت الشاشة */
 .caScr .caWrap.big{margin-block:auto;width:calc(100vw - 12px);margin-inline:calc(50% - 50vw + 6px);border-radius:0}   /* الزوايا في رسم اللوح (٦٫٧٠) */
 /* رسالة الإدخال: تظهر فوق اللوح لحظةً ثمّ تخفت */
-.caEnd{position:absolute;inset:0;z-index:5;display:flex;overflow:auto;padding:8px;box-sizing:border-box;background:rgba(5,8,16,.62);backdrop-filter:blur(2px)}
-.caEnd.in{animation:fi .25s ease}
-.caFinC{margin:auto;width:min(280px,80%);padding:22px 16px 16px;border-radius:20px;text-align:center;background:linear-gradient(180deg,rgba(27,38,71,.96),rgba(14,21,48,.96));
- box-shadow:0 0 0 1.5px rgba(160,176,210,.45),0 18px 40px rgba(0,0,0,.55)}
-.caFinC.won{box-shadow:0 0 0 2px #E8B23A,0 0 34px rgba(232,178,58,.35),0 18px 40px rgba(0,0,0,.55)}
+/* ٦٫٩٧ — «شاشة الفوز شكلها سيّئ… وأقدر أحرّكها بإصبعي»: كانت بطاقةً داخل إطار اللوح (.caWrap) تُقصّ وتنزلق بالإصبع
+   وزرّاها تحت الحافّة. الآن طبقةٌ ثابتة فوق الشاشة كلّها: رأسٌ، ثمّ قلبٌ يُصغَّر حتّى يتّسع (لا تمرير أبدًا)، ثمّ الزرّان
+   مثبّتان فوق الحافّة الآمنة. لا backdrop-filter، والأشعّة صورةٌ مرسومةٌ مرّةً واحدة بتلاشٍ شعاعيّ — ساكنةٌ في طبقة الخلفيّة */
+.caEnd{position:fixed;inset:0;z-index:60;overflow:hidden;touch-action:none;overscroll-behavior:contain;contain:strict;box-sizing:border-box;
+ display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:6px;padding:max(10px,env(safe-area-inset-top)) 16px max(14px,env(safe-area-inset-bottom));
+ background:#070A14;color:#F6E7C6;text-align:center;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;
+ --f:232,178,58;--s1:#1B2647;--s2:#070A14;--g:#E8B23A}
+.caEnd.fresh{animation:ceFi .28s .25s ease both}
+@keyframes ceFi{from{opacity:0}to{opacity:1}}
+.ceBg{position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(120% 80% at 50% 30%,rgba(var(--f),.3),transparent 60%),linear-gradient(180deg,var(--s1),var(--s2) 78%)}
+.ceBg.art{background-size:cover;background-position:center 30%}
+.ceBg.art::after{content:'';position:absolute;inset:0;background:radial-gradient(110% 60% at 50% 32%,rgba(var(--f),.18),transparent 62%),linear-gradient(180deg,rgba(5,8,16,.34),rgba(5,8,16,.52) 45%,rgba(5,8,16,.9))}
+.ceBg.art.dim{filter:saturate(.2) brightness(.55)}
+.ceRays{position:absolute;left:0;right:0;top:0;bottom:28%;margin:auto;width:min(120vmin,540px);height:min(120vmin,540px);z-index:0;pointer-events:none;
+ background:center/100% 100% no-repeat;opacity:.7}
+/* الأشعّة ساكنة تُرسم مع الخلفيّة في طبقتها: قرصٌ دوّار بعرض الشاشة كان وحده يُسقط الدخول من ~٥٥ إلى ~٣٠ إطارًا/ث بإبطاء ×٤ */
+.ceTop{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:34px;font-size:12px;font-weight:800;color:#C9B37A}
+.ceTop .ceAr{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 6px;border-radius:999px;background:rgba(6,10,20,.6);border:1px solid rgba(217,183,110,.32);color:var(--g)}
+.ceTop .ceAr svg,.ceTop .ceAr img{width:20px;height:20px;flex-shrink:0}
+.ceTop .ceMd{padding:4px 10px;border-radius:999px;background:rgba(6,10,20,.45);color:#C9B37A}
+.ceMid{position:relative;z-index:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.ceIn{display:flex;flex-direction:column;align-items:center;gap:clamp(7px,1.9vh,20px);width:100%;max-width:380px;transform-origin:50% 50%}
+.ceCrowns{display:flex;gap:10px;align-items:flex-end;justify-content:center;--cr:clamp(34px,6.2vh,60px)}
+.ceCrowns i{width:var(--cr);height:var(--cr);border-radius:50%;display:grid;place-items:center;background:#111A33;box-shadow:inset 0 0 0 1px rgba(217,183,110,.25)}
+.ceCrowns i:nth-child(2){width:calc(var(--cr)*1.16);height:calc(var(--cr)*1.16);margin-bottom:calc(var(--cr)*.18)}
+.ceCrowns i svg{width:58%;height:58%}
+.ceCrowns i:not(.on) svg{filter:grayscale(1);opacity:.3}
+.ceCrowns i.on{background:radial-gradient(circle at 35% 30%,#FFF1C4,#E8B23A 60%,#9A6A12);box-shadow:0 0 0 2px #0B1020,0 0 18px rgba(255,216,107,.55)}
+/* اللوحة: شريطٌ كحليّ بحافّتين ذهبيّتين وطرفين مشقوقين كالراية — والخسارة فولاذيّة فضّيّة */
+.cePlq{position:relative;display:grid;place-items:center;min-width:min(74vw,290px);box-sizing:border-box;padding:clamp(2px,.8vh,8px) 46px clamp(4px,1vh,10px);isolation:isolate}
+.cePlq::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(90deg,#9A6A12,#FFE9A8 50%,#9A6A12) top/100% 2px no-repeat,linear-gradient(90deg,#7A5212,#E8B23A 50%,#7A5212) bottom/100% 2px no-repeat,
+  radial-gradient(70% 90% at 50% 0,rgba(255,233,168,.2),transparent 70%),linear-gradient(180deg,#1E2E62,#0D1634 72%,#0A1128);
+ -webkit-clip-path:polygon(0 0,100% 0,calc(100% - 20px) 50%,100% 100%,0 100%,20px 50%);clip-path:polygon(0 0,100% 0,calc(100% - 20px) 50%,100% 100%,0 100%,20px 50%)}
+.cePlq::after{content:'';position:absolute;inset:5px 28px;z-index:-1;pointer-events:none;border-block:1px solid rgba(255,225,150,.32)}
+.cePlq.lost::before{background:linear-gradient(90deg,#4A5570,#C9D2E8 50%,#4A5570) top/100% 2px no-repeat,linear-gradient(90deg,#3A4458,#8A96B0 50%,#3A4458) bottom/100% 2px no-repeat,
+  radial-gradient(70% 90% at 50% 0,rgba(220,227,242,.12),transparent 70%),linear-gradient(180deg,#2A3348,#161C2B 72%,#10141F)}
+.cePlq.lost::after{border-color:rgba(201,210,232,.22)}
+.cePlq .cePlaque{margin:0;font-family:var(--fd);font-weight:700;font-size:clamp(38px,7.2vh,64px);line-height:1.2;color:#FFE9A8;text-shadow:0 3px 0 #6A3606,0 0 26px rgba(255,210,100,.5);white-space:nowrap}
+.cePlq.lost .cePlaque{font-size:clamp(34px,6.4vh,56px);color:#E4E9F5;text-shadow:0 2px 0 #0A0F1C,0 0 16px rgba(140,160,200,.3)}
+.ceSub{padding:3px 12px;border-radius:999px;background:rgba(6,10,20,.58);font-size:13px;font-weight:800;color:#E3CD94;max-width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ceVs{display:flex;align-items:center;justify-content:center;gap:clamp(10px,4vw,22px);width:100%;--av:clamp(40px,6.8vh,68px)}
+.ceP{display:flex;flex-direction:column;align-items:center;gap:3px;width:88px;min-width:0}
+.ceAvs{display:flex;justify-content:center}.ceAvs .ceAvW+.ceAvW{margin-inline-start:calc(var(--av)*-.34)}
+.ceP .csAv{width:var(--av);height:var(--av);box-shadow:0 0 0 2px rgba(10,16,32,.95),0 0 0 3.5px rgba(160,176,210,.4)}
+.ceP .csAv>.avPic{width:100%!important;height:100%!important}
+.ceP.w .csAv{box-shadow:0 0 0 2px rgba(10,16,32,.95),0 0 0 3.5px #E3BF6E,0 0 16px rgba(255,216,107,.45)}
+.ceP .ceNm{max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:800;color:#F6E7C6}
+.ceP .ceDots{display:flex;gap:3px}.ceP .ceDots i{width:7px;height:7px;border-radius:50%;background:#1E2947;box-shadow:inset 0 0 0 1px rgba(217,183,110,.25)}.ceP .ceDots i.on{background:#E8B23A;box-shadow:0 0 6px rgba(255,216,107,.7)}
+.ceAvW{position:relative;display:inline-flex}
+.ceAvW .ceBadge{position:absolute;z-index:3;top:-6px;inset-inline-end:-8px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#FFF1C4,#E8B23A 60%,#9A6A12);box-shadow:0 0 0 2px #0B1020}
+.ceAvW .ceBadge svg{width:13px;height:13px}
+.ceScore{display:flex;align-items:baseline;gap:8px;font-family:var(--fd);font-weight:700;font-size:clamp(28px,4.6vh,40px);line-height:1;color:#FFF1C4;font-variant-numeric:tabular-nums;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.ceScore s{text-decoration:none;font-size:.6em;color:#C9B37A}
+.caEnd.lost .ceScore{color:#E4E9F5}
+.ceSay{height:22px;line-height:16px;box-sizing:border-box;padding:3px 12px;border-radius:999px;background:rgba(6,10,20,.5);font-size:12px;font-weight:700;color:#D9C48F;opacity:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ceSay.on{opacity:1;transition:opacity .4s}
+.ceTro{width:100%;box-sizing:border-box;padding:clamp(8px,1.3vh,12px) 14px;border-radius:16px;background:linear-gradient(180deg,rgba(22,30,51,.94),rgba(11,16,29,.94));border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 12px 26px -12px #000;cursor:pointer}
+.ceTroR{display:flex;align-items:center;justify-content:center;gap:10px}
+.ceTroR .rico{width:clamp(28px,4.4vh,38px)!important;height:clamp(28px,4.4vh,38px)!important;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+.ceNum{font-family:var(--fd);font-weight:700;font-size:clamp(32px,5.2vh,46px);line-height:1;color:#FFF1C4;font-variant-numeric:tabular-nums;direction:ltr;text-shadow:0 2px 0 #6A3606;min-width:2.4em}
+.ceNum.dn{color:#F2A0A0;text-shadow:0 2px 0 #3D0F14}
+.ceDelta{display:inline-flex;align-items:center;gap:4px;font-family:var(--fd);font-size:17px;font-weight:700;padding:3px 11px;border-radius:999px;background:#0F3D2A;color:#6BEA9E;white-space:nowrap}
+.ceDelta.n{direction:ltr}
+.ceDelta.dn{background:#3D0F14;color:#FF8A8A}.ceDelta.z{background:rgba(217,183,110,.16);color:#E3C77E;font-family:inherit;font-size:13px;font-weight:800}
+.ceDelta .rico{width:16px!important;height:16px!important}
+.ceTroA{display:flex;align-items:center;gap:8px;margin-top:clamp(6px,1vh,9px);font-size:11.5px;font-weight:800;color:#9AA6C2}
+.ceTroA .arBar{height:8px}.ceTroA .arBar i{transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.ceTroN{margin-top:5px;font-size:11px;font-weight:800;color:#D9B76E}
+.ceIn .finCh{margin:0;width:100%;box-sizing:border-box}
+.ceRw{display:flex;gap:clamp(6px,2vw,9px);width:100%;justify-content:center}
+.ceTile{position:relative;flex:1 1 0;min-width:0;max-width:92px;min-height:clamp(60px,9.4vh,88px);box-sizing:border-box;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 3px;margin:0;
+ appearance:none;-webkit-appearance:none;background:rgba(6,10,20,.66);border:1px solid rgba(217,183,110,.3);font-family:inherit;color:#F6E7C6;cursor:default;line-height:1.2}
+.ceTile.tap{cursor:pointer;border-color:rgba(232,178,58,.65);background:linear-gradient(180deg,rgba(40,32,12,.72),rgba(6,10,20,.72))}
+.ceTile.tap::after{content:'';position:absolute;inset:-3px;border-radius:17px;border:2px solid rgba(255,225,150,.85);pointer-events:none;opacity:0;will-change:transform,opacity}
+.caEnd:not(.lock) .ceTile.tap:not(.seen)::after{animation:ceRing 1.5s ease-out 4}   /* نبضٌ محدود (٤ مرّات) لا دائم */
+@keyframes ceRing{0%{opacity:.9;transform:scale(.97)}100%{opacity:0;transform:scale(1.1)}}
+.ceTile.tap:active{filter:brightness(1.15)}
+.ceTile .rico,.ceTile svg.ico{width:clamp(22px,3.4vh,30px)!important;height:clamp(22px,3.4vh,30px)!important}
+.ceTile .ceIc{display:grid;place-items:center;width:clamp(24px,3.6vh,32px);height:clamp(24px,3.6vh,32px)}
+.ceTile .ceIc img,.ceTile .ceIc>div,.ceTile .ceIc svg{width:100%;height:100%;object-fit:contain}
+.ceLv{display:grid;place-items:center;background:center/contain no-repeat;font-family:var(--fd);font-weight:700;font-size:11px;color:#FFE9A8;text-shadow:0 1px 1px #000}
+.ceTile b{font-family:var(--fd);font-size:clamp(12px,3.7vw,15px);font-weight:700;line-height:1.15;color:#F6E7C6;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ceTile b.n{direction:ltr;unicode-bidi:isolate}
+.ceTile s{text-decoration:none;font-size:clamp(9.5px,3vw,11px);font-weight:800;line-height:1.25;color:#C9B37A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ceNote{font-size:11px;font-weight:800;color:#AEB9CF}
+.ceBtns{position:relative;z-index:1;display:grid;gap:10px;width:100%;max-width:420px;margin:0 auto}
+.ceBtns .rbtn{width:100%}.ceBtns .rbtn>span{padding:15px}
+.ceBtns .btn.g{width:100%;padding:13px;font-weight:700;color:#F1DFAE;border-color:rgba(217,183,110,.35)}
+.ceBtns .ceWait{padding:12px;border-radius:999px;font-size:13px;font-weight:800;color:#C9B37A;background:rgba(6,10,20,.55);border:1px solid rgba(217,183,110,.3)}
+.caEnd .btn::after,.caEnd .rbtn::after,.caEnd .rbtn::before{animation:none!important}
+.caEnd.lock button,.caEnd.lock [onclick]{pointer-events:none}   /* زرٌّ لم يظهر بعدُ لا يُضغط */
+/* ما تحت الطبقة لا يتحرّك ولا يُرسم بعد ظهورها: الشفق، والساحة، واللوح */
+body.caOver{overflow:hidden;overscroll-behavior:none}
+body.caOver::before,body.caOver #arena,body.caOver #rmScr>.caStage{animation:ceHide 0s .6s both}
+body.caOver #arena *{animation-play-state:paused!important}
+@keyframes ceHide{to{visibility:hidden}}
+/* الجدول الزمنيّ (مرّةً لكلّ مباراة — .fresh): تيجانٌ تنبثق، الراية تهبط، المواجهة، الكؤوس بعدّاد، الجوائز، ثمّ الزرّان */
+.caEnd.fresh .ceAn{animation:cePop .32s cubic-bezier(.2,1.4,.4,1) both;animation-delay:var(--d,0ms)}
+.caEnd.fresh .ceFade{animation:ceUp .24s ease both;animation-delay:var(--d,0ms)}
+.caEnd.fresh .ceCrowns i{animation:ceCrown .28s cubic-bezier(.2,1.5,.4,1) both;animation-delay:var(--d,0ms)}
+.caEnd.fresh .cePlq{animation:ceSlam .34s cubic-bezier(.2,1.4,.4,1) both;animation-delay:var(--d,0ms)}
+.caEnd.fresh .cePlq.lost{animation:ceDrop .32s ease-out both;animation-delay:var(--d,0ms)}
+.caEnd.fresh .ceTile.chest .ceIc{animation:ceChestDrop .7s cubic-bezier(.3,.05,.4,1) both;animation-delay:calc(var(--d,0ms) + 60ms);transform-origin:50% 90%}
+@keyframes cePop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+@keyframes ceUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes ceCrown{from{opacity:0;transform:scale(.3)}60%{opacity:1;transform:scale(1.2)}to{opacity:1;transform:none}}
+@keyframes ceSlam{from{opacity:0;transform:scale(1.5)}to{opacity:1;transform:none}}
+@keyframes ceDrop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes ceChestDrop{0%{opacity:0;transform:translateY(-40px) scale(.7)}62%{opacity:1;transform:translateY(0) scale(1.02,.98)}72%{transform:translateY(0) scale(1.12,.84)}84%{transform:translateY(-4px) scale(.96,1.06)}100%{opacity:1;transform:none}}
+@media (max-height:620px){.ceTop{min-height:30px}.ceBtns{gap:8px}.ceBtns .rbtn>span{padding:13px}.ceBtns .btn.g{padding:11px}.cePlq{padding-inline:40px}}
+@media (prefers-reduced-motion:reduce){.caEnd.fresh .ceAn,.caEnd.fresh .ceFade,.caEnd.fresh .ceCrowns i,.caEnd.fresh .cePlq,.caEnd.fresh .ceTile.chest .ceIc{animation:ceFi .3s ease both!important}.ceTile.tap::after{animation:none!important}}
+/* نتيجة المسابقة والغرفة: الراية نفسها، والسطر تحت «فزت!» كان يكاد يختفي فوق خلفيّة النصر */
+.rs .cePlq,.rmOver .cePlq{margin:6px auto 0}
+.rmOver .cePlq{min-width:0;max-width:100%;padding-inline:36px}.rmOver .cePlq .cePlaque{font-size:clamp(28px,8.4vw,40px)}
+.rs .rsb{display:inline-block;margin-top:10px;padding:3px 12px;border-radius:999px;color:#F6E7C6;background:rgba(6,8,16,.55);border:1px solid rgba(217,183,110,.3)}
 .caFinT{font-size:34px;font-weight:900;line-height:1.2;color:#DCE3F2;margin-bottom:12px}
-.caEnd.won{backdrop-filter:none}
-.caRays{position:absolute;left:50%;top:34%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;opacity:.55;
- background:repeating-conic-gradient(from 0deg,rgba(255,225,140,.18) 0 5deg,transparent 5deg 16deg);
- -webkit-mask:radial-gradient(circle,#000 0,transparent 38%);mask:radial-gradient(circle,#000 0,transparent 38%);animation:vchSpin 26s linear infinite}
 @keyframes vchSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
 .caFinCup{display:flex;justify-content:center;margin:2px 0 6px;filter:drop-shadow(0 12px 18px rgba(0,0,0,.6)) drop-shadow(0 0 22px rgba(255,205,90,.45));animation:caCup .7s cubic-bezier(.2,1.4,.4,1) both}
 .caFinCup.lose{filter:grayscale(.85) brightness(.6) drop-shadow(0 8px 14px rgba(0,0,0,.6));animation:none;opacity:.7}
 @keyframes caCup{from{opacity:0;transform:translateY(-40px) scale(.6)}to{opacity:1;transform:none}}
-.caEnd.won .caFinT{color:#FFE9A8;text-shadow:0 2px 0 #6A3606,0 0 22px rgba(255,210,100,.6)}
-.caFinRw{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:0 0 14px}
-.caFinRw span{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900;color:#F6E7C6;padding:6px 11px;border-radius:12px;background:rgba(6,10,20,.55);border:1px solid rgba(217,183,110,.35)}
-@media (prefers-reduced-motion:reduce){.caRays,.caFinCup{animation:none}}
-.caFinC.won .caFinT{color:#FFD36A}
-.caFinX{width:100%;margin-top:8px}
-.caEndGo{width:100%;justify-content:center}.caEndGo>b{flex:none;text-align:center}
-/* الهواتف الضيّقة: البطاقة أقصر من اللوح، ولوحة النتيجة تتّسع (المراجعة: ٣٢٠–٣٦٠ بكسل) */
-@media (max-width:380px){
- .caFinT{font-size:28px}.caEndGo{min-height:44px}
-}
+@media (prefers-reduced-motion:reduce){.caFinCup{animation:none}}
 .caFloat{position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:3;pointer-events:none;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis;
  padding:7px 14px;border-radius:999px;background:rgba(10,18,34,.86);border:1px solid rgba(232,178,58,.6);color:#FFE9A8;font-size:12px;font-weight:900;
  box-shadow:0 6px 18px rgba(0,0,0,.45);animation:caFloat 3.2s ease forwards}
@@ -2281,7 +2379,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0007833685" data-head="0001025559" aria-hidden="true">
+<div id="ld" data-total="0007860644" data-head="0001037804" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -15553,7 +15651,7 @@ function venueHTML(kind){
 }
 let _arKey=null;
 /** setArena(0..9) ساحة المسابقة بلون الرتبة · setArena('carrom'|'uno'|'atelier'|'mafia'|'majlis') مكان اللعبة */
-function setArena(k,soft){   // soft: خلف شاشات الردهة والبحث والإعداد — أعتم قليلًا كي تبقى البطاقات مقروءة
+function setArena(k,soft,keepDuck){   // soft: خلف شاشات الردهة والبحث والإعداد — أعتم قليلًا كي تبقى البطاقات مقروءة
  let key;
  if(typeof k==='string'&&VENUES[k])key=k;else key=Math.max(0,Math.min(9,k|0));
  let el=document.getElementById('arena');
@@ -15561,7 +15659,7 @@ function setArena(k,soft){   // soft: خلف شاشات الردهة والبح�
  if(_arKey!==key){el.innerHTML=typeof key==='string'?venueHTML(key):arenaHTML(key);_arKey=key;el.dataset.kind=typeof key==='string'?key:'studio'}
  el.classList.toggle('soft',!!soft);
  el.classList.add('on');
- mscDuck(!soft);   // داخل المباراة تخفت، وخلف الردهة والبحث تبقى كما هي
+ mscDuck(!soft||!!keepDuck);   // داخل المباراة تخفت، وخلف الردهة والبحث تبقى كما هي — ٦٫٩٧: وعلى نتيجة الكيرم تبقى خافتة (نداء النتيجة وحده)
 }
 function hideArena(){const el=document.getElementById('arena');if(el)el.classList.remove('on');mscDuck(0);mscScene('menu')}
 /** الموسيقى تخفت داخل مكان اللعب ولا تُقطع — تعود كما كانت حين تخرج */
@@ -16522,6 +16620,20 @@ var SFX=(function(){
   o.connect(v);v.connect(c.destination);
   o.start(t0);o.stop(t0+d+0.03);
  }
+ /* ٦٫٩٧ — نغمةٌ دافئة: مذبذبٌ عبر مرشّحٍ منخفضٍ ليّن، هجومٌ ناعم (٣٠ مللي ثانية) وذيلٌ طويل — لنداءَي الفوز والخسارة */
+ function pad(f,t0,d,type,g,rel,cut){
+  var c=ac();if(!c)return;
+  var o=c.createOscillator(),v=c.createGain(),lp=c.createBiquadFilter();
+  o.type=type||'triangle';o.frequency.setValueAtTime(f,t0);
+  lp.type='lowpass';lp.frequency.setValueAtTime(cut||2400,t0);lp.Q.value=0.5;
+  rel=rel||0.3;g=g||0.1;
+  v.gain.setValueAtTime(0.0001,t0);
+  v.gain.linearRampToValueAtTime(g,t0+0.03);
+  v.gain.setValueAtTime(g,t0+Math.max(0.03,d-rel));
+  v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  o.connect(lp);lp.connect(v);v.connect(c.destination);
+  o.start(t0);o.stop(t0+d+0.05);
+ }
  var noiseBuf=null;
  /* ضجيج قصير مرشَّح — لطقّة الضارب وسقوط القطعة */
  function noise(t0,d,g,cut){
@@ -16673,8 +16785,10 @@ var SFX=(function(){
   tap:   function(t){tone(880,t,0.045,'sine',0.07)},
   ok:    function(t){tone(660,t,0.09,'triangle',0.15);tone(990,t+0.08,0.15,'triangle',0.15)},
   bad:   function(t){tone(230,t,0.2,'sawtooth',0.10,150)},
-  win:   function(t){[523,659,784,1047].forEach(function(f,i){tone(f,t+i*0.11,0.24,'triangle',0.15)})},
-  lose:  function(t){[392,330,262].forEach(function(f,i){tone(f,t+i*0.14,0.26,'sine',0.13)})},
+  /* ٦٫٩٧ — «صوتٌ غبيّ على شاشة الفوز»: الفوز وترٌ دافئ من أربع نغماتٍ (مثلّث + جيبٍ أخفض بثُمانية) تتفتّح في ٢٠٠ مللي ثانية
+     بذيلِ ٣٠٠ ومرشّحٍ ناعم، وبريقٌ عالٍ خافت. الخسارة نغمتان جيبيّتان هابطتان بهدوءٍ وذيلٍ طويل. لا سلّم ألعاب الثمانية بت */
+  win:   function(t){noise(t,0.35,0.025,700);[[523,0],[659,0.06],[784,0.12],[1047,0.2]].forEach(function(n){pad(n[0],t+n[1],1.0-n[1],'triangle',0.065,0.3,2600);pad(n[0]/2,t+n[1],1.0-n[1],'sine',0.045,0.3,1600)});pad(2093,t+0.32,0.7,'sine',0.022,0.35,3400)},
+  lose:  function(t){pad(330,t,0.75,'sine',0.085,0.55,1400);pad(262,t+0.24,1.05,'sine',0.08,0.75,1200);pad(131,t+0.24,1.05,'sine',0.03,0.75,900)},
   /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
   /* الإطلاق: نقرة الإصبع تكاد لا تُسمع في الواقع — همسةٌ خافتة، والطقّة الحقيقيّة عند أوّل اصطدام */
   /* الأصليّ: صوت الإطلاق في التسجيل بعلوّ الطقّات نفسها — يُشغَّل بمستواه المسجَّل */
@@ -16694,19 +16808,24 @@ var SFX=(function(){
   /* ٦٫٩٣ — «حتّى الصوت لمّا تحصل على صندوق ما يحسّسك إنّها لعبة»: أصوات لعبةٍ فاخرة لا صفّارات —
      صندوقٌ يرتطم وينفتح ويلمع، مكافأةٌ تُكشف بنغمةٍ زجاجيّة ترتفع مع الندرة، عدّادٌ يطقّ، إشعارٌ يرنّ رنّتين،
      كأسٌ تُحتسب، وساحةٌ تُفتح بجملةٍ صاعدة. كلّها من tone/noise فلا ملفّات تُنتظر */
-  chest: function(t){noise(t,0.16,0.05,900);tone(140,t,0.14,'sine',0.12,90);tone(1900,t+0.16,0.03,'square',0.05);tone(2400,t+0.20,0.03,'square',0.05);
-   [880,1175,1568,2093].forEach(function(f,i){tone(f,t+0.28+i*0.06,0.22,'triangle',0.07)})},
+  chest: function(t){noise(t,0.16,0.05,900);tone(140,t,0.14,'sine',0.12,90);   // ٦٫٩٧: ارتطامٌ ثمّ لمعانٌ هادئ — بلا صفّارتَي موجةٍ مربّعة
+   [880,1175,1568,2093].forEach(function(f,i){pad(f,t+0.3+i*0.09,0.34,'triangle',0.055,0.22,3600)});pad(2093,t+0.62,0.6,'sine',0.035,0.4,4200)},
   reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[1047,1319,1568,2093][Math.min(3,r)];noise(t,0.05,0.012,6000);tone(f,t,0.18,'triangle',0.09);tone(f*2,t+0.02,0.25,'sine',0.045)},
   rare:  function(t){[523,659,784,1047,1319].forEach(function(f,i){tone(f,t+i*0.07,0.5,'triangle',0.09)});tone(2093,t+0.35,0.6,'sine',0.05)},
-  tally: function(t){tone(2400,t,0.02,'square',0.03,2000)},
+  tally: function(t){tone(1400*(0.95+Math.random()*0.1),t,0.02,'sine',0.03)},   // ٦٫٩٧: طقّةٌ جيبيّة ناعمة لا صفّارة
   notif: function(t){tone(1568,t,0.09,'sine',0.08);tone(2093,t+0.09,0.16,'sine',0.07)},
   trophy:function(t){tone(1319,t,0.08,'triangle',0.08);tone(1760,t+0.08,0.2,'triangle',0.08)},
   arena: function(t){[392,523,659,784].forEach(function(f,i){tone(f,t+i*0.12,0.42,'triangle',0.11)});[784,1047,1319].forEach(function(f,i){tone(f,t+0.5+i*0.1,0.5,'sine',0.06)})}
  };
  var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],hit:[7],chest:[18,30,18],reveal:[10],rare:[20,40,60],arena:[30,40,30,40,80],notif:[12],trophy:[15]};
 
- function play(k,opt){
+ /* ٦٫٩٧: المفتاح نفسه مرّتين في ٨٠ مللي ثانية = مرّةٌ واحدة (رنّات الإنجازات الثلاث كانت تُسمع رنّةً واحدةً عالية) —
+    إلّا أصوات اللوح الحقيقيّة: الاصطدامات والإدخال والإطلاق تتزامن فعلًا */
+ var lastAt={},NODUP={hit:1,wall:1,pot:1,strike:1,tally:1};
+ function dup(k){if(NODUP[k])return false;var n=Date.now();if(lastAt[k]&&n-lastAt[k]<80)return true;lastAt[k]=n;return false}
+ function play(k,opt,_nd){
   var f=LIB[k];if(!f)return false;
+  if(!_nd&&dup(k))return false;
   var on=false;try{on=!!enabled()}catch(e){}
   if(!on)return false;
   var c=ac();if(!c)return false;
@@ -16720,7 +16839,7 @@ var SFX=(function(){
   if(!on||!W||!W.navigator||typeof W.navigator.vibrate!=='function')return false;
   try{return !!W.navigator.vibrate(pat)}catch(e){return false}
  }
- function fx(k,opt){var a=play(k,opt),b=vibe(k);return a||b}
+ function fx(k,opt){if(dup(k))return false;var a=play(k,opt,1),b=vibe(k);return a||b}
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
@@ -22785,7 +22904,7 @@ function mResult(res,won,coins,xp,frag){
  <div class="tbar"><button class="bk" onclick="tab('play')" title="الرئيسية">${bkChev()}</button><h2>نتيجة المباراة</h2><span class="sp"></span></div>
  <div class="rs">
  ${resMedal(won?'win':'lose')}
- <h2 class="mtl" style="${won?'color:#FFE9A8;text-shadow:0 2px 0 #6A3606,0 0 22px rgba(255,210,100,.6);font-size:30px':''}">${won?'فزت!':'خسرت'}</h2>
+ <div class="cePlq${won?'':' lost'}"><h2 class="cePlaque">${won?'فزت!':'خسرت'}</h2></div>
  <div class="rsb">${M.me} مقابل ${M.opp}</div>
  ${res.placement?`<div class="orn" style="margin-top:18px"><div class="in">${ornCorners()}
   <div style="font-size:13px">مباراة تحديد ${r.placementDone}/5</div>
@@ -23367,7 +23486,7 @@ function achPing(k,quiet){
  const a=ACH2.find(x=>x.k===k);if(!a)return false;
  S.achN=S.achN||{};const t=achTier(a,achVal(a));if(t<=(S.achN[k]|0))return false;
  S.achN[k]=t;try{saveState()}catch(e){}
- if(!quiet)setTimeout(()=>{try{toast(ico('medal',13)+' إنجاز! '+a.n+' — المرتبة '+ACH_RN[t]+' · استلمه من الإنجازات');if(window.SFX)SFX.fx('trophy')}catch(e){}},900);
+ if(!quiet)setTimeout(()=>{try{toast(ico('medal',13)+' إنجاز! '+a.n+' — المرتبة '+ACH_RN[t]+' · استلمه من الإنجازات');if(window.SFX&&!toastHold())SFX.fx('trophy')}catch(e){}},900);
  return true;
 }
 /** المسارات المحسوبة من الحالة تُفحَص عند فتح الرئيسيّة: إعلانٌ مجمَّع لا سيلٌ من الرسائل */
@@ -23678,7 +23797,7 @@ function trApply(o){
  else if(mode!=='ranked'&&mode!=='casual'&&mode!=='bot'){raw=0;why='none'}
  const before=t.tr,aBefore=trArenaIx(before),gate=TR_ARENA[t.gate|0]||0;
  let after=Math.max(0,before+raw);
- if(after<gate){after=gate;why=why||'gate'}
+ if(after<gate||(raw<0&&after===before&&after===gate)){after=gate;why=why||'gate'}   // ٦٫٩٧: وعلى أرض الساحة الأولى (٠) أيضًا
  t.tr=after;if(after>t.best)t.best=after;
  const aAfter=trArenaIx(after);
  if(aAfter>(t.gate|0))t.gate=aAfter;
@@ -23802,7 +23921,7 @@ function trFinHTML(tro){
 /** إعلان الساحة الجديدة — مرّةً لكلّ ساحة، ولا فوق شاشة الصندوق (تنتظر إغلاقه) */
 function trArenaUpCheck(){
  const t=TR();if((t.gate|0)<=(t.up|0))return false;
- if(document.querySelector('.vchOv,.aruOv'))return false;
+ if(document.querySelector('.vchOv,.aruOv,.caEnd'))return false;   // ٦٫٩٧: ولا فوق لوحة النتيجة — بعد مغادرتها
  t.up=t.gate;try{saveState()}catch(e){}
  arenaUpFx(t.gate);return true;
 }
@@ -23951,15 +24070,16 @@ function chestDropFx(k,slot,full){
   <button class="vchB">${T('رائع!')}</button>`;
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
  const close=()=>{ov.classList.add('out');setTimeout(()=>{ov.remove();try{trArenaUpCheck()}catch(e){}},230)};   // ٦٫٩٣: وبعده إعلان الساحة الجديدة إن وُجد
- ov.querySelector('.vchB').onclick=close;
+ {const t0=Date.now();ov.querySelector('.vchB').onclick=()=>{if(Date.now()-t0<1300)return;close()}}   // ٦٫٩٦: لمسةٌ ثانية سريعة لا تغلق المشهد قبل ظهوره
  setTimeout(()=>{try{if(window.SFX)SFX.fx(full?'bad':'chest')}catch(e){}},620);   // ٦٫٩٣: ارتطام الصندوق ولمعانه — صوتُ لعبةٍ لا «طقّة موافقة»
 }
 function dropBattleChest(){
  const bc=BC(),i=bc.findIndex(x=>!x);
  const k=rollBattleChest();
- if(i<0){setTimeout(()=>chestDropFx(k,-1,true),1400);return}
+ const host=RM.game==='carrom'&&RM.phase==='over';   // ٦٫٩٧: في الكيرم بلاطةٌ داخل شاشة النتيجة تفتح المشهد باللمس — لا طبقةٌ فوقها
+ if(i<0){if(host)RM.bcPend={k,i:-1,full:true};else setTimeout(()=>chestDropFx(k,-1,true),1400);return}
  bc[i]={k,st:'idle'};saveState();   // ٦٫٩٦: لا أصل للصندوق — كلّ الصناديق نسخُ جيس
- setTimeout(()=>chestDropFx(k,i,false),1400);   // بعد لحظة النتيجة — لا فوقها
+ if(host)RM.bcPend={k,i,full:false};else setTimeout(()=>chestDropFx(k,i,false),1400);   // بعد لحظة النتيجة — لا فوقها
 }
 function bcFmt(s){
  if(s>=3600){const mn=Math.ceil(s/60),h=Math.floor(mn/60),m=mn%60;return m?h+' س '+m+' د':h+' س'}   // ٦٫٩٥: التقريب مرّةً واحدة — لا «60 د»
@@ -24492,13 +24612,16 @@ function caMatchReward(won){
  if(!RM.mid||S.caRw===RM.mid)return;S.caRw=RM.mid;
  try{achMatch(!!won)}catch(e){}   // ٦٫٩٥: الإنجازات
  RM.bcDrop=!!won&&bcDropOk();   // ٦٫٩٤: صندوق النصر من الأونلاين، أو من الآليّ المتوسّط فما فوق تحت سقف الكؤوس — لا الودّيّات ولا السهل
- const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0);
+ const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0), rw=RM.rw={mid:RM.mid,xp,n,k,lv:0};   // ٦٫٩٧: لبلاطات شاشة النتيجة
  try{skMastAdd(caSkMine(),{m:1,win:won?1:0})}catch(e){}   // ٦٫٩٤: إتقان الجيس المجهَّز
  S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(RM.bcDrop&&typeof dropBattleChest==='function')dropBattleChest();
- RM.lkDrop=lkEligible(!!won);if(RM.lkDrop)setTimeout(lkQueue,RM.bcDrop?2200:1600);   // ٦٫٩٥: إسقاط الحظّ لأوّل ثلاثة انتصاراتٍ في اليوم
+ RM.lkDrop=lkEligible(!!won);
+ /* ٦٫٩٧: على شاشة النتيجة بلاطةٌ تُلمس — ويُحفظ الإسقاط معلّقًا الآن، فإن خرج اللاعب دون لمسه ظهر له في الرئيسيّة */
+ if(RM.lkDrop){if(RM.phase==='over'){try{if(!S.lkPend){const lk=LK();lk.n=(lk.n|0)+1;S.lkPend={fin:lkRoll(),at:Date.now()}}}catch(e){}}else setTimeout(lkQueue,RM.bcDrop?2200:1600)}   // ٦٫٩٥: إسقاط الحظّ لأوّل ثلاثة انتصاراتٍ في اليوم
  try{saveState()}catch(e){}
  const lv1=lvl(S.xp);
- setTimeout(()=>toast(`+${xp} ${T('خبرة')} · ${n}× ${T('جيس')} «${tlNm('sk',k)}»${lv1>lv0?' · '+T('المستوى')+' '+lv1+'!':''}`),700);   // بلا رنّة: صوت الصندوق يليه
+ if(lv1>lv0)rw.lv=lv1;
+ setTimeout(()=>{if(rw.shown)return;toast(`+${xp} ${T('خبرة')} · ${n}× ${T('جيس')} «${tlNm('sk',k)}»${lv1>lv0?' · '+T('المستوى')+' '+lv1+'!':''}`)},700);   // ٦٫٩٧: إن ظهرت بلاطتها فلا رسالة   // بلا رنّة: صوت الصندوق يليه
 }
 /* حلقة القدرة حول الضارب — لكلّ قدرةٍ شكلها */
 function caPwRing(cx,X,Y,r,k,tm){
@@ -25325,7 +25448,7 @@ function rmLeave(silent){
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  RM.U=null;RM.C=null;RM.uno=null;RM.ca=null;RM.hand=[];
  if(RM.solo){RM.solo=0;RMcap=undefined;_ca.sim=null}   // يُعاد حلّ الناقل الحقيقي في الغرفة التالية
- RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;RM.szG=0;RM.crowns=0;RM.bcDrop=false;RM.lkDrop=false;
+ RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;RM.szG=0;RM.crowns=0;RM.bcDrop=false;RM.lkDrop=false;RM.bcPend=null;RM.rw=null;RM.botSay=null;
  RM.mm=0;clearInterval(_mmTm);
  // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
  try{cancelAnimationFrame(_ca.anim)}catch(e){}
@@ -25338,6 +25461,8 @@ function rmLeave(silent){
 }
 /** «رجوع» داخل غرفة: أثناء المباراة سؤال، وفي الردهة مغادرة */
 function rmBack(){
+ if(RM.phase==='over')return rmLeave();   // ٦٫٩٦: انتهت المباراة — لا «المباراة جارية»
+ if(document.querySelector('.qvov'))return;   // ولا نافذتا تأكيدٍ متراكبتان
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
  if(!playing)return rmLeave();
  confirmSheet('مغادرة الغرفة',RM.solo||rmMode()==='room'?'المباراة جارية — إن غادرت الآن فلن تعود إليها.':'المباراة جارية — الانسحاب يُحتسب خسارةً في الكؤوس والتصنيف.','مغادرة',()=>rmLeave());
@@ -25511,7 +25636,7 @@ function rmSettle(d){
 function rmOn(d,m){
  const me=RM.me;
  if(d.t==='start'){RM.game=d.g;RM.phase=d.g==='draw'?'paint':d.g==='uno'?'uno':d.g==='carrom'?'carrom':'deal';
-  RM.mid=d.mid||rmNewMid();RM.rank=null;RM.ch12=null;RM.szG=0;try{for(const k in RM._drop||{})clearTimeout(RM._drop[k]);RM._drop={}}catch(e){}
+  RM.mid=d.mid||rmNewMid();RM.rank=null;RM.ch12=null;RM.szG=0;RM.bcPend=null;RM.rw=null;RM.botSay=null;try{for(const k in RM._drop||{})clearTimeout(RM._drop[k]);RM._drop={}}catch(e){}
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null;RM.crowns=0;RM._t0=Date.now();achMatchReset();try{rmLiveMark()}catch(e){}
   if(d.g==='carrom'&&caTourney())setTimeout(()=>{try{toast(ico('crown',13)+' مستوًى موحّد — في تحدّي الاثني عشر لا يمنح الجيس أفضليّة')}catch(e){}},1200)}
@@ -25522,11 +25647,11 @@ function rmOn(d,m){
   if(d.secs)rmTimer(d.secs)}
  else if(d.t==='end'){RM.phase='end';RM.res=d;rmSettle(d)}
  else if(d.t==='night'){RM.phase='night';RM.step=d.step;RM.msg=d.m||'';RM.day=d.day||RM.day}
- else if(d.t==='over'){RM.phase='over';RM.res=d;evtGame(d);rmSettle(d)}
+ else if(d.t==='over'){RM.phase='over';RM.res=d;try{_ca.overAt=performance.now()}catch(e){}evtGame(d);rmSettle(d)}
  else if(d.t==='emo'){                                    // تعبير لاعب آخر
   if(d.by===me)return;
   const p=(RM.players||[]).find(x=>x.peer===d.by);
-  if(typeof bubbleFx==='function')bubbleFx(d.k,'op',(p&&p.n)||'لاعب');
+  if(typeof bubbleFx==='function')bubbleFx(d.k,'op',(p&&(p.name||p.n))||'لاعب');
  }
  else if(d.t==='shout'){                                  // صيحة لاعب آخر: تُسمع بصوته هو لا بصوتي
   if(d.by===me)return;
@@ -25790,7 +25915,7 @@ function roomDraw(){
  const R=rmRoster();
  if(!RM.me){const me=rmMine();if(me)RM.me=me.peer}
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
- setArena(vnKind(RM.game),!playing||RM.phase==='over');   // مكان اللعبة خلف الغرفة دائمًا — أعتم في الردهة والنتيجة
+ setArena(vnKind(RM.game),!playing||RM.phase==='over',RM.phase==='over'&&RM.game==='carrom'&&!!RM.ca);   // مكان اللعبة خلف الغرفة دائمًا — أعتم في الردهة والنتيجة
  const head=(playing&&RM.game==='carrom'&&(RM.phase!=='over'||RM.ca))?''   // الكيرم: رأسه في بطاقتَي اللاعبين
   :playing
   ?`<div class="rmTopMini"><span>${ico('group',11)} ${R.length}</span>
@@ -25884,14 +26009,16 @@ function rmLobbyRing(R){
 /* نهاية اللعبة — بطاقة فوز واضحة لكل ألعاب الغرفة */
 function rmOverScr(){
  const r=RM.res||{};
- const iWon=/فاز/.test(r.msg||'')&&(r.msg||'').includes(S.name||'@@');
+ const meP=(RM.players||[]).find(p=>p&&p.peer===RM.me);
+ const iWon=r.by!=null?(r.by===RM.me||!!(RM.ca&&RM.ca.col&&RM.ca.col[r.by]===RM.ca.col[RM.me])):!!(meP&&r.all&&r.all[0]&&r.all[0].n===meP.name);   // ٦٫٩٧: بالمعرّف لا بورود الاسم في الجملة
  setTimeout(()=>{if(iWon&&window.FX)FX.win()},120);
  let bg='';try{if(iWon&&REAL_ART.ui_win_bg)bg=` style="background:radial-gradient(circle at 50% 30%,rgba(255,205,90,.1),rgba(6,8,16,.7) 72%),url(${REAL_ART.ui_win_bg}) center/cover"`}catch(e){}
  return `<div class="rmOver${iWon?' won':''}"${bg}>
   <div class="rmOverGlow"></div>
   <div style="position:relative">
    <div class="caFinCup${iWon?'':' lose'}" style="margin-bottom:4px">${r.win==='mafia'?ico('swords',88):ico('trophy',96)}</div>
-   <div class="mtl" style="font-size:21px;margin-top:10px">${r.msg||'انتهت اللعبة'}</div>
+   <div class="cePlq${iWon?'':' lost'}"><h1 class="cePlaque">${iWon?'فزت!':'انتهت الجولة'}</h1></div>
+   <div class="mtl" style="font-size:15px;margin-top:8px">${r.msg||'انتهت اللعبة'}</div>
    ${trFinHTML(RM.rank&&RM.rank.tro)}
    ${(r.all||[]).length?`<div class="rmOverList">
     ${(r.all||[]).map((x,i)=>`<div class="rmOverRow ${i===0?'top':''}">
@@ -28679,6 +28806,10 @@ function caRR(cx,x,y,w,h,r){r=Math.min(r,w/2,h/2);cx.beginPath();cx.moveTo(x+r,y
 function caLoop(){
  _ca.loop=0;
  if(!RM.ca||!RM.code||_ca.sim)return;
+ /* ٦٫٩٧ — بعد النهاية لا حلقة: اللوح ساكنٌ تحت لوحة النتيجة (كان يُعاد رسمه كلّه كلّ إطار لأنّ الدور دوري).
+    ما زال يطير إلى الرفّ يُكمل طيرانه (٩٠٠ مللي ثانية على الأكثر) ثمّ رسمةٌ أخيرة وتقف */
+ if(RM.phase==='over'){const busy=(_ca.fly&&_ca.fly.length)||(_ca.drop&&_ca.drop.some(d=>!d.flown&&d.t!=='s'));
+  if(!busy||performance.now()-(_ca.overAt||0)>900){try{caRender()}catch(e){}return}}
  const now=performance.now(), k60=Math.min(4,Math.max(0,(now-(_ca.lt||now))/16.667));_ca.lt=now;
  caMoveIdle();
  caFps(now);
@@ -28701,8 +28832,8 @@ function caLoop(){
  }
  _ca.t=(_ca.t||0)+1;
  /* كلّ إطار ما دام شيءٌ يتحرّك أو هو دوري (نبض سهمَي الشريط)؛ في دور غيري بلا حركةٍ لا يتغيّر شيء — فكلّ رابع */
- const myT=RM.ca.turn===RM.me;
- if(easing||_ca.drag||_ca.slide||myT||_ca.sRet||(_ca.drop&&_ca.drop.some(d=>!d.flown&&d.t!=='s'))||(_ca.fly&&_ca.fly.length)||_ca.fpsOn||(_ca.t&3)===0)caRender();
+ const myT=RM.ca.turn===RM.me&&RM.phase!=='over';   // ٦٫٩٧: نبض السهمين في دوري الساكن يكفيه نصف الإطارات (٣٠/ث)
+ if(easing||_ca.drag||_ca.slide||(myT&&(_ca.t&1)===0)||_ca.sRet||(_ca.drop&&_ca.drop.some(d=>!d.flown&&d.t!=='s'))||(_ca.fly&&_ca.fly.length)||_ca.fpsOn||(_ca.t&3)===0)caRender();
  _ca.loop=requestAnimationFrame(caLoop);
 }
 function caLoopOn(){if(!_ca.loop&&!_ca.sim)_ca.loop=requestAnimationFrame(caLoop)}
@@ -28957,9 +29088,9 @@ function rmCarrom(R){
  <div class="caWrap big${duo?' duo':''}"><canvas id="caC" width="720" height="816"></canvas>
   ${seat.map(chip).join('')}
   ${msg&&RM.phase!=='over'?`<div class="caFloat" key="${esc(msg).length}">${msg}</div>`:''}
-  ${RM.phase==='over'?caMatchEnd(C):''}</div>
+</div>
  ${card(myCol,'bot')}
- </div>`;
+ </div>${RM.phase==='over'?caMatchEnd(C):''}`;
 }
 /* ═══ ٦٫٦٢ — «يجب الخصم يرسل تعبيرات أثناء اللعب، ومكانها جنب صورته» ═══
    الآليّ يعلّق بجملةٍ من بنك الصيحات (بصوتٍ حقيقيّ، والضحكة تسجيل المالك) في فقاعةٍ تخرج من صورته:
@@ -28978,7 +29109,7 @@ function caBotReact(cur,e){
  const botShot=/^bot/.test(cur), say=(w,gg,pr)=>{if(w&&Math.random()<pr){who=w;g=gg}};
  if(e.over){
   const botWon=RM.ca.col[cur]!==myCol;
-  who=pick(foes.length?foes:bots);g=botWon?(Math.random()<.5?'tease':'gg'):'nice';
+  who=pick(foes.length?foes:bots);g=botWon?'gg':'nice';   // ٦٫٩٧: بعد النهاية تحيّةٌ لا سخرية
  }else if(botShot){
   const me2=RM.players.find(p=>p.peer===cur), left=RM.ca.pcs.filter(p=>p.t===e.mine).length, foe=RM.ca.col[cur]!==myCol;
   if(e.foul)say(me2,'back',.35);
@@ -28998,25 +29129,130 @@ function caBotReact(cur,e){
   hype:['h1','h2','h3','h5','h8'],nice:['c1','c2','c3','c4','c6'],gg:e.over&&RM.ca.col[cur]!==myCol?['g1','g2','g4']:['g1','g3','g4','g5']};
  const pool=SHOUTS.filter(x=>x.g===g&&(!OK[g]||OK[g].indexOf(x.i)>=0));if(!pool.length)return;
  _caTalk=now;
+ /* ٦٫٩٧ — بعد النهاية: لا نطق ولا نقرة ولا فقاعةٌ فوق النتيجة — سطرٌ مكتوبٌ تحت المواجهة بعد انتهاء الدخول */
+ if(e.over){const sh=pick(pool),mid=RM.mid;setTimeout(()=>{try{if(RM.phase!=='over'||RM.mid!==mid)return;RM.botSay={mid,t:sh.t,n:who.name};
+   const el=document.querySelector('.caEnd .ceSay');if(el){el.textContent='«'+sh.t+'» — '+who.name;el.classList.add('on')}}catch(x){}},1500);return}
  try{shoutOut(pick(pool),'op',who.name,who.peer)}catch(x){}
 }
 /** نهاية المباراة (٦٫٥٨) — «ما أريد ألعابًا ناريّة، فقط فزتَ أو فاز الخصم في نصّ الشاشة»: كلمةٌ واحدة في
     وسط اللوح، وتحتها «العب مرّة أخرى» و«خروج». لا شاشة نتائج عامّة ولا قصاصاتٌ متطايرة */
 function caMatchEnd(C){
  const fresh=_ca.endSeen!==RM.mid;_ca.endSeen=RM.mid;   // الدخول المتحرّك مرّةً واحدة لكلّ مباراة
- const r=RM.res||{}, myCol=C.col[RM.me], meWon=!!r.by&&C.col[r.by]===myCol, duo=(RM.players||[]).length<=2;
- const t=meWon?(duo?'فزت':'فاز فريقك'):(duo?'فاز الخصم':'فاز الفريق الخصم');
- const oc=myCol==='w'?'b':'w', fs=caIsPts(C)&&C.pp?`<div class="caFinS"><b>${C.pp[myCol]||0}</b><span>مقابل</span><b>${C.pp[oc]||0}</b></div>`
-  :C.md==='icf'&&C.M?`<div class="caFinS"><b>${C.M.pts[myCol]||0}</b><span>مقابل</span><b>${C.M.pts[oc]||0}</b></div>`:'';
- /* ٦٫٩٢ — «ولقد فزت»: شاشة الفوز كما في الألعاب الكبيرة — خلفيّة نصرٍ ذهبيّة بأشعّةٍ تدور، كأسٌ حقيقيّة تهبط، اسمٌ ذهبيّ
-    متوهّج، ثمّ ما ربحت. والخسارة هادئةٌ كحليّة بلا كأس، لا تعاقب العين */
- let bg='';try{if(meWon&&REAL_ART.ui_win_bg)bg=`style="background:radial-gradient(circle at 50% 40%,rgba(255,205,90,.12),rgba(6,8,16,.62) 70%),url(${REAL_ART.ui_win_bg}) center/cover"`}catch(e){}
- return `<div class="caEnd${fresh?' in':''}${meWon?' won':''}" ${bg}>${meWon?'<div class="caRays"></div>':''}<div class="caFinC${meWon?' won':''}">
-  ${meWon?`<div class="caFinCup">${ico('trophy',104)}</div>`:`<div class="caFinCup lose">${ico('swords',84)}</div>`}
-  <div class="caFinT">${t}</div>${fs}${trFinHTML(RM.rank&&RM.rank.tro)}${ch12FinHTML(RM.ch12)}
-  ${meWon?`<div class="caFinRw">${caCrownHTML(RM.crowns)}<span>${ico('coin',18)} +40 ${T('خبرة')}</span>${RM.bcDrop?`<span>${ico('chest',18)} ${T('صندوق نصر')}</span>`:''}${RM.lkDrop?`<span>${ico('gift',17)} إسقاط حظّ</span>`:''}${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>${!RM.bcDrop&&RM.solo?`<div class="note caNoBc">${(TR().tr|0)>=TR_BOT_CAP?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' كأس: صناديق النصر من الأونلاين':'صندوق النصر من الآليّ المتوسّط فما فوق'}</div>`:''}`:`<div class="caFinRw"><span>${ico('coin',18)} +15 ${T('خبرة')}</span>${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>`}
-  ${RM.host?`<button class="rbtn caEndGo" onclick="rmStart()"><span>${T('العب مرّة أخرى')}</span></button>`:'<div class="note">بانتظار المضيف…</div>'}
-  <button class="btn g caFinX" onclick="rmLeave()">${T('خروج')}</button></div></div>`;
+ const r=RM.res||{}, myCol=C.col[RM.me], meWon=!!r.by&&C.col[r.by]===myCol, duo=(RM.players||[]).length<=2, oc=myCol==='w'?'b':'w';
+ const t=meWon?(duo?'فزت!':'فاز فريقك!'):(duo?'خسرت':'خسر فريقك');
+ /* ٦٫٩٧ — «شاشة الفوز شكلها سيّئ… وأقدر أحرّكها»: تسلسلٌ كشاشة نتيجة كلاش رويال — التيجان، راية «فزت!»، الخصم، المواجهة
+    بالصور والنتيجة، الكؤوس بعدّادٍ يتحرّك وشريط الساحة، الجوائز بلاطاتٍ في صفٍّ واحد، والزرّان مثبّتان في الأسفل.
+    الصندوق وإسقاط الحظّ بلاطتان هنا تفتحان مشهدهما باللمس — لا طبقاتٌ تتراكب فوق النتيجة */
+ const pot=c=>caIsPts(C)&&C.pp?((C.pp||{})[c]||0):C.md==='icf'&&C.M?((C.M.pts||{})[c]||0):Math.max(0,9-(C.pcs||[]).filter(p=>p&&p.t===c).length);
+ const my=pot(myCol),op=pot(oc);
+ const mine=(RM.players||[]).filter(p=>p&&C.col[p.peer]===myCol), foes=(RM.players||[]).filter(p=>p&&C.col[p.peer]===oc);
+ const meP=mine.find(p=>p.peer===RM.me)||{peer:RM.me,name:S.name||'أنت'}, foe=foes[0]||{name:'الخصم'};
+ const myTeam=[meP].concat(mine.filter(p=>p.peer!==RM.me)).slice(0,2);
+ const avOf=p=>p.peer===RM.me?avatarArt(60):(p.av?avatarSVG(p.av,60):personArt(p.name||'؟',60));
+ const dTxt=({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||'';
+ const mdN=({classic:'كلاسيكيّ',disc:'ديسك بول',pts:'حاصد النقاط',icf:'بطولة'})[C.md||'classic']||'كلاسيكيّ';
+ const myCr=RM.crowns|0, opCr=foe.peer?caCrownsOf(foe.peer,r):0;
+ const tro=RM.rank&&RM.rank.tro, tr=tro?tro.tr|0:trMine(), ix=trArenaIx(tr), A=ARENAS[ix]||ARENAS[0];
+ let art='',dim=false;try{if(!meWon&&REAL_ART.ui_lose_bg)art=REAL_ART.ui_lose_bg;else if(REAL_ART.ui_win_bg){art=REAL_ART.ui_win_bg;dim=!meWon}}catch(e){}
+ const side=(ps,won,cr,cls,lbl)=>`<div class="ceP${won?' w':''} ${cls}"><span class="ceAvs">${ps.map((p,i)=>`<span class="ceAvW"><span class="csAv" data-pr="${esc(String(p.peer||''))}">${avOf(p)}</span>${won&&i===0?`<i class="ceBadge">${ico('crown',13)}</i>`:''}</span>`).join('')}</span><b class="ceNm">${lbl}</b><span class="ceDots">${[0,1,2].map(i=>`<i class="${i<cr?'on':''}"></i>`).join('')}</span></div>`;
+ const foeNames=foes.map(p=>esc(p.name||'الخصم')).join(' و');
+ let troH='';
+ if(tro){
+  const d=tro.d|0,before=tro.before!=null?tro.before|0:tr-d,nx=trNext(tr),lo=TR_ARENA[ix],pct=v=>nx?Math.max(0,Math.min(100,Math.round((v-lo)/(nx-lo)*100))):100;
+  const prot=d===0&&tro.why==='gate', v0=fresh?before:tr;
+  const chip=d>0?`<span class="ceDelta n">+${d}</span>`:d<0?`<span class="ceDelta n dn">−${Math.abs(d)}</span>`:prot?`<span class="ceDelta z">${ico('shield',16)} محميّ</span>`:`<span class="ceDelta n z">+0</span>`;
+  const note=tro.why==='gate'?(lo>0?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):'في الساحة الأولى لا تنقص كؤوسك'):tro.why==='botcap'?'الآليّ لا يمنح كؤوسًا فوق '+TR_BOT_CAP.toLocaleString('en-US')+' — العب أونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
+  troH=`<div class="ceTro ceAn" style="--d:${meWon?1100:950}ms" onclick="push('arenaScr')" data-from="${v0}" data-to="${tr}" data-p1="${pct(tr)}"><div class="ceTroR">${ico('trophy',38)}<b class="ceNum${d<0?' dn':''}">${v0.toLocaleString('en-US')}</b>${chip}</div>
+   <div class="ceTroA"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct(v0)}%"></i></div><span>${nx?nx.toLocaleString('en-US'):'القمّة'}</span></div>${note?`<div class="ceTroN">${note}</div>`:''}</div>`;
+ }
+ const tile=(cls,icon,val,lbl,d,on,num)=>{const tg=on?'button':'div';return `<${tg} class="ceTile ceAn ${cls}${on?' tap':''}" style="--d:${d}ms"${on?` onclick="${on}"`:''}><span class="ceIc">${icon}</span><b${num?' class="n"':''}>${val}</b><s>${lbl}</s></${tg}>`};
+ const rw=RM.rw&&RM.rw.mid===RM.mid?RM.rw:null, bp=RM.bcPend, T0=meWon?1700:1500, tiles=[];
+ let lvIc=ico('up',24);try{if(REAL_ART.ic_level)lvIc=`<span class="ceLv" style="width:100%;height:100%;background-image:url(${REAL_ART.ic_level})">${lvl(S.xp||0)}</span>`}catch(e){}
+ tiles.push(['xp',lvIc,'+'+(rw?rw.xp:meWon?40:15),rw&&rw.lv?T('المستوى')+' '+rw.lv:T('خبرة'),'',1]);
+ if(RM.szG)tiles.push(['',ico('ticket',26),'+'+RM.szG,T('تذكرة'),'',1]);
+ if(meWon&&RM.bcDrop&&bp)tiles.push(['chest'+(_ca.bcSeen===RM.mid?' seen':''),chestPic(bp.k),T('صندوق'),bp.full?'الخانات ملأى':'نصر · الخانة '+(bp.i+1),'caEndChest()',0]);
+ if(meWon&&RM.lkDrop){const pend=!!S.lkPend;tiles.push(['luck',ico('gift',28),'إسقاط حظّ',pend?'افتحه':'فُتح',pend?'caEndLuck()':'',0])}
+ if(rw&&tiles.length<4){rw.shown=1;tiles.splice(1,0,['sk',skImg(rw.k,32),'×'+rw.n,esc(tlNm('sk',rw.k)),'',1])}   // نسخ الجيس — وإن ضاق الصفّ فرسالتها في الشاشة التالية
+ const tilesH=tiles.map((x,i)=>tile(x[0],x[1],x[2],x[3],T0+i*80,x[4],x[5])).join('');
+ const noBc=meWon&&!RM.bcDrop&&RM.solo?`<div class="ceNote ceFade" style="--d:${T0+300}ms">${(TR().tr|0)>=TR_BOT_CAP?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' كأس: صناديق النصر من الأونلاين':'صندوق النصر من الآليّ المتوسّط فما فوق'}</div>`:'';
+ const ch=ch12FinHTML(RM.ch12);
+ const say=RM.botSay&&RM.botSay.mid===RM.mid?RM.botSay:null;
+ const tPl=meWon?800:620, tSub=meWon?950:760, tVs=meWon?1000:800, tBtn=meWon?2000:1800;
+ setTimeout(()=>{try{caEndFit();if(fresh)caEndAnim(meWon)}catch(e){}},0);
+ return `<div class="caEnd${fresh?' fresh lock':''} ${meWon?'won':'lost'}" role="dialog" aria-modal="true" data-mid="${esc(String(RM.mid||''))}" style="--f:${A.f};--s1:${A.s1};--s2:${A.s2};--g:${A.g}">
+  <div class="ceBg${art?' art':''}${dim?' dim':''}"${art?` style="background-image:url(${art})"`:''}></div>${meWon?`<div class="ceRays" style="background-image:url(${ceRaysUrl()})"></div>`:''}
+  <header class="ceTop"><span class="ceAr">${tierEmblem(ix,20)} ${esc(A.n)}</span><span class="ceMd">كيرم · ${mdN}</span></header>
+  <main class="ceMid"><div class="ceIn">
+   <div class="ceCrowns">${[0,1,2].map(i=>`<i class="${i<myCr?'on':''}" style="--d:${450+i*150}ms">${ico('crown',24)}</i>`).join('')}</div>
+   <div class="cePlq${meWon?'':' lost'}" style="--d:${tPl}ms"><h1 class="cePlaque">${t}</h1></div>
+   <div class="ceSub ceFade" style="--d:${tSub}ms">ضدّ ${foeNames||'الخصم'} · ${RM.solo?(dTxt||'الآليّ'):rmMode()==='room'?'مباراة ودّيّة':'أونلاين'}</div>
+   <div class="ceVs ceFade" style="--d:${tVs}ms">${side(myTeam,meWon,myCr,'ceMe',duo?'أنت':'فريقك')}<div class="ceScore"><span>${my}</span><s>–</s><span>${op}</span></div>${side(foes.slice(0,2).length?foes.slice(0,2):[foe],!meWon,opCr,'ceOp',duo?esc(foe.name||'الخصم'):'الخصم')}</div>
+   ${RM.solo?`<div class="ceSay${say?' on':''}">${say?`«${esc(say.t)}» — ${esc(say.n)}`:''}</div>`:''}
+   ${troH}${ch?`<div class="ceAn" style="--d:${T0-200}ms;width:100%">${ch}</div>`:''}
+   <div class="ceRw">${tilesH}</div>${noBc}
+  </div></main>
+  <footer class="ceBtns ceFade" style="--d:${tBtn}ms">${RM.host?`<button class="rbtn caEndGo" onclick="caEndGo(rmStart)"><span>${T('العب مرّة أخرى')}</span></button>`:`<div class="ceWait">بانتظار المضيف…</div>`}<button class="btn g caFinX" onclick="caEndGo(rmLeave)">${T('خروج')}</button></footer></div>`;
+}
+/** قرص الأشعّة يُرسم مرّةً واحدة (٥١٢ بكسل بتلاشٍ شعاعيّ) ويُعرض صورةً ساكنة — لا تدرّجٌ مخروطيّ بقناعٍ يُعاد كلّ إطار */
+let _ceRays='';
+function ceRaysUrl(){
+ if(_ceRays)return _ceRays;
+ try{const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');
+  const rg=g.createRadialGradient(256,256,24,256,256,256);rg.addColorStop(0,'rgba(255,236,176,.5)');rg.addColorStop(.4,'rgba(255,222,140,.2)');rg.addColorStop(1,'rgba(255,222,140,0)');
+  g.fillStyle=rg;g.beginPath();for(let i=0;i<20;i++){const a=i/20*Math.PI*2,w=Math.PI/20*.5;g.moveTo(256,256);g.arc(256,256,256,a-w,a+w);g.closePath()}g.fill();
+  _ceRays=c.toDataURL('image/png')}catch(e){}
+ return _ceRays;
+}
+/** صندوق النصر: بلاطته في شاشة النتيجة تفتح مشهد الهبوط القائم */
+function caEndChest(){const p=RM.bcPend;if(!p)return;_ca.bcSeen=RM.mid;document.querySelectorAll('.ceTile.chest').forEach(x=>x.classList.add('seen'));try{chestDropFx(p.k,p.i,p.full)}catch(e){}}
+/** إسقاط الحظّ من بلاطته (محفوظٌ معلّقًا منذ الفوز — إن لم يُلمس ظهر في الرئيسيّة) */
+function caEndLuck(){document.querySelectorAll('.ceTile.luck').forEach(x=>x.classList.add('seen'));try{lkShow()}catch(e){}}
+/** زرّا النتيجة */
+function caEndGo(fn){try{fn()}catch(e){}}
+/** القلب يُصغَّر ليتّسع بين الرأس والزرّين — لا تمرير أبدًا (٣٢٠×٥٦٨)؛ والإصبع لا يحرّك الطبقة */
+function caEndFit(){
+ const el=document.querySelector('.caEnd');if(!el)return;
+ if(!el._bound){el._bound=1;
+  el.addEventListener('touchmove',e=>{if(e.cancelable)e.preventDefault()},{passive:false});
+  el.addEventListener('pointerdown',caEndSkip);
+  el.addEventListener('wheel',e=>e.preventDefault(),{passive:false})}
+ if(!_ca.fitBound){_ca.fitBound=1;addEventListener('resize',()=>{if(document.querySelector('.caEnd'))caEndFit()})}
+ const mid=el.querySelector('.ceMid'),inn=mid&&mid.querySelector('.ceIn');if(!inn)return;
+ inn.style.transform='';
+ const h=inn.offsetHeight,avail=mid.clientHeight;
+ if(h>avail+1){const s=Math.max(.5,avail/h);inn.style.transform='scale('+s.toFixed(3)+')'}
+}
+/** لمسةٌ أثناء الدخول تُكمل كلّ شيءٍ فورًا (لا ضغطةٌ على زرٍّ لم يظهر بعد) */
+function caEndSkip(e){
+ const el=e.currentTarget;if(!el||!el.classList.contains('fresh'))return;
+ el.classList.remove('fresh');setTimeout(()=>el.classList.remove('lock'),450);   // اللمسة نفسها لا تصل إلى زرٍّ ظهر تحتها للتوّ
+ const tro=el.querySelector('.ceTro');if(tro&&tro._fin)tro._fin();
+}
+/** الجدول الزمنيّ بعد الرسم: نداءٌ واحدٌ للفوز أو الخسارة، ثمّ عدّاد الكؤوس (صامت) — ولا غيرها. لا قماش احتفالٍ بملء الشاشة هنا:
+    للنتيجة أشعّتها وتيجانها، وكان رفعُ ذلك القماش كلّ إطار أغلى ما في الدخول */
+function caEndAnim(won){
+ const el=document.querySelector('.caEnd.fresh');if(!el)return;
+ try{const t=$('tst');if(t&&t.classList.contains('on')){const sp=t.firstElementChild;_toastQ.unshift([sp?sp.innerHTML:t.innerHTML]);t.classList.remove('on')}}catch(e){}   // رسالةٌ سبقت النتيجة بلحظة لا تبقى فوقها — تعود في الشاشة التالية
+ setTimeout(caEndFit,350);setTimeout(caEndFit,1200);setTimeout(caEndFit,2600);   // بعد وصول الخطوط والصور
+ const at=(ms,fn)=>setTimeout(()=>{try{if(el.isConnected)fn()}catch(e){}},ms);
+ setTimeout(()=>{try{if(document.querySelector('.caEnd')&&window.SFX)SFX.fx(won?'win':'lose')}catch(e){}},350);   // إعادة رسمٍ للشاشة لا تُسقط النداء
+ at(won?2200:2000,()=>el.classList.remove('lock'));
+ const tro=el.querySelector('.ceTro');
+ if(tro){
+  const from=+tro.dataset.from||0,to=+tro.dataset.to||0,p1=+tro.dataset.p1||0,num=tro.querySelector('.ceNum'),bar=tro.querySelector('.arBar i');
+  let done=false;
+  tro._fin=()=>{done=true;if(num)num.textContent=to.toLocaleString('en-US');if(bar)bar.style.width=p1+'%'};
+  const dur=won?900:700;
+  at(won?1250:1050,()=>{
+   if(done)return;
+   if(bar)bar.style.width=p1+'%';
+   if(from===to)return;
+   let st=null;const ease=x=>1-Math.pow(1-x,3);
+   const step=ts=>{if(done||!tro.isConnected)return;if(!st)st=ts;const k=Math.min(1,(ts-st)/dur),v=Math.round(from+(to-from)*ease(k));
+    if(num)num.textContent=v.toLocaleString('en-US');
+    if(k<1)requestAnimationFrame(step);else tro._fin()};
+   requestAnimationFrame(step)});
+ }
 }
 /** قائمة الإعدادات (زرّ الترس): القوانين، شكل اللوح، صوت الطقّات، الخروج */
 function caMenu(){
@@ -44090,7 +44326,17 @@ function errClear(){ERR_LOG=[];errSave();refresh(errScrLog);toast('مُسح ال
 
 /* ٦٫٩٣ — «الإشعارات اللي تجيك ما تحسّسك إنّها لعبة»: اللوحة ذهبيّة (LUX_CSS)، والنوع الثاني اختياريّ يرنّ رنّةً زجاجيّة
    قصيرة: 'ok' لما يُفرح، 'bad' لما يُخيّب — والافتراضيّ صامتٌ كي لا تصير كلّ رسالةٍ جرسًا */
+/* ٦٫٩٧ — على شاشة نتيجة الكيرم لا رسائل ولا رنّات تتراكب فوقها: تُحفظ وتُعرض تباعًا في الشاشة التالية.
+   (ما يخرج من مشهد الصندوق أو إسقاط الحظّ حين يفتحهما اللاعب يظهر في حينه) */
+var _toastQ=[],_ceWas=false;
+function toastHold(){try{return RM.phase==='over'&&RM.game==='carrom'&&!!document.querySelector('.caEnd')&&!document.querySelector('.vchOv,.lkOv,.aruOv')}catch(e){return false}}
+function toastFlush(){if(!_toastQ.length||toastHold())return;
+ const ach=_toastQ.filter(a=>/إنجاز/.test(String(a[0]))),rest=_toastQ.filter(a=>!/إنجاز/.test(String(a[0])));_toastQ.length=0;   // ٦٫٩٦: الإنجازات سطرٌ واحد — لا يضيع منها شيء
+ const q=rest.slice(0,ach.length?2:3);if(ach.length===1)q.push(ach[0]);else if(ach.length>1)q.push([ico('medal',13)+' '+ach.length+' إنجازاتٍ جديدة جاهزة للاستلام']);
+ q.forEach((a,i)=>setTimeout(()=>{try{toast(a[0],a[1])}catch(e){}},i*2600))}
+var _tapAt=0;try{document.addEventListener('pointerdown',()=>{_tapAt=Date.now()},true)}catch(e){}
 function toast(m,k){const t=$('tst');
+ if(toastHold()&&Date.now()-_tapAt>700){if(_toastQ.length<12)_toastQ.push([m,k]);return}   // ٦٫٩٦: ردّ لمسة اللاعب نفسه يظهر فورًا
  if(k){try{if(window.SFX)SFX.fx(k==='bad'?'bad':'notif')}catch(e){}}
  t.innerHTML='<span style="display:inline-flex;align-items:center;gap:6px;justify-content:center">'+m+'</span>';
  try{enPass(t)}catch(e){}
@@ -44121,6 +44367,9 @@ const go=h=>{
   if(nc){nc.replaceWith(liveCv);app.replaceChildren(t.content);try{caRender()}catch(e){}}else app.innerHTML=h;   // الغلاف جديد: أصنافه (caDrag) تُطبَّق الآن لا في الإطار التالي (المراجعة)
  }else app.innerHTML=h;
  if(still)for(const e of app.children)if(e.classList.contains('scr'))e.classList.add('still');
+ try{const ce=!!app.querySelector('.caEnd');document.body.classList.toggle('caOver',ce);   // ٦٫٩٧: لوحة النتيجة تُسكِن ما تحتها
+  if(!ce&&_ceWas){setTimeout(toastFlush,400);setTimeout(()=>{try{if(document.getElementById('caC')||document.querySelector('.caEnd'))return;trArenaUpCheck()}catch(e){}},900)}   // ٦٫٩٦: يُعاد الفحص عند الموعد — «العب مرّة أخرى» لا يفتح الإعلان فوق المباراة   // وما أُرجئ يظهر في الشاشة التالية
+  _ceWas=ce}catch(e){}
  try{enPass(app)}catch(e){}
  const tok=++_goTok;                                   // رسم أحدث يلغي أي تثبيت مؤجّل من رسم سابق
  if(_keepY!=null){
@@ -45359,7 +45608,7 @@ splash();
 
  // قصاصات احتفال خفيفة
  const fc=document.createElement('canvas');fc.id='fxc';document.body.appendChild(fc);
- const fx=fc.getContext('2d');let P=[],_fxOn=false;const FD=Math.min(DPR,1.5);   // ٦٫٩٦
+ const fx=fc.getContext('2d');let P=[],_fxOn=false,_fxT=0;const FD=Math.min(DPR,1.5);   // ٦٫٩٦
  function fxKick(){if(!_fxOn){_fxOn=true;requestAnimationFrame(floop)}}
  function frs(){fc.width=innerWidth*FD;fc.height=innerHeight*FD;fc.style.width=innerWidth+'px';fc.style.height=innerHeight+'px';fx.setTransform(FD,0,0,FD,0,0)}
  frs();addEventListener('resize',frs);
@@ -45378,15 +45627,15 @@ splash();
   const rg=g.createRadialGradient(16,16,0,16,16,16);rg.addColorStop(0,'rgba(255,241,196,1)');rg.addColorStop(.35,'rgba(255,233,168,.75)');rg.addColorStop(1,'rgba(255,220,140,0)');
   g.fillStyle=rg;g.fillRect(0,0,32,32);return moteSpr=c}
  function motes(n){for(let i=0;i<n;i++)P.push({t:'m',x:Math.random()*innerWidth,y:innerHeight*.55+Math.random()*innerHeight*.5,vx:(Math.random()-.5)*.25,vy:-(.35+Math.random()*.9),
-  life:1,dl:.0035+Math.random()*.004,w:.9+Math.random()*2.2,c:GOLD[(Math.random()*GOLD.length)|0],ph:Math.random()*6.28});fxKick()}
+  life:1,dl:.006+Math.random()*.004,w:.9+Math.random()*2.2,c:GOLD[(Math.random()*GOLD.length)|0],ph:Math.random()*6.28});fxKick()}
  function floop(){
-  if(!P.length){fx.clearRect(0,0,innerWidth,innerHeight);_fxOn=false;return}   // ٦٫٩٦: تنام الحلقة حين لا جسيمات — كان يمسح قماشًا بحجم الشاشة كلّ إطار إلى الأبد
+  if(!P.length){fx.clearRect(0,0,innerWidth,innerHeight);_fxOn=false;_fxT=0;return}   // ٦٫٩٦: تنام الحلقة حين لا جسيمات — كان يمسح قماشًا بحجم الشاشة كلّ إطار إلى الأبد
   requestAnimationFrame(floop);
   fx.clearRect(0,0,innerWidth,innerHeight);
   P=P.filter(p=>p.life>0);
-  const now=performance.now()/1000;
+  const now=performance.now()/1000,tn=performance.now(),kf=_fxT?Math.min(3,(tn-_fxT)/16.667):1;_fxT=tn;   // ٦٫٩٧: العمر والحركة بالزمن لا بالإطار
   for(const p of P){
-   p.life-=p.dl;
+   p.life-=p.dl*kf;
    if(p.t==='f'){ // وميض مركزيّ يتّسع ويذوب
     const r=p.R*(1.15-p.life*.35),g=fx.createRadialGradient(p.x,p.y,0,p.x,p.y,r);
     g.addColorStop(0,'rgba(255,241,196,'+(.42*p.life).toFixed(3)+')');g.addColorStop(.45,'rgba(255,215,120,'+(.16*p.life).toFixed(3)+')');g.addColorStop(1,'rgba(255,215,120,0)');
@@ -45397,11 +45646,11 @@ splash();
     fx.globalCompositeOperation='lighter';fx.globalAlpha=1;fx.strokeStyle=g;fx.lineWidth=p.w;fx.lineCap='round';
     fx.beginPath();fx.moveTo(p.x,p.y);fx.lineTo(p.x+Math.cos(p.a)*L,p.y+Math.sin(p.a)*L);fx.stroke();
    }else if(p.t==='m'){ // غبار ذهبيّ صاعد يومض بهدوء
-    p.x+=p.vx+Math.sin(now*1.3+p.ph)*.18;p.y+=p.vy;
+    p.x+=(p.vx+Math.sin(now*1.3+p.ph)*.18)*kf;p.y+=p.vy*kf;
     fx.globalCompositeOperation='lighter';fx.globalAlpha=Math.max(0,p.life)*(.45+.55*Math.abs(Math.sin(now*2.2+p.ph)));
     const d=p.w*5;fx.drawImage(moteSprite(),p.x-d/2,p.y-d/2,d,d);
    }else{ // شرارة ذهبيّة صغيرة بذيل
-    const px=p.x,py=p.y;p.vx*=.985;p.vy=p.vy*.985+.1;p.x+=p.vx;p.y+=p.vy;
+    const px=p.x,py=p.y;p.vx*=.985;p.vy=p.vy*.985+.1*kf;p.x+=p.vx*kf;p.y+=p.vy*kf;
     fx.globalCompositeOperation='lighter';fx.globalAlpha=Math.max(0,p.life);fx.strokeStyle=p.c;fx.lineWidth=p.w;fx.lineCap='round';
     fx.beginPath();fx.moveTo(px-p.vx*2.2,py-p.vy*2.2);fx.lineTo(p.x,p.y);fx.stroke();
    }
@@ -45413,8 +45662,8 @@ splash();
    const r=q?q.getBoundingClientRect():{left:innerWidth/2,top:160,width:0,height:0};
    burst(r.left+r.width/2,r.top+r.height/2,st>=5?26:st>=3?18:12,st>=5?7:5.5)},
   win(){if(reduced())return;const cx=innerWidth*.5,cy=innerHeight*.36;
-   flash(cx,cy,Math.max(innerWidth,innerHeight)*.55);streaks(cx,cy,14);motes(34);
-   setTimeout(()=>motes(22),350);setTimeout(()=>{streaks(cx,cy,8);motes(16)},800)},
+   flash(cx,cy,Math.max(innerWidth,innerHeight)*.55);streaks(cx,cy,12);motes(22);
+   setTimeout(()=>motes(10),400)},   // ٦٫٩٧: دفعةٌ واحدة وتهدأ — لا ثلاث
   glow(x,y){if(reduced())return;flash(x,y,160);streaks(x,y,6)}
  };
 })();
