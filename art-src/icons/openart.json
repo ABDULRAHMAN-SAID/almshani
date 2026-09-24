@@ -1,0 +1,25 @@
+{
+ "_": "أيقونات واقعيّة للواجهة (OpenArt · Nano Banana Pro، خلفيّة خضراء). الروابط تُملأ حين يكتمل التوليد.",
+ "prefix": "ic_",
+ "kind": "key",
+ "size": 256,
+ "q": 88,
+ "items": {
+  "gift": {
+   "historyId": "cTUJDXrQKH34o7wieIUL"
+  },
+  "missions": {
+   "historyId": "cfPNX9qIwrUNI927iKOP"
+  },
+  "challenge": {
+   "historyId": "LrNVa9tIaoNY7ES5WN0h"
+  },
+  "trophy": {
+   "historyId": "R3R9K0OEZLDjQ3pFPC3i"
+  },
+  "friends": {
+   "historyId": "",
+   "todo": "أعِد الإرسال: رُفض لتجاوز حدّ التوليد المتزامن"
+  }
+ }
+}
