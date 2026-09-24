@@ -22121,7 +22121,7 @@ function bcOddsScr(){
  go(`<div class="scr on">${tbar('احتمالات صناديق المعارك')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:12px">
-  بعد كل فوز في مباراة أونلاين يسقط صندوق واحد بهذه النسب — معروضة كاملة بلا إخفاء.</div>
+  بعد كل فوز في مباراة أونلاين يسقط صندوق واحد بهذه النسب — معروضة كاملة بلا إخفاء.<br>وفوق الحظّ ضمان: صندوقٌ نادرٌ فأعلى كلّ ${BC_PITY.rival} انتصاراتٍ على الأكثر، وملحميٌّ فأعلى كلّ ${BC_PITY.elite}.</div>
  ${BC_ODDS.map(([k,w])=>{const ch=ECON.chests[k]||{n:BC_LABEL[k]||k};const pc=Math.round(w/tot*1000)/10;
   return `<div style="margin-bottom:12px">
    <div style="display:flex;font-size:13px;align-items:center;gap:7px">
@@ -25222,10 +25222,18 @@ const BC_ODDS=[['knowledge',55],['rival',30],['elite',11],['legend',4]];
 const BC_TIME={knowledge:300,rival:1800,elite:7200,legend:14400}; // ثوانٍ
 const BC_LABEL={knowledge:'عادي',rival:'نادر',elite:'ملحمي',legend:'أسطوري'};
 function BC(){if(!S.bc)S.bc=[null,null,null,null];return S.bc}
+/* ٦٫٩٤ — دورة الصناديق (كلاش رويال تضمن الصناديق الكبيرة في دورةٍ ثابتة): الحظّ كما هو معلَن، مع ضمانٍ فوقه —
+   صندوقٌ نادرٌ فأعلى كلّ ستّ انتصاراتٍ على الأكثر، وملحميٌّ فأعلى كلّ خمسٍ وعشرين — فلا يطول جفاف الحظّ */
+const BC_PITY={rival:6,elite:25};
 function rollBattleChest(){
- let r=Math.random()*100;
- for(const[k,p]of BC_ODDS){if((r-=p)<0)return k}
- return 'knowledge';
+ const rank={knowledge:0,rival:1,elite:2,legend:3};
+ let r=Math.random()*100,k='knowledge';
+ for(const[kk,p]of BC_ODDS){if((r-=p)<0){k=kk;break}}
+ S.bcN=(S.bcN|0)+1;S.bcE=(S.bcE|0)+1;
+ if(S.bcE>=BC_PITY.elite&&rank[k]<2)k='elite';
+ else if(S.bcN>=BC_PITY.rival&&rank[k]<1)k='rival';
+ if(rank[k]>=1)S.bcN=0;if(rank[k]>=2)S.bcE=0;
+ return k;
 }
 /* ═══ ٦٫٩٠ — «لمّا تفوز يسقط على الشاشة صندوق بتصميمٍ جيّد، بدل رسالة "سقط صندوق" — نفس الألعاب» ═══
    كما في Clash Royale وCarrom Pool: صندوق النصر لحظةٌ لا سطر. شاشةٌ معتمة بأشعّةٍ تدور بلون رتبة الصندوق، يسقط الصندوق
