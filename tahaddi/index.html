@@ -2158,7 +2158,7 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 .pCard.on{border-color:rgba(217,183,110,.85);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 0 0 1px rgba(217,183,110,.2),0 0 24px rgba(217,183,110,.16)}
 .pCard.on::before{content:'';position:absolute;top:-1px;left:28%;right:28%;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,var(--lxG),transparent)}
 .pAvs{display:flex;flex-shrink:0}
-.pAvs.two .csAv+.csAv{margin-inline-start:-16px}
+.pAvs.two .csAvW+.csAvW{margin-inline-start:-16px}
 .pCard .csAv{width:clamp(44px,7.4vh,68px);height:clamp(44px,7.4vh,68px);border-radius:50%;overflow:hidden;display:flex;box-shadow:0 0 0 2px #0B0F1A,0 0 0 3.5px rgba(217,183,110,.45)}
 .pCard.on .csAv{box-shadow:0 0 0 2px #0B0F1A,0 0 0 3.5px #E3BF6E,0 0 16px rgba(227,191,110,.55);animation:pOn 1.6s ease-in-out infinite}
 @keyframes pOn{50%{box-shadow:0 0 0 2px #0B0F1A,0 0 0 3.5px #F6E3AE,0 0 26px rgba(227,191,110,.75)}}
@@ -2214,7 +2214,8 @@ body::before{content:'';position:fixed;inset:-20%;z-index:0;pointer-events:none;
 @media (max-height:700px){.caStage{gap:6px;padding-block:2px}.pCard{padding-block:6px}.pCard .csAv{width:40px;height:40px}.pCard .caRnd{width:38px;height:38px}.caScr .caTbar{padding-bottom:6px}}
 /* الرباعيّ: صورتان متراكبتان أصغر فيبقى للاسم والحال مكان */
 .pAvs.two .csAv{width:clamp(34px,5.2vh,46px);height:clamp(34px,5.2vh,46px)}
-.pAvs.two .csAv+.csAv{margin-inline-start:-18px}
+.pAvs.two .csAvW+.csAvW{margin-inline-start:-18px}
+.csAvW{position:relative;display:inline-flex;flex:0 0 auto}
 .pCard:has(.pAvs.two){gap:9px;padding-inline:10px}
 .shfx.anch.up .shtx::before{top:auto;bottom:-6px;border-top:0;border-left:0;border-bottom:1px solid var(--lxLine);border-right:1px solid var(--lxLine)}
 .btn.dbOpt.ok{border-color:var(--ok);color:var(--ok);background:rgba(46,204,113,.14)}
@@ -17847,6 +17848,7 @@ function grantRewards(list){
   if(x.t==='shard')S.shards=(S.shards||0)+x.v;
   if(x.t==='emote'&&!(S.emotes||[]).includes(x.k))S.emotes=(S.emotes||[]).concat(x.k);
   if(x.t==='frame'){S.frames=S.frames||[];if(!S.frames.includes(x.k))S.frames.push(x.k)}
+  if(x.t==='skc')tlAddCopies(x.k,x.v);
  });
 }
 
@@ -22179,6 +22181,7 @@ function rewardBody(x){
  if(x.t==='shard')return `<div class="rwBig">${ico('energy',74)}</div>
   <div class="mtl" style="font-size:22px;margin-top:8px">${x.v}</div>
   <div style="font-size:12px;color:var(--tx2)">شظية تطور</div>`;
+ if(x.t==='skc')return `${skImg(x.k,96)}<div class="mtl" style="font-size:16px;margin-top:8px">${T('جيس')} «${tlNm('sk',x.k)}»</div><div style="font-size:20px;font-weight:900;margin-top:4px;color:#FFE9A8">×${x.v}</div>`;
  if(x.t==='emote'){const e=EMOTES.find(y=>y.k===x.k);
   return `<div style="display:flex;justify-content:center">${face(e.k,56)}</div>
   <div class="mtl" style="font-size:16px;margin-top:8px">تعبير: ${e.n}</div>`}
@@ -22191,6 +22194,7 @@ function miniReward(x){
   <div style="font-size:12px;color:${RCOL[cardById(x.id).r].g};margin-top:3px">×${x.v}</div>`;
  if(x.t==='wild')return `<div style="display:flex;justify-content:center">${ico('wild',30)}</div><div style="font-size:11px;margin-top:3px">جوكر ${RARITY[x.r].n}</div>`;
  if(x.t==='shard')return `<div style="display:flex;justify-content:center">${ico('energy',30)}</div><div style="font-size:12px;margin-top:3px">${x.v} شظية</div>`;
+ if(x.t==='skc')return `${skImg(x.k,34)}<div style="font-size:11px;font-weight:800;margin-top:3px">${tlNm('sk',x.k)} ×${x.v}</div>`;
  if(x.t==='emote')return `<div style="display:flex;justify-content:center">${face(x.k,26)}</div>
   <div style="font-size:11px;margin-top:3px">${EMOTES.find(y=>y.k===x.k).n}</div>`;
  return '';
@@ -24664,7 +24668,7 @@ function plMissions(){
 function plHead(){
  const on=netOnline();
  return `<div class="hmTop">
-  <div class="hmAv" onclick="push('avScr')">${avatarArt(42)}<i class="${on?'on':''}" title="${on?'متّصل':'بلا اتصال'}"></i></div>
+  <div class="hmAv" style="position:relative" onclick="push('avScr')">${avatarArt(42)}<i class="${on?'on':''}" title="${on?'متّصل':'بلا اتصال'}"></i><b class="hmLv">${lvl(S.xp||0)}</b></div>
   <div class="hmHi"><b>مرحبًا ${esc(S.name)}</b><s>مستعدّ لجولة ممتعة؟</s></div>
   <span class="hmCur" onclick="push('storeScr')">${ico('coin',15)}
    <u>${S.coins.toLocaleString('en-US')}</u><span class="pl">+</span></span>
@@ -24827,7 +24831,7 @@ function bcOpen(i){
  const bc=BC(),c=bc[i];if(!c)return;
  const ch=ECON.chests[c.k];
  bc[i]=null;
- const list=openChest(c.k);
+ const list=openChest(c.k).concat(tlChestCopies(c.k));   // ٦٫٨٩: وفي كلّ صندوقٍ نسخ جيس
  grantRewards(list);saveState();
  if(window.FX)FX.win();
  push('rewardScr',{title:ch.n,list});
@@ -24898,7 +24902,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.88';
+const APP_VER='6.89';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25135,13 +25139,17 @@ function moreScr(){
 }
 
 
-/* ═══ ٦٫٨٨ — «الأدوات» (بعد صور المالك: ألوانٌ واضحة، ندرةٌ لكلّ أداة، ومجموعةٌ تُجمع) ═══
-   أربعة أقسام، وكلّها تعمل في اللعب فعلًا — لا صورةَ بلا أثر:
-   الجيس (يراه خصمك)، والقطع (طقم الأبيض والأسود)، والأثر (خلف ضاربك في ضرباتك)، والجيب (لحظة دخول قطعتك).
-   تُشترى بالعملات أو الجواهر مرّةً وتبقى لك. التصميم تصميمنا: كحليٌّ وذهب، وألوان الندرة زاهية */
-const TL_RAR={c:{n:'عاديّ',a:'#6B7C99',b:'#26314A',g:'rgba(160,180,215,.35)'},r:{n:'نادر',a:'#2F8FE8',b:'#0F2F66',g:'rgba(90,170,255,.45)'},
- e:{n:'ملحميّ',a:'#A45CF5',b:'#35166E',g:'rgba(190,130,255,.45)'},l:{n:'أسطوريّ',a:'#F5B82E',b:'#6A3606',g:'rgba(255,205,90,.55)'}};
-const TL_CAT=[['sk','الجيس'],['cs','القطع'],['tr','الأثر'],['pk','الجيب']];
+/* ═══ ٦٫٨٩ — «الأدوات» كما في Carrom Pool (قرأتُ عنها: صفحة Miniclip «Strikers, Powers, Pucks and Trails») ═══
+   لكلّ جيسٍ ثلاث قدرات حقيقيّة تعمل في اللعب:
+     القوّة   — سرعة الضربة وشدّتها (أقصى سرعة × ٠٫٩ + ٠٫٠٢×القوّة: ٥ = كما كانت، ١٠ = +١٠٪)
+     التصويب — طول خطّ التصويب أمام السهم (٧ + التصويب نقطة: ٥ = ١٢ كما كان)
+     الزمن    — مهلة الضربة (١٥ + الزمن ثانية: ٥ = ٢٠ كما كانت) — والمضيف يحكم بزمن صاحب الدور
+   ويُرقّى الجيس بنسخٍ منه (من الصناديق والمباريات) وعملات، فتزيد قدراته. وكلّ ترقيةٍ تملأ «قدرة المجموعة»،
+   وكلّما امتلأت فُتحت «قدرة» جديدة بالترتيب — والقدرة تُضاف فوق قدرات الجيس (٦-٦-٦ + ٢-٢-٢ = ٨-٨-٨) ولها حلقةٌ حوله.
+   التصميم تصميمنا (كحليّ وذهب)؛ المأخوذ من اللعبة النظامُ والمقاييس لا الشكل. */
+const TL_RAR={c:{n:'عاديّ',a:'#6B7C99',b:'#26314A',g:'rgba(160,180,215,.35)',m:1},r:{n:'نادر',a:'#2F8FE8',b:'#0F2F66',g:'rgba(90,170,255,.45)',m:1.5},
+ e:{n:'ملحميّ',a:'#A45CF5',b:'#35166E',g:'rgba(190,130,255,.45)',m:2},l:{n:'أسطوريّ',a:'#F5B82E',b:'#6A3606',g:'rgba(255,205,90,.55)',m:3}};
+const TL_CAT=[['sk','الجيس'],['pw','القدرات'],['cs','القطع'],['tr','الأثر'],['pk','الجيب']];
 const TL_ITEMS={
  sk:[['blue','c'],['emerald','c'],['onyx','c'],['violet','c'],['ruby','r',1200],['teal','r',1200],['amber','e',3000],['ice','e',3000],['moon','l',60,1],['sun','l',60,1]],
  cs:[['classic','c'],['sandal','r',1500],['pearl','e',3500],['royal','l',80,1]],
@@ -25151,45 +25159,149 @@ const TL_ITEMS={
 const TL_NM={cs:{classic:'الكلاسيكيّ',sandal:'الصندل',pearl:'اللؤلؤ والكحليّ',royal:'الملكيّ'},
  tr:{none:'بلا أثر',gold:'الذهبيّ',fire:'الناريّ',ice:'الجليديّ',aurora:'الشفق'},
  pk:{gold:'الذهبيّ',emerald:'الزمرّديّ',fire:'الناريّ',star:'النجوم'}};
-function tlNm(c,k){return c==='sk'?(CA_STRIKERS[k]||{}).n||k:(TL_NM[c]||{})[k]||k}
+/* القدرات الأساسيّة للجيس في المستوى ١ (من ١٠): العاديّ ١٥ نقطة، النادر ١٦، الملحميّ ١٨، الأسطوريّ ٢٠ */
+const TL_SKST={blue:[5,5,5],emerald:[6,4,5],onyx:[4,6,5],violet:[5,4,6],ruby:[7,5,4],teal:[4,7,5],amber:[7,6,5],ice:[5,7,6],moon:[6,7,7],sun:[8,6,6]};
+const TL_LVB=[[0,0,0],[1,0,0],[1,1,0],[1,1,1],[2,2,1]];            // ما يضيفه كلّ مستوى (١…٥)
+const TL_UPC=[5,10,20,40], TL_UPG=[500,1500,4000,10000];          // نسخ وعملات الترقية من المستوى ١ إلى ٥ (× ندرة الجيس في العملات)
+const TL_UNL={r:10,e:15,l:20};                                     // نسخٌ تفتح الجيس المقفل بلا شراء
+const TL_CPP={c:4,r:6,e:9,l:14};                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
+const TL_PWPTS=20;                                                  // نقاطٌ تفتح القدرة التالية
+const TL_PWR=[{k:'def',n:'الأساسيّة',st:[0,0,0],col:'232,178,58'},{k:'halo',n:'الهالة',st:[1,0,0],col:'255,205,90'},
+ {k:'thorn',n:'الأشواك',st:[0,1,0],col:'80,200,255'},{k:'venom',n:'السمّ',st:[0,0,1],col:'120,230,90'},
+ {k:'orbit',n:'المدار',st:[1,1,0],col:'200,120,255'},{k:'blaze',n:'اللهب',st:[1,0,1],col:'255,110,40'},
+ {k:'wave',n:'الموج',st:[0,1,1],col:'60,220,200'},{k:'crown',n:'التاج',st:[1,1,1],col:'255,225,120'},
+ {k:'comet',n:'المذنّب',st:[2,1,1],col:'255,150,220'}];
+function tlNm(c,k){return c==='sk'?(CA_STRIKERS[k]||{}).n||k:c==='pw'?(TL_PWR.find(x=>x.k===k)||{}).n||k:(TL_NM[c]||{})[k]||k}
 function tlItem(c,k){return (TL_ITEMS[c]||[]).find(x=>x[0]===k)}
 function tlOwn(c,k){const it=tlItem(c,k);if(!it)return false;if(!it[2])return true;return !!(S.tlOwn&&S.tlOwn.includes(c+':'+k))}
-function tlEq(c){return c==='sk'?caSkMine():c==='cs'?caCsMine():c==='tr'?caTrMine():caPkMine()}
-function tlSetEq(c,k){if(c==='sk')S.caStriker=k;else if(c==='cs')S.tlCs=k;else if(c==='tr')S.tlTr=k;else S.tlPk=k}
+function tlEq(c){return c==='sk'?caSkMine():c==='cs'?caCsMine():c==='tr'?caTrMine():c==='pw'?tlPwMine():caPkMine()}
+function tlSetEq(c,k){if(c==='sk')S.caStriker=k;else if(c==='cs')S.tlCs=k;else if(c==='tr')S.tlTr=k;else if(c==='pw')S.tlPw=k;else S.tlPk=k}
+function skLv(k){return tlOwn('sk',k)?Math.max(1,Math.min(5,(S.skLv||{})[k]||1)):1}
+function skCp(k){return (S.skCp||{})[k]||0}
+function tlPwUnl(){return Math.min(TL_PWR.length,1+Math.floor((S.tlCP||0)/TL_PWPTS))}
+function tlPwMine(){const i=TL_PWR.findIndex(x=>x.k===S.tlPw);return i>0&&i<tlPwUnl()?S.tlPw:'def'}
+function skStats(k,lv,pw){const b=TL_SKST[k]||[5,5,5],B=TL_LVB[(lv||1)-1]||TL_LVB[0],P=(TL_PWR.find(x=>x.k===pw)||TL_PWR[0]).st;return b.map((v,i)=>Math.min(10,v+B[i]+P[i]))}
+function caMyStats(){const k=caSkMine();return skStats(k,skLv(k),tlPwMine())}
+/** قدرات جيس لاعبٍ في المباراة: أنا من حسابي، والبشر من حضورهم (مقيّدةٌ ١…١٠)، والآليّ من جيسه في المستوى ١ */
+function caStatsOf(peer){
+ if(!peer||peer===RM.me)return caMyStats();
+ const p=(RM.players||[]).find(x=>x.peer===peer);
+ if(p&&Array.isArray(p.ss)&&p.ss.length===3)return p.ss.map(v=>Math.max(1,Math.min(10,Math.round(+v)||5)));
+ if(typeof isBot==='function'&&isBot(peer))return skStats(caSkOf(peer),1,'def');
+ return [5,5,5];
+}
+function caForceMul(){return .9+.02*caMyStats()[0]}
+function caAimDots(){return 7+caMyStats()[1]}
+function caShotSecOf(peer){return 15+caStatsOf(peer)[2]}
+/* مستوى اللاعب على صورته: أنا من خبرتي، والبشر من حضورهم، والآليّ بحسب صعوبته (ثابتٌ لاسمه) */
+function plLvOf(p){
+ if(!p)return 1;if(p.peer===RM.me)return lvl(S.xp||0);
+ if(typeof isBot==='function'&&isBot(p.peer)){let h=0;for(const ch of String(p.name||p.peer))h=(h*31+ch.charCodeAt(0))>>>0;
+  const R={easy:[2,6],mid:[7,14],hard:[15,24],imp:[25,40]}[RM.diff||'mid']||[7,14];return R[0]+h%(R[1]-R[0]+1)}
+ return Math.max(1,Math.min(999,Math.round(+p.lv)||1));
+}
+/** نسخٌ من جيس: تُحسب، وتفتح الجيس المقفل إذا اكتملت */
+function tlAddCopies(k,v){
+ const it=tlItem('sk',k);if(!it||!v)return;
+ S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+v;
+ if(!tlOwn('sk',k)&&S.skCp[k]>=TL_UNL[it[1]]){S.skCp[k]-=TL_UNL[it[1]];S.tlOwn=S.tlOwn||[];S.tlOwn.push('sk:'+k);tlAddCP(TL_CPP[it[1]]);
+  setTimeout(()=>toast(ico('sparkle',13)+' '+T('فُتح جيس')+' «'+tlNm('sk',k)+'»'),1200)}
+}
+function tlAddCP(n){const u0=tlPwUnl();S.tlCP=(S.tlCP||0)+n;const u1=tlPwUnl();
+ if(u1>u0)setTimeout(()=>toast(ico('energy',13)+' '+T('فُتحت قدرة جديدة')+': '+TL_PWR[u1-1].n),1600)}
+/** جيسٌ عشوائيّ بوزن ندرته — العاديّ أكثر، والأسطوريّ نادر */
+function tlRandSk(){const W={c:45,r:30,e:18,l:7},L=TL_ITEMS.sk;let t=Math.random()*L.reduce((a,x)=>a+W[x[1]],0);for(const x of L){t-=W[x[1]];if(t<=0)return x[0]}return L[0][0]}
+function tlChestCopies(ck){const n={knowledge:4,rival:6,elite:10,legend:16}[ck]||4, a=tlRandSk(), b=tlRandSk();
+ return a===b?[{t:'skc',k:a,v:n}]:[{t:'skc',k:a,v:Math.ceil(n*.6)},{t:'skc',k:b,v:Math.floor(n*.4)}]}
+function skImg(k,sz){try{return `<img src="${caDisc('s:'+k,40).toDataURL()}" width="${sz}" height="${sz}" style="display:block;margin:0 auto" alt="">`}catch(e){return ''}}
+/** مكافأة مباراة الكيرم: خبرة ونسخ جيس — مرّةً واحدة لكلّ مباراة */
+function caMatchReward(won){
+ if(!RM.mid||S.caRw===RM.mid)return;S.caRw=RM.mid;
+ const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0);
+ S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(won&&typeof dropBattleChest==='function')dropBattleChest();
+ try{saveState()}catch(e){}
+ const lv1=lvl(S.xp);
+ setTimeout(()=>toast(`+${xp} ${T('خبرة')} · ${n}× ${T('جيس')} «${tlNm('sk',k)}»${lv1>lv0?' · '+T('المستوى')+' '+lv1+'!':''}`),700);
+}
+/* حلقة القدرة حول الضارب — لكلّ قدرةٍ شكلها */
+function caPwRing(cx,X,Y,r,k,tm){
+ const P=TL_PWR.find(x=>x.k===k);if(!P||k==='def')return;
+ const c=P.col, t=(tm||performance.now())/1000;
+ cx.save();cx.lineCap='round';
+ const ring=(rr,w,a)=>{cx.beginPath();cx.arc(X,Y,rr,0,7);cx.strokeStyle='rgba('+c+','+a+')';cx.lineWidth=w;cx.stroke()};
+ ring(r*1.16,r*.14,.85);ring(r*1.34,r*.07,.35);
+ cx.fillStyle='rgb('+c+')';cx.strokeStyle='rgb('+c+')';
+ if(k==='halo'){cx.globalAlpha=.35+.25*Math.sin(t*3);ring(r*1.5,r*.2,.5)}
+ else if(k==='thorn'){for(let i=0;i<24;i++){const a=i*Math.PI/12+t*.4;cx.beginPath();cx.moveTo(X+Math.cos(a-.08)*r*1.22,Y+Math.sin(a-.08)*r*1.22);cx.lineTo(X+Math.cos(a)*r*1.5,Y+Math.sin(a)*r*1.5);cx.lineTo(X+Math.cos(a+.08)*r*1.22,Y+Math.sin(a+.08)*r*1.22);cx.fill()}}
+ else if(k==='venom'){for(let i=0;i<4;i++){const a=i*Math.PI/2+t*.6;cx.beginPath();cx.moveTo(X+Math.cos(a-.2)*r*1.28,Y+Math.sin(a-.2)*r*1.28);cx.lineTo(X+Math.cos(a)*r*1.05,Y+Math.sin(a)*r*1.05);cx.lineTo(X+Math.cos(a+.2)*r*1.28,Y+Math.sin(a+.2)*r*1.28);cx.fill()}}
+ else if(k==='orbit'){cx.lineWidth=r*.12;for(let i=0;i<2;i++){const a=t*2+i*Math.PI;cx.beginPath();cx.arc(X,Y,r*1.45,a,a+1.6);cx.stroke()}}
+ else if(k==='blaze'){cx.beginPath();for(let i=0;i<=48;i++){const a=i*Math.PI/24,rr=r*(1.3+.14*Math.sin(i*3+t*8));cx.lineTo(X+Math.cos(a)*rr,Y+Math.sin(a)*rr)}cx.lineWidth=r*.1;cx.stroke()}
+ else if(k==='wave'){cx.beginPath();for(let i=0;i<=60;i++){const a=i*Math.PI/30,rr=r*(1.36+.09*Math.sin(i*1.5-t*5));cx.lineTo(X+Math.cos(a)*rr,Y+Math.sin(a)*rr)}cx.lineWidth=r*.09;cx.stroke()}
+ else if(k==='crown'){for(let i=0;i<8;i++){const a=i*Math.PI/4+t*.3;cx.beginPath();cx.arc(X+Math.cos(a)*r*1.42,Y+Math.sin(a)*r*1.42,r*.1,0,7);cx.fill()}}
+ else if(k==='comet'){for(let i=0;i<14;i++){const a=t*2.4-i*.14;cx.globalAlpha=1-i/14;cx.beginPath();cx.arc(X+Math.cos(a)*r*1.45,Y+Math.sin(a)*r*1.45,r*.14*(1-i/16),0,7);cx.fill()}}
+ cx.restore();
+}
 let _tlCat='sk';
 const TOOLS_CSS=`.tlHd{display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;margin-bottom:12px;
  background:linear-gradient(180deg,#1B2442,#0F1528);border:1.5px solid rgba(232,178,58,.55);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35)}
 .tlHd .tlLv{flex:0 0 46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;color:#1A1206;
  background:radial-gradient(circle at 35% 30%,#FFF1C4,#E8B23A 60%,#9A6A12);box-shadow:0 0 0 3px #0B1020,0 0 0 4.5px rgba(232,178,58,.6)}
 .tlHd .tlT{font-weight:900;font-size:14px;color:#FFE9A8}.tlHd .tlS2{font-size:10.5px;color:var(--tx2);margin-top:2px}
-.tlBar{height:10px;border-radius:6px;background:#070B16;margin-top:7px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
-.tlBar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#B8871E,#FFE9A8)}
-.tlTabs{display:flex;gap:6px;margin-bottom:12px}
-.tlTab{flex:1;padding:10px 4px;border-radius:12px;font-weight:900;font-size:13px;color:var(--tx2);font-family:inherit;cursor:pointer;
+.tlBar{position:relative;height:12px;border-radius:7px;background:#070B16;margin-top:7px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+.tlBar i{display:block;height:100%;border-radius:7px;background:linear-gradient(90deg,#B8871E,#FFE9A8)}
+.tlBar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;text-shadow:0 1px 2px #000}
+.tlTabs{display:flex;gap:5px;margin-bottom:12px}
+.tlTab{flex:1;padding:10px 2px;border-radius:12px;font-weight:900;font-size:12px;color:var(--tx2);font-family:inherit;cursor:pointer;
  background:#121A30;border:1.5px solid rgba(255,255,255,.07)}
 .tlTab.on{color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);border-color:#FFE9A8;box-shadow:0 3px 10px rgba(232,178,58,.3)}
-.tlTab:active,.tlCard:active{filter:brightness(1.15)}
+.tlTab:active,.tlCard:active,.tlBtn:active{filter:brightness(1.15)}
 .tlGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
 .tlCard{position:relative;display:flex;flex-direction:column;align-items:center;padding:9px 5px 8px;border-radius:14px;cursor:pointer;overflow:hidden;
  font-family:inherit;color:#fff;border:2px solid rgba(255,255,255,.14);box-shadow:0 4px 12px rgba(0,0,0,.35)}
-.tlCard::before{content:'';position:absolute;left:50%;top:44%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;
+.tlCard::before{content:'';position:absolute;left:50%;top:40%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%);pointer-events:none;
  background:radial-gradient(circle,var(--tg) 0,transparent 55%)}
 .tlCard.eq{border-color:#4BE08A;box-shadow:0 0 0 1px rgba(75,224,138,.5),0 0 16px rgba(75,224,138,.35)}
 .tlCard.lk .tlCv{filter:saturate(.35) brightness(.7)}
 .tlNm{position:relative;font-size:12px;font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.3;text-align:center}
 .tlRr{position:relative;font-size:9.5px;font-weight:800;opacity:.9}
-.tlCv{position:relative;width:64px;height:64px;display:block;margin:5px 0 6px}
-.tlBt{position:relative;width:100%;font-size:10.5px;font-weight:900;border-radius:9px;padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:3px;background:rgba(0,0,0,.4)}
+.tlCv{position:relative;width:60px;height:60px;display:block;margin:4px 0 5px}
+.tlBt{position:relative;width:100%;font-size:10.5px;font-weight:900;border-radius:9px;padding:4px 2px;display:flex;align-items:center;justify-content:center;gap:3px;background:rgba(0,0,0,.4);margin-top:4px}
 .tlCard.eq .tlBt{background:#1E9E57;color:#fff}
 .tlBt.buy{background:linear-gradient(180deg,#FFE9A8,#D9A93C);color:#1A1206}
-.tlTag{position:absolute;top:0;left:0;font-size:8.5px;font-weight:900;background:#1E9E57;color:#fff;padding:2px 6px;border-bottom-right-radius:8px;z-index:1}`;
+.tlTag{position:absolute;top:0;left:0;font-size:8.5px;font-weight:900;background:#1E9E57;color:#fff;padding:2px 6px;border-bottom-right-radius:8px;z-index:1}
+.tlLvB{position:absolute;top:5px;right:5px;z-index:1;min-width:20px;height:20px;border-radius:10px;font-size:11px;font-weight:900;color:#1A1206;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 35% 30%,#FFF1C4,#E8B23A 65%);box-shadow:0 0 0 2px rgba(0,0,0,.45)}
+.tlSt{position:relative;width:100%;display:grid;grid-template-columns:auto 1fr;gap:2px 4px;align-items:center;font-size:8.5px;font-weight:800;margin-top:2px}
+.tlSeg{display:flex;gap:1.5px;direction:ltr}.tlSeg i{flex:1;height:5px;border-radius:1.5px;background:rgba(0,0,0,.45)}.tlSeg i.f{background:#4BE08A}.tlSeg i.u{background:#FFD36A}
+.tlCp{position:relative;width:100%;height:14px;border-radius:7px;background:rgba(0,0,0,.45);overflow:hidden;margin-top:5px}
+.tlCp i{display:block;height:100%;background:linear-gradient(90deg,#3DBE72,#7CF0A6)}.tlCp.rd i{background:linear-gradient(90deg,#E8B23A,#FFE9A8)}
+.tlCp span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:900;text-shadow:0 1px 2px #000}
+.tlLock{position:relative;font-size:10px;font-weight:800;color:#E6ECF8;text-align:center;line-height:1.35;margin-top:4px;display:flex;align-items:center;gap:4px;justify-content:center}
+.tlPwHd{display:flex;gap:10px;align-items:center;padding:10px;border-radius:14px;margin-bottom:10px;background:#111830;border:1.5px solid rgba(255,255,255,.08)}
+.tlPwHd canvas{width:84px;height:84px;flex:0 0 84px}
+.tlDet{display:flex;flex-direction:column;align-items:center;gap:6px}
+.tlDet canvas{width:120px;height:120px}
+.tlDet .tlSt{font-size:11px;gap:5px 8px;max-width:260px}.tlDet .tlSeg i{height:8px}
+.tlBtn{width:100%;border:0;border-radius:12px;padding:11px;font-weight:900;font-size:13.5px;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.tlBtn.up{background:linear-gradient(180deg,#7CF0A6,#1E9E57);color:#062012}.tlBtn.g{background:linear-gradient(180deg,#FFE9A8,#D9A93C);color:#1A1206}.tlBtn.n{background:#1B2442;color:var(--tx)}
+.tlBtn:disabled{opacity:.45}
+.csLv{position:absolute;right:-5px;bottom:-4px;z-index:3;min-width:20px;height:20px;padding:0 4px;border-radius:10px;font-size:10.5px;font-weight:900;color:#1A1206;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 35% 30%,#FFF1C4,#E8B23A 65%);box-shadow:0 0 0 2px #0B1020;font-style:normal;line-height:1}
+.hmAv>b.hmLv{width:auto;height:20px;display:flex;overflow:visible}
+.hmLv{position:absolute;right:-6px;top:-6px;z-index:3;min-width:20px;height:20px;padding:0 4px;border-radius:10px;font-size:10.5px;font-weight:900;color:#1A1206;display:flex;align-items:center;justify-content:center;
+ background:radial-gradient(circle at 35% 30%,#FFF1C4,#E8B23A 65%);box-shadow:0 0 0 2px #0B1020;font-style:normal;line-height:1}`;
+function tlCss(){if(!document.getElementById('toolsCss')){const st=document.createElement('style');st.id='toolsCss';st.textContent=TOOLS_CSS;document.head.appendChild(st)}}
+try{tlCss()}catch(e){}   // شارات المستوى تظهر في الرئيسيّة والمباراة قبل فتح الأدوات
+function tlSeg(v,base){return `<span class="tlSeg">${Array.from({length:10},(_,i)=>`<i class="${i<Math.min(v,base==null?v:base)?'f':i<v?'u':''}"></i>`).join('')}</span>`}
+function tlStats(st,base){const L=[T('القوّة'),T('التصويب'),T('الزمن')];return `<span class="tlSt">${st.map((v,i)=>`<b>${L[i]}</b>${tlSeg(v,base?base[i]:null)}`).join('')}</span>`}
 function toolsScr(){
- if(!document.getElementById('toolsCss')){const st=document.createElement('style');st.id='toolsCss';st.textContent=TOOLS_CSS;document.head.appendChild(st)}
- const all=Object.entries(TL_ITEMS).flatMap(([c,L])=>L.map(x=>c+':'+x[0])), own=all.filter(k=>{const [c,i]=k.split(':');return tlOwn(c,i)}).length;
+ tlCss();
+ if(!S.tlGift){S.tlGift=1;S.skCp=S.skCp||{};S.skCp.blue=(S.skCp.blue||0)+5;try{saveState()}catch(e){}}   // هديّة البداية: خمس نسخٍ من الأزرق لتجرّب الترقية
+ const un=tlPwUnl(), cp=S.tlCP||0, full=un>=TL_PWR.length, prog=full?TL_PWPTS:cp%TL_PWPTS;
  go(`<div class="scr on" id="toolsScr">${tb(T('الأدوات'))}
- <div class="tlHd"><div class="tlLv">${Math.floor(own/4)+1}</div><div style="flex:1;min-width:0">
-  <div class="tlT">${T('قوّة المجموعة')}</div><div class="tlS2">${T('كلّ أداةٍ تملكها ترفع مجموعتك')} · ${own}/${all.length}</div>
-  <div class="tlBar"><i style="width:${Math.round(own/all.length*100)}%"></i></div></div>
+ <div class="tlHd"><div class="tlLv">${un}</div><div style="flex:1;min-width:0">
+  <div class="tlT">${T('قدرة المجموعة')}</div><div class="tlS2">${full?T('فتحت كلّ القدرات!'):T('رقِّ الجيس لتفتح القدرة التالية')}</div>
+  <div class="tlBar"><i style="width:${Math.round(prog/TL_PWPTS*100)}%"></i><span>${prog}/${TL_PWPTS}</span></div></div>
   <div class="cur" style="display:flex;flex-direction:column;gap:4px"><span class="cch">${ico('coin',13)} ${S.coins}</span><span class="cch" style="color:var(--gem)">${ico('gem',13)} ${S.gems}</span></div></div>
  <div class="tlTabs">${TL_CAT.map(([c,n])=>`<button class="tlTab${c===_tlCat?' on':''}" onclick="tlTab('${c}',this)">${T(n)}</button>`).join('')}</div>
  <div id="tlBody">${tlBody()}</div>
@@ -25201,34 +25313,106 @@ function toolsScr(){
 }
 function tlBody(){
  const c=_tlCat, eq=tlEq(c);
- const note={sk:'جيسك يراه خصمك في كلّ مباراة كيرم.',cs:'طقم القطع يظهر على جهازك في كلّ لوح.',tr:'الأثر يظهر خلف ضاربك في ضرباتك أنت.',pk:'أثر الجيب يظهر لحظة دخول قطعةٍ من ضربتك.'}[c];
+ if(c==='pw'){
+  const un=tlPwUnl(), cp=S.tlCP||0, k=caSkMine();
+  return `<div class="tlPwHd"><canvas class="tlCv" data-c="pwhd" data-k="${eq}" width="168" height="168"></canvas><div style="flex:1;min-width:0">
+   <div class="tlNm" style="text-align:start">${tlNm('sk',k)} · ${T('المستوى')} ${skLv(k)}${eq!=='def'?' + '+tlNm('pw',eq):''}</div>
+   <div class="tlS2" style="font-size:10.5px;color:var(--tx2);margin:3px 0 5px">${T('اجمع الجيس ورقِّه لتفتح قدراتٍ تقوّي ضربتك.')}</div>
+   ${tlStats(caMyStats(),skStats(k,skLv(k),'def'))}</div></div>
+   <div class="tlGrid">${TL_PWR.map((P,i)=>{const o=i<un, e=o&&P.k===eq, nx=i===un;
+   const R=TL_RAR[i===0?'c':i<3?'r':i<6?'e':'l'];
+   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlPwTap('${P.k}',${i})">
+    ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}<span class="tlNm">${P.n}</span>
+    <canvas class="tlCv" data-c="pw" data-k="${P.k}" width="120" height="120"></canvas>
+    ${o?`<span class="tlSt">${P.st.map((v,j)=>`<b>${[T('القوّة'),T('التصويب'),T('الزمن')][j]}</b><span style="font-weight:900;color:${v?'#7CF0A6':'rgba(255,255,255,.5)'}">+${v}</span>`).join('')}</span>`
+     :nx?`<span class="tlLock">${T('النقاط اللازمة لفتح القفل')}</span><span class="tlCp rd"><i style="width:${Math.round(cp%TL_PWPTS/TL_PWPTS*100)}%"></i><span>${cp%TL_PWPTS}/${TL_PWPTS}</span></span>`
+     :`<span class="tlLock">${ico('lock',12)} ${T('افتح قفل القدرة السابقة')}</span>`}</button>`}).join('')}</div>
+   <div class="dkNote" style="margin-top:8px">${T('القدرة تُضاف فوق قدرات جيسك، ولها حلقةٌ حوله في المباراة.')}</div>`;
+ }
+ const note={sk:'الجيس يُرقّى بنسخٍ منه (من الصناديق والمباريات) وعملات. القوّة: شدّة الضربة · التصويب: طول خطّ التصويب · الزمن: مهلة الضربة.',cs:'طقم القطع يظهر على جهازك في كلّ لوح.',tr:'الأثر يظهر خلف ضاربك في ضرباتك أنت.',pk:'أثر الجيب يظهر لحظة دخول قطعةٍ من ضربتك.'}[c];
  return `<div class="tlGrid">${TL_ITEMS[c].map(([k,rr,pr,gm])=>{const R=TL_RAR[rr], o=tlOwn(c,k), e=o&&k===eq;
-  const bt=e?T('قيد الاستخدام'):o?T('استخدم'):`${ico(gm?'gem':'coin',12)} ${pr}`;
+  let foot='';
+  if(c==='sk'){const L=skLv(k), n=skCp(k);
+   foot=tlStats(skStats(k,o?L:1,'def'))+(o?(L>=5?`<span class="tlCp rd"><i style="width:100%"></i><span>${T('أقصى مستوى')}</span></span>`
+     :`<span class="tlCp${n>=TL_UPC[L-1]?' rd':''}"><i style="width:${Math.min(100,Math.round(n/TL_UPC[L-1]*100))}%"></i><span>${n}/${TL_UPC[L-1]}</span></span>`)
+    :`<span class="tlCp"><i style="width:${Math.min(100,Math.round(n/TL_UNL[rr]*100))}%"></i><span>${n}/${TL_UNL[rr]}</span></span>`);
+  }
+  const bt=e?T('قيد الاستخدام'):o?(c==='sk'&&skLv(k)<5&&skCp(k)>=TL_UPC[skLv(k)-1]?T('ترقية!'):T('استخدم')):`${ico(gm?'gem':'coin',12)} ${pr}`;
   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlTap('${c}','${k}')">
-   ${e?`<span class="tlTag">${T('مُجهَّز')}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
-   <canvas class="tlCv" data-c="${c}" data-k="${k}" width="128" height="128"></canvas><span class="tlBt${o?'':' buy'}">${bt}</span></button>`}).join('')}</div>
+   ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o?`<span class="tlLvB">${skLv(k)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
+   <canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${foot}<span class="tlBt${o?'':' buy'}">${bt}</span></button>`}).join('')}</div>
  <div class="dkNote" style="margin-top:8px">${T(note)}</div>`;
 }
-function tlTab(c,el){_tlCat=c;uiPick(el);const b=document.getElementById('tlBody');if(b){b.innerHTML=tlBody();try{enPass(b)}catch(e){}toolsDraw()}}
+function tlTab(c,el){_tlCat=c;if(el)uiPick(el);const b=document.getElementById('tlBody');if(b){b.innerHTML=tlBody();try{enPass(b)}catch(e){}toolsDraw()}}
+function tlPwTap(k,i){
+ if(i>=tlPwUnl()){toast(i===tlPwUnl()?T('رقِّ الجيس لتملأ قدرة المجموعة'):T('افتح قفل القدرة السابقة أوّلًا'));return}
+ if(tlPwMine()===k)return;
+ S.tlPw=k;try{saveState()}catch(e){}tlTab('pw');toast(T('جُهّزت القدرة')+': '+tlNm('pw',k));
+}
 function tlTap(c,k){
  const it=tlItem(c,k);if(!it)return;
- if(tlOwn(c,k)){if(tlEq(c)===k)return;tlSetEq(c,k);try{saveState()}catch(e){}tlTab(c,document.querySelector('.tlTab.on'));toast(T('جُهّز')+': '+tlNm(c,k));return}
- const pr=it[2], gm=!!it[3], have=gm?S.gems:S.coins;
+ if(c==='sk'){tlSkSheet(k);return}
+ if(tlOwn(c,k)){if(tlEq(c)===k)return;tlSetEq(c,k);try{saveState()}catch(e){}tlTab(c);toast(T('جُهّز')+': '+tlNm(c,k));return}
+ tlBuy(c,k);
+}
+function tlBuy(c,k){
+ const it=tlItem(c,k), pr=it[2], gm=!!it[3], have=gm?S.gems:S.coins;
  if(have<pr){toast(gm?T('جواهر غير كافية'):T('عملات غير كافية'));return}
  confirmSheet(T('شراء أداة'),`${tlNm(c,k)} — ${T(TL_RAR[it[1]].n)}<br>${T('ستدفع')} <b style="color:${gm?'var(--gem)':'var(--gold)'}">${pr} ${gm?T('جوهرة'):T('عملة')}</b>`,T('اشترِ وجهّز'),()=>{
   if((gm?S.gems:S.coins)<pr){toast(gm?T('جواهر غير كافية'):T('عملات غير كافية'));return}
   if(gm)S.gems-=pr;else S.coins-=pr;
   S.tlOwn=S.tlOwn||[];if(!S.tlOwn.includes(c+':'+k))S.tlOwn.push(c+':'+k);
+  if(c==='sk')tlAddCP(TL_CPP[it[1]]);
   tlSetEq(c,k);try{saveState()}catch(e){}
   try{buyFx(ico('gift',15),T('صارت لك')+': '+tlNm(c,k))}catch(e){toast(T('صارت لك')+': '+tlNm(c,k))}
   refresh(toolsScr);
  });
 }
-function toolsDraw(){
- document.querySelectorAll('.tlCv').forEach(cv=>{try{
+/** بطاقة الجيس: قدراته الآن وبعد الترقية، والنسخ والعملات، وزرّا الترقية والاستخدام */
+function tlSkSheet(k){
+ tlCss();
+ const it=tlItem('sk',k), R=TL_RAR[it[1]], o=tlOwn('sk',k), L=skLv(k), n=skCp(k), mx=L>=5;
+ const needC=mx?0:TL_UPC[L-1], cost=mx?0:Math.round(TL_UPG[L-1]*R.m), can=o&&!mx&&n>=needC&&S.coins>=cost;
+ const cur=skStats(k,L,'def'), nxt=mx?cur:skStats(k,L+1,'def');
+ const ov=document.createElement('div');ov.className='qvov';
+ ov.innerHTML=`<div class="qvbox" style="max-width:320px"><div class="tlDet">
+  <div class="qvt" style="margin:0">${tlNm('sk',k)} <span style="font-size:11px;color:${R.a}">${T(R.n)}</span></div>
+  <canvas class="tlCv" data-c="sk" data-k="${k}" width="200" height="200"></canvas>
+  <div style="font-weight:900;color:#FFE9A8">${o?T('المستوى')+' '+L+(mx?' ('+T('الأقصى')+')':' → '+(L+1)):T('مقفل')}</div>
+  ${tlStats(nxt,cur)}
+  <div style="font-size:10.5px;color:var(--tx2)">${o?(mx?T('بلغ أقصى مستوى'):T('الأصفر: ما تضيفه الترقية')):T('اعثر على نسخه في الصناديق والمباريات')}</div>
+  <span class="tlCp${o&&n>=needC?' rd':''}" style="max-width:240px;height:18px"><i style="width:${Math.min(100,Math.round(n/(o?needC||1:TL_UNL[it[1]])*100))}%"></i><span>${o?(mx?T('أقصى مستوى'):n+'/'+needC+' '+T('نسخة')):n+'/'+TL_UNL[it[1]]+' '+T('نسخة')}</span></span>
+  ${o&&!mx?`<button class="tlBtn up" id="tlUp" ${can?'':'disabled'}>${T('ترقية')} · ${ico('coin',14)} ${cost}</button>`:''}
+  ${o?(caSkMine()===k?`<button class="tlBtn n" disabled>${T('قيد الاستخدام')}</button>`:`<button class="tlBtn g" id="tlUse">${T('استخدم')}</button>`)
+    :`<button class="tlBtn g" id="tlBuyB">${ico(it[3]?'gem':'coin',14)} ${it[2]} — ${T('اشترِ الآن')}</button>`}
+  <button class="tlBtn n" id="tlX">${T('إغلاق')}</button></div></div>`;
+ document.body.appendChild(ov);try{enPass(ov)}catch(e){}
+ toolsDraw(ov);
+ const close=()=>ov.remove();
+ ov.onclick=e=>{if(e.target===ov)close()};
+ ov.querySelector('#tlX').onclick=close;
+ const up=ov.querySelector('#tlUp');if(up)up.onclick=()=>{close();tlUpgrade(k)};
+ const us=ov.querySelector('#tlUse');if(us)us.onclick=()=>{close();S.caStriker=k;try{saveState()}catch(e){}tlTab('sk');toast(T('جُهّز')+': '+tlNm('sk',k))};
+ const bb=ov.querySelector('#tlBuyB');if(bb)bb.onclick=()=>{close();tlBuy('sk',k)};
+}
+function tlUpgrade(k){
+ const it=tlItem('sk',k);if(!it||!tlOwn('sk',k))return;
+ const L=skLv(k);if(L>=5)return;
+ const need=TL_UPC[L-1], cost=Math.round(TL_UPG[L-1]*TL_RAR[it[1]].m);
+ if(skCp(k)<need){toast(T('نسخٌ غير كافية'));return}
+ if(S.coins<cost){toast(T('عملات غير كافية'));return}
+ S.coins-=cost;S.skCp[k]-=need;S.skLv=S.skLv||{};S.skLv[k]=L+1;tlAddCP(TL_CPP[it[1]]);
+ try{saveState()}catch(e){}
+ try{buyFx(ico('up',15),tlNm('sk',k)+' — '+T('المستوى')+' '+(L+1))}catch(e){toast(T('المستوى')+' '+(L+1))}
+ if(window.FX)try{FX.win()}catch(e){}
+ refresh(toolsScr);
+}
+function toolsDraw(root){
+ (root||document).querySelectorAll('.tlCv').forEach(cv=>{try{
   const c=cv.dataset.c,k=cv.dataset.k,x=cv.getContext('2d'),W=cv.width;x.clearRect(0,0,W,W);
   const put=(sp,cx0,cy0,sz)=>{const m=sp.width*.13;x.drawImage(sp,m,m,sp.width-2*m,sp.height-2*m,cx0-sz/2,cy0-sz/2,sz,sz)};
   if(c==='sk')put(caDisc('s:'+k,40),W/2,W/2,W*.96);
+  else if(c==='pw'||c==='pwhd'){put(caDisc('s:'+caSkMine(),40),W/2,W/2,W*.6);caPwRing(x,W/2,W/2,W*.25,k,1200)}
   else if(c==='cs'){put(caDisc('b',24,k),W*.3,W*.62,W*.5);put(caDisc('w',24,k),W*.7,W*.62,W*.5);put(caDisc('q',24,k),W*.5,W*.36,W*.5)}
   else if(c==='tr'){const C=TL_TR[k];if(C){x.globalCompositeOperation='lighter';for(let i=0;i<18;i++){const f=(i+1)/18,px=W*.12+W*.52*f,py=W*.82-W*.5*f+Math.sin(f*3)*W*.05;x.globalAlpha=Math.min(1,f*f*.95+.08);x.fillStyle=f>.6?C[0]:C[1];x.beginPath();x.arc(px,py,W*(.05+.12*f),0,7);x.fill()}x.globalCompositeOperation='source-over';x.globalAlpha=1}
    put(caDisc('s:'+caSkMine(),40),W*.7,W*.3,W*.5)}
@@ -25374,7 +25558,9 @@ function rmRoster(){
  return (c.peers()||[]).filter(p=>p.presence&&p.presence.pc===RM.code&&p.kind==='viewer')
   .map(p=>{const o={peer:p.peer,id:p.by||null,name:String(p.presence.nm||'لاعب').slice(0,18),host:!!p.presence.hs,
     vote:p.presence.vt||null,me:!!(p.isMe&&p.sameTab),av:p.presence.av&&typeof p.presence.av==='object'?p.presence.av:null,
-    sk:typeof p.presence.sk==='string'&&CA_STRIKERS[p.presence.sk]?p.presence.sk:null};
+    sk:typeof p.presence.sk==='string'&&CA_STRIKERS[p.presence.sk]?p.presence.sk:null,
+    ss:Array.isArray(p.presence.ss)&&p.presence.ss.length===3?p.presence.ss.map(v=>Math.max(1,Math.min(10,Math.round(+v)||5))):null,
+    lv:Math.max(1,Math.min(999,Math.round(+p.presence.lv)||1))};
    if(!o.me)metSeen(o.id,o.name,o.av);   // قابلته في غرفة: يدخل «لاعبون قابلتهم» فتضيفه صديقًا بلمسة
    return o})
   .sort((a,b)=>(b.host?1:0)-(a.host?1:0)||a.peer.localeCompare(b.peer));
@@ -25558,6 +25744,7 @@ function rmSettle(d){
  try{
   const gid=gameIdOfRoom(RM.game);if(!gid)return null;
   const res=rmResultFor(gid,d);if(!res)return null;
+  if(gid==='carrom')try{caMatchReward(!!res.won)}catch(e){}   // ٦٫٨٩: خبرة ونسخ جيس وصندوق للفائز
   const opp=(RM.players||[]).filter(x=>x&&x.peer!==RM.me).map(()=>({mmr:1000}));
   if(!RM.mid)RM.mid=rmNewMid();
   const out=resolveMatch({gameId:gid,mode:rmMode(),matchId:RM.mid,
@@ -25728,7 +25915,7 @@ function mmTick(){
  const code=(grp[0].peer.replace(/[^A-Za-z0-9]/g,'').slice(0,4).toUpperCase()+'XXXX').slice(0,4);
  RM.mm=0;clearInterval(_mmTm);
  RM.code=code;RM.host=!!(grp[0].isMe&&grp[0].sameTab);RM.phase='lobby';
- rmKeys().then(k=>{try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby',av:S.av||null,sk:caSkMine(),pk:k?k.pub:null})}catch(e){}});
+ rmKeys().then(k=>{try{c.presence({pc:code,nm:RM.name,hs:RM.host?1:null,lf:null,st:'lobby',av:S.av||null,sk:caSkMine(),ss:caMyStats(),lv:lvl(S.xp||0),pk:k?k.pub:null})}catch(e){}});
  rmBind();
  toast('وُجد لاعبون!');if(window.FX)FX.correct(3);
  setTimeout(roomDraw,120);
@@ -25802,7 +25989,7 @@ async function rmCreate(){
  RM.code=rmCode();RM.host=1;RM.phase='lobby';RM.players=[];RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
  const kC=await rmKeys();   // المفتاح العامّ يُنشر مع الحضور — به وحده تُعمّى الأدوار إليّ
- try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),pk:kC?kC.pub:null})}catch(e){}
+ try{await c.presence({pc:RM.code,nm:RM.name,hs:1,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),ss:caMyStats(),lv:lvl(S.xp||0),pk:kC?kC.pub:null})}catch(e){}
  rmBind();roomDraw();
 }
 async function rmJoin(){
@@ -25815,7 +26002,7 @@ async function rmJoin(){
  RM.code=code;RM.host=0;RM.phase='lobby';RM.acts={};
  const me=rmMine();RM.me=me?me.peer:null;
  const kJ=await rmKeys();
- try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),pk:kJ?kJ.pub:null})}catch(e){}
+ try{await c.presence({pc:code,nm:RM.name,hs:null,st:'lobby',vt:null,av:S.av||null,sk:caSkMine(),ss:caMyStats(),lv:lvl(S.xp||0),pk:kJ?kJ.pub:null})}catch(e){}
  rmBind();roomDraw();
  setTimeout(()=>{if(RM.code&&rmRoster().length<2)toast('بانتظار بقية اللاعبين… تأكد من الكود')},2500);
 }
@@ -25952,7 +26139,7 @@ function rmStart(){
  const lim=RM_MIN[RM.game]||[2,12];
  if(R.length<lim[0]){toast(`تحتاج ${lim[0]} لاعبين على الأقل`);return}
  if(R.length>lim[1]){toast(`الحد الأقصى ${lim[1]} لاعبين لهذه اللعبة`);return}
- const ps=R.map(p=>({peer:p.peer,name:p.name,id:p.id||null,av:p.av||null,sk:p.sk||null}));   // ٦٫٥٨: ومظهر الضارب   // 5.82: الصورة والمعرّف يرافقان اللاعب داخل اللعبة
+ const ps=R.map(p=>({peer:p.peer,name:p.name,id:p.id||null,av:p.av||null,sk:p.sk||null,ss:p.ss||null,lv:p.lv||1}));   // ٦٫٨٩: وقدرات جيسه ومستواه   // ٦٫٥٨: ومظهر الضارب   // 5.82: الصورة والمعرّف يرافقان اللاعب داخل اللعبة
  // 5.90: لعبة مجهولة لا تسقط في فرعٍ صامت — تُرفض بوضوح
  if(!/^(uno|carrom)$/.test(RM.game)){
   toast('هذه اللعبة لا تُلعب في غرفة');
@@ -27681,7 +27868,7 @@ function caTimerArm(peer){
  clearTimeout(_ca.tmr);
  if(!RM.host||!RM.C||RM.C.over||isBot(peer))return;
  const stamp=_ca.tmrS=(_ca.tmrS||0)+1;
- _ca.tmr=setTimeout(()=>caTimeout(peer,stamp),CA_SHOT_SEC*1000+1500);   // مهلةٌ لما في الطريق — والعميل يُقفل قبلها بثانية (المراجعة)
+ _ca.tmr=setTimeout(()=>caTimeout(peer,stamp),caShotSecOf(peer)*1000+1500);   // ٦٫٨٩: «الزمن» في جيس صاحب الدور   // مهلةٌ لما في الطريق — والعميل يُقفل قبلها بثانية (المراجعة)
 }
 function caTimeout(peer,stamp){
  const C=RM.C;
@@ -28403,6 +28590,7 @@ function caRender(rest){
   if(p.t==='s'&&p.sk0&&p.mix<1&&'s:'+p.sk0!==stT){const s0=caDisc('s:'+p.sk0,r);cx.globalAlpha=1-p.mix;cx.drawImage(s0,X-s0._o,Y-s0._o,s0._s,s0._s);cx.globalAlpha=p.mix}
   if(p.t==='s')caTrail(cx,X,Y,r);
   cx.drawImage(sp,X-o,Y-o,sp._s,sp._s);cx.globalAlpha=1;
+  if(p.t==='s'&&RM.ca&&(_ca.sim?_ca.sim.by:RM.ca.turn)===RM.me)caPwRing(cx,X,Y,r,tlPwMine());   // ٦٫٨٩: حلقة قدرتي حول ضاربي
   if(p.t==='s'&&!_ca.sim&&!sBad&&RM.ca&&RM.ca.turn===RM.me&&!(_ca.sRet&&_ca.sRet.hand)){cx.beginPath();cx.arc(X,Y,r+1.1*sc,0,7);cx.strokeStyle='rgba(255,168,36,.95)';cx.lineWidth=2.2*sc;cx.stroke()}
   if(p.t==='s'&&sBad){cx.globalAlpha=1;cx.beginPath();cx.arc(X,Y,r+1.5*sc,0,7);cx.strokeStyle='rgba(226,75,74,.95)';cx.lineWidth=2.5*sc;cx.stroke()}   // بلا أثر حركة: الاستيفاء يكفي، والصورة المزدوجة كانت تُدوّخ
  }
@@ -28480,7 +28668,7 @@ function caRender(rest){
   cx.fillStyle=can?'rgba(226,75,74,.14)':'rgba(40,22,8,'+(0.06+0.05*pw).toFixed(3)+')';cx.fill();
   cx.setLineDash([2*sc,4*sc]);cx.strokeStyle=can?'rgba(226,75,74,.9)':'rgba(40,24,10,.55)';cx.lineWidth=1.3*sc;cx.stroke();cx.setLineDash([]);
   if(can){cx.fillStyle='#FFB4B3';cx.font='900 '+Math.round(12*sc)+'px Cairo,system-ui';cx.textAlign='center';cx.textBaseline='middle';cx.fillText('أفلت للإلغاء',PX(d.sx),PY(d.sy)-CA_GAUGE*sc-9*sc)}
-  if(raw>=10&&!can)caAimDraw(cx,PX,PY,sc,d.sx,d.sy,-d.dx/raw,-d.dy/raw,pw,{pull:Math.min(120,raw),back});
+  if(raw>=10&&!can)caAimDraw(cx,PX,PY,sc,d.sx,d.sy,-d.dx/raw,-d.dy/raw,pw,{pull:Math.min(120,raw),back,dots:caAimDots()});   // ٦٫٨٩: «التصويب» يطيل الخطّ
   // خطّ التصويب المنقّط إلى أوّل تماسّ — لا يُرسم إلا إن فعّله اللاعب من إعداد التدريب
   /* ٦٫٤٩: خطّ التوقّع مطفأٌ ما لم يُفعَّل صراحةً — «السهم الثاني المساعد ما أريده» */
   const g=null;   // ٦٫٦٤: خطّ التوقّع حُذف مع إعداده («احذف سهم المساعد»)
@@ -28557,7 +28745,7 @@ function caAimDraw(cx,PX,PY,sc,x,y,ux,uy,pw,o){
  cx.lineJoin='round';cx.strokeStyle='rgba(110,34,8,.55)';cx.lineWidth=.8*sc;cx.stroke();
  /* نقاط الاتّجاه أمام السهم (٦٫٥٨، كما في الفيديو): بيضاء تصغر وتخفت، ولا تتجاوز اللوح.
     ٦٫٦٧ — أُعيدت كما كانت: «السهم لمّا أصوّب نفس الفيديو… لا ترجع للخلف» — حذفُها في ٦٫٦٤ كان خطأً */
- for(let k=0;k<12;k++){
+ for(let k=0;k<(o.dots||12);k++){
   const t=r1+6+k*8.5, px=x+ux*t, py=y+uy*t;if(px<CA_DLO||px>CA_R-CA_DLO||py<CA_DLO||py>CA_R-CA_DLO)break;
   cx.globalAlpha=.95-.05*k;cx.beginPath();cx.arc(PX(px),PY(py),(2.5-.14*k)*sc,0,7);cx.fillStyle='#FFFFFF';cx.fill();
  }
@@ -28759,7 +28947,7 @@ function caInit(){
   const d=_ca.drag;if(!d)return;_ca.drag=null;
   if(!RM.ca||RM.ca.turn!==RM.me||_ca.sim){caAimTx(1);caRender();return}   // ٦٫٧٢: انتهى وقتي أثناء السحب
   /* المراجعة: يُقفل الإفلات قبل مهلة المضيف بثانية — فلا تصله ضربةٌ بعد أن نقل الدور */
-  if(!RM.solo&&_ca.tt&&performance.now()-_ca.tt.t0>=(CA_SHOT_SEC-1)*1000){caAimTx(1);caRender();toast('انتهى الوقت');return}
+  if(!RM.solo&&_ca.tt&&performance.now()-_ca.tt.t0>=(caShotSecOf(RM.me)-1)*1000){caAimTx(1);caRender();toast('انتهى الوقت');return}
   caAimTx(1);   // آخر حالٍ للخصم: سهمي يختفي عنده إن أُلغيت الضربة (المراجعة)
   const pw=Math.hypot(d.dx,d.dy);
   if(d.cancel||pw<10){caRender();if(d.cancel)toast('أُلغيت الضربة');return}
@@ -28770,7 +28958,7 @@ function caInit(){
   const lp=caLocalPcs(ms);
   // يُرفض فقط إن وُجد موضعٌ حرّ؛ فإن حُجز الخطّ كلّه (نادر) تُضرب من حيث هي بدل أن يُقفل الدور
   if(caBlockedAt(lp,d.sx)&&!caBlockedAt(lp,caFreeX(lp,d.sx))){caRender();toast('الضارب فوق قطعة — حرّكه أوّلًا');return}
-  const v=CA_VMAX*caPower(pw);
+  const v=CA_VMAX*caPower(pw)*caForceMul();   // ٦٫٨٩: «القوّة» في جيسك
   // الضربة تُحسب في إطاري (أنا أسفل) ثمّ تُحوَّل إلى إحداثيّات اللوح — فتتّفق الأجهزة كلّها
   const bp=caL2B(ms,d.sx,d.sy), bv=caL2Bv(ms,-d.dx/pw*v,-d.dy/pw*v);
   const shot={x:bp[0],y:bp[1],vx:bv[0],vy:bv[1]};
@@ -28874,8 +29062,8 @@ function rmCarrom(R){
   const avOf=p=>p.peer===RM.me?avatarArt(46):(p.av?avatarSVG(p.av,46):personArt(p.name,46));
   /* ٦٫٧٥ — «على صورة البروفايل يكون عدّاد الوقت دائريًّا»: حلقةٌ تنقص حول صورة صاحب الدور، وتحمرّ في آخرها */
   const tmOn=RM.phase!=='over'&&!_ca.sim&&_ca.tt&&_ca.tt.peer===C.turn&&!isBot(C.turn);
-  const tmSt=tmOn?` style="--tpd:${CA_SHOT_SEC}s;--tpo:-${Math.max(0,(performance.now()-_ca.tt.t0)/1000).toFixed(2)}s"`:'';
-  const avs=ps.slice(0,2).map(p=>`<span class="csAv${tmOn&&p.peer===C.turn?' tmr':''}"${tmOn&&p.peer===C.turn?tmSt:''} data-pr="${esc(p.peer)}" onclick="caProf(this.dataset.pr)">${avOf(p)}</span>`).join('');
+  const tmSt=tmOn?` style="--tpd:${caShotSecOf(C.turn)}s;--tpo:-${Math.max(0,(performance.now()-_ca.tt.t0)/1000).toFixed(2)}s"`:'';
+  const avs=ps.slice(0,2).map(p=>`<span class="csAvW"><span class="csAv${tmOn&&p.peer===C.turn?' tmr':''}"${tmOn&&p.peer===C.turn?tmSt:''} data-pr="${esc(p.peer)}" onclick="caProf(this.dataset.pr)">${avOf(p)}</span><i class="csLv">${plLvOf(p)}</i></span>`).join('');   // ٦٫٨٩: مستوى اللاعب على صورته
   const who=duo?(me2?'أنت':esc(ps[0]?ps[0].name:'الخصم')):(me2?'فريقك':'الفريق الخصم');
   const sub=RM.phase==='over'?'انتهت المباراة'
    :me2?(mine?'<b>دورك</b> <span class="pH">— اسحب وأفلت</span>':(on?'<b>دور '+esc(nm(C.turn))+'</b> — يصوّب…':'انتظر دورك'))
