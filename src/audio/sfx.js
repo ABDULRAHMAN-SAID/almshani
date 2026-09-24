@@ -215,9 +215,20 @@ var SFX=(function(){
   /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
   tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},
   tickHot:function(t){noise(t,0.022,0.115,7000);tone(2050,t,0.034,'square',0.062,1500)},
-  timeUp:function(t){tone(300,t,0.34,'triangle',0.16,120);noise(t,0.09,0.10,1200)}
+  timeUp:function(t){tone(300,t,0.34,'triangle',0.16,120);noise(t,0.09,0.10,1200)},
+  /* ٦٫٩٣ — «حتّى الصوت لمّا تحصل على صندوق ما يحسّسك إنّها لعبة»: أصوات لعبةٍ فاخرة لا صفّارات —
+     صندوقٌ يرتطم وينفتح ويلمع، مكافأةٌ تُكشف بنغمةٍ زجاجيّة ترتفع مع الندرة، عدّادٌ يطقّ، إشعارٌ يرنّ رنّتين،
+     كأسٌ تُحتسب، وساحةٌ تُفتح بجملةٍ صاعدة. كلّها من tone/noise فلا ملفّات تُنتظر */
+  chest: function(t){noise(t,0.16,0.05,900);tone(140,t,0.14,'sine',0.12,90);tone(1900,t+0.16,0.03,'square',0.05);tone(2400,t+0.20,0.03,'square',0.05);
+   [880,1175,1568,2093].forEach(function(f,i){tone(f,t+0.28+i*0.06,0.22,'triangle',0.07)})},
+  reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[1047,1319,1568,2093][Math.min(3,r)];noise(t,0.05,0.012,6000);tone(f,t,0.18,'triangle',0.09);tone(f*2,t+0.02,0.25,'sine',0.045)},
+  rare:  function(t){[523,659,784,1047,1319].forEach(function(f,i){tone(f,t+i*0.07,0.5,'triangle',0.09)});tone(2093,t+0.35,0.6,'sine',0.05)},
+  tally: function(t){tone(2400,t,0.02,'square',0.03,2000)},
+  notif: function(t){tone(1568,t,0.09,'sine',0.08);tone(2093,t+0.09,0.16,'sine',0.07)},
+  trophy:function(t){tone(1319,t,0.08,'triangle',0.08);tone(1760,t+0.08,0.2,'triangle',0.08)},
+  arena: function(t){[392,523,659,784].forEach(function(f,i){tone(f,t+i*0.12,0.42,'triangle',0.11)});[784,1047,1319].forEach(function(f,i){tone(f,t+0.5+i*0.1,0.5,'sine',0.06)})}
  };
- var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],hit:[7]};
+ var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],hit:[7],chest:[18,30,18],reveal:[10],rare:[20,40,60],arena:[30,40,30,40,80],notif:[12],trophy:[15]};
 
  function play(k,opt){
   var f=LIB[k];if(!f)return false;

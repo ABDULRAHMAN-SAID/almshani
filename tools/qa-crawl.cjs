@@ -34,9 +34,15 @@ const CAPTURES=require('./qa-states.cjs');
   window.qaWait=ms=>new Promise(r=>setTimeout(r,ms));
   window.qaImg=col=>{const c=document.createElement('canvas');c.width=300;c.height=200;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,300,200);x.strokeStyle=col;x.lineWidth=8;x.beginPath();x.arc(150,100,60,0,6.3);x.stroke();return c.toDataURL('image/png')};
   window.qaClan=()=>{if(!S.clan||!S.clan.c){CLAN.act(S.uid,'create',{n:'فرسان المعرفة',desc:'نادٍ تنافسي للاختبار',i:'book',col:'#5AC8F5',jt:'req'});CLAN.seedBots(S.clan.c.id,12)}};
+  window.__qaBase=new Set([...document.body.children]);
   window.qaReset=()=>{try{if(RM&&RM.code)rmLeave(1)}catch(e){}try{if(M){clearInterval(M.tm);M=null}}catch(e){}try{if(G){clearInterval(G.tm);G=null}}catch(e){}
    try{if(PT&&PT.tm)clearInterval(PT.tm)}catch(e){}try{clearInterval(_introTm);_intro=null}catch(e){}
-   document.querySelectorAll('.qvov').forEach(x=>x.remove());try{hideArena()}catch(e){}cur='play';nav();Router.reset('playScr')};
+   document.querySelectorAll('.qvov,.vchOv,.ebar').forEach(x=>x.remove());
+   /* ٦٫٩٢: كلّ طبقةٍ ثابتة ليست من هيكل الصفحة (ورقة لاعب، لوحة مكافأة…) تُزال — حالةٌ سابقة لا تلوّث لقطة التالية */
+   try{if(typeof closeSheet==='function')closeSheet()}catch(e){}   // ورقة بطاقة اللاعب عنصرٌ أصليّ يبقى مفتوحًا وإلّا
+   if(!window.__qaBase)window.__qaBase=new Set([...document.body.children]);
+   [...document.body.children].forEach(el=>{try{if(!window.__qaBase.has(el)&&!/^(SCRIPT|STYLE|LINK)$/.test(el.tagName))el.remove()}catch(e){}});
+   try{hideArena()}catch(e){}cur='play';nav();Router.reset('playScr')};
   window.qaMeasure=()=>{
    const app=document.getElementById('app');const vw=document.documentElement.clientWidth;
    const vis=el=>{const r=el.getBoundingClientRect();const cs=getComputedStyle(el);return r.width>0&&r.height>0&&cs.visibility!=='hidden'&&cs.display!=='none'};

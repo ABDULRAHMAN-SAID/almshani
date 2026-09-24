@@ -25,7 +25,7 @@ const SCREENS=[
  ['moreScr','المزيد'],['seasonScr','الموسم'],['evoShopScr','متجر التطوّر'],
  ['wildScr','الجوكر'],['emoteScr','التعبيرات'],['colScr','المجموعة'],
  ['setScr','الإعدادات'],['avScr','الأفاتار'],['achScr','الإنجازات'],
- ['misScr','المهام'],['evtScr','التحديات'],['lbScr','الصدارة'],
+ ['misScr','المهام'],['evtScr','التحديات'],['lbScr','الصدارة'],['arenaScr','الساحات'],
  ['quickScr','السريع'],['clubHome','النادي'],['clSearchScr','بحث الأندية'],
  ['clMembersScr','الأعضاء'],['clChatScr','الدردشة'],['clEventsScr','منافسات النادي'],
  ['clDonorsScr','الداعمون'],['clMoreScr','مزيد النادي'],['clCreateScr','إنشاء نادٍ']
