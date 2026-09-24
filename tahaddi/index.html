@@ -24959,6 +24959,42 @@ function playScr(){
  setTimeout(()=>{try{lvUpCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد
 }
 
+/* ═══ ٦٫٩٤ — إتقان الجيس (Card Mastery في كلاش رويال) ═══
+   لكلّ جيسٍ ستّ مهامّ في ثلاث درجات: قطعٌ تُدخلها به، ملكاتٌ، وانتصارات. كلّ مهمّةٍ تُنجَز تُطالَب بجائزتها من ورقة
+   الجيس (عملات، نسخٌ منه، جواهر). العدّ في skMastAdd وحدها: من ضربتك أنت بالجيس المجهَّز، ومن نتيجة المباراة. */
+const SK_MAST=[
+ {i:0,tier:1,k:'pot',need:25,n:'أدخل 25 قطعة',rw:{t:'coins',v:150}},
+ {i:1,tier:1,k:'win',need:5,n:'افز بـ 5 مباريات',rw:{t:'skc',v:3}},
+ {i:2,tier:2,k:'q',need:5,n:'أدخل الملكة 5 مرّات',rw:{t:'gems',v:10}},
+ {i:3,tier:2,k:'pot',need:100,n:'أدخل 100 قطعة',rw:{t:'coins',v:400}},
+ {i:4,tier:3,k:'win',need:20,n:'افز بـ 20 مباراة',rw:{t:'skc',v:6}},
+ {i:5,tier:3,k:'pot',need:300,n:'أدخل 300 قطعة',rw:{t:'gems',v:30}}];
+function SKM(k){if(!S.skM||typeof S.skM!=='object')S.skM={};const m=S.skM[k]||(S.skM[k]={pot:0,q:0,win:0,m:0,cl:[]});if(!Array.isArray(m.cl))m.cl=[];return m}
+function skMastAdd(k,d){if(!k||!d)return;const m=SKM(k);for(const f of ['pot','q','win','m'])if(d[f])m[f]=(m[f]|0)+(d[f]|0);try{saveState()}catch(e){}}
+function skMastState(k,t){const m=SKM(k);return m.cl.indexOf(t.i)>=0?'done':(m[t.k]|0)>=t.need?'ready':'lock'}
+function skMastReady(k){return SK_MAST.filter(t=>skMastState(k,t)==='ready').length}
+function skMastReadyAny(){let n=0;try{for(const it of TL_ITEMS.sk)if(tlOwn('sk',it[0]))n+=skMastReady(it[0])}catch(e){}return n}
+function skMastRwLbl(t){return t.rw.t==='coins'?t.rw.v+' عملة':t.rw.t==='gems'?t.rw.v+' جوهرة':t.rw.v+' نسخ'}
+function skMastClaim(k,i){
+ const t=SK_MAST[i];if(!t||skMastState(k,t)!=='ready')return;
+ const m=SKM(k);m.cl.push(i);
+ const rw=t.rw.t==='skc'?{t:'skc',k,v:t.rw.v}:t.rw;
+ grantRewards([rw]);try{saveState()}catch(e){}
+ try{if(window.SFX)SFX.fx('notif')}catch(e){}
+ try{buyFx(rw.t==='skc'?skImg(k,42):ico(rw.t,42),'إتقان: '+skMastRwLbl(t),tlNm('sk',k))}catch(e){toast('إتقان: '+skMastRwLbl(t))}
+ const ov=document.querySelector('.qvov');if(ov)ov.remove();tlSkSheet(k);
+}
+/** لوحة الإتقان داخل ورقة الجيس: المهمّة التالية في كلّ درجة مع شريطها، والجاهزة بزرّ استلام */
+function skMastHTML(k){
+ const m=SKM(k),rows=[];
+ for(const tier of [1,2,3]){const t=SK_MAST.find(x=>x.tier===tier&&skMastState(k,x)!=='done');
+  if(!t){rows.push(`<div class="skMr done"><span class="skMt">الإتقان ${['','I','II','III'][tier]}</span><span class="skMn">${ico('check',12,'#5DE39A')} مكتمل</span></div>`);continue}
+  const v=Math.min(t.need,m[t.k]|0),st=skMastState(k,t);
+  rows.push(`<div class="skMr${st==='ready'?' ready':''}"><span class="skMt">الإتقان ${['','I','II','III'][tier]}</span>
+   <span class="skMn">${t.n}<i class="skMb"><b style="width:${Math.round(v/t.need*100)}%"></b></i><s>${numPair(v,t.need)} · ${skMastRwLbl(t)}</s></span>
+   ${st==='ready'?`<button class="skMc" onclick="skMastClaim('${k}',${t.i})">استلم</button>`:''}</div>`)}
+ return `<div class="skM">${rows.join('')}</div>`;
+}
 /* ═══ ٦٫٩٤ — الأدوات السحريّة (Magic Items في كلاش رويال) ═══
    جوكر الجيس: نسخٌ تُصرف على أيّ جيسٍ تملكه من ندرته (Wild Cards). كتاب الجيس: يكمل نسخ الترقية التالية لجيسٍ تختاره
    (Book of Cards). تأتي من صناديق النخبة والأسطورة وطريق الكؤوس والمتجر، وتُستعمل من ورقة الجيس. */
@@ -25787,6 +25823,7 @@ function skImg(k,sz){
 function caMatchReward(won){
  if(!RM.mid||S.caRw===RM.mid)return;S.caRw=RM.mid;
  const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0);
+ try{skMastAdd(caSkMine(),{m:1,win:won?1:0})}catch(e){}   // ٦٫٩٤: إتقان الجيس المجهَّز
  S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(won&&typeof dropBattleChest==='function')dropBattleChest();
  try{saveState()}catch(e){}
  const lv1=lvl(S.xp);
@@ -26033,6 +26070,17 @@ body .finCh{margin:-4px auto 12px;max-width:340px;padding:8px 14px;border-radius
 body .finCh b{font-family:var(--fd);font-size:15px;color:#FFF1C4}body .finCh u{text-decoration:none;color:#FFE9A8}
 body .finCh.done{border-color:#FFE9A8;box-shadow:0 0 14px rgba(232,178,58,.35)}body .finCh.dim{opacity:.7;cursor:default;color:#9AA6C2}
 body .finCh .rico{width:16px!important;height:16px!important}
+body .skM{width:100%;max-width:260px;display:flex;flex-direction:column;gap:6px;margin:2px 0 4px}
+body .skMr{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:12px;background:rgba(6,10,20,.55);border:1px solid var(--lxHair2);text-align:start}
+body .skMr.ready{border-color:#FFE9A8;box-shadow:0 0 0 1px rgba(255,233,168,.35),0 0 12px rgba(232,178,58,.3)}
+body .skMr.done{opacity:.6}
+body .skMt{flex-shrink:0;font-family:var(--fd);font-size:11px;font-weight:700;color:#D9B76E;min-width:58px}
+body .skMn{flex:1;min-width:0;font-size:11px;font-weight:800;color:#F1F4FA;display:flex;flex-direction:column;gap:3px}
+body .skMb{display:block;height:5px;border-radius:4px;background:#070B16;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+body .skMb b{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#B8871E,#FFE9A8)}
+body .skMn s{text-decoration:none;font-size:9.5px;font-weight:800;color:#9AA6C2}
+body .skMc{flex-shrink:0;border:0;border-radius:9px;padding:6px 10px;font-family:var(--fd);font-weight:700;font-size:12px;color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 2px 0 #6E4E12;cursor:pointer}
+body .tlMst{position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 0 10px rgba(255,233,168,.6);animation:puls 1.5s ease-in-out infinite;z-index:2}
 body .mgW{position:relative;display:inline-block;vertical-align:middle;border-radius:50%;box-shadow:0 0 0 2px var(--c),0 0 14px color-mix(in srgb,var(--c) 70%,transparent);background:#0B101D;flex-shrink:0}
 body .mgW img{width:100%;height:100%;display:block;border-radius:50%}
 body .mgW b{position:absolute;right:-6%;bottom:-6%;width:40%;height:40%;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 1px 3px rgba(0,0,0,.6)}
@@ -26129,7 +26177,7 @@ function tlBody(){
   const arLk=c==='sk'&&!o&&!tlArenaOk(rr);
   const bt=e?T('قيد الاستخدام'):o?(c==='sk'&&skLv(k)<5&&skCp(k)>=TL_UPC[skLv(k)-1]?T('ترقية!'):T('استخدم')):arLk?`${ico('lock',12)} ${T('مقفل')}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlTap('${c}','${k}')">
-   ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o?`<span class="tlLvB">${skLv(k)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
+   ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o?`<span class="tlLvB">${skLv(k)}</span>`:''}${c==='sk'&&o&&skMastReady(k)?`<span class="tlMst">${ico('gift',12)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
    <canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${foot}<span class="tlBt${o?'':' buy'}">${bt}</span></button>`}).join('')}</div>
  <div class="dkNote" style="margin-top:8px">${T(note)}</div>`;
 }
@@ -26173,6 +26221,7 @@ function tlSkSheet(k){
   ${tlStats(nxt,cur)}
   <div style="font-size:10.5px;color:var(--tx2)">${o?(mx?T('بلغ أقصى مستوى'):T('الأصفر: ما تضيفه الترقية')):T('اعثر على نسخه في الصناديق والمباريات')}</div>
   <span class="tlCp${o&&n>=needC?' rd':''}" style="max-width:240px;height:18px"><i style="width:${Math.min(100,Math.round(n/(o?needC||1:TL_UNL[it[1]])*100))}%"></i><span>${o?(mx?T('أقصى مستوى'):n+'/'+needC+' '+T('نسخة')):n+'/'+TL_UNL[it[1]]+' '+T('نسخة')}</span></span>
+  ${o?skMastHTML(k):''}
   ${o&&!mx?`<button class="tlBtn up" id="tlUp" ${can?'':'disabled'}>${T('ترقية')} · ${ico('coin',14)} ${cost}</button>`:''}
   ${o&&!mx&&n<needC&&mgWild(it[1])>0?`<button class="tlBtn g" id="tlWild">${mgWildImg(it[1],18)} ${T('استخدم جوكر')} (${mgWild(it[1])})</button>`:''}
   ${o&&!mx&&n<needC&&mgBooks()>0?`<button class="tlBtn g" id="tlBook">${ico('book',14)} ${T('استخدم كتاب الجيس')} (${mgBooks()})</button>`:''}
@@ -28763,7 +28812,7 @@ function caStep(){
     x=ux>0?Math.ceil(x*10)/10:Math.floor(x*10)/10;y=uy>0?Math.ceil(y*10)/10:Math.floor(y*10)/10}}
   return {x,y,t:p.t}});
  const shooter=S2.by!=null?S2.by:(RM.ca?RM.ca.turn:null);   // صاحب الضربة كما بدأت — لا ما صار الدورُ إليه (المراجعة)
- if(shooter===RM.me&&S2.pot&&S2.pot.length){const n=S2.pot.filter(t=>t!=='s').length;if(n){try{const e=EV();e.carromPot=(e.carromPot||0)+n;trk('carrom_pot',n);saveState()}catch(x){}}}
+ if(shooter===RM.me&&S2.pot&&S2.pot.length){const n=S2.pot.filter(t=>t!=='s').length;if(n){try{const e=EV();e.carromPot=(e.carromPot||0)+n;trk('carrom_pot',n);saveState()}catch(x){}try{skMastAdd(caSkMine(),{pot:n,q:S2.pot.indexOf('q')>=0?1:0})}catch(x){}}}   // ٦٫٩٤: إتقان الجيس
  if(shooter===RM.me||(RM.solo&&RM.host)){
   rmSend({t:'act',by:shooter,a:'rest',pcs:rest,pot:S2.pot,
    msg:caPotMsg(S2.pot,shooter)});
