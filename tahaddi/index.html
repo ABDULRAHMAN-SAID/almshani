@@ -22006,6 +22006,7 @@ function coinArt(kind){
 // ═══════════ البند 12 — المتجر ═══════════
 let shopTab='home';
 function shopScr(){
+ try{trChestCss()}catch(e){}
  ensureEcon();
  go(`<div class="scr on">${NAV.length>1?tbar('المتجر'):shopHeader()}
  ${curBar()}
@@ -22022,6 +22023,7 @@ function shopScr(){
  <div class="ls">استُلمت — تعود بعد ${dealsResetIn()}</div></div>
  <span style="color:var(--ok);font-size:18px">${ico('check',14)}</span></div></div>`}
 
+ ${arOfferHTML()}
  ${banner("الصفقات اليومية")}
  <div style="text-align:center;font-size:11px;color:var(--mut);margin:-6px 0 10px">تتجدد بعد ${dealsResetIn()}</div>
  ${todayDeals().map((d,i)=>{
@@ -25273,7 +25275,31 @@ function trArenaUpCheck(){
  t.up=t.gate;try{saveState()}catch(e){}
  arenaUpFx(t.gate);return true;
 }
+/* ٦٫٩٤ — عرض الساحة (Arena Offer): عند بلوغ ساحةٍ جديدة يظهر في المتجر عرضٌ لأربعٍ وعشرين ساعة — صندوقٌ ونسخٌ وعملات بجواهرٍ أقلّ من ثمنها */
+function arOffer(){const o=S.arOffer;if(!o||o.bought||Date.now()>o.until)return null;return o}
+function arOfferMake(ix){S.arOffer={ix,until:Date.now()+24*3600e3,bought:0};try{saveState()}catch(e){}}
+function arOfferPack(ix){const rr=ix>=6?'l':ix>=4?'e':ix>=2?'r':'c',sk=TL_ITEMS.sk.filter(x=>x[1]===rr),k=sk[ix%sk.length][0];
+ return {chest:ix>=6?'legend':ix>=3?'elite':'rival',k,copies:6+ix*2,coins:300+ix*150,gems:Math.round((60+ix*22)*1.0),worth:Math.round((60+ix*22)*2.2)}}
+function arOfferLeft(){const o=arOffer();if(!o)return '';const s=Math.max(0,Math.round((o.until-Date.now())/1000));return bcFmt(s)}
+function arOfferBuy(){
+ const o=arOffer();if(!o)return;const p=arOfferPack(o.ix);
+ if(S.gems<p.gems){toast('جواهر غير كافية','bad');return}
+ confirmSheet('عرض '+ARENAS[o.ix].n,`ستدفع <b style="color:var(--gem)">${p.gems} جوهرة</b> مقابل ${(ECON.chests[p.chest]||{}).n} و${p.copies} نسخ «${tlNm('sk',p.k)}» و${p.coins.toLocaleString('en-US')} عملة.`,'اشترِ العرض',()=>{
+  if(S.gems<p.gems){toast('جواهر غير كافية','bad');return}
+  S.gems-=p.gems;o.bought=1;
+  const list=[{t:'coins',v:p.coins},{t:'skc',k:p.k,v:p.copies}].concat(openChest(p.chest)).concat(tlChestCopies(p.chest));
+  grantRewards(list);try{saveState()}catch(e){}
+  push('rewardScr',{title:'عرض '+ARENAS[o.ix].n,list,chest:p.chest});
+ });
+}
+function arOfferHTML(){
+ const o=arOffer();if(!o)return '';const A=ARENAS[o.ix],p=arOfferPack(o.ix);
+ return `<div class="arOf" style="--g:${A.g};--f:${A.f}"><div class="arOfH"><span class="em">${tierEmblem(o.ix,44)}</span><div class="bd"><b>عرض ${esc(A.n)}</b><s>${ico('timer',12)} ينتهي خلال ${arOfferLeft()} · مرّةً واحدة</s></div><span class="arOfW"><i>${p.worth}</i>${p.gems} ${ico('gem',16)}</span></div>
+  <div class="arOfB"><span class="arOfI"><span class="arMArt ch-${p.chest}"></span><s>${(ECON.chests[p.chest]||{}).n}</s></span><span class="arOfI">${skImg(p.k,44)}<s>×${p.copies} ${tlNm('sk',p.k)}</s></span><span class="arOfI">${ico('coin',44)}<s>${p.coins.toLocaleString('en-US')} عملة</s></span></div>
+  <button class="rbtn" onclick="arOfferBuy()"><span>اشترِ العرض — ${p.gems} ${ico('gem',16)}</span></button></div>`;
+}
 function arenaUpFx(ix){
+ try{arOfferMake(ix)}catch(e){}
  const A=ARENAS[ix]||ARENAS[0];document.querySelectorAll('.aruOv').forEach(x=>x.remove());
  const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
  ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${tierEmblem(ix,150)}</div><div class="aruN">${esc(A.n)}</div>
@@ -26070,6 +26096,13 @@ body .finCh{margin:-4px auto 12px;max-width:340px;padding:8px 14px;border-radius
 body .finCh b{font-family:var(--fd);font-size:15px;color:#FFF1C4}body .finCh u{text-decoration:none;color:#FFE9A8}
 body .finCh.done{border-color:#FFE9A8;box-shadow:0 0 14px rgba(232,178,58,.35)}body .finCh.dim{opacity:.7;cursor:default;color:#9AA6C2}
 body .finCh .rico{width:16px!important;height:16px!important}
+body .arOf{position:relative;overflow:hidden;border-radius:18px;padding:12px;margin-bottom:14px;background:radial-gradient(120% 120% at 100% 0%,rgba(var(--f),.28),transparent 55%),var(--lxCard);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 14px 30px -14px rgba(0,0,0,.9)}
+body .arOfH{display:flex;align-items:center;gap:10px}body .arOfH .em{flex-shrink:0;display:flex;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+body .arOfH .bd{flex:1;min-width:0}body .arOfH b{display:block;font-family:var(--fd);font-size:16px;font-weight:700;color:var(--g)}body .arOfH s{display:flex;align-items:center;gap:4px;text-decoration:none;font-size:10.5px;font-weight:800;color:#C9B37A;margin-top:2px}
+body .arOfW{flex-shrink:0;display:flex;flex-direction:column;align-items:center;font-family:var(--fd);font-weight:700;font-size:16px;color:#FFF1C4}body .arOfW i{font-style:normal;font-size:11px;color:#8B96B6;text-decoration:line-through}
+body .arOfW .rico{width:16px!important;height:16px!important;vertical-align:-3px}
+body .arOfB{display:flex;gap:8px;margin:12px 0}body .arOfI{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 4px;border-radius:12px;background:rgba(6,10,20,.55);border:1px solid var(--lxHair2)}
+body .arOfI .arMArt,body .arOfI img,body .arOfI .rico{width:44px;height:44px}body .arOfI s{text-decoration:none;font-size:10px;font-weight:800;color:#F6E7C6;text-align:center}
 body .skM{width:100%;max-width:260px;display:flex;flex-direction:column;gap:6px;margin:2px 0 4px}
 body .skMr{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:12px;background:rgba(6,10,20,.55);border:1px solid var(--lxHair2);text-align:start}
 body .skMr.ready{border-color:#FFE9A8;box-shadow:0 0 0 1px rgba(255,233,168,.35),0 0 12px rgba(232,178,58,.3)}
