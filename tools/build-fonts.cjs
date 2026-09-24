@@ -15,17 +15,16 @@ const ROOT=path.join(__dirname,'..');
 const DIR=path.join(ROOT,'tahaddi','fonts');
 const HTML=path.join(ROOT,'tahaddi','index.html');
 
-/* نطاقات المحارف من ورقة Google Fonts نفسها: المتصفّح لا ينزّل شريحة لا يحتاجها */
-/* ٦٫٩٣ — وجهٌ ثانٍ للعرض: El Messiri (SIL OFL) للعناوين والأرقام الكبيرة والأزرار — شريحتان (عربيّة ولاتينيّة للأرقام) ~٤٦ك */
+/* ٦٫٩٦ — عدسة الطباعة (قياسٌ على ١٥ شاشة و١٢ خطًّا): El Messiri كان يرسم أرقام اللعبة كلّها بنمطٍ رفيعٍ شبه «تايمز» وبلا أرقامٍ
+   متساوية العرض فيهتزّ العدّ المتحرّك، ووزنه 700 فقط. البديل: Baloo Bhaijaan 2 للعناوين والأرقام (700–800، أرقامٌ جدوليّة عبر tnum،
+   أقرب خطٍّ مفتوح الترخيص لطابع كلاش رويال) وCairo للنصّ (400–900 بلا ميل). كلاهما شريحةٌ واحدة مقتطعة بـ pyftsubset
+   (لاتينيّة أساسيّة + « » · × + العربيّة وأشكالها + علامات الترقيم العامّة + € −) — ٩٣ك بدل ١٢٧ك. */
 const SUBSETS=[
- {fam:'Cairo',w:'200 1000',f:'cairo-arabic.woff2',r:'U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC'},
- {fam:'Cairo',w:'200 1000',f:'cairo-latin.woff2',r:'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'},
- {fam:'Cairo',w:'200 1000',f:'cairo-latin-ext.woff2',r:'U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF'},
- {fam:'El Messiri',w:'700',f:'elmessiri-700-arabic.woff2',r:'U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC'},
- {fam:'El Messiri',w:'700',f:'elmessiri-700-latin.woff2',r:'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'}
+ {fam:'Cairo',w:'400 900',f:'cairo-400-900.woff2'},
+ {fam:'Baloo Bhaijaan 2',w:'700 800',f:'baloobhaijaan2-700-800.woff2'}
 ];
 
-let css='/* خطّا Cairo وEl Messiri — SIL Open Font License 1.1 — مضمَّنان كي تعمل اللعبة والتطبيق دون اتصال */\n';
+let css='/* خطّا Cairo وBaloo Bhaijaan 2 — SIL Open Font License 1.1 — مضمَّنان كي تعمل اللعبة والتطبيق دون اتصال */\n';
 let bytes=0;
 for(const s of SUBSETS){
  const p=path.join(DIR,s.f);
@@ -33,7 +32,7 @@ for(const s of SUBSETS){
  const b64=fs.readFileSync(p).toString('base64');
  bytes+=fs.statSync(p).size;
  css+=`@font-face{font-family:'${s.fam}';font-style:normal;font-weight:${s.w};font-display:swap;`
-  +`src:url(data:font/woff2;base64,${b64}) format('woff2');unicode-range:${s.r}}\n`;
+  +`src:url(data:font/woff2;base64,${b64}) format('woff2')${s.r?';unicode-range:'+s.r:''}}\n`;
 }
 
 const html=fs.readFileSync(HTML,'utf8');
