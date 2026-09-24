@@ -2379,7 +2379,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0007865044" data-head="0001037804" aria-hidden="true">
+<div id="ld" data-total="0007918019" data-head="0001037804" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -15236,18 +15236,20 @@ function face(k,s){
   '</g>'+ring+'</svg>';
 }
 
-// ═══════════ ساحات القتال العشر — واحدة لكل رتبة ═══════════
+// ═══════════ الساحات العشر (طريق الكؤوس) — ٦٫٩٦: أسماءٌ عربيّة على موضوع لوحة كلّ ساحة، والألوان كما هي ═══════════
+// ١ رمال الصحراء · ٢ الجليد · ٣ مدرّجٌ ذهبيّ · ٤ حدائق قصرٍ أندلسيّ تحت القمر · ٥ كهف بلّورٍ وماس · ٦ مجلسٌ ملكيّ بمخملٍ بنفسجيّ
+// ٧ قلعةٌ في ليل الصحراء · ٨ ميدان الأبطال برايات قرمزيّة · ٩ منصّةٌ في سديمٍ كونيّ · ١٠ قصرٌ ذهبيّ فوق السحاب
 const ARENAS=[
  {n:'ساحة الرمال',s1:'#4A3218',s2:'#140C04',g:'#CD7F32',f:'205,127,50',d:'pyr'},
- {n:'ساحة الجليد',s1:'#274A66',s2:'#081222',g:'#BFE3FF',f:'127,184,216',d:'ice'},
- {n:'الساحة الذهبية',s1:'#57400F',s2:'#181004',g:'#E8B23A',f:'232,178,58',d:'clsm'},
- {n:'حدائق البلاتين',s1:'#0F4438',s2:'#06150F',g:'#5DCAA5',f:'93,202,165',d:'pyr'},
- {n:'كهف الماس',s1:'#123B63',s2:'#04101E',g:'#5AC8F5',f:'90,200,245',d:'ice'},
- {n:'عرين الماستر',s1:'#331A5E',s2:'#0D0522',g:'#B76CF0',f:'183,108,240',d:'clsm'},
- {n:'قلعة الجراند',s1:'#26104E',s2:'#08041A',g:'#8B3FD9',f:'139,63,217',d:'clsm'},
- {n:'ساحة الأبطال',s1:'#4E1414',s2:'#160404',g:'#E24B4A',f:'226,75,74',d:'pyr'},
- {n:'سديم الميثيك',s1:'#4E1A38',s2:'#14040E',g:'#FF6B9D',f:'255,107,157',d:'ice'},
- {n:'سماء الليجند',s1:'#4E3A08',s2:'#141002',g:'#FFD700',f:'255,215,0',d:'clsm'}
+ {n:'قمم الجليد',s1:'#274A66',s2:'#081222',g:'#BFE3FF',f:'127,184,216',d:'ice'},
+ {n:'المدرّج الذهبيّ',s1:'#57400F',s2:'#181004',g:'#E8B23A',f:'232,178,58',d:'clsm'},
+ {n:'حدائق الأندلس',s1:'#0F4438',s2:'#06150F',g:'#5DCAA5',f:'93,202,165',d:'pyr'},
+ {n:'كهف البلّور',s1:'#123B63',s2:'#04101E',g:'#5AC8F5',f:'90,200,245',d:'ice'},
+ {n:'المجلس الملكيّ',s1:'#331A5E',s2:'#0D0522',g:'#B76CF0',f:'183,108,240',d:'clsm'},
+ {n:'قلعة البيداء',s1:'#26104E',s2:'#08041A',g:'#8B3FD9',f:'139,63,217',d:'clsm'},
+ {n:'ميدان الأبطال',s1:'#4E1414',s2:'#160404',g:'#E24B4A',f:'226,75,74',d:'pyr'},
+ {n:'سديم النجوم',s1:'#4E1A38',s2:'#14040E',g:'#FF6B9D',f:'255,107,157',d:'ice'},
+ {n:'قصر السحاب',s1:'#4E3A08',s2:'#141002',g:'#FFD700',f:'255,215,0',d:'clsm'}
 ];
 function arPillar(g){
  return `<svg viewBox="0 0 24 120" width="100%" height="100%">
@@ -15618,14 +15620,14 @@ function arenaHTML(ix){
   return `<div class="vnImg arBgImg" style="background-image:url(${ARENA_BG[ix]})"></div>
   <div class="arGlow" style="background:radial-gradient(58% 34% at 50% 44%,${A.g}2E,transparent 70%)"></div>
   <div class="arBeam l" style="--bc:${A.f}"></div><div class="arBeam r" style="--bc:${A.f}"></div>
-  <div class="arNm" style="color:${A.g};border-color:${A.g}55">${A.n} — رتبة ${TIERS[ix]?TIERS[ix].ar:''}</div>`;
+  <div class="arNm" style="color:${A.g};border-color:${A.g}55">${esc(A.n)}</div>`;
  }
  if(VN_SCENE_IMG.studio){   // الاستوديو المرسوم (بلون أساس أزرق) يتلوّن بصبغة الرتبة، وفوقه التوهّج والأشعّة الحيّة
   const rot=Math.round(hexHue(A.g)-197);
   return `<div class="vnImg" style="background-image:url(${VN_SCENE_IMG.studio});filter:hue-rotate(${rot}deg) saturate(1.08)"></div>${vnOverlay('studio',A.g)}
   <div class="arGlow" style="background:radial-gradient(58% 34% at 50% 44%,${A.g}3A,transparent 70%)"></div>
   <div class="arBeam l" style="--bc:${A.f}"></div><div class="arBeam r" style="--bc:${A.f}"></div><div class="arBeam c" style="--bc:${A.f}"></div>
-  <div class="arNm" style="color:${A.g};border-color:${A.g}55">${A.n} — رتبة ${TIERS[ix]?TIERS[ix].ar:''}</div>`;
+  <div class="arNm" style="color:${A.g};border-color:${A.g}55">${esc(A.n)}</div>`;
  }
  return `<div class="arSky" style="background:radial-gradient(120% 90% at 50% -8%,${A.s1},${A.s2} 68%)"></div>
  <svg class="arHex" viewBox="0 0 400 300" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><defs>
@@ -15641,7 +15643,7 @@ function arenaHTML(ix){
  <div class="arRing" style="background:radial-gradient(ellipse at center,rgba(${A.f},.5),rgba(${A.f},.16) 42%,transparent 70%)"></div>
  <div class="arPil l">${arPillar(A.g)}</div>
  <div class="arPil r">${arPillar(A.g)}</div>
- <div class="arNm" style="color:${A.g};border-color:${A.g}55">${A.n} — رتبة ${TIERS[ix]?TIERS[ix].ar:''}</div>`;
+ <div class="arNm" style="color:${A.g};border-color:${A.g}55">${esc(A.n)}</div>`;
 }
 function venueHTML(kind){
  const art=VN_SCENE_IMG[kind]?`<div class="vnImg" style="background-image:url(${VN_SCENE_IMG[kind]})"></div>${vnOverlay(kind)}`:(VENUES[kind]||VENUES.carrom)();
@@ -17602,7 +17604,7 @@ const RAR_ORDER=['common','rare','epic','legendary'];
 
 /** البند 9 — فتح صندوق */
 /* ٦٫٩٤ — كما في كلاش رويال: الصندوق نفسه يحمل ذهبًا ونسخًا أكثر كلّما ارتفعت ساحتك (أعلى ساحةٍ بلغتها) —
-   +12% لكلّ ساحة، فصندوق ساحة القمّة يحمل ضعفَي صندوق ساحة الرمال */
+   +12% لكلّ ساحة، فصندوق الساحة العاشرة (قصر السحاب) يحمل ٢٫٤ ضعف صندوق ساحة الرمال */
 const ARENA_MUL=[1,1.12,1.24,1.36,1.5,1.65,1.8,2,2.2,2.4];   // ٦٫٩٤: مضاعف الساحة الواحد — للعملات والنسخ والصفقات (صناديق كلاش رويال تكبر بالساحة)
 function trChestMul(){try{return ARENA_MUL[trArenaIx(TR().best|0)]||1}catch(e){return 1}}
 /* ٦٫٩٤ — صندوق لاعب الكيرم نسخُ جيس لا بطاقاتُ معرفة (في كلاش رويال كلّ صندوقٍ بطاقات): مجموعٌ يكبر بالساحة، موزَّعٌ على
@@ -18308,7 +18310,7 @@ function introBack(){
  introDraw();
 }
 function introDraw(){
- setArena((S.ranked&&S.ranked.tier)||0);
+ setArena(arMineIx());
  const r=S.ranked,t=tierOf(r),rv=_intro.rv;
  const basket=roundBasket(_intro.seq);
  go(`<div class="scr on">
@@ -21298,7 +21300,7 @@ function renderReward(a){
   go(`<div class="scr on rvScr"><div class="rvBg" ${bg}></div><div class="rvVig"></div>${top}
    <div class="rvSumT">${n?'أُضيفت إلى حسابك':'لم يحمل الصندوق شيئًا هذه المرّة'}</div>
    <div class="rvSum">${L.map(x=>{const K=rvKind(x);return `<div class="rvSumC" style="--gc:${K.c}">${miniReward(x)}</div>`}).join('')}</div>
-   <div class="rvBtns"><button class="rbtn" onclick="back()"><span>تم</span></button></div></div>`);
+   <div class="rvBtns"><button class="rbtn" onclick="back()"><span>تم</span></button>${L.some(x=>x&&x.t==='skc')&&typeof skUpReady==='function'&&skUpReady()?`<button class="btn g" onclick="_tlCat='sk';push('toolsScr')">${ico('up',14)} ${T('رقِّ جيسك')}</button>`:''}</div></div>`);
  }
 }
 /** بعد الرسم: الصندوق يهتزّ ثمّ ينفتح مرّةً واحدة، ثمّ تظهر المكافأة بنغمتها وعدّادها */
@@ -22205,7 +22207,7 @@ function mDraw(){
   </div>`);
   return;
  }
- setArena((S.ranked&&S.ranked.tier)||0);
+ setArena(arMineIx());
  const st=M.st,k=st.k;
  const soft=arguments.length&&arguments[0]===1;
  const sy=soft?window.scrollY:0;
@@ -23259,10 +23261,10 @@ function plMissions(){
 /** الشريط العلويّ: صورتك وتحيّتك، ثمّ رصيدك، ثمّ الجرس */
 /* ٦٫٩٣ — شريط الساحة: شعارها واسمها وشريط التقدّم إلى التالية وعدّاد الكؤوس — لمسةٌ تفتح طريق الكؤوس */
 function plArenaBar(){
- const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix],pct=nx?Math.round((tr-lo)/(nx-lo)*100):100,ready=trRoadReady();
+ const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix],gl=trGoal(tr),pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100,ready=trRoadReady();
  return `<button class="hmArB" style="--g:${A.g};--f:${A.f}" onclick="push('arenaScr')">
   <span class="em">${tierEmblem(ix,38)}</span>
-  <span class="bd"><b>${esc(A.n)}</b><span class="bar"><i style="width:${pct}%"></i></span><s>${nx?'التالية عند '+nx.toLocaleString('en-US')+' كأس':'أنت في القمّة'}</s></span>
+  <span class="bd"><b>${esc(A.n)}</b><span class="bar"><i style="width:${pct}%"></i></span><s>${trNextTxt(tr)}</s></span>
   <span class="tr">${ico('trophy',24)}<u>${tr.toLocaleString('en-US')}</u></span>
   ${ready?`<span class="rd">${ready}</span>`:''}
   <span class="go">${chev('#D9B76E',16)}</span></button>`;
@@ -23271,7 +23273,7 @@ function plHead(){
  const on=netOnline();
  return `<div class="hmTop">
   <div class="hmAv" style="position:relative" onclick="push('avScr')">${avatarArt(42)}<i class="${on?'on':''}" title="${on?'متّصل':'بلا اتصال'}"></i><b class="hmLv lvB">${lvl(S.xp||0)}</b></div>
-  <div class="hmHi"><b>مرحبًا ${esc(S.name)}</b><s>مستعدّ لجولة ممتعة؟</s></div>
+  <div class="hmHi"><b>مرحبًا <bdi class="hmNm">${esc(S.name)}</bdi></b><s>مستعدّ لجولة ممتعة؟</s></div>
   <span class="hmCur" onclick="push('storeScr')">${ico('coin',15)}
    <u>${S.coins.toLocaleString('en-US')}</u><span class="pl">+</span></span>
   <span class="hmCur" onclick="push('storeScr')">${ico('gem',15)}
@@ -23370,6 +23372,7 @@ function playScr(){
  ${plHead()}
  ${plArenaBar()}
  ${plCarousel()}
+ ${skTileHTML({ctx:'home'})}
  <div class="hmSec"><b>أوضاع اللعب</b><span onclick="push('gamesScr')">عرض الكل ${chev()}</span></div>
  ${plModes()}
  ${plDaily()}
@@ -23389,10 +23392,10 @@ function playScr(){
  </div>
  <div style="text-align:center;font-size:${VER_NEW?'11.5px':'9.5px'};color:${VER_NEW?'var(--gold)':'var(--mut)'};font-weight:${VER_NEW?'900':'400'};margin-top:18px;padding:11px 0;min-height:36px" onclick="devTap()">${VER_NEW?`تحديث جديد · ${APP_VER}`:`نسخة تجريبية ${APP_VER}`}${S.dev?' · وضع المطوّر':''}</div>
  </div></div>`);
- bcTick();plDots();
+ bcTick();plDots();skTileDraw();
  verAnnounce();          // الرئيسية رُسمت، فالنافذة تجد شاشةً تظهر فوقها
  try{achDay();achPingAll();if(S.lkPend&&!document.querySelector('.lkOv'))setTimeout(lkShow,900)}catch(e){}   // ٦٫٩٥
- setTimeout(()=>{try{if(!lvUpCheck())trSeasonRwCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد، أو إعلان الموسم
+ setTimeout(()=>{try{if(!lvUpCheck()&&!trSeasonRwCheck())trArenaUpCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد، أو إعلان الموسم
 }
 
 /* ═══ ٦٫٩٥ — إسقاط الحظّ (Lucky Drop): أوّل ثلاثة انتصاراتٍ في اليوم — فوريّ، بلا مؤقّت، يرتفع بالنجوم مع اللمس ═══ */
@@ -23459,7 +23462,7 @@ const ACH2=[
  {k:'a_multi',s:'skill',n:'ضربة مزدوجة',d:'أدخل قطعتين فأكثر بضربةٍ واحدة {n} مرّة',t:[10,100,500],c:[50,150,400],g:[1,3,6],i:'sparkle'},
  {k:'a_queen',s:'skill',n:'تاج الملكة',d:'غطِّ الملكة {n} مرّة',t:[5,50,250],c:[50,150,400],g:[1,3,6],i:'gem'},
  {k:'a_nofoul',s:'skill',n:'يدٌ ثابتة',d:'افز {n} مرّة بلا خطأ ضاربٍ واحد',t:[1,20,100],c:[100,300,700],g:[2,5,10],i:'check'},
- {k:'a_arena',s:'road',n:'طريق المجد',d:'بلغ الساحة رقم {n}',t:[3,6,9],c:[150,450,1000],g:[3,8,15],i:'map',calc:()=>trArenaIx(TR().best|0)+1},
+ {k:'a_arena',s:'road',n:'طريق المجد',d:'بلغ الساحة رقم {n}',t:[3,6,10],c:[150,450,1000],g:[3,8,15],i:'map',calc:()=>trArenaIx(TR().best|0)+1},
  {k:'a_tr',s:'road',n:'جامع الكؤوس',d:'اجمع {n} كأس',t:[1000,2500,4000],c:[150,450,1000],g:[3,8,15],e:'sheikh',i:'trophy',calc:()=>TR().best|0},
  {k:'a_ch12',s:'road',n:'بطل الاثني عشر',d:'بلغ {n} انتصارات في تحدٍّ واحد',t:[4,8,12],c:[150,450,1000],g:[3,8,15],e:'trophy',i:'medal',calc:()=>CH12().best|0},
  {k:'a_season',s:'road',n:'موسمٌ بعد موسم',d:'أكمل {n} مواسم',t:[1,3,10],c:[100,300,700],g:[2,5,10],i:'timer'},
@@ -23579,12 +23582,12 @@ function skMastClaim(k,i){
 function skMastHTML(k){
  const m=SKM(k),rows=[];
  for(const tier of [1,2,3]){const t=SK_MAST.find(x=>x.tier===tier&&skMastState(k,x)!=='done');
-  if(!t){rows.push(`<div class="skMr done"><span class="skMt">الإتقان ${['','I','II','III'][tier]}</span><span class="skMn">${ico('check',12,'#5DE39A')} مكتمل</span></div>`);continue}
+  if(!t){rows.push(`<div class="skMr done"><span class="skMt">${['','الدرجة الأولى','الدرجة الثانية','الدرجة الثالثة'][tier]}</span><span class="skMn">${ico('check',12,'#5DE39A')} مكتمل</span></div>`);continue}
   const v=Math.min(t.need,m[t.k]|0),st=skMastState(k,t);
-  rows.push(`<div class="skMr${st==='ready'?' ready':''}"><span class="skMt">الإتقان ${['','I','II','III'][tier]}</span>
+  rows.push(`<div class="skMr${st==='ready'?' ready':''}"><span class="skMt">${['','الدرجة الأولى','الدرجة الثانية','الدرجة الثالثة'][tier]}</span>
    <span class="skMn">${t.n}<i class="skMb"><b style="width:${Math.round(v/t.need*100)}%"></b></i><s>${numPair(v,t.need)} · ${skMastRwLbl(t)}</s></span>
    ${st==='ready'?`<button class="skMc" onclick="skMastClaim('${k}',${t.i})">استلم</button>`:''}</div>`)}
- return `<div class="skM">${rows.join('')}</div>`;
+ return `<div class="skM"><div class="skMh">${T('إتقان الجيس')}</div>${rows.join('')}</div>`;
 }
 /* ═══ ٦٫٩٤ — الأدوات السحريّة (Magic Items في كلاش رويال) ═══
    جوكر الجيس: نسخٌ تُصرف على أيّ جيسٍ تملكه من ندرته (Wild Cards). كتاب الجيس: يكمل نسخ الترقية التالية لجيسٍ تختاره
@@ -23639,7 +23642,7 @@ function trSeasonRwCheck(){
  const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
  ov.classList.add('sea');
  ov.innerHTML=`<div class="aruRays"></div><div class="aruT">انتهى الموسم — مكافأتك</div><div class="aruEm">${tierEmblem(r.arena|0,140)}</div><div class="aruN">${esc(A.n)}</div>
-  <div class="aruS">مكافأة الموسم على أعلى ساحةٍ بلغتها: <b>${(r.coins|0).toLocaleString('en-US')}</b> عملة و<b>${r.gems|0}</b> جوهرة أُضيفت إلى حسابك.${r.from>r.to?`<br>كؤوسك فوق القمّة أُعيدت من ${r.from.toLocaleString('en-US')} إلى ${r.to.toLocaleString('en-US')} — الموسم الجديد يبدأ.`:''}</div>
+  <div class="aruS">مكافأة الموسم على أعلى ساحةٍ بلغتها: <b>${(r.coins|0).toLocaleString('en-US')}</b> عملة و<b>${r.gems|0}</b> جوهرة أُضيفت إلى حسابك.${r.from>r.to?`<br>كؤوسك فوق <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> أُعيدت من <bdi class="nowrap">${r.from.toLocaleString('en-US')}</bdi> إلى <bdi class="nowrap">${r.to.toLocaleString('en-US')}</bdi> — الموسم الجديد يبدأ.`:''}</div>
   <div class="aruB"><button class="rbtn" onclick="this.closest('.aruOv').remove();push('arenaScr')"><span>طريق الكؤوس</span></button><button class="btn g" onclick="this.closest('.aruOv').remove()">رائع</button></div>`;
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
  try{if(window.SFX)SFX.fx('arena')}catch(e){}
@@ -23745,15 +23748,50 @@ function ch12FinHTML(r){
    خصمك أدنى منك إلى 38 إن كان أعلى)، والخسارة مثلها نقصًا، والتعادل لا شيء. عشر ساحات بعتبات، ولكلّ ساحةٍ بوابة: من
    بلغها لا يهبط تحتها أبدًا. طريق الكؤوس: مكافأةٌ عند كلّ مئة كأس تُطالَب بها بضغطة، وعتبات الساحات صناديق. الآليّ
    يمنح الكؤوس في الساحات الثلاث الأولى فقط (كمدرّبي كلاش رويال في البداية) وفوقها تدريبٌ بلا كؤوس، والغرف الخاصّة
-   ودّيّة بلا كؤوس. الموسم شهرٌ ميلاديّ: من تجاوز 4000 يعود إلى 4000 ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.
+   ودّيّة بلا كؤوس. الموسم شهرٌ ميلاديّ: من تجاوز 3000 (آخر الساحات) يعود إلى 3000 ونصف ما فوقها — والطريق يمتدّ بجوائزه إلى 4000 «طريق الأساطير»، ويُكافأ على أعلى ساحةٍ بلغها.
    الحساب كلّه في trApply وحدها، وتُنادى من resolveMatch بعد أن تُحتسب النتيجة مرّةً واحدة (لا تُحسب مرّتين). */
 const TR_ARENA=[0,300,600,1000,1300,1600,2000,2300,2600,3000];   // ٦٫٩٦: عتبات الساحات العشر الأولى في كلاش رويال حرفيًّا
-const TR_BOT_CAP=1000, TR_LEG=4000;
+const TR_BOT_CAP=TR_ARENA[3], TR_LEG=TR_ARENA[TR_ARENA.length-1];   // ٦٫٩٦: 1,000 (الآليّ يمنح الكؤوس في الساحات الثلاث الأولى) · 3,000 = آخر الساحات وأرضيّة الموسم كما في كلاش رويال
+const TR_ROAD_END=4000;   // ٦٫٩٦: الطريق يمتدّ فوق آخر الساحات 3,000→4,000 «طريق الأساطير» وينتهي بصندوقٍ أسطوريّ
+const TR_SKBOOK=2500;     // ٦٫٩٦: كتاب الجيس — كان عند 2,000 وصارت عتبة ساحة
+/** هدف شريط التقدّم: الساحة التالية، وفي آخر الساحات نهاية طريق الأساطير، وبعدها لا شيء */
+function trGoal(tr){const n=trNext(tr);return n!=null?n:(tr<TR_ROAD_END?TR_ROAD_END:null)}
+/** سطر «التالية» في الرئيسيّة وردهة اللعبة: الساحة باسمها، والرقم لا ينقسم */
+function trNextTxt(tr){const ix=trArenaIx(tr),nx=trNext(tr),gl=trGoal(tr),n=v=>'<bdi class="nowrap">'+v.toLocaleString('en-US')+'</bdi>';
+ return nx!=null?'التالية: <span class="nowrap">'+esc(ARENAS[ix+1].n)+' · '+n(nx)+'</span>':gl!=null?'طريق الأساطير حتّى '+n(gl):'أتممت طريق الأساطير'}
+/* ٦٫٩٦ — ترحيل الحفظ إلى العتبات الجديدة، مرّةً واحدة (t.v=2). S.tro.gate وS.tro.up فهرسان على جدول ≤٦٫٩٥، وclaimed قيم
+   كؤوس. الكؤوس (tr/best) لا تُمسّ، ولا يُرى لاعبٌ في ساحةٍ أدنى ممّا كان: البوّابة = أعلى الاثنتين (البوّابة القديمة بعد
+   تحويلها، والساحة التي فيها كؤوسك الآن) بسقف أعلى ساحةٍ بلغتها؛ ومن رفعه الجدول الجديد يُعلَن له مرّةً (up أدنى).
+   صناديق العتبات: عدد ما استلمته يبقى كما هو — ما عُلِّم مُستلَمًا ولم يُستلَم يعود «جاهزًا»، وما استُلم بالجدول القديم
+   لا يُعطى مرّتين — وكتاب الجيس المستلَم عند 2,000 ينتقل إلى 2,500. حفظٌ جرى على الجدول الجديد قبل الترقيم (نسخة
+   أندرويد ٦٫٩٥) تفضحه بوّابته (لا يفسّرها إلّا الجدول الجديد) فلا يُرحَّل مرّةً ثانية. */
+const TR_ARENA_V1=[0,300,600,1000,1400,1800,2300,2800,3400,4000];   // ≤٦٫٩٥
+function trIxOn(T,tr){let i=0;for(let k=0;k<T.length;k++)if(tr>=T[k])i=k;return i}
+function trMigrate(t){
+ if(!t||typeof t!=='object'||(t.v|0)>=2)return false;
+ const hi=Math.max(t.best|0,t.tr|0),bestIx=trArenaIx(hi),g0=Math.max(0,Math.min(TR_ARENA_V1.length-1,t.gate|0));
+ const isNew=g0>0&&g0===trArenaIx(t.best|0)&&g0!==trIxOn(TR_ARENA_V1,t.best|0);
+ if(!isNew){
+  const map=i=>trArenaIx(TR_ARENA_V1[Math.max(0,Math.min(TR_ARENA_V1.length-1,i|0))]);
+  const g=Math.min(bestIx,Math.max(map(g0),trArenaIx(t.tr|0)));
+  if(g>map(g0))t.migUp=1;                          // ارتفع بالجدول الجديد — سطرٌ في إعلان الساحة
+  t.up=Math.min(g,map(t.up));t.gate=g;
+  const c=new Set((Array.isArray(t.claimed)?t.claimed:[]).map(x=>x|0)),hadBook=c.has(2000);
+  const OLDC=TR_ARENA_V1.slice(1),NEWC=TR_ARENA.slice(1).concat([TR_ROAD_END]);
+  let got=OLDC.filter(x=>c.has(x)).length,marked=NEWC.filter(x=>c.has(x)).length;
+  for(let i=NEWC.length-1;i>=0&&marked>got;i--){const x=NEWC[i];if(c.has(x)&&OLDC.indexOf(x)<0){c.delete(x);marked--}}   // «مُستلَمة» ولم تُستلَم → جاهزة
+  for(let i=0;i<NEWC.length&&got>marked;i++){const x=NEWC[i];if(!c.has(x)&&hi>=x){c.add(x);marked++}}                     // استُلمت بالجدول القديم → لا تُعطى مرّتين
+  if(hadBook)c.add(TR_SKBOOK);
+  t.claimed=[...c].sort((a,b)=>a-b);
+ }
+ t.v=2;return true;
+}
 function trSeasonKey(){const d=new Date();return d.getUTCFullYear()+'-'+(d.getUTCMonth()+1)}
 function trSeasonN(k){const m=/^(\d+)-(\d+)$/.exec(String(k||''));return m?(+m[1])*12+(+m[2]):0}
 function TR(){
- if(!S.tro||typeof S.tro!=='object')S.tro={tr:0,best:0,gate:0,w:0,l:0,claimed:[],season:trSeasonKey(),up:0};
+ if(!S.tro||typeof S.tro!=='object')S.tro={tr:0,best:0,gate:0,w:0,l:0,claimed:[],season:trSeasonKey(),up:0,v:2};
  const t=S.tro;if(!Array.isArray(t.claimed))t.claimed=[];
+ if(trMigrate(t)){try{saveState()}catch(e){}}   // ٦٫٩٦: حفظٌ من جدول العتبات القديم — مرّةً واحدة
  const key=trSeasonKey();
  if(t.season!==key&&trSeasonN(key)>trSeasonN(t.season)){   // موسمٌ جديد (شهرٌ لاحق فقط — إرجاع ساعة الجهاز لا يصنع موسمًا، ولا أقلّ من عشرين يومًا بين موسمين)
   if((!t.sAt||Date.now()-t.sAt>20*864e5)&&((t.w|0)+(t.l|0))>0){   // حسابٌ لعب في الموسم الماضي
@@ -23769,6 +23807,7 @@ function TR(){
 function trMine(){return TR().tr|0}
 function trArenaIx(tr){let i=0;for(let k=0;k<TR_ARENA.length;k++)if(tr>=TR_ARENA[k])i=k;return i}
 function trArena(tr){return ARENAS[trArenaIx(tr==null?trMine():tr)]||ARENAS[0]}
+function arMineIx(){try{return trArenaIx(trMine())}catch(e){return 0}}   // ٦٫٩٦: ساحة كؤوسك — خلفيّة المسابقة أيضًا
 function trNext(tr){const i=trArenaIx(tr);return i<TR_ARENA.length-1?TR_ARENA[i+1]:null}
 /** فرق الكؤوس مع الخصم يميل الرقم ±8 حول 30 — خصمٌ أعلى يعطي أكثر ويأخذ أقلّ */
 function trDelta(won,my,opp){
@@ -23806,20 +23845,29 @@ function trApply(o){
  t.last=out;try{saveState()}catch(e){}
  return out;
 }
-/* طريق الكؤوس: علامةٌ كلّ مئة كأس حتّى القمّة؛ عتبات الساحات صناديق، وبينها عملاتٌ وجواهر ونسخ جيس — ثابتةٌ لا عشوائيّة */
+/* طريق الكؤوس (٦٫٩٦): علامةٌ كلّ خمسين كأسًا حتّى 3,000 ثمّ كلّ مئة حتّى 4,000 (طريق الأساطير)؛ عتبات الساحات صناديق، وبينها عملاتٌ وجواهر ونسخ جيس — ثابتةٌ لا عشوائيّة */
 let _trRoad=null;   // يُبنى عند أوّل طلب لا عند التحميل: قائمة الجيس (TL_ITEMS) تُعرَّف بعد هذا السطر
 function trRoad(){
  if(_trRoad)return _trRoad;
  const L=[],sk=TL_ITEMS.sk.map(x=>x[0]);
+ /* ٦٫٩٦ — نسخ الجيس في الطريق من جيوس ساحتها فقط (قاعدة الصناديق نفسها): لا نسخ لجيسٍ لم تفتحه ساحتك بعد */
+ const skAt=(a,n)=>{const P=sk.filter(k=>tlArenaOf('sk',k)<=a);return (P.length?P:sk)[n%(P.length||sk.length)]};
+ const chest=(tr,a)=>({t:'chest',k:tr===TR_ROAD_END||a>=8?'legend':a>=5?'elite':a>=2?'rival':'knowledge'});
+ const full=(a,i)=>i%4===0?{t:'gems',v:4+a*3}:i%4===2?{t:'skc',k:skAt(a,i/2),v:2+a}:{t:'coins',v:80+a*70+(i%4===3?40:0)};
  /* ٦٫٩٥ — كطريق كلاش رويال: جوائزُ متقاربة في البداية (كلّ 50 كأسًا حتّى 1,000 — أوّلها بعد فوزين)، ثمّ كلّ 100 */
  for(let tr=50;tr<1000;tr+=100){const a=trArenaIx(tr);
-  L.push({tr,r:tr===250?{t:'emote',k:'angry'}:tr===750?{t:'emote',k:'coffee'}:(tr/50)%4===1?{t:'coins',v:100+40*a}:{t:'skc',k:sk[(tr/50)%sk.length],v:2+a}})}
- for(let tr=100;tr<=TR_LEG;tr+=100){const a=trArenaIx(tr),i=tr/100;let r;
-  if(TR_ARENA.indexOf(tr)>0)r={t:'chest',k:a>=8?'legend':a>=5?'elite':a>=2?'rival':'knowledge'};
-  else if(tr===2000)r={t:'skbook',v:1};
-  else if(i%4===0)r={t:'gems',v:4+a*3};
-  else if(i%4===2)r={t:'skc',k:sk[(i/2)%sk.length],v:2+a};
-  else r={t:'coins',v:80+a*70+(i%4===3?40:0)};
+  L.push({tr,r:tr===250?{t:'emote',k:'angry'}:tr===750?{t:'emote',k:'coffee'}:(tr/50)%4===1?{t:'coins',v:100+40*a}:{t:'skc',k:skAt(a,tr/50),v:2+a}})}
+ for(let tr=100;tr<1000;tr+=100){const a=trArenaIx(tr);L.push({tr,r:TR_ARENA.indexOf(tr)>0?chest(tr,a):full(a,tr/100)})}
+ /* ٦٫٩٦ — من 1,000 إلى 3,000 علامةٌ كلّ خمسين كأسًا بنصف القيمة تقريبًا (ستّ علاماتٍ إلى ثمانٍ لكلّ ساحة بعد أن كانت ثلاثًا)،
+    ثمّ «طريق الأساطير» 3,000→4,000 كلّ مئة بقيمه كما كانت، وآخره صندوقٌ أسطوريّ. المجاميع: عملات ≈9,140 (كانت 9,000)،
+    جواهر 178 (176)، نسخ 57 (57)، وكتاب الجيس عاد (2,500) */
+ for(let tr=1000;tr<=TR_ROAD_END;tr+=tr<TR_LEG?50:100){const a=trArenaIx(tr),j=tr/50;let r;
+  if(TR_ARENA.indexOf(tr)>0||tr===TR_ROAD_END)r=chest(tr,a);
+  else if(tr===TR_SKBOOK)r={t:'skbook',v:1};
+  else if(tr>=TR_LEG)r=full(a,tr/100);
+  else if(j%4===0)r={t:'gems',v:3*a};
+  else if(j%4===2)r={t:'skc',k:skAt(a,j/2),v:Math.ceil(a/2)};
+  else r={t:'coins',v:40+30*a};
   L.push({tr,r})}
  L.sort((x,y)=>x.tr-y.tr);
  return _trRoad=L;
@@ -23843,19 +23891,30 @@ function trChestCss(){
  st.textContent=Object.keys(ECON.chests).map(k=>REAL_ART['chest_'+k]?`.arMArt.ch-${k}{background:url(${REAL_ART['chest_'+k]}) center/contain no-repeat;width:52px;height:52px}`:'').join('\n');
  document.head.appendChild(st);
 }
+/* ٦٫٩٦ — عملات الطريق وجواهره وكؤوس لوحاته: ico() يضع صورة base64 كاملة (٢٤–٣٢ ك.ب) في كلّ نداء، وقد صارت العلامات
+   سبعين. هنا تُحقن كلّ صورةٍ مرّةً واحدة في ورقة أنماط (كصور الصناديق) ويُكتفى في كلّ علامةٍ بصنفٍ خفيف */
+const _trArtK={};
+function trArtCss(n){
+ if(_trArtK[n])return true;let src=null;try{src=REAL_ART[ICO_REAL[n]]}catch(e){}if(!src)return false;
+ try{let st=document.getElementById('arIcoCss');if(!st){st=document.createElement('style');st.id='arIcoCss';document.head.appendChild(st)}
+  st.appendChild(document.createTextNode('.ic-'+n+'{background:url("'+src+'") center/contain no-repeat}\n'));_trArtK[n]=1;return true}catch(e){return false}
+}
+function trIco(n,s){return trArtCss(n)?`<span class="rico trvTi ic-${n}" style="width:${s}px;height:${s}px" aria-hidden="true"></span>`:ico(n,s)}   // span لا i: «.trvYou i» خطّ الدبّوس
 function trRoadArt(r){
  if(r.t==='skbook')return `<span class="arMArt">${ico('book',44,'#FFE9A8')}</span>`;
  if(r.t==='chest')return REAL_ART['chest_'+r.k]?`<span class="arMArt ch-${r.k}"></span>`:`<span class="arMArt">${chestPic(r.k)}</span>`;
- if(r.t==='coins')return `<span class="arMArt">${ico('coin',48)}</span>`;
- if(r.t==='gems')return `<span class="arMArt">${ico('gem',48)}</span>`;
+ if(r.t==='coins'||r.t==='gems'){const n=r.t==='coins'?'coin':'gem';return trArtCss(n)?`<span class="arMArt ic-${n}"></span>`:`<span class="arMArt">${ico(n,48)}</span>`}
  if(r.t==='skc')return `<span class="arMArt" data-sk="${r.k}"></span>`;   // تُملأ بعد الرسم الأوّل (trRoadFill) فلا تؤخّر الشاشة
  if(r.t==='emote')return `<span class="arMArt">${face(r.k,46)}</span>`;
  return '';
 }
 /** صور الجيس في الطريق: واحدةٌ في كلّ إطار بعد أن تُرسم الشاشة — أوّل رسمٍ لكلّ جيسٍ يفكّ صورته (~٥٠ مللي ثانية) */
+let _trFillQ=null;   // ٦٫٩٦: وصور رقائق الفتح في اللوحات — الظاهر في الشاشة أوّلًا (قياسٌ واحد عند بدء كلّ دورة)
 function trRoadFill(){
- const el=document.querySelector('.trv .arMArt[data-sk]');if(!el)return;
- try{el.innerHTML=skImg(el.dataset.sk,48)}catch(e){}el.removeAttribute('data-sk');
+ if(!_trFillQ||!_trFillQ.length||!_trFillQ[0].isConnected){const L=[...document.querySelectorAll('.trv [data-sk]')];if(!L.length){_trFillQ=null;return}
+  const H=innerHeight,v=L.map(e=>{const r=e.getBoundingClientRect();return (r.width>0||r.height>0)&&r.bottom>0&&r.top<H});_trFillQ=L.filter((e,i)=>v[i]).concat(L.filter((e,i)=>!v[i]))}
+ const el=_trFillQ.shift();
+ if(el&&el.isConnected&&el.dataset.sk){try{el.innerHTML=skImg(el.dataset.sk,+el.dataset.sz||48)}catch(e){}el.removeAttribute('data-sk')}
  requestAnimationFrame(trRoadFill);
 }
 function trRoadLbl(r){return r.t==='emote'?'تعبير «'+(((typeof EMOTES!=='undefined'&&EMOTES.find(e=>e.k===r.k))||{}).n||'')+'»':r.t==='skbook'?'كتاب الجيس':r.t==='chest'?((ECON.chests[r.k]||{}).n||'صندوق'):r.t==='coins'?r.v.toLocaleString('en-US')+' عملة':r.t==='gems'?r.v+' جوهرة':r.t==='skc'?tlNm('sk',r.k)+' ×'+r.v:''}
@@ -23876,18 +23935,19 @@ function trRoadV(ix){
  const t=TR(),tr=t.tr|0,road=trRoad(),gate=TR_ARENA[t.gate|0]||0;
  let nextTr=null,youTr=null;
  for(const m of road){if(nextTr==null&&trRoadState(m)==='lock')nextTr=m.tr;if(m.tr<=tr)youTr=m.tr}
- const pin=`<div class="trvYou"><i></i><span class="trvYouP">${ico('trophy',15)}<bdi dir="ltr">${tr.toLocaleString('en-US')}</bdi><s>أنت هنا</s></span>${nextTr!=null?`<em>بقي ${trvCups(Math.max(0,nextTr-tr))} للمكافأة التالية</em>`:'<em>بلغت آخر الطريق</em>'}</div>`;
+ const gA=trGoal(tr),toA=gA!=null?`<em class="ar">بقي ${trvCups(Math.max(0,gA-tr))} ${trNext(tr)!=null?'للساحة التالية':'لنهاية طريق الأساطير'}</em>`:'';   // ٦٫٩٦: والساحة التالية
+ const pin=`<div class="trvYou"><i></i><span class="trvYouP">${trIco('trophy',15)}<bdi dir="ltr">${tr.toLocaleString('en-US')}</bdi><s>أنت هنا</s></span>${nextTr!=null&&nextTr!==gA?`<em>بقي ${trvCups(Math.max(0,nextTr-tr))} للمكافأة التالية</em>`:nextTr==null?'<em>بلغت آخر الطريق</em>':''}${toA}</div>`;
  const N=ARENAS.length,out=[];
  for(let a=N-1;a>=0;a--){
   const A=ARENAS[a],lo=TR_ARENA[a],hi=a<N-1?TR_ARENA[a+1]:Infinity;
   const ms=road.filter(m=>m.tr>=lo&&m.tr<hi).sort((x,y)=>y.tr-x.tr);
   const sts=ms.map(m=>{const st=trRoadState(m);return st==='lock'&&m.tr===nextTr?'next':st});
   const nReady=sts.filter(x=>x==='ready').length,nDone=sts.filter(x=>x==='done').length;
-  const rel=a===ix?'cur':a<ix?'past':'fut',open=rel==='cur'||nReady>0||sts.indexOf('next')>=0||(_keepY!=null&&_trvOpen.has(a)),un=tlArenaUnlockTxt(a);   // ٦٫٩٦: قسم المكافأة التالية مفتوح، وما فتحه اللاعب يبقى مفتوحًا بعد الاستلام
+  const rel=a===ix?'cur':a<ix?'past':'fut',open=rel==='cur'||nReady>0||sts.indexOf('next')>=0||(_keepY!=null&&_trvOpen.has(a)),un=trvUnChips(a,rel);   // ٦٫٩٦: قسم المكافأة التالية مفتوح، وما فتحه اللاعب يبقى مفتوحًا بعد الاستلام
   const bg=arBgCls(a)?` data-bg="1"`:'';   // ٦٫٩٦: فئة CSS تُحقن مرّة — لا نسخ data-URI في كلّ رسم   // لوحة الساحة إن رفعها المالك، وإلّا تدرّج ألوانها
-  const sum=rel==='fut'?`${ico('lock',11)} تُفتح عند ${lo.toLocaleString('en-US')} كأس`
-   :rel==='cur'?`ساحتك الآن${gate?` · لا تهبط تحت ${gate.toLocaleString('en-US')}`:''}`
-   :`${ico('check',11,A.g)} بلغتها · ${nDone}/${ms.length} مُستلَمة`;
+  const sum=rel==='fut'?`<span>${ico('lock',11)} ${a===ix+1?'الساحة التالية · <span class="nowrap">بقي '+trvCups(lo-tr)+'</span>':'مقفلة'}</span>`   // ٦٫٩٦: العتبة في الشارة جانبًا — لا تكرار
+   :rel==='cur'?`<span>ساحتك الآن${gate?` · <span class="nowrap">لا تهبط تحت <bdi>${gate.toLocaleString('en-US')}</bdi></span>`:''}</span>`
+   :`<span>${ico('check',11,A.g)} بلغتها · <span class="nowrap"><bdi>${nDone}/${ms.length}</bdi> مُستلَمة</span></span>`;
   const rows=ms.map((m,k)=>{const st=sts[k],r=m.r;
    const act=st==='ready'?`<button class="trvBtn" onclick="trClaim(${m.tr})"><span>استلم</span></button>`
     :st==='done'?`<span class="trvSt ok">${ico('check',14,'#9FE7B5')}</span>`
@@ -23899,10 +23959,10 @@ function trRoadV(ix){
    <div class="trvBg ${arBgCls(a)}"${bg}></div>
    <div class="trvPl" role="button" aria-expanded="${open?'true':'false'}" onclick="trvTog(${a})">
     <span class="trvNo"><b>${a+1}</b><s>الساحة</s></span>
-    <div class="trvPlB"><b class="trvNm">${esc(A.n)}</b><span class="trvSum">${sum}${nReady?`<i class="arReady">${nReady} جاهزة</i>`:''}</span>${un?`<span class="trvUn">${ico('sparkle',11,A.g)} تفتح ${esc(un)}</span>`:''}</div>
-    <span class="trvTh">${ico('trophy',16)}<bdi dir="ltr">${lo.toLocaleString('en-US')}</bdi></span>
+    <div class="trvPlB"><b class="trvNm">${esc(A.n)}</b><span class="trvSum">${sum}${nReady?`<i class="arReady">${nReady} جاهزة</i>`:''}</span></div>
+    <span class="trvTh">${trIco('trophy',16)}<bdi dir="ltr">${lo.toLocaleString('en-US')}</bdi></span>
     <span class="trvChev">${chev(A.g,15)}</span>
-   </div>
+   </div>${un}
    <div class="trvL">${rows}${a===0&&youTr==null?pin:''}</div>
   </section>`);
  }
@@ -23911,11 +23971,11 @@ function trRoadV(ix){
 /** صفّ الكؤوس في شاشات النتيجة: الفرق كبيرًا، ثمّ المجموع، ثمّ الساحة وشريطها إلى التالية */
 function trFinHTML(tro){
  if(!tro)return '';
- const tr=tro.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix],pct=nx?Math.round((tr-lo)/(nx-lo)*100):100;
+ const tr=tro.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),gl=trGoal(tr),lo=TR_ARENA[ix],pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100;
  const d=tro.d|0,sign=d>0?'+':d<0?'−':'';
  const note=tro.why==='gate'?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):tro.why==='botcap'?'الآليّ لا يمنح كؤوسًا فوق '+TR_BOT_CAP.toLocaleString('en-US')+' — العب أونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
  return `<div class="finTr" onclick="push('arenaScr')"><div class="finTrRow">${ico('trophy',30)}<b class="${d>0?'up':d<0?'dn':''}">${sign}${Math.abs(d)}</b><span><i>${tr.toLocaleString('en-US')}</i>كأس</span></div>
-  <div class="finTrAr"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct}%"></i></div><span>${nx?nx.toLocaleString('en-US'):'القمّة'}</span></div>
+  <div class="finTrAr"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct}%"></i></div><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi>':gl?'طريق الأساطير <bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi>':'أتممت طريق الأساطير'}</span></div>
   ${note?`<div class="finTrN">${note}</div>`:''}</div>`;
 }
 /** إعلان الساحة الجديدة — مرّةً لكلّ ساحة، ولا فوق شاشة الصندوق (تنتظر إغلاقه) */
@@ -23951,10 +24011,12 @@ function arOfferHTML(){
 function arenaUpFx(ix){
  try{arOfferMake(ix)}catch(e){}
  const A=ARENAS[ix]||ARENAS[0];document.querySelectorAll('.aruOv').forEach(x=>x.remove());
+ let mig=0;try{const t=TR();if(t.migUp){mig=1;delete t.migUp;saveState()}}catch(e){}   // ٦٫٩٦: ارتقاءٌ بالعتبات الجديدة
  const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
- ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${tierEmblem(ix,150)}</div><div class="aruN">${esc(A.n)}</div>
-  <div class="aruS">بلغت ${TR_ARENA[ix].toLocaleString('en-US')} كأس — ومن الآن لا تهبط تحتها.<br>${ix<ARENAS.length-1?'الساحة التالية عند '+TR_ARENA[ix+1].toLocaleString('en-US')+' كأس':'أنت في القمّة'}</div>
-  ${(()=>{const L=tlArenaUnlocks(ix);return L.length?`<div class="aruUn"><span>فُتح في هذه الساحة</span><div class="aruUnL">${L.map(x=>`<span class="aruUnI">${x.c==='sk'?skImg(x.k,36):ico(x.c==='cs'?'star':x.c==='tr'?'sparkle':'target',24)}<i>${esc(x.n)}</i></span>`).join('')}</div></div>`:''})()}
+ ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${tierEmblem(ix,innerHeight<640?92:innerHeight<760?120:150)}</div><div class="aruN">${esc(A.n)}</div>
+  <div class="aruS">بلغت <bdi class="nowrap">${TR_ARENA[ix].toLocaleString('en-US')}</bdi> كأس — ومن الآن لا تهبط تحتها.<br>${ix<ARENAS.length-1?'الساحة التالية: <b>'+esc(ARENAS[ix+1].n)+'</b> عند <bdi class="nowrap">'+TR_ARENA[ix+1].toLocaleString('en-US')+'</bdi> كأس':'آخر الساحات — وطريق الأساطير يمتدّ بجوائزه حتّى <bdi class="nowrap">'+TR_ROAD_END.toLocaleString('en-US')+'</bdi> كأس'}</div>
+  ${mig?'<div class="aruMig">تجدّدت عتبات الساحات — فارتقيت إلى ساحةٍ أعلى</div>':''}
+  ${(()=>{const L=tlArenaUnlocks(ix);return L.length?`<div class="aruUn"><span>فُتح في هذه الساحة</span><div class="aruUnL">${L.map(x=>`<span class="aruUnI">${tlUnPrev(x.c,x.k,40)}<s>${tlUnCat(x.c)}</s><i>${esc(x.n)}</i></span>`).join('')}</div></div>`:''})()}
   <div class="aruB"><button class="rbtn" onclick="this.closest('.aruOv').remove();push('arenaScr')"><span>طريق الكؤوس</span></button><button class="btn g" onclick="this.closest('.aruOv').remove()">رائع</button></div>`;
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
  try{if(window.SFX)SFX.fx('arena')}catch(e){}
@@ -23963,7 +24025,7 @@ function arenaUpFx(ix){
 function arenaScr(){
  trChestCss();
  const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix];
- const pct=nx?Math.round((tr-lo)/(nx-lo)*100):100,ready=trRoadReady(),keep=_keepY!=null;   // ٦٫٩٦: عودةٌ من شاشة المكافأة (أو refresh) → الموجّه يعيد موضع التمرير ولا نقفز
+ const gl=trGoal(tr),pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100,ready=trRoadReady(),keep=_keepY!=null;   // ٦٫٩٦: عودةٌ من شاشة المكافأة (أو refresh) → الموجّه يعيد موضع التمرير ولا نقفز
  go(`<div class="scr on arV">${tbar('الكؤوس والساحات')}
  <div class="arHero arHv" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
   <div class="arHeroRays"></div>
@@ -23971,13 +24033,13 @@ function arenaScr(){
    <div class="arHvB"><div class="arHeroN">${esc(A.n)}</div>
     <div class="arHeroTr">${ico('trophy',24)}<b>${tr.toLocaleString('en-US')}</b><span>كأس</span></div></div></div>
   <div class="arBarW"><div class="arBar"><i style="width:${pct}%"></i></div>
-   <div class="arBarL"><span>${lo.toLocaleString('en-US')}</span><span>${nx?nx.toLocaleString('en-US')+' — '+esc(ARENAS[ix+1].n):'القمّة'}</span></div></div>
+   <div class="arBarL"><span><bdi class="nowrap">${lo.toLocaleString('en-US')}</bdi></span><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi> — '+esc(ARENAS[ix+1].n):gl?'<bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi> — طريق الأساطير':'أتممت طريق الأساطير'}</span></div></div>
   <div class="arHvSt"><span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
  </div>
  <div class="sl" style="display:flex;align-items:center">طريق الكؤوس${ready?`<span class="arReady">${ready} جاهزة</span>`:''}</div>
  ${trRoadV(ix)}
  <div class="sl">كيف تُحسب الكؤوس؟</div>
- <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز ${TR_LEG.toLocaleString('en-US')} يعود إلى ${TR_LEG.toLocaleString('en-US')} ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.</div>
+ <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> (${esc(ARENAS[ARENAS.length-1].n)}) يعود إلى <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.<br>${ico('crown',13)} بعد آخر الساحات يمتدّ طريق الأساطير بجوائزه حتّى <bdi class="nowrap">${TR_ROAD_END.toLocaleString('en-US')}</bdi> كأس، وآخره صندوقٌ أسطوريّ.</div>
  <div class="trvOkW"><button class="rbtn" onclick="back()"><span>موافق</span></button></div>
  </div>`);
  requestAnimationFrame(trRoadFill);
@@ -24515,11 +24577,11 @@ const TL_CAT=[['sk','الجيس'],['pw','القدرات'],['cs','القطع'],['
 const TL_ITEMS={
  sk:[['blue','c'],['emerald','c'],['onyx','c'],['violet','c'],['ruby','r',1200],['teal','r',1200],['amber','e',3000],['ice','e',3000],['moon','l',60,1],['sun','l',60,1]],
  cs:[['classic','c'],['sandal','r',1500],['pearl','e',3500],['royal','l',80,1]],
- tr:[['none','c'],['gold','r',1000],['fire','e',2500],['ice','e',2500],['aurora','l',50,1]],
+ tr:[['none','c'],['gold','r',1000],['fire','e',2500],['ice','e',2500],['aurora','l',50,1],['legend','l',50,1]],
  pk:[['gold','c'],['emerald','r',1000],['fire','e',2500],['star','l',50,1]]
 };
 const TL_NM={cs:{classic:'الكلاسيكيّ',sandal:'الصندل',pearl:'اللؤلؤ والكحليّ',royal:'الملكيّ'},
- tr:{none:'بلا أثر',gold:'الذهبيّ',fire:'الناريّ',ice:'الجليديّ',aurora:'الشفق'},
+ tr:{none:'بلا أثر',gold:'الذهبيّ',fire:'الناريّ',ice:'الجليديّ',aurora:'الشفق',legend:'نجوم الأساطير'},
  pk:{gold:'الذهبيّ',emerald:'الزمرّديّ',fire:'الناريّ',star:'النجوم'}};
 /* القدرات الأساسيّة للجيس في المستوى ١ (من ١٠): العاديّ ١٥ نقطة، النادر ١٦، الملحميّ ١٨، الأسطوريّ ٢٠ */
 const TL_SKST={blue:[5,5,5],emerald:[6,4,5],onyx:[4,6,5],violet:[5,4,6],ruby:[7,5,4],teal:[4,7,5],amber:[7,6,5],ice:[5,7,6],moon:[6,7,7],sun:[8,6,6]};
@@ -24528,18 +24590,34 @@ const TL_UPC=[5,10,20,40], TL_UPG=[500,1500,4000,10000];          // نسخ وع
 const TL_UNL={r:10,e:15,l:20};                                     // نسخٌ تفتح الجيس المقفل بلا شراء
 const TL_CPP={c:4,r:6,e:9,l:14};
 const TL_XP={c:20,r:40,e:80,l:160};                                 // خبرة اللاعب لكلّ ترقية (× المستوى الحاليّ) — ٦٫٩٤
-/* ٦٫٩٤ — كما تفتح ساحات كلاش رويال بطاقاتٍ جديدة: النادر من الساحة الذهبيّة، والملحميّ من كهف الماس، والأسطوريّ من
-   قلعة الجراند (بأعلى ساحةٍ بلغتها). قبلها: لا شراءٌ ولا فتحٌ بالنسخ ولا نسخٌ في الصناديق — ويبقى الجيس ظاهرًا مقفلًا باسم ساحته */
-const TR_UNL={c:0,r:2,e:4,l:6};
+/* ٦٫٩٤ — كما تفتح ساحات كلاش رويال بطاقاتٍ جديدة: النادر من المدرّج الذهبيّ، والملحميّ من كهف البلّور، والأسطوريّ من
+   قلعة البيداء (بأعلى ساحةٍ بلغتها — TL_AR هو المرجع). قبلها: لا شراءٌ ولا فتحٌ بالنسخ ولا نسخٌ في الصناديق — ويبقى الجيس ظاهرًا مقفلًا باسم ساحته */
 /* ٦٫٩٤ — كلّ ساحةٍ تفتح شيئًا (كما تفتح كلّ ساحةٍ في كلاش رويال بطاقاتها): ساحةُ الفتح لكلّ عنصرٍ لا لكلّ ندرة */
-const TL_AR={sk:{blue:0,emerald:0,onyx:1,violet:1,ruby:2,teal:3,amber:4,ice:5,moon:6,sun:7},cs:{classic:0,sandal:3,pearl:5,royal:8},tr:{none:0,gold:1,fire:4,ice:5,aurora:7},pk:{gold:0,emerald:3,fire:4,star:8}};
-function tlArenaOf(c,k){return ((TL_AR[c]||{})[k])|0}
+const TL_AR={sk:{blue:0,emerald:0,onyx:1,violet:1,ruby:2,teal:3,amber:4,ice:5,moon:6,sun:7},cs:{classic:0,sandal:3,pearl:5,royal:8},tr:{none:0,gold:1,fire:4,ice:5,aurora:7,legend:9},pk:{gold:0,emerald:3,fire:4,star:8}};
+function tlArenaOf(c,k){const it=(TL_ITEMS[c]||[]).find(x=>x[0]===k);if(it&&!it[2])return 0;return ((TL_AR[c]||{})[k])|0}   // ٦٫٩٦: ما يُملك من البداية (بلا سعر) ساحته الأولى — كان العقيق والبنفسجيّ «يُفتحان» في الثانية وهما لك
 function tlArenaOkItem(c,k){try{return trArenaIx(TR().best|0)>=tlArenaOf(c,k)}catch(e){return true}}
 function tlArenaNmItem(c,k){return (ARENAS[tlArenaOf(c,k)]||ARENAS[0]).n}
 function tlArenaOk(rr){try{return TL_ITEMS.sk.some(x=>x[1]===rr&&tlArenaOkItem('sk',x[0]))}catch(e){return true}}   // هل لهذه الندرة جيسٌ مفتوح؟
 function tlArenaNm(rr){const L=TL_ITEMS.sk.filter(x=>x[1]===rr).map(x=>tlArenaOf('sk',x[0]));return (ARENAS[L.length?Math.min.apply(null,L):0]||ARENAS[0]).n}
 /** ما تفتحه الساحة i */
 function tlArenaUnlocks(i){const L=[];for(const c of ['sk','cs','tr','pk'])for(const it of (TL_ITEMS[c]||[]))if(tlArenaOf(c,it[0])===i&&!(c==='tr'&&it[0]==='none'))L.push({c,k:it[0],n:tlNm(c,it[0])});return L}
+/* ٦٫٩٦ — رقائق ما تفتحه الساحة: الصنف (جيس/مجموعة/أثر/جيب) والاسم والصورة الحقيقيّة، بلا قصٍّ بثلاث نقاط */
+function tlUnCat(c){return c==='sk'?'جيس':c==='cs'?'مجموعة':c==='tr'?'أثر':'جيب'}
+function tlUnPrev(c,k,sz,lazy){
+ const svg=b=>`<span class="unPv"><svg viewBox="0 0 32 32" width="${sz}" height="${sz}" aria-hidden="true">${b}</svg></span>`;
+ if(c==='sk')return lazy?`<span class="unPv" data-sk="${k}" data-sz="48"></span>`:`<span class="unPv">${skImg(k,sz)}</span>`;
+ if(c==='tr'){const C=(typeof TL_TR!=='undefined'&&TL_TR[k])||['#FFF1C4','#E8B23A'];let d='';
+  for(let i=0;i<7;i++){const f=(i+1)/7;d+=`<circle cx="${(5+19*f).toFixed(1)}" cy="${(27-19*f).toFixed(1)}" r="${(1.3+4.4*f).toFixed(1)}" fill="${f>.6?C[0]:C[1]}" opacity="${(.3+.7*f).toFixed(2)}"/>`}
+  return svg(d)}
+ if(c==='pk'){const col=(typeof TL_PK!=='undefined'&&TL_PK[k])||'255,233,168';
+  return svg(`<circle cx="16" cy="16" r="14" fill="none" stroke="rgb(${col})" stroke-width="1.2" opacity=".45"/><circle cx="16" cy="16" r="10.5" fill="none" stroke="rgb(${col})" stroke-width="2.4"/><circle cx="16" cy="16" r="7.4" fill="#050608" stroke="#2A1A0C" stroke-width="1.4"/>`)}
+ if(c==='cs'){const Q=(typeof CA_CSETS!=='undefined'&&CA_CSETS[k])||{},w=(Q.w&&Q.w.face)||'#F3E3C0',b=(Q.b&&Q.b.face)||'#2B1B12';
+  return svg(`<circle cx="11.5" cy="18.5" r="8.6" fill="${b}" stroke="rgba(0,0,0,.55)" stroke-width="1"/><circle cx="11.5" cy="18.5" r="5.4" fill="none" stroke="rgba(255,255,255,.18)"/><circle cx="20.5" cy="13.5" r="8.6" fill="${w}" stroke="rgba(0,0,0,.4)" stroke-width="1"/><circle cx="20.5" cy="13.5" r="5.4" fill="none" stroke="rgba(0,0,0,.16)"/>`)}
+ return `<span class="unPv">${ico('sparkle',sz)}</span>`;
+}
+/** صينيّة الفتح تحت لوحة الساحة (لا داخلها: اللوحة تلتصق بأعلى الشاشة فتبقى قصيرة): «معك من البداية» للأولى، «فُتح لك» لما بلغته، «تفتح» لما بعدها — ظاهرةٌ ولو طُويت الساحة */
+function trvUnChips(a,rel){const L=tlArenaUnlocks(a);if(!L.length)return '';
+ return `<div class="trvUn"><s>${a===0?'معك من البداية':rel==='fut'?'تفتح':'فُتح لك'}</s>${L.map(x=>`<span class="unCh">${tlUnPrev(x.c,x.k,18,1)}<b>${tlUnCat(x.c)}</b>${esc(x.n)}</span>`).join('')}</div>`}
 function tlArenaUnlockTxt(i){return tlArenaUnlocks(i).map(x=>(x.c==='sk'?'جيس ':x.c==='cs'?'مجموعة ':x.c==='tr'?'أثر ':'جيب ')+'«'+x.n+'»').join('، ')}                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
 const TL_PWPTS=20;                                                  // نقاطٌ تفتح القدرة التالية
 const TL_PWR=[{k:'def',n:'الأساسيّة',st:[0,0,0],col:'232,178,58'},{k:'halo',n:'الهالة',st:[1,0,0],col:'255,205,90'},
@@ -24831,7 +24909,9 @@ body .pkPr .rico{width:15px!important;height:15px!important;vertical-align:-3px}
 body .hmTop{gap:7px}
 body .hmCur{min-height:34px;padding-inline:5px 4px;gap:4px}body .hmCur .rico{width:20px!important;height:20px!important}body .hmCur u{font-size:13px}body .hmCur .pl{width:20px;height:20px}
 body .hmHi s{white-space:normal;overflow:visible;max-width:100%;line-height:1.25}
-body .hmHi b{white-space:normal;overflow-wrap:anywhere;line-height:1.2}
+body .hmHi b{white-space:normal;overflow-wrap:normal;word-break:keep-all;line-height:1.2}
+body .hmHi .hmNm{display:inline-block;max-width:100%;vertical-align:top;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(13px,3.75vw,17px)}
+@media (max-width:359px){body .hmTop{flex-wrap:wrap;row-gap:4px;column-gap:4px}body .hmCur{padding-inline:4px 3px}body .hmHi{order:5;flex:1 0 100%;display:flex;align-items:baseline;gap:8px;min-width:0}body .hmHi b{font-size:15px;white-space:nowrap;flex-shrink:0;max-width:62%}body .hmHi s{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 body .hmArB{display:flex;align-items:center;gap:10px;width:100%;margin:10px 0 2px;padding:8px 10px 8px 12px;border-radius:16px;cursor:pointer;font-family:inherit;text-align:start;color:#F6E7C6;
  background:radial-gradient(120% 140% at 100% 50%,rgba(var(--f),.22),transparent 55%),var(--lxCard);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 12px 26px -14px rgba(0,0,0,.9)}
 body .hmArB:active{filter:brightness(1.12)}
@@ -25015,7 +25095,19 @@ body .trvPlB{min-width:0}
 body .trvNm{display:block;font-family:var(--fd);font-size:16px;font-weight:700;color:var(--g);line-height:1.25;text-shadow:0 1px 0 rgba(0,0,0,.7),0 0 14px rgba(var(--f),.35)}
 body .trvSum{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;font-size:10.5px;font-weight:800;color:#CFD7EA;margin-top:2px;line-height:1.5}
 body .trvSum .arReady{margin:0;font-style:normal}
-body .trvUn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:10px;color:#D9C9A0;margin-top:3px;line-height:1.5}
+body .nowrap{white-space:nowrap}
+body .trvSum>span{min-width:0}
+body .trvUn{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:5px 6px;margin:-9px 9px 0;padding:15px 10px 8px;border-radius:0 0 14px 14px;background:linear-gradient(180deg,rgba(6,9,18,.82),rgba(6,9,18,.55));border:1px solid rgba(var(--f),.32);border-top:0;box-shadow:inset 0 -1px 0 rgba(255,255,255,.04)}
+body .trvUn>s{text-decoration:none;font-size:10px;font-weight:800;color:#C9B37A;margin-inline-end:1px}
+body .unCh{display:inline-flex;align-items:center;gap:5px;padding:3px;padding-inline-start:4px;padding-inline-end:9px;border-radius:999px;background:rgba(6,9,18,.62);border:1px solid rgba(var(--f),.36);font-size:10.5px;font-weight:800;color:#F6E7C6;line-height:1.35;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+body .unCh b{font-weight:800;color:var(--g)}
+body .unPv{display:inline-flex;flex:0 0 auto;width:18px;height:18px;border-radius:50%;align-items:center;justify-content:center}
+body .unPv[data-sk]{background:radial-gradient(circle at 40% 35%,rgba(255,255,255,.22),rgba(6,9,18,.4) 70%)}
+body .unPv img,body .unPv svg,body .unPv .rico{width:100%!important;height:100%!important;display:block;margin:0!important}
+body .arMArt.ic-coin,body .arMArt.ic-gem{width:48px;height:48px;margin:0 auto}
+body .trvTi{display:inline-block;flex-shrink:0;vertical-align:-.2em}
+body .trvYou em.ar{color:#FFE9A8;border-color:rgba(255,233,168,.42)}
+body .ghArena .rt{white-space:nowrap;flex-shrink:0}body .ghArena .rp{min-width:0;line-height:1.5}
 body .trvTh{display:inline-flex;align-items:center;gap:4px;padding:5px 8px;border-radius:11px;background:rgba(6,9,18,.62);border:1px solid rgba(217,183,110,.32);font-family:var(--fd);font-weight:700;font-size:13px;color:#FFF1C4;font-variant-numeric:tabular-nums;white-space:nowrap}
 body .trvTh .rico{width:16px!important;height:16px!important}
 body .trvChev{display:flex;opacity:.85;transform:rotate(-90deg);transition:transform .25s ease}
@@ -25069,9 +25161,15 @@ body .aruEm{position:relative;animation:aruDrop .8s cubic-bezier(.2,1.4,.4,1) bo
 body .aruN{position:relative;font-size:32px;font-weight:700;color:var(--g);text-shadow:0 2px 0 rgba(0,0,0,.5),0 0 22px rgba(var(--f),.6);animation:aruPop .5s .45s cubic-bezier(.2,1.5,.4,1) both}
 body .aruS{position:relative;font-size:12.5px;color:#DDE3F2;line-height:1.7;animation:aruPop .4s .7s ease both}
 body .aruUn{position:relative;margin-top:4px;font-size:11.5px;color:#C9B37A;animation:aruPop .4s .75s ease both}
-body .aruUnL{display:flex;gap:12px;justify-content:center;margin-top:7px;flex-wrap:wrap}
-body .aruUnI{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:#F1F4FA;min-width:52px}
-body .aruUnI i{font-style:normal;font-weight:800}
+body .aruOv{overflow-y:auto;justify-content:safe center}
+body .aruUnL{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+body .aruUnI{display:flex;flex-direction:column;align-items:center;gap:5px;width:84px;padding:9px 6px 8px;border-radius:14px;background:linear-gradient(180deg,rgba(var(--f),.2),rgba(6,9,18,.72) 70%);border:1px solid rgba(var(--f),.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 8px 18px -10px rgba(0,0,0,.9)}
+body .aruUnI .unPv{width:40px;height:40px}
+body .aruUnI s{text-decoration:none;font-size:9.5px;font-weight:800;color:var(--g);line-height:1}
+body .aruUnI i{font-style:normal;font-weight:800;font-size:11px;color:#F1F4FA;line-height:1.3;text-align:center}
+body .aruS b{color:var(--g);font-weight:800}
+body .aruMig{position:relative;font-size:11.5px;font-weight:800;color:#FFE9A8;padding:5px 12px;border-radius:10px;background:rgba(232,178,58,.12);border:1px solid rgba(232,178,58,.35);animation:aruPop .4s .72s ease both}
+@media (max-height:640px){body .aruOv{gap:6px;padding:14px 18px}body .aruN{font-size:26px}body .aruS{line-height:1.6}body .aruUnI{padding:7px 5px 6px}body .aruUnI .unPv{width:32px;height:32px}body .aruB{margin-top:4px;gap:7px}}
 body .aruB{position:relative;margin-top:8px;display:flex;flex-direction:column;gap:9px;width:min(80vw,300px);animation:aruPop .4s .85s ease both}
 body .lvBig{position:static;width:120px;height:120px;min-width:0;border-radius:50%;font-size:52px;font-family:var(--fd);font-weight:700;display:grid;place-items:center;padding:0}
 @media (prefers-reduced-motion:reduce){.arHeroRays,.aruRays,.aruEm,.hmRoadDot,.arM.ready{animation:none!important}}
@@ -25102,33 +25200,34 @@ function tlBody(){
   const un=tlPwUnl(), cp=S.tlCP||0, k=caSkMine();
   return `<div class="tlPwHd"><canvas class="tlCv" data-c="pwhd" data-k="${eq}" width="168" height="168"></canvas><div style="flex:1;min-width:0">
    <div class="tlNm" style="text-align:start">${tlNm('sk',k)} · ${T('المستوى')} ${skLv(k)}${eq!=='def'?' + '+tlNm('pw',eq):''}</div>
-   <div class="tlS2" style="font-size:10.5px;color:var(--tx2);margin:3px 0 5px">${T('اجمع الجيس ورقِّه لتفتح قدراتٍ تقوّي ضربتك.')}</div>
-   ${tlStats(caMyStats(),skStats(k,skLv(k),'def'))}</div></div>
+   <div class="tlS2" style="font-size:11.5px;color:var(--tx2);margin:3px 0 6px">${T('اجمع الجيس ورقِّه لتفتح قدراتٍ تقوّي ضربتك.')}</div>
+   ${skStatRows(k,skLv(k),eq)}</div></div>
    <div class="tlGrid">${TL_PWR.map((P,i)=>{const o=i<un, e=o&&P.k===eq, nx=i===un;
    const R=TL_RAR[i===0?'c':i<3?'r':i<6?'e':'l'];
    return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlPwTap('${P.k}',${i})">
     ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}<span class="tlNm">${P.n}</span>
     <canvas class="tlCv" data-c="pw" data-k="${P.k}" width="120" height="120"></canvas>
-    ${o?`<span class="tlSt">${P.st.map((v,j)=>`<b>${[T('القوّة'),T('التصويب'),T('الزمن')][j]}</b><span style="font-weight:900;color:${v?'#7CF0A6':'rgba(255,255,255,.5)'}">+${v}</span>`).join('')}</span>`
+    ${o?`<span class="tlSt">${P.st.map((v,j)=>`<b>${[T('القوّة'),T('التصويب'),T('الزمن')][j]}</b><span style="font-weight:900;color:${v?'#7CF0A6':'rgba(255,255,255,.5)'}"><bdi>+${v}</bdi></span>`).join('')}</span>`
      :nx?`<span class="tlLock">${T('النقاط اللازمة لفتح القفل')}</span><span class="tlCp rd"><i style="width:${Math.round(cp%TL_PWPTS/TL_PWPTS*100)}%"></i><span>${cp%TL_PWPTS}/${TL_PWPTS}</span></span>`
      :`<span class="tlLock">${ico('lock',12)} ${T('افتح قفل القدرة السابقة')}</span>`}</button>`}).join('')}</div>
    <div class="dkNote" style="margin-top:8px">${T('القدرة تُضاف فوق قدرات جيسك، ولها حلقةٌ حوله في المباراة.')}</div>`;
  }
  const note={sk:'الجيس يُرقّى بنسخٍ منه (من الصناديق والمباريات) وعملات. القوّة: شدّة الضربة · التصويب: طول خطّ التصويب · الزمن: مهلة الضربة.',cs:'طقم القطع يظهر على جهازك في كلّ لوح.',tr:'الأثر يظهر خلف ضاربك في ضرباتك أنت.',pk:'أثر الجيب يظهر لحظة دخول قطعةٍ من ضربتك.'}[c];
- return `<div class="tlGrid">${TL_ITEMS[c].map(([k,rr,pr,gm])=>{const R=TL_RAR[rr], o=tlOwn(c,k), e=o&&k===eq;
+ return `<div class="tlGrid">${(c==='sk'?skSorted():TL_ITEMS[c]).map(([k,rr,pr,gm])=>{const R=TL_RAR[rr], o=tlOwn(c,k), e=o&&k===eq;
   let foot='';
   if(c==='sk'){const L=skLv(k), n=skCp(k);
-   foot=tlStats(skStats(k,o?L:1,'def'))+(o?(L>=5?`<span class="tlCp rd"><i style="width:100%"></i><span>${T('أقصى مستوى')}</span></span>`
+   foot=skChipsHTML(skStats(k,o?L:1,'def'))+(o?(L>=5?`<span class="tlCp rd"><i style="width:100%"></i><span>${T('أقصى مستوى')}</span></span>`
      :`<span class="tlCp${n>=TL_UPC[L-1]?' rd':''}"><i style="width:${Math.min(100,Math.round(n/TL_UPC[L-1]*100))}%"></i><span>${n}/${TL_UPC[L-1]}</span></span>`)
-    :!tlArenaOkItem(c,k)?`<span class="tlLock">${ico('lock',12)} ${T('يُفتح في')} ${tlArenaNmItem(c,k)}</span>`
+    :!tlArenaOkItem(c,k)?''
     :`<span class="tlCp"><i style="width:${Math.min(100,Math.round(n/TL_UNL[rr]*100))}%"></i><span>${n}/${TL_UNL[rr]}</span></span>`);
   }
   const arLk=!o&&!tlArenaOkItem(c,k);
-  const bt=e?T('قيد الاستخدام'):o?(c==='sk'&&skLv(k)<5&&skCp(k)>=TL_UPC[skLv(k)-1]?T('ترقية!'):T('استخدم')):arLk?`${ico('lock',12)} ${T('مقفل')}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
+  const up=c==='sk'&&skUpOk(k);   // ٦٫٩٦: المجهَّز أيضًا يقول «ترقية!» حين تكفي نسخه (هديّة البداية كانت تختفي تحت «قيد الاستخدام»)
+  const bt=up?`${ico('up',12)} ${T('ترقية!')}`:e?T('قيد الاستخدام'):o?T('استخدم'):arLk?`${ico('lock',12)} ${T('يُفتح في')} ${tlArenaNmItem(c,k)}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlTap('${c}','${k}')">
-   ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o?`<span class="tlLvB">${skLv(k)}</span>`:''}${c==='sk'&&o&&skMastReady(k)?`<span class="tlMst">${ico('gift',12)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
-   <canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${foot}<span class="tlBt${o?'':' buy'}">${bt}</span></button>`}).join('')}</div>
- <div class="dkNote" style="margin-top:8px">${T(note)}</div>`;
+   ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o&&skMastReady(k)?`<span class="tlMst">${ico('gift',12)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
+   <span class="tlCvW"><canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${c==='sk'&&o?`<i class="tlLvB">${skNum(skLv(k))}</i>`:''}</span>${foot}<span class="tlBt${up?' up':o?'':arLk?' lk':' buy'}">${bt}</span></button>`}).join('')}</div>
+ ${c==='sk'?skLegend():''}<div class="dkNote" style="margin-top:8px">${T(note)}</div>`;
 }
 function tlTab(c,el){_tlCat=c;if(el)uiPick(el);const b=document.getElementById('tlBody');if(b){b.innerHTML=tlBody();try{enPass(b)}catch(e){}toolsDraw()}}
 function tlPwTap(k,i){
@@ -25153,7 +25252,7 @@ function tlBuy(c,k){
   if(c==='sk')tlAddCP(TL_CPP[it[1]]);
   tlSetEq(c,k);try{saveState()}catch(e){}
   try{buyFx(ico('gift',15),T('صارت لك')+': '+tlNm(c,k))}catch(e){toast(T('صارت لك')+': '+tlNm(c,k))}
-  refresh(toolsScr);
+  tlRefresh();
  });
 }
 /** بطاقة الجيس: قدراته الآن وبعد الترقية، والنسخ والعملات، وزرّا الترقية والاستخدام */
@@ -25161,29 +25260,31 @@ function tlSkSheet(k){
  tlCss();
  const it=tlItem('sk',k), R=TL_RAR[it[1]], o=tlOwn('sk',k), L=skLv(k), n=skCp(k), mx=L>=5;
  const needC=mx?0:TL_UPC[L-1], cost=mx?0:Math.round(TL_UPG[L-1]*R.m), can=o&&!mx&&n>=needC&&S.coins>=cost;
- const cur=skStats(k,L,'def'), nxt=mx?cur:skStats(k,L+1,'def');
- const ov=document.createElement('div');ov.className='qvov';
+ const cur=skStats(k,L,'def'), nxt=mx?cur:skStats(k,L+1,'def'), pwM=tlPwMine();   // ٦٫٩٦: القدرة المجهَّزة تُضاف لأيّ جيسٍ تجهّزه
+ const ov=document.createElement('div');ov.className='qvov tlSkOv';
  ov.innerHTML=`<div class="qvbox" style="max-width:320px"><div class="tlDet">
   <div class="qvt" style="margin:0">${tlNm('sk',k)} <span style="font-size:11px;color:${R.a}">${T(R.n)}</span></div>
   <canvas class="tlCv" data-c="sk" data-k="${k}" width="200" height="200"></canvas>
-  <div style="font-weight:900;color:#FFE9A8">${o?T('المستوى')+' '+L+(mx?' ('+T('الأقصى')+')':' → '+(L+1)):T('مقفل')}</div>
-  ${tlStats(nxt,cur)}
-  <div style="font-size:10.5px;color:var(--tx2)">${o?(mx?T('بلغ أقصى مستوى'):T('الأصفر: ما تضيفه الترقية')):T('اعثر على نسخه في الصناديق والمباريات')}</div>
+  <div style="font-weight:900;color:#FFE9A8">${o?T('المستوى')+' '+L+(mx?' ('+T('الأقصى')+')':' ← '+(L+1)):T('مقفل')}</div>
+  ${skStatRows(k,o?L:1,pwM,o&&!mx?L+1:0)}
+  <div style="font-size:11.5px;color:var(--tx2);line-height:1.6">${o?(mx?T('بلغ أقصى مستوى'):(pwM!=='def'?T('السماويّ من قدرتك')+' «'+tlNm('pw',pwM)+'» · ':'')+T('الأخضر: ما تضيفه الترقية')):T('اعثر على نسخه في الصناديق والمباريات')}</div>
   <span class="tlCp${o&&n>=needC?' rd':''}" style="max-width:240px;height:18px"><i style="width:${Math.min(100,Math.round(n/(o?needC||1:TL_UNL[it[1]])*100))}%"></i><span>${o?(mx?T('أقصى مستوى'):n+'/'+needC+' '+T('نسخة')):n+'/'+TL_UNL[it[1]]+' '+T('نسخة')}</span></span>
   ${o?skMastHTML(k):''}
   ${o&&!mx?`<button class="tlBtn up" id="tlUp" ${can?'':'disabled'}>${T('ترقية')} · ${ico('coin',14)} ${cost}</button>`:''}
   ${o&&!mx&&n<needC&&mgWild(it[1])>0?`<button class="tlBtn g" id="tlWild">${mgWildImg(it[1],18)} ${T('استخدم جوكر')} (${mgWild(it[1])})</button>`:''}
   ${o&&!mx&&n<needC&&mgBooks()>0?`<button class="tlBtn g" id="tlBook">${ico('book',14)} ${T('استخدم كتاب الجيس')} (${mgBooks()})</button>`:''}
   ${o?(caSkMine()===k?`<button class="tlBtn n" disabled>${T('قيد الاستخدام')}</button>`:`<button class="tlBtn g" id="tlUse">${T('استخدم')}</button>`)
+    :!tlArenaOkItem('sk',k)?`<button class="tlBtn n" disabled>${ico('lock',14)} ${T('يُفتح في')} ${tlArenaNmItem('sk',k)} — ${skNum(TR_ARENA[tlArenaOf('sk',k)]||0)} ${T('كأس')}</button>`
     :`<button class="tlBtn g" id="tlBuyB">${ico(it[3]?'gem':'coin',14)} ${it[2]} — ${T('اشترِ الآن')}</button>`}
   <button class="tlBtn n" id="tlX">${T('إغلاق')}</button></div></div>`;
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
  toolsDraw(ov);
- const close=()=>ov.remove();
+ try{skBackArm()}catch(e){}
+ const close=()=>{ov.remove();if(!document.querySelector('.skPOv'))try{skBackDisarm()}catch(e){}try{skSync()}catch(e){}};
  ov.onclick=e=>{if(e.target===ov)close()};
  ov.querySelector('#tlX').onclick=close;
  const up=ov.querySelector('#tlUp');if(up)up.onclick=()=>{close();tlUpgrade(k)};
- const us=ov.querySelector('#tlUse');if(us)us.onclick=()=>{close();S.caStriker=k;try{saveState()}catch(e){}tlTab('sk');toast(T('جُهّز')+': '+tlNm('sk',k))};
+ const us=ov.querySelector('#tlUse');if(us)us.onclick=()=>{close();S.caStriker=k;try{saveState()}catch(e){}tlTab('sk');skPresence();skSync();toast(T('جُهّز')+': '+tlNm('sk',k),'ok')};
  const bb=ov.querySelector('#tlBuyB');if(bb)bb.onclick=()=>{close();tlBuy('sk',k)};
  const wd=ov.querySelector('#tlWild');if(wd)wd.onclick=()=>{close();mgUseWild(k)};
  const bk=ov.querySelector('#tlBook');if(bk)bk.onclick=()=>{close();mgUseBook(k)};
@@ -25199,13 +25300,14 @@ function tlUpgrade(k){
  try{saveState()}catch(e){}
  try{buyFx(ico('up',15),tlNm('sk',k)+' — '+T('المستوى')+' '+(L+1),'+'+xp+' '+T('خبرة'))}catch(e){toast(T('المستوى')+' '+(L+1))}
  if(window.FX)try{FX.win()}catch(e){}
- refresh(toolsScr);
+ tlRefresh();
 }
 function toolsDraw(root){
  (root||document).querySelectorAll('.tlCv').forEach(cv=>{try{
   const c=cv.dataset.c,k=cv.dataset.k,x=cv.getContext('2d'),W=cv.width;x.clearRect(0,0,W,W);
   const put=(sp,cx0,cy0,sz)=>{const m=sp.width*.13;x.drawImage(sp,m,m,sp.width-2*m,sp.height-2*m,cx0-sz/2,cy0-sz/2,sz,sz)};
   if(c==='sk')put(caDisc('s:'+k,40),W/2,W/2,W*.96);
+  else if(c==='skpw'){const q=String(k).split('|'),hp=!!q[1]&&q[1]!=='def'&&TL_PWR.some(z=>z.k===q[1]);put(caDisc('s:'+q[0],40),W/2,W/2,hp?W*.6:W*.94);if(hp)caPwRing(x,W/2,W/2,W*.25,q[1],1200);skArtWatch(q[0])}   // ٦٫٩٦: بطاقة «جيسي» وورقتها
   else if(c==='pw'||c==='pwhd'){put(caDisc('s:'+caSkMine(),40),W/2,W/2,W*.6);caPwRing(x,W/2,W/2,W*.25,k,1200)}
   else if(c==='cs'){put(caDisc('b',24,k),W*.3,W*.62,W*.5);put(caDisc('w',24,k),W*.7,W*.62,W*.5);put(caDisc('q',24,k),W*.5,W*.36,W*.5)}
   else if(c==='tr'){const C=TL_TR[k];if(C){x.globalCompositeOperation='lighter';for(let i=0;i<18;i++){const f=(i+1)/18,px=W*.12+W*.52*f,py=W*.82-W*.5*f+Math.sin(f*3)*W*.05;x.globalAlpha=Math.min(1,f*f*.95+.08);x.fillStyle=f>.6?C[0]:C[1];x.beginPath();x.arc(px,py,W*(.05+.12*f),0,7);x.fill()}x.globalCompositeOperation='source-over';x.globalAlpha=1}
@@ -25214,6 +25316,366 @@ function toolsDraw(root){
    for(const t of [.12,.42,.7])caPkFx(x,W/2,W/2,W*.2,t,2.4,k)}
  }catch(e){}});
 }
+
+/* ═══ ٦٫٩٦ — «جيسي»: الجيس وقدرته أمام كلّ مباراة ═══
+   المالك: «لا يوجد زرّ اختار جيس أو قدرة». بطاقةٌ ذهبيّة (skTileHTML) في مركز الكيرم والرئيسيّة وقبل مباراة الآليّ وأثناء
+   البحث وفي الردهة؛ لمستها تفتح ورقة الاختيار skPick() فوق الشاشة نفسها — لا tab() ولا مغادرة، فالرجوع من حيث جئت.
+   الطبقة مسطّحة بلا ضبابيّة ولا حركةٍ دائمة (القاعدة ٣)، والأقراص لوحاتٌ من ذاكرة caDisc لا صورٌ تُرمَّز في كلّ رسم */
+const SK_L3=['القوّة','التصويب','الزمن'], SK_IC=['energy','target','timer'], SK_RR={c:1,r:2,e:3,l:4};
+const SK_STAR="url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23E8B23A' stroke-width='3'%3E%3Crect x='21' y='21' width='58' height='58'/%3E%3Crect x='21' y='21' width='58' height='58' transform='rotate(45 50 50)'/%3E%3Ccircle cx='50' cy='50' r='15'/%3E%3C/g%3E%3C/svg%3E\")";
+const SKP_CSS=`
+body .skHub{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:76px;margin:10px 0 4px;padding:11px 12px 12px;border-radius:16px;cursor:pointer;text-align:start;font-family:inherit;color:#F6E7C6;overflow:hidden;
+ border:1px solid rgba(255,233,168,.55);background:radial-gradient(120% 140% at 88% 0%,rgba(232,178,58,.2),transparent 55%),linear-gradient(180deg,#1B2748,#0D1428);
+ box-shadow:0 4px 0 #070B16,0 0 0 1px rgba(232,178,58,.16),0 14px 26px -14px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,244,214,.14);transition:transform .08s ease,box-shadow .08s ease;-webkit-tap-highlight-color:transparent}
+body .skHub::before{content:'';position:absolute;left:14%;right:14%;top:0;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#FFE9A8,transparent);pointer-events:none}
+body .skHub:active{transform:translateY(2px);box-shadow:0 2px 0 #070B16,0 0 0 1px rgba(232,178,58,.16),inset 0 1px 0 rgba(255,244,214,.14)}
+body .skDisc{position:relative;flex-shrink:0;display:block;border-radius:50%;padding:3px;background:conic-gradient(from 210deg,var(--ra),#FFE9A8 25%,var(--ra) 50%,#FFE9A8 75%,var(--ra));box-shadow:0 0 14px var(--rg),0 4px 10px rgba(0,0,0,.55)}
+body .skDisc>.tlCv{display:block;width:100%;height:100%;margin:0;border-radius:50%;background:radial-gradient(circle at 50% 38%,#1C2848,#0A0F1E 72%)}
+body .skDisc .skLvP{position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);min-width:24px;height:20px;padding:0 6px;border-radius:10px;background:linear-gradient(180deg,#FFF3D0,#D9A93C);color:#1A1206;
+ font:800 12px/20px 'Cairo',sans-serif;text-align:center;font-style:normal;font-variant-numeric:tabular-nums;box-shadow:0 2px 0 #6E4E12,0 0 0 1.5px #0B1020}
+body .skHub .skDisc{width:66px;height:66px}
+body .skHubB{position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+body .skHubK{font-size:11px;font-weight:800;color:#D9B76E;line-height:1.3;letter-spacing:.02em}
+body .skHubN{font-family:var(--fd);font-size:17px;font-weight:700;line-height:1.35;color:#F6E7C6;overflow-wrap:anywhere;padding-inline-end:2px}
+body .skHubN em{font:800 11px 'Cairo',sans-serif;color:color-mix(in srgb,var(--ra) 62%,#fff);margin-inline-start:6px;font-style:normal;white-space:nowrap}
+body .skChips{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+body .skChips b{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;line-height:1.55;padding:1px 8px;border-radius:999px;background:rgba(6,10,20,.62);border:1px solid rgba(217,183,110,.24);color:#E8DCC0;font-variant-numeric:tabular-nums;white-space:nowrap}
+body .skChips b.pw{color:#BDEBFF;border-color:rgba(95,208,255,.4)}
+body .skChips b.pw i{width:9px;height:9px;border-radius:50%;border:2px solid rgb(var(--pc));box-shadow:0 0 6px rgba(var(--pc),.7)}
+body .skStd{font-size:11px;font-weight:700;color:#C9B37A;line-height:1.45}
+body .skGo{position:relative;z-index:1;flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:6px;max-width:84px}
+body .skGo>span{position:relative;padding:9px 15px;border-radius:12px;background:linear-gradient(180deg,#FFF3D0 0%,#F0CF7A 22%,#D9AE4E 50%,#B98A2E 78%,#D6B05C 100%);color:#1A1206;
+ font:700 14.5px/1.2 var(--fd);box-shadow:0 3px 0 #6E4E12,inset 0 1px 0 rgba(255,255,255,.7);text-shadow:0 1px 0 rgba(255,246,220,.6);white-space:nowrap}
+body .skGo>span b{position:absolute;top:-8px;inset-inline-end:-8px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:linear-gradient(180deg,#7CF0A6,#1E9E57);color:#062012;font:800 11px/19px 'Cairo',sans-serif;text-shadow:none;box-shadow:0 0 0 2px #0D1428;display:none}
+body .skGo i{font-style:normal;font-size:11px;font-weight:800;line-height:1.3;color:#FFE9A8;text-align:center;display:inline-flex;align-items:center;gap:2px}
+body .skHub.sm{min-height:64px;margin:12px 0 6px;padding:9px 10px 10px;gap:10px}body .skHub.sm .skDisc{width:54px;height:54px}body .skHub.sm .skHubN{font-size:15.5px}
+body .skHub.sm .skGo>span{padding:8px 13px;font-size:14px}
+@media (max-width:359px){body .skHub{gap:9px;padding:10px 9px 11px}body .skHub .skDisc{width:54px;height:54px}body .skHub.sm .skDisc{width:48px;height:48px}
+ body .skHubN{font-size:15.5px}body .skGo>span{padding:8px 11px;font-size:13.5px}body .skGo i{display:none}body .skGo>span b{display:block}body .skChips b{padding:1px 6px}}
+/* الورقة */
+body .skPOv{position:fixed;inset:0;z-index:90;background:rgba(3,5,11,.86);display:flex;align-items:flex-end;justify-content:center;animation:skFd .18s ease both}
+body .skP{position:relative;width:100%;max-width:520px;max-height:92dvh;display:flex;flex-direction:column;border-radius:22px 22px 0 0;background:linear-gradient(180deg,#16203A 0%,#0C1222 100%);
+ border:1px solid rgba(217,183,110,.42);border-bottom:0;box-shadow:0 -18px 50px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,244,214,.1);animation:skIn .24s cubic-bezier(.2,.9,.3,1) both;overflow:hidden}
+body .skP::before{content:'';position:absolute;left:10%;right:10%;top:0;height:2px;background:linear-gradient(90deg,transparent,#FFE9A8,transparent);pointer-events:none}
+body .skP::after{content:'';position:absolute;left:0;right:0;top:0;height:74px;background:${SK_STAR} 0 6px/30px 30px repeat-x;opacity:.06;pointer-events:none}
+@keyframes skIn{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes skFd{from{opacity:0}to{opacity:1}}
+body .skPHd{width:44px;height:5px;border-radius:3px;background:rgba(217,183,110,.38);margin:8px auto 0;flex-shrink:0}
+body .skPH{position:relative;z-index:1;display:flex;align-items:center;gap:10px;padding:6px 16px 8px;flex-shrink:0}
+body .skPT{flex:1;min-width:0}
+body .skPT b{display:flex;align-items:center;gap:8px;font-family:var(--fd);font-size:21px;font-weight:700;color:#FFE9A8;line-height:1.3;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+body .skPT small{display:block;font-size:11.5px;font-weight:700;color:#AEB7CF;margin-top:1px;line-height:1.5}
+body .skPX{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid rgba(217,183,110,.5);background:radial-gradient(circle at 50% 35%,#27335F,#0A1026 78%);color:#FFE9A8;display:grid;place-items:center;cursor:pointer;
+ box-shadow:0 3px 0 #05080F,inset 0 1px 0 rgba(255,244,214,.18)}
+body .skPX:active{transform:translateY(2px);box-shadow:0 1px 0 #05080F}
+body .skPB{position:relative;z-index:1;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px 16px 14px;-webkit-overflow-scrolling:touch}
+body .skHero{display:flex;gap:14px;align-items:center;padding:12px 12px 14px;border-radius:16px;background:radial-gradient(110% 120% at 90% 0%,rgba(var(--rr),.24),transparent 60%),rgba(6,10,20,.55);border:1px solid rgba(217,183,110,.26)}
+body .skHero .skDisc{width:92px;height:92px}
+body .skHeroB{flex:1;min-width:0}
+body .skHeroN{font-family:var(--fd);font-size:19px;font-weight:700;color:#F6E7C6;line-height:1.35}
+body .skHeroR{display:flex;gap:5px;margin:3px 0 6px;flex-wrap:wrap}
+body .skTag{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;padding:0 8px;border-radius:999px;border:1px solid currentColor;line-height:1.7;white-space:nowrap}
+body .skTag.rr{color:color-mix(in srgb,var(--ra) 62%,#fff)}body .skTag.gd{color:#FFE9A8}body .skTag.eq{color:#1A1206;background:linear-gradient(180deg,#FFF3D0,#D9A93C);border-color:#FFE9A8}
+body .skSt{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:5px 7px}
+body .skSt.nx{grid-template-columns:auto 1fr auto 22px}
+body .skSt>b{font-size:12px;font-weight:800;color:#DCE3F2;white-space:nowrap}
+body .skSt>u{text-decoration:none;font:800 12px 'Cairo',sans-serif;color:#FFE9A8;text-align:end;font-variant-numeric:tabular-nums;white-space:nowrap}
+body .skSt>u small{font-size:10.5px;color:#8B96B6}
+body .skSt>s{text-decoration:none;font:800 12px 'Cairo',sans-serif;color:#7CF0A6;font-variant-numeric:tabular-nums}
+body .skBar{display:flex;gap:2px;direction:ltr;min-width:0}body .skBar i{flex:1;height:8px;border-radius:2px;background:rgba(0,0,0,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.04)}
+body .skBar i.f{background:linear-gradient(180deg,#FFE9A8,#D9A93C)}body .skBar i.p{background:linear-gradient(180deg,#9FE3FF,#3DB4F0)}
+body .skFx{font-size:11.5px;font-weight:700;color:#AEB7CF;line-height:1.75;margin:8px 2px 0}
+body .skFxI{white-space:nowrap}
+body .skFx bdi{color:#F6E7C6;font-weight:800;font-variant-numeric:tabular-nums}
+body .skFxP{display:inline-flex;align-items:center;gap:5px;color:#9FE3FF}body .skFxP i{width:14px;height:6px;border-radius:2px;background:linear-gradient(180deg,#9FE3FF,#3DB4F0)}
+body .skSec{display:flex;align-items:center;gap:8px;margin:16px 0 8px}
+body .skSec b{font-family:var(--fd);font-size:15.5px;font-weight:700;color:#F1DFAE;white-space:nowrap}
+body .skSec::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(217,183,110,.4),transparent);order:2}
+body .skSec em{order:3;font-style:normal;font-size:11px;font-weight:800;color:#8B96B6;white-space:nowrap}
+[dir=rtl] body .skSec::after{background:linear-gradient(270deg,rgba(217,183,110,.4),transparent)}
+body .skPw{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;overscroll-behavior-x:contain}
+body .skPw::-webkit-scrollbar{display:none}
+body .skPwC{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:8px 11px 8px 12px;border-radius:14px;background:rgba(6,10,20,.6);border:1px solid rgba(217,183,110,.24);color:#E8DCC0;font-family:inherit;text-align:start;cursor:pointer}
+body .skPwC>i{flex-shrink:0;width:24px;height:24px;border-radius:50%;border:2.5px solid rgb(var(--pc));box-shadow:0 0 8px rgba(var(--pc),.55),inset 0 0 6px rgba(var(--pc),.35);display:grid;place-items:center;color:#C9B37A}
+body .skPwC b{display:block;font-size:12.5px;font-weight:800;line-height:1.35;color:#F1F4FA}
+body .skPwC small{display:block;font-size:11px;font-weight:800;color:#9FE3FF;line-height:1.35;white-space:nowrap}
+body .skPwC.on{border-color:#FFE9A8;background:linear-gradient(180deg,rgba(255,233,168,.16),rgba(232,178,58,.05)),rgba(6,10,20,.6);box-shadow:0 0 0 1px rgba(255,233,168,.4)}
+body .skPwC.lk{opacity:.5}body .skPwC.lk small{color:#AEB7CF}body .skPwC.lk>i{border-color:rgba(var(--pc),.45);box-shadow:none}
+body .skPw.ro .skPwC{cursor:default}
+body .skPwN{font-size:11px;font-weight:700;color:#8B96B6;margin-top:2px}
+body .skGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 8px}
+body .skC{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 3px 8px;border-radius:14px;cursor:pointer;font-family:inherit;color:#F1F4FA;
+ background:linear-gradient(180deg,rgba(var(--rr),.22),rgba(10,15,30,.92) 72%);border:1px solid rgba(var(--rr),.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+body .skC .skDisc{width:56px;height:56px;margin-bottom:6px}
+body .skC .nm{font-size:11.5px;font-weight:800;line-height:1.3;text-align:center;min-height:30px;display:flex;align-items:center;justify-content:center}
+body .skC.on{border-color:#FFE9A8;box-shadow:0 0 0 2px rgba(255,233,168,.6),0 0 18px rgba(232,178,58,.38)}
+body .skC.lk .skDisc{filter:saturate(.25) brightness(.55)}body .skC.lk .nm{color:#8B96B6}
+body .skEq{position:absolute;top:-8px;inset-inline-start:-5px;z-index:2;width:24px;height:24px;border-radius:50%;background:linear-gradient(180deg,#FFF3D0,#D9A93C);color:#1A1206;display:grid;place-items:center;box-shadow:0 2px 0 #6E4E12,0 0 0 2px #0B1020}
+body .skUp{position:absolute;top:-8px;inset-inline-end:-5px;z-index:2;padding:0 6px;height:19px;border-radius:10px;background:linear-gradient(180deg,#7CF0A6,#1E9E57);color:#062012;font:800 11px/19px 'Cairo',sans-serif;box-shadow:0 0 0 2px #0B1020;white-space:nowrap}
+body .skCp{position:relative;display:block;width:92%;height:15px;border-radius:8px;background:rgba(0,0,0,.55);overflow:hidden}
+body .skCp i{display:block;height:100%;background:linear-gradient(90deg,#9A6E1E,#E8B23A)}body .skCp.rd i{background:linear-gradient(90deg,#1E9E57,#7CF0A6)}
+body .skCp span{position:absolute;inset:0;font:800 11px/15px 'Cairo',sans-serif;text-align:center;color:#fff;text-shadow:0 1px 2px #000;font-variant-numeric:tabular-nums}
+body .skAr{display:flex;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:800;color:#C9B37A;text-align:center;line-height:1.3;min-height:15px}
+body .skPF{position:relative;z-index:1;flex-shrink:0;display:flex;gap:8px;padding:10px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid rgba(217,183,110,.2);background:linear-gradient(180deg,#0F172C,#0A1020)}
+body .skPF .rbtn{flex:1;min-width:0;margin:0}
+body .skPF .rbtn:disabled{opacity:.6;cursor:default}
+body .skPF .rbtn>span{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:6px 10px;line-height:1.3}
+body .skDt{flex:0 0 auto;padding:0 16px;border-radius:12px;border:1px solid rgba(217,183,110,.5);background:linear-gradient(180deg,#161E33,#0B101D);color:#F1DFAE;font:700 14px var(--fd);cursor:pointer;box-shadow:0 3px 0 #05080F,inset 0 1px 0 rgba(255,244,214,.08)}
+body .skAll{display:flex;align-items:center;gap:10px;width:100%;margin-top:16px;padding:11px 12px;border-radius:14px;cursor:pointer;text-align:start;font-family:inherit;color:#F6E7C6;background:linear-gradient(180deg,#161E33,#0B101D);border:1px solid rgba(217,183,110,.42);box-shadow:inset 0 1px 0 rgba(255,244,214,.08)}
+body .skAll>span:nth-child(2){flex:1;min-width:0}body .skAll b{display:block;font-family:var(--fd);font-size:15px;font-weight:700;color:#F6E7C6}
+body .skAll small{display:block;font-size:11px;font-weight:700;color:#9AA6C2;margin-top:1px}
+@media (max-width:359px){body .skGrid{grid-template-columns:repeat(3,minmax(0,1fr))}body .skHero .skDisc{width:76px;height:76px}body .skHero{gap:10px;padding:10px}body .skPB{padding-inline:12px}}
+@media (prefers-reduced-motion:reduce){body .skP,body .skPOv{animation:none}}
+/* الشريط السفليّ: قرص جيسك على صفيحةٍ كحليّة بحلقةٍ ذهبيّة — يُرى حتّى الجيس الداكن (العقيق والهلال) */
+body .nav .nvSk{display:grid;place-items:center;width:32px;height:32px;margin:0 auto;border-radius:50%;background:radial-gradient(circle at 50% 34%,#31447A 0%,#17204A 55%,#0A1026 100%);
+ box-shadow:0 0 0 2px #E8B23A,0 0 0 3.5px rgba(8,11,22,.95),0 3px 8px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,244,214,.25)}
+body .nav .nvSk img,body .nav .nvSk svg{width:25px!important;height:25px!important;border-radius:50%;box-shadow:none!important}
+body .nav .nvi>span:first-child:not(.i){z-index:3}
+body .nav .nvi.on .nvSk{box-shadow:0 0 0 2px #FFE9A8,0 0 0 3.5px rgba(8,11,22,.95),0 0 14px rgba(232,178,58,.65),inset 0 1px 0 rgba(255,244,214,.25)}
+/* المباراة: قرص جيسك ومستواه بجانب «أنت» — للعرض */
+body .pNm .skHud{display:inline-flex;align-items:center;gap:3px;vertical-align:-3px;margin-inline-start:6px;padding:0 6px 0 1px;height:18px;border-radius:999px;background:rgba(6,10,20,.72);border:1px solid rgba(232,178,58,.6)}
+body .skHud img{width:15px!important;height:15px!important;border-radius:50%;margin:0!important}
+body .skHud i{font:800 11px/1 'Cairo',sans-serif;color:#FFE9A8;font-style:normal;font-variant-numeric:tabular-nums}
+/* نهاية المباراة: شريط «جيسك» المضغوط */
+body .skEndC{position:relative;z-index:3;flex-shrink:0;display:flex;align-items:center;gap:9px;width:min(340px,100%);min-height:44px;margin:6px auto 8px;padding:5px 6px 5px 12px;border-radius:14px;cursor:pointer;font-family:inherit;text-align:start;color:#F6E7C6;
+ background:linear-gradient(180deg,#1B2748,#0D1428);border:1px solid rgba(255,233,168,.5);box-shadow:0 3px 0 #070B16,inset 0 1px 0 rgba(255,244,214,.12)}
+body .skEndC>img{width:32px!important;height:32px!important;margin:0!important;border-radius:50%;box-shadow:0 0 0 2px #E8B23A,0 0 10px rgba(232,178,58,.4);flex-shrink:0}
+body .skEndC>span{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;line-height:1.3}
+body .skEndC small{font-size:11px;font-weight:800;color:#D9B76E}body .skEndC b{font-family:var(--fd);font-size:14px;font-weight:700;color:#F6E7C6}
+body .skEndC i{font-style:normal;font-size:11px;font-weight:700;color:#AEB7CF}
+body .skEndC em{flex-shrink:0;font-style:normal;padding:7px 12px;border-radius:10px;background:linear-gradient(180deg,#FFF3D0 0%,#F0CF7A 22%,#D9AE4E 50%,#B98A2E 78%,#D6B05C 100%);color:#1A1206;font:700 13px/1.2 var(--fd);box-shadow:0 2px 0 #6E4E12,inset 0 1px 0 rgba(255,255,255,.7)}
+/* الردهة: قرص جيس كلّ لاعبٍ على زاوية صورته */
+body .rmSeat .skSeat{position:absolute;left:-8px;bottom:-6px;z-index:2;display:block;width:22px;height:22px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(232,178,58,.8),0 2px 5px rgba(0,0,0,.6);overflow:hidden;background:#0A1026}
+body .rmSeat .skSeat img{width:22px!important;height:22px!important;display:block}
+/* الخزانة: خطٌّ لا يقلّ عن ١١، الذهب للمجهَّز، المستوى تحت القرص، والقفل كحليّ باسم ساحته */
+body .tlHd .tlS2{font-size:11.5px}
+body .tlBar{height:16px}body .tlBar span{font:800 11px 'Cairo',sans-serif;font-variant-numeric:tabular-nums}
+body .tlNm{font-size:12.5px}body .tlRr{font-size:11px}
+body .tlCard.eq{border-color:#FFE9A8;box-shadow:0 0 0 1px rgba(255,233,168,.55),0 0 16px rgba(232,178,58,.45)}
+body .tlCard.eq .tlBt{background:linear-gradient(180deg,#FFF3D0,#D9A93C);color:#1A1206}
+body .tlTag{font-size:11px;line-height:1.4;padding:2px 6px;background:linear-gradient(180deg,#FFF3D0,#D9A93C);color:#1A1206}
+body .tlTag~.tlNm{margin-top:17px}
+body .tlCvW{position:relative;display:block;margin:4px 0 9px}body .tlCvW>.tlCv{margin:0}
+body .tlCvW>.tlLvB{top:auto;right:auto;bottom:-8px;left:50%;transform:translateX(-50%);min-width:22px;height:20px;padding:0 5px;font:800 12px/20px 'Cairo',sans-serif;font-style:normal;box-shadow:0 2px 0 #6E4E12,0 0 0 1.5px #0B1020}
+body .tlBt{font-size:12px;padding:5px 3px}
+body .tlCard.eq .tlBt.up,body .tlBt.up{background:linear-gradient(180deg,#7CF0A6,#1E9E57);color:#062012}
+body .tlBt.lk{background:#0B1226;color:#E3CD92;border:1px solid rgba(217,183,110,.4);font-size:11px;line-height:1.3;padding:4px 3px}
+body .tlCp{height:16px}body .tlCp span{font:800 11px 'Cairo',sans-serif;font-variant-numeric:tabular-nums}
+body .tlCp i{background:linear-gradient(90deg,#9A6E1E,#E8B23A)}body .tlCp.rd i{background:linear-gradient(90deg,#1E9E57,#7CF0A6)}
+body .tlSt{font-size:11px}body .tlLock{font-size:11px}
+body .tlSt3{position:relative;display:flex;justify-content:center;gap:3px;width:100%;margin-top:2px}
+body .tlSt3>i{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:8px;background:rgba(0,0,0,.4);font-style:normal}
+body .tlSt3 b{font:800 12px/1.4 'Cairo',sans-serif;color:#FFF3D0;font-variant-numeric:tabular-nums}
+@media (max-width:359px){body .tlSt3>i{padding:1px 3px}}
+body .tlLeg{display:flex;flex-wrap:wrap;gap:6px 12px;margin-top:10px;font-size:11.5px;font-weight:700;color:#C9D2E8}body .tlLeg span{display:inline-flex;align-items:center;gap:4px}
+body .tlMst{animation:none;box-shadow:0 0 0 2px #0B1020,0 0 10px rgba(255,233,168,.55)}
+body #toolsScr .dkNote{font-size:11.5px;line-height:1.7}
+body .tlDet .skSt{width:100%;max-width:270px}
+body .qvov.tlSkOv{z-index:95;background:rgba(3,5,11,.86);backdrop-filter:none;-webkit-backdrop-filter:none}
+body .skM .skMh{font-family:var(--fd);font-size:13px;font-weight:700;color:#D9B76E;text-align:start;margin-bottom:2px}
+body .skMt{min-width:64px}body .skMn s{font-size:11px}body .skMb{height:6px}
+`;
+const SK_SVG={x:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>',ok:'<path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'};
+function skSvg(n,z){return `<svg viewBox="0 0 24 24" width="${z}" height="${z}" aria-hidden="true" style="display:block;flex-shrink:0">${SK_SVG[n]}</svg>`}
+function skCss(){if(!document.getElementById('skpCss')){const st=document.createElement('style');st.id='skpCss';st.textContent=SKP_CSS;document.head.appendChild(st)}}
+function skNum(v){return `<bdi>${(+v||0).toLocaleString('en-US')}</bdi>`}
+function skFrac(a,b){return `<bdi>${(+a||0).toLocaleString('en-US')}/${(+b||0).toLocaleString('en-US')}</bdi>`}
+function skSign(v){v=Math.round(+v||0);return `<bdi>${v>0?'+':v<0?'−':''}${Math.abs(v).toLocaleString('en-US')}</bdi>`}
+function skPct(v){v=Math.round(+v||0);return `<bdi>${v>0?'+':v<0?'−':''}${Math.abs(v).toLocaleString('en-US')}٪</bdi>`}
+function skRGB(h){h=String(h||'#888888').replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16)||0).join(',')}
+/** جيسٌ تملكه ونسخه تكفي للترقية التالية */
+function skUpOk(k){try{const L=skLv(k);return tlOwn('sk',k)&&L<5&&skCp(k)>=TL_UPC[L-1]}catch(e){return false}}
+function skUpReady(){let n=0;try{for(const it of TL_ITEMS.sk)if(skUpOk(it[0]))n++}catch(e){}return n}
+/** شارة تبويب «الجيوس»: ترقياتٌ جاهزة + جوائز إتقانٍ جاهزة (كانت شارة البطاقات قبل حذفها) */
+function skBadgeN(){try{return skUpReady()+skMastReadyAny()}catch(e){return 0}}
+function skUpTxt(n){return n===1?T('ترقيةٌ جاهزة'):n===2?T('ترقيتان جاهزتان'):skNum(n)+' '+(n<=10?T('ترقيات جاهزة'):T('ترقية جاهزة'))}
+/** مباراةٌ جارية: الورقة للعرض فقط — تغيير الجيس في منتصفها يخالف ما أعلنه حضورك للمضيف (مهلة الضربة) */
+function skPickLocked(){try{return !!RM.code&&!/^(lobby|idle|over)$/.test(RM.phase||'idle')}catch(e){return false}}
+/** ترتيب الجيوس: المجهَّز، ثمّ ما تملك (الأندر فالأعلى مستوًى)، ثمّ ما يُفتح بالنسخ، ثمّ المقفل بساحته (الأقرب أوّلًا) */
+function skSorted(){const eq=caSkMine();
+ const sc=x=>{const k=x[0],r=SK_RR[x[1]]||1;if(k===eq)return 1e7;if(tlOwn('sk',k))return 1e6+r*1e4+skLv(k)*1e3+Math.min(999,skCp(k));
+  if(tlArenaOkItem('sk',k))return 5e5+r*1e4+Math.min(999,skCp(k));return 1e4-tlArenaOf('sk',k)*100-r};
+ return TL_ITEMS.sk.slice().sort((a,b)=>sc(b)-sc(a))}
+/** قرص جيس بحلقة ندرته: لوحةٌ تُرسم من ذاكرة caDisc (toolsDraw)، وحلقة قدرتك حوله إن كانت لك قدرة */
+function skDisc(k,lv,pw,px){const it=tlItem('sk',k)||['blue','c'],R=TL_RAR[it[1]];px=px||120;
+ return `<span class="skDisc" style="--ra:${R.a};--rg:${R.g}"><canvas class="tlCv" data-c="skpw" data-k="${k}|${pw||'def'}" width="${px}" height="${px}"></canvas>${lv?`<i class="skLvP">${skNum(lv)}</i>`:''}</span>`}
+/** بطاقة «جيسي» — قابلةٌ للاستعمال في أيّ شاشة: skTileHTML({sm, ctx}) ثمّ skTileDraw() بعد الرسم.
+    ctx: hub · home · solo · mm · lobby · end — يُعاد بناؤها في مكانها بعد كلّ تجهيز (skSync) */
+function skTileHTML(o){
+ o=o||{};skCss();
+ const k=caSkMine(),it=tlItem('sk',k)||['blue','c'],R=TL_RAR[it[1]],L=skLv(k),pw=tlPwMine(),P=TL_PWR.find(x=>x.k===pw)||TL_PWR[0],st=skStats(k,L,pw),up=skUpReady();
+ let std=false;try{std=ch12Std()}catch(e){}
+ const ctx=String(o.ctx||'hub').replace(/[^a-z]/g,'');
+ return `<button type="button" class="skHub${o.sm?' sm':''}" data-ctx="${ctx}" data-sig="${[k,L,pw,st.join(''),up,std?1:0].join('.')}" style="--ra:${R.a};--rg:${R.g}" onclick="skPick({from:'${ctx}'})">
+  ${skDisc(k,L,pw,o.sm?108:132)}
+  <span class="skHubB"><span class="skHubK">${T('جيسي')}</span>
+   <span class="skHubN">${esc(tlNm('sk',k))}<em>${T(R.n)}</em></span>
+   <span class="skChips">${st.map((v,i)=>`<b>${T(SK_L3[i])} ${skNum(v)}</b>`).join('')}${pw!=='def'?`<b class="pw" style="--pc:${P.col}"><i></i>${esc(P.n)}</b>`:''}</span>
+   ${std?`<span class="skStd">${T('في مباريات تحدّي الاثني عشر تتساوى القدرات')}</span>`:''}</span>
+  <span class="skGo"><span>${T('غيّر')}${up?`<b>${skNum(up)}</b>`:''}</span>${up?`<i>${skUpTxt(up)}</i>`:''}</span></button>`;
+}
+/** يرسم أقراص البطاقات في الشاشة بعد رسمها، ويسخّن ذاكرة الأقراص في وقت الفراغ */
+function skTileDraw(root){try{(root||document.getElementById('app')||document).querySelectorAll('.skHub').forEach(t=>toolsDraw(t))}catch(e){}skPrewarm()}
+/** للشاشات التي تُعاد كلّ ثانية (البحث) أو مع كلّ حضور (الردهة): البطاقة نفسها تبقى إن لم يتغيّر شيء — فلا تضيع لمسةٌ ولا يُعاد رسم */
+function skTileKeep(old){try{document.querySelectorAll('#app .skHub').forEach(nw=>{
+  if(old&&old!==nw&&old.dataset.sig===nw.dataset.sig&&old.dataset.ctx===nw.dataset.ctx){nw.replaceWith(old);old=null}else toolsDraw(nw)})}catch(e){}skPrewarm()}
+let _skWarm=0;
+/** أقراص جيوسك أوّلًا ثمّ البقيّة، قرصٌ في كلّ فسحة فراغ — فأوّل فتحٍ للورقة لا يبني عشرة أقراص دفعةً واحدة */
+function skPrewarm(){if(_skWarm)return;_skWarm=1;
+ let L=[];try{L=TL_ITEMS.sk.filter(x=>tlOwn('sk',x[0])).concat(TL_ITEMS.sk.filter(x=>!tlOwn('sk',x[0]))).map(x=>x[0])}catch(e){}
+ const ric=window.requestIdleCallback?f=>requestIdleCallback(f,{timeout:1500}):f=>setTimeout(()=>f({timeRemaining:()=>6,didTimeout:true}),200);
+ const step=d=>{let n=0;while(L.length&&(n===0||d.timeRemaining()>5)){try{caDisc('s:'+L.shift(),40)}catch(e){}n++}if(L.length)ric(step)};
+ ric(step)}
+let _skP=null;
+/** ورقة الاختيار في مكانها. o: {from, sel} */
+function skPick(o){
+ o=o||{};tlCss();skCss();
+ if(!S.tlGift){S.tlGift=1;S.skCp=S.skCp||{};S.skCp.blue=(S.skCp.blue||0)+5;try{saveState()}catch(e){}}   // هديّة البداية نفسها التي تمنحها الخزانة
+ const eq=caSkMine();
+ _skP={sel:(o.sel&&tlItem('sk',o.sel))?o.sel:eq,from:String(o.from||''),ord:skSorted().map(x=>x[0]),ro:skPickLocked()};
+ document.querySelectorAll('.skPOv').forEach(x=>x.remove());
+ const ov=document.createElement('div');ov.className='skPOv';
+ ov.innerHTML=`<div class="skP" role="dialog" aria-modal="true" aria-label="${T('جيسي')}"><div class="skPHd"></div>
+  <div class="skPH"><div class="skPT"><b>${ico('crown',16)} ${T('جيسي')}</b><small class="skPSub">${T('اختر جيسك وقدرته — تُحفظ لكلّ مبارياتك')}</small></div>
+   <button type="button" class="skPX" onclick="skPickClose()" aria-label="${T('إغلاق')}">${skSvg('x',18)}</button></div>
+  <div class="skPB"></div><div class="skPF"></div></div>`;
+ ov.addEventListener('click',e=>{if(e.target===ov)skPickClose()});
+ document.body.appendChild(ov);
+ skPickRender(1);
+ skBackArm();   // زرّ الرجوع في أندرويد يغلق الورقة لا الشاشة ولا التطبيق
+ skPrewarm();
+}
+function skPickClose(){document.querySelectorAll('.skPOv').forEach(x=>x.remove());_skP=null;if(!document.querySelector('.qvov.tlSkOv'))skBackDisarm()}
+function skHeroHTML(){
+ const P=_skP,eq=caSkMine(),k=P.sel,it=tlItem('sk',k)||['blue','c'],R=TL_RAR[it[1]],o=tlOwn('sk',k),L=o?skLv(k):1,pw=tlPwMine();
+ let std=false;try{std=P.ro&&caTourney()}catch(e){}
+ const s=std?CA_STD.slice():skStats(k,L,pw),f=Math.round((.9+.02*s[0]-1)*100);
+ return `<div class="skHero" style="--rr:${skRGB(R.a)};--ra:${R.a}">${skDisc(k,o?L:0,pw,192)}
+  <div class="skHeroB"><div class="skHeroN">${esc(tlNm('sk',k))}</div>
+   <div class="skHeroR"><span class="skTag rr">${T(R.n)}</span><span class="skTag gd">${o?T('المستوى')+' '+skNum(L)+' '+T('من')+' '+skNum(5):ico('lock',11)+' '+T('مقفل')}</span>${k===eq?`<span class="skTag eq">${skSvg('ok',11)} ${T('مُجهَّز')}</span>`:''}</div>
+   ${skStatRows(k,L,pw,0,std)}</div></div>
+  <div class="skFx">${std?T('مباراةٌ بقدراتٍ موحّدة — ستّةٌ في كلّ قدرة')
+   :`<span class="skFxI">${T('القوّة')}: ${f>0?T('ضربةٌ أشدّ')+' '+skPct(f):f<0?T('ضربةٌ أخفّ')+' '+skPct(f):T('ضربةٌ عاديّة')}</span> · <span class="skFxI">${T('التصويب')}: ${T('خطٌّ من')} ${skNum(7+s[1])} ${T('نقطة')}</span> · <span class="skFxI">${T('الزمن')}: ${skNum(15+s[2])} ${T('ثانية للضربة')}</span>`}
+   ${pw!=='def'&&!std?`<br><span class="skFxP"><i></i>${T('من قدرة')} «${esc(tlNm('pw',pw))}»</span>`:''}</div>`;
+}
+/** ثلاثة أشرطة من عشر خانات (٨ بكسل): الذهب للجيس ومستواه، والسماويّ للقدرة، والرقم «8/10» — ومع nx ما تضيفه الترقية */
+function skStatRows(k,lv,pw,nx,std){
+ const b=std?CA_STD.slice():skStats(k,lv,'def'),f=std?CA_STD.slice():skStats(k,lv,pw),n=nx?skStats(k,nx,pw):null;
+ return `<div class="skSt${n?' nx':''}">${SK_L3.map((t,i)=>`<b>${T(t)}</b><span class="skBar">${Array.from({length:10},(_,j)=>`<i class="${j<b[i]?'f':j<f[i]?'p':''}"></i>`).join('')}</span><u>${skFrac(f[i],10)}</u>${n?`<s>${n[i]>f[i]?skSign(n[i]-f[i]):''}</s>`:''}`).join('')}</div>`;
+}
+function skCellHTML(k){
+ const P=_skP,eq=caSkMine(),x=tlItem('sk',k),RR=TL_RAR[x[1]],ow=tlOwn('sk',k),lv=skLv(k),n=skCp(k),arOk=tlArenaOkItem('sk',k),up=skUpOk(k);
+ const need=ow?(lv>=5?0:TL_UPC[lv-1]):(TL_UNL[x[1]]||0);
+ const foot=ow||arOk?`<span class="skCp${up?' rd':''}"><i style="width:${need?Math.min(100,Math.round(n/need*100)):100}%"></i><span>${need?skFrac(n,need):T('الأقصى')}</span></span>`
+  :`<span class="skAr">${ico('lock',11)} ${esc(tlArenaNmItem('sk',k))}</span>`;
+ return `<button type="button" class="skC${k===P.sel?' on':''}${ow?'':arOk?' nw':' lk'}" data-k="${k}" style="--rr:${skRGB(RR.a)}" onclick="skPickSel('${k}')" aria-pressed="${k===P.sel}">${k===eq?`<span class="skEq">${skSvg('ok',14)}</span>`:''}${up?`<span class="skUp">${T('ترقية!')}</span>`:''}${skDisc(k,ow?lv:0,'def',112)}<span class="nm">${esc(tlNm('sk',k))}</span>${foot}</button>`;
+}
+function skPwHTML(){
+ const pw=tlPwMine(),un=tlPwUnl(),cp=S.tlCP||0;
+ return TL_PWR.map((Q,i)=>{const op=i<un,on=Q.k===pw,nx=i===un;
+  const sub=op?(Q.st.some(v=>v)?Q.st.map((v,j)=>v?skSign(v)+' '+T(SK_L3[j]):'').filter(Boolean).join(' · '):T('بلا إضافة'))
+   :nx?T('مقفلة')+' · '+skFrac(cp%TL_PWPTS,TL_PWPTS):T('مقفلة');
+  return `<button type="button" class="skPwC${on?' on':''}${op?'':' lk'}" style="--pc:${Q.col}" onclick="skPw('${Q.k}',${i})" aria-pressed="${on}"><i>${op?'':ico('lock',11)}</i><span><b>${esc(Q.n)}</b><small>${sub}</small></span></button>`}).join('');
+}
+function skPickBody(){
+ const P=_skP,un=tlPwUnl(),cp=S.tlCP||0,own=TL_ITEMS.sk.filter(x=>tlOwn('sk',x[0])).length;
+ return `<div class="skHeroW">${skHeroHTML()}</div>
+  <div class="skSec"><b>${T('القدرة')}</b><em>${skNum(un)} ${T('من')} ${skNum(TL_PWR.length)} ${T('مفتوحة')}</em></div>
+  <div class="skPw${P.ro?' ro':''}">${skPwHTML()}</div>
+  ${un<TL_PWR.length?`<div class="skPwN">${T('تُفتح القدرة التالية بنقاطٍ تجمعها من ترقية جيوسك وفتحها')} · ${skFrac(cp%TL_PWPTS,TL_PWPTS)}</div>`:''}
+  <div class="skSec"><b>${T('جيوسي')}</b><em>${skNum(own)} ${T('من')} ${skNum(TL_ITEMS.sk.length)}</em></div>
+  <div class="skGrid">${P.ord.map(skCellHTML).join('')}</div>
+  ${P.ro||/^(mm|lobby|hud|end)$/.test(P.from)?'':`<button type="button" class="skAll" onclick="skPickClose();_tlCat='sk';push('toolsScr')"><span>${ico('chest',24)}</span><span><b>${T('الخزانة كاملة')}</b><small>${T('الترقية والإتقان والقطع والأثر والجيب')}</small></span>${chev('#E8B23A',15)}</button>`}`;
+}
+function skPickFoot(){
+ const P=_skP,eq=caSkMine(),k=P.sel,x=tlItem('sk',k)||['blue','c'],o=tlOwn('sk',k);
+ const main=P.ro?`<button type="button" class="rbtn" disabled><span>${ico('lock',15)} ${T('المباراة جارية — غيّره بعدها')}</span></button>`
+  :k===eq?`<button type="button" class="rbtn" disabled><span>${skSvg('ok',16)} ${T('مُجهَّز الآن')}</span></button>`
+  :o?`<button type="button" class="rbtn" id="skUse" onclick="skEquip('${k}')"><span>${T('جهّز')} «${esc(tlNm('sk',k))}»</span></button>`
+  :!tlArenaOkItem('sk',k)?`<button type="button" class="rbtn" disabled><span>${ico('lock',15)} ${T('يُفتح في')} ${esc(tlArenaNmItem('sk',k))}</span></button>`
+  :`<button type="button" class="rbtn" disabled><span>${skFrac(skCp(k),TL_UNL[x[1]]||0)} ${T('نسخة لفتحه')}</span></button>`;
+ return main+(P.ro?'':`<button type="button" class="skDt" onclick="tlSkSheet('${k}')">${T('التفاصيل')}</button>`);
+}
+function skPickRender(first){
+ const ov=document.querySelector('.skPOv');if(!ov||!_skP)return;
+ _skP.ro=skPickLocked();
+ const B=ov.querySelector('.skPB'),F=ov.querySelector('.skPF'),y=B.scrollTop,w0=B.querySelector('.skPw'),sx=w0?w0.scrollLeft:0;
+ B.innerHTML=skPickBody();F.innerHTML=skPickFoot();
+ const sub=ov.querySelector('.skPSub');if(sub)sub.textContent=_skP.ro?T('للعرض أثناء المباراة — تُغيَّر بعدها'):T('اختر جيسك وقدرته — تُحفظ لكلّ مبارياتك');
+ B.scrollTop=y;
+ const w=B.querySelector('.skPw');
+ if(w){if(first)requestAnimationFrame(()=>{const on=w.querySelector('.skPwC.on');if(!on||!w.isConnected)return;const a=on.getBoundingClientRect(),r=w.getBoundingClientRect();if(a.left<r.left||a.right>r.right)w.scrollLeft+=(a.left+a.width/2)-(r.left+r.width/2)});else w.scrollLeft=sx}
+ try{enPass(ov)}catch(e){}
+ toolsDraw(ov);
+}
+/** لمسة بطاقة: تعرضها في الأعلى وتسمّي الزرّ — لا تجهّز (الزرّ يجهّز) */
+function skPickSel(k){
+ if(!_skP||!tlItem('sk',k))return;
+ _skP.sel=k;const ov=document.querySelector('.skPOv');if(!ov)return;
+ ov.querySelectorAll('.skC').forEach(c=>{const on=c.dataset.k===k;c.classList.toggle('on',on);c.setAttribute('aria-pressed',on)});
+ const H=ov.querySelector('.skHeroW');if(H){H.innerHTML=skHeroHTML();toolsDraw(H)}
+ const F=ov.querySelector('.skPF');if(F)F.innerHTML=skPickFoot();
+ try{enPass(ov)}catch(e){}
+}
+function skEquip(k){
+ if(skPickLocked()){toast(T('المباراة جارية — غيّر جيسك بعدها'),'bad');skPickRender();return}
+ if(!tlOwn('sk',k)){skPickSel(k);return}
+ if(caSkMine()!==k){S.caStriker=k;try{saveState()}catch(e){}skPresence();toast(T('جُهّز')+': «'+esc(tlNm('sk',k))+'»','ok')}
+ skPickClose();skSync();
+}
+function skPw(k,i){
+ if(skPickLocked()){toast(T('المباراة جارية — غيّر قدرتك بعدها'),'bad');return}
+ const un=tlPwUnl();
+ if(i>=un){toast(ico('lock',13)+' '+(i===un?T('رقِّ جيوسك لتفتحها')+' · '+skFrac((S.tlCP||0)%TL_PWPTS,TL_PWPTS):T('افتح قفل القدرة السابقة أوّلًا')));return}
+ if(tlPwMine()===k)return;
+ S.tlPw=k;try{saveState()}catch(e){}skPresence();
+ toast(ico('energy',14)+' '+T('جُهّزت القدرة')+': «'+esc(tlNm('pw',k))+'»','ok');
+ const ov=document.querySelector('.skPOv');
+ if(ov&&_skP){const H=ov.querySelector('.skHeroW'),Wp=ov.querySelector('.skPw'),F=ov.querySelector('.skPF');if(H){H.innerHTML=skHeroHTML();toolsDraw(H)}if(Wp){const x=Wp.scrollLeft;Wp.innerHTML=skPwHTML();Wp.scrollLeft=x}if(F)F.innerHTML=skPickFoot();try{enPass(ov)}catch(e){}}
+ skSync(1);
+}
+/** في الردهة أو بعد المباراة: الحضور يحمل الجيس الجديد وقدراته — فيقرؤه الخصم ومهلة الضربة عند المضيف */
+function skPresence(){try{if(RM.code&&RMcap&&/^(lobby|over)$/.test(RM.phase||'')){const p=RMcap.presence({sk:caSkMine(),ss:caMyStats()});if(p&&p.catch)p.catch(()=>{})}}catch(e){}}
+/** بعد أيّ تغيير في الجيس أو قدرته أو مستواه: الشريط السفليّ، والبطاقات في مكانها، والورقة إن كانت مفتوحة */
+function skSync(noPick){
+ try{nav()}catch(e){}
+ try{document.querySelectorAll('#app .skHub').forEach(el=>{const t=document.createElement('template');t.innerHTML=skTileHTML({sm:el.classList.contains('sm'),ctx:el.dataset.ctx}).trim();
+  const n=t.content.firstElementChild;if(n){el.replaceWith(n);try{enPass(n)}catch(e){}toolsDraw(n)}})}catch(e){}
+ try{document.querySelectorAll('.skEndC').forEach(el=>{const t=document.createElement('template');t.innerHTML=skEndChip();if(t.content.firstElementChild)el.replaceWith(t.content.firstElementChild)})}catch(e){}
+ if(!noPick&&document.querySelector('.skPOv'))skPickRender();
+}
+/** ترقيةٌ أو شراءٌ من ورقة التفاصيل: الخزانة تُعاد إن كانت هي الشاشة، وإلّا تُحدَّث البطاقة والورقة في مكانهما (لا قفزة إلى الخزانة) */
+function tlRefresh(){if(document.getElementById('toolsScr')){refresh(toolsScr);try{nav()}catch(e){}}else skSync()}
+/** بدأت المباراة والورقة مفتوحة من الردهة: تُغلق كي يرى اللاعب لوحه */
+function skPickMatch(){if(!_skP||_skP.from==='hud'||!document.querySelector('.skPOv'))return;
+ if(skPickLocked()){skPickClose();const d=document.querySelector('.qvov.tlSkOv');if(d)d.remove();toast(T('بدأت المباراة'))}}
+/** زرّ الرجوع (أندرويد والمتصفّح): ما دامت ورقةٌ مفتوحة يصير «رجوع» الشاشة الحاليّة إغلاقًا لها — ورقة التفاصيل ثمّ ورقة
+    الاختيار — عبر مدخل leave في الموجّه نفسه (مستمع popstate عنده يسبق أيّ مستمعٍ نضيفه)، ثمّ يعود كما كان */
+let _skBk=null;
+function skBackArm(){try{const t=Router.current();if(!t)return;
+  if(_skBk&&_skBk.fn===t.fn)return;skBackDisarm();
+  const d=Router.def(t.fn)||{},orig=d.leave||null,h=function(done){if(skBackEat())return;if(orig)return orig(done);done()};
+  Router.register(t.fn,{leave:h});_skBk={fn:t.fn,h:h,orig:orig};
+  if(Router._state&&!Router._state().sent)Router.arm()}catch(e){}}
+function skBackDisarm(){try{if(!_skBk)return;const d=Router.def(_skBk.fn);if(d&&d.leave===_skBk.h){if(_skBk.orig)d.leave=_skBk.orig;else delete d.leave}}catch(e){}_skBk=null}
+function skBackEat(){const d=document.querySelector('.qvov.tlSkOv'),p=document.querySelector('.skPOv');
+ if(d){d.remove();if(!p)skBackDisarm();else try{skSync()}catch(e){}return true}
+ if(p){skPickClose();return true}
+ skBackDisarm();return false}
+/** شارة المباراة: قرص جيسك ومستواه بجانب «أنت» — للعرض فقط (لا لمسة صغيرة فوق لوحٍ حيّ) */
+function skHudChip(){try{const k=caSkMine();return `<span class="skHud" aria-label="${T('جيسي')}: ${esc(tlNm('sk',k))} · ${T('المستوى')} ${skLv(k)}">${skImg(k,28)}<i>${skNum(skLv(k))}</i></span>`}catch(e){return ''}}
+/** صورة الجيس الحقيقيّة تصل بعد رسم القرص المؤقّت: caArtInv (المسجَّل أوّلًا) يمحو القرص من الذاكرة، ثمّ يُعاد رسم البطاقات والورقة */
+function skArtRedraw(){try{document.querySelectorAll('.skDisc').forEach(d=>toolsDraw(d))}catch(e){}}
+function skArtWatch(k){try{if(REAL_ART['sk_'+k]&&!artImg('sk_'+k))artImg('sk_'+k,skArtRedraw)}catch(e){}}
+/** شريط «جيسك» المضغوط لشاشة نهاية المباراة (سطرٌ واحد ٤٤ بكسل، صورةٌ مخزّنة لا لوحة) — «غيّر» تفتح الورقة، والتجهيز
+    بعد النهاية يعيد إرسال الحضور فتلعب الجولة التالية به */
+function skEndChip(){try{skCss();const k=caSkMine(),L=skLv(k),pw=tlPwMine();
+ return `<button type="button" class="skEndC" onclick="skPick({from:'end'})">${skImg(k,28)}<span><small>${T('جيسك')}</small><b>${esc(tlNm('sk',k))}</b><i>${T('المستوى')} ${skNum(L)}${pw!=='def'?' · '+esc(tlNm('pw',pw)):''}</i></span><em>${T('غيّر')}</em></button>`}catch(e){return ''}}
+function skSeatChip(k){try{return k&&CA_STRIKERS[k]?`<em class="skSeat">${skImg(k,28)}</em>`:''}catch(e){return ''}}
+/** بطاقة الخزانة: أرقام القدرات الثلاث بأيقوناتها (القوّة · التصويب · الزمن) بدل أشرطةٍ بلا أرقام */
+function skChipsHTML(st){return `<span class="tlSt3" aria-label="${SK_L3.map((t,i)=>T(t)+' '+st[i]).join('، ')}">${st.map((v,i)=>`<i>${ico(SK_IC[i],12)}<b>${(+v).toLocaleString('en-US')}</b></i>`).join('')}</span>`}
+function skLegend(){return `<div class="tlLeg">${SK_L3.map((t,i)=>`<span>${ico(SK_IC[i],13)} ${T(t)}</span>`).join('')}</div>`}
+try{skCss()}catch(e){}
 
 /** شاشة اختيار وضع اللعب — أقسام مصنّفة لا 12 بطاقة مبعثرة */
 /* شعارات الأوضاع — ميداليات مرسومة بتدرجات معدنية، لكل وضع هويته */
@@ -25823,6 +26285,7 @@ function mmTick(){
 }
 function mmDraw(){
  const S2=mmSearchers(),lim=RM_MIN[RM.game]||[2,8];
+ const _skOld=document.querySelector('#mmScr .skHub');
  const row=PT_GAMES.find(x=>x[3]===RM.game)||[];
  go(`<div class="scr on nofi" id="mmScr">${tb('بحث عن لاعبين')}
  <div class="gHero sm">${GAME_ART[RM.game]||''}</div>
@@ -25836,12 +26299,14 @@ function mmDraw(){
   ${S2.length?`<div class="mmList">${S2.map(p=>{const me=!!(p.isMe&&p.sameTab),nm=String((p.presence&&p.presence.nm)||'لاعب').slice(0,18),av=p.presence&&p.presence.av&&typeof p.presence.av==='object'?p.presence.av:null;
     return `<div class="mmP${me?' me':''}"><span class="mmAv">${me?avatarArt(38):(av?avatarSVG(av,38):personArt(nm,38))}</span><span class="n">${me?'أنت':esc(nm)}</span></div>`}).join('')}</div>`:''}
  </div></div></div>
+ ${RM.game==='carrom'?skTileHTML({sm:1,ctx:'mm'}):''}
  ${(RM.mmT||0)>12?`<div class="wb" style="text-align:start;margin-top:12px">${ico('info',12)}
   لا يوجد لاعبون متصلون الآن. شارك رابط اللعبة مع أصدقائك ليدخلوا، أو العب ضد الذكاء الاصطناعي.</div>
   ${SOLO_OK[RM.game]?`<button class="rbtn" style="margin-top:10px" onclick="mmCancel(1);Router.replace('soloScr','${RM.game}')"><span>${ico('robot',13)} العب ضد الذكاء الاصطناعي</span></button>`:''}
   <button class="btn g" style="margin-top:9px" onclick="mmCancel(1);Router.replace('roomScr','${RM.game}')">${ico('next',13)} أنشئ غرفة بكود بدلًا من ذلك</button>`:''}
  <button class="btn g" style="margin-top:14px;color:var(--no)" onclick="mmCancel()">${ico('door',13)} إلغاء البحث</button>
  </div>`);
+ if(RM.game==='carrom')skTileKeep(_skOld);
 }
 function mmCancel(silent){
  const c=RMcap;RM.mm=0;clearInterval(_mmTm);try{clearTimeout(RM._botTm);RM._botTm=null}catch(e){}
@@ -25908,6 +26373,7 @@ async function rmJoin(){
  setTimeout(()=>{if(RM.code&&rmRoster().length<2)toast('بانتظار بقية اللاعبين… تأكد من الكود')},2500);
 }
 function roomDraw(){
+ const _skOld=document.querySelector('#rmScr .skHub');
  if(_rmDrawQ){cancelAnimationFrame(_rmDrawQ);_rmDrawQ=0}   // رسمٌ مباشر يغني عن المؤجَّل
  // الغرفة إطار حيّ واحد يحلّ محلّ شاشة الدخول التي جاءت منها (كود/بحث/كمبيوتر)
  if(RM.code){const t0=Router.current();
@@ -25915,6 +26381,7 @@ function roomDraw(){
  const R=rmRoster();
  if(!RM.me){const me=rmMine();if(me)RM.me=me.peer}
  const playing=RM.phase!=='lobby'&&RM.phase!=='idle';
+ if(playing&&RM.game==='carrom')try{skPickMatch()}catch(e){}
  setArena(vnKind(RM.game),!playing||RM.phase==='over',RM.phase==='over'&&RM.game==='carrom'&&!!RM.ca);   // مكان اللعبة خلف الغرفة دائمًا — أعتم في الردهة والنتيجة
  const head=(playing&&RM.game==='carrom'&&(RM.phase!=='over'||RM.ca))?''   // الكيرم: رأسه في بطاقتَي اللاعبين
   :playing
@@ -25933,7 +26400,7 @@ function roomDraw(){
  let body='';
  if(RM.phase==='lobby'){
   if(RM.game==='carrom')caPrefetch();
-  body=`${rmLobbyRing(R)}
+  body=`${rmLobbyRing(R)}${RM.game==='carrom'?skTileHTML({sm:1,ctx:'lobby'}):''}
   ${RM.host?`<div class="sl">اللعبة</div>
    <div class="rmGames">
     ${[['uno','أونو'],['carrom','كيرم']].map(([g,n])=>
@@ -25963,6 +26430,7 @@ function roomDraw(){
  const caPlay_=playing&&RM.game==='carrom';   // ونهاية المباراة داخل شاشة الكيرم (٦٫٥٨)   // الكيرم: الوجوه والخروج في شريط أدواته
  go(`<div class="scr on nofi${caPlay_?" caScr":""}" id="rmScr">${playing&&!caPlay_?`<button class="efab" onclick="rmEmoteBar()">${emoFab(26)}</button>`:''}${caPlay_?`<div class="tbar caTbar"><button class="bk" onclick="back()">${bkChev()}</button><h2>كيرم<small class="caSub">${caMdLbl(RM.ca)?`<span class="caPtsT">${caMdLbl(RM.ca)}</span>`:`<span class="caM">${RM.solo?'ضد الذكاء الاصطناعي':'أونلاين'}</span>`}${RM.solo?`<i></i>${({easy:'سهل',mid:'متوسط',hard:'صعب',imp:'مستحيل'})[RM.diff]||''}`:''}${RM.ca&&!caIsDisc(RM.ca)?`<i></i><span class="caQ${RM.ca.q?' hot':''}">${caQTxt(RM.ca)}</span>`:''}</small></h2><button class="caGear" onclick="caMenu()" aria-label="الإعدادات">${ico('gear',18)}</button></div>`:tb(RM.code==='SOLO'?'ضد الذكاء الاصطناعي':'غرفة '+(RM.code||''))}${head}${body}
  ${caPlay_?'':`<button class="btn g" style="margin-top:16px;color:var(--no)" onclick="rmLeave()">${ico('door',13)} مغادرة الغرفة</button>`}</div>`);
+ if(document.querySelector('#rmScr .skHub'))skTileKeep(_skOld);
  if(oldCv){const nw=document.getElementById('caC');if(nw&&nw!==oldCv){nw.replaceWith(oldCv);oldCv._pk=null;try{caRender()}catch(e){}try{caLoopOn()}catch(e){}}}
  if(typeof vb3dMountLobby==='function'){if(RM.phase==='lobby')vb3dMountLobby(rmLobbySeats(R),RM.game);else if(typeof VB3!=='undefined'&&VB3.lobby)vb3dDispose()}   // المجلس المجسّم في الردهة (5.52) — ويُفكّ حين تبدأ اللعبة أو تُغادَر الغرفة
  rmAutoStart(R);
@@ -26002,7 +26470,7 @@ function rmLobbyRing(R){
  const n=seats.length,row=PT_GAMES.find(x=>x[3]===RM.game)||[];
  return `<div class="rmRing" id="rmStage">${seats.map((p,i)=>{const pos=rmSeatPos(i,n),st=`data-seat="${i}" style="left:${pos.x.toFixed(1)}%;top:${pos.y.toFixed(1)}%"`;
    if(!p)return `<div class="rmSeat empty" ${st}><div class="rmAv">${ico('plus',16)}</div><span>بانتظار…</span></div>`;
-   return `<div class="rmSeat${p.me?' me':''}" ${st} onclick="pcOpen('${p.me?'':(p.id||'')}',${JSON.stringify(p.name)},${p.av?JSON.stringify(p.av):'null'})"><div class="rmAv">${p.me?avatarArt(44):(p.av?avatarSVG(p.av,44):personArt(p.name,44))}${p.host?`<i>${ico('crown',11)}</i>`:''}</div><span>${esc(p.name)}${p.me?' <b>أنت</b>':''}</span></div>`}).join('')}
+   return `<div class="rmSeat${p.me?' me':''}" ${st} onclick="pcOpen('${p.me?'':(p.id||'')}',${JSON.stringify(p.name)},${p.av?JSON.stringify(p.av):'null'})"><div class="rmAv">${p.me?avatarArt(44):(p.av?avatarSVG(p.av,44):personArt(p.name,44))}${p.host?`<i>${ico('crown',11)}</i>`:''}${RM.game==='carrom'?skSeatChip(p.me?caSkMine():p.sk):''}</div><span>${esc(p.name)}${p.me?' <b>أنت</b>':''}</span></div>`}).join('')}
   <div class="rmTable"><span class="art">${GAME_ART[RM.game]||''}</span><b>${R.length}/${lim[1]}</b></div></div>
   <div class="note" style="margin-top:4px">${R.length<lim[0]?`نحتاج ${lim[0]} لاعبين على الأقل لـ${row[1]||'هذه اللعبة'}`:R.length<lim[1]?`يمكن البدء الآن — وما زال في المجلس متّسع حتى ${lim[1]}`:`المجلس مكتمل — ${RM.host?'ابدأ حين تشاء':'بانتظار المضيف'}`}</div>`;
 }
@@ -26236,6 +26704,7 @@ function soloScr(g){
  if(g==='carrom')caPrefetch();
  go(`<div class="scr on">${tb(T('ضد الذكاء الاصطناعي'))}
  <div class="gHero xs">${GAME_ART[g]||''}</div>
+ ${g==='carrom'?skTileHTML({sm:1,ctx:'solo'}):''}
  <div class="sl">${T('مستوى الخصم')}</div>
  <div class="dfRow">${diffsFor(g).map(([k,n,e],di)=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';uiPick(this);soloGoSync()">
   <i class="dfLv">${[0,1,2,3].map(j=>`<em${j<=di?' class="f"':''}></em>`).join('')}</i><b>${T(n)}</b><u>${((DIFF_SAY[g]||{})[k])||''}</u></div>`).join('')}</div>
@@ -26256,6 +26725,7 @@ function soloScr(g){
  <div class="soloGo"><button class="goBtn" onclick="soloBegin('${g}')">
   <i class="goPlay">${ico('play',18)}</i><b>${T('ابدأ اللعب')}</b>
   <em class="goDiff">${T((DIFF_P[RM.diff||'mid']||DIFF_P.mid).n)}</em></button></div></div>`);
+ if(g==='carrom')skTileDraw();
  if(g==='mafia')AI.probe().then(on=>{const el=document.getElementById('vbAiNote');if(!el)return;
   el.textContent=T(on?'الآليون هنا يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم':'الآليون يعملون بعقلهم المحلي الآن — الذكاء الاصطناعي يحتاج اتصالًا بخادم مضبوط أو نسخة الأرتيفاكت')});
 }
@@ -28199,7 +28669,7 @@ const CA_CSETS={
  royal:{w:{face:'#F4E2A4',lo:'#DEC474',edge:'#A0802E',groove:'rgba(110,84,20,.40)',lit:'rgba(255,250,220,.70)',grain:'rgba(180,140,50,',gA:.07},
         b:{face:'#12503A',lo:'#0A3626',edge:'#021810',groove:'rgba(0,10,4,.66)',lit:'rgba(190,255,220,.20)',grain:'rgba(40,110,80,',gA:.08}}
 };
-const TL_TR={none:null,gold:['#FFF1C4','#E8B23A'],fire:['#FFE08A','#FF4A14'],ice:['#F0FDFF','#4FC3F7'],aurora:['#8CFFC4','#A06CFF']};
+const TL_TR={none:null,gold:['#FFF1C4','#E8B23A'],fire:['#FFE08A','#FF4A14'],ice:['#F0FDFF','#4FC3F7'],aurora:['#8CFFC4','#A06CFF'],legend:['#FFF6D8','#FFD700']};
 const TL_PK={gold:'255,233,168',emerald:'70,230,150',fire:'255,110,30',star:'190,140,255'};
 function caCsMine(){return CA_CSETS[S.tlCs]&&tlOwn('cs',S.tlCs)?S.tlCs:'classic'}
 function caTrMine(){return TL_TR[S.tlTr]&&tlOwn('tr',S.tlTr)?S.tlTr:'none'}
@@ -29138,7 +29608,7 @@ function rmCarrom(R){
    :Array.from({length:9},(_,i)=>`<i class="${i<got?'f '+col:''}"></i>`).join('')+(qHere?'<i class="f q"></i>':'');
   return `<div class="pCard ${pos}${me2?' me':''}${on&&RM.phase!=='over'?' on':''}">
    <span class="pAvs${ps.length>1?' two':''}">${avs}</span>
-   <span class="pTx"><b class="pNm">${who}</b><span class="pSub">${sub}</span></span>
+   <span class="pTx"><b class="pNm">${who}${me2?skHudChip():''}</b><span class="pSub">${sub}</span></span>
    <span class="pScore${pts?' pts':''}">${pts?`<b>${got}<small> من ${caPtsWin(C)}</small></b>`:`<b>${got}</b>`}<span class="pSlots">${slots}</span></span>
    ${me2?`<button class="caRnd" onclick="rmEmoteBar()" aria-label="تفاعل">${emoFab(22)}</button>`:''}
   </div>`;
@@ -29219,12 +29689,12 @@ function caMatchEnd(C){
  const foeNames=foes.map(p=>esc(p.name||'الخصم')).join(' و');
  let troH='';
  if(tro){
-  const d=tro.d|0,before=tro.before!=null?tro.before|0:tr-d,nx=trNext(tr),lo=TR_ARENA[ix],pct=v=>nx?Math.max(0,Math.min(100,Math.round((v-lo)/(nx-lo)*100))):100;
+  const d=tro.d|0,before=tro.before!=null?tro.before|0:tr-d,nx=trNext(tr),gl=(typeof trGoal==='function'?trGoal(tr):nx),lo=TR_ARENA[ix],pct=v=>gl?Math.max(0,Math.min(100,Math.round((v-lo)/(gl-lo)*100))):100;
   const prot=d===0&&tro.why==='gate', v0=fresh?before:tr;
   const chip=d>0?`<span class="ceDelta n">+${d}</span>`:d<0?`<span class="ceDelta n dn">−${Math.abs(d)}</span>`:prot?`<span class="ceDelta z">${ico('shield',16)} محميّ</span>`:`<span class="ceDelta n z">+0</span>`;
   const note=tro.why==='gate'?(lo>0?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):'في الساحة الأولى لا تنقص كؤوسك'):tro.why==='botcap'?'الآليّ لا يمنح كؤوسًا فوق '+TR_BOT_CAP.toLocaleString('en-US')+' — العب أونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
   troH=`<div class="ceTro ceAn" style="--d:${meWon?1100:950}ms" onclick="push('arenaScr')" data-from="${v0}" data-to="${tr}" data-p1="${pct(tr)}"><div class="ceTroR">${ico('trophy',38)}<b class="ceNum${d<0?' dn':''}">${v0.toLocaleString('en-US')}</b>${chip}</div>
-   <div class="ceTroA"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct(v0)}%"></i></div><span>${nx?nx.toLocaleString('en-US'):'القمّة'}</span></div>${note?`<div class="ceTroN">${note}</div>`:''}</div>`;
+   <div class="ceTroA"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct(v0)}%"></i></div><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi>':gl?'طريق الأساطير <bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi>':'أتممت طريق الأساطير'}</span></div>${note?`<div class="ceTroN">${note}</div>`:''}</div>`;
  }
  const tile=(cls,icon,val,lbl,d,on,num)=>{const tg=on?'button':'div';return `<${tg} class="ceTile ceAn ${cls}${on?' tap':''}" style="--d:${d}ms"${on?` onclick="${on}"`:''}><span class="ceIc">${icon}</span><b${num?' class="n"':''}>${val}</b><s>${lbl}</s></${tg}>`};
  const rw=RM.rw&&RM.rw.mid===RM.mid?RM.rw:null, bp=RM.bcPend, T0=meWon?1700:1500, tiles=[];
@@ -29252,7 +29722,7 @@ function caMatchEnd(C){
    ${troH}${ch?`<div class="ceAn" style="--d:${T0-200}ms;width:100%">${ch}</div>`:''}
    <div class="ceRw">${tilesH}</div>${noBc}
   </div></main>
-  <footer class="ceBtns ceFade" style="--d:${tBtn}ms">${RM.host?`<button class="rbtn caEndGo" onclick="caEndGo(rmStart)"><span>${T('العب مرّة أخرى')}</span></button>`:`<div class="ceWait">بانتظار المضيف…</div>`}<button class="btn g caFinX" onclick="caEndGo(rmLeave)">${T('خروج')}</button></footer></div>`;
+  ${typeof skEndChip==='function'?skEndChip():''}<footer class="ceBtns ceFade" style="--d:${tBtn}ms">${RM.host?`<button class="rbtn caEndGo" onclick="caEndGo(rmStart)"><span>${T('العب مرّة أخرى')}</span></button>`:`<div class="ceWait">بانتظار المضيف…</div>`}<button class="btn g caFinX" onclick="caEndGo(rmLeave)">${T('خروج')}</button></footer></div>`;
 }
 /** قرص الأشعّة يُرسم مرّةً واحدة (٥١٢ بكسل بتلاشٍ شعاعيّ) ويُعرض صورةً ساكنة — لا تدرّجٌ مخروطيّ بقناعٍ يُعاد كلّ إطار */
 let _ceRays='';
@@ -37095,13 +37565,9 @@ function gameHub(g){
   <button class="ghRank ghArena" onclick="push('arenaScr')">
    ${ico('trophy',18)}
    <span class="rt" style="color:${trArena().g}">${esc(trArena().n)}</span>
-   <span class="rp">${trMine().toLocaleString('en-US')} كأس · ${trNext(trMine())!=null?'التالية عند '+trNext(trMine()).toLocaleString('en-US'):'القمّة'}</span>
+   <span class="rp"><bdi class="nowrap">${trMine().toLocaleString('en-US')}</bdi> كأس · ${trNextTxt(trMine())}</span>
    <span class="go">${ghChev()}</span></button>
-  ${g==='carrom'?`<button class="ghRank ghSk" onclick="tab('tools')">
-   <span class="skIm">${skImg(caSkMine(),36)}</span>
-   <span class="rt">${esc(tlNm('sk',caSkMine()))} · ${T('المستوى')} ${skLv(caSkMine())}</span>
-   <span class="rp">${T('اختر جيسك وقدراته قبل المباراة')}</span>
-   <span class="go">${ghChev()}</span></button>`:''}
+  ${g==='carrom'?skTileHTML({ctx:'hub'}):''}
  </div>
 
  <div class="ghSec"><i></i><b>${ico('crown',15)}</b><span>مع من تلعب؟</span><b>${ico('crown',15)}</b><i></i></div>
@@ -37114,6 +37580,7 @@ function gameHub(g){
    R.solo||`push('soloScr','${g}')`,'#2FC4A8')}
  <div class="ghNote">نقاط التصنيف من اللعب أونلاين وحده — واللعب ضدّ الذكاء الاصطناعي للتمرين بلا رتب.</div>
  </div>`);
+ if(g==='carrom')skTileDraw();
 }
 
 /** يسجّل شاشات اللعب في سجلّ الشاشات فيعمل زرّ الرجوع ومكدّس التنقّل */
@@ -44539,7 +45006,7 @@ function navIco(k){if(k==='tools'){try{const im=skImg(caSkMine(),28);if(im)retur
 function nav(){
  const items=[['clubs','clubs','النادي'],['tools','tools','الجيوس'],['play','swords','اللعب'],['shop','shop','المتجر'],['more','user','المزيد']].map(a=>[a[0],a[1],T(a[2])]);
  // البند 31 — شارة فقط عند فائدة حقيقية: ترقية جاهزة أو هدية جاهزة
- const badge={shop:(typeof giftReady==='function'&&giftReady())?1:0};
+ const badge={shop:(typeof giftReady==='function'&&giftReady())?1:0,tools:(typeof skBadgeN==='function')?skBadgeN():0};   // ٦٫٩٦: ترقياتٌ وإتقانٌ جاهزة
  $('nav').innerHTML=items.map(([k,i,l])=>{
   const b=badge[k]||0;
   const dot=b?`<span style="position:absolute;top:4px;left:calc(50% - 20px);
@@ -44890,7 +45357,7 @@ function tick(){
  if(b){b.style.width=r*100+'%';b.style.background=c}
 }
 function draw(){
- setArena((S.ranked&&S.ranked.tier)||0);
+ setArena(arMineIx());
  const q=G.qs[G.i],lim=tl(q),c=DC[q.d],r=Math.max(0,G.ms/(lim*1000));
  const tc=r>.5?'#2ECC71':r>.25?'#EF9F27':'#E24B4A';
  const nd=NODES.find(n=>n.id===q.n),nt=nd?NETS.find(t=>t.id===nd.net):null;
@@ -45289,7 +45756,7 @@ function lbRows(r){
 }
 // ═══════════ الملف الشخصي الاحترافي — لي وللخصوم ═══════════
 const PROF_TITLES=['مقاتل ناشئ','منافس صاعد','فارس الذهب','نخبة البلاتين','صائد الماس',
- 'سيد الماستر','جراند ماستر','بطل الساحة','أسطورة ميثيك','الليجند الخالد'];
+ 'سيّد المحترفين','نخبة النخبة','بطل الساحة','أسطورة المجالس','الأسطورة الخالدة'];
 
 // خمسة عشر مسار إنجاز، كل مسار بثلاثة أوسمة: برونزي ثم فضي ثم ذهبي = 45 وساماً (٦٫٩٥: مسارات الجيوس والكؤوس والصناديق مكان مسارات البطاقات)
 const ACH_FAM=[
