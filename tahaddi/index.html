@@ -20729,6 +20729,11 @@ const EN={
  'احتمالات صناديق المعارك':'Battle chest odds',
  'الاحتمالات':'Odds',
  'نسب بطاقات هذا الصندوق':'Card odds for this chest',
+ 'ما في هذا الصندوق':'What this chest holds',
+ 'دورة ثابتة من 40:':'Fixed cycle of 40:',
+ 'القادم:':'Next:',
+ 'صناديقك القادمة:':'Your next chests:',
+ 'موضعك في الدورة':'Your place in the cycle',
  'النسب ثابتة ولا تتغيّر بعدد محاولاتك.':'The odds are fixed and don’t change with how many times you try.',
  'الحظ المعلن:':'Declared odds:',
  'صندوق النخبة':'Elite chest',
@@ -22157,7 +22162,7 @@ function bcOddsScr(){
     <span style="font-weight:900;color:var(--gold)"><bdi dir="ltr">${pc}%</bdi></span></div>
    <div class="plBarTrk" style="margin-top:6px"><i style="width:${pc}%;background:linear-gradient(90deg,#B8871E,#FFE9A8)"></i></div>
    <div style="font-size:9.5px;color:var(--mut);margin-top:4px">مدّة الفتح: ${bcFmt(BC_TIME[k]||0)}</div>
-   <button class="btn g" style="margin-top:7px;min-height:38px" onclick="push('oddsScr','${k}')">${ico('chart',14)} نسب بطاقات هذا الصندوق</button>
+   <button class="btn g" style="margin-top:7px;min-height:38px" onclick="push('oddsScr','${k}')">${ico('chart',14)} ما في هذا الصندوق</button>
   </div>`}).join('')}
  <div class="note">النسب مشتقّةٌ من الدورة نفسها، لا تتغيّر بعدد محاولاتك ولا بما تشتريه.</div>
  </div></div></div>`);
@@ -25485,7 +25490,7 @@ function dropBattleChest(g){
  setTimeout(()=>chestDropFx(k,i,false),1400);   // بعد لحظة النتيجة — لا فوقها
 }
 function bcFmt(s){
- if(s>=3600)return Math.floor(s/3600)+'س '+Math.ceil(s%3600/60)+'د';
+ if(s>=3600){const h=Math.floor(s/3600),m=Math.ceil(s%3600/60);return m?h+' س '+m+' د':h+' س'}
  if(s>=60)return Math.ceil(s/60)+' دقيقة';
  return s+' ثانية';
 }
@@ -25562,8 +25567,8 @@ function battleChestRow(bare){
     ready?'افتح!':unlocking?bcFmt(Math.ceil((c.doneAt-Date.now())/1000)):S.dev?'افتح فورًا':'اضغط للفتح'}</span>
   </div>`}).join('')}
  </div>
- <div style="font-size:9.5px;color:var(--mut);margin-top:5px;text-align:center">الحظ المعلن:
-  ${BC_ODDS.map(([k,p])=>`${BC_LABEL[k]} ${p}%`).join(' · ')}</div>`;
+ <div style="font-size:9.5px;color:var(--mut);margin-top:5px;text-align:center">دورة ثابتة من 40:
+  ${Object.keys(BC_CYCLE_N).map(k=>`${BC_LABEL[k]} ${BC_CYCLE_N[k]}`).join(' · ')} — القادم: ${BC_LABEL[bcNext(1)[0]]||'عادي'}</div>`;
 }
 /* عدّاد حي لخانات الصناديق أثناء بقاء شاشة العب مفتوحة */
 function bcTick(){
