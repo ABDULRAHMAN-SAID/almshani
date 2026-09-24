@@ -25281,7 +25281,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.93';
+const APP_VER='6.94';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -28880,10 +28880,16 @@ function caSkOf(peer){
 /* ٦٫٨٨ — أثر الضارب: خيطٌ من الضوء خلف ضاربي في ضرباتي أنا، بلون الأثر الذي اخترته */
 /* ٦٫٩٢ — ظلّ التماسّ: احتضانٌ ضيّق داكن تحت القطعة (لا ظلٌّ مزاح يجعلها «فوق بعض» كما شكا المالك في ٦٫٧٥):
    حلقةٌ من حافّة القطعة إلى ١٫١٦ من نصف قطرها، مائلةٌ قليلًا إلى الأسفل حيث لا يصل ضوء النافذة */
+/* ٦٫٩٤ — «القطع لاصقة في اللوح»: الظلّ المركزيّ كان يُغرقها. الآن ظلٌّ مُسقَطٌ مزاحٌ نحو أسفل اليمين (الضوء من أعلى
+   اليسار كما في اللوح المرسوم) وخطُّ تماسٍّ ضيّقٌ تحت القطعة — فتُقرأ قرصًا سميكًا يجلس على الخشب لا بقعةً فيه */
 function caGround(cx,X,Y,r,al){
- const a=al==null?1:al, g=cx.createRadialGradient(X,Y+r*.05,r*.9,X,Y+r*.05,r*1.16);
- g.addColorStop(0,'rgba(10,5,2,'+(.34*a).toFixed(3)+')');g.addColorStop(.55,'rgba(10,5,2,'+(.12*a).toFixed(3)+')');g.addColorStop(1,'rgba(10,5,2,0)');
- cx.fillStyle=g;cx.beginPath();cx.arc(X,Y+r*.05,r*1.16,0,7);cx.fill();
+ const a=al==null?1:al, dx=r*.15, dy=r*.21;
+ const g=cx.createRadialGradient(X+dx,Y+dy,r*.6,X+dx,Y+dy,r*1.14);
+ g.addColorStop(0,'rgba(12,6,2,'+(.44*a).toFixed(3)+')');g.addColorStop(.55,'rgba(12,6,2,'+(.2*a).toFixed(3)+')');g.addColorStop(1,'rgba(12,6,2,0)');
+ cx.fillStyle=g;cx.beginPath();cx.arc(X+dx,Y+dy,r*1.14,0,7);cx.fill();
+ const c=cx.createRadialGradient(X+r*.03,Y+r*.05,r*.92,X+r*.03,Y+r*.05,r*1.04);
+ c.addColorStop(0,'rgba(12,6,2,'+(.28*a).toFixed(3)+')');c.addColorStop(1,'rgba(12,6,2,0)');
+ cx.fillStyle=c;cx.beginPath();cx.arc(X+r*.03,Y+r*.05,r*1.04,0,7);cx.fill();
 }
 function caTrail(cx,X,Y,r){
  const k=caTrMine(), on=k!=='none'&&_ca.sim&&_ca.sim.by===RM.me;
@@ -28977,9 +28983,15 @@ function caDisc(t,r,cs){
   x.save();x.beginPath();x.arc(X,Y,R,0,7);x.clip();x.drawImage(im,X-R,Y-R,R*2,R*2);
   /* ٦٫٩٢ — «القطع واضحة بشكلٍ لا يناسب اللوح، تحسّهم مو مع بعض»: الصورة كانت تُلصق كما هي — حافّةٌ حادّة وضوءٌ
      مستقلّ. الآن: تعتيمٌ رفيع عند المحيط (حافّةٌ مشطوفة تلتقي بالسطح لا خطٌّ مقصوص)، ودفءٌ خفيف بلون ضوء اللوح */
-  const eg=x.createRadialGradient(X,Y,R*.84,X,Y,R);eg.addColorStop(0,'rgba(0,0,0,0)');eg.addColorStop(.7,'rgba(24,12,4,.14)');eg.addColorStop(1,'rgba(24,12,4,.5)');
-  x.fillStyle=eg;x.fillRect(X-R,Y-R,R*2,R*2);
-  x.globalCompositeOperation='multiply';x.fillStyle='rgba(255,224,176,.18)';x.fillRect(X-R,Y-R,R*2,R*2);
+  /* ٦٫٩٤ — «حدودها ما تتناسق معها»: الحلقة الداكنة أُزيلت. الحافّة شطفةٌ حقيقيّة: تدرّجٌ خطّيّ على المحيط من ضوءٍ في
+     أعلى اليسار إلى ظلٍّ في أسفل اليمين (سُمك القرص يلتقط ضوء اللوح)، وقبّةٌ خفيفة جدًّا نحو المحيط — والصورة تبقى بألوانها */
+  const dome=x.createRadialGradient(X-R*.2,Y-R*.25,R*.2,X,Y,R);dome.addColorStop(0,'rgba(255,255,255,.07)');dome.addColorStop(.75,'rgba(0,0,0,0)');dome.addColorStop(1,'rgba(0,0,0,.16)');
+  x.fillStyle=dome;x.fillRect(X-R,Y-R,R*2,R*2);
+  const bw=Math.max(2,R*.115);
+  const bv=x.createLinearGradient(X-R,Y-R,X+R,Y+R);bv.addColorStop(0,'rgba(255,250,236,.8)');bv.addColorStop(.42,'rgba(255,250,236,.22)');bv.addColorStop(.58,'rgba(0,0,0,.10)');bv.addColorStop(1,'rgba(0,0,0,.46)');
+  x.beginPath();x.arc(X,Y,R-bw*.5,0,7);x.strokeStyle=bv;x.lineWidth=bw;x.stroke();
+  x.beginPath();x.arc(X,Y,R-bw*1.25,0,7);x.strokeStyle='rgba(0,0,0,.16)';x.lineWidth=Math.max(1,bw*.3);x.stroke();
+  x.beginPath();x.arc(X,Y,R-.5,0,7);x.strokeStyle='rgba(0,0,0,.28)';x.lineWidth=1;x.stroke();
   x.restore();
   c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c}}
 
