@@ -17363,7 +17363,7 @@ function resolveMatch(o){
  const p=def?rankOf(def.id):null;
  const out=RankCore.resolve(p,o,Date.now());   // يُطبَّق فورًا للعرض
  if(out.applied&&def)netReport(def.id,o,out);   // ثم يقول الخادم كلمته إن وُجد
- if(out.applied){try{out.tro=trApply({won:trResult(o.result),mode:o.mode,oppTr:trOppOf(o.opponents),gid:def?def.id:''});   // ٦٫٩٣: الكؤوس مع النتيجة نفسها
+ if(out.applied){try{out.tro=trApply({won:trResult(o.result),mode:(def&&def.id==='knowledge')?'bot':o.mode,oppTr:trOppOf(o.opponents),gid:def?def.id:''});   // ٦٫٩٣: الكؤوس مع النتيجة نفسها — ومباراة المعرفة خصمها مرسومٌ محلّيًّا فتُعامل كالآليّ (٦٫٩٤)
   if(out.tro.arenaUp>=0)setTimeout(()=>{try{trArenaUpCheck()}catch(e){}},1800)}catch(e){}}
  return out;
 }
@@ -18033,7 +18033,7 @@ function todayDeals(){
  return [
   {t:'skc',k:sk(1,'c'),n:10,cost:600,cur:'coins'},
   {t:'skc',k:sk(2,'r'),n:6,cost:1200,cur:'coins'},
-  {t:'skc',k:sk(3,'e'),n:4,cost:70,cur:'gems'},
+  {t:'skc',k:sk(3,tlArenaOk('e')?'e':tlArenaOk('r')?'r':'c'),n:4,cost:70,cur:'gems'},   // ٦٫٩٤: أعلى ندرةٍ فتحتها ساحتك
   (()=>{const p=EMOTES.filter(x=>!x.free);const e=p[Math.floor(rnd(4)*p.length)];
    return {t:'emote',e:e,cost:EMO_TIER[e.r].cost,cur:'gems'}})()
  ];
@@ -25190,7 +25190,7 @@ function arenaScr(){
  ${ARENAS.map((a,i)=>`<div class="li arRow${i===ix?' now':''}"><div class="lr">
    <span class="arRowEm">${tierEmblem(i,40)}</span>
    <div class="lb"><div class="lt" style="color:${i<=ix?a.g:'var(--tx2)'}">${esc(a.n)}</div>
-   <div class="ls">${TR_ARENA[i].toLocaleString('en-US')} كأس${i===ix?' · ساحتك الآن':i<ix?' · بلغتها':''}</div></div>
+   <div class="ls">${TR_ARENA[i].toLocaleString('en-US')} كأس${i===ix?' · ساحتك الآن':i<ix?' · بلغتها':''}${({2:' · تفتح الجيس النادر',4:' · تفتح الجيس الملحميّ',6:' · تفتح الجيس الأسطوريّ'})[i]||''}</div></div>
    ${i<=ix?ico('check',16,a.g):ico('lock',14)}</div></div>`).join('')}
  <div class="sl">كيف تُحسب الكؤوس؟</div>
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز ${TR_LEG.toLocaleString('en-US')} يعود إلى ${TR_LEG.toLocaleString('en-US')} ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.</div>
@@ -25627,7 +25627,12 @@ const TL_LVB=[[0,0,0],[1,0,0],[1,1,0],[1,1,1],[2,2,1]];            // ما يض�
 const TL_UPC=[5,10,20,40], TL_UPG=[500,1500,4000,10000];          // نسخ وعملات الترقية من المستوى ١ إلى ٥ (× ندرة الجيس في العملات)
 const TL_UNL={r:10,e:15,l:20};                                     // نسخٌ تفتح الجيس المقفل بلا شراء
 const TL_CPP={c:4,r:6,e:9,l:14};
-const TL_XP={c:20,r:40,e:80,l:160};                                 // خبرة اللاعب لكلّ ترقية (× المستوى الحاليّ) — ٦٫٩٤                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
+const TL_XP={c:20,r:40,e:80,l:160};                                 // خبرة اللاعب لكلّ ترقية (× المستوى الحاليّ) — ٦٫٩٤
+/* ٦٫٩٤ — كما تفتح ساحات كلاش رويال بطاقاتٍ جديدة: النادر من الساحة الذهبيّة، والملحميّ من كهف الماس، والأسطوريّ من
+   قلعة الجراند (بأعلى ساحةٍ بلغتها). قبلها: لا شراءٌ ولا فتحٌ بالنسخ ولا نسخٌ في الصناديق — ويبقى الجيس ظاهرًا مقفلًا باسم ساحته */
+const TR_UNL={c:0,r:2,e:4,l:6};
+function tlArenaOk(rr){try{return trArenaIx(TR().best|0)>=(TR_UNL[rr]||0)}catch(e){return true}}
+function tlArenaNm(rr){return (ARENAS[TR_UNL[rr]||0]||ARENAS[0]).n}                                   // نقاط «قدرة المجموعة» لكلّ ترقيةٍ أو فتح
 const TL_PWPTS=20;                                                  // نقاطٌ تفتح القدرة التالية
 const TL_PWR=[{k:'def',n:'الأساسيّة',st:[0,0,0],col:'232,178,58'},{k:'halo',n:'الهالة',st:[1,0,0],col:'255,205,90'},
  {k:'thorn',n:'الأشواك',st:[0,1,0],col:'80,200,255'},{k:'venom',n:'السمّ',st:[0,0,1],col:'120,230,90'},
@@ -25667,13 +25672,13 @@ function plLvOf(p){
 function tlAddCopies(k,v){
  const it=tlItem('sk',k);if(!it||!v)return;
  S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+v;
- if(!tlOwn('sk',k)&&S.skCp[k]>=TL_UNL[it[1]]){S.skCp[k]-=TL_UNL[it[1]];S.tlOwn=S.tlOwn||[];S.tlOwn.push('sk:'+k);tlAddCP(TL_CPP[it[1]]);
+ if(!tlOwn('sk',k)&&tlArenaOk(it[1])&&S.skCp[k]>=TL_UNL[it[1]]){S.skCp[k]-=TL_UNL[it[1]];S.tlOwn=S.tlOwn||[];S.tlOwn.push('sk:'+k);tlAddCP(TL_CPP[it[1]]);
   setTimeout(()=>toast(ico('sparkle',13)+' '+T('فُتح جيس')+' «'+tlNm('sk',k)+'»'),1200)}
 }
 function tlAddCP(n){const u0=tlPwUnl();S.tlCP=(S.tlCP||0)+n;const u1=tlPwUnl();
  if(u1>u0)setTimeout(()=>toast(ico('energy',13)+' '+T('فُتحت قدرة جديدة')+': '+TL_PWR[u1-1].n),1600)}
 /** جيسٌ عشوائيّ بوزن ندرته — العاديّ أكثر، والأسطوريّ نادر */
-function tlRandSk(){const W={c:45,r:30,e:18,l:7},L=TL_ITEMS.sk;let t=Math.random()*L.reduce((a,x)=>a+W[x[1]],0);for(const x of L){t-=W[x[1]];if(t<=0)return x[0]}return L[0][0]}
+function tlRandSk(){const W={c:45,r:30,e:18,l:7},L=TL_ITEMS.sk.filter(x=>tlArenaOk(x[1]));let t=Math.random()*L.reduce((a,x)=>a+W[x[1]],0);for(const x of L){t-=W[x[1]];if(t<=0)return x[0]}return L[0][0]}
 function tlChestCopies(ck){const n=Math.round(({knowledge:4,rival:6,elite:10,legend:16}[ck]||4)*(1+.1*trArenaIx(TR().best|0))), a=tlRandSk(), b=tlRandSk();   // ٦٫٩٤: نسخٌ أكثر في الساحات العليا
  return a===b?[{t:'skc',k:a,v:n}]:[{t:'skc',k:a,v:Math.ceil(n*.6)},{t:'skc',k:b,v:Math.floor(n*.4)}]}
 /* ٦٫٩٣ — صورة الجيس كانت تُرمَّز PNG في كلّ نداء (نصف ثانية للواحدة!) فتأخّر المتجر والأدوات وطريق الكؤوس.
@@ -26022,9 +26027,11 @@ function tlBody(){
   if(c==='sk'){const L=skLv(k), n=skCp(k);
    foot=tlStats(skStats(k,o?L:1,'def'))+(o?(L>=5?`<span class="tlCp rd"><i style="width:100%"></i><span>${T('أقصى مستوى')}</span></span>`
      :`<span class="tlCp${n>=TL_UPC[L-1]?' rd':''}"><i style="width:${Math.min(100,Math.round(n/TL_UPC[L-1]*100))}%"></i><span>${n}/${TL_UPC[L-1]}</span></span>`)
+    :!tlArenaOk(rr)?`<span class="tlLock">${ico('lock',12)} ${T('يُفتح في')} ${tlArenaNm(rr)}</span>`
     :`<span class="tlCp"><i style="width:${Math.min(100,Math.round(n/TL_UNL[rr]*100))}%"></i><span>${n}/${TL_UNL[rr]}</span></span>`);
   }
-  const bt=e?T('قيد الاستخدام'):o?(c==='sk'&&skLv(k)<5&&skCp(k)>=TL_UPC[skLv(k)-1]?T('ترقية!'):T('استخدم')):`${ico(gm?'gem':'coin',12)} ${pr}`;
+  const arLk=c==='sk'&&!o&&!tlArenaOk(rr);
+  const bt=e?T('قيد الاستخدام'):o?(c==='sk'&&skLv(k)<5&&skCp(k)>=TL_UPC[skLv(k)-1]?T('ترقية!'):T('استخدم')):arLk?`${ico('lock',12)} ${T('مقفل')}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlTap('${c}','${k}')">
    ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o?`<span class="tlLvB">${skLv(k)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
    <canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${foot}<span class="tlBt${o?'':' buy'}">${bt}</span></button>`}).join('')}</div>
@@ -26044,6 +26051,7 @@ function tlTap(c,k){
 }
 function tlBuy(c,k){
  const it=tlItem(c,k), pr=it[2], gm=!!it[3], have=gm?S.gems:S.coins;
+ if(c==='sk'&&!tlArenaOk(it[1])){toast(ico('lock',13)+' '+T('يُفتح هذا الجيس في')+' '+tlArenaNm(it[1])+' — '+TR_ARENA[TR_UNL[it[1]]].toLocaleString('en-US')+' '+T('كأس'),'bad');return}   // ٦٫٩٤
  if(have<pr){toast(gm?T('جواهر غير كافية'):T('عملات غير كافية'));return}
  confirmSheet(T('شراء أداة'),`${tlNm(c,k)} — ${T(TL_RAR[it[1]].n)}<br>${T('ستدفع')} <b style="color:${gm?'var(--gem)':'var(--gold)'}">${pr} ${gm?T('جوهرة'):T('عملة')}</b>`,T('اشترِ وجهّز'),()=>{
   if((gm?S.gems:S.coins)<pr){toast(gm?T('جواهر غير كافية'):T('عملات غير كافية'));return}
