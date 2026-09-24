@@ -22047,7 +22047,7 @@ function shopScr(){
 
  ${banner('الأدوات السحريّة')}
  ${MG_SHOP.map((m,i)=>`<div class="li"><div class="lr">
-  <div class="shArt">${ico(m.t==='skbook'?'book':'wild',30,m.t==='skbook'?'#FFE9A8':TL_RAR[m.r].a)}</div>
+  <div class="shArt">${m.t==='skbook'?ico('book',30,'#FFE9A8'):mgWildImg(m.r,36)}</div>
   <div class="lb"><div class="lt">${m.n}</div><div class="ls">${m.t==='skbook'?'يكمل نسخ الترقية التالية لجيسٍ تختاره':'نسخٌ تُصرف على أيّ جيسٍ تملكه من هذه الندرة'}${(m.t==='skbook'?mgBooks():mgWild(m.r))?' · لديك '+(m.t==='skbook'?mgBooks():mgWild(m.r)):''}</div></div>
   <button class="btn g" style="width:auto;padding:7px 12px;font-size:12px" onclick="mgBuy(${i})">${m.gems} ${ico('gem',15)}</button></div></div>`).join('')}
 
@@ -22321,7 +22321,7 @@ function rewardBody(x){
  if(x.t==='wild')return `<div class="rvArt">${ico('wild',110)}</div><div class="rvNm">جوكر ${RARITY[x.r].n}</div>${num(x.v,'بطاقة')}`;
  if(x.t==='shard')return `<div class="rvArt">${ico('energy',110)}</div>${num(x.v,'شظيّة تطوّر')}`;
  if(x.t==='emote'){const e=EMOTES.find(y=>y.k===x.k)||{n:''};return `<div class="rvArt">${face(x.k,110)}</div><div class="rvNm">تعبير «${e.n}»</div>`}
- if(x.t==='skw'){const R=TL_RAR[x.r]||TL_RAR.c;return `<div class="rvArt">${ico('wild',110,R.a)}</div><div class="rvTag" style="color:${R.a}">${T(R.n)}</div><div class="rvNm">جوكر جيس</div>${num(x.v,'نسخة لأيّ جيسٍ من هذه الندرة')}`}
+ if(x.t==='skw'){const R=TL_RAR[x.r]||TL_RAR.c;return `<div class="rvArt">${mgWildImg(x.r,118)}</div><div class="rvTag" style="color:${R.a}">${T(R.n)}</div><div class="rvNm">جوكر جيس</div>${num(x.v,'نسخة لأيّ جيسٍ من هذه الندرة')}`}
  if(x.t==='skbook')return `<div class="rvArt">${ico('book',110,'#FFE9A8')}</div><div class="rvNm">كتاب الجيس</div><div class="rvLbl">يكمل نسخ الترقية التالية لجيسٍ تختاره</div>`;
  return '';
 }
@@ -22334,7 +22334,7 @@ function miniReward(x){
  if(x.t==='wild')return one(ico('wild',40),'×'+x.v,'جوكر '+RARITY[x.r].n);
  if(x.t==='shard')return one(ico('energy',40),x.v,'شظيّة');
  if(x.t==='emote')return one(face(x.k,40),'',(EMOTES.find(y=>y.k===x.k)||{}).n||'');
- if(x.t==='skw')return one(ico('wild',40,(TL_RAR[x.r]||TL_RAR.c).a),'×'+x.v,'جوكر '+(TL_RAR[x.r]||TL_RAR.c).n);
+ if(x.t==='skw')return one(mgWildImg(x.r,40),'×'+x.v,'جوكر '+(TL_RAR[x.r]||TL_RAR.c).n);
  if(x.t==='skbook')return one(ico('book',40,'#FFE9A8'),'','كتاب الجيس');
  return '';
 }
@@ -24967,6 +24967,13 @@ function MG(){if(!S.skW||typeof S.skW!=='object')S.skW={c:0,r:0,e:0,l:0};return 
 function mgWild(r){return (MG()[r]|0)}
 function mgBooks(){return S.skBook|0}
 function mgLbl(x){return x.t==='skbook'?'كتاب الجيس':'جوكر جيس '+(TL_RAR[x.r]||TL_RAR.c).n}
+/** صورة جوكر الجيس: قرصُ جيسٍ خامٌ (الرسم العامّ بلا هويّة) بحلقةٍ بلون الندرة ونجمةٍ ذهبيّة — لا بطاقة أونو */
+let _mgWildU=null;
+function mgWildImg(r,sz){
+ const R=TL_RAR[r]||TL_RAR.c;
+ if(!_mgWildU){try{const c=caDisc('s',40);_mgWildU=c.toDataURL(_skWebp?'image/webp':'image/png',.92)}catch(e){_mgWildU=''}}
+ return `<span class="mgW" style="--c:${R.a};width:${sz}px;height:${sz}px">${_mgWildU?`<img src="${_mgWildU}" alt="">`:''}<b>${ico('star',Math.max(10,Math.round(sz*.3)),'#FFE9A8')}</b></span>`;
+}
 /** يصرف جوكرًا من ندرة الجيس على نسخه — بقدر ما يحتاج للترقية التالية أو ما يملك */
 function mgUseWild(k){
  const it=tlItem('sk',k);if(!it||!tlOwn('sk',k))return;
@@ -24974,7 +24981,7 @@ function mgUseWild(k){
  const need=Math.max(0,TL_UPC[L-1]-skCp(k)),have=mgWild(rr),use=Math.min(need,have);
  if(!use){toast(need?'لا جوكر من هذه الندرة':'النسخ مكتملة — رقِّ الجيس');return}
  MG()[rr]-=use;S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+use;try{saveState()}catch(e){}
- try{buyFx(ico('wild',15),'+'+use+' '+T('نسخة'),tlNm('sk',k))}catch(e){toast('+'+use+' نسخة')}
+ try{buyFx(mgWildImg(rr,42),'+'+use+' '+T('نسخة'),tlNm('sk',k))}catch(e){toast('+'+use+' نسخة')}
  tlTab('sk');
 }
 function mgUseBook(k){
@@ -24992,7 +24999,7 @@ function mgBuy(i){
  confirmSheet('شراء أداة سحريّة',`ستدفع <b style="color:var(--gem)">${m.gems} جوهرة</b> مقابل <b>${m.n}</b>.`,'تأكيد الشراء',()=>{
   if(S.gems<m.gems){toast('جواهر غير كافية','bad');return}
   S.gems-=m.gems;grantRewards([{t:m.t,r:m.r,v:m.v}]);try{saveState()}catch(e){}
-  try{buyFx(ico(m.t==='skbook'?'book':'wild',15),m.n)}catch(e){toast(m.n)}
+  try{buyFx(m.t==='skbook'?ico('book',42,'#FFE9A8'):mgWildImg(m.r,42),m.n)}catch(e){toast(m.n)}
   refresh(shopScr);
  });
 }
@@ -26026,6 +26033,10 @@ body .finCh{margin:-4px auto 12px;max-width:340px;padding:8px 14px;border-radius
 body .finCh b{font-family:var(--fd);font-size:15px;color:#FFF1C4}body .finCh u{text-decoration:none;color:#FFE9A8}
 body .finCh.done{border-color:#FFE9A8;box-shadow:0 0 14px rgba(232,178,58,.35)}body .finCh.dim{opacity:.7;cursor:default;color:#9AA6C2}
 body .finCh .rico{width:16px!important;height:16px!important}
+body .mgW{position:relative;display:inline-block;vertical-align:middle;border-radius:50%;box-shadow:0 0 0 2px var(--c),0 0 14px color-mix(in srgb,var(--c) 70%,transparent);background:#0B101D;flex-shrink:0}
+body .mgW img{width:100%;height:100%;display:block;border-radius:50%}
+body .mgW b{position:absolute;right:-6%;bottom:-6%;width:40%;height:40%;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 1px 3px rgba(0,0,0,.6)}
+body .mgW b .ico{width:70%;height:70%}
 /* شاشة الساحات */
 body .arHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,var(--s1),var(--s2) 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
 body .arHeroRays{position:absolute;left:50%;top:40%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 32%);mask:radial-gradient(circle,#000 0,transparent 32%);animation:arSpin 40s linear infinite}
@@ -26163,7 +26174,7 @@ function tlSkSheet(k){
   <div style="font-size:10.5px;color:var(--tx2)">${o?(mx?T('بلغ أقصى مستوى'):T('الأصفر: ما تضيفه الترقية')):T('اعثر على نسخه في الصناديق والمباريات')}</div>
   <span class="tlCp${o&&n>=needC?' rd':''}" style="max-width:240px;height:18px"><i style="width:${Math.min(100,Math.round(n/(o?needC||1:TL_UNL[it[1]])*100))}%"></i><span>${o?(mx?T('أقصى مستوى'):n+'/'+needC+' '+T('نسخة')):n+'/'+TL_UNL[it[1]]+' '+T('نسخة')}</span></span>
   ${o&&!mx?`<button class="tlBtn up" id="tlUp" ${can?'':'disabled'}>${T('ترقية')} · ${ico('coin',14)} ${cost}</button>`:''}
-  ${o&&!mx&&n<needC&&mgWild(it[1])>0?`<button class="tlBtn g" id="tlWild">${ico('wild',14)} ${T('استخدم جوكر')} (${mgWild(it[1])})</button>`:''}
+  ${o&&!mx&&n<needC&&mgWild(it[1])>0?`<button class="tlBtn g" id="tlWild">${mgWildImg(it[1],18)} ${T('استخدم جوكر')} (${mgWild(it[1])})</button>`:''}
   ${o&&!mx&&n<needC&&mgBooks()>0?`<button class="tlBtn g" id="tlBook">${ico('book',14)} ${T('استخدم كتاب الجيس')} (${mgBooks()})</button>`:''}
   ${o?(caSkMine()===k?`<button class="tlBtn n" disabled>${T('قيد الاستخدام')}</button>`:`<button class="tlBtn g" id="tlUse">${T('استخدم')}</button>`)
     :`<button class="tlBtn g" id="tlBuyB">${ico(it[3]?'gem':'coin',14)} ${it[2]} — ${T('اشترِ الآن')}</button>`}
