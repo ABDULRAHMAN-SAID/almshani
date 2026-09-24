@@ -67,6 +67,8 @@ module.exports=[
  // ── الكؤوس والساحات (٦٫٩٣) ──
  ['arenaScr',R("tab('play');S.tro={tr:740,best:760,gate:2,w:31,l:19,claimed:[100,200,300],season:trSeasonKey(),up:2};push('arenaScr')")],
  ['arenaScr-new',R("tab('play');S.tro=null;push('arenaScr')")],
+ ['ch12Scr',R("tab('play');S.ch12={act:1,w:4,l:1,claimed:0,best:4,runs:1,free:0};push('ch12Scr')")],
+ ['ch12Scr-new',R("tab('play');S.ch12=null;push('ch12Scr')")],
  ['arenaUp',R("tab('play');S.tro={tr:1010,best:1010,gate:3,w:40,l:22,claimed:[],season:trSeasonKey(),up:2};arenaUpFx(3)")],
  ['wildScr',R("tab('shop');push('wildScr')")],['evoShopScr',R("tab('shop');push('evoShopScr')")],
  ...['all','own','locked','fav','deck'].map(t=>[`emoteScr-${t}`,R(`tab('more');emTab='${t}';push('emoteScr')`)]),

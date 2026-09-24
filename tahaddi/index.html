@@ -18528,10 +18528,10 @@ function quitMatch(force){
  if(!force&&!(S.opt&&S.opt.confirm===0)){M.menu=false;M.quitAsk=true;mDraw();return}
  clearInterval(M.tm);clearInterval(M.autoTm);
  if(M.st&&M.st.timer)clearInterval(M.st.timer);
- const res=resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,
+ const res=M.casual?{applied:false,rpGain:0}:resolveMatch({gameId:'knowledge',mode:'ranked',matchId:M.mid,   // ٦٫٩٤: الودّيّة ضدّ الآليّ لا تُحتسب خسارةً ولا كؤوسًا
   result:{won:false},opponents:[{mmr:M.oppMmr}]});
- M=null;
- toast('انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} نقطة تصنيف)`:''));
+ const wasCasual=!!M.casual;M=null;
+ toast(wasCasual?'انسحبت — مباراة ودّيّة بلا أثر':'انسحبت — احتُسبت خسارة'+(res.rpGain?` (${res.rpGain} نقطة تصنيف)`:''));
  Router.settle('rankedScr');
 }
 function toggleMenu(){M.menu=!M.menu;mDraw(1)}
@@ -19443,7 +19443,7 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // شاشات عادية: تُرسم بدالّتها العامة، والرجوع منها سحب
  ['toolsScr','cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','drawLesson',
   'profScr','achScr','misScr','storeScr','lbScr','seasonScr','avScr','setScr','setSection','delAsk','legalScr','rankGuideScr','emailAsk',
-  'shopScr','chestScr','oddsScr','bcOddsScr','arenaScr','wildScr','evoShopScr','emoteScr','colScr',
+  'shopScr','chestScr','oddsScr','bcOddsScr','arenaScr','ch12Scr','wildScr','evoShopScr','emoteScr','colScr',
   'playScr','gamesScr','dmScr','moreScr','playModesScr','netsScr','mapScr','quickScr','home','evtScr','rankedScr',
   'gameRankScr','soloScr','roomScr','xferScr','xferShow',
   'clubHome','clMembersScr','clMemberScr','clInfoScr','clChatScr','clDonorsScr','clRequestsScr',
@@ -24928,6 +24928,8 @@ function playScr(){
    "push('friendsScr')",'#3AAE6E',(FR&&FR.in&&FR.in.length)?`<span class="plNew">${FR.in.length}</span>`:'')}
   ${plRow(ico('swords',40),'تحدِّ صديقًا','ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
    "push('chalScr')",'#E8B23A',chDue()?`<span class="plNew">${chDue()}</span>`:'')}
+  ${plRow(ico('trophy',40),'تحدّي الاثني عشر',CH12().act?`جارٍ — ${CH12().w}/${CHL.wins} فوز · ${CH12().l}/${CHL.losses} خسارة`:'12 فوزًا قبل 3 خسائر — سلّم جوائز وصناديق',
+   "push('ch12Scr')",'#D9B76E',CH12().act&&(CH12().w>=CHL.wins||CH12().l>=CHL.losses)?'<span class="plNew">!</span>':'')}
  </div>
  <div class="plSec">
   <div class="plSecT">${ico('chest',14)} صناديق المعارك
@@ -24940,6 +24942,84 @@ function playScr(){
  verAnnounce();          // الرئيسية رُسمت، فالنافذة تجد شاشةً تظهر فوقها
 }
 
+/* ═══ ٦٫٩٤ — تحدّي الاثني عشر (على مثال Classic Challenge في كلاش رويال) ═══
+   تدخل بعشر جواهر (والأولى مجّانًا)، وتلعب مباريات كيرم حتّى تجمع اثني عشر فوزًا أو تخسر ثلاثًا. كلّ فوزٍ يضيف
+   جائزةً إلى السلّم (عملات، نسخ جيس، جواهر، وصناديق عند 3 و9 و12)، وتستلم ما بلغته في أيّ وقتٍ — فينتهي التحدّي.
+   تُحتسب المباريات أونلاين، وضدّ الآليّ في الصعب والمستحيل فقط (لا ودّيّات ولا سهل). كلّ الحساب في ch12Match وحدها. */
+const CHL={entry:10,wins:12,losses:3,
+ rw:[{w:1,coins:80},{w:2,coins:140},{w:3,chest:'rival'},{w:4,coins:220},{w:5,skc:6},{w:6,gems:15},
+     {w:7,coins:380},{w:8,skc:10},{w:9,chest:'elite'},{w:10,coins:650},{w:11,gems:30},{w:12,chest:'legend',gems:60}]};
+function CH12(){if(!S.ch12||typeof S.ch12!=='object')S.ch12={act:0,w:0,l:0,claimed:0,best:0,runs:0,free:1};return S.ch12}
+function ch12Cost(){return CH12().free?0:CHL.entry}
+function ch12Start(){
+ const c=CH12();if(c.act){push('ch12Scr');return}
+ const cost=ch12Cost();
+ if(S.gems<cost){toast('جواهر غير كافية — تحتاج '+cost,'bad');return}
+ const go2=()=>{if(S.gems<ch12Cost()){toast('جواهر غير كافية','bad');return}
+  S.gems-=ch12Cost();c.free=0;c.act=1;c.w=0;c.l=0;c.claimed=0;c.runs=(c.runs|0)+1;try{saveState()}catch(e){}
+  try{if(window.SFX)SFX.fx('trophy')}catch(e){}
+  Router.settle?Router.settle('ch12Scr'):push('ch12Scr')};
+ if(!cost){go2();return}
+ confirmSheet('دخول التحدّي',`ستدفع <b style="color:var(--gem)">${cost} جواهر</b> لتدخل تحدّي الاثني عشر.<br>12 فوزًا قبل 3 خسائر — وتستلم ما بلغته متى شئت.`,'ادخل',go2);
+}
+/** من rmSettle: يحسب المباراة إن كان التحدّي قائمًا — ويعيد ما حدث للعرض */
+function ch12Match(won,mode){
+ const c=CH12();if(!c.act||won==null)return null;
+ if(mode==='room')return {skip:'room'};
+ if(mode==='bot'&&!/^(hard|imp)$/.test(RM.diff||''))return {skip:'easy'};
+ if(won)c.w++;else c.l++;
+ if(c.w>(c.best|0))c.best=c.w;
+ const done=c.w>=CHL.wins||c.l>=CHL.losses;
+ try{saveState()}catch(e){}
+ return {w:c.w,l:c.l,done,won,win12:c.w>=CHL.wins};
+}
+function ch12Rw(r){return (r.coins?[{t:'coins',v:r.coins}]:[]).concat(r.gems?[{t:'gems',v:r.gems}]:[]).concat(r.skc?[{t:'skc',k:tlRandSk(),v:r.skc}]:[])}
+function ch12RwLbl(r){const p=[];if(r.chest)p.push((ECON.chests[r.chest]||{}).n||'صندوق');if(r.coins)p.push(r.coins.toLocaleString('en-US')+' عملة');if(r.gems)p.push(r.gems+' جوهرة');if(r.skc)p.push(r.skc+' نسخ جيس');return p.join(' + ')}
+/** يستلم كلّ ما بلغه — وينهي التحدّي (كزرّ Claim في كلاش رويال) */
+function ch12Claim(){
+ const c=CH12();if(!c.act)return;
+ let list=[],chest=null;
+ for(const r of CHL.rw){if(r.w<=c.w&&r.w>(c.claimed|0)){list=list.concat(ch12Rw(r));if(r.chest){chest=r.chest;list=list.concat(openChest(r.chest)).concat(tlChestCopies(r.chest))}}}
+ const w=c.w;c.claimed=c.w;c.act=0;
+ grantRewards(list);try{saveState()}catch(e){}
+ if(!list.length){toast('انتهى التحدّي بلا فوز — حظًّا أوفر في المرّة القادمة');Router.settle?Router.settle('ch12Scr'):refresh(ch12Scr);return}
+ push('rewardScr',{title:'تحدّي الاثني عشر — '+w+' '+(w===1?'فوز':'انتصارات'),list,chest});
+}
+function ch12Slots(){
+ const c=CH12();
+ return `<div class="chSl">${Array.from({length:CHL.wins},(_,i)=>`<i class="w${i<c.w?' on':''}${CHL.rw[i].chest?' big':''}">${i<c.w?ico('check',11):(i+1)}</i>`).join('')}</div>
+  <div class="chSl ls">${Array.from({length:CHL.losses},(_,i)=>`<i class="l${i<c.l?' on':''}">${i<c.l?ico('cross',11):''}</i>`).join('')}<span>الخسائر ${c.l}/${CHL.losses}</span></div>`;
+}
+function ch12Scr(){
+ const c=CH12(),act=!!c.act,done=act&&(c.w>=CHL.wins||c.l>=CHL.losses),cost=ch12Cost();
+ go(`<div class="scr on">${tbar('تحدّي الاثني عشر')}
+ <div class="chHero">
+  <div class="chHeroRays"></div>
+  <div class="chHeroT">${act?(done?(c.w>=CHL.wins?'اكتمل التحدّي — اثنا عشر فوزًا!':'انتهى التحدّي'):'التحدّي جارٍ'):'اثنا عشر فوزًا قبل ثلاث خسائر'}</div>
+  <div class="chHeroN">${ico('trophy',26)}<b>${c.w}</b><span>/ ${CHL.wins}</span></div>
+  ${ch12Slots()}
+  ${act?(done?`<button class="rbtn" style="margin-top:12px" onclick="ch12Claim()"><span>استلم الجوائز</span></button>`
+   :`<button class="rbtn" style="margin-top:12px" onclick="push('gameHub','carrom')"><span>العب مباراة كيرم</span></button>
+     <button class="btn g" style="margin-top:9px" onclick="confirmSheet('الانسحاب من التحدّي','ستستلم جوائز ما بلغته (${c.w} ${c.w===1?'فوز':'انتصارات'}) وينتهي التحدّي.','استلم وانسحب',()=>ch12Claim())">استلم ما بلغته وانسحب</button>`)
+   :`<button class="rbtn" style="margin-top:12px" onclick="ch12Start()"><span>${cost?`ادخل التحدّي — ${cost} جواهر`:'ادخل التحدّي — مجّانًا أوّل مرّة'}</span></button>`}
+  <div class="chHeroS">${act?'أونلاين أو ضدّ الآليّ في الصعب والمستحيل — الودّيّات لا تُحسب':'أفضل نتيجة: '+(c.best|0)+' فوز · خضت '+(c.runs|0)+' تحدّيات'}</div>
+ </div>
+ <div class="sl">سلّم الجوائز</div>
+ ${CHL.rw.map(r=>{const got=r.w<=c.w,next=act&&!got&&r.w===c.w+1;return `<div class="li chRw${got?' got':''}${next?' next':''}${r.chest?' big':''}"><div class="lr">
+   <span class="chRwN">${got?ico('check',14,'#5DE39A'):r.w}</span>
+   <span class="chRwA">${r.chest?`<span class="arMArt ch-${r.chest}"></span>`:r.gems&&!r.coins?ico('gem',34):r.skc?skImg('blue',34):ico('coin',34)}</span>
+   <div class="lb"><div class="lt">${r.w===CHL.wins?'الفوز الثاني عشر':'الفوز '+r.w}</div><div class="ls">${ch12RwLbl(r)}</div></div></div></div>`}).join('')}
+ <div class="sl">القواعد</div>
+ <div class="note" style="text-align:start;line-height:1.9">${ico('gem',13)} الدخول ${CHL.entry} جواهر — والمرّة الأولى مجّانًا.<br>${ico('trophy',13)} كلّ فوزٍ يفتح درجةً في السلّم، وثلاث خسائر تُنهي التحدّي.<br>${ico('gift',13)} تستلم كلّ ما بلغته متى شئت — فينتهي التحدّي وتبدأ غيره.<br>${ico('bulb',13)} الكؤوس والصناديق العاديّة تُحتسب في مباريات التحدّي أيضًا.</div>
+ </div>`);
+ try{trChestCss()}catch(e){}
+}
+/** سطر التحدّي في شاشة النتيجة */
+function ch12FinHTML(r){
+ if(!r)return '';
+ if(r.skip)return `<div class="finCh dim">${ico('crown',14)} تحدّي الاثني عشر لا يحتسب ${r.skip==='room'?'الودّيّات':'الآليّ السهل والمتوسّط'}</div>`;
+ return `<div class="finCh${r.done?' done':''}" onclick="push('ch12Scr')">${ico('crown',16)} التحدّي: <b>${numPair(r.w,CHL.wins)}</b> فوز · <b>${numPair(r.l,CHL.losses)}</b> خسارة${r.done?' — <u>'+(r.win12?'اكتمل! استلم جوائزك':'انتهى — استلم ما بلغته')+'</u>':''}</div>`;
+}
 /* ═══ ٦٫٩٣ — الكؤوس والساحات (على نظام كلاش رويال) ═══
    «ولمّا تفوز كم كأس تحصل؟» كأسٌ واحدة للحساب كلّه تُرى في الرئيسيّة والمباراة والملفّ. الفوز +30 تقريبًا (من 22 إن كان
    خصمك أدنى منك إلى 38 إن كان أعلى)، والخسارة مثلها نقصًا، والتعادل لا شيء. عشر ساحات بعتبات، ولكلّ ساحةٍ بوابة: من
@@ -25832,6 +25912,31 @@ body .finTrN{margin-top:6px;font-size:10.5px;font-weight:800;color:#D9B76E;text-
 body .pfTr{position:relative;display:inline-flex;align-items:center;gap:5px;margin-top:5px;font-size:12.5px;font-weight:700;color:#F6E7C6}
 body .pfTr .rico{width:16px!important;height:16px!important}
 body .ghArena{margin-top:8px}
+/* تحدّي الاثني عشر */
+body .chHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,#3A2A0E,#0C1222 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
+body .chHeroRays{position:absolute;left:50%;top:30%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,225,150,.10) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 30%);mask:radial-gradient(circle,#000 0,transparent 30%);animation:arSpin 40s linear infinite}
+body .chHeroT{position:relative;font-family:var(--fd);font-size:19px;font-weight:700;color:#F6E7C6}
+body .chHeroN{position:relative;display:inline-flex;align-items:baseline;gap:6px;margin-top:6px}
+body .chHeroN .rico{width:26px!important;height:26px!important;align-self:center}
+body .chHeroN b{font-family:var(--fd);font-size:40px;font-weight:700;line-height:1;color:#FFF1C4;text-shadow:0 2px 0 #6A3606,0 0 18px rgba(255,210,100,.5);font-variant-numeric:tabular-nums}
+body .chHeroN span{font-size:14px;font-weight:800;color:#D9B76E}
+body .chSl{position:relative;display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-top:12px}
+body .chSl{gap:4px}
+body .chSl i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:900;color:#8B96B6;background:#070B16;border:1px solid rgba(217,183,110,.28)}
+body .chSl i.big{width:26px;height:26px;border-color:var(--lxHair)}
+body .chSl.ls i{width:24px;height:24px}
+body .chSl i.w.on{color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);border-color:#FFE9A8;box-shadow:0 0 10px rgba(255,233,168,.45)}
+body .chSl.ls{margin-top:9px;align-items:center;gap:7px}body .chSl.ls span{font-size:11px;font-weight:800;color:#C9B37A;margin-inline-start:4px}
+body .chSl i.l{border-color:rgba(226,75,74,.4)}body .chSl i.l.on{color:#fff;background:linear-gradient(180deg,#F08A8A,#B8312F);border-color:#F08A8A}
+body .chHeroS{position:relative;margin-top:10px;font-size:11px;font-weight:800;color:#C9B37A}
+body .chRw.got{opacity:.6}body .chRw.next{border-color:#FFE9A8;box-shadow:0 0 0 1px rgba(255,233,168,.35),0 0 14px rgba(232,178,58,.3)}
+body .chRw .chRwN{flex-shrink:0;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-family:var(--fd);font-weight:700;font-size:13px;color:#F6E7C6;background:#070B16;border:1px solid var(--lxHair2)}
+body .chRw .chRwA{flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+body .chRw .chRwA .arMArt{width:44px;height:44px}body .chRw .chRwA .rico{width:34px!important;height:34px!important}
+body .finCh{margin:-4px auto 12px;max-width:340px;padding:8px 14px;border-radius:14px;cursor:pointer;font-size:12px;font-weight:800;color:#F6E7C6;background:linear-gradient(180deg,rgba(22,30,51,.92),rgba(11,16,29,.92));border:1px solid var(--lxHair2);display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
+body .finCh b{font-family:var(--fd);font-size:15px;color:#FFF1C4}body .finCh u{text-decoration:none;color:#FFE9A8}
+body .finCh.done{border-color:#FFE9A8;box-shadow:0 0 14px rgba(232,178,58,.35)}body .finCh.dim{opacity:.7;cursor:default;color:#9AA6C2}
+body .finCh .rico{width:16px!important;height:16px!important}
 /* شاشة الساحات */
 body .arHero{position:relative;overflow:hidden;border-radius:20px;padding:18px 14px 14px;text-align:center;background:radial-gradient(120% 90% at 50% -10%,var(--s1),var(--s2) 70%);border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.1),0 18px 40px -18px rgba(0,0,0,.95)}
 body .arHeroRays{position:absolute;left:50%;top:40%;width:160vmax;height:160vmax;transform:translate(-50%,-50%);pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(var(--f),.16) 0 5deg,transparent 5deg 16deg);-webkit-mask:radial-gradient(circle,#000 0,transparent 32%);mask:radial-gradient(circle,#000 0,transparent 32%);animation:arSpin 40s linear infinite}
@@ -26168,7 +26273,7 @@ function rmLeave(silent){
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  RM.U=null;RM.C=null;RM.uno=null;RM.ca=null;RM.hand=[];
  if(RM.solo){RM.solo=0;RMcap=undefined;_ca.sim=null}   // يُعاد حلّ الناقل الحقيقي في الغرفة التالية
- RM.mode=null;RM.mid=null;RM.rank=null;
+ RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;
  RM.mm=0;clearInterval(_mmTm);
  // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
  try{cancelAnimationFrame(_ca.anim)}catch(e){}
@@ -26334,6 +26439,7 @@ function rmSettle(d){
   const out=resolveMatch({gameId:gid,mode:rmMode(),matchId:RM.mid,
    result:res,opponents:opp});
   if(out&&out.applied){RM.rank=out;saveState()}
+  if(out&&out.applied&&gid==='carrom')try{RM.ch12=ch12Match(trResult(res),rmMode())}catch(e){}   // ٦٫٩٤: تحدّي الاثني عشر
   return out;
  }catch(e){return null}
 }
@@ -29820,7 +29926,7 @@ function caMatchEnd(C){
  let bg='';try{if(meWon&&REAL_ART.ui_win_bg)bg=`style="background:radial-gradient(circle at 50% 40%,rgba(255,205,90,.12),rgba(6,8,16,.62) 70%),url(${REAL_ART.ui_win_bg}) center/cover"`}catch(e){}
  return `<div class="caEnd${fresh?' in':''}${meWon?' won':''}" ${bg}>${meWon?'<div class="caRays"></div>':''}<div class="caFinC${meWon?' won':''}">
   ${meWon?`<div class="caFinCup">${ico('trophy',104)}</div>`:`<div class="caFinCup lose">${ico('swords',84)}</div>`}
-  <div class="caFinT">${t}</div>${fs}${trFinHTML(RM.rank&&RM.rank.tro)}
+  <div class="caFinT">${t}</div>${fs}${trFinHTML(RM.rank&&RM.rank.tro)}${ch12FinHTML(RM.ch12)}
   ${meWon?`<div class="caFinRw"><span>${ico('coin',18)} +40 ${T('خبرة')}</span><span>${ico('chest',18)} ${T('صندوق نصر')}</span></div>`:`<div class="caFinRw"><span>${ico('coin',18)} +15 ${T('خبرة')}</span></div>`}
   ${RM.host?`<button class="rbtn caEndGo" onclick="rmStart()"><span>${T('العب مرّة أخرى')}</span></button>`:'<div class="note">بانتظار المضيف…</div>'}
   <button class="btn g caFinX" onclick="rmLeave()">${T('خروج')}</button></div></div>`;
