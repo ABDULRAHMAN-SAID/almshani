@@ -178,5 +178,17 @@
   "historyId": "fRGja4YUF59JULTDHGMj",
   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790264441409_e87c19fb.png",
   "prompt": "Game asset sprite sheet, isometric 3D renders in the exact visual style of Clash Royale trophy-road reward platforms: st"
+ },
+ {
+  "path": "art/uno/scene",
+  "historyId": "firzyjOcs3FlR9lKTtVz",
+  "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790275114063_c0ad3a51.png",
+  "prompt": "Uno round navy/gold table in an Arabian majlis, 9:16, 3/4 view, empty felt"
+ },
+ {
+  "path": "art/uno/sheet",
+  "historyId": "CmKomblTzDoes3nxkYvl",
+  "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790275113996_9ac10963.png",
+  "prompt": "magenta sheet: card back, red UNO button, colour medallion"
  }
 ]
