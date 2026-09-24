@@ -25459,6 +25459,8 @@ function evtScr(){
 function SZ(){if(!S.szn)S.szn={xp:0,cf:[],cp:[],prem:false};return S.szn}
 const SZ_MAX=100,SZ_STEP=100,SZ_PASS_COST=950,SZ_END=new Date('2026-10-12T00:00:00Z');
 function szLv(){return Math.min(SZ_MAX,Math.floor(SZ().xp/SZ_STEP))}
+/** ٦٫٩٤ — تقدّم التذكرة من أيّ مباراة: يعيد ما أُضيف فعلًا (صفرٌ عند السقف) */
+function szAdd(n){const z=SZ(),b=z.xp;z.xp=Math.min(SZ_MAX*SZ_STEP,z.xp+(n|0));return z.xp-b}
 // مكافأة كل مستوى — حتمية وواضحة، والمميز أكرم دائماً
 function szReward(lv,prem){
  if(prem){
@@ -26281,7 +26283,7 @@ function rmLeave(silent){
  RM.code=null;RM.host=0;RM.phase='idle';RM.role=null;RM.players=[];RM.votes={};RM.res=null;RM.acts={};
  RM.U=null;RM.C=null;RM.uno=null;RM.ca=null;RM.hand=[];
  if(RM.solo){RM.solo=0;RMcap=undefined;_ca.sim=null}   // يُعاد حلّ الناقل الحقيقي في الغرفة التالية
- RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;
+ RM.mode=null;RM.mid=null;RM.rank=null;RM.ch12=null;RM.szG=0;
  RM.mm=0;clearInterval(_mmTm);
  // حالة الكيرم تبدأ نظيفة في كل مباراة — الفن المخزّن وتفضيل الشكل يبقيان
  try{cancelAnimationFrame(_ca.anim)}catch(e){}
@@ -26448,6 +26450,7 @@ function rmSettle(d){
    result:res,opponents:opp});
   if(out&&out.applied){RM.rank=out;saveState()}
   if(out&&out.applied&&gid==='carrom')try{RM.ch12=ch12Match(trResult(res),rmMode())}catch(e){}   // ٦٫٩٤: تحدّي الاثني عشر
+  if(out&&out.applied&&rmMode()!=='room')try{const w=trResult(res);RM.szG=szAdd(w===true?80:w===false?30:50)}catch(e){}   // ٦٫٩٤: تذكرة الموسم تتقدّم بكلّ مباراة (التيجان في كلاش رويال) — لا الودّيّات
   return out;
  }catch(e){return null}
 }
@@ -26456,7 +26459,7 @@ function rmSettle(d){
 function rmOn(d,m){
  const me=RM.me;
  if(d.t==='start'){RM.game=d.g;RM.phase=d.g==='draw'?'paint':d.g==='uno'?'uno':d.g==='carrom'?'carrom':'deal';
-  RM.mid=d.mid||rmNewMid();RM.rank=null;
+  RM.mid=d.mid||rmNewMid();RM.rank=null;RM.ch12=null;RM.szG=0;
   RM.role=null;RM.word=d.w||'';RM.cat=d.cat||'';RM.art={};RM.hand=[];RM.uno=null;RM.ca=null;
   RM.players=d.ps||[];RM.alive=(d.ps||[]).map(x=>x.peer);RM.day=1;RM.votes={};RM.res=null}
  else if(d.t==='seal'){if(d.to===me)rmSealOpen(d,m)}   // غلاف مُعمّى: لا يفكّه إلا صاحبه
@@ -29935,7 +29938,7 @@ function caMatchEnd(C){
  return `<div class="caEnd${fresh?' in':''}${meWon?' won':''}" ${bg}>${meWon?'<div class="caRays"></div>':''}<div class="caFinC${meWon?' won':''}">
   ${meWon?`<div class="caFinCup">${ico('trophy',104)}</div>`:`<div class="caFinCup lose">${ico('swords',84)}</div>`}
   <div class="caFinT">${t}</div>${fs}${trFinHTML(RM.rank&&RM.rank.tro)}${ch12FinHTML(RM.ch12)}
-  ${meWon?`<div class="caFinRw"><span>${ico('coin',18)} +40 ${T('خبرة')}</span><span>${ico('chest',18)} ${T('صندوق نصر')}</span></div>`:`<div class="caFinRw"><span>${ico('coin',18)} +15 ${T('خبرة')}</span></div>`}
+  ${meWon?`<div class="caFinRw"><span>${ico('coin',18)} +40 ${T('خبرة')}</span><span>${ico('chest',18)} ${T('صندوق نصر')}</span>${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>`:`<div class="caFinRw"><span>${ico('coin',18)} +15 ${T('خبرة')}</span>${RM.szG?`<span>${ico('ticket',16)} +${RM.szG} ${T('تذكرة')}</span>`:''}</div>`}
   ${RM.host?`<button class="rbtn caEndGo" onclick="rmStart()"><span>${T('العب مرّة أخرى')}</span></button>`:'<div class="note">بانتظار المضيف…</div>'}
   <button class="btn g caFinX" onclick="rmLeave()">${T('خروج')}</button></div></div>`;
 }
