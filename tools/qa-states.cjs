@@ -7,7 +7,7 @@ module.exports=[
  // ── الترحيب والتعليم ──
  ['welcomeScr',R("Router.reset('welcomeScr')")],
  ['askTut',R("Router.reset('welcomeScr');push('askTut')")],
- ...[0,1,2,3,4].map(i=>[`tutorial-${i}`,R(`Router.reset('welcomeScr');tutStart();T2.i=${i};tDraw()`)]),
+ ...[0,1,2,3].map(i=>[`tutorial-${i}`,R(`Router.reset('welcomeScr');tutStart();T2.i=${i};tDraw()`)]),
  ['tDone',R("Router.reset('welcomeScr');tutStart();tDone()")],
  ['skipAsk',R("Router.reset('welcomeScr');tutStart();push('skipAsk')")],
  // ── العب ──
@@ -46,21 +46,13 @@ module.exports=[
  ['setSection-all',R("tab('more');push('setScr');const ks=SETS.map(s=>s.k);window.__setKeys=ks;push('setSection',ks[ks.length-1])")],
  ['avScr',R("tab('more');push('avScr')")],['renameAsk',R("tab('more');push('renameAsk')")],['delAsk',R("tab('more');push('delAsk')")],
  ['profScr',R("tab('more');push('profScr')")],['profileView-rival',R("push('profileView',rivalProfile('سالم',{mmrHint:1400}))")],
- // ── البطاقات ──
- ['cardsScr',R("tab('cards')")],
- ...['read','learn','watch','try'].map(t=>[`cardDetail-${t}`,R(`tab('cards');cdTab='${t}';push('cardDetail',+Object.keys(S.cards.owned)[0])`)]),
- ['cardLevels',R("tab('cards');push('cardLevels',+Object.keys(S.cards.owned)[0])")],
- ['levelDetail',R("tab('cards');push('levelDetail',{id:+Object.keys(S.cards.owned)[0],lv:3})")],
- ['deckScr',R("tab('cards');push('deckScr')")],
- ...[0,2,4].map(i=>[`drawLesson-${i}`,R(`tab('cards');_lsn=${i};push('drawLesson')`)]),
- ['tryCard',R("tab('cards');push('tryCard',+Object.keys(S.cards.owned)[0])")],
  // ── المتجر ──
  ['shopScr',R("tab('shop')")],
  ['chestScr-all',R("tab('shop');const ks=Object.keys(ECON.chests);window.__chestKeys=ks;push('chestScr',ks[0])")],
  ['chestScr-2',R("tab('shop');push('chestScr',Object.keys(ECON.chests)[1])")],
  ['chestScr-last',R("tab('shop');const ks=Object.keys(ECON.chests);push('chestScr',ks[ks.length-1])")],
  ['oddsScr',R("tab('shop');push('oddsScr',Object.keys(ECON.chests)[0])")],
- ['rewardScr',R("tab('shop');push('rewardScr',{title:'صندوق المعرفة',list:[{t:'coins',v:120},{t:'frag',id:CARDS[0].id,v:3},{t:'gems',v:5}]})")],
+ ['rewardScr',R("tab('shop');push('rewardScr',{title:'صندوق المعرفة',list:[{t:'coins',v:120},{t:'skc',k:'blue',v:3},{t:'gems',v:5}]})")],
  ['rewardScr-empty',R("tab('shop');push('rewardScr',{title:'مكافآت',list:[]})")],
  ['rewardScr-chest',R("tab('shop');push('rewardScr',{title:'صندوق المنافس',chest:'rival',list:[{t:'coins',v:240},{t:'skc',k:'ruby',v:4},{t:'gems',v:3}]})")],
  ['rewardScr-sum',R("tab('shop');push('rewardScr',{title:'صندوق المعرفة',list:[{t:'coins',v:120},{t:'skc',k:'blue',v:3}]});setTimeout(()=>revealAll(),150)")],
@@ -70,9 +62,7 @@ module.exports=[
  ['ch12Scr',R("tab('play');S.ch12={act:1,w:4,l:1,claimed:0,best:4,runs:1,free:0};push('ch12Scr')")],
  ['ch12Scr-new',R("tab('play');S.ch12=null;push('ch12Scr')")],
  ['arenaUp',R("tab('play');S.tro={tr:1010,best:1010,gate:3,w:40,l:22,claimed:[],season:trSeasonKey(),up:2};arenaUpFx(3)")],
- ['wildScr',R("tab('shop');push('wildScr')")],['evoShopScr',R("tab('shop');push('evoShopScr')")],
  ...['all','own','locked','fav','deck'].map(t=>[`emoteScr-${t}`,R(`tab('more');emTab='${t}';push('emoteScr')`)]),
- ['colScr',R("tab('more');push('colScr')")],
  // ── النادي ──
  ['clSearchScr-noclan',R("S.clan=null;tab('clubs')")],
  ['clCreateScr',R("S.clan=null;tab('clubs');push('clCreateScr')")],

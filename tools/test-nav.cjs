@@ -26,7 +26,7 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
    drawPass:'party',drawBoard:'party',drawVote:'party',drawEnd:'party',
    drawAv:'avScr',renderReward:'rewardScr',renameAsk:'renameAsk',
    clanScrFail:'*',clScreen:'*',clGo:'*',clEmptyScr:'*',clErrScr:'*'};
-  const names=['drawAv','introDraw','drawLesson','cardsScr','cardDetail','cardLevels','levelDetail','deckScr','tryCard','setScr','setSection','renameAsk','delAsk','shopScr','chestScr','oddsScr','renderReward','wildScr','evoShopScr','emoteScr','colScr','welcomeScr','askTut','skipAsk','tDraw','tDone','rankedScr','preMatchOld','mDraw','mResult','playScr','evtScr','seasonScr','moreScr','playModesScr','mmScr','mmDraw','roomScr','roomDraw','soloScr','partyScr','gameHub','gameRankScr','mafiaSetup','mafiaDeal','mafGate','mafPick','mafCheck','mafiaMorning','mafLynch','mafWinCheck','drawSetup','drawPass','drawBoard','drawVote','drawEnd','clanScrFail','clScreen','clGo','clEmptyScr','clErrScr','clChatScr','clRequestSupportScr','clSupportScr','clDonorsScr','clEventsScr','clAchScr','home','netsScr','mapScr','quickScr','draw','done','misScr','achScr','storeScr','lbScr','profileView'];
+  const names=['drawAv','setScr','setSection','renameAsk','delAsk','shopScr','chestScr','oddsScr','renderReward','emoteScr','welcomeScr','askTut','skipAsk','tDraw','tDone','rankedScr','preMatchOld','mDraw','mResult','playScr','evtScr','seasonScr','moreScr','playModesScr','mmScr','mmDraw','roomScr','roomDraw','soloScr','partyScr','gameHub','gameRankScr','mafiaSetup','mafiaDeal','mafGate','mafPick','mafCheck','mafiaMorning','mafLynch','mafWinCheck','drawSetup','drawPass','drawBoard','drawVote','drawEnd','clanScrFail','clScreen','clGo','clEmptyScr','clErrScr','clChatScr','clRequestSupportScr','clSupportScr','clDonorsScr','clEventsScr','clAchScr','home','netsScr','mapScr','quickScr','draw','done','misScr','achScr','storeScr','lbScr','profileView'];
   const miss=[],dead=[];
   for(const n of names){
    const f=FLOW.hasOwnProperty(n)?FLOW[n]:n;
@@ -43,12 +43,11 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
  const every=await page.evaluate(async()=>{
   if(!S.clan||!S.clan.c){CLAN.act(S.uid,'create',{n:'فرسان الاختبار',desc:'x',i:'book',col:'#5AC8F5',jt:'open'});CLAN.seedBots(S.clan.c.id,6)}
   const uid=Object.keys(S.clan.mem).find(u=>u!==S.uid);
-  const cid=Object.keys(S.cards.owned)[0];
   const ck=Object.keys(ECON.chests)[0];
-  const ARG={cardDetail:+cid||cid,cardLevels:+cid||cid,levelDetail:{id:+cid||cid,lv:1},tryCard:+cid||cid,setSection:'account',chestScr:ck,oddsScr:ck,
+  const ARG={setSection:'account',chestScr:ck,oddsScr:ck,
    rewardScr:{list:[],title:'اختبار'},mapScr:NETS[0].id,gameHub:'carrom',gameRankScr:'carrom',soloScr:'carrom',roomScr:'carrom',
    mmScr:{g:'uno',mode:'casual'},clMemberScr:uid,profileView:myProfile()};
-  const skip=new Set(['playScr','moreScr','cardsScr','shopScr','home','netsScr','authScr','welcomeScr','askTut','skipAsk','clubHome','clSearchScr',
+  const skip=new Set(['playScr','moreScr','shopScr','home','netsScr','authScr','welcomeScr','askTut','skipAsk','clubHome','clSearchScr',
    'match','intro','mResult','tutorial','room','party','vsbot','quiz','clTransferScr']);
   const out=[];
   for(const n of Router.names()){
@@ -90,22 +89,22 @@ const check=(n,ok,info)=>{if(ok){pass++;console.log('  ✓ '+n)}else{fail++;cons
  check('عشرون رجوعًا من أي عمق تنتهي بجذر التبويب بلا استثناء ولا شاشة بيضاء',!twenty.threw&&twenty.depth===1&&twenty.cur==='playScr'&&twenty.len>500,JSON.stringify(twenty));
 
  // ── د) الجذور بعمق واحد في كل التبويبات ──
- const roots=await page.evaluate(()=>['play','cards','shop','more','clubs'].map(k=>{tab(k);return [k,Router.depth(),Router.current().fn]}));
+ const roots=await page.evaluate(()=>['play','nets','shop','more','clubs'].map(k=>{tab(k);return [k,Router.depth(),Router.current().fn]}));
  check('كل تبويب جذره على المكدّس بعمق ١ — لا فرق بين «العب» و«المتجر»',roots.every(r=>r[1]===1),JSON.stringify(roots));
 
  // ── هـ) استعادة التمرير ──
  const scroll=await page.evaluate(async()=>{
-  tab('cards');window.scrollTo(0,0);
+  tab('shop');window.scrollTo(0,0);
   const h=document.documentElement.scrollHeight;
   window.scrollTo(0,420);await new Promise(r=>setTimeout(r,40));
   const y0=window.scrollY;
-  push('cardDetail',+Object.keys(S.cards.owned)[0]||Object.keys(S.cards.owned)[0]);
+  push('chestScr',Object.keys(ECON.chests)[0]);
   await new Promise(r=>setTimeout(r,40));
   const yIn=window.scrollY;
   back();await new Promise(r=>setTimeout(r,40));
   return {h,y0,yIn,y1:window.scrollY};
  });
- check('الرجوع من تفاصيل بطاقة يعيدك إلى موضعك في القائمة لا إلى أعلاها',scroll.y0>300&&scroll.yIn<50&&Math.abs(scroll.y1-scroll.y0)<8,JSON.stringify(scroll));
+ check('الرجوع من صندوقٍ يعيدك إلى موضعك في المتجر لا إلى أعلاه',scroll.y0>300&&scroll.yIn<50&&Math.abs(scroll.y1-scroll.y0)<8,JSON.stringify(scroll));
 
  // ── و) الضغطة المزدوجة ──
  const dbl=await page.evaluate(()=>{tab('play');push('evtScr');push('evtScr');return Router.depth()});

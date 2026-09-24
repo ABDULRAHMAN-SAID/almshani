@@ -72,7 +72,7 @@ const CAPTURES=require('./qa-states.cjs');
   n++;errs=[];
   let fail=null;
   try{await page.evaluate(`(async()=>{qaReset();${code}})()`)}catch(e){fail=e.message.split('\n')[0].slice(0,160)}
-  await page.waitForTimeout(name==='tryCard'?900:650);   // الصفحة أثقل بعد تضمين التعبيرات المرسومة
+  await page.waitForTimeout(650);   // الصفحة أثقل بعد تضمين التعبيرات المرسومة
   let m={};try{m=await page.evaluate(()=>qaMeasure())}catch(e){fail=fail||('measure: '+e.message.slice(0,100))}
   const file=`${String(n).padStart(3,'0')}-${name}.png`;
   try{await page.screenshot({path:path.join(OUT,file)})}catch(e){}
@@ -85,7 +85,7 @@ const CAPTURES=require('./qa-states.cjs');
   const t=performance.timing;const mem=performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576):null;
   const time=(f)=>{const a=performance.now();f();return +(performance.now()-a).toFixed(1)};
   const r={mem,scriptChars:document.scripts[0]?document.scripts[0].text.length:0};
-  r.playScrMs=time(()=>{tab('play')});r.cardsScrMs=time(()=>{tab('cards')});r.cardsNodes=document.getElementById('app').querySelectorAll('*').length;
+  r.playScrMs=time(()=>{tab('play')});r.moreScrMs=time(()=>{tab('more')});r.moreNodes=document.getElementById('app').querySelectorAll('*').length;
   r.shopScrMs=time(()=>{tab('shop')});r.clubHomeMs=time(()=>{qaClan();tab('clubs')});
   tab('play');push('gameHub','carrom');RM.caN=2;soloStart('carrom','mid');await new Promise(r=>setTimeout(r,400));
   const dts=[];let last=performance.now();

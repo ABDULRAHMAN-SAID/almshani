@@ -23,8 +23,7 @@ out.badCorrectIndex=Q.filter(q=>q.o&&!(q.c>=0&&q.c<q.o.length)).map(q=>q.t.slice
 out.dupOptions=Q.filter(q=>q.o&&new Set(q.o.map(x=>String(x).trim())).size!==q.o.length).map(q=>q.t.slice(0,40)).slice(0,10);
 out.longText=Q.filter(q=>(q.t||'').length>110).length;
 out.latinInQuestions=Q.filter(q=>/[A-Za-z]{3,}/.test(q.t+' '+(q.o||[]).join(' '))).length;
-// البطاقات والتعبيرات
-const cards=arr('CARDS');out.cards=cards?(cards.match(/\{id:/g)||[]).length:null;
+// التعبيرات (٦٫٩٥: بطاقات المعرفة حُذفت)
 const em=arr('EMOTES');out.emotes=em?(em.match(/\{k:/g)||[]).length:null;
 const pw=obj('PARTY_WORDS');if(pw){const cats=[...pw.matchAll(/'([^']+)':\[([^\]]*)\]/g)];out.partyWords=Object.fromEntries(cats.map(m=>[m[1],(m[2].match(/'/g)||[]).length/2]))}
 const mis=arr('MIS');out.missions=mis?(mis.match(/\{k:/g)||[]).length:null;

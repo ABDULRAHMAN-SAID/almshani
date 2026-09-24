@@ -13,7 +13,7 @@ var CATALOG=(function(){
   {id:'gems_2500',   kind:'gems',   usd:19.99, gems:2500,  n:'كنز',   art:'chest',  bonus:15},
   {id:'gems_6500',   kind:'gems',   usd:49.99, gems:6500,  n:'خزنة',  art:'vault',  bonus:22},
   {id:'gems_14000',  kind:'gems',   usd:99.99, gems:14000, n:'قمّة',  art:'summit', bonus:30},
-  {id:'bundle_start',kind:'bundle', usd:2.99,  gems:300, coins:3000, wild:'rare', n:'حزمة البداية', d:'300 جوهرة + 3000 عملة + جوكر نادر'},
+  {id:'bundle_start',kind:'bundle', usd:2.99,  gems:300, coins:3000, wild:'rare', n:'حزمة البداية', d:'300 جوهرة + 3000 عملة + جوكر جيس نادر ×3'},
   {id:'season_pass', kind:'pass',   usd:9.99,  gems:200, pass:true, consumable:false, n:'التذكرة المميزة', d:'تفعيل تذكرة الموسم + 200 جوهرة'}
  ];
  var byId={};

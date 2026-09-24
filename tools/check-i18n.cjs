@@ -20,10 +20,8 @@ const NEVER=new Set(['VS','RP','MMR','OK','NEW','PLAY','WIN','XP']);
 
 const SCREENS=[
  ['playScr','اللعب'],['partyScr','ليلة العائلة'],['playModesScr','أوضاع اللعب'],
- ['rankedScr','التصنيف'],['netsScr','الشبكات'],['cardsScr','البطاقات'],
- ['deckScr','التشكيلة'],['shopScr','المتجر'],
- ['moreScr','المزيد'],['seasonScr','الموسم'],['evoShopScr','متجر التطوّر'],
- ['wildScr','الجوكر'],['emoteScr','التعبيرات'],['colScr','المجموعة'],
+ ['rankedScr','التصنيف'],['netsScr','الشبكات'],['shopScr','المتجر'],
+ ['moreScr','المزيد'],['seasonScr','الموسم'],['emoteScr','التعبيرات'],
  ['setScr','الإعدادات'],['avScr','الأفاتار'],['achScr','الإنجازات'],
  ['misScr','المهام'],['evtScr','التحديات'],['lbScr','الصدارة'],['arenaScr','الساحات'],['ch12Scr','تحدّي الاثني عشر'],
  ['quickScr','السريع'],['clubHome','النادي'],['clSearchScr','بحث الأندية'],
