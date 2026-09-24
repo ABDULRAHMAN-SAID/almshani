@@ -1,0 +1,34 @@
+diff --git a/tahaddi/index.html b/tahaddi/index.html
+index 0b09a30..c433186 100644
+--- a/tahaddi/index.html
++++ b/tahaddi/index.html
+@@ -28313,6 +28313,19 @@ function caPkFx(cx,x,y,R,t,sc,kk){
+  }
+  cx.restore();
+ }
++/* ٦٫٩٠ — «تصاميمك كرتونيّة، ارفع السقف»: صور جيسٍ حقيقيّة مولّدة (OpenArt · Nano Banana Pro، منظرٌ علويّ) مقصوصةٌ دوائر.
++   تُحمَّل مرّةً، وحتى تجهز يُرسم الجيس بالرسم القديم؛ فإذا جهزت تُمحى نسخته المخزّنة فيُعاد رسمه بالصورة */
++const CA_SKIMG_SRC={};
++const CA_SKIMG={};
++function caSkImg(k){
++ const src=CA_SKIMG_SRC[k];if(!src)return null;
++ let im=CA_SKIMG[k];
++ if(!im){im=CA_SKIMG[k]=new Image();
++  im.onload=()=>{for(const key in CA_SPR)if(key.indexOf('s:'+k+'|')===0)delete CA_SPR[key];
++   try{if(RM&&RM.ca)caRender()}catch(e){}try{if(document.getElementById('toolsScr'))toolsDraw()}catch(e){}};
++  im.src=src}
++ return im.complete&&im.naturalWidth?im:null;
++}
+ function caDisc(t,r,cs){
+  const wb=t==='w'||t==='b', set=wb?(cs||caCsMine()):'';
+  const k=t+'|'+Math.round(r*4)+'|'+caK()+'|'+set;
+@@ -28322,6 +28335,9 @@ function caDisc(t,r,cs){
+  const isS=t==='s'||t.slice(0,2)==='s:';
+  const x=c.getContext('2d'),X=S/2,Y=S/2, P=(wb&&CA_CSETS[set]&&CA_CSETS[set][t])||CA_WOOD[t]||(isS&&CA_STRIKERS[t.slice(2)])||CA_WOOD.s;
+  const th=Math.max(1.5,R*.085);                       // سُمك الحافّة الظاهر
++ if(isS){const im=caSkImg(t.slice(2));if(im){
++  x.save();x.beginPath();x.arc(X,Y,R,0,7);x.clip();x.drawImage(im,X-R,Y-R,R*2,R*2);x.restore();
++  c._s=S/Q;c._o=S/Q/2;CA_SPR[k]=c;return c}}
+ 
+  /* ٦٫٧٥ — «الوضوح… ولا أريد ظلًّا، القطع تظهر كأنّها فوق بعض»: لا ظلّ تماسٍّ ولا سُمكٍ مزاح تحت الوجه —
+     قرصٌ مسطّحٌ واضحٌ بحافّةٍ حادّة، كما في صورة المالك */

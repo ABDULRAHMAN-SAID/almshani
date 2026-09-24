@@ -1,0 +1,47 @@
+{
+ "_": "صور الجيس المولّدة في OpenArt (Nano Banana Pro، 2K، خلفيّة سوداء، منظرٌ علويّ). تُقصّ دوائر بـ art-src/strikers/cut.py وتُضمَّن في اللعبة.",
+ "model": "nano-banana-pro",
+ "resolution": "2K",
+ "items": {
+  "blue": {
+   "historyId": "6jgo6CgIXin021gKY6Aq",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220549562_39c94013_1790220550168_3b90161c.png"
+  },
+  "emerald": {
+   "historyId": "of3GLXcuz7WJtvDtgb9P",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220668981_5382973c_1790220669626_50a72336.png"
+  },
+  "onyx": {
+   "historyId": "e3rSGriqKNmKObEeguBq",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220676203_a2f9ec39_1790220676823_248ab6b5.png"
+  },
+  "violet": {
+   "historyId": "IKJOQ1Ee48PDo1Xb9xlc",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220692414_38a32abb_1790220693400_17deaaf4.png"
+  },
+  "ruby": {
+   "historyId": "VGtw0y93qpAEElUo4n7W",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220711308_44b9c934_1790220711914_8d6a6d2a.png"
+  },
+  "teal": {
+   "historyId": "litn0PmbnAHSRriLc94R",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220713976_665e22f4_1790220714422_f0941a5b.png"
+  },
+  "amber": {
+   "historyId": "XchUPlXtI7XQyJ2DwX5s",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220728629_2adddcda_1790220729771_c4a85ecb.png"
+  },
+  "ice": {
+   "historyId": "XBL8dElASe8qe1VFiCA8",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220763363_aa5b183b_1790220763487_b1e343e1.png"
+  },
+  "moon": {
+   "historyId": "B5xZqjjGnWAlTY6r4HRs",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220778406_ee49d338_1790220781186_1ab6c4a9.png"
+  },
+  "sun": {
+   "historyId": "7Vt2eYHdxbDk61r1hgBb",
+   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/image_1790220800024_cc692c59_1790220800712_0463511c.png"
+  }
+ }
+}
