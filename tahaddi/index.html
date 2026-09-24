@@ -17847,12 +17847,24 @@ function addColXP(n){
    +12% لكلّ ساحة، فصندوق ساحة القمّة يحمل ضعفَي صندوق ساحة الرمال */
 const ARENA_MUL=[1,1.12,1.24,1.36,1.5,1.65,1.8,2,2.2,2.4];   // ٦٫٩٤: مضاعف الساحة الواحد — للعملات والنسخ والصفقات (صناديق كلاش رويال تكبر بالساحة)
 function trChestMul(){try{return ARENA_MUL[trArenaIx(TR().best|0)]||1}catch(e){return 1}}
-function openChest(key){
+/* ٦٫٩٤ — صندوق لاعب الكيرم نسخُ جيس لا بطاقاتُ معرفة (في كلاش رويال كلّ صندوقٍ بطاقات): مجموعٌ يكبر بالساحة، موزَّعٌ على
+   عدّة جيوس مفتوحةٍ لساحتك، وجيسٌ مضمونٌ من ندرة الصندوق (نادرٌ في المنافس، ملحميّ في النخبة، أسطوريّ في الأسطورة) */
+const SKC_T={knowledge:{n:[4,6],k:2,fl:null},rival:{n:[8,12],k:3,fl:'r'},elite:{n:[16,24],k:4,fl:'e'},legend:{n:[32,48],k:5,fl:'l'}};
+function skChestCopies(ck){
+ const T=SKC_T[ck]||SKC_T.knowledge,tot=Math.max(T.k,Math.round(rndInt(T.n[0],T.n[1])*trChestMul())),ks=[];
+ if(T.fl){const L=TL_ITEMS.sk.filter(x=>x[1]===T.fl&&tlArenaOkItem('sk',x[0]));if(L.length)ks.push(L[Math.floor(Math.random()*L.length)][0])}
+ let g=0;while(ks.length<T.k&&g++<60){const k=tlRandSk();if(ks.indexOf(k)<0)ks.push(k)}
+ const W={c:6,r:3,e:1.5,l:.6},ws=ks.map(k=>W[(tlItem('sk',k)||['','c'])[1]]||6),sum=ws.reduce((a,b)=>a+b,0)||1;
+ return ks.map((k,i)=>({t:'skc',k,v:Math.max(1,Math.round(tot*ws[i]/sum))}));
+}
+function skChestTxt(ck){const T=SKC_T[ck]||SKC_T.knowledge,m=trChestMul(),fl=T.fl?({r:'نادرٌ',e:'ملحميّ',l:'أسطوريّ'})[T.fl]:'';return `${Math.round(T.n[0]*m)}–${Math.round(T.n[1]*m)} نسخة على ${T.k} جيوس${fl?' · جيسٌ '+fl+' مضمون':''}`}
+function openChest(key,opt){
  const ch=ECON.chests[key];
- const out=[];
+ const out=[],cards=!!(opt&&opt.cards);   // بطاقات المعرفة لصندوقٍ أسقطته مباراة معرفة وحده
  out.push({t:'coins',v:Math.round(rndInt(ch.coins[0],ch.coins[1])*trChestMul())});
  if(ch.gems[1]>0){const g=rndInt(ch.gems[0],ch.gems[1]);if(g)out.push({t:'gems',v:g})}
- for(let i=0;i<ch.slots;i++){
+ if(!cards){try{out.push.apply(out,skChestCopies(key))}catch(e){}}
+ for(let i=0;i<(cards?ch.slots:0);i++){
   const r=rollRarity(ch.odds);
   const pool=CARDS.filter(c=>c.r===r);
   const c=pool[Math.floor(Math.random()*pool.length)];
@@ -17860,11 +17872,11 @@ function openChest(key){
   const n=r==='legendary'?1:r==='epic'?rndInt(1,3):r==='rare'?rndInt(2,8):rndInt(4,22);
   out.push({t:'card',id:c.id,v:n,isNew});
  }
- if(Math.random()*100<ch.wild){
+ if(cards&&Math.random()*100<ch.wild){
   const r=rollRarity({common:50,rare:30,epic:16,legendary:4});
   out.push({t:'wild',r,v:1});
  }
- if(Math.random()*100<ch.shard)out.push({t:'shard',v:rndInt(1,2)});
+ if(cards&&Math.random()*100<ch.shard)out.push({t:'shard',v:rndInt(1,2)});
  if(key==='elite'&&Math.random()<.25)out.push({t:'skw',r:Math.random()<.6?'r':'e',v:rndInt(2,4)});   // ٦٫٩٤: أدوات سحريّة
  if(key==='legend'){if(Math.random()<.5)out.push({t:'skw',r:Math.random()<.65?'e':'l',v:rndInt(2,3)});if(Math.random()<.15)out.push({t:'skbook',v:1})}
  if(Math.random()*100<ch.cosmetic){
@@ -19047,7 +19059,7 @@ function mEnd(){
    result:{won:won},opponents:[{mmr:M.oppMmr,tr:Math.max(0,Math.round(((M.oppMmr||1000)-800)*2.1))}]});
  // مكافآت
  const coins=(won?120:45)+(M.chaseBonus?80:0),xp=Math.round((M.correct||0)*12+(won?60:20));
- S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;dropBattleChest()} saveState();
+ S.coins+=coins;S.xp+=xp;S.matches++;if(won){S.wins++;dropBattleChest('kn')} saveState();
  // شظايا بطاقات
  const frag=won?3:1;
  const ids=Object.keys(S.cards.owned);
@@ -22109,12 +22121,11 @@ function chestScr(key){
  <div style="text-align:center;padding:6px 0">
  <div style="width:46%;margin:0 auto;filter:drop-shadow(0 0 22px ${c.c}66)">${chestArt(key)}</div>
  <div class="mtl" style="font-size:19px;margin-top:8px">${c.n}</div>
- <div style="font-size:12px;color:var(--tx2);margin-top:4px">${c.slots} مكافآت</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:4px">${skChestTxt(key)}</div>
  <div style="display:flex;gap:7px;margin-top:13px">
- ${[[`${ico('coin',15)}`,`${Math.round(c.coins[0]*trChestMul())}–${Math.round(c.coins[1]*trChestMul())}`],
-    ...(c.gems[1]?[[`${ico('gem',15)}`,`${c.gems[0]}–${c.gems[1]}`]]:[]),
-    ...(c.wild?[[`${ico('wild',16)}`,c.wild+'%']]:[]),
-    ...(c.shard?[[`${ico('energy',15)}`,c.shard+'%']]:[])].map(([i,v])=>
+ ${[[`${ico('coin',15)}`,`<bdi dir="ltr">${Math.round(c.coins[0]*trChestMul())}–${Math.round(c.coins[1]*trChestMul())}</bdi>`],
+    ...(c.gems[1]?[[`${ico('gem',15)}`,`<bdi dir="ltr">${c.gems[0]}–${c.gems[1]}</bdi>`]]:[]),
+    ...(key==='elite'?[[mgWildImg('r',18),'25%']]:key==='legend'?[[mgWildImg('e',18),'50%'],[`${ico('book',16,'#FFE9A8')}`,'15%']]:[])].map(([i,v])=>
  `<div style="flex:1;background:rgba(232,178,58,.08);border:1px solid rgba(232,178,58,.24);
    border-radius:10px;padding:8px 3px"><div style="font-size:14px">${i}</div>
    <div class="mtl" style="font-size:12px">${v}</div></div>`).join('')}</div>
@@ -22136,7 +22147,9 @@ function bcOddsScr(){
  go(`<div class="scr on">${tbar('احتمالات صناديق المعارك')}
  <div class="orn"><div class="in">${ornCorners()}
  <div style="font-size:11.5px;color:var(--tx2);line-height:1.7;margin-bottom:12px">
-  بعد كل فوز في مباراة أونلاين يسقط صندوق واحد بهذه النسب — معروضة كاملة بلا إخفاء.<br>وفوق الحظّ ضمان: صندوقٌ نادرٌ فأعلى كلّ ${BC_PITY.rival} انتصاراتٍ على الأكثر، وملحميٌّ فأعلى كلّ ${BC_PITY.elite}.</div>
+  بعد كلّ فوزٍ يستحقّ صندوقًا يسقط واحدٌ من <b>دورةٍ ثابتة من 40</b>: 22 عاديًّا، 12 نادرًا، 5 ملحميّة، وأسطوريٌّ واحد — مخلوطةً مرّةً لكلّ دورة، فالأسطوريّ مضمونٌ كلّ أربعين فوزًا لا بالحظّ، ولا يأتي في أوّل عشرة.<br>
+  <span style="color:#F6E7C6;font-weight:800">صناديقك القادمة:</span> ${bcNext(3).map((k,ii)=>`<span class="bcNx">${ii+1}. ${esc((ECON.chests[k]||{}).n||BC_LABEL[k])}</span>`).join(' ')}
+  <span style="color:var(--mut)"> · موضعك في الدورة ${((S.bcPos|0)+1)}/40</span></div>
  ${BC_ODDS.map(([k,w])=>{const ch=ECON.chests[k]||{n:BC_LABEL[k]||k};const pc=Math.round(w/tot*1000)/10;
   return `<div style="margin-bottom:12px">
    <div style="display:flex;font-size:13px;align-items:center;gap:7px">
@@ -22146,14 +22159,26 @@ function bcOddsScr(){
    <div style="font-size:9.5px;color:var(--mut);margin-top:4px">مدّة الفتح: ${bcFmt(BC_TIME[k]||0)}</div>
    <button class="btn g" style="margin-top:7px;min-height:38px" onclick="push('oddsScr','${k}')">${ico('chart',14)} نسب بطاقات هذا الصندوق</button>
   </div>`}).join('')}
- <div class="note">النسب ثابتة ولا تتغيّر بعدد محاولاتك.</div>
+ <div class="note">النسب مشتقّةٌ من الدورة نفسها، لا تتغيّر بعدد محاولاتك ولا بما تشتريه.</div>
  </div></div></div>`);
 }
 function oddsScr(key){
  const c=ECON.chests[key];
  if(!c)return bcOddsScr();
+ const SKW={common:45,rare:30,epic:18,legendary:7},SKT=SKC_T[key]||SKC_T.knowledge;
  go(`<div class="scr on">${tbar('نسب الظهور',c.n)}
  <div class="orn"><div class="in">${ornCorners()}
+ <div class="sl" style="margin-top:0">نسخ الجيس — ${skChestTxt(key)}</div>
+ ${RAR_ORDER.map(r=>{const v=SKW[r],R=RCOL[r];
+ return `<div style="margin-bottom:9px">
+  <div style="display:flex;font-size:13px;align-items:center">
+   <span style="flex:1;color:${R.g};font-weight:800">${RARITY[r].n}${SKT.fl&&({r:'rare',e:'epic',l:'legendary'})[SKT.fl]===r?' <small style="color:var(--tx2)">· واحدٌ مضمون</small>':''}</span>
+   <span class="mtl" style="font-size:14px">${v}%</span></div>
+  <div class="pbf" style="margin-top:5px"><div class="pbi" style="height:8px">
+   <i style="width:${v}%;background:linear-gradient(90deg,${R.a},${R.g})"></i></div></div>
+  </div>`}).join('')}
+ <div class="note" style="text-align:start;margin:0 0 8px">الجيس المقفل لساحتك لا يخرج من الصندوق — ينزل حين تبلغ ساحته.</div>
+ <div class="sl">بطاقات المعرفة — لصندوقٍ أسقطته مباراة معرفة</div>
  ${RAR_ORDER.map(r=>{const v=c.odds[r],R=RCOL[r];
  return `<div style="margin-bottom:11px">
   <div style="display:flex;font-size:13px;align-items:center">
@@ -22184,7 +22209,7 @@ function buyChest(key){
 /* ٦٫٩٤ — الصندوق المجانيّ مؤقّتٌ كما كان في كلاش رويال: واحدٌ كلّ أربع ساعات ويتراكم اثنان — لا حنفيّةَ عملاتٍ بلا حدّ */
 const FC_MS=4*3600e3,FC_MAX=2;
 function fcN(){if(!S.fcAt)S.fcAt=Date.now()-FC_MS;return Math.max(0,Math.min(FC_MAX,Math.floor((Date.now()-S.fcAt)/FC_MS)))}
-function fcIn(){fcN();if(fcN()>=FC_MAX)return '';const ms=Math.max(0,FC_MS-((Date.now()-S.fcAt)%FC_MS)),mn=Math.max(1,Math.ceil(ms/60e3)),h=Math.floor(mn/60),m=mn%60;return h?`${h} س ${m} د`:`${m} د`}
+function fcIn(){fcN();if(fcN()>=FC_MAX)return '';const ms=Math.max(0,FC_MS-((Date.now()-S.fcAt)%FC_MS)),mn=Math.max(1,Math.ceil(ms/60e3)),h=Math.floor(mn/60),m=mn%60;return h?(m?`${h} س ${m} د`:`${h} س`):`${m} د`}
 function fcTake(){const n=fcN();if(!n)return false;if(n>=FC_MAX)S.fcAt=Date.now()-(FC_MAX-1)*FC_MS;else S.fcAt+=FC_MS;return true}
 function doOpen(key){
  const c=ECON.chests[key];if(!c)return;
@@ -25054,7 +25079,7 @@ function mgBuy(i){
   if(S.gems<m.gems){toast('جواهر غير كافية','bad');return}
   S.gems-=m.gems;grantRewards([{t:m.t,r:m.r,v:m.v}]);try{saveState()}catch(e){}
   try{buyFx(m.t==='skbook'?ico('book',42,'#FFE9A8'):mgWildImg(m.r,42),m.n)}catch(e){toast(m.n)}
-  refresh(shopScr);
+  refresh(Router.current()&&Router.current().fn==='storeScr'?storeScr:shopScr);
  });
 }
 /** ٦٫٩٤ — إعلان مكافأة الموسم مرّةً واحدة عند أوّل فتحٍ للرئيسيّة بعد التصفير */
@@ -25252,7 +25277,7 @@ function trClaim(tr){
  const m=trRoad().find(x=>x.tr===tr);if(!m||trRoadState(m)!=='ready')return;
  const t=TR();t.claimed.push(tr);
  let list,title='طريق الكؤوس — '+tr.toLocaleString('en-US')+' كأس',chest=null;
- if(m.r.t==='chest'){chest=m.r.k;list=openChest(chest).concat(tlChestCopies(chest));title=(ECON.chests[chest]||{}).n||title}
+ if(m.r.t==='chest'){chest=m.r.k;list=openChest(chest);title=(ECON.chests[chest]||{}).n||title}
  else list=[m.r];
  grantRewards(list);saveState();
  if(!chest){try{if(window.SFX)SFX.fx('notif')}catch(e){}}
@@ -25376,21 +25401,30 @@ function arenaScr(){
 
 /* ═══ صناديق المعارك — نظام كلاش رويال: الفوز أونلاين يُسقط صندوقًا بحظ معلَن ═══ */
 const BC_ODDS=[['knowledge',55],['rival',30],['elite',11],['legend',4]];
-const BC_TIME={knowledge:300,rival:1800,elite:7200,legend:14400}; // ثوانٍ
+const BC_TIME={knowledge:1800,rival:10800,elite:28800,legend:43200}; // ثوانٍ — ٦٫٩٤: ٣٠ د · ٣ س · ٨ س · ١٢ س (جلسات الكيرم قصيرة، وكلاش رويال ٣/٨/١٢/٢٤ س)
 const BC_LABEL={knowledge:'عادي',rival:'نادر',elite:'ملحمي',legend:'أسطوري'};
 function BC(){if(!S.bc)S.bc=[null,null,null,null];return S.bc}
 /* ٦٫٩٤ — دورة الصناديق (كلاش رويال تضمن الصناديق الكبيرة في دورةٍ ثابتة): الحظّ كما هو معلَن، مع ضمانٍ فوقه —
    صندوقٌ نادرٌ فأعلى كلّ ستّ انتصاراتٍ على الأكثر، وملحميٌّ فأعلى كلّ خمسٍ وعشرين — فلا يطول جفاف الحظّ */
 const BC_PITY={rival:6,elite:25};
+/* ٦٫٩٤ — دورةٌ ثابتة كدورة كلاش رويال: ٤٠ صندوقًا (٢٢ عاديّ، ١٢ نادر، ٥ ملحميّ، ١ أسطوريّ) تُخلَط مرّةً لكلّ دورة؛ الأسطوريّ
+   مضمونٌ كلّ أربعين فوزًا لا بالحظّ، وأوّل الدورة عاديّ، ولا أسطوريّ في أوّل عشرة. النسب المعروضة مشتقّةٌ منها */
+const BC_CYCLE_N={knowledge:22,rival:12,elite:5,legend:1};
+function bcCycle(){
+ if(!Array.isArray(S.bcCyc)||S.bcCyc.length!==40){
+  const a=[];for(const k in BC_CYCLE_N)for(let i=0;i<BC_CYCLE_N[k];i++)a.push(k);
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}
+  const li=a.indexOf('legend');if(li<10){const j=10+Math.floor(Math.random()*30);a[li]=a[j];a[j]='legend'}
+  if(a[0]!=='knowledge'){const j=a.indexOf('knowledge');a[j]=a[0];a[0]='knowledge'}
+  S.bcCyc=a;S.bcPos=0;
+ }
+ S.bcPos=Math.max(0,Math.min(39,S.bcPos|0));return S.bcCyc;
+}
+function bcNext(n){const c=bcCycle(),o=[];for(let i=0;i<(n||1);i++)o.push(c[(S.bcPos+i)%40]);return o}
 function rollBattleChest(){
- const rank={knowledge:0,rival:1,elite:2,legend:3};
- let r=Math.random()*100,k='knowledge';
- for(const[kk,p]of BC_ODDS){if((r-=p)<0){k=kk;break}}
- S.bcN=(S.bcN|0)+1;S.bcE=(S.bcE|0)+1;
- if(S.bcE>=BC_PITY.elite&&rank[k]<2)k='elite';
- else if(S.bcN>=BC_PITY.rival&&rank[k]<1)k='rival';
- if(rank[k]>=1)S.bcN=0;if(rank[k]>=2)S.bcE=0;
- return k;
+ const c=bcCycle(),k=c[S.bcPos];
+ S.bcPos=(S.bcPos|0)+1;if(S.bcPos>=40){S.bcCyc=null;S.bcPos=0}
+ return k||'knowledge';
 }
 /* ═══ ٦٫٩٠ — «لمّا تفوز يسقط على الشاشة صندوق بتصميمٍ جيّد، بدل رسالة "سقط صندوق" — نفس الألعاب» ═══
    كما في Clash Royale وCarrom Pool: صندوق النصر لحظةٌ لا سطر. شاشةٌ معتمة بأشعّةٍ تدور بلون رتبة الصندوق، يسقط الصندوق
@@ -25443,11 +25477,11 @@ function chestDropFx(k,slot,full){
  ov.querySelector('.vchB').onclick=close;
  setTimeout(()=>{try{if(window.SFX)SFX.fx(full?'bad':'chest')}catch(e){}},620);   // ٦٫٩٣: ارتطام الصندوق ولمعانه — صوتُ لعبةٍ لا «طقّة موافقة»
 }
-function dropBattleChest(){
+function dropBattleChest(g){
  const bc=BC(),i=bc.findIndex(x=>!x);
  const k=rollBattleChest();
  if(i<0){setTimeout(()=>chestDropFx(k,-1,true),1400);return}
- bc[i]={k,st:'idle'};saveState();
+ bc[i]={k,st:'idle',g:g||null};saveState();   // ٦٫٩٤: أصل الصندوق (مباراة معرفة → بطاقات)
  setTimeout(()=>chestDropFx(k,i,false),1400);   // بعد لحظة النتيجة — لا فوقها
 }
 function bcFmt(s){
@@ -25455,7 +25489,7 @@ function bcFmt(s){
  if(s>=60)return Math.ceil(s/60)+' دقيقة';
  return s+' ثانية';
 }
-const bcSkipCost=s=>Math.max(1,Math.ceil(s/600)); // جوهرة لكل 10 دقائق متبقية
+const bcSkipCost=s=>{const m=Math.ceil(s/60);return m<=60?Math.max(1,Math.ceil(m/10)):6+Math.ceil((m-60)/60)*6}; // جوهرة لكلّ ١٠ دقائق حتّى ساعة، ثمّ ٦ لكلّ ساعة (١٢ س = ٧٢)
 function bcTap(i){
  const bc=BC(),c=bc[i];
  if(!c){toast(`${ico('swords',13)} افز بمباراة أونلاين ليسقط صندوق هنا`);return}
@@ -25479,7 +25513,7 @@ function bcOpen(i){
  const bc=BC(),c=bc[i];if(!c)return;
  const ch=ECON.chests[c.k];
  bc[i]=null;
- const list=openChest(c.k).concat(tlChestCopies(c.k));   // ٦٫٨٩: وفي كلّ صندوقٍ نسخ جيس
+ const kn=c.g==='kn';const list=kn?openChest(c.k,{cards:true}).concat(tlChestCopies(c.k)):openChest(c.k);   // ٦٫٩٤: نسخ جيسٍ بأرضيّة ندرة — وبطاقاتٌ لصندوق المعرفة
  grantRewards(list);saveState();
  push('rewardScr',{title:ch.n,list,chest:c.k});   // ٦٫٩٣: الكشف الفاخر يفتح الصندوق بنفسه — لا ألعاب ناريّة فوقه
 }
@@ -25512,7 +25546,7 @@ function chestArt(k){
 function battleChestRow(bare){
  const bc=BC();
  return (bare?'':`<div class="sl" style="margin:14px 0 4px;display:flex;align-items:center;gap:7px">صناديق المعارك
-  <span style="font-size:9.5px;color:var(--tx2);font-weight:700">افز أونلاين ليسقط صندوق — حظك يحدد ندرته</span></div>`)+`
+  <span style="font-size:9.5px;color:var(--tx2);font-weight:700">افز أونلاين ليسقط صندوق — القادم: ${BC_LABEL[bcNext(1)[0]]||'عادي'}</span></div>`)+`
  <div id="bcRow" style="display:flex;gap:8px">
  ${bc.map((c,i)=>{
   if(!c)return `<div class="bcSlot empty" onclick="bcTap(${i})">
@@ -26107,6 +26141,7 @@ body .hmArB .go{flex-shrink:0;display:flex}
 body .finTr{margin:0 auto 12px;max-width:340px;padding:10px 14px 9px;border-radius:16px;cursor:pointer;background:linear-gradient(180deg,rgba(22,30,51,.92),rgba(11,16,29,.92));border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 12px 26px -12px rgba(0,0,0,.9)}
 body .finTrRow{display:flex;align-items:center;justify-content:center;gap:10px}
 body .finTrRow .rico{width:30px!important;height:30px!important;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
+body .bcNx{display:inline-block;padding:2px 8px;border-radius:8px;background:rgba(232,178,58,.1);border:1px solid rgba(232,178,58,.28);color:#F6E7C6;font-weight:800;margin:2px 0}
 body .caCrn{display:inline-flex;gap:2px;align-items:center;margin-inline-end:4px}
 body .caCrn .crn{display:inline-flex;opacity:.22;filter:grayscale(1)}
 body .caCrn .crn.on{opacity:1;filter:drop-shadow(0 0 6px rgba(255,216,107,.7))}
@@ -46111,7 +46146,7 @@ function buyJoker(i){const j=JOKERS[i];
   buyFx(ico('wild',16),'جوكر '+RARITY[j.r].n+' في جعبتك');if(window.FX)FX.correct(3);refresh(storeScr)})}
 function storeScr(){
  go(`<div class="scr on">${tb('المتجر')}
- <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وجوكرات وتجميليات فقط. ${(window.Billing?Billing.status():'no_store')==='store'?'الشراء عبر متجر التطبيقات والخادم يتحقّق من كل إيصال.':'الشراء بالمال متاح داخل تطبيق تحدّي على المتاجر؛ هنا تُعرض الأسعار فقط.'}</div>
+ <div class="wb">المتجر لا يبيع فوزًا ولا إجابات — عملات وجواهر وأدوات سحريّة وتجميليات فقط. ${(window.Billing?Billing.status():'no_store')==='store'?'الشراء عبر متجر التطبيقات والخادم يتحقّق من كل إيصال.':'الشراء بالمال متاح داخل تطبيق تحدّي على المتاجر؛ هنا تُعرض الأسعار فقط.'}</div>
  <div style="display:flex;gap:9px;justify-content:center;margin-bottom:8px">
  <span class="cch" style="font-size:14px;padding:9px 15px">${ico('coin',15)} ${S.coins.toLocaleString('en-US')}</span>
  <span class="cch" style="font-size:14px;padding:9px 15px;color:var(--gem)">${ico('gem',15)} ${S.gems.toLocaleString('en-US')}</span></div>
@@ -46133,14 +46168,14 @@ function storeScr(){
  <button class="btn gd prcbtn" onclick="buyBundle('${b.k}')">${usdTxt(b.usd)}</button></div></div>`).join('')}
 
  <div class="sl">${ico('coin',14)} صرف الجواهر عملاتٍ</div>
- ${EXCH.map((e,i)=>`<div class="li"><div class="lr"><span style="font-size:21px">${ico('coin',17)}</span>
- <div class="lb"><div class="lt">${e.c.toLocaleString('en-US')} عملة</div></div>
- <button class="btn prcbtn" onclick="buyExch(${i})">${ico('gem',12)} ${e.g}</button></div></div>`).join('')}
+ ${ECON.coinPacks.map(p=>`<div class="li"><div class="lr"><span style="font-size:21px">${ico('coin',17)}</span>
+ <div class="lb"><div class="lt">${p.coins.toLocaleString('en-US')} عملة${p.tag?` <small style="color:var(--gold)">${p.tag}</small>`:''}</div><div class="ls">${p.n}</div></div>
+ <button class="btn prcbtn" onclick="buyCoins('${p.id}')">${ico('gem',12)} ${p.gems}</button></div></div>`).join('')}
 
- <div class="sl">${ico('wild',15)} جوكرات الترقية</div>
- ${JOKERS.map((j,i)=>`<div class="li"><div class="lr"><span style="font-size:21px;color:${RARITY[j.r].c}">${ico('wild',17)}</span>
- <div class="lb"><div class="lt">جوكر ${RARITY[j.r].n}</div><div class="ls">يرقّي أي بطاقة من ندرة ${RARITY[j.r].n}</div></div>
- <button class="btn prcbtn" onclick="buyJoker(${i})">${ico('gem',12)} ${j.g}</button></div></div>`).join('')}
+ <div class="sl">${ico('wild',15)} الأدوات السحريّة</div>
+ ${MG_SHOP.map((m,i)=>`<div class="li"><div class="lr"><span style="font-size:21px">${m.t==='skbook'?ico('book',22,'#FFE9A8'):mgWildImg(m.r,26)}</span>
+ <div class="lb"><div class="lt">${m.n}</div><div class="ls">${m.t==='skbook'?'يكمل نسخ الترقية التالية لجيسٍ تختاره':'نسخٌ تُصرف على أيّ جيسٍ تملكه من هذه الندرة'}</div></div>
+ <button class="btn prcbtn" onclick="mgBuy(${i})">${ico('gem',12)} ${m.gems}</button></div></div>`).join('')}
  </div>`);
 }
 
