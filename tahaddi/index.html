@@ -2587,7 +2587,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0008141179" data-head="0000967237" aria-hidden="true">
+<div id="ld" data-total="0008141883" data-head="0000967237" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -21084,7 +21084,7 @@ function setSection(k){
   <div class="li" style="margin-top:9px"><div class="lr">
    <div class="lb"><div class="lt">التحديثات</div><div class="ls">${VER_READY?`تحديث جاهز · ${esc(VER_READY)} — اضغط ليُطبَّق`:'اللعبة تجلب أحدث نسخة من الويب بلا تثبيت'}</div></div>
    <button class="btn ${VER_READY?'gd':'g'}" style="width:auto;padding:9px 16px;font-size:12px;min-height:38px"
-    onclick="${VER_READY?`try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){};location.reload()`:'verFetch(true)'}">${VER_READY?'طبّق':'تحقّق'}</button></div></div>
+    onclick="${VER_READY?'verGo()':'verFetch(true)'}">${VER_READY?'طبّق':'تحقّق'}</button></div></div>
   ${[['terms','الشروط والأحكام'],['privacy','سياسة الخصوصية'],['licenses','التراخيص']].map(([k,n])=>
   `<div class="li" style="cursor:pointer" onclick="push('legalScr','${k}')"><div class="lr">
    <div class="lb"><div class="lt">${n}</div></div>${chev()}</div></div>`).join('')}`;
@@ -24531,7 +24531,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.97';
+const APP_VER='6.98';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -46374,6 +46374,7 @@ function verFetch(say){
    if(!j||!j.v){if(say)toast('تعذّر الفحص — تحقّق من الاتصال');return}
    if(j.v===APP_VER){if(say)toast('أنت على آخر نسخة');return}
    VER_READY=j.v;verBar();
+   if(!say)verAuto();
    if(say)toast('تحديث جاهز — اضغط الشريط أعلى الشاشة');
   })
   .catch(function(){_verBusy=0;if(say)toast('تعذّر الفحص — تحقّق من الاتصال')});
@@ -46388,13 +46389,30 @@ function verBar(){
  b.onclick=function(ev){
   /* الإخفاء لا يطبّق: من ضغط «لاحقًا» لا يريد إعادة تحميلٍ الآن */
   if(ev&&ev.target&&ev.target.id==='verX'){ev.stopPropagation();b.remove();return}
-  try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}
-  /* إعادة التحميل قد يردّها مخزنٌ وسيط بالنسخة نفسها، فيضغط ولا يتغيّر شيء.
-     وعنوانٌ لم يُطلب قطّ لا يوجد في مخزنٍ أصلًا. */
-  try{var u=new URL(location.href);u.searchParams.set('v',VER_READY);location.replace(u.toString())}
-  catch(e){location.reload()}
+  verGo();
  };
  document.body.appendChild(b);
+}
+/** يطبّق التحديث: عنوانٌ جديد (?v=) لم يُطلب قطّ، فلا يردّه مخزنٌ وسيط ولا عامل الخدمة بالنسخة القديمة */
+function verGo(){
+ try{localStorage.setItem('tahaddi_ver_seen',APP_VER)}catch(e){}
+ try{var u=new URL(location.href);u.searchParams.set('v',VER_READY||APP_VER);location.replace(u.toString())}
+ catch(e){location.reload()}
+}
+/* ٦٫٩٨ — «ايش مشكلتك لا ارى التعديلات»: الشريط يُفوَّت، والتطبيق يُستأنف من الخلفيّة بالصفحة القديمة.
+   فإن وُجدت نسخةٌ أحدث عند الإقلاع — ولم تبدأ مباراةٌ بعد، واللاعب على الرئيسيّة أو الدخول — طُبِّقت وحدها.
+   والحارس: مرّتان لكلّ إصدارٍ على الأكثر، فمخزنٌ وسيطٌ عنيد لا يصنع حلقة إعادة تحميلٍ لا تنتهي. */
+function verAuto(){
+ try{
+  if(!VER_READY||(performance.now()>45000))return;
+  var t=(typeof Router==='object'&&Router.current)?Router.current():null,fn=(t&&t.fn)||'';
+  if(!/^(playScr|authScr|welcomeScr|)$/.test(fn))return;
+  if(document.querySelector('.qvov,#arena.on'))return;
+  var k='tahaddi_auto_'+VER_READY,n=+(localStorage.getItem(k)||0);
+  if(n>=2)return;
+  localStorage.setItem(k,String(n+1));
+  verGo();
+ }catch(e){}
 }
 var _verSaid=0;
 /** يُنادى بعد رسم الرئيسية — الشاشة موجودة فتُرى النافذة.

@@ -39,14 +39,23 @@ self.addEventListener('fetch',e=>{
  const doc=req.mode==='navigate'||/(^|\/)(index\.html)?$/.test(url.pathname);
  if(doc){
   // الشبكة أوّلًا: نسخةٌ قديمة من الصفحة = تحديثٌ لا يصل
+  /* ٦٫٩٨ — «لا أرى التعديلات»: الصفحة ٩ ميجا، وعلى شبكة الجوّال لا تصل في ٦ ثوانٍ، فكان التنزيل يُلغى
+     وتُخدم النسخة القديمة من المخزن — في كلّ فتحة، وحتى بعد ضغط «تحديث جاهز». الآن لا يُلغى التنزيل أبدًا:
+     إن تأخّر خُدم المخزن مؤقّتًا وأكمل التنزيل في الخلفية وحُفظ، فالفتحة التالية جديدة؛ وطلب التحديث الصريح
+     (?v=… من شريط «تحديث جاهز») ينتظر الشبكة حتى تصل. */
+  const explicit=url.searchParams.has('v');
+  const c0=caches.open(CACHE);
+  const net=fetch(req,{cache:'no-store'}).then(r=>{
+   if(r&&r.ok){const cp=r.clone();c0.then(c=>c.put('./index.html',cp)).catch(()=>{})}
+   return r}).catch(()=>null);
+  e.waitUntil(net);                                            // يكمل التنزيل ولو خُدم المخزن
   e.respondWith((async()=>{
-   const c=await caches.open(CACHE);
-   try{
-    const r=await netIn(req,NET_MS);
-    if(r&&r.ok){c.put('./index.html',r.clone()).catch(()=>{});return r}
-   }catch(x){}
+   const c=await c0;
    const hit=await c.match('./index.html')||await c.match('./');
-   return hit||new Response('',{status:504,statusText:'offline'});
+   if(explicit||!hit){const r=await net;if(r&&r.ok)return r;return hit||r||new Response('',{status:504,statusText:'offline'})}
+   const r=await Promise.race([net,new Promise(ok=>setTimeout(()=>ok('slow'),NET_MS))]);
+   if(r&&r!=='slow'&&r.ok)return r;
+   return hit;
   })());
   return;
  }
