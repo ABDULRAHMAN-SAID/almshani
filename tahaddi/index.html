@@ -2603,7 +2603,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0011050111" data-head="0001107429" aria-hidden="true">
+<div id="ld" data-total="0011060513" data-head="0001107429" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -24330,37 +24330,37 @@ function trRoadCR(ix){
  let nextTr=null,youTr=null;
  for(const m of road){if(nextTr==null&&trRoadState(m)==='lock')nextTr=m.tr;if(m.tr<=tr)youTr=m.tr}
  const gA=trGoal(tr);
- const pin=`<div class="crvYou" id="crvYou"><span class="crvYouL"></span><span class="crvYouP">${trIco('trophy',16)}<bdi dir="ltr">${tr.toLocaleString('en-US')}</bdi><s>أنت هنا</s></span>${nextTr!=null&&nextTr!==gA?`<em>بقي ${trvCups(Math.max(0,nextTr-tr))} للمكافأة التالية</em>`:''}${gA!=null?`<em>بقي ${trvCups(Math.max(0,gA-tr))} ${trNext(tr)!=null?'للساحة التالية':'لنهاية طريق الأساطير'}</em>`:''}</div>`;
+ const pin=`<div class="crvYou" id="crvYou"><span class="crvYouL"></span><span class="crvYouP">${trIco('trophy',16)}<bdi dir="ltr">${tr}</bdi><s>أنت هنا</s></span>${nextTr!=null&&nextTr!==gA?`<em>بقي ${trvCups(Math.max(0,nextTr-tr))} للمكافأة التالية</em>`:''}${gA!=null?`<em>بقي ${trvCups(Math.max(0,gA-tr))} ${trNext(tr)!=null?'للساحة التالية':'لنهاية طريق الأساطير'}</em>`:''}</div>`;
  const PL=(typeof ROAD_PLAT!=='undefined')?ROAD_PLAT:{},PR=(typeof ROAD_PROP!=='undefined')?ROAD_PROP:{};
- const WH={rival:'b',elite:'m',legend:'g',knowledge:'b'},ORD=['الأولى','الثانية','الثالثة','الرابعة','الخامسة','السادسة','السابعة','الثامنة','التاسعة','العاشرة'];
+ const WH={rival:'b',elite:'m',legend:'g',knowledge:'b'};
  const N=ARENAS.length,out=[],top=road.reduce((x,m)=>Math.max(x,m.tr),0);
  for(let a=N-1;a>=0;a--){
   const A=ARENAS[a],lo=TR_ARENA[a],hi=a<N-1?TR_ARENA[a+1]:Infinity,rel=a===ix?'cur':a<ix?'past':'fut';
   const ms=road.filter(m=>m.tr>=lo&&m.tr<hi).sort((x,y)=>y.tr-x.tr);
   const plat=PL[a]?artSrc('~plat:'+a,PL[a]):null,U=tlArenaUnlocks(a);
   const rows=ms.map((m,k)=>{const s0=trRoadState(m),st=s0==='lock'&&m.tr===nextTr?'next':s0,r=m.r,side=k%2?'l':'r',pk=k%2;   // أوّل صفٍّ تحت اللافتة: البطاقة يمينًا
-   const pv=PR[a*2+pk]?artSrc('~prop:'+(a*2+pk),PR[a*2+pk]):(PR[a]?artSrc('~prop:'+a,PR[a]):null);
+   const pv=PR[a*2+pk]?artSrc('~prop:'+(a*2+pk),PR[a*2+pk]):(PR[a]?artSrc('~prop:'+a,PR[a]):null),fl=!pv&&(CRV_PROPK[a]||[])[pk]==='brazier';
    const res=r.t==='coins'||r.t==='gems',lbl=esc(trRoadLbl(r));
-   const face=res?`<span class="crvWin"><b class="crvWN${r.t==='gems'?' gm':''}"><bdi dir="ltr">${r.t==='coins'?r.v.toLocaleString('en-US'):r.v}</bdi></b><span class="crvArt">${trRoadArt(r)}</span></span>`
+   const face=res?`<span class="crvWin"><b class="crvWN${r.t==='gems'?' gm':''}"><bdi dir="ltr">${r.v}</bdi></b><span class="crvArt">${trRoadArt(r)}</span></span>`
     :`<span class="crvArt">${trRoadArt(r)}</span>${r.t==='skc'?`<b class="crvQ"><bdi dir="ltr">×${r.v}</bdi></b>`:''}`;
-   return `${m.tr===youTr?pin:''}<div class="crvM ${st} c${side}${r.t==='chest'?' wh'+(WH[r.k]||'b'):''}" data-tr="${m.tr}">
-    <bdi class="crvTr" dir="ltr">${m.tr.toLocaleString('en-US')}</bdi>
+   return `${m.tr===youTr?pin:''}<div class="crvM ${st} crvS${side.toUpperCase()}${r.t==='chest'?' wh'+(WH[r.k]||'b'):''}" data-tr="${m.tr}"${r.t==='chest'?` style="--sd:-${((m.tr/25|0)%7*.37).toFixed(2)}s"`:''}>
+    <bdi class="crvTr" dir="ltr">${a>0&&m.tr===lo?'':m.tr}</bdi>
     <div class="crvPlat${plat?' art':''}">${plat?`<img class="crvPlatImg" src="${plat}" alt="" loading="lazy">`:`<span class="crvBase"></span><span class="crvTrench"></span><span class="crvBr"></span><span class="crvPad pl"></span><span class="crvPad pr"></span><span class="crvPlq"><i></i></span>`}
-     <span class="crvProp"><img src="${pv||crvPropSrc(a,pk)}" alt="" loading="lazy"></span>
-     <div class="crvCard${res?' res':''}"${st==='ready'?` role="button" aria-label="استلم ${lbl}" onclick="trClaim(${m.tr})"`:` aria-label="${lbl}"`}>${face}${st==='done'?`<i class="crvOk">${ico('check',13,'#fff')}</i>`:''}${st==='ready'?'<s class="crvGet">استلم</s>':''}</div>
-    </div></div>`}).join('');
+     <span class="crvProp"><img src="${pv||crvPropSrc(a,pk)}" alt="" loading="lazy">${fl?'<i class="crvFl"></i>':''}</span>
+    </div>
+    <div class="crvCard${res?' res':''}"${st==='ready'?` role="button" aria-label="استلم ${lbl}" onclick="trClaim(${m.tr})"`:` aria-label="${lbl}"`}>${face}${st==='done'?`<i class="crvOk">${ico('check',13,'#fff')}</i>`:''}${st==='ready'?'<s class="crvGet">استلم</s>':''}</div></div>`}).join('');
   const dio=arDioSrc(a);
-  const un=U.length?`<div class="crvUn"><s class="crvUnT">${a===0?'معك من البداية':rel==='fut'?'تُفتح في هذه الساحة':'فتحتَها في هذه الساحة'}:</s><div class="crvUnL">${U.slice(0,4).map(x=>`<span class="crvUnC" title="${esc(tlUnCat(x.c)+' «'+x.n+'»')}"><i class="crvUnK">${tlUnCat(x.c)}</i><span class="crvUnImg">${tlUnPrev(x.c,x.k,52)}</span><b>${esc(x.n)}</b></span>`).join('')}${U.length>4?`<span class="crvUnC more"><b>+${U.length-4}</b></span>`:''}</div></div>`:'';
-  const tk=a===N-1&&top>lo?`<div class="crvTk"><span class="crvTkArt" aria-hidden="true"></span><b>طريق الأساطير</b><span>بعد هذه الساحة: مكافآتٌ حتّى <bdi>${top.toLocaleString('en-US')}</bdi> كأس، تتجدّد كلّ موسم</span></div>`:'';
-  out.push(`<section class="crvA ${rel} m${a}" id="trvA${a}" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}${a===1||a===4||a===8?`;--bri:url('${crvPropK('crystal',A.g)}')`:''};contain-intrinsic-size:auto calc(${ms.length}*34.58cqw + ${122+(U.length?42:0)+(a===N-1&&top>lo?24:0)}cqw)">
+  const un=U.length?`<div class="crvUn"><s class="crvUnT">${a===0?'معك من البداية':rel==='fut'?'تُفتح هنا':'فتحتَها هنا'}:</s><div class="crvUnL">${U.slice(0,U.length>4?3:4).map(x=>`<span class="crvUnC" title="${esc(tlUnCat(x.c)+' «'+x.n+'»')}"><i class="crvUnK">${tlUnCat(x.c)}</i><span class="crvUnImg">${tlUnPrev(x.c,x.k,52)}</span><b>${esc(x.n)}</b></span>`).join('')}${U.length>4?`<span class="crvUnC more"><b><bdi dir="ltr">+${U.length-3}</bdi></b></span>`:''}</div></div>`:'';
+  const tk=a===N-1&&top>lo?`<div class="crvTk"><span class="crvTkArt" aria-hidden="true"></span><b>طريق الأساطير</b><span>مكافآتٌ حتّى <bdi>${top}</bdi> كأس كلّ موسم</span></div>`:'';
+  out.push(`<section class="crvA ${rel} m${a}" id="trvA${a}" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}${a===1||a===4||a===8?`;--bri:url('${crvPropK('crystal',A.g)}')`:''};contain-intrinsic-size:auto calc(${ms.length}*34.58cqw + ${141+(U.length?31:0)+(a===N-1&&top>lo?24:0)}cqw)">
    <div class="crvL">${rows}${a===0&&youTr==null?pin:''}</div>
    <div class="crvH${un?' un':tk?' tk':''}">
     <div class="crvDioW">${dio?`<img class="crvDio" src="${dio}" alt="" loading="lazy">`:`<span class="crvEm">${tierEmblem(a,120)}</span>`}
-    ${rel==='fut'?`<span class="crvHLk">${ico('lock',14,'#FFE9A8')} تُفتح عند <bdi>${lo.toLocaleString('en-US')}</bdi> كأس</span>`:rel==='cur'?'<span class="crvHLk cur">ساحتك الآن</span>':''}</div>
+    ${rel==='fut'?`<span class="crvHLk">${ico('lock',14,'#FFE9A8')} تُفتح عند <bdi>${lo}</bdi> كأس</span>`:rel==='cur'?'<span class="crvHLk cur">ساحتك الآن</span>':''}</div>
     <div class="crvNm">${esc(A.n)}</div>
-    <div class="crvBanRow"><bdi class="crvTr" dir="ltr">${lo.toLocaleString('en-US')}</bdi>
-     <div class="crvBan"><span class="crvCrown"><b>${a+1}</b></span><s>الساحة ${ORD[a]||a+1}</s><span class="crvBT">${trIco('trophy',28)}<bdi dir="ltr">${lo.toLocaleString('en-US')}</bdi></span></div></div>
-    <div class="crvGemTab"><i class="p"></i><i class="o"></i><i class="x"></i></div>
+    <div class="crvBanRow"><bdi class="crvTr" dir="ltr">${lo}</bdi>
+     <div class="crvBan"><span class="crvCrown"><b>${a+1}</b></span><s>الساحة <b>${a+1}</b></s><span class="crvBT">${trIco('trophy',34)}<bdi dir="ltr">${lo}</bdi></span></div></div>
+    <div class="crvGemW"><div class="crvGemTab"><i class="p"></i><i class="o"></i><i class="x"></i></div></div>
     ${tk}${un}
    </div>
   </section>`);
@@ -24377,7 +24377,7 @@ function crvPropSrc(a,pk){const A=ARENAS[a]||ARENAS[0];return crvPropK((CRV_PROP
 function crvPropK(k,g){
  const key=k+g;
  if(_crvPropC.has(key))return _crvPropC.get(key);
- const L=crvMix(g,'#FFFFFF',.55),D=crvMix(g,'#000000',.45),sh='<ellipse cx="32" cy="58.5" rx="15" ry="3.6" fill="#000" opacity=".32"/>';
+ g=crvMix(g,'#1C2744',.3);const L=crvMix(g,'#FFFFFF',.3),D=crvMix(g,'#000000',.45),sh='<ellipse cx="32" cy="58.5" rx="15" ry="3.6" fill="#000" opacity=".32"/>';
  const gold='<linearGradient id="gd" x1="0" x2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset=".5" stop-color="#E8B23A"/><stop offset="1" stop-color="#9A6414"/></linearGradient>';
  let b='';
  if(k==='urn')b=`<defs><linearGradient id="u" x1="0" x2="1"><stop offset="0" stop-color="#EDA66A"/><stop offset=".45" stop-color="#C8743A"/><stop offset="1" stop-color="#7E3E1C"/></linearGradient></defs>${sh}
@@ -24424,7 +24424,7 @@ function crvPop(){
   const H=innerHeight,off=b=>b.top>H+4||b.bottom<-4,out=[];
   for(const sc of secs){const rs=sc.querySelectorAll('.crvM');if(off(sc.getBoundingClientRect()))out.push(...rs);else rs.forEach(r=>{if(off(r.getBoundingClientRect()))out.push(r)})}
   if(!out.length)return;
-  _crvIO=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){const el=e.target;el.classList.remove('pre');el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),700);_crvIO&&_crvIO.unobserve(el)}},{threshold:.12});
+  _crvIO=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting){const el=e.target;el.classList.remove('pre');el.classList.add('pop');setTimeout(()=>el.classList.remove('pop'),700);_crvIO&&_crvIO.unobserve(el)}},{threshold:0});
   out.forEach(r=>{r.classList.add('pre');_crvIO.observe(r)});
  }catch(e){}
 }
@@ -24528,7 +24528,7 @@ function arenaScr(){
  trChestCss();
  const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix];
  const gl=trGoal(tr),pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100,ready=trRoadReady(),keep=_keepY!=null;   // ٦٫٩٦: عودةٌ من شاشة المكافأة (أو refresh) → الموجّه يعيد موضع التمرير ولا نقفز
- go(`<div class="scr on arV">${tbar('الكؤوس والساحات')}
+ go(`<div class="scr on arV" aria-label="الكؤوس والساحات"><div class="crvSky" aria-hidden="true"></div><div class="crvTopS" aria-hidden="true"></div><button class="crvBack" onclick="back()" aria-label="رجوع">${bkChev()}</button>
  <!-- ٧٫٠٤: الطريق يُقرأ من الأسفل إلى الأعلى (الساحة ١ في القاع) — فبطاقة ساحتك وشرح الكؤوس في القاع أيضًا لا فوق الساحة ١٠ -->
  ${trRoadCR(ix)}
  <div class="sl" style="display:flex;align-items:center">ساحتك الآن${ready?`<span class="arReady">${ready} جاهزة</span>`:''}</div>
@@ -24540,11 +24540,11 @@ function arenaScr(){
     <div class="arHeroTr">${ico('trophy',24)}<b>${tr.toLocaleString('en-US')}</b><span>كأس</span></div></div></div>
   <div class="arBarW"><div class="arBar"><i style="width:${pct}%"></i></div>
    <div class="arBarL"><span><bdi class="nowrap">${lo.toLocaleString('en-US')}</bdi></span><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi> — '+esc(ARENAS[ix+1].n):gl?'<bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi> — طريق الأساطير':'أتممت طريق الأساطير'}</span></div></div>
-  <div class="arHvSt"><span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
+  <div class="arHvSt">${(()=>{const nr=trRoad().find(m=>trRoadState(m)==='lock');return nr?`<span>${ico('gift',12)} بقي <bdi>${trvCups(Math.max(0,nr.tr-tr))}</bdi> للمكافأة التالية</span>`:''})()}<span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
  </div>
  <div class="sl">كيف تُحسب الكؤوس؟</div>
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> (${esc(ARENAS[ARENAS.length-1].n)}) يعود إلى <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.<br>${ico('crown',13)} بعد آخر الساحات يمتدّ طريق الأساطير بجوائزه حتّى <bdi class="nowrap">${TR_ROAD_END.toLocaleString('en-US')}</bdi> كأس، وآخره صندوقٌ أسطوريّ.</div>
- <div class="trvOkW crvOkW"><button class="crvDown" onclick="trvJump()" aria-label="موضعي في الطريق">${ico('back',18,'#fff')}</button><button class="crvOk2" onclick="back()">موافق</button></div>
+ <div class="trvOkW crvOkW"><button class="crvDown" onclick="trvJump()" aria-label="موضعي في الطريق"><i><svg viewBox="0 0 64 30" width="100%" height="100%" aria-hidden="true"><defs><linearGradient id="crvDg" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="#fff"/><stop offset="1" stop-color="#B4C0C8"/></linearGradient></defs><path d="M5 4.5h54c2.4 0 3.4 2.2 2 3.9L34.8 26.9c-1.5 1.7-4.1 1.7-5.6 0L3 8.4C1.6 6.7 2.6 4.5 5 4.5z" fill="#2C5C85" opacity=".5"/><path d="M5 2h54c2.4 0 3.4 2.2 2 3.9L34.8 24.4c-1.5 1.7-4.1 1.7-5.6 0L3 5.9C1.6 4.2 2.6 2 5 2z" fill="url(#crvDg)" stroke="#0B3A75" stroke-width="1.8" stroke-linejoin="round"/></svg></i></button><button class="crvOk2" onclick="back()">موافق</button></div>
  </div>`);
  requestAnimationFrame(trRoadFill);
  trvAfterDraw(keep);
@@ -24746,7 +24746,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.06';
+const APP_VER='7.07';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25617,36 +25617,46 @@ body .trvA:not(.open){padding-bottom:8px}
 body .trvBg{position:absolute;inset:0;border-radius:20px;overflow:hidden;background:radial-gradient(70% 46% at 50% 0%,rgba(var(--f),.32),transparent 70%),linear-gradient(180deg,var(--s1),var(--s2) 62%);background-size:cover;background-position:center;border:1px solid rgba(var(--f),.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px -18px rgba(0,0,0,.9)}
 body .trvBg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px),repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px)}
 body .trvA.fut .trvBg{opacity:.5}
-body .scr.arV{--lat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23115A96'/%3E%3Cstop offset='1' stop-color='%230B477F'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' fill='%23062B5A'/%3E%3Cpath d='M32 1.5L62.5 32 32 62.5 1.5 32z' fill='url(%23g)'/%3E%3Cpath d='M32 1.5L1.5 32h4.2L32 5.7z' fill='%232072AC'/%3E%3Cpath d='M32 1.5L62.5 32h-4.2L32 5.7z' fill='%23176499'/%3E%3Cpath d='M1.5 32L32 62.5v-4.2L5.7 32z' fill='%230A3F74'/%3E%3Cpath d='M62.5 32L32 62.5v-4.2L58.3 32z' fill='%23073463'/%3E%3C/svg%3E");padding-bottom:calc(88px + env(safe-area-inset-bottom,0px));background:radial-gradient(140% 70% at 50% 40%,transparent 55%,rgba(2,12,34,.55) 100%),var(--lat) 0 0/64px 64px,#083E74}
+/* ٧٫٠٦ — كالفيديو: الخلفيّة (شبكة المعيّنات والتظليل) ثابتةٌ في الشاشة لا تتحرّك، والمحتوى وحده يمرّ فوقها — طبقةٌ ثابتة لا يُعاد رسمها أثناء التمرير */
+body .scr.arV{position:relative;z-index:0;--T:calc(min(100vw,520px) * .1741);--q:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 188 188'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%230D5B91'/%3E%3Cstop offset='1' stop-color='%231168A6'/%3E%3C/linearGradient%3E%3ClinearGradient id='l' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23156C9A'/%3E%3Cstop offset='1' stop-color='%231A7EAF'/%3E%3C/linearGradient%3E%3ClinearGradient id='bd' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23001A4A' stop-opacity='.42'/%3E%3Cstop offset='.1' stop-color='%23001A4A' stop-opacity='0'/%3E%3Cstop offset='.9' stop-color='%23BFE4FF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23BFE4FF' stop-opacity='.14'/%3E%3C/linearGradient%3E%3ClinearGradient id='bl' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23001A4A' stop-opacity='.15'/%3E%3Cstop offset='.1' stop-color='%23001A4A' stop-opacity='0'/%3E%3Cstop offset='.9' stop-color='%23BFE4FF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23BFE4FF' stop-opacity='.16'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='188' height='188' fill='%23002F6E'/%3E%3Crect x='84' y='-10' width='20' height='20' fill='%23053D79'/%3E%3Crect x='84' y='178' width='20' height='20' fill='%23053D79'/%3E%3Crect x='-10' y='84' width='20' height='20' fill='%23053D79'/%3E%3Crect x='178' y='84' width='20' height='20' fill='%23053D79'/%3E%3Cg transform='rotate%2845 94 94%29'%3E%3Crect x='29.0' y='29.0' width='129.9' height='129.9' rx='11' fill='url%28%23d%29'/%3E%3Crect x='29.0' y='29.0' width='129.9' height='129.9' rx='11' fill='url%28%23bd%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 0 0%29'%3E%3Crect x='-65.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='-65.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 188 0%29'%3E%3Crect x='123.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='123.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 0 188%29'%3E%3Crect x='-65.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='-65.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 188 188%29'%3E%3Crect x='123.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='123.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3C/svg%3E");padding-top:calc(max(env(safe-area-inset-top,0px),27px) + 11.5px);padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));background:#0B4A80}
+body .crvSky{position:fixed;top:0;bottom:0;left:50%;width:min(100vw,520px);transform:translateX(-50%);z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(0,8,40,0.85) 0%,rgba(0,8,40,0.82) 4%,rgba(0,8,40,0.8) 7%,rgba(0,8,40,0.8) 11%,rgba(0,8,40,0.72) 15%,rgba(0,8,40,0.63) 19%,rgba(0,8,40,0.54) 23%,rgba(0,8,40,0.45) 27%,rgba(0,8,40,0.35) 30.5%,rgba(0,8,40,0.24) 34.5%,rgba(0,8,40,0.12) 38%,rgba(0,8,40,0.04) 42%,rgba(0,8,40,0) 46%,rgba(0,8,40,0.03) 62%,rgba(0,8,40,0.07) 66%,rgba(0,8,40,0.08) 70%,rgba(0,8,40,0.14) 74%,rgba(0,8,40,0.21) 77.5%,rgba(0,8,40,0.29) 81.5%,rgba(0,8,40,0.33) 85%,rgba(0,8,40,0.36) 89%,rgba(0,8,40,0.46) 93%,rgba(0,8,40,0.55) 100%),var(--q) 0 max(env(safe-area-inset-top,0px),27px)/var(--T) var(--T) repeat,#0F5F98}
+body .crvTopS{position:fixed;top:0;left:50%;width:min(100vw,520px);transform:translateX(-50%);height:calc(max(env(safe-area-inset-top,0px),27px) + 11.5px);z-index:40;pointer-events:none;background:linear-gradient(180deg,#05020C 0,#05020C 13%,#0B0411 30%,#110618 54%,#14081D 67%,#160921 75%,#160921) 0 0/100% max(env(safe-area-inset-top,0px),27px) no-repeat,linear-gradient(rgba(0,8,40,.78),rgba(0,8,40,.78)),var(--q) 0 max(env(safe-area-inset-top,0px),27px)/var(--T) var(--T) repeat,#0F63A2}
 body .scr.arV .tbar,body .scr.arV>.tb{background:linear-gradient(180deg,#0B0412,#10122A)}
-body .crv{display:flex;flex-direction:column;margin:4px -14px 0;direction:ltr;container-type:inline-size;background:linear-gradient(90deg,rgba(0,14,38,.24) 0 7.2%,transparent 7.2%)}
+body .crv{display:flex;flex-direction:column;gap:0;margin:4px -14px 0;direction:ltr;container-type:inline-size;background:linear-gradient(90deg,rgba(0,6,24,.2) 0 7.2%,transparent 7.2%)}
 body .crvA{position:relative;display:flex;flex-direction:column;content-visibility:auto}   /* ٧٫٠٦: الساحات خارج الشاشة لا تُرسم (٦٠ إطارًا عند إبطاء المعالج ×٤) */
 body .crvL{display:flex;flex-direction:column;padding:7% 0}
 /* ٧٫٠٦ — إطار الصفّ الثابت (مقاسٌ من الفيديو): الخطوة ٣٤٫٥٨٪ من العرض، محور المنصّة ٥٧٫٦٪، الرقم عند ٩٪ على خطٍّ محفور */
-body .crvM{position:relative;width:100%;aspect-ratio:1/.3458}
-body .crvM::before{content:'';position:absolute;left:0;width:7.2%;top:calc(54% - 2.5px);height:5px;background:linear-gradient(180deg,#01264A 0 2px,#1B4468 2px 5px)}
-body .crvTr{position:absolute;left:9.07%;top:54%;transform:translateY(-50%);font-family:var(--fd);font-size:13px;font-size:clamp(11px,3.1cqw,14px);font-weight:700;line-height:1;color:#E3ECF8;font-variant-numeric:tabular-nums;white-space:nowrap;text-shadow:0 3px 0 #00081E,1.5px 0 0 #000A1F,-1.5px 0 0 #000A1F,0 1.5px 0 #000A1F,0 -1.5px 0 #000A1F,1px 1px 0 #000A1F,-1px -1px 0 #000A1F,1px -1px 0 #000A1F,-1px 1px 0 #000A1F}
-body .crvPlat{position:absolute;left:25.9%;width:63.1%;bottom:4%;aspect-ratio:2.365;transform-origin:50% 50%;transition:transform .45s cubic-bezier(.3,1.72,.6,1)}
+body .crvM{position:relative;display:block;overflow:visible;padding:0;gap:0;width:100%;aspect-ratio:1/.3458;background:linear-gradient(180deg,rgba(0,8,30,.2) 0%,rgba(0,8,30,0) 39%,rgba(0,8,30,.3) 70%,rgba(0,8,30,.3) 83.5%,rgba(0,8,30,.2) 100%) 100% 0/92.8% 100% no-repeat,linear-gradient(180deg,rgba(0,8,30,.11) 0%,rgba(0,8,30,0) 39%,rgba(0,8,30,.13) 70%,rgba(0,8,30,.13) 83.5%,rgba(0,8,30,.11) 100%) 0 0/7.2% 100% no-repeat}
+body .crvL>.crvM:first-of-type{background:linear-gradient(180deg,rgba(0,8,30,0) 39%,rgba(0,8,30,.3) 70%,rgba(0,8,30,.3) 83.5%,rgba(0,8,30,.2) 100%) 100% 0/92.8% 100% no-repeat,linear-gradient(180deg,rgba(0,8,30,0) 39%,rgba(0,8,30,.13) 70%,rgba(0,8,30,.13) 83.5%,rgba(0,8,30,.11) 100%) 0 0/7.2% 100% no-repeat}
+body .crvL{background:linear-gradient(180deg,rgba(0,8,30,.2),rgba(0,8,30,0)) 100% 100%/92.8% 7cqw no-repeat}
+body .crvM::before{content:'';position:absolute;left:0;width:7.2%;top:calc(54% - 2.5px);height:2px;background:linear-gradient(180deg,rgba(0,16,44,.35) 0 .75px,rgba(150,200,240,.07) .75px 2px)}
+body .crvTr{position:absolute;left:9.07%;top:54%;transform:translateY(-50%);font-family:var(--fd);font-size:13px;font-size:clamp(11px,3.45cqw,15px);font-weight:800;line-height:1;color:#E2E1E7;font-variant-numeric:normal;letter-spacing:-.02em;white-space:nowrap;text-shadow:0 1.4px 0 #00081E,.75px 0 0 #000A1F,-.75px 0 0 #000A1F,0 .75px 0 #000A1F,0 -.75px 0 #000A1F,.5px .5px 0 #000A1F,-.5px -.5px 0 #000A1F,.5px -.5px 0 #000A1F,-.5px .5px 0 #000A1F}
+body .crvPlat{position:absolute;left:25.9%;width:63.1%;bottom:4%;aspect-ratio:2.365;transform-origin:50% 41.3%}
 body .crvPlat::before{content:'';position:absolute;left:4%;right:4%;top:92%;height:30%;background:radial-gradient(closest-side,rgba(0,12,32,.5),rgba(0,12,32,0));pointer-events:none}
 /* القاعدة: سطحٌ فضّيّ يحيط بالقطعتين، ثمّ حافّةٌ أماميّة، ثمّ الشريط اللامع (أرجوانيّ ← فضّيّ ← فولاذيّ)، وحدٌّ سفليٌّ داكن */
 body .crvBase{position:absolute;inset:0;border-radius:3.2% / 7.6%;background:var(--bt,linear-gradient(90deg,#9A99A3,#A4AFBD 50%,#8AA8B0));border-bottom:1.5px solid #374B6B}
 body .crvBase::before{content:'';position:absolute;left:0;right:0;top:78.8%;height:5.2%;background:var(--bl,linear-gradient(90deg,#A08BAE,#A9A5AD 30%,#A9A5AD 70%,#8A9DAA))}
-body .crvBase::after{content:'';position:absolute;left:0;right:0;top:84%;bottom:0;border-radius:0 0 3.2% 3.2% / 0 0 40% 40%;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,0) 45%,rgba(0,0,0,.14)),var(--bf,linear-gradient(90deg,#4A2D64 0%,#8A6AA6 3%,#B874C0 9%,#B874C0 15%,#AE93B8 16.5%,#A8A7B4 18%,#A8A7B4 55%,#8AA0B4 62%,#6FA2BA 70%,#6FA2BA 91%,#5E98B2 95%,#20576D 100%))}
+body .crvBase::after{content:'';position:absolute;left:0;right:0;top:84%;bottom:0;border-radius:0 0 3.2% 3.2% / 0 0 40% 40%;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 45%,rgba(0,0,0,.06)),var(--bf,linear-gradient(90deg,#4A2D64 0%,#7D6098 3%,#A266AA 9%,#A266AA 15%,#9E83A7 16.5%,#97939F 18%,#92919D 55%,#788C9F 62%,#608DA3 70%,#5A8CA3 91%,#5288A1 97.5%,#20576D 100%))}
 /* القطعتان المرفوعتان: إطارٌ سميك (٢٫٢٪ من العرض) وأرضيّةٌ من مادّة الساحة ووجهٌ أماميّ */
-body .crvPad{position:absolute;top:0;width:36.4%;height:76.7%;border-radius:10% / 11%;background:var(--pt,repeating-linear-gradient(90deg,#150E40 0 2px,transparent 2px 50%),repeating-linear-gradient(0deg,#150E40 0 2px,transparent 2px 50%),linear-gradient(135deg,#6259AE,#4F479A 55%,#443E86));box-shadow:inset 0 0 0 2.2cqw var(--pr,#4E5564),inset 0 0 0 calc(2.2cqw + 1.5px) var(--ptr,rgba(12,12,40,.55)),inset 0 calc(2.2cqw + 5px) 6px -3px rgba(20,22,60,.5),0 2cqw 0 var(--pd,#5A5E6E),0 calc(2cqw + 1.5px) 0 var(--ph,#828796),0 calc(2cqw + 3.5px) 0 rgba(30,30,48,.55)}
+body .crvPad{position:absolute;top:0;width:36.4%;height:74%;border-radius:10% / 11%;background:var(--pt,repeating-linear-gradient(90deg,#150E40 0 2px,transparent 2px 50%),repeating-linear-gradient(0deg,#150E40 0 2px,transparent 2px 50%),linear-gradient(135deg,#6259AE,#4F479A 55%,#443E86));box-shadow:inset 0 0 0 2.2cqw var(--pr,#4E5564),inset 0 0 0 calc(2.2cqw + 1.5px) var(--ptr,rgba(12,12,40,.55)),inset 0 calc(2.2cqw + 5px) 6px -3px rgba(20,22,60,.5),0 1.5px 0 var(--ph,#828796),0 4.5px 0 rgba(24,24,40,.78)}
 body .crvPad.pl{left:2.5%}body .crvPad.pr{right:2.35%}
 /* الجسر: قناةٌ داكنة بين القطعتين، وحزامٌ ينطوي تحت القطعتين، وصفيحةٌ بلوحةٍ ذهبيّة مثمّنة عليها نجمةٌ ثمانيّة */
 body .crvTrench{position:absolute;left:39.4%;width:21.8%;top:40%;height:40%;background:#10141C;border-radius:0 0 8% 8%}
 body .crvBr{position:absolute;left:31.9%;width:37.1%;top:16%;height:34.7%;border-radius:18% / 40%;background:#3A3B44;box-shadow:inset 0 2px 0 rgba(255,255,255,.1)}
 body .crvPlq{position:absolute;left:40.1%;width:20.1%;top:7.3%;height:50.3%;border-radius:12% / 11%;background:linear-gradient(180deg,#34374A,#23252F);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.14),0 2px 0 #14161E}
-body .crvPlq i{position:absolute;left:14.6%;right:14.6%;top:8.3%;bottom:11.7%;clip-path:polygon(28% 0,50% 6%,72% 0,100% 28%,94% 50%,100% 72%,72% 100%,50% 94%,28% 100%,0 72%,6% 50%,0 28%);background:linear-gradient(160deg,#FFE39A,#E3AE48 45%,#B07A28 80%,#7A4A12)}
+body .crvPlq i{position:absolute;left:14.6%;right:14.6%;top:8.3%;bottom:11.7%;clip-path:polygon(28% 0,50% 6%,72% 0,100% 28%,94% 50%,100% 72%,72% 100%,50% 94%,28% 100%,0 72%,6% 50%,0 28%);background:linear-gradient(160deg,#E2B062,#C08A3A 45%,#9A6A2C 80%,#6A3E10)}
 body .crvPlq i::before,body .crvPlq i::after{content:'';position:absolute;left:31%;top:31%;width:38%;height:38%;background:linear-gradient(160deg,#FFF3C8,#F2C766);box-shadow:0 1px 0 #7A4A12}
 body .crvPlq i::after{transform:rotate(45deg)}
+/* ٧٫٠٧ — الحزام فوق حافّتي القطعتين ومسماران ذهبيّان (كالفيديو)، والصفيحة والمجسّم والبطاقة فوقه */
+body .crvA.m2 .crvBr,body .crvA.m6 .crvBr,body .crvA.m9 .crvBr{z-index:1}body .crvPlq,body .crvProp{z-index:2}
+body .crvA.m2 .crvBr::before,body .crvA.m2 .crvBr::after,body .crvA.m6 .crvBr::before,body .crvA.m6 .crvBr::after,body .crvA.m9 .crvBr::before,body .crvA.m9 .crvBr::after{content:'';position:absolute;top:30%;width:4.7%;height:38%;background:linear-gradient(180deg,#B8863A,#976B2F);clip-path:polygon(0 12%,100% 0,100% 100%,0 88%)}
+body .crvA.m2 .crvBr::before,body .crvA.m6 .crvBr::before,body .crvA.m9 .crvBr::before{left:9.5%}body .crvA.m2 .crvBr::after,body .crvA.m6 .crvBr::after,body .crvA.m9 .crvBr::after{right:9.5%;transform:scaleX(-1)}
+body .crvPlq::before{content:'';position:absolute;left:12.6%;right:12.6%;top:6.3%;bottom:9.7%;clip-path:polygon(28% 0,50% 6%,72% 0,100% 28%,94% 50%,100% 72%,72% 100%,50% 94%,28% 100%,0 72%,6% 50%,0 28%);background:#3F1401}
 body .crvPlatImg{position:absolute;left:-4%;width:108%;bottom:-6%;height:auto;pointer-events:none}
 /* المجسّم على القطعة الأخرى: بعرض القطعة، يعلو البطاقة قليلًا، ظلّه إلى أسفل اليمين */
 body .crvProp{position:absolute;bottom:30%;width:40%;aspect-ratio:1;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
 body .crvProp img{width:100%;height:100%;object-fit:contain;object-position:50% 100%}
-body .crvM.cr .crvProp{left:.7%}body .crvM.cl .crvProp{right:.6%}
+body .crvM.crvSR .crvProp{left:.7%}body .crvM.crvSL .crvProp{right:.6%}
 /* ٧٫٠٦ — مادّة كلّ ساحة (كعائلات الفيديو: قاعدةٌ لامعة للساحات العليا، خشبٌ أو حجرٌ داكن لما دونها، وجسرٌ بزخرفة الساحة) */
 body .crvA.m0{--pr:#8E7666;--pd:#6E584A;--ph:#A38A78;--pt:repeating-linear-gradient(0deg,rgba(120,88,52,.5) 0 2px,transparent 2px 33.4%),repeating-linear-gradient(90deg,rgba(120,88,52,.5) 0 2px,transparent 2px 25%),radial-gradient(120% 90% at 30% 20%,#F2DFB6,#DCC195 55%,#C3A273);--bt:linear-gradient(90deg,#8A7466,#A08878 50%,#8A7466);--bl:#6E4A3A;--bf:linear-gradient(90deg,#221D22,#412C2C 12%,#46302E 50%,#3A2828 88%,#1C171C)}
 body .crvA.m0 .crvPlq,body .crvA.m0 .crvTrench{display:none}
@@ -25671,96 +25681,117 @@ body .crvA.m7{--pr:#6D4040;--pd:#53282D;--ph:#7E5050;--ptr:rgba(40,10,14,.5);--p
 body .crvA.m7 .crvBr{background:linear-gradient(90deg,#754821 0 3%,#A57A4E 3% 14%,#8A1F33 14% 86%,#A57A4E 86% 97%,#754821 97%)}
 body .crvA.m8{--pr:#3A2448;--pd:#2A1836;--ph:#56386A;--ptr:rgba(255,160,210,.25);--pt:radial-gradient(circle at 22% 30%,#fff 0 1px,transparent 1.8px),radial-gradient(circle at 70% 62%,#fff 0 1px,transparent 1.8px),radial-gradient(circle at 46% 82%,#FFC6E0 0 1px,transparent 1.8px),radial-gradient(circle at 80% 22%,#FFC6E0 0 1px,transparent 1.8px),radial-gradient(120% 90% at 30% 20%,#6A3280,#3E1A56 55%,#1E0C33)}
 body .crvA.m9{--pr:#C09A48;--pd:#8E6E28;--ph:#E2C27A;--ptr:rgba(120,90,20,.45);--pt:linear-gradient(115deg,transparent 30%,rgba(190,196,214,.5) 31%,transparent 33%,transparent 64%,rgba(190,196,214,.4) 65%,transparent 67%),radial-gradient(120% 90% at 30% 20%,#FFFFFF,#EEF1F7 50%,#CCD3E0)}
-/* ٧٫٠٦ — دخول الصفّ (مقاسٌ من الفيديو): من ٢٥٪ إلى ١١٠٪ ثمّ ١٠٠٪ في ٤٥٠ مللي ثانية، بلا تلاشٍ؛ البطاقة تتأخّر قليلًا */
-body .crvM.pre .crvPlat{transform:scale(.25)}
-body .crvM.pre .crvCard{transform:scale(.9)}
+/* ٧٫٠٦ — دخول الصفّ (مقاسٌ من الفيديو): من الصفر، ٠٫٤٥ عند ٧٠ مللي ثانية، ١٫٠ عند ١٨٠، ١٫١٠ عند ٢٦٠، ثمّ يستقرّ عند ٤٦٠ — بلا تلاشٍ.
+   المنصّة والبطاقة كلٌّ حول مركزه الأفقيّ وعلى خطّ الصفّ عموديًّا، فتنفصل البطاقة الصغيرة عن منصّتها لحظةً كما في الفيديو */
+body .crvM.pre .crvPlat,body .crvM.pre .crvCard{transform:scale(.25)}
+body .crvM.pop .crvPlat,body .crvM.pop .crvCard{animation:crvIn .46s linear both}
+@keyframes crvIn{0%{transform:scale(.25)}15%{transform:scale(.52)}30%{transform:scale(.82)}40%{transform:scale(1)}58%{transform:scale(1.1)}78%{transform:scale(.98)}100%{transform:scale(1)}}
 /* البطاقة: ١٩٫٤٪ × ٢١٫٩٪ من العرض، وجهٌ فضّيٌّ فاتح بإطارٍ داكن وسُمكٍ سفليّ، قاعدتها عند ثلثي عمق القطعة */
-body .crvCard{position:absolute;bottom:38%;width:30.7%;aspect-ratio:.882;box-sizing:border-box;border-radius:10% / 8.8%;display:flex;align-items:center;justify-content:center;padding-bottom:12%;background:linear-gradient(180deg,#EDF0F5 0,#DDE1E9 55%,#CDD2DC 85%,#A6AFC4 85%,#A0ABC5 93%,#6B738F 93%);border:2.5px solid #1D243A;box-shadow:inset 0 2px 3px rgba(90,104,140,.55),3px 4px 0 rgba(18,22,48,.45);transform-origin:50% 85%;transition:transform .5s cubic-bezier(.34,1.56,.64,1) .03s}
-body .crvM.cr .crvCard{right:4.5%}body .crvM.cl .crvCard{left:4.5%}
+body .crvCard{position:absolute;z-index:3;bottom:33.3%;width:19.37%;height:21.94cqw;min-height:0;aspect-ratio:.882;box-sizing:border-box;border-radius:10% / 8.8%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#BEC2CD 0,#B9BDC8 92%,#A3ABC1 92%,#9AA5BC 97%,#6A758C 97%);border:1.1px solid #1C2744;box-shadow:inset 4px 0 3px -1px rgba(174,190,210,.9),inset -3px 0 3px -1px rgba(140,150,172,.8),inset 0 4px 3px -1px rgba(150,160,182,.85),0 3px 4px rgba(8,10,30,.55);transform-origin:50% 75%}
+body .crvM.crvSR .crvCard{right:13.84%}body .crvM.crvSL .crvCard{left:28.74%}
 body .crvArt{display:flex;align-items:center;justify-content:center;transform:scale(1.12)}
 body .crvArt .arMArt{margin:0;filter:drop-shadow(0 3px 2px rgba(0,0,0,.3))}
-body .crvQ{position:absolute;left:0;right:0;bottom:15%;text-align:center;font-family:var(--fd);font-size:18px;font-size:clamp(15px,4.8cqw,20px);font-weight:700;color:#fff;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 3px 0 #000,2px 0 0 #000,-2px 0 0 #000,0 2px 0 #000,0 -2px 0 #000,1.5px 1.5px 0 #000,-1.5px -1.5px 0 #000,1.5px -1.5px 0 #000,-1.5px 1.5px 0 #000}
+body .crvCard:not(.res) .crvArt{transform:translateY(-9%) scale(1.45)}
+body .crvM.whb .crvCard .crvArt,body .crvM.whg .crvCard .crvArt,body .crvM.whm .crvCard .crvArt{transform:translateY(-4%) scale(1.18)}
+body .crvQ{position:absolute;left:0;right:0;bottom:13%;text-align:center;font-family:var(--fd);font-size:20px;font-size:clamp(17px,6.2cqw,26px);font-weight:800;color:#fff;line-height:1;font-variant-numeric:normal;text-shadow:0 2.1px 0 #000,1.3px 0 0 #000,-1.3px 0 0 #000,0 1.3px 0 #000,0 -1.3px 0 #000,.9px .9px 0 #000,-.9px -.9px 0 #000,.9px -.9px 0 #000,-.9px .9px 0 #000}
 /* بطاقة العملات والجواهر: نافذةٌ داكنة كخشبة مسرحٍ مضاءة، والعدد أعلاها */
 body .crvCard.res{padding:0}
-body .crvWin{position:absolute;left:14.4%;right:15.8%;top:11%;bottom:15%;border:2px solid #070A15;border-radius:16% / 13%;background:linear-gradient(180deg,#444C72,#7E7C98 70%,#A8A2AB);box-shadow:inset 0 1.5px 0 #B3B9BD;display:flex;flex-direction:column;align-items:center;overflow:hidden}
-body .crvWN{margin-top:7%;font-family:var(--fd);font-size:13px;font-size:clamp(11.5px,3.5cqw,15px);font-weight:700;line-height:1;color:#FFF04A;font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #000,1.5px 0 0 #000,-1.5px 0 0 #000,0 1.5px 0 #000,0 -1.5px 0 #000}
+body .crvWin{position:absolute;left:12.7%;right:14.7%;top:9.1%;bottom:10.4%;border:2px solid #070A15;border-radius:8% / 6.5%;background:linear-gradient(180deg,#425172 0,#425172 50%,#6C6E86 76%,#948D8C 100%);box-shadow:inset 0 1.5px 0 #B3B9BD;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+body .crvWN{margin-top:7%;font-family:var(--fd);font-size:13px;font-size:clamp(12.5px,3.9cqw,16px);font-weight:800;line-height:1;color:#FFF04A;font-variant-numeric:normal;text-shadow:0 2px 0 #000,1.5px 0 0 #000,-1.5px 0 0 #000,0 1.5px 0 #000,0 -1.5px 0 #000}
 body .crvWN.gm{color:#F4CCFF}
 body .crvWin .crvArt{flex:1;transform:none;padding-bottom:6%}
 body .crvWin .arMArt{transform:scale(.8)}
 body .crvOk{position:absolute;top:-9px;right:-9px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#5BE08F,#1F9A55);border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.5)}
 body .crvGet{position:absolute;left:50%;bottom:-13px;transform:translateX(-50%);text-decoration:none;padding:2px 10px;border-radius:9px;font-size:11px;font-weight:900;color:#fff;background:linear-gradient(180deg,#6BE39A,#1F9A55);border:1.5px solid #fff;box-shadow:0 2px 0 #11643A;white-space:nowrap}
 body .crvM.done .crvCard{filter:saturate(.45) brightness(.86)}
-body .crvM.ready .crvCard{cursor:pointer;border-color:#7A5208;box-shadow:inset 0 2px 3px rgba(90,104,140,.55),0 0 0 2.5px #FFE9A8,0 0 18px 4px rgba(255,210,100,.85),3px 4px 0 rgba(18,22,48,.45)}
+body .crvM.ready .crvCard{cursor:pointer;border-color:#7A5208;box-shadow:inset 4px 0 3px -1px rgba(174,190,210,.9),inset -3px 0 3px -1px rgba(140,150,172,.8),inset 0 4px 3px -1px rgba(150,160,182,.85),0 0 0 2.5px #FFE9A8,0 0 18px 4px rgba(255,210,100,.85),0 3px 4px rgba(8,10,30,.55)}
 body .crvM.ready.hot .crvCard{animation:crvHop 1.5s ease-in-out infinite;will-change:transform}
 @keyframes crvHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-body .crvM.next .crvCard{box-shadow:inset 0 2px 3px rgba(90,104,140,.55),0 0 0 2px rgba(255,233,168,.9),3px 4px 0 rgba(18,22,48,.45)}
+body .crvM.next .crvCard{box-shadow:inset 4px 0 3px -1px rgba(174,190,210,.9),inset -3px 0 3px -1px rgba(140,150,172,.8),inset 0 4px 3px -1px rgba(150,160,182,.85),0 0 0 2px rgba(255,233,168,.9),0 3px 4px rgba(8,10,30,.55)}
 /* خطوط الضوء على الصندوق حين يدخل (أزرق/ذهبيّ/أرجوانيّ بحسب الصندوق) — تحويلٌ وشفافيّةٌ فقط، ٤٢٠ مللي ثانية */
 body .crvM.whb{--wc:#95FFFF;--wg:rgba(112,163,224,.75)}body .crvM.whg{--wc:#FFF6A9;--wg:rgba(227,194,141,.75)}body .crvM.whm{--wc:#FF92FF;--wg:rgba(203,127,211,.75)}
-body .crvM.pop.whb .crvCard::after,body .crvM.pop.whg .crvCard::after,body .crvM.pop.whm .crvCard::after{content:'';position:absolute;left:18%;right:-58%;top:24%;height:50%;pointer-events:none;background:linear-gradient(90deg,transparent 0,var(--wc) 16%,var(--wg) 52%,transparent 100%) 0 6%/100% 9% no-repeat,linear-gradient(90deg,transparent 0,#fff 12%,var(--wc) 28%,var(--wg) 60%,transparent 100%) 0 50%/88% 13% no-repeat,linear-gradient(90deg,transparent 0,var(--wc) 20%,var(--wg) 56%,transparent 100%) 0 94%/76% 8% no-repeat;animation:crvWh .42s ease-out forwards}
-@keyframes crvWh{0%{transform:translateX(-42%);opacity:1}70%{opacity:.9}100%{transform:translateX(16%);opacity:0}}
+body .crvM.whb .crvCard::after,body .crvM.whg .crvCard::after,body .crvM.whm .crvCard::after{content:'';position:absolute;left:-17%;width:134%;aspect-ratio:1;top:50%;margin-top:-67%;border-radius:50%;pointer-events:none;background:conic-gradient(from 0deg,#fff 0deg,var(--wc) 5deg,var(--wg) 42deg,rgba(255,255,255,0) 110deg);-webkit-mask:radial-gradient(closest-side,transparent 80%,#000 82%,#000 93%,transparent 95%);mask:radial-gradient(closest-side,transparent 80%,#000 82%,#000 93%,transparent 95%);opacity:0;animation:crvSw 1.25s linear infinite;animation-delay:var(--sd,0s)}
+@keyframes crvSw{0%{transform:rotate(-12deg) scaleY(.4) rotate(290deg);opacity:0}3%{opacity:1}28%{transform:rotate(-12deg) scaleY(.4) rotate(70deg);opacity:1}32%{opacity:0}100%{transform:rotate(-12deg) scaleY(.4) rotate(70deg);opacity:0}}
+/* لهب المشعل يرتجف (كالفيديو) — تحويلٌ فقط على طبقةٍ صغيرة */
+body .crvFl{position:absolute;left:33%;width:34%;top:3%;height:44%;transform-origin:50% 100%;border-radius:50% 50% 45% 45% / 62% 62% 38% 38%;background:radial-gradient(ellipse 50% 60% at 50% 72%,rgba(255,250,210,.95) 0,rgba(255,206,90,.85) 38%,rgba(255,130,30,.5) 62%,rgba(255,110,20,0) 78%);animation:crvFl .48s steps(1) infinite}
+@keyframes crvFl{0%{transform:scale(1,1)}25%{transform:scale(.9,1.12) skewX(4deg)}50%{transform:scale(1.06,.9)}75%{transform:scale(.94,1.06) skewX(-4deg)}}
 /* ٧٫٠٦ — رأس الساحة على لوحٍ مستقلّ بحدّين (الشبكة تبدأ من جديد عنده)، ومحوره عند ٥٨٪ كالفيديو */
-body .crvH{position:relative;display:flex;flex-direction:column;align-items:center;padding:7% 0 19%;background:linear-gradient(180deg,rgba(0,14,40,0) calc(100% - 30px),rgba(0,14,40,.28)),linear-gradient(90deg,rgba(0,14,38,.24) 0 7.2%,transparent 7.2%),var(--lat) 0 0/64px 64px,#083E74}
+body .crvH{position:relative;display:flex;flex-direction:column;align-items:center;padding:17.5% 0 19%;background:rgba(0,8,40,.15)}
 body .crvH.un{padding-bottom:5%}body .crvH.tk{padding-bottom:5%}
-body .crvH::before{content:'';position:absolute;left:0;right:0;top:0;height:5px;background:linear-gradient(180deg,#011331 0 1px,#253A5C 1px 4px,#011331 4px 5px)}
-body .crvH::after{content:'';position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(180deg,#064A79 0 2px,#3C83B4 2px 5px)}
-body .crvDioW{position:relative;width:62%;margin-left:16%;display:flex;justify-content:center}
-body .crvDio{width:100%;aspect-ratio:1.12;object-fit:contain;filter:drop-shadow(-14px 14px 4px rgba(0,22,55,.42))}
+body .crvH::before,body .crvH::after{content:'';position:absolute;left:0;right:0;height:2px;background:linear-gradient(180deg,rgba(0,10,40,.3) 0 .75px,rgba(170,210,255,.28) .75px 1.5px,rgba(170,210,255,.1) 1.5px 2px)}
+body .crvH::before{top:0}body .crvH::after{bottom:0}
+body .crvDioW{position:relative;width:68%;margin-left:16%;display:flex;justify-content:center}
+body .crvDio{width:100%;aspect-ratio:1.12;object-fit:contain;filter:drop-shadow(-17px 14px 2px rgba(0,20,45,.5))}
 body .crvEm{display:grid;place-items:center;height:150px}
 body .crvHLk{position:absolute;left:50%;bottom:0;transform:translateX(-50%);white-space:nowrap;z-index:1;display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:12px;font-size:11.5px;font-weight:800;color:#FFE9A8;background:rgba(6,14,34,.85);border:1px solid rgba(232,178,58,.6);direction:rtl}
 body .crvHLk.cur{color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);border-color:#FFF3C8}
-body .crvNm{margin:6% 0 0 16%;font-family:var(--fd);font-size:22px;font-size:clamp(20px,5.6cqw,26px);font-weight:700;color:#fff;line-height:1.2;text-align:center;direction:rtl;text-shadow:0 5px 0 #04091D,2px 0 0 #04091D,-2px 0 0 #04091D,0 2px 0 #04091D,0 -2px 0 #04091D,1.5px 1.5px 0 #04091D,-1.5px 1.5px 0 #04091D,1.5px -1.5px 0 #04091D,-1.5px -1.5px 0 #04091D}
+body .crvNm{margin:8.7% 0 0 16%;font-family:var(--fd);font-size:22px;font-size:clamp(20px,5.6cqw,26px);font-weight:700;color:#fff;line-height:1.2;text-align:center;direction:rtl;text-shadow:0 2.5px 0 #04091D,0 1.6px 0 #04091D,.8px 0 0 #04091D,-.8px 0 0 #04091D,0 .8px 0 #04091D,0 -.8px 0 #04091D,.6px .6px 0 #04091D,-.6px .6px 0 #04091D,.6px -.6px 0 #04091D,-.6px -.6px 0 #04091D}
 /* اللافتة السداسيّة: ٧٤٫٩٪ من العرض من ٢٠٫٦٪ إلى ٩٥٫٥٪، طرفان مسطّحان، إطارٌ ولوحٌ بخطوطٍ شعريّة مائلة وحافّةٌ ثلاثيّة */
-body .crvBanRow{position:relative;width:100%;display:flex;justify-content:center;margin-top:1.4%}
+body .crvBanRow{position:relative;width:100%;display:flex;justify-content:center;margin-top:.7%}
 body .crvBanRow>.crvTr{top:46%}
-body .crvBan{position:relative;width:74.9%;margin-left:16%;aspect-ratio:809/146;box-sizing:border-box;display:flex;align-items:center;padding:0 12.6% 0 6.9%;filter:drop-shadow(0 1.1cqw 0 #0555A0) drop-shadow(0 .9cqw 1.2cqw rgba(0,20,60,.6))}
-body .crvBan::before{content:'';position:absolute;inset:0;clip-path:polygon(5.3% 0,94.7% 0,100% 43.8%,100% 55.5%,94.7% 100%,5.3% 100%,0 55.5%,0 43.8%);background:linear-gradient(180deg,#1690D6 0 3%,#0A82C8 3% 94%,#0E8AD0 94%)}
-body .crvBan::after{content:'';position:absolute;inset:0;clip-path:polygon(6.55% 11.6%,93.45% 11.6%,97.5% 43.8%,97.5% 55.5%,93.45% 87.7%,6.55% 87.7%,2.5% 55.5%,2.5% 43.8%);background:linear-gradient(180deg,rgba(30,177,251,0) 85%,#2BB8FF 87.7%),radial-gradient(24% 70% at 50% 100%,rgba(60,205,255,.55),rgba(60,205,255,0)),repeating-linear-gradient(-45deg,rgba(255,255,255,.04) 0 1.5px,rgba(255,255,255,0) 1.5px 5px),#1AA8EC}
+body .crvBanRow::before{content:'';position:absolute;left:0;width:7.2%;top:42%;height:3px;background:linear-gradient(180deg,#052645 0 1.5px,#1B4F7A 1.5px 3px)}
+body .crvBan{position:relative;width:74.9%;margin-left:16%;aspect-ratio:809/146;box-sizing:border-box;display:flex;align-items:center;padding:0 9.8% 0 5%;filter:drop-shadow(0 .75cqw 0 #0555A0) drop-shadow(0 .35cqw 0 #0B3F6A) drop-shadow(0 .95cqw 0 rgba(0,22,56,.6))}
+body .crvBan::before{content:'';position:absolute;inset:0;clip-path:polygon(5.3% 0,94.7% 0,100% 43.8%,100% 55.5%,94.7% 100%,5.3% 100%,0 55.5%,0 43.8%);background:linear-gradient(180deg,#0E7EC4 0 1.5%,#0879C0 1.5% 94%,#0E8AD0 94%)}
+body .crvBan::after{content:'';position:absolute;inset:0;clip-path:polygon(6.55% 11.6%,93.45% 11.6%,97.5% 43.8%,97.5% 55.5%,93.45% 87.7%,6.55% 87.7%,2.5% 55.5%,2.5% 43.8%);background:linear-gradient(180deg,rgba(30,177,251,0) 85%,#2BB8FF 87.7%),radial-gradient(11% 26% at 45.5% 100%,rgba(40,190,255,.75),rgba(40,190,255,0)),repeating-linear-gradient(-45deg,rgba(255,255,255,.022) 0 1px,rgba(255,255,255,0) 1px 5px),#149FE4}
 body .crvBan>*{position:relative;z-index:1}
-body .crvCrown{flex:0 0 auto;width:12.4%;aspect-ratio:78/61;margin-top:-1%;display:grid;place-items:center}
-body .crvCrown::before,body .crvCrown::after{content:'';position:absolute;clip-path:polygon(0 4%,23% 20%,27% 38%,37% 38%,37% 0,63% 0,63% 38%,73% 38%,77% 20%,100% 4%,92% 100%,8% 100%)}
+body .crvCrown{flex:0 0 auto;width:12.9%;aspect-ratio:84/67;margin-top:-1.5%;display:grid;place-items:center}
+body .crvCrown::before,body .crvCrown::after{content:'';position:absolute;clip-path:polygon(0 13%,19% 10%,26% 27%,32% 27%,38% 1%,62% 1%,68% 27%,74% 27%,81% 10%,100% 13%,92% 100%,8% 100%)}
 body .crvCrown::before{inset:0;background:#4D3D05}
-body .crvCrown::after{inset:2px;background:linear-gradient(180deg,#FFE24E 0,#FAD31D 45%,#EFBF14 74%,#A27400 74% 79%,#E5B801 79%)}
-body .crvCrown b{position:relative;z-index:1;margin-top:30%;font-family:var(--fd);font-size:15px;font-size:clamp(13px,4.2cqw,18px);font-weight:700;line-height:1;color:#FFFDFD;text-shadow:1px 2px 0 #3A2400,1.5px 0 0 #3A2400,-1.5px 0 0 #3A2400,0 1.5px 0 #3A2400,0 -1.5px 0 #3A2400}
-body .crvBan>s{margin-left:2.4cqw;text-decoration:none;direction:rtl;white-space:nowrap;font-size:12px;font-size:clamp(11px,3.2cqw,13.5px);font-weight:900;color:#EAF4FB;text-shadow:0 1.5px 0 #0A283F,1.2px 0 0 #0A283F,-1.2px 0 0 #0A283F,0 -1.2px 0 #0A283F}
-body .crvBT{margin-left:auto;display:inline-flex;align-items:center;gap:1.2cqw}
-body .crvBT bdi{font-family:var(--fd);font-size:19px;font-size:clamp(17px,5cqw,22px);font-weight:700;line-height:1;color:#FFE94A;font-variant-numeric:tabular-nums;letter-spacing:-.02em;text-shadow:0 3px 0 #132719,2px 0 0 #132719,-2px 0 0 #132719,0 2px 0 #132719,0 -2px 0 #132719,1.5px 1.5px 0 #132719,-1.5px -1.5px 0 #132719}
+body .crvCrown::after{inset:1px;background:linear-gradient(180deg,#FFE24E 0,#FAD31D 45%,#EFBF14 76%,#A27400 76% 80%,#E5B801 80%)}
+body .crvCrown b{position:relative;z-index:1;margin-top:19%;font-family:var(--fd);font-size:17px;font-size:clamp(15px,4.8cqw,20px);font-weight:800;line-height:1;letter-spacing:-.04em;color:#FFFDFD;text-shadow:1px 1.5px 0 #3A2400,1.1px 0 0 #3A2400,-1.1px 0 0 #3A2400,0 1.1px 0 #3A2400,0 -1.1px 0 #3A2400}
+body .crvBan>s{margin-left:1.9cqw;text-decoration:none;direction:rtl;white-space:nowrap;font-size:11px;font-size:clamp(11px,2.8cqw,12px);font-weight:600;color:#E3F1FB;text-shadow:0 1.5px 0 #0A283F,1px 0 0 #0A283F,-1px 0 0 #0A283F,0 -1px 0 #0A283F}
+body .crvBan>s b{font-family:var(--fd);font-size:clamp(12px,3.3cqw,14px);font-weight:800;color:#FAFDFF;font-variant-numeric:normal}
+body .crvBT{margin-left:auto;display:inline-flex;align-items:center;gap:0}
+body .crvBT .rico{filter:drop-shadow(1px 0 0 #3D2A00) drop-shadow(-1px 0 0 #3D2A00) drop-shadow(0 1px 0 #3D2A00) drop-shadow(0 -1px 0 #3D2A00)}
+body .crvBT bdi{font-family:var(--fd);font-size:19px;font-size:clamp(17px,5cqw,22px);font-weight:800;line-height:1;color:#FFE94A;font-variant-numeric:normal;letter-spacing:-.03em;text-shadow:0 1.6px 0 #132719,.9px 0 0 #132719,-.9px 0 0 #132719,0 .9px 0 #132719,0 -.9px 0 #132719,.6px .6px 0 #132719,-.6px -.6px 0 #132719}
 /* لسان الجواهر تحت اللافتة: ثلاث جواهر بأربعة أوجهٍ مضاءةٍ من أعلى اليمين، والثالثة نصفها أرجوانيّ ونصفها برتقاليّ */
-body .crvGemTab{position:relative;margin:-.4cqw 0 0 16%;width:24.6%;aspect-ratio:266/54;display:flex;align-items:center;justify-content:center;gap:2.65cqw;clip-path:polygon(0 0,100% 0,86.5% 88%,84% 100%,16% 100%,13.5% 88%);background:linear-gradient(180deg,#085D9C 0 11%,#0881C3 11% 78%,#2595D5 78% 86%,#47A4E8 86% 90%,#0E529A 90%)}
-body .crvGemTab i{width:3.05cqw;aspect-ratio:1;margin-top:-.6cqw;transform:rotate(45deg);border-radius:18%;border:1.5px solid;border-color:#DEB175 #98614C #98614C #DEB175;box-shadow:0 0 0 1px #3A2410}
-body .crvGemTab i.p{background:conic-gradient(from -45deg,#D77CF0 0 90deg,#5D00C8 90deg 180deg,#9E37D5 180deg 270deg,#8A17BA 270deg)}
-body .crvGemTab i.o{background:conic-gradient(from -45deg,#F8CB6F 0 90deg,#CB6B02 90deg 180deg,#E6A941 180deg 270deg,#E9AA22 270deg)}
-body .crvGemTab i.x{background:conic-gradient(from -45deg,#FCEF95 0 90deg,#F28903 90deg 180deg,#AF3FE6 180deg 270deg,#B717D7 270deg)}
+body .crvGemW{margin:.7cqw 0 0 17%;width:24.6%;filter:drop-shadow(0 .8cqw 0 rgba(10,40,70,.55))}
+body .crvGemTab{position:relative;margin:0;width:100%;aspect-ratio:266/54;display:flex;align-items:center;justify-content:center;gap:2.65cqw;clip-path:polygon(0 0,100% 0,87.5% 80%,85.5% 94%,83% 100%,17% 100%,14.5% 94%,12.5% 80%);background:linear-gradient(180deg,#2595D5,#47A4E8 90%,#0E529A 90%)}
+body .crvGemTab::before{content:'';position:absolute;inset:0;clip-path:polygon(1.2% 0,98.8% 0,86.3% 78%,84.6% 86%,82.4% 88%,17.6% 88%,15.4% 86%,13.7% 78%);background:linear-gradient(180deg,#085D9C 0 11%,#0881C3 11%)}
+body .crvGemTab i{position:relative;z-index:1;width:3.05cqw;aspect-ratio:1;margin-top:-.6cqw;transform:scaleY(1.04) rotate(45deg);border-radius:18%;border:2px solid;border-color:#DEB175 #98614C #98614C #DEB175;box-shadow:0 0 0 .5px #4A2E12}
+body .crvGemTab i.p{background:radial-gradient(circle at 70% 28%,rgba(255,255,255,.55),rgba(255,255,255,0) 32%),conic-gradient(from -45deg,#D77CF0 0 90deg,#5D00C8 90deg 180deg,#9E37D5 180deg 270deg,#8A17BA 270deg)}
+body .crvGemTab i.o{background:radial-gradient(circle at 70% 28%,rgba(255,255,255,.55),rgba(255,255,255,0) 32%),conic-gradient(from -45deg,#F8CB6F 0 90deg,#CB6B02 90deg 180deg,#E6A941 180deg 270deg,#E9AA22 270deg)}
+body .crvGemTab i.x{background:radial-gradient(circle at 70% 28%,rgba(255,255,255,.55),rgba(255,255,255,0) 32%),conic-gradient(from -45deg,#FCEF95 0 90deg,#F28903 90deg 180deg,#AF3FE6 180deg 270deg,#B717D7 270deg)}
 /* لوحة «طريق الأساطير» تحت أعلى ساحة (كلوحة التذكرة في الفيديو): كهرمانيّة بحافّةٍ سفليّةٍ أفتح، وتذكرةٌ ذهبيّة مائلة تتجاوزها */
-body .crvTk{position:relative;align-self:flex-start;box-sizing:border-box;margin:8.1cqw 0 0 26.4%;width:68%;min-height:14.2cqw;display:flex;flex-direction:column;justify-content:center;gap:2px;padding:6px 10px 7px 18.8%;direction:rtl;text-align:left;border:1.5px solid #5C463E;border-radius:1.9cqw;background:linear-gradient(180deg,#FAD07A 0 6%,#C37E31 6% 8%,#EB9F40 8% 83%,#FFE260 83% 85%,#F7BC36 85% 95%,#CA7E20 95%);box-shadow:inset 3px 0 0 #FBC555,inset -3px 0 0 #FBC555,3px 2px 0 #0B2A4A}
+body .crvTk{position:relative;align-self:flex-start;box-sizing:border-box;margin:8.5cqw 0 0 26.4%;width:68%;min-height:14.2cqw;display:flex;flex-direction:column;justify-content:center;gap:5px;padding:4px 10px 5px 12.8%;direction:rtl;text-align:left;border:1.5px solid #5C463E;border-radius:1.9cqw;background:linear-gradient(180deg,#FAD07A 0 6%,#C37E31 6% 8%,#EB9F40 8% 83%,#FFE260 83% 85%,#F7BC36 85% 95%,#CA7E20 95%);box-shadow:inset 3px 0 0 #FBC555,inset -3px 0 0 #FBC555,3px 2px 0 #0B2A4A}
 body .crvTkArt{position:absolute;left:-13.6%;top:-8%;width:28.8%;height:116%;transform:rotate(-12deg);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 150'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23FFC05E'/%3E%3Cstop offset='.25' stop-color='%23FFF788'/%3E%3Cstop offset='.5' stop-color='%23F9A144'/%3E%3Cstop offset='.7' stop-color='%23FFFE9B'/%3E%3Cstop offset='1' stop-color='%23D18842'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath transform='translate(0 7)' d='M22 20Q60 6 100 18T180 16L188 24V46A10 10 0 0 0 188 66V124L180 132Q140 144 100 130T22 132L14 124V66A10 10 0 0 0 14 46V28Z' fill='%23B3713A'/%3E%3Cpath d='M22 20Q60 6 100 18T180 16L188 24V46A10 10 0 0 0 188 66V124L180 132Q140 144 100 130T22 132L14 124V66A10 10 0 0 0 14 46V28Z' fill='url(%23g)'/%3E%3Cpath d='M30 30Q62 18 100 29T172 27L177 32V50A12 12 0 0 0 177 62V116L172 121Q138 132 100 119T30 121L25 116V62A12 12 0 0 0 25 50V35Z' fill='none' stroke='%239A6615' stroke-width='3' opacity='.75'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
-body .crvTk b{font-size:13px;font-size:clamp(12px,3.4cqw,14.5px);font-weight:900;line-height:1.25;color:#F6E8DE;text-shadow:0 2.5px 0 #2E1709,1.2px 0 0 #2E1709,-1.2px 0 0 #2E1709,0 -1.2px 0 #2E1709}
-body .crvTk>span:not(.crvTkArt){font-size:11px;font-size:clamp(11px,2.9cqw,12.5px);font-weight:800;line-height:1.35;color:#F6D79C;text-shadow:0 1.5px 0 #421F00,1px 0 0 #421F00,-1px 0 0 #421F00,0 -1px 0 #421F00}
+body .crvTk b{font-size:12px;font-size:clamp(11px,3cqw,12.5px);font-weight:700;line-height:1.25;color:#F6E8DE;text-shadow:0 1.5px 0 #2E1709,1px 0 0 #2E1709,-1px 0 0 #2E1709,0 -1px 0 #2E1709}
+body .crvTk>span:not(.crvTkArt){font-size:11px;font-weight:700;line-height:1.35;white-space:nowrap;color:#F6D79C;text-shadow:0 1.5px 0 #421F00,1px 0 0 #421F00,-1px 0 0 #421F00,0 -1px 0 #421F00}
 /* بطاقات الفتح (كبطاقة «فتح البطاقات» في الفيديو): عنوانٌ مائيّ، وبطاقةٌ بإطارٍ داكن وهالةٍ سماويّة — رماديّةٌ ما دامت الساحة مقفلة */
 body .crvUn{position:relative;width:84%;margin:9.4cqw 0 0 16%;direction:rtl;display:flex;flex-direction:column;align-items:center;gap:4.6cqw}
-body .crvUnT{text-decoration:none;font-size:13px;font-size:clamp(12px,3.4cqw,14.5px);font-weight:900;color:#8CE6F4;text-shadow:0 2px 0 #002B46,1.2px 0 0 #002B46,-1.2px 0 0 #002B46,0 -1.2px 0 #002B46}
-body .crvUnL{box-sizing:border-box;width:100%;display:flex;flex-wrap:wrap;justify-content:center;gap:9px;direction:rtl}
-body .crvUnC{position:relative;width:16cqw;min-width:58px;max-width:78px;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12% 0 0;overflow:hidden;background:linear-gradient(180deg,#F4F6FA,#CFD6E2);border:2.5px solid #1B1618;box-shadow:inset 0 2.5px 0 #FFFDFF,0 0 0 2px #F0FAF5,0 0 12px 5px rgba(82,155,195,.7)}
+body .crvUnT{text-decoration:none;font-size:11px;font-size:clamp(11px,2.9cqw,12px);font-weight:700;color:#8CE6F4;text-shadow:0 1.5px 0 #002B46,1px 0 0 #002B46,-1px 0 0 #002B46,0 -1px 0 #002B46}
+body .crvUnL{box-sizing:border-box;width:100%;display:flex;flex-wrap:nowrap;justify-content:center;gap:14px;direction:rtl}
+body .crvUnC{position:relative;width:15cqw;min-width:58px;max-width:64px;aspect-ratio:.81;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;padding:0;overflow:hidden;background:linear-gradient(180deg,#F4F6FA,#CFD6E2 55%,#9AA3B3);border:2.2px solid #1B1618;box-shadow:inset 0 1.5px 0 #FFFDFF,0 0 0 1.5px #EDFFFF,0 0 0 3px #A6E3FC,0 0 5px 4px rgba(111,185,227,.9)}
 body .crvA.fut .crvUnC{background:linear-gradient(180deg,#A39DA8,#7A7A7E 55%,#6A6A6E)}
 body .crvA.fut .crvUnImg{filter:grayscale(1) drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 body .crvUnC.more{justify-content:center;background:linear-gradient(180deg,#34405E,#1C2438);padding:0}
-body .crvUnC.more>b{background:none;font-family:var(--fd);font-size:clamp(18px,5.4cqw,24px)}
-body .crvUnK{position:absolute;top:3px;left:3px;z-index:1;font-style:normal;font-size:10px;font-weight:900;color:#fff;padding:1px 7px;border-radius:8px;background:linear-gradient(180deg,#4FB2F5,#1F74C8);border:1.5px solid #fff;box-shadow:0 2px 0 #0B3A70}
-body .crvUnImg{width:68%;aspect-ratio:1;margin-top:4px;display:grid;place-items:center;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
+body .crvUnC.more>b{margin:auto 0;background:none;font-family:var(--fd);font-size:clamp(18px,5.4cqw,24px)}
+body .crvUnK{position:absolute;top:4px;left:5px;z-index:1;font-style:normal;font-size:11px;font-weight:900;color:#fff;padding:0;border:0;border-radius:0;background:none;box-shadow:none;text-shadow:0 1px 0 #0B3A70,1px 0 0 #0B3A70,-1px 0 0 #0B3A70,0 -1px 0 #0B3A70}
+body .crvUnImg{width:70%;flex:none;aspect-ratio:1;margin-top:5%;display:grid;place-items:center;filter:drop-shadow(0 3px 2px rgba(0,0,0,.35))}
 body .crvUnImg .unPv{display:grid;place-items:center;width:100%!important;height:100%!important;background:none!important;border:0!important;box-shadow:none!important}
 body .crvUnImg .unPv svg,body .crvUnImg .unPv img{width:100%!important;height:100%!important;object-fit:contain}
-body .crvUnC>b{box-sizing:border-box;width:100%;padding:4px 3px 5px;background:linear-gradient(180deg,#34405E,#1C2438);font-size:11px;font-size:clamp(10px,2.8cqw,12px);font-weight:900;line-height:1.2;color:#fff;text-align:center;text-wrap:balance;overflow-wrap:anywhere;flex:1;display:flex;align-items:center;justify-content:center;text-shadow:0 1.5px 0 #141A2C,1px 0 0 #141A2C,-1px 0 0 #141A2C,0 -1px 0 #141A2C}
-body .crvYou{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;margin:10px 0 12px;padding-left:16%;direction:rtl}
-body .crvYouL{position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,transparent,#FFE9A8 20%,#FFE9A8 80%,transparent)}
-body .crvYouP{position:relative;display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:16px;background:linear-gradient(180deg,#FFF3C8,#D9A93C);color:#2A1B00;font-weight:900;box-shadow:0 3px 0 #8A6210}
-body .crvYouP bdi{font-family:var(--fd);font-size:17px}
+body .crvUnC>b{box-sizing:border-box;width:100%;padding:0 3px 7%;margin-top:auto;background:none;flex:none;font-size:11px;font-weight:900;line-height:1.1;color:#fff;text-align:center;text-wrap:balance;overflow-wrap:anywhere;display:block;text-shadow:0 1.5px 0 #141A2C,1px 0 0 #141A2C,-1px 0 0 #141A2C,0 -1px 0 #141A2C}
+body .crvYou{position:relative;display:block;height:0;margin:0;padding:0;z-index:4;direction:rtl}
+body .crvYouL{position:absolute;top:-1px;left:0;width:26%;height:2px;background:linear-gradient(90deg,rgba(255,233,168,.2),#FFE9A8 60%,rgba(255,233,168,0))}
+body .crvYouP{position:absolute;left:1.2%;top:0;transform:translateY(-50%);display:inline-flex;flex-direction:column;align-items:center;gap:0;padding:3px 9px 4px;border-radius:12px;line-height:1.1;background:linear-gradient(180deg,#FFF3C8,#D9A93C);color:#2A1B00;font-weight:900;box-shadow:0 3px 0 #8A6210}
+body .crvYouP bdi{font-family:var(--fd);font-size:15px}
 body .crvYouP s{text-decoration:none;font-size:11px}
-body .crvYou em{font-style:normal;font-size:11px;font-weight:800;color:#E6ECFF;background:rgba(6,14,34,.72);padding:2px 10px;border-radius:10px}
-body .trvOkW.crvOkW{bottom:0;height:calc(62px + env(safe-area-inset-bottom,0px));padding:8px 0 env(safe-area-inset-bottom,0px);align-items:flex-start;background:linear-gradient(180deg,#7486A2 0,#5A6A85 3px,#4B586F 100%);box-shadow:0 -4px 12px rgba(0,0,0,.35);pointer-events:auto}
-body .crvOk2{min-width:116px;height:44px;border:0;border-radius:11px;font-family:var(--fd);font-size:17px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(180deg,#8FD0FF 0%,#55AFFD 48%,#3E97EC 52%,#4AA3F4 100%);box-shadow:0 4px 0 #1F5E9E,inset 0 2px 0 rgba(255,255,255,.6);text-shadow:0 2px 0 #1F4E80,1px 0 0 #1F4E80,-1px 0 0 #1F4E80}
-body .crvOk2:active{transform:translateY(3px);box-shadow:0 1px 0 #1F5E9E,inset 0 2px 0 rgba(255,255,255,.6)}
-body .crvDown{position:fixed;left:max(12px,calc(50% - 248px));bottom:calc(74px + env(safe-area-inset-bottom,0px));width:44px;height:44px;border:0;border-radius:10px;display:grid;place-items:center;cursor:pointer;background:linear-gradient(180deg,#8FD0FF,#3E97EC);box-shadow:0 4px 0 #1F5E9E,inset 0 2px 0 rgba(255,255,255,.6)}
-body .crvDown svg{transform:rotate(-90deg)}
-@media (prefers-reduced-motion:reduce){body .crvM.ready.hot .crvCard{animation:none}body .crvM.pop .crvCard::after{display:none}}
+body .crvYou em{display:none}
+/* ٧٫٠٦ — الشريط السفليّ وزرّ «موافق» وزرّ القفز كما قيست في الفيديو */
+body .trvOkW.crvOkW{bottom:0;height:calc(min(14vw,73px) + env(safe-area-inset-bottom,0px));padding:min(2.1vw,11px) 0 env(safe-area-inset-bottom,0px);align-items:flex-start;background:linear-gradient(180deg,#465570 0,#465570 .4px,#8190AD .4px,#8190AD 2.5px,#6B7D9D 4px,#5E6E8A 7px,#4D5A71 12px,#4B586F 18px,#4A576C 100%);box-shadow:none;pointer-events:auto}
+body .trvOkW.crvOkW::before{content:'';position:absolute;left:0;right:0;top:-18px;height:18px;pointer-events:none;background:linear-gradient(180deg,rgba(0,4,20,0),rgba(0,4,20,.38))}
+body .crvOk2{position:relative;width:min(23.8vw,124px);height:min(10.6vw,55px);border:1px solid #1B2E3E;border-radius:4.7px;font-family:var(--fd);font-size:11px;font-weight:700;color:#EEF6FE;cursor:pointer;background:linear-gradient(180deg,#63CFFF 0,#63CFFF 1.1px,#56C5FA 1.1px,#47BCF9 4.5%,#57AFFC 10.4%,#69B9FE 10.4%,#69B9FE 41%,#4FADFC 41%,#4FADFC 83.5%,#358FF9 83.5%,#2395F6 91.7%,#1473D1 91.7%,#1473D1 92.6%,#0251A8 92.6%);box-shadow:inset 0 .75px 0 #9ADAF6,inset .75px 0 0 #4DA0CC,inset 3.5px 0 2.5px -1px #209BF4,inset -.75px 0 0 #4FBFFD,inset -3.5px 0 2.5px -1px #2897F6;text-shadow:0 1.2px 0 #001732,.8px 0 0 #031D37,-.8px 0 0 #031D37,0 -.8px 0 #031D37}
+body .crvOk2::after{content:'';position:absolute;right:2px;top:2.5px;width:4.8px;aspect-ratio:1;border-radius:50%;background:radial-gradient(#F2F8FF,#C7E1FC 55%,rgba(179,225,255,0))}
+body .crvOk2:active{transform:translateY(2px)}
+body .crvDown{position:fixed;left:calc(50% - min(50vw,260px) + min(8.2vw,43px));bottom:calc(min(14vw,73px) + min(2.7vw,14px) + env(safe-area-inset-bottom,0px));width:min(9.07vw,47px);height:min(9.07vw,47px);padding:0;border:1px solid #1D212A;border-radius:13%;display:grid;place-items:center;cursor:pointer;background:linear-gradient(180deg,#48C3FF 0,#48C3FF 3%,#55AEF9 9%,#6BB9FE 9%,#6BB9FE 38%,#50ADFC 38%,#4EABFC 82%,#358FF9 82%,#2395F6 90%,#1473D1 90%,#1473D1 91%,#0251A8 91%);box-shadow:inset 0 .75px 0 #70C4F4,inset 1px 0 0 #5AADDC,inset -1px 0 0 #5AADDC,inset 3px 0 2.5px -.5px #1B99EE,inset -3px 0 2.5px -.5px #2095F2,0 1.5px 0 #0B2A4D}
+body .crvBack{position:fixed;left:calc(50% - min(50vw,260px) + min(2vw,10px));top:calc(env(safe-area-inset-top,0px) + 3px);z-index:41;width:32px;height:32px;padding:0;border:1px solid #1D212A;border-radius:13%;display:grid;place-items:center;cursor:pointer;color:#fff;background:linear-gradient(180deg,#48C3FF 0,#48C3FF 3%,#55AEF9 9%,#6BB9FE 9%,#6BB9FE 38%,#50ADFC 38%,#4EABFC 82%,#358FF9 82%,#2395F6 90%,#1473D1 90%,#1473D1 91%,#0251A8 91%);box-shadow:inset 0 .75px 0 #70C4F4,inset 1px 0 0 #5AADDC,inset -1px 0 0 #5AADDC,inset 3px 0 2.5px -.5px #1B99EE,inset -3px 0 2.5px -.5px #2095F2,0 1.5px 0 #0B2A4D}
+body .crvBack svg{width:52%;height:52%;margin-bottom:10%}body .crvBack svg *{stroke:#fff}
+body .crvDown i{position:relative;width:74%;height:35%;margin-bottom:8%;animation:crvBob 1.75s ease-in-out infinite}
+body .crvDown i svg{display:block}
+@keyframes crvBob{0%,100%{transform:translateY(-.55px)}50%{transform:translateY(.55px)}}
+/* شرح الكؤوس تحت الطريق: لوحٌ داكن حتّى يُقرأ فوق الشبكة الزرقاء */
+body .scr.arV>.note{color:#E6ECFF;background:rgba(4,12,34,.72);border:1px solid rgba(232,178,58,.35);border-radius:14px;padding:12px 14px;margin:8px 0 0}
+@media (prefers-reduced-motion:reduce){body .crvM.ready.hot .crvCard{animation:none}body .crvM .crvCard::after{display:none}body .crvFl,body .crvDown i{animation:none}}
 body .trvPic{position:relative;display:block;height:clamp(120px,36vw,175px);margin:8px 2px 2px;border-radius:14px;overflow:hidden;background-size:cover;background-position:center 58%;border:1px solid rgba(var(--f),.55);box-shadow:0 10px 22px -12px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,244,214,.15);cursor:pointer}
 body .trvPicSh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,22,0) 55%,rgba(6,10,22,.6))}
 body .trvPic.hasDio{height:clamp(170px,50vw,230px)}
