@@ -2587,7 +2587,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0008124694" data-head="0000967237" aria-hidden="true">
+<div id="ld" data-total="0008141179" data-head="0000967237" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -19170,7 +19170,8 @@ Router.init({
  fail:(fn,e)=>{try{console.error('[nav]',fn,e)}catch(x){}try{clanScrFail(fn,e)}catch(x){}},
  scrollY:()=>window.scrollY,
  restore:y=>{_keepY=y},
- bar:(show,fn)=>{const el=$('nav');if(el)el.style.display=show?'flex':'none';if(fn&&!ARENA_FLOWS.test(fn))hideArena()},
+ bar:(show,fn)=>{try{skBackFollow()}catch(e){}   /* ٦٫٩٦: ورقة «جيسي» المفتوحة تتبع الشاشة الجديدة (رجوعها يغلقها) */
+  const el=$('nav');if(el)el.style.display=show?'flex':'none';if(fn&&!ARENA_FLOWS.test(fn))hideArena()},
  root:()=>{if(!hasAccount()){Router.reset('authScr');return}if(!S.tutorial_completed)return;tab(cur||'play')},
  confirmLeave:proceed=>confirmSheet('تغييرات لم تُحفظ','لديك تعديلات في هذه الشاشة لم تُحفظ بعد.','تجاهل والرجوع',proceed),   // تغييرات غير محفوظة تُؤكَّد دائمًا
  atRoot:()=>toast('اضغط رجوع مرّة أخرى للخروج'),
@@ -23882,7 +23883,7 @@ function mgUseWild(k){
  if(!use){toast(need?'لا جوكر من هذه الندرة':'النسخ مكتملة — رقِّ الجيس');return}
  MG()[rr]-=use;S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+use;try{saveState()}catch(e){}
  try{buyFx(mgWildImg(rr,42),'+'+use+' '+T('نسخة'),tlNm('sk',k))}catch(e){toast('+'+use+' نسخة')}
- tlTab('sk');
+ tlTab('sk');try{skSync();skPresence()}catch(e){}   // ٦٫٩٦: خانة الورقة وشارتا «غيّر» و«الجيوس» تتحدّث في مكانها
 }
 function mgUseBook(k){
  const it=tlItem('sk',k);if(!it||!tlOwn('sk',k))return;
@@ -23891,7 +23892,7 @@ function mgUseBook(k){
  const need=Math.max(0,TL_UPC[L-1]-skCp(k));if(!need){toast('النسخ مكتملة — رقِّ الجيس');return}
  S.skBook=mgBooks()-1;S.skCp=S.skCp||{};S.skCp[k]=TL_UPC[L-1];try{saveState()}catch(e){}
  try{buyFx(ico('book',15),T('اكتملت النسخ'),tlNm('sk',k))}catch(e){toast('اكتملت النسخ')}
- tlTab('sk');
+ tlTab('sk');try{skSync();skPresence()}catch(e){}   // ٦٫٩٦: كذلك
 }
 function mgBuy(i){
  const m=MG_SHOP[i];if(!m)return;
@@ -24026,40 +24027,57 @@ const TR_ROAD_END=4000;   // ٦٫٩٦: الطريق يمتدّ فوق آخر ا�
 const TR_SKBOOK=2500;     // ٦٫٩٦: كتاب الجيس — كان عند 2,000 وصارت عتبة ساحة
 /** هدف شريط التقدّم: الساحة التالية، وفي آخر الساحات نهاية طريق الأساطير، وبعدها لا شيء */
 function trGoal(tr){const n=trNext(tr);return n!=null?n:(tr<TR_ROAD_END?TR_ROAD_END:null)}
-/** سطر «التالية» في الرئيسيّة وردهة اللعبة: الساحة باسمها، والرقم لا ينقسم */
+/** سطر «التالية» في الرئيسيّة وردهة اللعبة: الساحة باسمها، والرقم لا ينقسم (٦٫٩٦: و«طريق الأساطير» و«حتّى 4,000» قطعتان، و«أتممت» لا تترك «الأساطير» وحدها) */
 function trNextTxt(tr){const ix=trArenaIx(tr),nx=trNext(tr),gl=trGoal(tr),n=v=>'<bdi class="nowrap">'+v.toLocaleString('en-US')+'</bdi>';
- return nx!=null?'التالية: <span class="nowrap">'+esc(ARENAS[ix+1].n)+' · '+n(nx)+'</span>':gl!=null?'طريق الأساطير حتّى '+n(gl):'أتممت طريق الأساطير'}
-/* ٦٫٩٦ — ترحيل الحفظ إلى العتبات الجديدة، مرّةً واحدة (t.v=2). S.tro.gate وS.tro.up فهرسان على جدول ≤٦٫٩٥، وclaimed قيم
+ return nx!=null?'التالية: <span class="nowrap">'+esc(ARENAS[ix+1].n)+' · '+n(nx)+'</span>':gl!=null?'<span class="nowrap">طريق الأساطير</span> <span class="nowrap">حتّى '+n(gl)+'</span>':'أتممت <span class="nowrap">طريق الأساطير</span>'}
+/** ٦٫٩٦ — سطر الكؤوس في ردهة اللعبة: «N كأس · التالية…» كما كان؛ وفي طريق الأساطير (لا ساحة تالية) قطعتان بفاصلٍ يُقصّ إن
+    التفّت الثانية إلى سطرٍ جديد — لا «3,600 كأس ·» معلّقة في 320 */
+function trHubTxt(tr){const c='<bdi class="nowrap">'+tr.toLocaleString('en-US')+'</bdi> كأس';
+ return trNext(tr)!=null?c+' · '+trNextTxt(tr):'<span class="trvSm trvSmW"><span>'+c+'</span><span>'+trNextTxt(tr)+'</span></span>'}
+/* ٦٫٩٦ — ترحيل الحفظ إلى العتبات الجديدة، مرّةً واحدة. S.tro.gate وS.tro.up فهرسان على جدول ≤٦٫٩٥، وclaimed قيم
    كؤوس. الكؤوس (tr/best) لا تُمسّ، ولا يُرى لاعبٌ في ساحةٍ أدنى ممّا كان: البوّابة = أعلى الاثنتين (البوّابة القديمة بعد
    تحويلها، والساحة التي فيها كؤوسك الآن) بسقف أعلى ساحةٍ بلغتها؛ ومن رفعه الجدول الجديد يُعلَن له مرّةً (up أدنى).
-   صناديق العتبات: عدد ما استلمته يبقى كما هو — ما عُلِّم مُستلَمًا ولم يُستلَم يعود «جاهزًا»، وما استُلم بالجدول القديم
-   لا يُعطى مرّتين — وكتاب الجيس المستلَم عند 2,000 ينتقل إلى 2,500. حفظٌ جرى على الجدول الجديد قبل الترقيم (نسخة
-   أندرويد ٦٫٩٥) تفضحه بوّابته (لا يفسّرها إلّا الجدول الجديد) فلا يُرحَّل مرّةً ثانية. */
+   صناديق العتبات: عدد ما استلمته من كلّ نوعٍ يبقى كما هو — ما عُلِّم مُستلَمًا ولم يُستلَم يعود «جاهزًا»، وما استُلم بالجدول القديم
+   لا يُعطى مرّتين — وكتاب الجيس المستلَم عند 2,000 ينتقل إلى 2,500. حفظٌ جرى على الجدول الجديد قبل الترقيم تفضحه بوّابته
+   (لا يفسّرها إلّا الجدول الجديد) فلا يُرحَّل مرّةً ثانية.
+   ٦٫٩٦ (مراجعة الترحيل) — كلّ حفظٍ بلا رقم نسخةٍ عند لاعبٍ حقيقيّ حفظٌ على الجدول القديم: البناءات التي حملت الجدول الجديد
+   بلا ترقيم (1a9ccb7…ab8f75e) لم تُنشر قطّ (نشر الصفحات توقّف عند فحص رقم الإصدار من 6bf9a51 حتّى 460a4dd)، وتطبيق
+   أندرويد ٦٫٩٥ غلافٌ يفتح الصفحات نفسها (TAHADDI_HOME) فلعب f88d274 على الجدول القديم. فالقراءة القديمة هي الأصل، ولا يُترك
+   إلّا لحفظٍ تفضحه بوّابته (معاينةٌ أو تطوير). وكتاب الجيس لم يُعطَ في أيّ طريقٍ قديم إلّا بعلامة 2,000: فإن لم تُستلَم عاد
+   الكتاب (2,500) جاهزًا ولو استُلمت عملات 2,500 القديمة. الختم v:3 — وv:2 ما رحّله ٦٫٩٦ كما شُحن، ونتيجته لكلّ حفظٍ على
+   الجدول القديم هي هذه نفسها إلّا حالة الكتاب تلك، ونوعَ الصندوق الجاهز حين تخطّى اللاعب علامةً (العدد نفسه)؛
+   وtools/test-tr-migrate.cjs يتحقّق من ذلك على كلّ حالة. */
 const TR_ARENA_V1=[0,300,600,1000,1400,1800,2300,2800,3400,4000];   // ≤٦٫٩٥
 function trIxOn(T,tr){let i=0;for(let k=0;k<T.length;k++)if(tr>=T[k])i=k;return i}
+/** يعيد false لحفظٍ مُرحَّل (v≥2) أو جديد، وإلّا الجدول الذي قُرئ به: 'old' (≤٦٫٩٥) أو 'new' (جديدٌ بلا ترقيم — تفضحه بوّابته) */
 function trMigrate(t){
  if(!t||typeof t!=='object'||(t.v|0)>=2)return false;
  const hi=Math.max(t.best|0,t.tr|0),bestIx=trArenaIx(hi),g0=Math.max(0,Math.min(TR_ARENA_V1.length-1,t.gate|0));
  const isNew=g0>0&&g0===trArenaIx(t.best|0)&&g0!==trIxOn(TR_ARENA_V1,t.best|0);
+ const c=new Set((Array.isArray(t.claimed)?t.claimed:[]).map(x=>x|0).filter(x=>x>0)),hadBook=c.has(2000);
  if(!isNew){
   const map=i=>trArenaIx(TR_ARENA_V1[Math.max(0,Math.min(TR_ARENA_V1.length-1,i|0))]);
   const g=Math.min(bestIx,Math.max(map(g0),trArenaIx(t.tr|0)));
   if(g>map(g0))t.migUp=1;                          // ارتفع بالجدول الجديد — سطرٌ في إعلان الساحة
   t.up=Math.min(g,map(t.up));t.gate=g;
-  const c=new Set((Array.isArray(t.claimed)?t.claimed:[]).map(x=>x|0)),hadBook=c.has(2000);
   const OLDC=TR_ARENA_V1.slice(1),NEWC=TR_ARENA.slice(1).concat([TR_ROAD_END]);
-  let got=OLDC.filter(x=>c.has(x)).length,marked=NEWC.filter(x=>c.has(x)).length;
-  for(let i=NEWC.length-1;i>=0&&marked>got;i--){const x=NEWC[i];if(c.has(x)&&OLDC.indexOf(x)<0){c.delete(x);marked--}}   // «مُستلَمة» ولم تُستلَم → جاهزة
-  for(let i=0;i<NEWC.length&&got>marked;i++){const x=NEWC[i];if(!c.has(x)&&hi>=x){c.add(x);marked++}}                     // استُلمت بالجدول القديم → لا تُعطى مرّتين
+  const kd=(T,x)=>{const a=trIxOn(T,x);return x===TR_ROAD_END||a>=8?3:a>=5?2:a>=2?1:0};   // نوع الصندوق كما في trRoad
+  for(let k=0;k<4;k++){   // ٦٫٩٦ (مراجعة): العدد لكلّ نوع — من فتح نخبةً لا يُعطى منافسًا بدلها ولا العكس
+   const nw=NEWC.filter(x=>x<=hi&&kd(TR_ARENA,x)===k),got=Math.min(nw.length,OLDC.filter(x=>c.has(x)&&kd(TR_ARENA_V1,x)===k).length);
+   let marked=nw.filter(x=>c.has(x)).length;
+   for(let i=nw.length-1;i>=0&&marked>got;i--){const x=nw[i];if(c.has(x)&&OLDC.indexOf(x)<0){c.delete(x);marked--}}   // «مُستلَمة» ولم تُستلَم → جاهزة
+   for(let i=0;i<nw.length&&got>marked;i++){const x=nw[i];if(!c.has(x)){c.add(x);marked++}}                              // استُلمت بالجدول القديم → لا تُعطى مرّتين
+  }
   if(hadBook)c.add(TR_SKBOOK);
-  t.claimed=[...c].sort((a,b)=>a-b);
  }
- t.v=2;return true;
+ if(!hadBook)c.delete(TR_SKBOOK);   // ٦٫٩٦ (مراجعة): 2,500 كانت عملاتٍ في كلّ طريقٍ قديم — بلا 2,000 لم يُستلَم كتابٌ قطّ
+ t.claimed=[...c].sort((a,b)=>a-b);
+ t.v=3;return isNew?'new':'old';
 }
 function trSeasonKey(){const d=new Date();return d.getUTCFullYear()+'-'+(d.getUTCMonth()+1)}
 function trSeasonN(k){const m=/^(\d+)-(\d+)$/.exec(String(k||''));return m?(+m[1])*12+(+m[2]):0}
 function TR(){
- if(!S.tro||typeof S.tro!=='object')S.tro={tr:0,best:0,gate:0,w:0,l:0,claimed:[],season:trSeasonKey(),up:0,v:2};
+ if(!S.tro||typeof S.tro!=='object')S.tro={tr:0,best:0,gate:0,w:0,l:0,claimed:[],season:trSeasonKey(),up:0,v:3};
  const t=S.tro;if(!Array.isArray(t.claimed))t.claimed=[];
  if(trMigrate(t)){try{saveState()}catch(e){}}   // ٦٫٩٦: حفظٌ من جدول العتبات القديم — مرّةً واحدة
  const key=trSeasonKey();
@@ -24215,9 +24233,10 @@ function trRoadV(ix){
   const nReady=sts.filter(x=>x==='ready').length,nDone=sts.filter(x=>x==='done').length;
   const rel=a===ix?'cur':a<ix?'past':'fut',open=rel==='cur'||nReady>0||sts.indexOf('next')>=0||(_keepY!=null&&_trvOpen.has(a)),un=trvUnChips(a,rel);   // ٦٫٩٦: قسم المكافأة التالية مفتوح، وما فتحه اللاعب يبقى مفتوحًا بعد الاستلام
   const bg=arBgCls(a)?` data-bg="1"`:'';   // ٦٫٩٦: فئة CSS تُحقن مرّة — لا نسخ data-URI في كلّ رسم   // لوحة الساحة إن رفعها المالك، وإلّا تدرّج ألوانها
-  const sum=rel==='fut'?`<span>${ico('lock',11)} ${a===ix+1?'الساحة التالية · <span class="nowrap">بقي '+trvCups(lo-tr)+'</span>':'مقفلة'}</span>`   // ٦٫٩٦: العتبة في الشارة جانبًا — لا تكرار
-   :rel==='cur'?`<span>ساحتك الآن${gate?` · <span class="nowrap">لا تهبط تحت <bdi>${gate.toLocaleString('en-US')}</bdi></span>`:''}</span>`
-   :`<span>${ico('check',11,A.g)} بلغتها · <span class="nowrap"><bdi>${nDone}/${ms.length}</bdi> مُستلَمة</span></span>`;
+  const sm=(...p)=>`<span class="trvSm">${p.filter(Boolean).map(x=>`<span>${x}</span>`).join('')}</span>`;   // ٦٫٩٦: قطعٌ لا تنقسم، وفاصل «·» يُقصّ إن التفّت قطعته إلى سطرٍ جديد
+  const sum=rel==='fut'?sm(`${ico('lock',11)} ${a===ix+1?'الساحة التالية':'مقفلة'}`,a===ix+1&&'بقي '+trvCups(lo-tr))   // ٦٫٩٦: العتبة في الشارة جانبًا — لا تكرار
+   :rel==='cur'?sm('ساحتك الآن',gate&&`لا تهبط تحت <bdi>${gate.toLocaleString('en-US')}</bdi>`)
+   :sm(`${ico('check',11,A.g)} بلغتها`,`<bdi>${nDone}/${ms.length}</bdi> مُستلَمة`);
   const rows=ms.map((m,k)=>{const st=sts[k],r=m.r;
    const act=st==='ready'?`<button class="trvBtn" onclick="trClaim(${m.tr})"><span>استلم</span></button>`
     :st==='done'?`<span class="trvSt ok">${ico('check',14,'#9FE7B5')}</span>`
@@ -24512,7 +24531,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.96';
+const APP_VER='6.97';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24895,7 +24914,10 @@ const TL_PWR=[{k:'def',n:'الأساسيّة',st:[0,0,0],col:'232,178,58'},{k:'h
  {k:'orbit',n:'المدار',st:[1,1,0],col:'200,120,255'},{k:'blaze',n:'اللهب',st:[1,0,1],col:'255,110,40'},
  {k:'wave',n:'الموج',st:[0,1,1],col:'60,220,200'},{k:'crown',n:'التاج',st:[1,1,1],col:'255,225,120'},
  {k:'comet',n:'المذنّب',st:[2,1,1],col:'255,150,220'}];
-function tlNm(c,k){return c==='sk'?(CA_STRIKERS[k]||{}).n||k:c==='pw'?(TL_PWR.find(x=>x.k===k)||{}).n||k:(TL_NM[c]||{})[k]||k}
+/** ٦٫٩٦: الاسم الإنجليزيّ للجيس والقدرة بمفتاحه لا بنصّه (فلا يصير «الهلال» في سؤالٍ رياضيّ اسمَ جيس) */
+const TL_EN={sk:{blue:'Royal Blue',emerald:'Emerald',onyx:'Black Onyx',ruby:'Ruby',teal:'Turquoise',amber:'Amber',ice:'Ice',moon:'Crescent',sun:'Sun',violet:'Violet'},
+ pw:{def:'Basic',halo:'Halo',thorn:'Thorns',venom:'Venom',orbit:'Orbit',blaze:'Blaze',wave:'Wave',crown:'Crown',comet:'Comet'}};
+function tlNm(c,k){try{if(S.lang==='en'&&TL_EN[c]&&TL_EN[c][k])return TL_EN[c][k]}catch(e){}return c==='sk'?(CA_STRIKERS[k]||{}).n||k:c==='pw'?(TL_PWR.find(x=>x.k===k)||{}).n||k:(TL_NM[c]||{})[k]||k}
 function tlItem(c,k){return (TL_ITEMS[c]||[]).find(x=>x[0]===k)}
 function tlOwn(c,k){const it=tlItem(c,k);if(!it)return false;if(!it[2])return true;return !!(S.tlOwn&&S.tlOwn.includes(c+':'+k))}
 function tlEq(c){return c==='sk'?caSkMine():c==='cs'?caCsMine():c==='tr'?caTrMine():c==='pw'?tlPwMine():caPkMine()}
@@ -25199,6 +25221,11 @@ body .hmArB .tr .rico{width:24px!important;height:24px!important;filter:drop-sha
 body .hmArB .tr u{text-decoration:none;font-family:var(--fd);font-size:17px;font-weight:700;color:#FFF1C4;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 #6A3606}
 body .hmArB .rd{flex-shrink:0;min-width:20px;height:20px;padding:0 6px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:900;color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 0 10px rgba(255,233,168,.6);animation:puls 1.5s ease-in-out infinite}
 body .hmArB .go{flex-shrink:0;display:flex}
+/* ٦٫٩٦ — شريط الساحة في الهواتف الصغيرة (≤359): كان عمود الاسم ضيّقًا فيخرج سطر «التالية» عن عموده ويُقصّ اسم الساحة.
+   العدّاد والشعار والفجوات أصغر قليلًا، وشارة الجاهز الذهبيّة النابضة تأخذ مكان السهم (هي الدعوة إلى اللمس) */
+@media (max-width:359px){body .hmArB{gap:7px;padding:8px 8px 8px 9px}body .hmArB .em .rkEmb{width:34px!important;height:34px!important}body .hmArB .tr{gap:3px;padding:3px 7px 3px 4px}body .hmArB .tr .rico{width:19px!important;height:19px!important}body .hmArB .tr u{font-size:15px}body .hmArB .rd+.go{display:none}}
+/* 360–389 (أشيع عرضٍ في أندرويد): الشارة وحدها مكان السهم — عمود الاسم ١٠٢→١٢٨ في 360، فسطرٌ واحد إلّا أطول «التالية» */
+@media (min-width:360px) and (max-width:389px){body .hmArB .rd+.go{display:none}}
 body .finTr{margin:0 auto 12px;max-width:340px;padding:10px 14px 9px;border-radius:16px;cursor:pointer;background:linear-gradient(180deg,rgba(22,30,51,.92),rgba(11,16,29,.92));border:1px solid var(--lxHair);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 12px 26px -12px rgba(0,0,0,.9)}
 body .finTrRow{display:flex;align-items:center;justify-content:center;gap:10px}
 body .finTrRow .rico{width:30px!important;height:30px!important;filter:drop-shadow(0 3px 5px rgba(0,0,0,.6))}
@@ -25369,6 +25396,14 @@ body .trvSum{display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;font-siz
 body .trvSum .arReady{margin:0;font-style:normal}
 body .nowrap{white-space:nowrap}
 body .trvSum>span{min-width:0}
+/* ٦٫٩٦ — ملخّص اللوحة (وسطر الردهة في طريق الأساطير) قطعٌ لا تنقسم، وقبل كلّ قطعةٍ بعد الأولى فاصل «·» في هامشٍ سالب: إن
+   التفّت القطعة إلى أوّل سطرٍ جديد وقع فاصلها خارج حافّة الصفّ فقُصّ — لا «ساحتك الآن ·» ولا «3,600 كأس ·» معلّقة في 320 */
+body .trvSm{display:flex;flex-wrap:wrap;align-items:center;overflow:hidden;max-width:100%}
+body .trvSm>span{white-space:nowrap}
+body .trvSm>span:not(:last-child){margin-inline-end:.69em}
+body .trvSm>span+span{margin-inline-start:-.69em}
+body .trvSm>span+span::before{content:'·';display:inline-block;width:.69em;text-align:center}   /* .69em = عرض « · » نفسه (7.2 من 10.5) — السطر لا يطول */
+body .trvSm.trvSmW>span{white-space:normal}   /* الردهة: القطعة الثانية تلتفّ في داخلها (بين قطعها الصغيرة) إن ضاق العمود — لا قصّ */
 body .trvUn{position:relative;z-index:2;display:flex;flex-wrap:wrap;align-items:center;gap:5px 6px;margin:-9px 9px 0;padding:15px 10px 8px;border-radius:0 0 14px 14px;background:linear-gradient(180deg,rgba(6,9,18,.82),rgba(6,9,18,.55));border:1px solid rgba(var(--f),.32);border-top:0;box-shadow:inset 0 -1px 0 rgba(255,255,255,.04)}
 body .trvUn>s{text-decoration:none;font-size:10px;font-weight:800;color:#C9B37A;margin-inline-end:1px}
 body .unCh{display:inline-flex;align-items:center;gap:5px;padding:3px;padding-inline-start:4px;padding-inline-end:9px;border-radius:999px;background:rgba(6,9,18,.62);border:1px solid rgba(var(--f),.36);font-size:10.5px;font-weight:800;color:#F6E7C6;line-height:1.35;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
@@ -25477,7 +25512,7 @@ function tlBody(){
    <div class="tlGrid">${TL_PWR.map((P,i)=>{const o=i<un, e=o&&P.k===eq, nx=i===un;
    const R=TL_RAR[i===0?'c':i<3?'r':i<6?'e':'l'];
    return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlPwTap('${P.k}',${i})">
-    ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}<span class="tlNm">${P.n}</span>
+    ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}<span class="tlNm">${tlNm('pw',P.k)}</span>
     <canvas class="tlCv" data-c="pw" data-k="${P.k}" width="120" height="120"></canvas>
     ${o?`<span class="tlSt">${P.st.map((v,j)=>`<b>${[T('القوّة'),T('التصويب'),T('الزمن')][j]}</b><span style="font-weight:900;color:${v?'#7CF0A6':'rgba(255,255,255,.5)'}"><bdi>+${v}</bdi></span>`).join('')}</span>`
      :nx?`<span class="tlLock">${T('النقاط اللازمة لفتح القفل')}</span><span class="tlCp rd"><i style="width:${Math.round(cp%TL_PWPTS/TL_PWPTS*100)}%"></i><span>${cp%TL_PWPTS}/${TL_PWPTS}</span></span>`
@@ -25495,10 +25530,10 @@ function tlBody(){
   }
   const arLk=!o&&!tlArenaOkItem(c,k);
   const up=c==='sk'&&skUpOk(k);   // ٦٫٩٦: المجهَّز أيضًا يقول «ترقية!» حين تكفي نسخه (هديّة البداية كانت تختفي تحت «قيد الاستخدام»)
-  const bt=up?`${ico('up',12)} ${T('ترقية!')}`:e?T('قيد الاستخدام'):o?T('استخدم'):arLk?`${ico('lock',12)} ${T('يُفتح في')} ${tlArenaNmItem(c,k)}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
+  const bt=up?`${ico('up',12)} ${T('ترقية!')}`:e?/* ٦٫٩٦: الوسم فوقه يقول «قيد الاستخدام» — الزرّ «مُجهَّز» في سطرٍ واحد (كان يلتفّ سطرين في ٣٢٠) */`${skSvg('ok',12)} ${T('مُجهَّز')}`:o?T('استخدم'):arLk?/* ٦٫٩٦: اسم الساحة في سطرٍ فوقه، والزرّ عدد كؤوسها — «يُفتح في المجلس الملكيّ» كان ثلاثة أسطر في ٣٢٠ */`${ico('trophy',12)} ${skNum(TR_ARENA[tlArenaOf(c,k)]||0)}`:`${ico(gm?'gem':'coin',12)} ${pr}`;
   return `<button class="tlCard${e?' eq':''}${o?'':' lk'}" style="background:linear-gradient(180deg,${R.a},${R.b});--tg:${R.g}" onclick="tlTap('${c}','${k}')">
    ${e?`<span class="tlTag">${T('قيد الاستخدام')}</span>`:''}${c==='sk'&&o&&skMastReady(k)?`<span class="tlMst">${ico('gift',12)}</span>`:''}<span class="tlNm">${tlNm(c,k)}</span><span class="tlRr">${T(R.n)}</span>
-   <span class="tlCvW"><canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${c==='sk'&&o?`<i class="tlLvB">${skNum(skLv(k))}</i>`:''}</span>${foot}<span class="tlBt${up?' up':o?'':arLk?' lk':' buy'}">${bt}</span></button>`}).join('')}</div>
+   <span class="tlCvW"><canvas class="tlCv" data-c="${c}" data-k="${k}" width="120" height="120"></canvas>${c==='sk'&&o?`<i class="tlLvB">${skNum(skLv(k))}</i>`:''}</span>${foot}${arLk?`<span class="tlArN">${ico('lock',11)} ${tlArenaNmItem(c,k)}</span>`:''}<span class="tlBt${up?' up':o?'':arLk?' lk':' buy'}">${bt}</span></button>`}).join('')}</div>
  ${c==='sk'?skLegend():''}<div class="dkNote" style="margin-top:8px">${T(note)}</div>`;
 }
 function tlTab(c,el){_tlCat=c;if(el)uiPick(el);const b=document.getElementById('tlBody');if(b){b.innerHTML=tlBody();try{enPass(b)}catch(e){}toolsDraw()}}
@@ -25552,14 +25587,15 @@ function tlSkSheet(k){
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
  toolsDraw(ov);
  try{skBackArm()}catch(e){}
- const close=()=>{ov.remove();if(!document.querySelector('.skPOv'))try{skBackDisarm()}catch(e){}try{skSync()}catch(e){}};
- ov.onclick=e=>{if(e.target===ov)close()};
- ov.querySelector('#tlX').onclick=close;
- const up=ov.querySelector('#tlUp');if(up)up.onclick=()=>{close();tlUpgrade(k)};
- const us=ov.querySelector('#tlUse');if(us)us.onclick=()=>{close();S.caStriker=k;try{saveState()}catch(e){}tlTab('sk');skPresence();skSync();toast(T('جُهّز')+': '+tlNm('sk',k),'ok')};
- const bb=ov.querySelector('#tlBuyB');if(bb)bb.onclick=()=>{close();tlBuy('sk',k)};
- const wd=ov.querySelector('#tlWild');if(wd)wd.onclick=()=>{close();mgUseWild(k)};
- const bk=ov.querySelector('#tlBook');if(bk)bk.onclick=()=>{close();mgUseBook(k)};
+ const close=sh=>{ov.remove();if(!document.querySelector('.skPOv'))try{skBackDisarm()}catch(e){}try{skSync()}catch(e){}if(sh)skShield()};   // ٦٫٩٦: sh — إغلاقٌ باللمس يترك درع الموضع
+ ov.addEventListener('click',skTapGuard(),true);   // ٦٫٩٦: كذلك ورقة التفاصيل (كانت اللمسة الثانية على «التفاصيل» تقع على «إغلاق» أو «ترقية»)
+ ov.onclick=e=>{if(e.target===ov)close(1)};
+ ov.querySelector('#tlX').onclick=()=>close(1);
+ const up=ov.querySelector('#tlUp');if(up)up.onclick=()=>{close(1);tlUpgrade(k)};
+ const us=ov.querySelector('#tlUse');if(us)us.onclick=()=>{close(1);S.caStriker=k;try{saveState()}catch(e){}tlTab('sk');skPresence();skSync();toast(T('جُهّز')+': '+tlNm('sk',k),'ok')};
+ const bb=ov.querySelector('#tlBuyB');if(bb)bb.onclick=()=>{close(1);tlBuy('sk',k)};
+ const wd=ov.querySelector('#tlWild');if(wd)wd.onclick=()=>{close(1);mgUseWild(k)};
+ const bk=ov.querySelector('#tlBook');if(bk)bk.onclick=()=>{close(1);mgUseBook(k)};
 }
 function tlUpgrade(k){
  const it=tlItem('sk',k);if(!it||!tlOwn('sk',k))return;
@@ -25716,6 +25752,62 @@ body .skEndC>span{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;f
 body .skEndC small{font-size:11px;font-weight:800;color:#D9B76E}body .skEndC b{font-family:var(--fd);font-size:14px;font-weight:700;color:#F6E7C6}
 body .skEndC i{font-style:normal;font-size:11px;font-weight:700;color:#AEB7CF}
 body .skEndC em{flex-shrink:0;font-style:normal;padding:7px 12px;border-radius:10px;background:linear-gradient(180deg,#FFF3D0 0%,#F0CF7A 22%,#D9AE4E 50%,#B98A2E 78%,#D6B05C 100%);color:#1A1206;font:700 13px/1.2 var(--fd);box-shadow:0 2px 0 #6E4E12,inset 0 1px 0 rgba(255,255,255,.7)}
+/* ٦٫٩٦: شريط «جيسك» في صفّ الأزرار المثبّت بجانب «خروج» — لا يقتطع سطرًا من النتيجة، فيبقى مقياس القلب
+   (التيجان واللوحة والكؤوس والجوائز) كما كان قبله. ارتفاعه لا يزيد على «خروج» فلا يطول الصفّ */
+body .caEnd .ceBtns.sk{grid-template-columns:minmax(0,1fr) auto}
+body .caEnd .ceBtns.sk>.rbtn,body .caEnd .ceBtns.sk>.ceWait,body .caEnd .ceBtns.sk>.rbtn+.caFinX,body .caEnd .ceBtns.sk>.ceWait+.caFinX{grid-column:1/-1}
+body .caEnd .ceBtns .skEndC{width:auto;min-width:0;min-height:0;margin:0;padding-block:4px;padding-inline:5px 9px;gap:8px;border-radius:12px}
+body .caEnd .ceBtns .skEndC>img{width:30px!important;height:30px!important}
+body .caEnd .ceBtns .skEndC>span{flex-direction:column;align-items:flex-start;gap:0;flex-wrap:nowrap}
+body .caEnd .ceBtns .skEndC small{display:none}
+body .caEnd .ceBtns .skEndC b,body .caEnd .ceBtns .skEndC i{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.3}
+body .caEnd .ceBtns .skEndC i .pw{color:#9FE3FF}
+body .caEnd .ceBtns .skEndC em{padding:7px 11px}
+body .caEnd .ceBtns.sk .caFinX{width:auto;min-width:84px;padding-inline:16px}
+body .skEndC>u.lv{display:none}
+/* ٦٫٩٦: تحت ٣٦٠ بكسل: المستوى شارةٌ ذهبيّة على القرص (كشارة المستوى في البطاقات)، والسطر الثاني اسم القدرة وحده */
+@media (max-width:359px){
+ body .caEnd .ceBtns .skEndC.hp>u.lv{display:block;position:absolute;top:50%;margin-top:6px;inset-inline-start:11px;min-width:18px;height:15px;padding:0 4px;border-radius:8px;text-decoration:none;text-align:center;
+  background:linear-gradient(180deg,#FFF3D0,#D9A93C);color:#1A1206;font:800 11px/15px 'Cairo',sans-serif;font-variant-numeric:tabular-nums;box-shadow:0 1px 0 #6E4E12,0 0 0 1.5px #0B1020}
+ body .caEnd .ceBtns .skEndC.hp i .lv,body .caEnd .ceBtns .skEndC.hp i .sep{display:none}
+}
+/* ٦٫٩٦: ما يُفتح فوق الورقة يُرى فوقها — بطاقة الترقية والجوكر والشراء، وتأكيد الشراء (ضوء الاحتفال #fxc فوقها أصلًا: ٤٠٠) */
+body .skPOv~.cardfx,body .skPOv~.qvov{z-index:96}
+/* ٦٫٩٦: درع اللمسة الثانية بعد الإغلاق (skShield) — قرصٌ شفّاف على موضع الإصبع، بلا رسم */
+body .skShd{position:fixed;z-index:99;width:80px;height:80px;margin:-40px 0 0 -40px;border-radius:50%;background:transparent;-webkit-tap-highlight-color:transparent}
+/* ٦٫٩٦: الخزانة — صفوف البطاقات بارتفاعٍ واحد، والزرّ في أسفل كلّ بطاقة؛ المقفلة بساحتها تسمّيها في سطرٍ فوق الزرّ */
+body #tlBody .tlGrid{grid-auto-rows:1fr}
+body #tlBody .tlCard>.tlBt{margin-top:auto}
+body #tlBody .tlCard>.tlCp{margin-bottom:4px}
+body .tlArN{position:relative;display:flex;align-items:center;justify-content:center;gap:3px;width:100%;margin:5px 0 4px;font-size:11px;font-weight:800;line-height:1.3;color:#E3CD92;text-align:center;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+body #tlBody .tlCard>.tlBt.lk{font-size:12px;line-height:normal;padding:4px 3px}
+/* ٦٫٩٦: الشاشات القصيرة (٣٦٠×٦٤٠ و٣٢٠×٥٦٨) — لا يُخفى شيء: الورقة تأخذ الطول، والرأس والبطل والقدرات أدقّ، وجملة الأثر
+   فقرةٌ واحدة مضغوطة، فيبدأ صفّ الجيوس الأوّل فوق الزرّ */
+@media (max-height:700px){
+ body .skP{max-height:calc(100dvh - 20px)}
+ body .skPHd{margin-top:6px}
+ body .skPH{padding:3px 14px 5px}
+ body .skPT b{font-size:18px;line-height:1.25}
+ body .skPT small{line-height:1.35}
+ body .skPX{width:36px;height:36px}
+ body .skHero{gap:10px;padding:8px 10px 9px}
+ body .skHero .skDisc{width:62px;height:62px}
+ body .skHero .skDisc .skLvP{bottom:-6px;min-width:22px;height:18px;font-size:11px;line-height:18px}
+ body .skHeroN{font-size:16.5px;line-height:1.25}
+ body .skHeroR{margin:2px 0 4px;gap:4px}
+ body .skHero .skTag{line-height:1.5}
+ body .skHero .skSt{gap:3px 7px}
+ body .skHero .skSt>b,body .skHero .skSt>u{line-height:1.35}
+ body .skFx{margin-top:5px;font-size:11px;line-height:1.5}
+ body .skFx br{display:none}
+ body .skFxP{margin-inline-start:6px}
+ body .skSec{margin:11px 0 6px}
+ body .skPwC{padding:6px 10px 6px 11px}
+ body .skPwN{line-height:1.45}
+ body .skPF{padding:8px 14px calc(9px + env(safe-area-inset-bottom,0px))}
+ body .skPF .rbtn>span{min-height:42px}
+}
+@media (max-height:600px){body .skP{max-height:calc(100dvh - 12px)}body .skSec{margin:9px 0 5px}}
 /* الردهة: قرص جيس كلّ لاعبٍ على زاوية صورته */
 body .rmSeat .skSeat{position:absolute;left:-8px;bottom:-6px;z-index:2;display:block;width:22px;height:22px;border-radius:50%;box-shadow:0 0 0 1.5px rgba(232,178,58,.8),0 2px 5px rgba(0,0,0,.6);overflow:hidden;background:#0A1026}
 body .rmSeat .skSeat img{width:22px!important;height:22px!important;display:block}
@@ -25753,7 +25845,7 @@ function skCss(){if(!document.getElementById('skpCss')){const st=document.create
 function skNum(v){return `<bdi>${(+v||0).toLocaleString('en-US')}</bdi>`}
 function skFrac(a,b){return `<bdi>${(+a||0).toLocaleString('en-US')}/${(+b||0).toLocaleString('en-US')}</bdi>`}
 function skSign(v){v=Math.round(+v||0);return `<bdi>${v>0?'+':v<0?'−':''}${Math.abs(v).toLocaleString('en-US')}</bdi>`}
-function skPct(v){v=Math.round(+v||0);return `<bdi>${v>0?'+':v<0?'−':''}${Math.abs(v).toLocaleString('en-US')}٪</bdi>`}
+function skPct(v){v=Math.round(+v||0);return `<bdi>${v>0?'+':v<0?'−':''}${Math.abs(v).toLocaleString('en-US')}${T('٪')}</bdi>`}
 function skRGB(h){h=String(h||'#888888').replace('#','');return [0,2,4].map(i=>parseInt(h.substr(i,2),16)||0).join(',')}
 /** جيسٌ تملكه ونسخه تكفي للترقية التالية */
 function skUpOk(k){try{const L=skLv(k);return tlOwn('sk',k)&&L<5&&skCp(k)>=TL_UPC[L-1]}catch(e){return false}}
@@ -25782,7 +25874,7 @@ function skTileHTML(o){
   ${skDisc(k,L,pw,o.sm?108:132)}
   <span class="skHubB"><span class="skHubK">${T('جيسي')}</span>
    <span class="skHubN">${esc(tlNm('sk',k))}<em>${T(R.n)}</em></span>
-   <span class="skChips">${st.map((v,i)=>`<b>${T(SK_L3[i])} ${skNum(v)}</b>`).join('')}${pw!=='def'?`<b class="pw" style="--pc:${P.col}"><i></i>${esc(P.n)}</b>`:''}</span>
+   <span class="skChips">${st.map((v,i)=>`<b>${T(SK_L3[i])} ${skNum(v)}</b>`).join('')}${pw!=='def'?`<b class="pw" style="--pc:${P.col}"><i></i>${esc(tlNm('pw',P.k))}</b>`:''}</span>
    ${std?`<span class="skStd">${T('في مباريات تحدّي الاثني عشر تتساوى القدرات')}</span>`:''}</span>
   <span class="skGo"><span>${T('غيّر')}${up?`<b>${skNum(up)}</b>`:''}</span>${up?`<i>${skUpTxt(up)}</i>`:''}</span></button>`;
 }
@@ -25802,22 +25894,41 @@ let _skP=null;
 /** ورقة الاختيار في مكانها. o: {from, sel} */
 function skPick(o){
  o=o||{};tlCss();skCss();
- if(!S.tlGift){S.tlGift=1;S.skCp=S.skCp||{};S.skCp.blue=(S.skCp.blue||0)+5;try{saveState()}catch(e){}}   // هديّة البداية نفسها التي تمنحها الخزانة
+ if(!S.tlGift){S.tlGift=1;S.skCp=S.skCp||{};S.skCp.blue=(S.skCp.blue||0)+5;try{saveState()}catch(e){}try{skSync(1)}catch(e){}}   // هديّة البداية نفسها التي تمنحها الخزانة — ٦٫٩٦: وشارتا «الجيوس» و«غيّر» تظهران معها
  const eq=caSkMine();
  _skP={sel:(o.sel&&tlItem('sk',o.sel))?o.sel:eq,from:String(o.from||''),ord:skSorted().map(x=>x[0]),ro:skPickLocked()};
  document.querySelectorAll('.skPOv').forEach(x=>x.remove());
  const ov=document.createElement('div');ov.className='skPOv';
  ov.innerHTML=`<div class="skP" role="dialog" aria-modal="true" aria-label="${T('جيسي')}"><div class="skPHd"></div>
   <div class="skPH"><div class="skPT"><b>${ico('crown',16)} ${T('جيسي')}</b><small class="skPSub">${T('اختر جيسك وقدرته — تُحفظ لكلّ مبارياتك')}</small></div>
-   <button type="button" class="skPX" onclick="skPickClose()" aria-label="${T('إغلاق')}">${skSvg('x',18)}</button></div>
+   <button type="button" class="skPX" onclick="skPickClose(1)" aria-label="${T('إغلاق')}">${skSvg('x',18)}</button></div>
   <div class="skPB"></div><div class="skPF"></div></div>`;
- ov.addEventListener('click',e=>{if(e.target===ov)skPickClose()});
+ const g=skTapGuard();ov.addEventListener('click',e=>{if(g(e))return;if(e.target===ov)skPickClose(1)},true);   // ٦٫٩٦: اللمسة الثانية من نقرةٍ مزدوجة على البطاقة لا تغلق الورقة ولا تجهّز قدرةً تحتها
  document.body.appendChild(ov);
  skPickRender(1);
  skBackArm();   // زرّ الرجوع في أندرويد يغلق الورقة لا الشاشة ولا التطبيق
  skPrewarm();
 }
-function skPickClose(){document.querySelectorAll('.skPOv').forEach(x=>x.remove());_skP=null;if(!document.querySelector('.qvov.tlSkOv'))skBackDisarm()}
+function skPickClose(sh){const had=!!document.querySelector('.skPOv');document.querySelectorAll('.skPOv').forEach(x=>x.remove());_skP=null;
+ if(!document.querySelector('.qvov.tlSkOv'))skBackDisarm();if(sh&&had)skShield()}
+/** ٦٫٩٦: لمسةٌ واحدة لا تُحسب مرّتين. الأزمنة زمنُ اللمسة نفسها (e.timeStamp) لا زمن وصولها — على هاتفٍ بطيء تصل اللمسة
+    الثانية بعد رسم الورقة بمئات الأجزاء من الثانية. SK_SPOT: لمسةٌ في موضع لمسة الفتح نفسه (نصف قطره SK_R) بعدها بأقلّ من
+    هذا نصفُ نقرةٍ مزدوجة (أطول من نافذة الموجّه DOUBLE_MS)، وكلّ لمسةٍ مبتلعة تمدّ النافذة (النقرة الثلاثيّة)؛ SK_DBL: وفي أيّ
+    موضعٍ من الورقة قبل هذا. لمسةٌ مقصودة في موضعٍ آخر تمرّ. اللمس الحقيقيّ وحده: لا نقرة برمجيّة ولا لوحة مفاتيح */
+const SK_DBL=300,SK_SPOT=700,SK_R=40;
+function skTapEv(){try{const e=window.event;return e&&e.isTrusted&&e.type==='click'&&e.detail>0?e:null}catch(er){return null}}
+/** ٦٫٩٦: حارس الفتح: مستمعٌ في طور الالتقاط على الورقة، يعيد true إن ابتلع اللمسة */
+function skTapGuard(){const o=skTapEv(),g={t0:o?o.timeStamp:performance.now(),t:o?o.timeStamp:-1e9,x:o?o.clientX:-1e4,y:o?o.clientY:-1e4};
+ return e=>{if(!e||!e.isTrusted)return false;const t=e.timeStamp,near=t-g.t<SK_SPOT&&Math.hypot(e.clientX-g.x,e.clientY-g.y)<SK_R;
+  if(near||t-g.t0<SK_DBL){e.stopImmediatePropagation();e.preventDefault();if(near){g.t=t;g.x=e.clientX;g.y=e.clientY}return true}   // ٦٫٩٦: النافذة تمتدّ مع الإصبع في موضعه فقط
+  return false}}
+/** ٦٫٩٦: إغلاقٌ باللمس: قرصٌ شفّاف صغير على موضع الإصبع — اللمسة الثانية من نقرةٍ مزدوجة على «جهّز» كانت تقع على تبويب «الجيوس»
+    تحته فتنقل اللاعب إلى الخزانة وتضيّع شاشته. كلّ لمسةٍ يبتلعها تمدّه، ولمسةٌ في موضعٍ آخر تمرّ فورًا. لا رسم ولا حركة */
+function skShield(){try{const o=skTapEv();if(!o)return;let d=document.getElementById('skShd');
+ if(!d){d=document.createElement('div');d.id='skShd';d.className='skShd';d.setAttribute('aria-hidden','true');
+  d.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();d.style.left=e.clientX+'px';d.style.top=e.clientY+'px';skShdT(d)});document.body.appendChild(d)}
+ d.style.left=o.clientX+'px';d.style.top=o.clientY+'px';skShdT(d)}catch(e){}}
+function skShdT(d){clearTimeout(d._t);d._t=setTimeout(()=>{try{d.remove()}catch(e){}},SK_SPOT)}
 function skHeroHTML(){
  const P=_skP,eq=caSkMine(),k=P.sel,it=tlItem('sk',k)||['blue','c'],R=TL_RAR[it[1]],o=tlOwn('sk',k),L=o?skLv(k):1,pw=tlPwMine();
  let std=false;try{std=P.ro&&caTourney()}catch(e){}
@@ -25847,7 +25958,7 @@ function skPwHTML(){
  return TL_PWR.map((Q,i)=>{const op=i<un,on=Q.k===pw,nx=i===un;
   const sub=op?(Q.st.some(v=>v)?Q.st.map((v,j)=>v?skSign(v)+' '+T(SK_L3[j]):'').filter(Boolean).join(' · '):T('بلا إضافة'))
    :nx?T('مقفلة')+' · '+skFrac(cp%TL_PWPTS,TL_PWPTS):T('مقفلة');
-  return `<button type="button" class="skPwC${on?' on':''}${op?'':' lk'}" style="--pc:${Q.col}" onclick="skPw('${Q.k}',${i})" aria-pressed="${on}"><i>${op?'':ico('lock',11)}</i><span><b>${esc(Q.n)}</b><small>${sub}</small></span></button>`}).join('');
+  return `<button type="button" class="skPwC${on?' on':''}${op?'':' lk'}" style="--pc:${Q.col}" onclick="skPw('${Q.k}',${i})" aria-pressed="${on}"><i>${op?'':ico('lock',11)}</i><span><b>${esc(tlNm('pw',Q.k))}</b><small>${sub}</small></span></button>`}).join('');
 }
 function skPickBody(){
  const P=_skP,un=tlPwUnl(),cp=S.tlCP||0,own=TL_ITEMS.sk.filter(x=>tlOwn('sk',x[0])).length;
@@ -25857,7 +25968,7 @@ function skPickBody(){
   ${un<TL_PWR.length?`<div class="skPwN">${T('تُفتح القدرة التالية بنقاطٍ تجمعها من ترقية جيوسك وفتحها')} · ${skFrac(cp%TL_PWPTS,TL_PWPTS)}</div>`:''}
   <div class="skSec"><b>${T('جيوسي')}</b><em>${skNum(own)} ${T('من')} ${skNum(TL_ITEMS.sk.length)}</em></div>
   <div class="skGrid">${P.ord.map(skCellHTML).join('')}</div>
-  ${P.ro||/^(mm|lobby|hud|end)$/.test(P.from)?'':`<button type="button" class="skAll" onclick="skPickClose();_tlCat='sk';push('toolsScr')"><span>${ico('chest',24)}</span><span><b>${T('الخزانة كاملة')}</b><small>${T('الترقية والإتقان والقطع والأثر والجيب')}</small></span>${chev('#E8B23A',15)}</button>`}`;
+  ${P.ro||/^(mm|lobby|hud|end)$/.test(P.from)?'':`<button type="button" class="skAll" onclick="skPickClose(1);_tlCat='sk';push('toolsScr')"><span>${ico('chest',24)}</span><span><b>${T('الخزانة كاملة')}</b><small>${T('الترقية والإتقان والقطع والأثر والجيب')}</small></span>${chev('#E8B23A',15)}</button>`}`;
 }
 function skPickFoot(){
  const P=_skP,eq=caSkMine(),k=P.sel,x=tlItem('sk',k)||['blue','c'],o=tlOwn('sk',k);
@@ -25876,10 +25987,16 @@ function skPickRender(first){
  const sub=ov.querySelector('.skPSub');if(sub)sub.textContent=_skP.ro?T('للعرض أثناء المباراة — تُغيَّر بعدها'):T('اختر جيسك وقدرته — تُحفظ لكلّ مبارياتك');
  B.scrollTop=y;
  const w=B.querySelector('.skPw');
- if(w){if(first)requestAnimationFrame(()=>{const on=w.querySelector('.skPwC.on');if(!on||!w.isConnected)return;const a=on.getBoundingClientRect(),r=w.getBoundingClientRect();if(a.left<r.left||a.right>r.right)w.scrollLeft+=(a.left+a.width/2)-(r.left+r.width/2)});else w.scrollLeft=sx}
+ if(w){if(first)requestAnimationFrame(()=>{try{skPwShow(w)}catch(e){}});else w.scrollLeft=sx}
  try{enPass(ov)}catch(e){}
  toolsDraw(ov);
 }
+/** ٦٫٩٦: عند الفتح يُرى في صفّ القدرات ما جهّزتَه والقدرةُ التالية المقفلة معًا («مقفلة · ٦/٢٠» — تقدّمك نحوها) إن اتّسع
+    الصفّ لهما، وإلّا تتوسّط المجهَّزة كما كانت */
+function skPwShow(w){const on=w.querySelector('.skPwC.on'),nx=w.querySelector('.skPwC.lk');if(!w.isConnected||!(on||nx))return;
+ const r=w.getBoundingClientRect(),a=(on||nx).getBoundingClientRect(),b=(nx||on).getBoundingClientRect();
+ const L=Math.min(a.left,b.left),R=Math.max(a.right,b.right),c=R-L<=r.width-8?(L+R)/2:a.left+a.width/2;
+ if(a.left<r.left||a.right>r.right||b.left<r.left||b.right>r.right)w.scrollLeft+=c-(r.left+r.width/2)}
 /** لمسة بطاقة: تعرضها في الأعلى وتسمّي الزرّ — لا تجهّز (الزرّ يجهّز) */
 function skPickSel(k){
  if(!_skP||!tlItem('sk',k))return;
@@ -25893,7 +26010,7 @@ function skEquip(k){
  if(skPickLocked()){toast(T('المباراة جارية — غيّر جيسك بعدها'),'bad');skPickRender();return}
  if(!tlOwn('sk',k)){skPickSel(k);return}
  if(caSkMine()!==k){S.caStriker=k;try{saveState()}catch(e){}skPresence();toast(T('جُهّز')+': «'+esc(tlNm('sk',k))+'»','ok')}
- skPickClose();skSync();
+ skPickClose(1);skSync();
 }
 function skPw(k,i){
  if(skPickLocked()){toast(T('المباراة جارية — غيّر قدرتك بعدها'),'bad');return}
@@ -25917,7 +26034,7 @@ function skSync(noPick){
  if(!noPick&&document.querySelector('.skPOv'))skPickRender();
 }
 /** ترقيةٌ أو شراءٌ من ورقة التفاصيل: الخزانة تُعاد إن كانت هي الشاشة، وإلّا تُحدَّث البطاقة والورقة في مكانهما (لا قفزة إلى الخزانة) */
-function tlRefresh(){if(document.getElementById('toolsScr')){refresh(toolsScr);try{nav()}catch(e){}}else skSync()}
+function tlRefresh(){if(document.getElementById('toolsScr')){refresh(toolsScr);try{nav()}catch(e){}}else skSync();try{skPresence()}catch(e){}}   // ٦٫٩٦: ترقيةٌ أو شراءٌ في الردهة أو بعد المباراة يصل المضيفَ بقدراته الجديدة
 /** بدأت المباراة والورقة مفتوحة من الردهة: تُغلق كي يرى اللاعب لوحه */
 function skPickMatch(){if(!_skP||_skP.from==='hud'||!document.querySelector('.skPOv'))return;
  if(skPickLocked()){skPickClose();const d=document.querySelector('.qvov.tlSkOv');if(d)d.remove();toast(T('بدأت المباراة'))}}
@@ -25931,9 +26048,15 @@ function skBackArm(){try{const t=Router.current();if(!t)return;
   if(Router._state&&!Router._state().sent)Router.arm()}catch(e){}}
 function skBackDisarm(){try{if(!_skBk)return;const d=Router.def(_skBk.fn);if(d&&d.leave===_skBk.h){if(_skBk.orig)d.leave=_skBk.orig;else delete d.leave}}catch(e){}_skBk=null}
 function skBackEat(){const d=document.querySelector('.qvov.tlSkOv'),p=document.querySelector('.skPOv');
+ const q=[...document.querySelectorAll('.skPOv~.qvov:not(.tlSkOv),.tlSkOv~.qvov:not(.tlSkOv)')].pop();   // ٦٫٩٦: تأكيد الشراء فوق الورقة يُلغى أوّلًا (كان الرجوع يغلق الورقة من تحته ويبقى هو)
+ if(q&&(d||p)){q.remove();return true}
  if(d){d.remove();if(!p)skBackDisarm();else try{skSync()}catch(e){}return true}
  if(p){skPickClose();return true}
  skBackDisarm();return false}
+/** ٦٫٩٦: تغيّرت الشاشة تحت ورقةٍ مفتوحة (وُجدت مباراة: البحث ← الردهة، أو خرجت الغرفة) — ينتقل مدخل «رجوع» الورقة إلى
+    الشاشة الجديدة، فيغلق الرجوعُ الورقةَ ويبقى اللاعب في الردهة. يناديه الموجّه مع كلّ تغييرٍ في الشاشة العليا (hooks.bar) */
+function skBackFollow(){try{if(!_skBk)return;const t=Router.current();if(t&&t.fn===_skBk.fn)return;
+ if(t&&document.querySelector('.skPOv,.qvov.tlSkOv'))skBackArm();else skBackDisarm()}catch(e){}}
 /** شارة المباراة: قرص جيسك ومستواه بجانب «أنت» — للعرض فقط (لا لمسة صغيرة فوق لوحٍ حيّ) */
 function skHudChip(){try{const k=caSkMine();return `<span class="skHud" aria-label="${T('جيسي')}: ${esc(tlNm('sk',k))} · ${T('المستوى')} ${skLv(k)}">${skImg(k,28)}<i>${skNum(skLv(k))}</i></span>`}catch(e){return ''}}
 /** صورة الجيس الحقيقيّة تصل بعد رسم القرص المؤقّت: caArtInv (المسجَّل أوّلًا) يمحو القرص من الذاكرة، ثمّ يُعاد رسم البطاقات والورقة */
@@ -25942,11 +26065,13 @@ function skArtWatch(k){try{if(REAL_ART['sk_'+k]&&!artImg('sk_'+k))artImg('sk_'+k
 /** شريط «جيسك» المضغوط لشاشة نهاية المباراة (سطرٌ واحد ٤٤ بكسل، صورةٌ مخزّنة لا لوحة) — «غيّر» تفتح الورقة، والتجهيز
     بعد النهاية يعيد إرسال الحضور فتلعب الجولة التالية به */
 function skEndChip(){try{skCss();const k=caSkMine(),L=skLv(k),pw=tlPwMine();
- return `<button type="button" class="skEndC" onclick="skPick({from:'end'})">${skImg(k,28)}<span><small>${T('جيسك')}</small><b>${esc(tlNm('sk',k))}</b><i>${T('المستوى')} ${skNum(L)}${pw!=='def'?' · '+esc(tlNm('pw',pw)):''}</i></span><em>${T('غيّر')}</em></button>`}catch(e){return ''}}
+ return `<button type="button" class="skEndC${pw!=='def'?' hp':''}" onclick="skPick({from:'end'})">${skImg(k,28)}<u class="lv">${skNum(L)}</u><span><small>${T('جيسك')}</small><b>${esc(tlNm('sk',k))}</b><i><span class="lv">${T('المستوى')} ${skNum(L)}</span>${pw!=='def'?'<span class="pw"><span class="sep"> · </span>'+esc(tlNm('pw',pw))+'</span>':''}</i></span><em>${T('غيّر')}</em></button>`}catch(e){return ''}}   // ٦٫٩٦: تحت ٣٦٠ بكسل يصير المستوى شارةً على القرص فيبقى اسم القدرة
 function skSeatChip(k){try{return k&&CA_STRIKERS[k]?`<em class="skSeat">${skImg(k,28)}</em>`:''}catch(e){return ''}}
 /** بطاقة الخزانة: أرقام القدرات الثلاث بأيقوناتها (القوّة · التصويب · الزمن) بدل أشرطةٍ بلا أرقام */
 function skChipsHTML(st){return `<span class="tlSt3" aria-label="${SK_L3.map((t,i)=>T(t)+' '+st[i]).join('، ')}">${st.map((v,i)=>`<i>${ico(SK_IC[i],12)}<b>${(+v).toLocaleString('en-US')}</b></i>`).join('')}</span>`}
 function skLegend(){return `<div class="tlLeg">${SK_L3.map((t,i)=>`<span>${ico(SK_IC[i],13)} ${T(t)}</span>`).join('')}</div>`}
+/** ٦٫٩٦: «جيسي» بالإنجليزيّة — نصوص البطاقة والورقة والتفاصيل والخزانة وشريط النتيجة (ما تُرجم قبلُ يبقى كما هو) */
+try{[['جيسي','My striker'],['جيسك','Your striker'],['غيّر','Change'],['ترقيةٌ جاهزة','Upgrade ready'],['ترقيتان جاهزتان','2 upgrades ready'],['ترقيات جاهزة','upgrades ready'],['ترقية جاهزة','upgrades ready'],['في مباريات تحدّي الاثني عشر تتساوى القدرات','In Twelve Challenge matches all stats are equal'],['اختر جيسك وقدرته — تُحفظ لكلّ مبارياتك','Pick your striker and power — kept for all your matches'],['للعرض أثناء المباراة — تُغيَّر بعدها','View only during the match — change it afterwards'],['من','of'],['مُجهَّز','Equipped'],['مُجهَّز الآن','Equipped now'],['قيد الاستخدام','In use'],['مباراةٌ بقدراتٍ موحّدة — ستّةٌ في كلّ قدرة','Standard stats match — six in every stat'],['القوّة','Strength'],['التصويب','Aim'],['الزمن','Time'],['ضربةٌ أشدّ','stronger shot'],['ضربةٌ أخفّ','softer shot'],['ضربةٌ عاديّة','normal shot'],['خطٌّ من','a line of'],['ثانية للضربة','seconds per shot'],['من قدرة','from power'],['٪','%'],['بلا إضافة','No bonus'],['مقفلة','Locked'],['مقفل','Locked'],['القدرة','Power'],['مفتوحة','unlocked'],['تُفتح القدرة التالية بنقاطٍ تجمعها من ترقية جيوسك وفتحها','The next power unlocks with points from upgrading and unlocking your strikers'],['جيوسي','My strikers'],['الخزانة كاملة','Full locker'],['الترقية والإتقان والقطع والأثر والجيب','Upgrades, mastery, pieces, trails and pockets'],['المباراة جارية — غيّره بعدها','Match in progress — change it afterwards'],['جهّز','Equip'],['نسخة لفتحه','copies to unlock'],['المباراة جارية — غيّر جيسك بعدها','Match in progress — change your striker afterwards'],['المباراة جارية — غيّر قدرتك بعدها','Match in progress — change your power afterwards'],['رقِّ جيوسك لتفتحها','Upgrade your strikers to unlock it'],['بدأت المباراة','The match has started'],['جُهّزت القدرة','Power equipped'],['جُهّز','Equipped'],['يُفتح في','Unlocks in'],['كأس','trophies'],['عاديّ','Common'],['نادر','Rare'],['ملحميّ','Epic'],['أسطوريّ','Legendary'],['الأقصى','max'],['بلغ أقصى مستوى','Max level reached'],['السماويّ من قدرتك','Blue: from your power'],['الأخضر: ما تضيفه الترقية','Green: what the upgrade adds'],['اعثر على نسخه في الصناديق والمباريات','Find its copies in chests and matches'],['نسخة','copies'],['ترقية','Upgrade'],['استخدم جوكر','Use wild'],['استخدم كتاب الجيس','Use striker book'],['استخدم','Use'],['اشترِ الآن','Buy now'],['نسخٌ غير كافية','Not enough copies'],['إتقان الجيس','Striker mastery'],['الدرجة الأولى','Tier 1'],['الدرجة الثانية','Tier 2'],['الدرجة الثالثة','Tier 3'],['مكتمل','Complete'],['استلم','Claim'],['جواهر غير كافية','Not enough gems'],['عملات غير كافية','Not enough coins'],['شراء أداة','Buy item'],['ستدفع','You will pay'],['اشترِ وجهّز','Buy and equip'],['صارت لك','Now yours'],['قدرة المجموعة','Collection power'],['فتحت كلّ القدرات!','All powers unlocked!'],['رقِّ الجيس لتفتح القدرة التالية','Upgrade strikers to unlock the next power'],['أدوات أخرى','Other items'],['التعبيرات والصيحات','Emotes and shouts'],['صورتي الرمزيّة','My avatar'],['اجمع الجيس ورقِّه لتفتح قدراتٍ تقوّي ضربتك.','Collect and upgrade strikers to unlock powers that boost your shot.'],['النقاط اللازمة لفتح القفل','Points needed to unlock'],['افتح قفل القدرة السابقة','Unlock the previous power'],['القدرة تُضاف فوق قدرات جيسك، ولها حلقةٌ حوله في المباراة.','The power adds to your striker’s stats and shows as a ring around it in the match.'],['أقصى مستوى','Max level'],['رقِّ الجيس لتملأ قدرة المجموعة','Upgrade strikers to fill the collection power'],['افتح قفل القدرة السابقة أوّلًا','Unlock the previous power first'],['الجيس يُرقّى بنسخٍ منه (من الصناديق والمباريات) وعملات. القوّة: شدّة الضربة · التصويب: طول خطّ التصويب · الزمن: مهلة الضربة.','Strikers upgrade with their copies (from chests and matches) and coins. Strength: shot power · Aim: aim line length · Time: time for each shot.']].forEach(([a,b])=>{if(!(a in EN))EN[a]=b})}catch(e){}
 try{skCss()}catch(e){}
 
 /** شاشة اختيار وضع اللعب — أقسام مصنّفة لا 12 بطاقة مبعثرة */
@@ -30862,7 +30987,7 @@ function caMatchEnd(C){
    ${troH}${ch?`<div class="ceAn" style="--d:${T0-200}ms;width:100%">${ch}</div>`:''}
    <div class="ceRw">${tilesH}</div>${noBc}
   </div></main>
-  ${typeof skEndChip==='function'?skEndChip():''}<footer class="ceBtns ceFade" style="--d:${tBtn}ms">${RM.host?`<button class="rbtn caEndGo" onclick="caEndGo(rmStart)"><span>${T('العب مرّة أخرى')}</span></button>`:`<div class="ceWait">بانتظار المضيف…</div>`}<button class="btn g caFinX" onclick="caEndGo(rmLeave)">${T('خروج')}</button></footer></div>`;
+  <footer class="ceBtns ceFade sk" style="--d:${tBtn}ms">${RM.host?`<button class="rbtn caEndGo" onclick="caEndGo(rmStart)"><span>${T('العب مرّة أخرى')}</span></button>`:`<div class="ceWait">بانتظار المضيف…</div>`}${typeof skEndChip==='function'?skEndChip():''}<button class="btn g caFinX" onclick="caEndGo(rmLeave)">${T('خروج')}</button></footer></div>`;
 }
 /** قرص الأشعّة يُرسم مرّةً واحدة (٥١٢ بكسل بتلاشٍ شعاعيّ) ويُعرض صورةً ساكنة — لا تدرّجٌ مخروطيّ بقناعٍ يُعاد كلّ إطار */
 let _ceRays='';
@@ -38708,7 +38833,7 @@ function gameHub(g){
   <button class="ghRank ghArena" onclick="push('arenaScr')">
    ${ico('trophy',18)}
    <span class="rt" style="color:${trArena().g}">${esc(trArena().n)}</span>
-   <span class="rp"><bdi class="nowrap">${trMine().toLocaleString('en-US')}</bdi> كأس · ${trNextTxt(trMine())}</span>
+   <span class="rp">${trHubTxt(trMine())}</span>
    <span class="go">${ghChev()}</span></button>
   ${g==='carrom'?skTileHTML({ctx:'hub'}):''}
   ${g==='uno'?`<button class="ghRank urHubB" onclick="push('unoRulesScr')">${ico('book',18)}<span class="rt">القوانين</span><span class="rp">قوانين أونو الرسميّة — مصوّرةً ببطاقاتها</span><span class="go">${ghChev()}</span></button>`:''}
