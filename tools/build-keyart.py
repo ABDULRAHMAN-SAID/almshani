@@ -45,18 +45,18 @@ def main():
         rep.append('لوحات الساحات %d/10 لم تُضمَّن حتّى تكتمل العشر (الناقص: %s؛ للمعاينة: --partial)'%(len(ar),' '.join('%02d'%i for i in range(1,11) if i not in ar)))
         ar={}
         if 'const ARENA_BG=' in s:s=re.sub(r'const ARENA_BG=\{[^\n]*\n','',s,count=1);rep.append('أُزيلت ARENA_BG الناقصة من اللعبة')
-    for i in sorted(ar):u,n=uri(Image.open(ar[i]),540,960,74);ar[i]=u;total+=n;rep.append('arena-%02d %dKB'%(i,n//1024))
+    for i in sorted(ar):u,n=uri(Image.open(ar[i]),900,1600,80);ar[i]=u;total+=n;rep.append('arena-%02d %dKB'%(i,n//1024))
     if ar:
-        body='const ARENA_BG={'+','.join('%d:%r'%(i-1,u) for i,u in sorted(ar.items()))+'};   // ٦٫٩٦: لوحات OpenArt للساحات (540×960 webp) — tools/build-keyart.py\n'
+        body='const ARENA_BG={'+','.join('%d:%r'%(i-1,u) for i,u in sorted(ar.items()))+'};   // ٦٫٩٦: لوحات OpenArt للساحات (900×1600 webp، ٧٫١١: للوضوح) — tools/build-keyart.py\n'
         if 'const ARENA_BG=' in s:s=re.sub(r'const ARENA_BG=\{[^\n]*\n',body,s,count=1)
         else:
             i=s.index('const ARENAS=[');s=s[:i]+body+s[i:]
-    for name,key,w,h,q in (('win','ui_win_bg',720,1280,78),('lose','ui_lose_bg',720,1280,74),('chest','ui_chest_bg',720,960,78)):
+    for name,key,w,h,q in (('win','ui_win_bg',900,1600,80),('lose','ui_lose_bg',900,1600,78),('chest','ui_chest_bg',900,1200,80)):
         p=find(name)
         if p:u,n=uri(Image.open(p),w,h,q);s,how=set_real(s,key,u);total+=n;rep.append('%s→%s %s %dKB'%(name,key,how,n//1024))
     p=find('splash')
     if p:
-        u,n=uri(Image.open(p),810,1440,80);total+=n
+        u,n=uri(Image.open(p),1080,1920,82);total+=n
         m=re.search(r"(#ld \.ldArt\{[^}]*?background:url\()data:image/\w+;base64,[A-Za-z0-9+/=]+(\))",s)
         if m:
             s=s[:m.start(1)]+m.group(1)+u+m.group(2)+s[m.end(2):];rep.append('splash %dKB'%(n//1024))
