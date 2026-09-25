@@ -2603,7 +2603,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0011060513" data-head="0001107429" aria-hidden="true">
+<div id="ld" data-total="0011066026" data-head="0001107429" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -24326,7 +24326,8 @@ function trRoadCR(ix){
     من فيديو المالك (١٠٨٠ عرضًا). الثوابت: خطوة الصفّ ٣٤٫٥٨٪ من العرض، محور الطريق عند ٥٨٪ لا عند المنتصف، رقم الكأس عند ٩٪
     على خطٍّ محفور، البطاقة ١٩٫٤×٢١٫٩٪ وجهتها يمينًا في أوّل صفٍّ تحت كلّ لافتة ثمّ تتبادل، المنصّة قاعدةٌ بشريطٍ لامع
     وقطعتان مرفوعتان وجسرٌ بصفيحةٍ ذهبيّة، والمجسّم على القطعة الأخرى. رأس الساحة على لوحٍ مستقلّ بحدّين */
- const t=TR(),tr=t.tr|0,road=trRoad();
+ const t=TR(),tr=t.tr|0,road=trRoad(),ART=crvHasArt();
+ if(ART)crvArtCss();
  let nextTr=null,youTr=null;
  for(const m of road){if(nextTr==null&&trRoadState(m)==='lock')nextTr=m.tr;if(m.tr<=tr)youTr=m.tr}
  const gA=trGoal(tr);
@@ -24339,14 +24340,14 @@ function trRoadCR(ix){
   const ms=road.filter(m=>m.tr>=lo&&m.tr<hi).sort((x,y)=>y.tr-x.tr);
   const plat=PL[a]?artSrc('~plat:'+a,PL[a]):null,U=tlArenaUnlocks(a);
   const rows=ms.map((m,k)=>{const s0=trRoadState(m),st=s0==='lock'&&m.tr===nextTr?'next':s0,r=m.r,side=k%2?'l':'r',pk=k%2;   // أوّل صفٍّ تحت اللافتة: البطاقة يمينًا
-   const pv=PR[a*2+pk]?artSrc('~prop:'+(a*2+pk),PR[a*2+pk]):(PR[a]?artSrc('~prop:'+a,PR[a]):null),fl=!pv&&(CRV_PROPK[a]||[])[pk]==='brazier';
+   const pv=PR[a*2+pk]?artSrc('~prop:'+(a*2+pk),PR[a*2+pk]):(PR[a]?artSrc('~prop:'+a,PR[a]):null),fl=!pv&&!ART&&(CRV_PROPK[a]||[])[pk]==='brazier';
    const res=r.t==='coins'||r.t==='gems',lbl=esc(trRoadLbl(r));
-   const face=res?`<span class="crvWin"><b class="crvWN${r.t==='gems'?' gm':''}"><bdi dir="ltr">${r.v}</bdi></b><span class="crvArt">${trRoadArt(r)}</span></span>`
-    :`<span class="crvArt">${trRoadArt(r)}</span>${r.t==='skc'?`<b class="crvQ"><bdi dir="ltr">×${r.v}</bdi></b>`:''}`;
+   const face=res?`<span class="crvWin"><b class="crvWN${r.t==='gems'?' gm':''}"><bdi dir="ltr">${r.v}</bdi></b><span class="crvArt">${ART?crvRewArt(r,a):trRoadArt(r)}</span></span>`
+    :`<span class="crvArt">${ART?crvRewArt(r,a):trRoadArt(r)}</span>${r.t==='skc'?`<b class="crvQ"><bdi dir="ltr">×${r.v}</bdi></b>`:''}`;
    return `${m.tr===youTr?pin:''}<div class="crvM ${st} crvS${side.toUpperCase()}${r.t==='chest'?' wh'+(WH[r.k]||'b'):''}" data-tr="${m.tr}"${r.t==='chest'?` style="--sd:-${((m.tr/25|0)%7*.37).toFixed(2)}s"`:''}>
     <bdi class="crvTr" dir="ltr">${a>0&&m.tr===lo?'':m.tr}</bdi>
     <div class="crvPlat${plat?' art':''}">${plat?`<img class="crvPlatImg" src="${plat}" alt="" loading="lazy">`:`<span class="crvBase"></span><span class="crvTrench"></span><span class="crvBr"></span><span class="crvPad pl"></span><span class="crvPad pr"></span><span class="crvPlq"><i></i></span>`}
-     <span class="crvProp"><img src="${pv||crvPropSrc(a,pk)}" alt="" loading="lazy">${fl?'<i class="crvFl"></i>':''}</span>
+     <span class="crvProp">${pv?`<img src="${pv}" alt="" loading="lazy">`:ART?crvPropArt(a,pk):`<img src="${crvPropSrc(a,pk)}" alt="" loading="lazy">${fl?'<i class="crvFl"></i>':''}`}</span>
     </div>
     <div class="crvCard${res?' res':''}"${st==='ready'?` role="button" aria-label="استلم ${lbl}" onclick="trClaim(${m.tr})"`:` aria-label="${lbl}"`}>${face}${st==='done'?`<i class="crvOk">${ico('check',13,'#fff')}</i>`:''}${st==='ready'?'<s class="crvGet">استلم</s>':''}</div></div>`}).join('');
   const dio=arDioSrc(a);
@@ -24370,6 +24371,34 @@ function trRoadCR(ix){
 /* ٧٫٠٦ — مجسّمات الزينة على المنصّات (كالفيديو: مشعل، بلّورات، فانوس، راية، نخلة، جرّة) — مرسومةٌ متّجهيًّا بلون الساحة
    حتّى تصل لوحة OpenArt (ROAD_PROP) فتحلّ محلّها. صورةٌ واحدة لكلّ نوعٍ ولون تُخزَّن، لا SVG مكرّر في الصفحة */
 const CRV_PROPK=[['urn','palm'],['crystal','flag'],['brazier','flag'],['palm','lantern'],['crystal','lantern'],['lantern','urn'],['flag','brazier'],['brazier','flag'],['crystal','lantern'],['lantern','flag']];
+/* ٧٫٠٨ — «الهدايا والجوائز شكلها غبي»: الجوائز والزينة من صور اللعبة المرسومة (OpenArt) لا من أشكالٍ متّجهيّة:
+   كومة عملاتٍ ذهبيّة تكبر مع المبلغ، كومة جواهر، كتاب الجيوس ثلاثة جيوسٍ مروحيّة؛ وعلى المنصّات برجُ قطع كيرم تعلوه الملكة،
+   وجيس الساحة على حاملٍ ذهبيّ، والكأس، ومشهد لعبٍ صغير — حتّى تصل لوحة مجسّمات OpenArt فتحلّ محلّها */
+const CRV_ART=[['stack','sk'],['sk','scatter'],['trophy','stack'],['scatter','sk'],['stack','trophy'],['sk','stack'],['trophy','scatter'],['stack','trophy'],['scatter','sk'],['trophy','stack']];
+const CRV_SK=['sk_amber','sk_ice','sk_sun','sk_emerald','sk_teal','sk_violet','sk_onyx','sk_ruby','sk_moon','sk_blue'];
+let _cpCss=0;
+function crvArtCss(){if(_cpCss)return;_cpCss=1;try{const K=['coin_w','coin_b','coin_q','ic_coin','ic_gem','ic_trophy'].concat(CRV_SK);
+ const st=document.createElement('style');st.id='cpArtCss';st.textContent=K.filter(k=>REAL_ART[k]).map(k=>`.cpI-${k}{--im:url("${REAL_ART[k]}")}`).join('\n');document.head.appendChild(st)}catch(e){}}
+function crvHasArt(){try{return !!(REAL_ART.coin_w&&REAL_ART.ic_coin)}catch(e){return false}}
+function crvSkOf(a,j){const L=CRV_SK.filter(k=>{try{return REAL_ART[k]}catch(e){return 0}});return L.length?L[(a+j)%L.length]:null}
+/** مجسّم الزينة على القطعة الأخرى */
+function crvPropArt(a,pk){
+ const k=(CRV_ART[a]||CRV_ART[0])[pk?1:0],sk=crvSkOf(a,0);
+ if(k==='stack'){let h='';for(let i=0;i<6;i++)h+=`<i class="cpI-${i%2?'coin_b':'coin_w'}" style="bottom:${8+i*6.2}%;left:${19+((i*37)%5-2)}%"></i>`;
+  return `<span class="cpSt">${h}<i class="cpI-coin_q" style="bottom:${8+6*6.2}%;left:20%"></i></span>`}
+ if(k==='sk'&&sk)return `<span class="cpSk"><b></b><i class="cpI-${sk}"></i></span>`;
+ if(k==='trophy')return `<span class="cpTr cpI-ic_trophy"></span>`;
+ const s2=crvSkOf(a,1)||sk;
+ return `<span class="cpSc"><i class="cpI-coin_w" style="left:6%;bottom:14%"></i><i class="cpI-coin_b" style="left:52%;bottom:8%"></i><i class="cpI-coin_q" style="left:40%;bottom:34%"></i><i class="cpI-coin_w" style="left:62%;bottom:40%"></i>${s2?`<i class="cpI-${s2} big" style="left:14%;bottom:36%"></i>`:''}</span>`;
+}
+/** صورة الجائزة على البطاقة: كومةٌ تكبر مع المبلغ */
+const CRV_PILE=[[0,0,60,-14],[40,-2,60,10],[20,16,60,-4],[-4,30,54,18],[46,28,54,-16],[22,44,54,6],[10,58,50,-8]];
+function crvRewArt(r,a){
+ if(r.t==='coins'||r.t==='gems'){const g=r.t==='gems',n=g?(r.v<10?3:r.v<25?4:5):(r.v<150?3:r.v<400?5:7),P=CRV_PILE.slice(0,n);
+  return `<span class="cpPile${g?' gm':''}">${P.map(q=>`<i class="cpI-${g?'ic_gem':'ic_coin'}" style="left:${q[0]}%;bottom:${q[1]}%;width:${q[2]}%;transform:rotate(${q[3]}deg)"></i>`).join('')}</span>`}
+ if(r.t==='skbook'){const A=[crvSkOf(a,0),crvSkOf(a,3),crvSkOf(a,6)];if(A[0])return `<span class="cpFan">${A.map((k,i)=>`<i class="cpI-${k}" style="transform:rotate(${(i-1)*22}deg)"></i>`).join('')}</span>`}
+ return trRoadArt(r);
+}
 const _crvPropC=new Map();
 function crvMix(h,t,w){const a=parseInt(h.slice(1),16),b=parseInt(t.slice(1),16),m=(x,y)=>Math.round(x+(y-x)*w);
  const r=m(a>>16&255,b>>16&255),g=m(a>>8&255,b>>8&255),bb=m(a&255,b&255);return '#'+((1<<24)|(r<<16)|(g<<8)|bb).toString(16).slice(1)}
@@ -24746,7 +24775,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.07';
+const APP_VER='7.08';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25657,6 +25686,28 @@ body .crvPlatImg{position:absolute;left:-4%;width:108%;bottom:-6%;height:auto;po
 body .crvProp{position:absolute;bottom:30%;width:40%;aspect-ratio:1;display:flex;align-items:flex-end;justify-content:center;pointer-events:none}
 body .crvProp img{width:100%;height:100%;object-fit:contain;object-position:50% 100%}
 body .crvM.crvSR .crvProp{left:.7%}body .crvM.crvSL .crvProp{right:.6%}
+/* ٧٫٠٨ — الزينة من صور اللعبة: ظلّ تماسٍّ بيضاويّ، وكلّ قطعةٍ صورتها في ::after وحافّتها في ::before (بلا مرشّحات) */
+body .crvProp::before{content:'';position:absolute;left:12%;right:12%;bottom:6%;height:16%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,20,.5),rgba(0,0,20,0))}
+body .cpSt,body .cpSc,body .cpSk{position:absolute;inset:0}
+body .cpSt i,body .cpSc i{position:absolute;width:62%;aspect-ratio:1;transform:scaleY(.42)}
+body .cpSc i{width:40%}body .cpSc i.big{width:50%}
+body .cpSt i::before,body .cpSt i::after,body .cpSc i::before,body .cpSc i::after{content:'';position:absolute;inset:0;border-radius:50%}
+body .cpSt i::before,body .cpSc i::before{background:#2A1F16;transform:translateY(15%)}
+body .cpSt i.cpI-coin_w::before,body .cpSc i.cpI-coin_w::before{background:#A99570}
+body .cpSt i.cpI-coin_q::before,body .cpSc i.cpI-coin_q::before{background:#5A0A10}
+body .cpSt i::after,body .cpSc i::after{background:var(--im) center/contain no-repeat}
+body .cpSk i{position:absolute;left:22%;bottom:22%;width:56%;aspect-ratio:1;border-radius:50%;background:var(--im) center/contain no-repeat;transform:rotate(-7deg);box-shadow:3px 4px 0 rgba(10,10,30,.35)}
+body .cpSk b{position:absolute;left:31%;bottom:9%;width:38%;height:17%;background:linear-gradient(180deg,#FFE08A,#D9A13A 45%,#8A5A14);clip-path:polygon(14% 0,86% 0,100% 72%,100% 100%,0 100%,0 72%);border-radius:2px}
+body .cpTr{position:absolute;left:10%;right:10%;top:2%;bottom:9%;background:var(--im) center bottom/contain no-repeat}
+/* الجائزة على البطاقة: كومة عملاتٍ أو جواهر تكبر مع المبلغ، وكتاب الجيوس ثلاثةٌ مروحيّة */
+body .cpPile{position:relative;display:block;width:86%;aspect-ratio:1;margin:0 auto}
+body .cpPile i{position:absolute;aspect-ratio:1;background:var(--im) center/contain no-repeat}
+body .cpPile::after{content:'';position:absolute;left:4%;right:4%;bottom:-6%;height:18%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,10,.45),rgba(0,0,10,0));z-index:-1}
+body .cpFan{position:relative;display:block;width:78%;aspect-ratio:1;margin:0 auto}
+body .cpFan i{position:absolute;left:18%;bottom:6%;width:64%;aspect-ratio:1;border-radius:50%;background:var(--im) center/contain no-repeat;transform-origin:50% 120%;box-shadow:0 3px 0 rgba(10,10,30,.3)}
+body .crvCard:not(.res) .crvArt:has(.cpFan){transform:translateY(-6%)}
+body .crvWin .crvArt{display:flex;align-items:flex-end;justify-content:center;width:100%}
+body .crvWin .crvArt .cpPile{width:100%;margin-bottom:-4%}
 /* ٧٫٠٦ — مادّة كلّ ساحة (كعائلات الفيديو: قاعدةٌ لامعة للساحات العليا، خشبٌ أو حجرٌ داكن لما دونها، وجسرٌ بزخرفة الساحة) */
 body .crvA.m0{--pr:#8E7666;--pd:#6E584A;--ph:#A38A78;--pt:repeating-linear-gradient(0deg,rgba(120,88,52,.5) 0 2px,transparent 2px 33.4%),repeating-linear-gradient(90deg,rgba(120,88,52,.5) 0 2px,transparent 2px 25%),radial-gradient(120% 90% at 30% 20%,#F2DFB6,#DCC195 55%,#C3A273);--bt:linear-gradient(90deg,#8A7466,#A08878 50%,#8A7466);--bl:#6E4A3A;--bf:linear-gradient(90deg,#221D22,#412C2C 12%,#46302E 50%,#3A2828 88%,#1C171C)}
 body .crvA.m0 .crvPlq,body .crvA.m0 .crvTrench{display:none}
