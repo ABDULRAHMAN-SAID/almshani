@@ -2603,7 +2603,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0011065222" data-head="0001107429" aria-hidden="true">
+<div id="ld" data-total="0011068194" data-head="0001107429" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -24342,14 +24342,14 @@ function trRoadCR(ix){
   const rows=ms.map((m,k)=>{const s0=trRoadState(m),st=s0==='lock'&&m.tr===nextTr?'next':s0,r=m.r,side=k%2?'l':'r',pk=k%2;   // أوّل صفٍّ تحت اللافتة: البطاقة يمينًا
    const pv=PR[a*2+pk]?artSrc('~prop:'+(a*2+pk),PR[a*2+pk]):(PR[a]?artSrc('~prop:'+a,PR[a]):null),fl=!pv&&!ART&&(CRV_PROPK[a]||[])[pk]==='brazier';
    const res=r.t==='coins'||r.t==='gems',lbl=esc(trRoadLbl(r));
-   const face=res?`<span class="crvWin"><b class="crvWN${r.t==='gems'?' gm':''}"><bdi dir="ltr">${r.v}</bdi></b><span class="crvArt">${ART?crvRewArt(r,a):trRoadArt(r)}</span></span>`
-    :`<span class="crvArt">${ART?crvRewArt(r,a):trRoadArt(r)}</span>${r.t==='skc'?`<b class="crvQ"><bdi dir="ltr">×${r.v}</bdi></b>`:''}`;
+   const qn=r.t==='coins'||r.t==='gems'?String(r.v):r.t==='skc'?'×'+r.v:'';
+   const face=`<span class="cbIn t-${r.t}"><span class="crvArt">${ART?crvRewArt(r,a):trRoadArt(r)}</span>${qn?`<b class="cbQ"><bdi dir="ltr">${qn}</bdi></b>`:''}</span>`;
    return `${m.tr===youTr?pin:''}<div class="crvM ${st} crvS${side.toUpperCase()}${r.t==='chest'?' wh'+(WH[r.k]||'b'):''}" data-tr="${m.tr}"${r.t==='chest'?` style="--sd:-${((m.tr/25|0)%7*.37).toFixed(2)}s"`:''}>
     <bdi class="crvTr" dir="ltr">${a>0&&m.tr===lo?'':m.tr}</bdi>
-    <div class="crvPlat${plat?' art':''}">${plat?`<img class="crvPlatImg" src="${plat}" alt="" loading="lazy">`:`<span class="crvBase"></span><span class="crvTrench"></span><span class="crvBr"></span><span class="crvPad pl"></span><span class="crvPad pr"></span><span class="crvPlq"><i></i></span>`}
+    <div class="crvPlat${plat?' art':''}">${plat?`<img class="crvPlatImg" src="${plat}" alt="" loading="lazy">`:`<span class="cbBoard"></span><span class="cbFlag"></span>`}
      <span class="crvProp">${pv?`<img src="${pv}" alt="" loading="lazy">`:ART?crvPropArt(a,pk):`<img src="${crvPropSrc(a,pk)}" alt="" loading="lazy">${fl?'<i class="crvFl"></i>':''}`}</span>
     </div>
-    <div class="crvCard${res?' res':''}"${st==='ready'?` role="button" aria-label="استلم ${lbl}" onclick="trClaim(${m.tr})"`:` aria-label="${lbl}"`}>${face}${st==='done'?`<i class="crvOk">${ico('check',13,'#fff')}</i>`:''}${st==='ready'?'<s class="crvGet">استلم</s>':''}</div></div>`}).join('');
+    <div class="crvCard"${st==='ready'?` role="button" aria-label="استلم ${lbl}" onclick="trClaim(${m.tr})"`:` aria-label="${lbl}"`}>${face}${st==='done'?`<i class="crvOk">${ico('check',13,'#fff')}</i>`:''}${st==='ready'?'<s class="crvGet">استلم</s>':''}</div></div>`}).join('');
   const dio=arDioSrc(a);
   const un=U.length?`<div class="crvUn"><s class="crvUnT">${a===0?'معك من البداية':rel==='fut'?'تُفتح هنا':'فتحتَها هنا'}:</s><div class="crvUnL">${U.slice(0,U.length>4?3:4).map(x=>`<span class="crvUnC" title="${esc(tlUnCat(x.c)+' «'+x.n+'»')}"><i class="crvUnK">${tlUnCat(x.c)}</i><span class="crvUnImg">${tlUnPrev(x.c,x.k,52)}</span><b>${esc(x.n)}</b></span>`).join('')}${U.length>4?`<span class="crvUnC more"><b><bdi dir="ltr">+${U.length-3}</bdi></b></span>`:''}</div></div>`:'';
   const tk=a===N-1&&top>lo?`<div class="crvTk"><span class="crvTkArt" aria-hidden="true"></span><b>طريق الأساطير</b><span>مكافآتٌ حتّى <bdi>${top}</bdi> كأس كلّ موسم</span></div>`:'';
@@ -24776,7 +24776,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.09';
+const APP_VER='7.10';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25648,7 +25648,7 @@ body .trvBg{position:absolute;inset:0;border-radius:20px;overflow:hidden;backgro
 body .trvBg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px),repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px)}
 body .trvA.fut .trvBg{opacity:.5}
 /* ٧٫٠٦ — كالفيديو: الخلفيّة (شبكة المعيّنات والتظليل) ثابتةٌ في الشاشة لا تتحرّك، والمحتوى وحده يمرّ فوقها — طبقةٌ ثابتة لا يُعاد رسمها أثناء التمرير */
-body .scr.arV{position:relative;z-index:0;--T:calc(min(100vw,520px) * .1741);--q:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 188 188'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%230D5B91'/%3E%3Cstop offset='1' stop-color='%231168A6'/%3E%3C/linearGradient%3E%3ClinearGradient id='l' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23156C9A'/%3E%3Cstop offset='1' stop-color='%231A7EAF'/%3E%3C/linearGradient%3E%3ClinearGradient id='bd' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23001A4A' stop-opacity='.42'/%3E%3Cstop offset='.1' stop-color='%23001A4A' stop-opacity='0'/%3E%3Cstop offset='.9' stop-color='%23BFE4FF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23BFE4FF' stop-opacity='.14'/%3E%3C/linearGradient%3E%3ClinearGradient id='bl' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23001A4A' stop-opacity='.15'/%3E%3Cstop offset='.1' stop-color='%23001A4A' stop-opacity='0'/%3E%3Cstop offset='.9' stop-color='%23BFE4FF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23BFE4FF' stop-opacity='.16'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='188' height='188' fill='%23002F6E'/%3E%3Crect x='84' y='-10' width='20' height='20' fill='%23053D79'/%3E%3Crect x='84' y='178' width='20' height='20' fill='%23053D79'/%3E%3Crect x='-10' y='84' width='20' height='20' fill='%23053D79'/%3E%3Crect x='178' y='84' width='20' height='20' fill='%23053D79'/%3E%3Cg transform='rotate%2845 94 94%29'%3E%3Crect x='29.0' y='29.0' width='129.9' height='129.9' rx='11' fill='url%28%23d%29'/%3E%3Crect x='29.0' y='29.0' width='129.9' height='129.9' rx='11' fill='url%28%23bd%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 0 0%29'%3E%3Crect x='-65.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='-65.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 188 0%29'%3E%3Crect x='123.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='123.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 0 188%29'%3E%3Crect x='-65.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='-65.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 188 188%29'%3E%3Crect x='123.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='123.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3C/svg%3E");padding-top:calc(max(env(safe-area-inset-top,0px),27px) + 11.5px);padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--q) 0 0/var(--T) var(--T) repeat,#0F63A2}
+body .scr.arV{position:relative;z-index:0;--T:calc(min(100vw,520px) * .1741);--q:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 188 188'%3E%3Cdefs%3E%3ClinearGradient id='d' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%231064AA'/%3E%3Cstop offset='1' stop-color='%23177AC4'/%3E%3C/linearGradient%3E%3ClinearGradient id='l' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%231E7DC0'/%3E%3Cstop offset='1' stop-color='%232893D8'/%3E%3C/linearGradient%3E%3ClinearGradient id='bd' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23001A4A' stop-opacity='.42'/%3E%3Cstop offset='.1' stop-color='%23001A4A' stop-opacity='0'/%3E%3Cstop offset='.9' stop-color='%23BFE4FF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23BFE4FF' stop-opacity='.3'/%3E%3C/linearGradient%3E%3ClinearGradient id='bl' x1='0' y1='1' x2='0' y2='0'%3E%3Cstop offset='0' stop-color='%23001A4A' stop-opacity='.15'/%3E%3Cstop offset='.1' stop-color='%23001A4A' stop-opacity='0'/%3E%3Cstop offset='.9' stop-color='%23BFE4FF' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23BFE4FF' stop-opacity='.32'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='188' height='188' fill='%23002F6E'/%3E%3Crect x='84' y='-10' width='20' height='20' fill='%23053D79'/%3E%3Crect x='84' y='178' width='20' height='20' fill='%23053D79'/%3E%3Crect x='-10' y='84' width='20' height='20' fill='%23053D79'/%3E%3Crect x='178' y='84' width='20' height='20' fill='%23053D79'/%3E%3Cg transform='rotate%2845 94 94%29'%3E%3Crect x='29.0' y='29.0' width='129.9' height='129.9' rx='11' fill='url%28%23d%29'/%3E%3Crect x='29.0' y='29.0' width='129.9' height='129.9' rx='11' fill='url%28%23bd%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 0 0%29'%3E%3Crect x='-65.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='-65.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 188 0%29'%3E%3Crect x='123.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='123.0' y='-65.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 0 188%29'%3E%3Crect x='-65.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='-65.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3Cg transform='rotate%2845 188 188%29'%3E%3Crect x='123.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23l%29'/%3E%3Crect x='123.0' y='123.0' width='129.9' height='129.9' rx='11' fill='url%28%23bl%29'/%3E%3C/g%3E%3C/svg%3E");padding-top:calc(max(env(safe-area-inset-top,0px),27px) + 11.5px);padding-bottom:calc(96px + env(safe-area-inset-bottom,0px));background:var(--q) 0 0/var(--T) var(--T) repeat,#0F63A2}
 body .crvSky{display:none}
 body .crvTopS{position:fixed;top:0;left:50%;width:min(100vw,520px);transform:translateX(-50%);height:calc(max(env(safe-area-inset-top,0px),27px) + 11.5px);z-index:40;pointer-events:none;background:linear-gradient(180deg,#05020C 0,#05020C 13%,#0B0411 30%,#110618 54%,#14081D 67%,#160921 75%,#160921) 0 0/100% max(env(safe-area-inset-top,0px),27px) no-repeat,linear-gradient(rgba(0,8,40,.78),rgba(0,8,40,.78)),var(--q) 0 max(env(safe-area-inset-top,0px),27px)/var(--T) var(--T) repeat,#0F63A2}
 body .scr.arV .tbar,body .scr.arV>.tb{background:linear-gradient(180deg,#0B0412,#10122A)}
@@ -25840,6 +25840,27 @@ body .crvBack{position:fixed;left:calc(50% - min(50vw,260px) + min(2vw,10px));to
 body .crvBack svg{width:52%;height:52%;margin-bottom:10%}body .crvBack svg *{stroke:#fff}
 body .crvDown i{position:relative;width:74%;height:35%;margin-bottom:8%;animation:crvBob 1.75s ease-in-out infinite}
 body .crvDown i svg{display:block}
+/* ٧٫١٠ — من فيديو المالك الثاني: كلّ صفٍّ لوحٌ خشبيٌّ واحد متماسك (سطحٌ بألواح، حافّةٌ فاتحة، وجهٌ أماميّ)،
+   وفي وسطه رايةٌ قماشيّة داكنة بحافّةٍ نحاسيّة تتدلّى بطرفٍ مدبّب؛ والبطاقة إطارٌ فضّيّ ونافذةٌ تملؤها الصورة */
+body .cbBoard{position:absolute;left:0;right:0;top:12%;height:60%;border-radius:5% / 14%;background:repeating-linear-gradient(180deg,rgba(0,0,0,0) 0 30%,rgba(20,8,4,.45) 30% 32%,rgba(0,0,0,0) 32% 33.4%),linear-gradient(180deg,#6E4431,#5B3627 60%,#4E2E20);box-shadow:inset 0 0 0 2.2cqw #8C5B3E,inset 0 0 0 calc(2.2cqw + 1.5px) #3A2014,inset 0 2px 0 2.2cqw #A8744F,0 0 0 1.5px #2A160D}
+body .cbBoard::after{content:'';position:absolute;left:0;right:0;top:100%;height:34%;border-radius:0 0 18% 18% / 0 0 60% 60%;background:linear-gradient(180deg,#5A3424,#3E2216 70%,#2E170E);box-shadow:0 0 0 1.5px #2A160D,0 8px 10px rgba(10,6,30,.35)}
+body .cbFlag{position:absolute;left:37.5%;width:25%;top:4%;height:96%;background:linear-gradient(90deg,#C07A45,#9A5A30);clip-path:polygon(0 0,100% 0,100% 78%,50% 100%,0 78%)}
+body .cbFlag::after{content:'';position:absolute;inset:0 7% 5%;background:linear-gradient(90deg,#4A4A52,#3A3A42 30%,#34343B 70%,#2C2C33),#3A3A42;clip-path:polygon(0 0,100% 0,100% 79%,50% 100%,0 79%)}
+body .cbFlag::before{content:'';position:absolute;left:0;right:0;top:0;height:9%;background:linear-gradient(180deg,#D38B55,#9A5A30);z-index:1}
+body .crvCard{background:linear-gradient(180deg,#F1F3F7,#D9DEE6 70%,#C3C9D3)!important;border:1.5px solid #6F7888!important;border-radius:11% / 9.5%!important;padding:0!important;box-shadow:inset 0 2px 0 #fff,0 3px 0 #8A93A3,0 5px 6px rgba(10,8,30,.4)!important}
+body .crvM.ready .crvCard{box-shadow:inset 0 2px 0 #fff,0 3px 0 #8A93A3,0 0 0 2.5px #FFE9A8,0 0 16px 4px rgba(255,210,100,.85)!important}
+body .crvM.next .crvCard{box-shadow:inset 0 2px 0 #fff,0 3px 0 #8A93A3,0 0 0 2px rgba(255,233,168,.9)!important}
+body .cbIn{position:absolute;left:9%;right:9%;top:8%;bottom:11%;border-radius:8% / 7%;overflow:hidden;border:1.5px solid #1A2030;display:flex;align-items:center;justify-content:center;background:radial-gradient(90% 80% at 50% 38%,#8FC6FF,#2E6DB8 70%,#1D467F)}
+body .cbIn.t-coins{background:radial-gradient(90% 80% at 50% 38%,#FFE38A,#E0A02C 62%,#9A5E10)}
+body .cbIn.t-gems{background:radial-gradient(90% 80% at 50% 38%,#E6B8FF,#9A4CE0 62%,#50208E)}
+body .cbIn.t-chest{background:radial-gradient(90% 80% at 50% 38%,#A8DCFF,#3C7CC8 62%,#1C3E7A)}
+body .cbIn.t-emote{background:radial-gradient(90% 80% at 50% 38%,#FFD19A,#E07A30 62%,#8E3E14)}
+body .cbIn.t-skbook{background:radial-gradient(90% 80% at 50% 38%,#9DF0D8,#2EA886 62%,#145C4A)}
+body .cbIn .crvArt{transform:scale(1.25)!important}
+body .cbIn.t-coins .crvArt,body .cbIn.t-gems .crvArt{transform:translateY(4%) scale(1.05)!important;width:100%}
+body .cbIn.t-chest .crvArt{transform:scale(1.2)!important}
+body .cbQ{position:absolute;right:6%;bottom:3%;font-family:var(--fd);font-size:17px;font-size:clamp(14px,4.9cqw,21px);font-weight:800;line-height:1;color:#fff;text-shadow:0 2px 0 #000,1.3px 0 0 #000,-1.3px 0 0 #000,0 1.3px 0 #000,0 -1.3px 0 #000,.9px .9px 0 #000,-.9px -.9px 0 #000}
+body .crvM.done .crvCard{filter:saturate(.5) brightness(.85)}
 @keyframes crvBob{0%,100%{transform:translateY(-.55px)}50%{transform:translateY(.55px)}}
 /* شرح الكؤوس تحت الطريق: لوحٌ داكن حتّى يُقرأ فوق الشبكة الزرقاء */
 body .scr.arV>.note{color:#E6ECFF;background:rgba(4,12,34,.72);border:1px solid rgba(232,178,58,.35);border-radius:14px;padding:12px 14px;margin:8px 0 0}
