@@ -14,7 +14,7 @@ from PIL import Image
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));SRC=os.path.join(ROOT,'art','keyart');GAME=os.path.join(ROOT,'tahaddi','index.html')
 EXT=('.png','.jpg','.jpeg','.webp')
 # ٦٫٩٦: لوحاتٌ محجوبة ببصمتها (أوّل ١٦ من sha256) — تُعامَل كأنّها غير موجودة؛ ملفٌّ جديدٌ بالاسم نفسه يمرّ تلقائيًّا
-HELD={'arena-07':('29bb660373ffa235','قلعةٌ أوروبيّة رماديّة وراياتٌ بزهرة الزنبق الفرنسيّة — «قلعة البيداء» حصنٌ رمليّ بهلالٍ ورايات نخيل كمجسّمها art/road/dio-07.png؛ تُعاد من OpenArt')}
+HELD={}   # ٧٫٠١: الساحة 7 صارت قلعةً رمليّة (مجسّمها dio-07 على ليل الصحراء) حتّى تصل لوحتها من OpenArt
 def sha(p):
     with open(p,'rb') as f:return hashlib.sha256(f.read()).hexdigest()
 def find(name):
