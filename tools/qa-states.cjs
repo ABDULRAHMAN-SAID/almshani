@@ -7,7 +7,7 @@ module.exports=[
  // ── الترحيب والتعليم ──
  ['welcomeScr',R("Router.reset('welcomeScr')")],
  ['askTut',R("Router.reset('welcomeScr');push('askTut')")],
- ...[0,1,2,3].map(i=>[`tutorial-${i}`,R(`Router.reset('welcomeScr');tutStart();T2.i=${i};tDraw()`)]),
+ ...[0,1,2,3].map(i=>[`tutorial-${i}`,R(`if(typeof gOff==='function'&&gOff('knowledge'))Router.reset('playScr');else{Router.reset('welcomeScr');tutStart();T2.i=${i};tDraw()}`)]),   // ٧٫٠٠: التدريب أسئلة — مخفيّ مع عالم المعرفة
  ['tDone',R("Router.reset('welcomeScr');tutStart();tDone()")],
  ['skipAsk',R("Router.reset('welcomeScr');tutStart();push('skipAsk')")],
  // ── العب ──

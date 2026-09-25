@@ -2585,7 +2585,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0009429457" data-head="0001104827" aria-hidden="true">
+<div id="ld" data-total="0009435742" data-head="0001104827" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -17602,6 +17602,10 @@ const GAMES=RankCore.GAMES;
  * status: live · soon · maintenance
  */
 const GAME_DEFS=RankCore.GAME_DEFS;const gameDef=id=>GAME_DEFS.find(g=>g.id===id)||null;
+/* ٧٫٠٠ — المالك: «اخفِ أونو واخفِ المعلومات من القائمة تمامًا» — الكيرم وحده في كلّ قائمةٍ ومسار؛
+   كودهما باقٍ (الحفظ والرتب لا تُمسّ) ولا يُفتح من أيّ باب. إرجاع لعبةٍ = حذفها من هذا الكائن */
+const GAMES_OFF={uno:1,knowledge:1};
+function gOff(id){return !!GAMES_OFF[id]}
 /** مفتاح الغرفة (carrom · uno · mafia · draw) إلى معرّف اللعبة */
 const gameIdOfRoom=k=>{const g=GAME_DEFS.find(x=>x.rmKey===k);return g?g.id:null};
 const gameName=id=>{const g=gameDef(id);return g?g.ar:''};
@@ -19208,7 +19212,9 @@ function run_(fn,arg){Router.render(fn,arg)}    // رسم بالاسم بلا م
  // حرّاس المسار: لا شاشة تعتمد على حالة غير موجودة
  R.register('clubHome',{guard:()=>!!(S.clan&&S.clan.c),fallback:'clSearchScr'});
  R.register('gameHub',{guard:g=>!!(typeof GAME_DEFS!=='undefined'&&
-  GAME_DEFS.find(x=>x.rmKey===g||x.id===g)),fallback:'playScr'});
+  GAME_DEFS.find(x=>(x.rmKey===g||x.id===g)&&!gOff(x.id))),fallback:'playScr'});
+ // ٧٫٠٠: شاشات عالم المعرفة (الأسئلة) مخفيّة — أيّ رابطٍ قديم إليها يعود إلى الرئيسيّة
+ ['rankedScr','quickScr','netsScr','mapScr','home','chalScr','playModesScr'].forEach(n=>R.register(n,{guard:()=>!gOff('knowledge'),fallback:'playScr'}));
  // محرّرات: سؤال قبل المغادرة بتغييرات
  R.register('renameAsk',{dirty:()=>{const el=$('nm');return !!el&&el.value.trim()!==(S.name||'')}});
  R.register('clCreateScr',{dirty:formDirty});
@@ -21913,6 +21919,7 @@ const TSTEP=[
 ];
 let T2=null;
 function tutStart(){
+ if(gOff('knowledge')){finishTut();return}   // ٧٫٠٠: التدريب جولة أسئلة — والأسئلة مخفيّة
  ensureEcon();
  Router.enter('tutorial');
  T2={i:0,ok:0,sel:null,picked:new Set(),ans:false,bid:2,used:false};
@@ -23362,7 +23369,7 @@ function playCss(){
  '.hmSec span{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:0 4px;cursor:pointer;',
  ' font-size:12.5px;font-weight:800;color:#C6D0E6;text-shadow:0 1px 6px rgba(6,10,20,.9)}',
 
- '.hmGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:11px}',
+ '.hmGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:11px}','.hmGrid.one{grid-template-columns:minmax(0,1fr)}','.hmGrid.one .hmMode{min-height:150px}',
  '.hmMode{position:relative;overflow:hidden;border-radius:20px;min-height:166px;padding:12px;cursor:pointer;',
  ' display:flex;flex-direction:column;justify-content:space-between;gap:10px;',
  ' font-family:inherit;text-align:start;color:#fff;',
@@ -23462,7 +23469,7 @@ function plHero(){
 
 /** شبكة الألعاب — كل لعبة برتبتها المستقلّة. all=صحيح تضمّ الأسئلة */
 function plGames(all){
- const rows=all?GAME_DEFS.slice():GAME_DEFS.filter(g=>g.id!=='knowledge');
+ const rows=(all?GAME_DEFS.slice():GAME_DEFS.filter(g=>g.id!=='knowledge')).filter(g=>!gOff(g.id));
  return `<div class="plGrid">${rows.map(g=>{
    const p=rankOf(g.id),col=plTierCol(p);
    const pct=p.placed?Math.min(100,Math.max(0,p.rp)):p.placementDone*20;
@@ -23532,12 +23539,16 @@ function plMissions(){
 /* ٦٫٩٣ — شريط الساحة: شعارها واسمها وشريط التقدّم إلى التالية وعدّاد الكؤوس — لمسةٌ تفتح طريق الكؤوس */
 function plArenaBar(){
  const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix],gl=trGoal(tr),pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100,ready=trRoadReady();
- return `<button class="hmArB" style="--g:${A.g};--f:${A.f}" onclick="push('arenaScr')">
+ const pc=arPicCls(ix);   // ٧٫٠٠: الساحة تُرى — لوحتها فوق الشريط
+ return `<div class="hmArC" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
+  <span class="hmArPic ${pc||'np'}" role="button" aria-label="${esc(A.n)} — طريق الكؤوس" onclick="push('arenaScr')">${pc?'':`<span class="em0">${tierEmblem(ix,86)}</span>`}
+   <span class="hmArNo"><s>الساحة</s><b>${ix+1}</b></span><span class="hmArNm">${esc(A.n)}</span></span>
+  <button class="hmArB" style="--g:${A.g};--f:${A.f}" onclick="push('arenaScr')">
   <span class="em">${tierEmblem(ix,38)}</span>
   <span class="bd"><b>${esc(A.n)}</b><span class="bar"><i style="width:${pct}%"></i></span><s>${trNextTxt(tr)}</s></span>
   <span class="tr">${ico('trophy',24)}<u>${tr.toLocaleString('en-US')}</u></span>
   ${ready?`<span class="rd">${ready}</span>`:''}
-  <span class="go">${chev('#D9B76E',16)}</span></button>`;
+  <span class="go">${chev('#D9B76E',16)}</span></button></div>`;
 }
 function plHead(){
  const on=netOnline();
@@ -23556,7 +23567,7 @@ function plNotes(){
  const out=[];
  try{
   const due=(typeof chDue==='function')?chDue():0;
-  if(due)out.push({k:'chal',go:"push('chalScr')",n:'تحدٍّ بانتظارك'});
+  if(due&&!gOff('knowledge'))out.push({k:'chal',go:"push('chalScr')",n:'تحدٍّ بانتظارك'});
   const fr=(typeof FR!=='undefined'&&FR.in)?FR.in.length:0;
   if(fr)out.push({k:'fr',go:"push('friendsScr')",n:'طلب صداقة جديد'});
   const ev=EV(),ready=EVT_GOALS.filter(g=>!ev.claimed.includes(g.k)&&g.of(ev)>=g.need).length;
@@ -23579,15 +23590,18 @@ function plBell(){
 const PL_SLIDES=[
  {a:'#17557C',b:'#0B2742',art:'dice',t:'اللعبة الجماعية<br>الأكثر متعة!',
   p:'اجتمع مع أصدقائك واختبر معلوماتك وذكاءك في جولات مشوّقة.',
-  c:'ابدأ اللعب',go:"push('gamesScr')",ti:'group',tg:'ثلاث ألعاب<br>في مكان واحد'},
+  c:'ابدأ اللعب',go:"push('gamesScr')",ti:'group',tg:'ثلاث ألعاب<br>في مكان واحد',
+  off:{t:'مجلس الكيرم<br>بانتظارك',p:'صوّب وأسقط قطعك قبل خصمك — أونلاين أو ضدّ الذكاء الاصطناعي.',c:'العب كيرم',go:"push('gameHub','carrom')",ti:'swords',tg:'مباراةٌ في<br>دقائق'}},
  {a:'#4A3210',b:'#1A1004',art:'trophy',t:'ارتقِ في<br>التصنيف',
   p:'العب مصنّفًا واصعد من البرونزيّ إلى القمّة — رتبة لكلّ لعبة.',
-  c:'العب مصنّفًا',go:"push('rankedScr')",ti:'shield',tg:'عشر رتب<br>بثلاث درجات'}
+  c:'العب مصنّفًا',go:"push('rankedScr')",ti:'shield',tg:'عشر رتب<br>بثلاث درجات',
+  off:{t:'اصعد في<br>الساحات',p:'اجمع الكؤوس وافتح عشر ساحات — لكلّ ساحةٍ لوحتها وجوائزها.',c:'طريق الكؤوس',go:"push('arenaScr')",ti:'trophy',tg:'عشر ساحات<br>وجوائز'}}
 ];
 function plCarousel(){
+ const SL=PL_SLIDES.map(x=>(gOff('knowledge')&&x.off)?Object.assign({},x,x.off):x);   // ٧٫٠٠
  return `<div class="hmCarWrap">
   <div class="hmCar" id="hmCar" onscroll="plDots()">
-  ${PL_SLIDES.map((x,i)=>{const ph=artSrc(i===0?'ui_hero_carrom':'ui_hero_rank')||(i?null:artSrc('ui_hero_carrom'));   // ٦٫٩١: صورةٌ واقعيّة خلف الشريحة
+  ${SL.map((x,i)=>{const ph=(i===1&&gOff('knowledge')&&arPicSrc(trArenaIx(TR().tr|0)))||artSrc(i===0?'ui_hero_carrom':'ui_hero_rank')||(i?null:artSrc('ui_hero_carrom'));   // ٦٫٩١: صورةٌ واقعيّة خلف الشريحة
    return `<div class="hmSl${ph?' ph':''}" style="--a:${x.a};--b:${x.b}${ph?`;background-image:linear-gradient(90deg,rgba(6,10,22,.15) 0%,rgba(6,10,22,.55) 45%,rgba(6,10,22,.92) 100%),url(${ph})`:''}">
    <span class="hmTag">${ico(x.ti,14)} <span>${x.tg}</span></span>
    <div class="tx"><b>${x.t}</b><p>${x.p}</p>
@@ -23611,7 +23625,8 @@ const PL_MODES=[
  {a:'#2F72D8',b:'#143C7E',art:'cards',t:'أونو',s:'تخلّص من بطاقاتك قبل الجميع',g:'uno',go:"push('gameHub','uno')"}
 ];
 function plModes(){
- return `<div class="hmGrid">${PL_MODES.map(m=>{
+ const MS=PL_MODES.filter(m=>!gOff(m.g));
+ return `<div class="hmGrid${MS.length===1?' one':''}">${MS.map(m=>{
   const d=gameDef(m.g),pl=d?(d.minP===d.maxP?(d.minP===2?'لاعبان':`${d.minP} لاعبين`):`${d.minP} - ${d.maxP} لاعبين`):'';
   const ph=artSrc({knowledge:'ui_mode_knowledge',carrom:'ui_hero_carrom',uno:'ui_mode_uno'}[m.g]);   // ٦٫٩١: صورةٌ واقعيّة بدل الرسم
   return `<button class="hmMode${ph?' ph':''}" style="--a:${m.a};--b:${m.b}${ph?`;background-image:linear-gradient(180deg,rgba(6,10,22,.15) 0%,rgba(6,10,22,.35) 45%,rgba(6,10,22,.92) 100%),url(${ph})`:''}" onclick="${m.go}">
@@ -23649,7 +23664,7 @@ function playScr(){
  <div class="plSec">
   ${plRow(ico('group',40),'الأصدقاء والدعوة',frMyCode()?'رمزك '+frMyCode()+' — شاركه ليضيفك':'أضف برمز صديقك وشارك رمزك',
    "push('friendsScr')",'#3AAE6E',(FR&&FR.in&&FR.in.length)?`<span class="plNew">${FR.in.length}</span>`:'')}
-  ${plRow(ico('swords',40),'تحدِّ صديقًا','ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
+  ${gOff('knowledge')?'':plRow(ico('swords',40),'تحدِّ صديقًا','ثمانية أسئلة — يلعبها متى شاء ولا تنتظره',
    "push('chalScr')",'#E8B23A',chDue()?`<span class="plNew">${chDue()}</span>`:'')}
   ${plRow(ico('medal',40),'الإنجازات',achReady()?`${achReady()} ${achReady()===1?'إنجاز جاهز':'إنجازات جاهزة'} للاستلام — ميدالياتك وسلاسلك`:'ميداليات بثلاث مراتب: سلاسل الفوز، الدور الذهبيّ، الملكة…',"push('achScr')",'#E8B23A')}
   ${plRow(ico('trophy',40),'تحدّي الاثني عشر',CH12().act?`جارٍ — ${CH12().w}/${CHL.wins} فوز · ${CH12().l}/${CHL.losses} خسارة`:'12 فوزًا قبل 3 خسائر — سلّم جوائز وصناديق',
@@ -24215,6 +24230,11 @@ const _trvOpen=new Set();
 /** ٦٫٩٦: خلفيّات الساحات فئاتُ CSS تُحقن مرّةً واحدة (كانت data-URI بنحو ٢٠٠ ك.ب تُنسخ في كلّ رسم) */
 function arBgCls(a){try{if(typeof ARENA_BG==='undefined'||!ARENA_BG[a])return '';if(!document.getElementById('arBgCss')){const st=document.createElement('style');st.id='arBgCss';
   st.textContent=Object.keys(ARENA_BG).map(k=>`.arBg${k}{background-image:linear-gradient(180deg,rgba(5,8,16,.62),rgba(5,8,16,.9)),url(${ARENA_BG[k]})!important;background-size:cover!important;background-position:center 40%!important}`).join('\n');document.head.appendChild(st)}return 'arBg'+a}catch(e){return ''}}
+/* ٧٫٠٠ — «وين الساحات؟»: كانت لوحة الساحة خلفيّةً معتمة (٦٢–٩٠٪ سواد) خلف القسم فلا تُرى. الآن تُعرض صريحةً:
+   في الرئيسيّة، وفي رأس شاشة الكؤوس، وفي كلّ قسمٍ من الطريق، وفي إعلان الساحة الجديدة. الساحة بلا لوحة ترجع إلى شعارها */
+function arPicSrc(a){try{return (typeof ARENA_BG!=='undefined'&&ARENA_BG[a])?artSrc('~arbg:'+a,ARENA_BG[a]):null}catch(e){return null}}
+function arPicCls(a){try{if(typeof ARENA_BG==='undefined'||!ARENA_BG[a])return '';if(!document.getElementById('arPicCss')){const st=document.createElement('style');st.id='arPicCss';
+  st.textContent=Object.keys(ARENA_BG).map(k=>`.arPic${k}{background-image:url(${ARENA_BG[k]})}`).join('\n');document.head.appendChild(st)}return 'arPic'+a}catch(e){return ''}}
 function trvTog(i){const el=document.getElementById('trvA'+i);if(!el)return;const pl=el.querySelector('.trvPl');const stuck=pl&&pl.getBoundingClientRect().top<=Math.max(8,parseFloat(getComputedStyle(pl).top)||0)+1&&el.getBoundingClientRect().top<0;
  const on=el.classList.toggle('open');if(on)_trvOpen.add(i);else _trvOpen.delete(i);if(pl)pl.setAttribute('aria-expanded',on?'true':'false');
  if(!on&&stuck)window.scrollTo(0,Math.max(0,window.scrollY+el.getBoundingClientRect().top-8))}   // ٦٫٩٦: طيّ اللوحة الملتصقة يعيد القسم إلى الشاشة
@@ -24231,7 +24251,8 @@ function trRoadV(ix){
   const sts=ms.map(m=>{const st=trRoadState(m);return st==='lock'&&m.tr===nextTr?'next':st});
   const nReady=sts.filter(x=>x==='ready').length,nDone=sts.filter(x=>x==='done').length;
   const rel=a===ix?'cur':a<ix?'past':'fut',open=rel==='cur'||nReady>0||sts.indexOf('next')>=0||(_keepY!=null&&_trvOpen.has(a)),un=trvUnChips(a,rel);   // ٦٫٩٦: قسم المكافأة التالية مفتوح، وما فتحه اللاعب يبقى مفتوحًا بعد الاستلام
-  const bg=arBgCls(a)?` data-bg="1"`:'';   // ٦٫٩٦: فئة CSS تُحقن مرّة — لا نسخ data-URI في كلّ رسم   // لوحة الساحة إن رفعها المالك، وإلّا تدرّج ألوانها
+  const bg=arBgCls(a)?` data-bg="1"`:'';
+  const pc=arPicCls(a),pic=pc?`<div class="trvPic ${pc}" role="button" onclick="trvTog(${a})"><span class="trvPicSh"></span>${rel==='fut'?`<span class="trvPicLk">${ico('lock',20,'#FFE9A8')}<s>تُفتح عند <bdi>${lo.toLocaleString('en-US')}</bdi> كأس</s></span>`:''}</div>`:'';   // ٧٫٠٠   // ٦٫٩٦: فئة CSS تُحقن مرّة — لا نسخ data-URI في كلّ رسم   // لوحة الساحة إن رفعها المالك، وإلّا تدرّج ألوانها
   const sm=(...p)=>`<span class="trvSm">${p.filter(Boolean).map(x=>`<span>${x}</span>`).join('')}</span>`;   // ٦٫٩٦: قطعٌ لا تنقسم، وفاصل «·» يُقصّ إن التفّت قطعته إلى سطرٍ جديد
   const sum=rel==='fut'?sm(`${ico('lock',11)} ${a===ix+1?'الساحة التالية':'مقفلة'}`,a===ix+1&&'بقي '+trvCups(lo-tr))   // ٦٫٩٦: العتبة في الشارة جانبًا — لا تكرار
    :rel==='cur'?sm('ساحتك الآن',gate&&`لا تهبط تحت <bdi>${gate.toLocaleString('en-US')}</bdi>`)
@@ -24250,7 +24271,7 @@ function trRoadV(ix){
     <div class="trvPlB"><b class="trvNm">${esc(A.n)}</b><span class="trvSum">${sum}${nReady?`<i class="arReady">${nReady} جاهزة</i>`:''}</span></div>
     <span class="trvTh">${trIco('trophy',16)}<bdi dir="ltr">${lo.toLocaleString('en-US')}</bdi></span>
     <span class="trvChev">${chev(A.g,15)}</span>
-   </div>${un}
+   </div>${pic}${un}
    <div class="trvL">${rows}${a===0&&youTr==null?pin:''}</div>
   </section>`);
  }
@@ -24301,7 +24322,7 @@ function arenaUpFx(ix){
  const A=ARENAS[ix]||ARENAS[0];document.querySelectorAll('.aruOv').forEach(x=>x.remove());
  let mig=0;try{const t=TR();if(t.migUp){mig=1;delete t.migUp;saveState()}}catch(e){}   // ٦٫٩٦: ارتقاءٌ بالعتبات الجديدة
  const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
- ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${tierEmblem(ix,innerHeight<640?92:innerHeight<760?120:150)}</div><div class="aruN">${esc(A.n)}</div>
+ ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${arPicCls(ix)?`<div class="aruPic ${arPicCls(ix)}"></div>`:tierEmblem(ix,innerHeight<640?92:innerHeight<760?120:150)}</div><div class="aruN">${esc(A.n)}</div>
   <div class="aruS">بلغت <bdi class="nowrap">${TR_ARENA[ix].toLocaleString('en-US')}</bdi> كأس — ومن الآن لا تهبط تحتها.<br>${ix<ARENAS.length-1?'الساحة التالية: <b>'+esc(ARENAS[ix+1].n)+'</b> عند <bdi class="nowrap">'+TR_ARENA[ix+1].toLocaleString('en-US')+'</bdi> كأس':'آخر الساحات — وطريق الأساطير يمتدّ بجوائزه حتّى <bdi class="nowrap">'+TR_ROAD_END.toLocaleString('en-US')+'</bdi> كأس'}</div>
   ${mig?'<div class="aruMig">تجدّدت عتبات الساحات — فارتقيت إلى ساحةٍ أعلى</div>':''}
   ${(()=>{const L=tlArenaUnlocks(ix);return L.length?`<div class="aruUn"><span>فُتح في هذه الساحة</span><div class="aruUnL">${L.map(x=>`<span class="aruUnI">${tlUnPrev(x.c,x.k,40)}<s>${tlUnCat(x.c)}</s><i>${esc(x.n)}</i></span>`).join('')}</div></div>`:''})()}
@@ -24317,6 +24338,7 @@ function arenaScr(){
  go(`<div class="scr on arV">${tbar('الكؤوس والساحات')}
  <div class="arHero arHv" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
   <div class="arHeroRays"></div>
+  ${(()=>{const pc=arPicCls(ix);return pc?`<div class="arHvPic ${pc}"><span class="hmArNo"><s>الساحة</s><b>${ix+1}</b></span></div>`:''})()}
   <div class="arHvRow"><div class="arHeroEm">${tierEmblem(ix,68)}</div>
    <div class="arHvB"><div class="arHeroN">${esc(A.n)}</div>
     <div class="arHeroTr">${ico('trophy',24)}<b>${tr.toLocaleString('en-US')}</b><span>كأس</span></div></div></div>
@@ -24530,7 +24552,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='6.99';
+const APP_VER='7.00';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24541,7 +24563,7 @@ function EV(){
 /* أهداف اليوم تغطّي كل الألعاب: هدفان عامّان، وهدف من كل لعبة يتبدّل يوميًا */
 const EVT_POOL={
  general:[
-  {k:'p3', n:'العب 3 جولات اليوم — أسئلة أو كيرم أو أونو', need:3, of:e=>e.plays+(e.carrom||0)+(e.uno||0), r:{t:'gems',v:20}, ri:'gem', rn:'20 جوهرة'},
+  {k:'p3', get n(){return gOff('knowledge')&&gOff('uno')?'العب 3 مباريات كيرم اليوم':'العب 3 جولات اليوم — أسئلة أو كيرم أو أونو'}, need:3, of:e=>e.plays+(e.carrom||0)+(e.uno||0), r:{t:'gems',v:20}, ri:'gem', rn:'20 جوهرة'},
   {k:'w2', n:'افز بجولتين في أي لعبة', need:2, of:e=>e.wins+(e.carromWin||0)+(e.unoWin||0), r:{t:'gems',v:30}, ri:'gem', rn:'30 جوهرة'}],
  quiz:[
   {k:'c20',n:'أجب 20 إجابة صحيحة',            need:20,of:e=>e.correct,   r:{t:'coins',v:2500},ri:'coin', rn:'2500 عملة'},
@@ -24563,7 +24585,10 @@ function evtRefresh(){
  let h=7;for(const ch of String(d))h=(h*31+ch.charCodeAt(0))>>>0;
  const pick=(a,i)=>a[(h+i)%a.length];
  EVT_GOALS.length=0;
- EVT_GOALS.push(EVT_POOL.general[0],EVT_POOL.general[1],pick(EVT_POOL.quiz,1),pick(EVT_POOL.carrom,2),pick(EVT_POOL.uno,3));
+ EVT_GOALS.push(EVT_POOL.general[0],EVT_POOL.general[1]);
+ if(!gOff('knowledge'))EVT_GOALS.push(pick(EVT_POOL.quiz,1));
+ if(!gOff('uno'))EVT_GOALS.push(pick(EVT_POOL.uno,3));
+ if(gOff('knowledge')&&gOff('uno'))EVT_GOALS.push(...EVT_POOL.carrom);else EVT_GOALS.push(pick(EVT_POOL.carrom,2));   // ٧٫٠٠: الكيرم وحده
  EVT_GOALS._day=d;
 }
 /** نهاية لعبة في غرفة (كيرم/أونو/مافيا/رسم): تُحتسب لأهداف اليوم والمهام */
@@ -24841,7 +24866,7 @@ function moreScr(){
     [`${ico('user',16)}`,'التعبيرات',"push('emoteScr')"],
     [`${ico('ticket',16)}`,'الموسم',"push('seasonScr')"],
     [`${ico('gear',16)}`,'الإعدادات',"push('setScr')"],
-    [`${ico('cap',16)}`,`إعادة تجربة التدريب`,`tutStart()`],
+    ...(gOff('knowledge')?[]:[[`${ico('cap',16)}`,`إعادة تجربة التدريب`,`tutStart()`]]),
     [`${ico('info',16)}`,`سجلّ الأخطاء${ERR_LOG.length?' ('+ERR_LOG.length+')':''}`,"push('errLogScr')"],
     [`${ico('reset',16)}`,`إعادة الضبط`,`splash()`]].map(([i,n,f])=>
  `<div class="li" style="cursor:pointer" onclick="${f}"><div class="lr">
@@ -25220,6 +25245,20 @@ body .hmArB .tr .rico{width:24px!important;height:24px!important;filter:drop-sha
 body .hmArB .tr u{text-decoration:none;font-family:var(--fd);font-size:17px;font-weight:700;color:#FFF1C4;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 #6A3606}
 body .hmArB .rd{flex-shrink:0;min-width:20px;height:20px;padding:0 6px;border-radius:10px;display:grid;place-items:center;font-size:11px;font-weight:900;color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);box-shadow:0 0 10px rgba(255,233,168,.6);animation:puls 1.5s ease-in-out infinite}
 body .hmArB .go{flex-shrink:0;display:flex}
+body .hmArC{position:relative;margin:10px 0 2px;border-radius:18px;overflow:hidden;background:#0B1530;border:1px solid rgba(var(--f),.5);box-shadow:0 16px 30px -16px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,244,214,.12)}
+body .hmArPic{position:relative;display:block;height:clamp(150px,46vw,215px);background-size:cover;background-position:center 58%;cursor:pointer}
+body .hmArPic.np{display:grid;place-items:center;background:radial-gradient(80% 90% at 50% 25%,var(--s1),var(--s2))}
+body .hmArPic::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(6,10,22,.18) 0%,rgba(6,10,22,0) 30%,rgba(6,10,22,0) 55%,rgba(6,10,22,.88) 100%)}
+body .hmArPic:active{filter:brightness(1.1)}
+body .hmArNo{position:absolute;top:10px;inset-inline-start:10px;z-index:1;display:flex;flex-direction:column;align-items:center;min-width:46px;padding:4px 9px 5px;border-radius:12px;background:linear-gradient(180deg,#1C2D62,#0B1530);border:1.5px solid #E8B23A;box-shadow:0 4px 12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,233,168,.25)}
+body .hmArNo s{text-decoration:none;font-size:9px;font-weight:800;color:#D9B76E;line-height:1.3}
+body .hmArNo b{font-family:var(--fd);font-size:23px;font-weight:700;line-height:1;color:#FFE9A8;font-variant-numeric:tabular-nums}
+body .hmArNm{position:absolute;bottom:9px;inset-inline:12px;z-index:1;text-align:center;font-family:var(--fd);font-size:clamp(19px,5.6vw,25px);font-weight:700;color:#FFF1C4;text-shadow:0 2px 0 #3A2406,0 0 18px rgba(0,0,0,.85)}
+body .hmArC .hmArB{margin:0;border-radius:0;border:0;border-top:1px solid rgba(var(--f),.4)}
+body .hmArC .hmArB .bd b{display:none}
+body .arHvPic{position:relative;height:clamp(170px,52vw,250px);margin:-14px -14px 12px;background-size:cover;background-position:center 58%}
+body .arHvPic::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,22,0) 55%,var(--s1) 100%)}
+body .aruPic{height:min(40vh,330px);aspect-ratio:3/4;border-radius:18px;background-size:cover;background-position:center 58%;border:2px solid #E8B23A;box-shadow:0 0 44px rgba(var(--f),.55),0 18px 34px rgba(0,0,0,.6)}
 /* ٦٫٩٦ — شريط الساحة في الهواتف الصغيرة (≤359): كان عمود الاسم ضيّقًا فيخرج سطر «التالية» عن عموده ويُقصّ اسم الساحة.
    العدّاد والشعار والفجوات أصغر قليلًا، وشارة الجاهز الذهبيّة النابضة تأخذ مكان السهم (هي الدعوة إلى اللمس) */
 @media (max-width:359px){body .hmArB{gap:7px;padding:8px 8px 8px 9px}body .hmArB .em .rkEmb{width:34px!important;height:34px!important}body .hmArB .tr{gap:3px;padding:3px 7px 3px 4px}body .hmArB .tr .rico{width:19px!important;height:19px!important}body .hmArB .tr u{font-size:15px}body .hmArB .rd+.go{display:none}}
@@ -25384,6 +25423,11 @@ body .trvA:not(.open){padding-bottom:8px}
 body .trvBg{position:absolute;inset:0;border-radius:20px;overflow:hidden;background:radial-gradient(70% 46% at 50% 0%,rgba(var(--f),.32),transparent 70%),linear-gradient(180deg,var(--s1),var(--s2) 62%);background-size:cover;background-position:center;border:1px solid rgba(var(--f),.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px -18px rgba(0,0,0,.9)}
 body .trvBg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px),repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px)}
 body .trvA.fut .trvBg{opacity:.5}
+body .trvPic{position:relative;display:block;height:clamp(120px,36vw,175px);margin:8px 2px 2px;border-radius:14px;overflow:hidden;background-size:cover;background-position:center 58%;border:1px solid rgba(var(--f),.55);box-shadow:0 10px 22px -12px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,244,214,.15);cursor:pointer}
+body .trvPicSh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,22,0) 55%,rgba(6,10,22,.6))}
+body .trvA.fut .trvPicSh{background:rgba(6,10,22,.58)}
+body .trvPicLk{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#FFE9A8;font-size:12px;font-weight:800}
+body .trvPicLk s{text-decoration:none;padding:4px 12px;border-radius:10px;background:rgba(6,10,22,.75);border:1px solid rgba(232,178,58,.55)}
 body .trvA.fut .trvPl{opacity:.86}
 body .trvPl{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:3;display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:9px;padding:8px 10px;border-radius:15px;cursor:pointer;-webkit-tap-highlight-color:transparent;background:linear-gradient(180deg,rgba(var(--f),.28),rgba(var(--f),.05) 60%),linear-gradient(180deg,#151D34,#0A0F1E);border:1px solid rgba(var(--f),.55);box-shadow:0 4px 0 #060912,0 10px 24px -8px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.14)}
 body .trvNo{display:flex;flex-direction:column;align-items:center;justify-content:center;width:42px;height:42px;border-radius:12px;background:radial-gradient(circle at 50% 30%,rgba(var(--f),.55),rgba(6,9,18,.8) 78%);border:1px solid rgba(var(--f),.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.22)}
@@ -38762,7 +38806,7 @@ function sgRow(r){
 function partyScr(){
  clearInterval(PT&&PT.tm);PT=null;rmLeave(1);
  rankAll();hubCss();sgCss();hubRegister();
- const defs=GAME_DEFS.filter(g=>g.id!=='knowledge');
+ const defs=GAME_DEFS.filter(g=>g.id!=='knowledge'&&!gOff(g.id));
  // آخر لعبة لعبتها تتصدّر القائمة — ولا تظهر للاعب الجديد
  const last=defs.slice().sort((a,b)=>(rankOf(b.id).lastPlayedAt||0)-(rankOf(a.id).lastPlayedAt||0))[0];
  const cont=(last&&rankOf(last.id).lastPlayedAt)?last:null;
@@ -47037,7 +47081,7 @@ function storeScr(){
 let lbGame='carrom';
 function lbScr(){
  const online=netOnline();
- const chips=GAME_DEFS.map(g=>`<div class="fc ${lbGame===g.id?'on':''}" onclick="lbGame='${g.id}';refresh(lbScr)">${g.ar}</div>`).join('');
+ const chips=GAME_DEFS.filter(g=>!gOff(g.id)).map(g=>`<div class="fc ${lbGame===g.id?'on':''}" onclick="lbGame='${g.id}';refresh(lbScr)">${g.ar}</div>`).join('');
  go(`<div class="scr on">${tb('لوحة الصدارة')}
  <div class="cr" style="margin-bottom:10px">${chips}</div>
  <div id="lbBody">${online?'<div class="wb">جارٍ التحميل من الخادم…</div>':lbLocal()}</div></div>`);
@@ -47111,7 +47155,7 @@ function achWall(p){
 /* ═══ دليل التصنيف: الرتب العشر بدروعها كاملة، وكيف تصعد ═══ */
 const TIER_FLAVOR=['البداية — كل مباراة تعلّمك شيئًا','تعرف اللعبة وتثبت فيها','لاعب ثابت يفوز أكثر مما يخسر','أفضل من أغلب اللاعبين','دقّة وسرعة وقرارات صائبة','من النخبة — الأخطاء غالية هنا','قلّة يصلون إلى هنا','الأوائل في الموسم','أساطير الموسم','القمّة — لا درجات بعدها'];
 function rankGuideScr(g){
- g=(typeof g==='string'&&gameDef(g))?g:'knowledge';
+ g=(typeof g==='string'&&gameDef(g)&&!gOff(g))?g:(gOff('knowledge')?'carrom':'knowledge');
  const p=rankOf(g),gm=gameDef(g);
  const divs=i=>TIERS[i].div===0?'درجة واحدة':'ثلاث درجات: III ثم II ثم I';
  const left=Math.max(0,5-(p.placementDone||0));
