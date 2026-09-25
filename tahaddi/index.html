@@ -1547,6 +1547,22 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
 /* ═══ ساحات القتال — تتغير من رتبة لرتبة ═══ */
 #arena{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .6s;overflow:hidden}
 #arena.on{opacity:1}
+/* ٧٫١٤ — ساحة المباراة: لوحة الساحة بمنصّتها تحت اللوح، تعتيمٌ عند البطاقتين، وذرّاتٌ خفيفة */
+#arena .caArBg{position:absolute;inset:0;background-size:auto 130%;background-position:50% 100%;background-repeat:no-repeat}
+@media (min-aspect-ratio:10/16){#arena .caArBg{background-size:cover;background-position:50% 70%}}
+#arena .caArSh{position:absolute;inset:0;background:radial-gradient(70% 38% at 50% 52%,rgba(var(--f),.16),rgba(var(--f),0) 70%),linear-gradient(180deg,rgba(4,8,20,.72) 0,rgba(4,8,20,.34) 22%,rgba(4,8,20,.18) 48%,rgba(4,8,20,.3) 72%,rgba(4,8,20,.78) 100%),radial-gradient(120% 80% at 50% 50%,rgba(0,0,0,0) 55%,rgba(2,4,12,.55) 100%)}
+#arena .caFx{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#arena:not(.on) .caFx{display:none}
+#arena .caFx b{position:absolute;left:calc(var(--t) * -1);top:calc(var(--t) * -1);right:calc(var(--t) * -1);bottom:calc(var(--t) * -1);background-size:var(--t) var(--t);background-repeat:repeat;will-change:transform;animation:caFxMove var(--d,10s) linear infinite}
+@keyframes caFxMove{from{transform:translate3d(0,0,0)}to{transform:translate3d(var(--mx,0),var(--my,0),0)}}
+#arena .fx-sand b{--d:5s;--mx:var(--t);--my:calc(var(--t) * -.25)}
+#arena .fx-snow b{--d:11s;--mx:calc(var(--t) * .25);--my:var(--t)}
+#arena .fx-petal b{--d:16s;--mx:calc(var(--t) * .5);--my:var(--t)}
+#arena .fx-ember b{--d:9s;--mx:calc(var(--t) * -.25);--my:calc(var(--t) * -1)}
+#arena .fx-gold b,#arena .fx-crystal b,#arena .fx-star b{--d:40s;--mx:var(--t);--my:calc(var(--t) * -1)}
+#arena .fx-cloud b{--d:70s;--mx:var(--t);--my:0px}
+@media (prefers-reduced-motion:reduce){#arena .caFx{display:none}}
+
 #arena .arSky,#arena .vnSky{position:absolute;inset:0}
 #arena .vnSky{background:#0A0806}
 #arena .vnArt{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -2603,7 +2619,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0014057240" data-head="0001217877" aria-hidden="true">
+<div id="ld" data-total="0014079331" data-head="0001219519" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -15907,7 +15923,29 @@ function arenaHTML(ix){
  <div class="arPil r">${arPillar(A.g)}</div>
  <div class="arNm" style="color:${A.g};border-color:${A.g}55">${esc(A.n)}</div>`;
 }
+/* ٧٫١٤ — مكان الكيرم في المباراة هو الساحة نفسها: لوحتها (ARENA_BG) ومنصّتها تحت اللوح، معتمةٌ عند البطاقتين،
+   وفوقها ذرّاتٌ قليلة من مادّتها (رمل يسفّ، ثلج، بتلات، بريق، جمر، سحب) — تحويلٌ وشفافيّةٌ فقط، وتتوقّف حين يُخفى المكان */
+const CA_FX=['sand','snow','gold','petal','crystal','petal','sand','ember','star','cloud'];
+function caArenaVenue(ix){
+ const A=ARENAS[ix]||ARENAS[0];let bg='';try{if(typeof ARENA_BG!=='undefined'&&ARENA_BG[ix])bg=artSrc('~arbg:'+ix,ARENA_BG[ix])}catch(e){}
+ if(!bg)return null;
+ caDressWarm(ix);   // لباس اللوح يُرسم الآن في وقت الفراغ
+ /* ٧٫١٤: الذرّات بلاطةٌ واحدة مرسومة (SVG) تنزلق بمقدار بلاطتها في حلقةٍ بلا خياطة — طبقةٌ واحدة يحرّكها المركِّب، لا عشرات العناصر */
+ const k=CA_FX[ix]||'gold',r=vnRnd(ix*29+7),T=k==='cloud'?512:256;let g='';
+ const N={sand:26,snow:16,petal:9,gold:10,crystal:10,star:14,ember:9,cloud:4}[k]||10;
+ for(let i=0;i<N;i++){const x=(r()*T).toFixed(1),y=(r()*T).toFixed(1);
+  if(k==='sand')g+=`<ellipse cx="${x}" cy="${y}" rx="${(1+r()*1.6).toFixed(1)}" ry="${(.7+r()*.9).toFixed(1)}" fill="${['#F2DDA8','#E6C68A','#FFF0C8'][i%3]}" opacity="${(.45+r()*.4).toFixed(2)}"/>`;
+  else if(k==='snow')g+=`<circle cx="${x}" cy="${y}" r="${(1.4+r()*2.2).toFixed(1)}" fill="#F4FBFF" opacity="${(.55+r()*.4).toFixed(2)}"/>`;
+  else if(k==='petal')g+=`<ellipse cx="${x}" cy="${y}" rx="${(3+r()*2).toFixed(1)}" ry="${(1.6+r()*1).toFixed(1)}" transform="rotate(${(r()*180)|0} ${x} ${y})" fill="${['#F3A6BF','#FFFFFF','#B23C74'][i%3]}" opacity=".8"/>`;
+  else if(k==='ember')g+=`<circle cx="${x}" cy="${y}" r="${(1.2+r()*1.4).toFixed(1)}" fill="#FFB45A" opacity="${(.5+r()*.4).toFixed(2)}"/>`;
+  else if(k==='cloud')g+=`<circle cx="${x}" cy="${y}" r="${(70+r()*60)|0}" fill="url(#c)"/>`;
+  else{const z=(2.5+r()*3.5).toFixed(1),c={gold:'#FFE9A8',crystal:'#C9F1FF',star:'#FFD6EC'}[k];g+=`<path d="M${x} ${(y-z).toFixed(1)}Q${x} ${y} ${(+x+ +z).toFixed(1)} ${y}Q${x} ${y} ${x} ${(+y+ +z).toFixed(1)}Q${x} ${y} ${(x-z).toFixed(1)} ${y}Q${x} ${y} ${x} ${(y-z).toFixed(1)}Z" fill="${c}" opacity="${(.5+r()*.45).toFixed(2)}"/>`}}
+ const tile='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${T}" height="${T}" viewBox="0 0 ${T} ${T}">${k==='cloud'?'<defs><radialGradient id="c"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>':''}${g}</svg>`);
+ const fx=`<b style="background-image:url(&quot;${tile}&quot;);--t:${T}px"></b>`;
+ return `<div class="vnSky"></div><div class="caArBg" style="background-image:url(${bg})"></div><div class="caArSh" style="--f:${A.f}"></div><div class="caFx fx-${k}" aria-hidden="true">${fx}</div>`;
+}
 function venueHTML(kind){
+ if(kind==='carromR'){const h=caArenaVenue(caArIx());if(h)return h}   // ٧٫١٤
  const art=VN_SCENE_IMG[kind]?`<div class="vnImg" style="background-image:url(${artSrc('~vn:'+kind,VN_SCENE_IMG[kind])})"></div>${vnOverlay(kind)}`:(VENUES[kind]||VENUES.carrom)();
  /* اسم المكان لافتةٌ ثابتة أسفل الشاشة: في الكيرم تمرّ فوقها أزرار الغرفة ونصوصها («الكلمات داخلة في بعض») — فلا تُرسم */
  const nm=(kind==='carrom'||kind==='carromR')?'':`<div class="arNm" style="color:#FFE9A8;border-color:#E8B23A66">${VENUE_NAMES[kind]||''}</div>`;
@@ -15920,7 +15958,8 @@ function setArena(k,soft,keepDuck){   // soft: خلف شاشات الردهة و
  if(typeof k==='string'&&VENUES[k])key=k;else key=Math.max(0,Math.min(9,k|0));
  let el=document.getElementById('arena');
  if(!el){el=document.createElement('div');el.id='arena';document.body.prepend(el)}
- if(_arKey!==key){el.innerHTML=typeof key==='string'?venueHTML(key):arenaHTML(key);_arKey=key;el.dataset.kind=typeof key==='string'?key:'studio'}
+ const ck=key==='carromR'?key+':'+caArIx():key;   // ٧٫١٤: مكان الكيرم يتبع ساحتك
+ if(_arKey!==ck){el.innerHTML=typeof key==='string'?venueHTML(key):arenaHTML(key);_arKey=ck;el.dataset.kind=typeof key==='string'?key:'studio'}
  el.classList.toggle('soft',!!soft);
  el.classList.add('on');
  mscDuck(!soft||!!keepDuck);   // داخل المباراة تخفت، وخلف الردهة والبحث تبقى كما هي — ٦٫٩٧: وعلى نتيجة الكيرم تبقى خافتة (نداء النتيجة وحده)
@@ -20173,7 +20212,7 @@ const EN={
  'تحديات اليوم':'Today’s challenges',
  'أنجزت اليوم:':'Completed today:',
  '3 مكافآت':'3 rewards',
- 'ستة تحديات جديدة كل يوم — أنجزها واقبض جوائزها':'Six new challenges every day — finish them and claim their prizes',
+ 'تحدّيات جديدة كل يوم — أنجزها واقبض جوائزها':'New challenges every day — finish them and claim their prizes',
  'الإنجازات':'Achievements',
  'الشارات':'Badges',
  'جدار الأوسمة':'Badge wall',
@@ -23752,13 +23791,18 @@ function playScr(){
  </div></div>`);
  bcTick();plDots();skTileDraw();
  verAnnounce();          // الرئيسية رُسمت، فالنافذة تجد شاشةً تظهر فوقها
- try{achDay();achPingAll();if(S.lkPend&&!document.querySelector('.lkOv'))setTimeout(lkShow,900)}catch(e){}   // ٦٫٩٥
+ try{achDay();achPingAll();if(S.lkPend&&!document.querySelector('.lkOv'))setTimeout(lkShow,900);else if((S.crcPend|0)>0)setTimeout(crcOpen,900)}catch(e){}   // ٦٫٩٥
  setTimeout(()=>{try{if(!lvUpCheck()&&!trSeasonRwCheck())trArenaUpCheck()}catch(e){}},400);   // ٦٫٩٤: مكافأة المستوى الجديد، أو إعلان الموسم
 }
 
 /* ═══ ٦٫٩٥ — إسقاط الحظّ (Lucky Drop): أوّل ثلاثة انتصاراتٍ في اليوم — فوريّ، بلا مؤقّت، يرتفع بالنجوم مع اللمس ═══ */
-const LK_DAILY=3,LK_DIST=[.3164,.4391,.2010,.0405,.0030];   // احتمال أن ينتهي الإسقاط عند ١…٥ نجوم (كلاش رويال)
-function LK(){const d=Math.floor(Date.now()/864e5);if(!S.lk||typeof S.lk!=='object')S.lk={day:d,n:0,dry:0};if(S.lk.day!==d){S.lk.day=d;S.lk.n=0}return S.lk}
+const LK_DAILY=4,LK_DIST=[.3164,.4391,.2010,.0405,.0030];   // احتمال أن ينتهي الإسقاط عند ١…٥ نجوم (كلاش رويال)
+function LK(){const d=Math.floor(Date.now()/864e5);if(!S.lk||typeof S.lk!=='object')S.lk={day:d,n:0,dry:0};if(S.lk.day!==d){S.lk.day=d;S.lk.n=0;S.lk.w=0}return S.lk}
+/** ٧٫١٤ — الإسقاط الكبير (كصندوق الانتصار السادس في براول ستارز): يبدأ بثلاث نجوم — ٣★ ٧٠٪ · ٤★ ٢٤٪ · ٥★ ٦٪ */
+function lkRollG(){const r=Math.random();return r<.06?5:r<.30?4:3}
+/** الإسقاطات تُصفّ ولا تضيع: الأوّل في S.lkPend والباقي في S.lkQ */
+function lkPush(g){const lk=LK();let p;if(g)p={fin:lkRollG(),g:1,at:Date.now()};else{lk.n=(lk.n|0)+1;p={fin:lkRoll(),at:Date.now()}}
+ if(!S.lkPend)S.lkPend=p;else{if(!Array.isArray(S.lkQ))S.lkQ=[];S.lkQ.push(p)}}
 function lkLeft(){return Math.max(0,LK_DAILY-(LK().n|0))}
 /** يستحقّ إسقاطًا؟ فوزٌ أونلاين أو ضدّ آليّ متوسّط فما فوق، وما زال في اليوم رصيد */
 function lkEligible(won){try{if(!won||!lkLeft())return false;const m=rmMode();if(m==='room')return false;if(m==='bot')return /^(mid|hard|imp)$/.test(RM.diff||'mid');return true}catch(e){return false}}
@@ -23783,22 +23827,23 @@ function lkShow(){
   if(document.querySelector('.lkOv'))return;
   const k=LK();let fin;   // ٦٫٩٥: الإسقاط يُحفظ معلّقًا (S.lkPend) حتّى يُفتح — إغلاق التطبيق فوقه لا يحرقه
   if(S.lkPend&&S.lkPend.fin>=1)fin=S.lkPend.fin|0;else{k.n=(k.n|0)+1;fin=lkRoll();S.lkPend={fin,at:Date.now()};try{saveState()}catch(e){}}
-  let st=1,taps=0,opened=false;const ov=document.createElement('div');ov.className='lkOv aruOv';ov.style.setProperty('--f','232,178,58');ov.style.setProperty('--g','#FFE9A8');
+  const G=!!(S.lkPend&&S.lkPend.g);
+  let st=G?3:1,taps=0,opened=false;const ov=document.createElement('div');ov.className='lkOv aruOv';ov.style.setProperty('--f','232,178,58');ov.style.setProperty('--g','#FFE9A8');
   const sub=()=>taps<4?`المس الصندوق — <b>${4-taps}</b> ${4-taps===1?'لمسة':'لمسات'} قد ترفع نجومه`:'انتهت اللمسات — افتحه!';
   const btn=()=>taps<4?`<button class="rbtn" onclick="lkTap()"><span>${taps?'المس مرّةً أخرى':'المس الصندوق'}</span></button>`:`<button class="rbtn" onclick="lkOpen()"><span>افتح الإسقاط ${'★'.repeat(st)}</span></button>`;
-  const draw=()=>{ov.innerHTML=`<div class="aruRays"></div><div class="aruT">إسقاط الحظّ</div>
+  const draw=()=>{ov.innerHTML=`<div class="aruRays"></div><div class="aruT">${G?'الإسقاط الكبير':'إسقاط الحظّ'}</div>
    <div class="lkBox" id="lkBox" onclick="lkTap()">${ico('gift',120,'#FFE9A8')}</div>
    <div class="lkN" id="lkN">${lkStars(st)}</div>
    <div class="aruS" id="lkS">${sub()}</div>
    <div class="aruB" id="lkB">${btn()}</div>
-   <div class="note" style="position:relative;margin-top:6px">إسقاطات اليوم: ${(k.n|0)}/${LK_DAILY} — أوّل ثلاثة انتصاراتٍ كلّ يوم</div>`};
+   <div class="note" style="position:relative;margin-top:6px">${G?'انتصارك السادس اليوم — يبدأ بثلاث نجوم':`إسقاطات اليوم: ${Math.min(LK_DAILY,k.n|0)}/${LK_DAILY} — أوّل أربعة انتصاراتٍ، والسادس إسقاطٌ كبير`}</div>`};
   const upd=()=>{const n=document.getElementById('lkN'),t=document.getElementById('lkS'),b=document.getElementById('lkB'),bx=document.getElementById('lkBox');if(n)n.innerHTML=lkStars(st);if(t)t.innerHTML=sub();if(b)b.innerHTML=btn();if(bx)bx.classList.toggle('hi',st>=4)};
   window.lkTap=()=>{if(taps>=4)return;taps++;const up=st<fin&&(fin-st)>=(4-taps)?true:(st<fin&&Math.random()<.5);if(up){st++;try{if(window.SFX)SFX.fx('rare')}catch(e){}try{const b=document.getElementById('lkBox');if(b&&window.FX){const r=b.getBoundingClientRect();FX.glow(r.left+r.width/2,r.top+r.height/2)}}catch(e){}}
    else{try{if(window.SFX)SFX.fx('tally')}catch(e){}}
    if(taps>=4)st=Math.max(st,fin);upd()};
-  window.lkOpen=()=>{if(opened)return;opened=true;const L=lkRewards(st);delete S.lkPend;grantRewards(L);try{saveState()}catch(e){}ov.remove();window.lkOpen=null;window.lkTap=null;try{if(st>=4&&window.FX)FX.win()}catch(e){}
+  window.lkOpen=()=>{if(opened)return;opened=true;const L=lkRewards(st);delete S.lkPend;if(Array.isArray(S.lkQ)&&S.lkQ.length)S.lkPend=S.lkQ.shift();grantRewards(L);try{saveState()}catch(e){}ov.remove();window.lkOpen=null;window.lkTap=null;try{if(st>=4&&window.FX)FX.win()}catch(e){}
    try{achAdd('a_chest')}catch(e){}
-   push('rewardScr',{title:'إسقاط الحظّ '+'★'.repeat(st),list:L})};
+   push('rewardScr',{title:(G?'الإسقاط الكبير ':'إسقاط الحظّ ')+'★'.repeat(st),list:L})};
   draw();document.body.appendChild(ov);try{enPass(ov)}catch(e){}try{if(window.SFX)SFX.fx('chest')}catch(e){}
  }catch(e){}
 }
@@ -24207,7 +24252,7 @@ function trApply(o){
  const t=TR(),mode=o.mode||'casual',won=o.won;
  let raw=trDelta(won,t.tr,o.oppTr),why='';
  if(mode==='room'){raw=0;why='room'}
- else if(mode==='bot'&&t.tr>=TR_BOT_CAP){raw=0;why='botcap'}
+ else if(mode==='bot'&&t.tr>=TR_BOT_CAP&&!/^(hard|imp)$/.test(o.diff||((typeof RM!=='undefined'&&RM&&RM.diff)||''))){raw=0;why='botcap'}   // ٧٫١٤: الصعب والمستحيل يمنحان الكؤوس في كلّ الساحات
  else if(mode!=='ranked'&&mode!=='casual'&&mode!=='bot'){raw=0;why='none'}
  const before=t.tr,aBefore=trArenaIx(before),gate=TR_ARENA[t.gate|0]||0;
  let after=Math.max(0,before+raw);
@@ -24240,9 +24285,9 @@ function trRoad(){
   if(TR_ARENA.indexOf(tr)>0||tr===TR_ROAD_END)r=chest(tr,a);
   else if(tr===TR_SKBOOK)r={t:'skbook',v:1};
   else if(tr>=TR_LEG)r=full(a,tr/100);
-  else if(j%4===0)r={t:'gems',v:3*a};
-  else if(j%4===2)r={t:'skc',k:skAt(a,j/2),v:Math.ceil(a/2)};
-  else r={t:'coins',v:40+30*a};
+  else if(j%4===0)r={t:'gems',v:4+3*a};   // ٧٫١٤: القيمة كاملة (كانت نصفها: 3a جواهر، a/2 نسخ، 40+30a عملة)
+  else if(j%4===2)r={t:'skc',k:skAt(a,j/2),v:2+a};
+  else r={t:'coins',v:80+60*a+(j%4===3?40:0)};
   L.push({tr,r})}
  L.sort((x,y)=>x.tr-y.tr);
  return _trRoad=L;
@@ -24505,7 +24550,7 @@ function trFinHTML(tro){
  if(!tro)return '';
  const tr=tro.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),gl=trGoal(tr),lo=TR_ARENA[ix],pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100;
  const d=tro.d|0,sign=d>0?'+':d<0?'−':'';
- const note=tro.why==='gate'?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):tro.why==='botcap'?'الآليّ لا يمنح كؤوسًا فوق '+TR_BOT_CAP.toLocaleString('en-US')+' — العب أونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
+ const note=tro.why==='gate'?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):tro.why==='botcap'?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' تمنح الكؤوسَ مبارياتُ الآليّ الصعب والمستحيل والأونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
  return `<div class="finTr" onclick="push('arenaScr')"><div class="finTrRow">${ico('trophy',30)}<b class="${d>0?'up':d<0?'dn':''}">${sign}${Math.abs(d)}</b><span><i>${tr.toLocaleString('en-US')}</i>كأس</span></div>
   <div class="finTrAr"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct}%"></i></div><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi>':gl?'طريق الأساطير <bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi>':'أتممت طريق الأساطير'}</span></div>
   ${note?`<div class="finTrN">${note}</div>`:''}</div>`;
@@ -24573,7 +24618,7 @@ function arenaScr(){
   <div class="arHvSt">${(()=>{const nr=trRoad().find(m=>trRoadState(m)==='lock');return nr?`<span>${ico('gift',12)} بقي <bdi>${trvCups(Math.max(0,nr.tr-tr))}</bdi> للمكافأة التالية</span>`:''})()}<span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
  </div>
  <div class="sl">كيف تُحسب الكؤوس؟</div>
- <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> (${esc(ARENAS[ARENAS.length-1].n)}) يعود إلى <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.<br>${ico('crown',13)} بعد آخر الساحات يمتدّ طريق الأساطير بجوائزه حتّى <bdi class="nowrap">${TR_ROAD_END.toLocaleString('en-US')}</bdi> كأس، وآخره صندوقٌ أسطوريّ.</div>
+ <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ الصعب والمستحيل تُحسب الكؤوس في كلّ الساحات، والمتوسّط حتّى ${TR_BOT_CAP.toLocaleString('en-US')}، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('coin',13)} كلّ مباراةٍ محسوبة تدفع عملاتٍ بحسب ساحتك وتيجانك، وكلّ ١٠ تيجانٍ صندوقٌ نادر، وأوّل أربعة انتصاراتٍ في اليوم إسقاطات حظّ والسادس إسقاطٌ كبير.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> (${esc(ARENAS[ARENAS.length-1].n)}) يعود إلى <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.<br>${ico('crown',13)} بعد آخر الساحات يمتدّ طريق الأساطير بجوائزه حتّى <bdi class="nowrap">${TR_ROAD_END.toLocaleString('en-US')}</bdi> كأس، وآخره صندوقٌ أسطوريّ.</div>
  <div class="trvOkW crvOkW"><button class="crvDown" onclick="trvJump()" aria-label="موضعي في الطريق"><i><svg viewBox="0 0 64 30" width="100%" height="100%" aria-hidden="true"><defs><linearGradient id="crvDg" x1="0" y1="0" x2="0" y2="1"><stop offset=".45" stop-color="#fff"/><stop offset="1" stop-color="#B4C0C8"/></linearGradient></defs><path d="M5 4.5h54c2.4 0 3.4 2.2 2 3.9L34.8 26.9c-1.5 1.7-4.1 1.7-5.6 0L3 8.4C1.6 6.7 2.6 4.5 5 4.5z" fill="#2C5C85" opacity=".5"/><path d="M5 2h54c2.4 0 3.4 2.2 2 3.9L34.8 24.4c-1.5 1.7-4.1 1.7-5.6 0L3 5.9C1.6 4.2 2.6 2 5 2z" fill="url(#crvDg)" stroke="#0B3A75" stroke-width="1.8" stroke-linejoin="round"/></svg></i></button><button class="crvOk2" onclick="back()">موافق</button></div>
  </div>`);
  requestAnimationFrame(trRoadFill);
@@ -24592,7 +24637,7 @@ function trvAfterDraw(keep){
 }
 
 /* ═══ صناديق المعارك — نظام كلاش رويال: الفوز أونلاين يُسقط صندوقًا بحظ معلَن ═══ */
-const BC_ODDS=[['knowledge',55],['rival',30],['elite',11],['legend',4]];
+const BC_ODDS=[['knowledge',55],['rival',30],['elite',12.5],['legend',2.5]];   // ٧٫١٤: كما تعطيها الدورة (22/12/5/1 من 40)
 const BC_TIME={knowledge:1800,rival:10800,elite:28800,legend:43200}; // ثوانٍ — ٦٫٩٤: ٣٠ د · ٣ س · ٨ س · ١٢ س (جلسات الكيرم قصيرة، وكلاش رويال ٣/٨/١٢/٢٤ س)
 const BC_LABEL={knowledge:'عادي',rival:'نادر',elite:'ملحمي',legend:'أسطوري'};
 function BC(){if(!S.bc)S.bc=[null,null,null,null];return S.bc}
@@ -24650,7 +24695,7 @@ const VCH_CSS=`.vchOv{position:fixed;inset:0;z-index:300;background-size:cover!i
 .vchB:active{filter:brightness(1.15)}
 @media (prefers-reduced-motion:reduce){.vchRays,.vchBox,.vchSp{animation:none!important}.vchSp{display:none}}`;
 function chestPic(k){const s=artSrc('chest_'+k);return s?`<img src="${s}" alt="">`:`<div>${chestArt(k)}</div>`}
-function chestDropFx(k,slot,full){
+function chestDropFx(k,slot,full,coins){
  if(!document.getElementById('vchCss')){const st=document.createElement('style');st.id='vchCss';st.textContent=VCH_CSS;document.head.appendChild(st)}
  document.querySelectorAll('.vchOv').forEach(x=>x.remove());
  const ch=ECON.chests[k]||{n:'صندوق'}, col=VCH_COL[k]||VCH_COL.knowledge;
@@ -24661,7 +24706,7 @@ function chestDropFx(k,slot,full){
  ov.innerHTML=`<div class="vchRays"></div><div class="vchT">${full?T('الخانات ممتلئة'):T('صندوق نصر!')}</div>
   <div class="vchBox${full?' dim':''}"><span class="vchGlow"></span>${chestPic(k)}${full?'':sp}</div>
   <div class="vchN">${ch.n}${tier?' · '+tier:''}</div>
-  <div class="vchS">${full?T('افتح صندوقًا من صناديقك لتستقبل غيره في المرّة القادمة.')
+  <div class="vchS">${full?(coins?'حوّلناه إلى <b>'+coins.toLocaleString('en-US')+'</b> عملة — ':'')+T('افتح صندوقًا من صناديقك لتستقبل غيره في المرّة القادمة.')
    :T('وُضع في الخانة')+' '+(slot+1)+' · '+T('يُفتح خلال')+' '+bcFmt(BC_TIME[k]||60)+'<br>'+T('فيه عملات ونسخ جيس ومفاجآت')}</div>
   <button class="vchB">${T('رائع!')}</button>`;
  document.body.appendChild(ov);try{enPass(ov)}catch(e){}
@@ -24673,7 +24718,8 @@ function dropBattleChest(){
  const bc=BC(),i=bc.findIndex(x=>!x);
  const k=rollBattleChest();
  const host=RM.game==='carrom'&&RM.phase==='over';   // ٦٫٩٧: في الكيرم بلاطةٌ داخل شاشة النتيجة تفتح المشهد باللمس — لا طبقةٌ فوقها
- if(i<0){if(host)RM.bcPend={k,i:-1,full:true};else setTimeout(()=>chestDropFx(k,-1,true),1400);return}
+ if(i<0){const c=Math.round(({knowledge:120,rival:300,elite:700,legend:1500}[k]||120)*trChestMul());S.coins=(S.coins||0)+c;try{saveState()}catch(e){}   // ٧٫١٤: الخانات ملأى — الصندوق يصير عملاتٍ لا يضيع
+  if(host)RM.bcPend={k,i:-1,full:true,c};else setTimeout(()=>chestDropFx(k,-1,true,c),1400);return}
  bc[i]={k,st:'idle'};saveState();   // ٦٫٩٦: لا أصل للصندوق — كلّ الصناديق نسخُ جيس
  if(host)RM.bcPend={k,i,full:false};else setTimeout(()=>chestDropFx(k,i,false),1400);   // بعد لحظة النتيجة — لا فوقها
 }
@@ -24756,7 +24802,8 @@ function battleChestRow(bare){
     ready?'افتح!':unlocking?bcFmt(Math.ceil((c.doneAt-Date.now())/1000)):S.dev?'افتح فورًا':'اضغط للفتح'}</span>
   </div>`}).join('')}
  </div>
- <div class="lkRail">${ico('gift',14)} إسقاطات الحظّ اليوم: ${Array.from({length:LK_DAILY},(_,i)=>`<i class="${i<(LK().n|0)?'on':''}"></i>`).join('')} <span>${lkLeft()?`فوزك القادم يُسقط واحدًا`:'اكتملت — غدًا ثلاثة أخرى'}</span></div>
+ <div class="lkRail">${ico('gift',14)} إسقاطات الحظّ اليوم: ${Array.from({length:LK_DAILY},(_,i)=>`<i class="${i<(LK().n|0)?'on':''}"></i>`).join('')} <span>${lkLeft()?`فوزك القادم يُسقط واحدًا`:(LK().w|0)<LK_GRAND?`الانتصار السادس إسقاطٌ كبير <bdi>${LK().w|0}/${LK_GRAND}</bdi>`:'اكتملت — غدًا أربعة أخرى'}</span></div>
+ <div class="lkRail">${ico('crown',14)} صندوق التيجان: <b>${S.crc|0}/${CRC_N}</b> <span>كلّ عشرة تيجانٍ صندوقٌ نادر يُفتح فورًا</span></div>
  <div style="font-size:9.5px;color:var(--mut);margin-top:5px;text-align:center">دورة ثابتة من 40:
   ${Object.keys(BC_CYCLE_N).map(k=>`${BC_LABEL[k]} ${BC_CYCLE_N[k]}`).join(' · ')} — القادم: ${BC_LABEL[bcNext(1)[0]]||'عادي'}</div>`;
 }
@@ -24776,7 +24823,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.13';
+const APP_VER='7.14';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -24851,7 +24898,7 @@ function evtScr(){
  <div style="text-align:center">
  <div style="width:84px;height:84px;margin:0 auto">${homeArt('clip','ic_missions')}</div>
  <div class="mtl" style="font-size:20px;margin-top:4px">تحديات اليوم</div>
- <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">ستة تحديات جديدة كل يوم — أنجزها واقبض جوائزها<br>قبل أن تتجدد وتضيع عليك</div>
+ <div style="font-size:12px;color:var(--tx2);margin-top:6px;line-height:1.7">تحدّيات جديدة كل يوم — أنجزها واقبض جوائزها<br>قبل أن تتجدد وتضيع عليك</div>
  <div class="cch" style="display:inline-flex;margin-top:10px;color:var(--warn)">${ico('timer',13)} تتجدد بعد ${evtLeft()}</div>
  <div style="display:flex;gap:8px;justify-content:center;margin-top:11px">
   <span class="cch" style="color:var(--ok)">${ico('check',12)} أنجزت اليوم: <b>${evtDone()}/${EVT_GOALS.length}</b></span></div>
@@ -24872,8 +24919,17 @@ function evtScr(){
 }
 // ── الموسم: تذكرة معركة كاملة — 100 مستوى بمسارين مجاني ومميز ──
 function SZ(){if(!S.szn||typeof S.szn!=='object')S.szn={xp:0,cf:[],cp:[],prem:false};const z=S.szn;   // ٦٫٩٦: حفظٌ ناقص لا يعطي NaN ولا يكسر الشاشة
- if(!(+z.xp>=0))z.xp=0;else z.xp=+z.xp;if(!Array.isArray(z.cf))z.cf=[];if(!Array.isArray(z.cp))z.cp=[];return z}
-const SZ_MAX=100,SZ_STEP=100,SZ_PASS_COST=950,SZ_END=new Date('2026-10-12T00:00:00Z');
+ if(!(+z.xp>=0))z.xp=0;else z.xp=+z.xp;if(!Array.isArray(z.cf))z.cf=[];if(!Array.isArray(z.cp))z.cp=[];
+ /* ٧٫١٤ — الموسم كان ينتهي في تاريخٍ ثابت ولا يتجدّد، فمن أتمّه لا يجد بعده شيئًا. الآن موسمٌ لكلّ شهرٍ ميلاديّ كموسم كلاش رويال:
+    عند التجدّد تُستلَم تلقائيًّا كلّ جائزةٍ بلغتها ولم تستلمها (عدا ورقة الاختيار فتصير 100 جوهرة)، ثمّ يبدأ من الصفر */
+ const sid=szSid();if(z.sid==null)z.sid=sid;else if(z.sid!==sid){try{const lv=Math.min(SZ_MAX,Math.floor(z.xp/SZ_STEP)),L=[];
+   for(let i=1;i<=lv;i++){if(!z.cf.includes(i))L.push(szReward(i,false));if(z.prem&&!z.cp.includes(i)){const r=szReward(i,true);L.push(r.t==='choice'?{t:'gems',v:100}:r)}}
+   if(L.length){grantRewards(L);setTimeout(()=>{try{toast(ico('ticket',13)+' بدأ موسمٌ جديد — استلمنا لك '+L.length+' من جوائز الموسم الماضي','ok')}catch(e){}},1500)}}catch(e){}
+  z.xp=0;z.cf=[];z.cp=[];z.prem=false;z.sid=sid}
+ return z}
+function szSid(){const d=new Date();return d.getUTCFullYear()*12+d.getUTCMonth()}
+function szEnd(){const d=new Date();return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1))}
+const SZ_MAX=100,SZ_STEP=100,SZ_PASS_COST=950;
 function szLv(){return Math.min(SZ_MAX,Math.floor(SZ().xp/SZ_STEP))}
 /** ٦٫٩٤ — تقدّم التذكرة من أيّ مباراة: يعيد ما أُضيف فعلًا (صفرٌ عند السقف) */
 function szAdd(n){const z=SZ(),b=z.xp;z.xp=Math.min(SZ_MAX*SZ_STEP,z.xp+(n|0));return z.xp-b}
@@ -25028,7 +25084,7 @@ function szRow(lv,cur){
 function seasonScr(keep){
  const z=SZ(),lv=szLv(),full=lv>=SZ_MAX;
  const prog=full?SZ_STEP:z.xp-lv*SZ_STEP;
- const days=Math.max(0,Math.ceil((SZ_END-Date.now())/86400000));
+ const days=Math.max(0,Math.ceil((szEnd()-Date.now())/86400000));
  const ready=szReadyCount(),pend=szPendChoice();
  if(!keep&&_keepY==null)_szAll=false;   // ٦٫٩٦: الرجوع إلى التذكرة يحفظ «عرض الكلّ»
  const curLv=Math.max(1,lv);   // الصفّ المضاء: أعلى مستوًى بلغته (الأوّل قبل أيّ تقدّم)
@@ -25202,6 +25258,8 @@ function plLvOf(p){
 /** نسخٌ من جيس: تُحسب، وتفتح الجيس المقفل إذا اكتملت */
 function tlAddCopies(k,v){
  const it=tlItem('sk',k);if(!it||!v)return;
+ if(tlOwn('sk',k)&&typeof skLv==='function'&&skLv(k)>=5){const c=v*({c:20,r:50,e:120,l:400}[it[1]]||20);S.coins=(S.coins||0)+c;   // ٧٫١٤: جيسٌ في أقصى مستوى — نسخه ذهبٌ لا تضيع
+  setTimeout(()=>{try{toast(ico('coin',13)+' «'+tlNm('sk',k)+'» في أقصى مستوى — نسخه صارت '+c.toLocaleString('en-US')+' عملة')}catch(e){}},1400);return}
  S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+v;
  if(!tlOwn('sk',k)&&tlArenaOkItem('sk',k)&&S.skCp[k]>=TL_UNL[it[1]]){S.skCp[k]-=TL_UNL[it[1]];S.tlOwn=S.tlOwn||[];S.tlOwn.push('sk:'+k);tlAddCP(TL_CPP[it[1]]);
   setTimeout(()=>toast(ico('sparkle',13)+' '+T('فُتح جيس')+' «'+tlNm('sk',k)+'»'),1200)}
@@ -25228,17 +25286,28 @@ function skImg(k,sz){
  return `<img src="${url}" width="${sz}" height="${sz}" style="display:block;margin:0 auto" alt="">`;
 }
 /** مكافأة مباراة الكيرم: خبرة ونسخ جيس — مرّةً واحدة لكلّ مباراة */
-function bcDropOk(){try{const m=rmMode();if(m==='room')return false;if(m==='bot')return (TR().tr|0)<TR_BOT_CAP&&/^(mid|hard|imp)$/.test(RM.diff||'mid');return true}catch(e){return true}}
+function bcDropOk(){try{const m=rmMode();if(m==='room')return false;if(m==='bot'){const d=RM.diff||'mid';return d==='hard'||d==='imp'||(d==='mid'&&(TR().tr|0)<TR_BOT_CAP)}return true}catch(e){return true}}
+/* ٧٫١٤ — «بين ساعةٍ وساعة لا مكافآت تستحقّ»: كلّ مباراةٍ محسوبة تدفع عملاتٍ كذهب كلاش رويال لكلّ فوز (والخسارة قليلًا)،
+   وتيجانها تملأ صندوق التيجان (١٠ تيجان = صندوقٌ نادر فوريّ)، والانتصار السادس في اليوم إسقاطٌ كبير. المحسوبة: الأونلاين،
+   والآليّ ما عدا السهل — لا الغرف الودّيّة */
+const CRC_N=10,LK_GRAND=6;
+function caRwOk(){try{const m=rmMode();if(m==='room')return false;if(m==='bot')return (RM.diff||'mid')!=='easy';return true}catch(e){return false}}
+function crcOpen(){try{if(!((S.crcPend|0)>0))return;S.crcPend=(S.crcPend|0)-1;const L=openChest('rival');grantRewards(L);try{achAdd('a_chest')}catch(e){}saveState();
+ push('rewardScr',{title:'صندوق التيجان',list:L,chest:'rival'})}catch(e){}}
 function caMatchReward(won){
  if(!RM.mid||S.caRw===RM.mid)return;S.caRw=RM.mid;
  try{achMatch(!!won)}catch(e){}   // ٦٫٩٥: الإنجازات
  RM.bcDrop=!!won&&bcDropOk();   // ٦٫٩٤: صندوق النصر من الأونلاين، أو من الآليّ المتوسّط فما فوق تحت سقف الكؤوس — لا الودّيّات ولا السهل
- const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0), rw=RM.rw={mid:RM.mid,xp,n,k,lv:0};   // ٦٫٩٧: لبلاطات شاشة النتيجة
+ const xp=won?40:15, n=won?3:1, k=tlRandSk(), lv0=lvl(S.xp||0), rw=RM.rw={mid:RM.mid,xp,n,k,lv:0};
+ const ok=caRwOk(),cr=Math.max(0,Math.min(3,RM.crowns|0));RM.crcDrop=false;RM.lkGrand=false;
+ rw.c=ok?Math.round((won?25+6*cr:6+2*cr)*trChestMul()):0;if(rw.c)S.coins=(S.coins||0)+rw.c;   // ٧٫١٤: ذهب المباراة
+ if(ok&&cr){S.crc=(S.crc|0)+cr;while(S.crc>=CRC_N){S.crc-=CRC_N;S.crcPend=(S.crcPend|0)+1;RM.crcDrop=true}}rw.cr=ok?cr:0;   // ٧٫١٤: صندوق التيجان
+ if(ok)try{if(typeof clanPtsMatch==='function')clanPtsMatch(won?1:0,won?0:1)}catch(e){}   // ٧٫١٤: نقاط النادي من الكيرم (كانت من المسابقة وحدها)   // ٦٫٩٧: لبلاطات شاشة النتيجة
  try{skMastAdd(caSkMine(),{m:1,win:won?1:0})}catch(e){}   // ٦٫٩٤: إتقان الجيس المجهَّز
  S.xp=(S.xp||0)+xp;tlAddCopies(k,n);if(RM.bcDrop&&typeof dropBattleChest==='function')dropBattleChest();
- RM.lkDrop=lkEligible(!!won);
+ RM.lkDrop=false;if(won&&ok){const lk=LK();lk.w=(lk.w|0)+1;if(lk.w===LK_GRAND)RM.lkDrop=RM.lkGrand=true;else RM.lkDrop=lkLeft()>0}   // ٧٫١٤: أربعة إسقاطات، والانتصار السادس إسقاطٌ كبير
  /* ٦٫٩٧: على شاشة النتيجة بلاطةٌ تُلمس — ويُحفظ الإسقاط معلّقًا الآن، فإن خرج اللاعب دون لمسه ظهر له في الرئيسيّة */
- if(RM.lkDrop){if(RM.phase==='over'){try{if(!S.lkPend){const lk=LK();lk.n=(lk.n|0)+1;S.lkPend={fin:lkRoll(),at:Date.now()}}}catch(e){}}else setTimeout(lkQueue,RM.bcDrop?2200:1600)}   // ٦٫٩٥: إسقاط الحظّ لأوّل ثلاثة انتصاراتٍ في اليوم
+ if(RM.lkDrop){try{lkPush(RM.lkGrand)}catch(e){}if(RM.phase!=='over')setTimeout(lkQueue,RM.bcDrop?2200:1600)}   // ٦٫٩٥: إسقاط الحظّ لأوّل ثلاثة انتصاراتٍ في اليوم
  try{saveState()}catch(e){}
  const lv1=lvl(S.xp);
  if(lv1>lv0)rw.lv=lv1;
@@ -27231,9 +27300,8 @@ function mmAutoBot(){
  try{
   if(!RM.mm||RM.mmT!==25||!SOLO_OK[RM.game])return false;
   if(mmSearchers().length>=(RM_MIN[RM.game]||[2])[0])return false;
-  if((TR().tr|0)>=TR_BOT_CAP)return false;
-  const g=RM.game;mmCancel(1);
-  toast(ico('robot',13)+' لم يظهر خصمٌ حقيقيّ — مباراةٌ ضدّ لاعبٍ آليّ صعب، وكؤوسها تُحتسب تحت '+TR_BOT_CAP.toLocaleString('en-US'));
+  const g=RM.game;mmCancel(1);   // ٧٫١٤: في كلّ الساحات — الآليّ الصعب يمنح الكؤوس والصناديق فوق 1,000 أيضًا، فلا انتظارٌ بلا نهاية
+  toast(ico('robot',13)+' لم يظهر خصمٌ حقيقيّ — مباراةٌ ضدّ لاعبٍ آليّ صعب، وكؤوسها وصناديقها تُحتسب');
   RM.caN=2;RM.bots=1;   // بحثٌ فرديّ = مباراةٌ فرديّة، لا آخرُ اختيارٍ من شاشة الآليّ
   RM._botTm=setTimeout(()=>{RM._botTm=null;try{soloStart(g,'hard')}catch(e){}},400);
   return true;
@@ -30421,9 +30489,98 @@ function caRails(x,W,M){
   x.restore();
  }
 }
+/* ═══ ٧٫١٤ — «في ساحة الرمل يكون رمل في الساحة وأنا ألعب، والكيرم فيه رملٌ قليل على الحواف» ═══
+   كما تختلف ساحات كلاش رويال أثناء اللعب: كلّ ساحةٍ تلبس اللوح مادّتها — رملٌ على حوافّ الوجه والإطار، صقيعٌ وثلج،
+   غبار ذهب، أوراقٌ وبتلات، بلّورات… تُرسم مرّةً واحدة في صورة اللوح المخبوزة (caBoardImg) تحت القطع — فلا كلفة في الإطار،
+   ولا شيء فوق خطوط اللعب أو الجيوب أو مجرى القطع المُدخلة. خلف اللوح لوحة الساحة نفسها بمنصّتها (venueHTML) */
+function caArIx(){try{return Math.max(0,Math.min(9,trArenaIx(TR().tr|0)))}catch(e){return 0}}
+const CA_DRESS=[
+ {dust:['#FFF1CC','#F2D9A2','#B98547','#FFE7B0'],n:1500,a:.95,band:.07,heap:'#FBE6B6',rail:'grain',rn:320,hn:16,hw:1.35},                       // ساحة الرمال
+ {dust:['#F4FBFF','#DDF1FF','#BFE3FF'],n:1100,a:.85,band:.06,heap:'#FFFFFF',rail:'flake',rn:80,corner:'ice'},                        // قمم الجليد
+ {dust:['#FFE9A8','#E8B23A','#FFF6D8'],n:900,a:.85,band:.05,rail:'spark',rn:70,sparkC:'#FFE9A8',sn:40,corner:'gold'},                                      // المدرّج الذهبيّ
+ {dust:['#7FCB6A','#4E9E4A','#F6C9D8','#FFFFFF'],n:0,a:.0,band:.05,rail:'leaf',rn:46,sn:70,corner:'vine',leafC:['#5FAE52','#3F8F3E','#86C86A'],petalC:['#F7C6D6','#FFFFFF','#F3A6BF']},   // حدائق الأندلس
+ {dust:['#BDEBFF','#7FD3F7','#FFFFFF'],n:500,a:.7,band:.045,rail:'spark',rn:40,sparkC:'#C9F1FF',sn:24,corner:'crystal'},                  // كهف البلّور
+ {dust:['#E7C6FF','#FFE9A8'],n:260,a:.6,band:.05,rail:'petal',rn:40,sn:80,corner:'gold',petalC:['#8E2A5E','#B23C74','#6A1E6E','#D4A0E8']},             // المجلس الملكيّ
+ {dust:['#EFE3CC','#D6C19C','#7E6346','#F7EEDC'],n:1000,a:.85,band:.06,heap:'#E6D6B8',rail:'grain',rn:240,hn:12,hw:1.15},                           // قلعة البيداء
+ {dust:['#FFE9A8','#E24B4A'],n:200,a:.55,band:.05,rail:'confetti',rn:60,sn:90,corner:'laurel',confC:['#E24B4A','#FFD24A','#FFFFFF','#B8201F']},            // ميدان الأبطال
+ {dust:['#FFB8D6','#D8B4FF','#FFFFFF','#9FD8FF'],n:700,a:.75,band:.05,rail:'spark',rn:70,sparkC:'#FFD6EC',sn:40,corner:'glow'},                         // سديم النجوم
+ {dust:['#FFFFFF','#F4F7FF','#FFF1C8'],n:700,a:.7,band:.06,heap:'#FFFFFF',rail:'cloud',rn:34,corner:'glow',glowC:'255,244,210'}                                        // قصر السحاب
+];
+function caArenaDress(x,W,M,P,PR,ix){
+ const D=CA_DRESS[ix];if(!D)return;
+ const r=vnRnd(9173+ix*131), Mr=caRW(), tr=caTrayR(W), hw=5.4*tr*2.12+tr*1.6+10;
+ const nearPocket=(px,py,k)=>[[M,M],[M+P,M],[M+P,M+P],[M,M+P]].some(([a,b])=>Math.hypot(px-a,py-b)<PR*k);
+ const inTray=(px,py)=>Math.abs(px-W/2)<hw&&(py<Mr+2||py>W-Mr-2);
+ x.save();
+ /* ١) غبارٌ وحبوبٌ على الحوافّ الأربع لوجه اللوح: من الإطار (Mr) نحو الداخل، أكثف عند الإطار، بين الجيوب فقط، ولا يبلغ خطوط القاعدة */
+ const lo=M+PR*1.2, span=P-PR*2.4, B=D.band*W;
+ const at=(sd,along,d)=>sd===0?[along,Mr+d]:sd===1?[W-Mr-d,along]:sd===2?[along,W-Mr-d]:[Mr+d,along];
+ /* الحبوب تُجمع في دلاءٍ بلونها وشفافيّتها (ثلاث درجات) وتُملأ دفعةً واحدة لكلّ دلو — آلاف الحبوب في بضع عشرات نداء */
+ const GB=new Map(), grain=(px,py,rr,col,a)=>{const q=a>.72?.85:a>.45?.6:.35,k2=col+'|'+q;let L=GB.get(k2);if(!L)GB.set(k2,L=[]);L.push(px,py,rr,rr*(.62+r()*.4),r()*3.14)};
+ const flushG=()=>{for(const [k2,L] of GB){const [col,q]=k2.split('|');x.globalAlpha=+q;x.fillStyle=col;for(let i=0;i<L.length;i+=5){const w=L[i+2]*1.7,h=L[i+3]*1.7;x.fillRect(L[i]-w/2,L[i+1]-h/2,w,h)}}GB.clear()};   // حبّةٌ من بكسلٍ إلى ثلاثة: مستطيلٌ صغير لا يُفرَّق عن البيضة ويُرسم أسرع بكثير
+ for(let i=0;i<D.n;i++){const sd=Math.floor(r()*4), d=Math.pow(r(),2.4)*B, [px,py]=at(sd,lo+r()*span,d);
+  if(nearPocket(px,py,1.15))continue;grain(px,py,.5+r()*1.5,D.dust[Math.floor(r()*D.dust.length)],D.a*(.4+r()*.6)*(1-d/B*.7))}
+ /* ٢) كثبانٌ لاصقةٌ بالإطار (رمل، ثلج، سحاب): نصف بيضةٍ من حبوبٍ كثيفة، أفتح في قمّتها وأغمق عند حافّتها الداخليّة — حجمٌ لا بقعة */
+ if(D.heap){const HW=D.hw||1;for(let i=0;i<(D.hn||10);i++){const sd=i%4, w=(26+r()*34)*HW, h=(8+r()*11)*HW, c=lo+w+r()*(span-2*w);
+   for(let g=0;g<Math.round(150*HW*HW);g++){const u=(r()+r()-1), v=(1-Math.pow(Math.abs(u),1.6))*h*Math.sqrt(r()), [px,py]=at(sd,c+u*w,v);
+    if(nearPocket(px,py,1.1))continue;const rim=v>(1-Math.pow(Math.abs(u),1.6))*h*.78;
+    grain(px,py,.6+r()*1.3,rim?D.dust[D.dust.length>2?2:0]:(r()<.35?D.heap:D.dust[Math.floor(r()*2)]),rim?.75:.85)}
+   const [sx0,sy0]=at(sd,c,h*.95),[sx1,sy1]=at(sd,c,0);x.globalAlpha=.24;x.strokeStyle='#3A2208';x.lineWidth=2.6;x.beginPath();   // ظلّ الكثيب على الخشب
+   if(sd%2===0)x.ellipse(sx1,sy0,w*.8,1.2,0,0,6.283);else x.ellipse(sx0,sy1,1.2,w*.8,0,0,6.283);x.stroke()}}
+ flushG();
+ /* ٣) على الإطار الخشبيّ: حبوب، رقاقات ثلج، بريق، أوراق، بتلات، قصاصات، سحب — لا فوق مجرى القطع */
+ const bit=(px,py)=>{const k=D.rail,rot=r()*6.283;
+  if(k==='grain')grain(px,py,.7+r()*1.8,D.dust[Math.floor(r()*D.dust.length)],.55+r()*.4);
+  else if(k==='flake'){const sz=2.5+r()*4;x.globalAlpha=.55+r()*.35;x.strokeStyle='#F2FBFF';x.lineWidth=.9;x.beginPath();for(let a=0;a<6;a++){const an=rot+a*Math.PI/3;x.moveTo(px,py);x.lineTo(px+Math.cos(an)*sz,py+Math.sin(an)*sz)}x.stroke()}
+  else if(k==='spark'){const sz=1.8+r()*3.6;x.globalAlpha=.5+r()*.5;x.fillStyle=D.sparkC||'#FFE9A8';x.beginPath();x.moveTo(px,py-sz);x.quadraticCurveTo(px,py,px+sz,py);x.quadraticCurveTo(px,py,px,py+sz);x.quadraticCurveTo(px,py,px-sz,py);x.quadraticCurveTo(px,py,px,py-sz);x.fill()}
+  else if(k==='leaf'||k==='petal'){const C=k==='leaf'&&r()<.72?D.leafC:D.petalC,sz=k==='leaf'?4+r()*4:2.6+r()*2.6;x.save();x.translate(px,py);x.rotate(rot);x.globalAlpha=.85;x.fillStyle=C[Math.floor(r()*C.length)];
+   x.beginPath();x.moveTo(-sz,0);x.quadraticCurveTo(0,-sz*.62,sz,0);x.quadraticCurveTo(0,sz*.62,-sz,0);x.fill();x.globalAlpha=.35;x.strokeStyle='rgba(0,0,0,.5)';x.lineWidth=.5;x.beginPath();x.moveTo(-sz*.8,0);x.lineTo(sz*.8,0);x.stroke();x.restore()}
+  else if(k==='confetti'){x.save();x.translate(px,py);x.rotate(rot);x.globalAlpha=.8;x.fillStyle=D.confC[Math.floor(r()*D.confC.length)];x.fillRect(-2.2,-1,4.4,2);x.restore()}
+  else if(k==='cloud'){const sz=7+r()*9,g=x.createRadialGradient(px,py,0,px,py,sz);g.addColorStop(0,'rgba(255,255,255,.75)');g.addColorStop(1,'rgba(255,255,255,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(px,py,sz,0,6.283);x.fill()}};
+ for(let i=0;i<D.rn;i++){const sd=Math.floor(r()*4), t=r()*W, dd=r()*Mr*.92;let px,py;
+  if(sd===0){px=t;py=dd}else if(sd===1){px=W-dd;py=t}else if(sd===2){px=t;py=W-dd}else{px=dd;py=t}
+  if(inTray(px,py))continue;bit(px,py)}
+ for(let i=0;i<(D.sn|0);i++){const sd=Math.floor(r()*4), d=4+Math.pow(r(),1.6)*B*.9, [px,py]=at(sd,lo+r()*span,d);if(nearPocket(px,py,1.2))continue;bit(px,py)}   // على حافّة الوجه أيضًا
+ flushG();
+ /* ٤) زوايا الإطار: عناقيد بلّورٍ أزرق (كهف البلّور) أو ثلجٌ متراكم بصقيع (قمم الجليد) — على الزاوية النحاسيّة لا على الجيب */
+ if(D.corner){for(const [cx0,cy0,sx,sy] of [[0,0,1,1],[W,0,-1,1],[W,W,-1,-1],[0,W,1,-1]]){
+  if(D.corner==='crystal'){const shard=(bx,by,ang,len,wd)=>{x.save();x.translate(bx,by);x.rotate(ang);const g=x.createLinearGradient(0,-wd,0,wd);g.addColorStop(0,'#F0FCFF');g.addColorStop(.42,'#8FDBFA');g.addColorStop(1,'#1B64A0');
+    x.globalAlpha=.95;x.fillStyle=g;x.beginPath();x.moveTo(0,-wd*.55);x.lineTo(len*.8,-wd);x.lineTo(len,0);x.lineTo(len*.8,wd);x.lineTo(0,wd*.55);x.closePath();x.fill();
+    x.globalAlpha=.85;x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=.9;x.beginPath();x.moveTo(len*.08,-wd*.25);x.lineTo(len*.86,-wd*.5);x.stroke();
+    x.globalAlpha=.5;x.strokeStyle='#0D3E6A';x.lineWidth=.7;x.beginPath();x.moveTo(0,wd*.55);x.lineTo(len*.8,wd);x.lineTo(len,0);x.stroke();x.restore()};
+   const base=Math.atan2(sy,sx);   // الزاوية نحو الداخل؛ البلّورات على امتداد العارضتين، والقصيرة وحدها نحو القطر (الجيب أبعد منها)
+   const ox=cx0+sx*Mr*.5,oy=cy0+sy*Mr*.5;for(const [da,len,wd] of [[-Math.PI/4,78+r()*22,8.5],[-Math.PI/4+.14,40+r()*8,6.5],[Math.PI/4,78+r()*22,8.5],[Math.PI/4-.14,40+r()*8,6.5],[0,22,6]])shard(ox,oy,base+da,len,wd);   // على العارضتين، والجيب أبعد من أطرافها
+   const gl=x.createRadialGradient(cx0,cy0,0,cx0,cy0,90);gl.addColorStop(0,'rgba(140,220,255,.5)');gl.addColorStop(1,'rgba(140,220,255,0)');x.globalAlpha=1;x.fillStyle=gl;x.fillRect(cx0-90,cy0-90,180,180)}
+  else if(D.corner==='ice'){const g=x.createRadialGradient(cx0,cy0,0,cx0,cy0,Mr*2.2);g.addColorStop(0,'rgba(245,252,255,.95)');g.addColorStop(.45,'rgba(225,244,255,.55)');g.addColorStop(1,'rgba(225,244,255,0)');x.globalAlpha=1;x.fillStyle=g;x.beginPath();x.arc(cx0,cy0,Mr*2.2,0,6.283);x.fill()}
+  else if(D.corner==='gold'){   // صفيحةٌ ذهبيّة بزخرفةٍ على زاوية الإطار (المدرّج الذهبيّ، المجلس الملكيّ)
+   const L=86,T=9,ox=cx0+sx*Mr*.5,oy=cy0+sy*Mr*.5;x.globalAlpha=1;
+   for(const [dx,dy] of [[sx,0],[0,sy]]){const x0=Math.min(ox,ox+dx*L),y0=Math.min(oy,oy+dy*L),w=dx?L:T,h=dy?L:T,g=x.createLinearGradient(x0,y0,x0+(dy?w:0),y0+(dx?h:0));
+    g.addColorStop(0,'#FFF3C4');g.addColorStop(.45,'#E8B23A');g.addColorStop(1,'#8A5A10');x.fillStyle=g;x.fillRect(x0-(dy?T/2:0),y0-(dx?T/2:0),w,h);
+    x.fillStyle='#6A430A';for(let k=1;k<5;k++){x.beginPath();x.arc(ox+dx*k*L/5,oy+dy*k*L/5,1.5,0,6.283);x.fill()}}
+   x.save();x.translate(ox,oy);x.rotate(Math.PI/4);const gg=x.createLinearGradient(-9,-9,9,9);gg.addColorStop(0,'#FFF6D8');gg.addColorStop(1,'#B37D1E');x.fillStyle=gg;x.fillRect(-8,-8,16,16);x.fillStyle='#8A5A10';x.fillRect(-3,-3,6,6);x.restore()}
+  else if(D.corner==='vine'||D.corner==='laurel'){   // غصنٌ بأوراقه على امتداد العارضتين (حدائق الأندلس) أو إكليل غارٍ ذهبيّ بشريطةٍ حمراء (ميدان الأبطال)
+   const gold=D.corner==='laurel',ox=cx0+sx*Mr*.5,oy=cy0+sy*Mr*.5;
+   for(const [dx,dy] of [[sx,0],[0,sy]]){const L=110+r()*20;x.globalAlpha=.95;x.strokeStyle=gold?'#8A5A10':'#3E6B2A';x.lineWidth=1.6;x.beginPath();x.moveTo(ox,oy);x.lineTo(ox+dx*L,oy+dy*L);x.stroke();
+    for(let k=0;k<9;k++){const t=(k+.6)/9.4,px=ox+dx*L*t,py=oy+dy*L*t,side=k%2?1:-1,sz=(gold?7:6.5)*(1-t*.45),an=Math.atan2(dy,dx)+side*.7;
+     x.save();x.translate(px,py);x.rotate(an);const g=x.createLinearGradient(0,-sz*.5,0,sz*.5);if(gold){g.addColorStop(0,'#FFF3C4');g.addColorStop(1,'#B8860F')}else{g.addColorStop(0,'#8FD27A');g.addColorStop(1,'#2F7A34')}
+     x.fillStyle=g;x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(sz*.6,-sz*.55,sz*1.4,0);x.quadraticCurveTo(sz*.6,sz*.55,0,0);x.fill();x.restore()}
+    if(!gold)for(const t of [.3,.72]){const px=ox+dx*L*t,py=oy+dy*L*t;x.fillStyle='#FFFFFF';for(let q=0;q<5;q++){const an=q*1.2566;x.beginPath();x.ellipse(px+Math.cos(an)*2.6,py+Math.sin(an)*2.6,2.2,1.4,an,0,6.283);x.fill()}x.fillStyle='#F2C14E';x.beginPath();x.arc(px,py,1.4,0,6.283);x.fill()}}
+   if(gold){x.globalAlpha=1;x.fillStyle='#C8201F';x.beginPath();x.arc(ox,oy,6.5,0,6.283);x.fill();x.fillStyle='#FFD24A';x.beginPath();x.arc(ox,oy,2.5,0,6.283);x.fill()}}
+  else if(D.corner==='glow'){const C=D.glowC||'255,160,220',g=x.createRadialGradient(cx0,cy0,0,cx0,cy0,110);g.addColorStop(0,'rgba('+C+',.55)');g.addColorStop(.5,'rgba('+C+',.18)');g.addColorStop(1,'rgba('+C+',0)');x.globalAlpha=1;x.fillStyle=g;x.fillRect(cx0-110,cy0-110,220,220);
+   for(let k=0;k<7;k++){const a2=Math.atan2(sy,sx)+(r()-.5)*1.4,d2=14+r()*70;const sp=D.rail;D.rail='spark';bit(cx0+Math.cos(a2)*d2,cy0+Math.sin(a2)*d2);D.rail=sp}}}}
+ x.restore();x.globalAlpha=1;
+}
+/* لباس الساحة طبقةٌ شفّافة تُرسم مرّةً وتُحفظ (واحدةٌ فقط في الذاكرة)، وتُسخَّن في وقت الفراغ حين يُبنى مكان الساحة
+   قبل المباراة — فلا يتأخّر أوّل إطار (كان رسمها داخل خَبز اللوح ٧٠–١٣٠ مللي ثانية عند إبطاء المعالج ×٤) */
+const _caDress={};
+function caDressLayer(ix,KQ){const k=ix+'|'+KQ;if(_caDress[k])return _caDress[k];for(const kk in _caDress)delete _caDress[kk];
+ const W=CA_VW,M=caMG(),P=W-M*2,PR=CA_POCK*(P/CA_R),c=document.createElement('canvas');c.width=Math.round(W*KQ);c.height=c.width;const x=c.getContext('2d');x.scale(KQ,KQ);
+ x.beginPath();if(x.roundRect)x.roundRect(0,0,W,W,W*.016);else x.rect(0,0,W,W);x.clip();caArenaDress(x,W,M,P,PR,ix);return _caDress[k]=c}
+function caDressWarm(ix){try{const cw=_ca.cw||Math.min(innerWidth,520)-12,want=Math.round(Math.min(2160,Math.max(720,cw*Math.min(4,window.devicePixelRatio||1)))/30)*30,KQ=want/CA_VW;
+ (window.requestIdleCallback||(f=>setTimeout(f,300)))(()=>{try{caDressLayer(ix,KQ)}catch(e){}})}catch(e){}}
 function caBoardImg(W,H){
  if(H==null||typeof H==='boolean')H=W;
- const KQ=caK(), tb=H>W&&!!RM.ca, key=W+'x'+H+'|'+KQ+(tb?'|t':'');   // ٦٫٩٦: والحوض مخبوزٌ فيها أثناء المباراة
+ const KQ=caK(), tb=H>W&&!!RM.ca, ax=RM.ca?caArIx():-1, key=W+'x'+H+'|'+KQ+(tb?'|t':'')+'|a'+ax;   // ٧٫١٤: ولكلّ ساحةٍ لباسها   // ٦٫٩٦: والحوض مخبوزٌ فيها أثناء المباراة
  if(_ca.bg&&_ca.bgKey===key)return _ca.bg;
  const M=caMG(),P=W-M*2,sc=P/CA_R,PR=CA_POCK*sc;
  const c=document.createElement('canvas');c.width=Math.round(W*KQ);c.height=Math.round(H*KQ);
@@ -30434,6 +30591,7 @@ function caBoardImg(W,H){
  caSurface(x,M,P);                // وجه اللوح بدقّة الشاشة — ما خارج الإطار شفّاف
  caRails(x,W,caRW());                  // العوارض والزوايا النحاسيّة
  [[0,0],[1,0],[1,1],[0,1]].forEach(([a,b])=>caPocket(x,M+a*P,M+b*P,PR));
+ if(ax>=0)try{x.drawImage(caDressLayer(ax,KQ),0,0,W,W)}catch(e){}   // ٧٫١٤: مادّة الساحة على الحوافّ (طبقةٌ محفوظة)
  /* مكان تجميع القطع في وسط الحافّتين العليا والسفلى: مجرًى محفورٌ في الإطار بحدٍّ نحاسيّ رفيع */
  {const Mr=caRW(), tr=caTrayR(W), hw=5.4*tr*2.12+tr*1.6, hh=Math.min(Mr*.96,tr*2.5);
   for(const cy of [Mr/2,W-Mr/2]){
@@ -31222,6 +31380,7 @@ function caRes(cv){
  let want=720;
  /* ٦٫٦٦: بكسلات الشاشة نفسها (حتّى ٢١٦٠) — كانت ١٠٨٠ حدًّا فيلين اللوح على شاشات ١٤٤٠ */
  try{want=Math.round(Math.min(2160,Math.max(720,(cv.clientWidth||360)*Math.min(4,window.devicePixelRatio||1)))/30)*30}catch(e){}
+ try{_ca.cw=cv.clientWidth||_ca.cw}catch(e){}
  if(cv.width===want)return;
  cv.width=want;cv.height=want*34/30;_ca.bg=null;   // الحساب يبقى بوحدات ٧٢٠ المنطقيّة؛ الرسم يُكبَّر بتحويلٍ واحد
 }
@@ -31522,20 +31681,26 @@ function caMatchEnd(C){
   const d=tro.d|0,before=tro.before!=null?tro.before|0:tr-d,nx=trNext(tr),gl=(typeof trGoal==='function'?trGoal(tr):nx),lo=TR_ARENA[ix],pct=v=>gl?Math.max(0,Math.min(100,Math.round((v-lo)/(gl-lo)*100))):100;
   const prot=d===0&&tro.why==='gate', v0=fresh?before:tr;
   const chip=d>0?`<span class="ceDelta n">+${d}</span>`:d<0?`<span class="ceDelta n dn">−${Math.abs(d)}</span>`:prot?`<span class="ceDelta z">${ico('shield',16)} محميّ</span>`:`<span class="ceDelta n z">+0</span>`;
-  const note=tro.why==='gate'?(lo>0?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):'في الساحة الأولى لا تنقص كؤوسك'):tro.why==='botcap'?'الآليّ لا يمنح كؤوسًا فوق '+TR_BOT_CAP.toLocaleString('en-US')+' — العب أونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
+  const note=tro.why==='gate'?(lo>0?'بوابة الساحة حمتك — لا تهبط تحت '+lo.toLocaleString('en-US'):'في الساحة الأولى لا تنقص كؤوسك'):tro.why==='botcap'?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' تمنح الكؤوسَ مبارياتُ الآليّ الصعب والمستحيل والأونلاين':tro.why==='room'?'مباراة ودّيّة — بلا كؤوس':'';
   troH=`<div class="ceTro ceAn" style="--d:${meWon?1100:950}ms" onclick="push('arenaScr')" data-from="${v0}" data-to="${tr}" data-p1="${pct(tr)}"><div class="ceTroR">${ico('trophy',38)}<b class="ceNum${d<0?' dn':''}">${v0.toLocaleString('en-US')}</b>${chip}</div>
    <div class="ceTroA"><span style="color:${A.g}">${esc(A.n)}</span><div class="arBar sm"><i style="width:${pct(v0)}%"></i></div><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi>':gl?'طريق الأساطير <bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi>':'أتممت طريق الأساطير'}</span></div>${note?`<div class="ceTroN">${note}</div>`:''}</div>`;
  }
  const tile=(cls,icon,val,lbl,d,on,num)=>{const tg=on?'button':'div';return `<${tg} class="ceTile ceAn ${cls}${on?' tap':''}" style="--d:${d}ms"${on?` onclick="${on}"`:''}><span class="ceIc">${icon}</span><b${num?' class="n"':''}>${val}</b><s>${lbl}</s></${tg}>`};
  const rw=RM.rw&&RM.rw.mid===RM.mid?RM.rw:null, bp=RM.bcPend, T0=meWon?1700:1500, tiles=[];
  let lvIc=ico('up',24);try{if(REAL_ART.ic_level)lvIc=`<span class="ceLv" style="width:100%;height:100%;background-image:url(${artSrc('ic_level')})">${lvl(S.xp||0)}</span>`}catch(e){}
- tiles.push(['xp',lvIc,'+'+(rw?rw.xp:meWon?40:15),rw&&rw.lv?T('المستوى')+' '+rw.lv:T('خبرة'),'',1]);
- if(RM.szG)tiles.push(['',ico('ticket',26),'+'+RM.szG,T('تذكرة'),'',1]);
- if(meWon&&RM.bcDrop&&bp)tiles.push(['chest'+(_ca.bcSeen===RM.mid?' seen':''),chestPic(bp.k),T('صندوق'),bp.full?'الخانات ملأى':'نصر · الخانة '+(bp.i+1),'caEndChest()',0]);
- if(meWon&&RM.lkDrop){const pend=!!S.lkPend;tiles.push(['luck',ico('gift',28),'إسقاط حظّ',pend?'افتحه':'فُتح',pend?'caEndLuck()':'',0])}
- if(rw&&tiles.length<4){rw.shown=1;tiles.splice(1,0,['sk',skImg(rw.k,32),'×'+rw.n,esc(tlNm('sk',rw.k)),'',1])}   // نسخ الجيس — وإن ضاق الصفّ فرسالتها في الشاشة التالية
+ /* ٧٫١٤ — أربع بلاطاتٍ على الأكثر بحسب الأهمّيّة (الصندوق، الإسقاط، صندوق التيجان، الذهب، ثمّ الخبرة والتذكرة والنسخ)، وتُعرض بترتيبٍ ثابت */
+ const cand=[];
+ if(meWon&&RM.bcDrop&&bp)cand.push([1,4,['chest'+(_ca.bcSeen===RM.mid?' seen':''),chestPic(bp.k),bp.full?'+'+(bp.c|0).toLocaleString('en-US'):T('صندوق'),bp.full?'الخانات ملأى · عملات':'نصر · الخانة '+(bp.i+1),'caEndChest()',0]]);
+ if(meWon&&RM.lkDrop){const pend=!!S.lkPend;cand.push([2,5,['luck',ico('gift',28),RM.lkGrand?'إسقاط كبير':'إسقاط حظّ',pend?'افتحه':'فُتح',pend?'caEndLuck()':'',0]])}
+ if(RM.crcDrop){const pend=(S.crcPend|0)>0;cand.push([3,6,['crc',ico('crown',28),'التيجان',pend?'صندوقٌ · افتحه':'صندوقٌ · فُتح',pend?'caEndCrown()':'',0]])}
+ if(rw&&rw.c)cand.push([4,0,['coin',ico('coin',26),'+'+rw.c.toLocaleString('en-US'),T('عملة'),'',1]]);
+ if(rw&&rw.cr&&!RM.crcDrop)cand.push([5,7,['crc',ico('crown',26),(S.crc|0)+'/'+CRC_N,'صندوق التيجان','',0]]);
+ cand.push([6,1,['xp',lvIc,'+'+(rw?rw.xp:meWon?40:15),rw&&rw.lv?T('المستوى')+' '+rw.lv:T('خبرة'),'',1]]);
+ if(RM.szG)cand.push([7,2,['',ico('ticket',26),'+'+RM.szG,T('تذكرة'),'',1]]);
+ if(rw)cand.push([8,3,['sk',skImg(rw.k,32),'×'+rw.n,esc(tlNm('sk',rw.k)),'',1],1]);
+ cand.sort((a,b)=>a[0]-b[0]).slice(0,4).sort((a,b)=>a[1]-b[1]).forEach(x=>{if(x[3])rw.shown=1;tiles.push(x[2])});   // نسخ الجيس — وإن ضاق الصفّ فرسالتها في الشاشة التالية
  const tilesH=tiles.map((x,i)=>tile(x[0],x[1],x[2],x[3],T0+i*80,x[4],x[5])).join('');
- const noBc=meWon&&!RM.bcDrop&&RM.solo?`<div class="ceNote ceFade" style="--d:${T0+300}ms">${(TR().tr|0)>=TR_BOT_CAP?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' كأس: صناديق النصر من الأونلاين':'صندوق النصر من الآليّ المتوسّط فما فوق'}</div>`:'';
+ const noBc=meWon&&!RM.bcDrop&&RM.solo?`<div class="ceNote ceFade" style="--d:${T0+300}ms">${(TR().tr|0)>=TR_BOT_CAP?'فوق '+TR_BOT_CAP.toLocaleString('en-US')+' كأس: صناديق النصر من الآليّ الصعب فما فوق والأونلاين':'صندوق النصر من الآليّ المتوسّط فما فوق'}</div>`:'';
  const ch=ch12FinHTML(RM.ch12);
  const say=RM.botSay&&RM.botSay.mid===RM.mid?RM.botSay:null;
  const tPl=meWon?800:620, tSub=meWon?950:760, tVs=meWon?1000:800, tBtn=meWon?2000:1800;
@@ -31565,8 +31730,9 @@ function ceRaysUrl(){
  return _ceRays?artSrc('~ceRays',_ceRays):_ceRays;
 }
 /** صندوق النصر: بلاطته في شاشة النتيجة تفتح مشهد الهبوط القائم */
-function caEndChest(){const p=RM.bcPend;if(!p)return;_ca.bcSeen=RM.mid;document.querySelectorAll('.ceTile.chest').forEach(x=>x.classList.add('seen'));try{chestDropFx(p.k,p.i,p.full)}catch(e){}}
+function caEndChest(){const p=RM.bcPend;if(!p)return;_ca.bcSeen=RM.mid;document.querySelectorAll('.ceTile.chest').forEach(x=>x.classList.add('seen'));try{chestDropFx(p.k,p.i,p.full,p.c)}catch(e){}}
 /** إسقاط الحظّ من بلاطته (محفوظٌ معلّقًا منذ الفوز — إن لم يُلمس ظهر في الرئيسيّة) */
+function caEndCrown(){document.querySelectorAll('.ceTile.crc').forEach(x=>x.classList.add('seen'));try{crcOpen()}catch(e){}}
 function caEndLuck(){document.querySelectorAll('.ceTile.luck').forEach(x=>x.classList.add('seen'));try{lkShow()}catch(e){}}
 /** زرّا النتيجة */
 function caEndGo(fn){try{fn()}catch(e){}}
