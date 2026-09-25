@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """وحدة مشتركة: إزالة خلفيّة الأرجوانيّ (#FF00FF) من لوحات OpenArt إلى شفافيّة، واكتشاف العناصر وترتيبها شبكيًّا.
-تستعملها tools/build-avatars.py و tools/slice-uikit.py"""
+تستعملها tools/build-avatars.py و tools/slice-uikit.py (٦٫٩٦: وkeyout_matte للبورتريهات)"""
 import numpy as np
 from PIL import Image
 try:
@@ -18,6 +18,42 @@ def keyout(im,tol=60):
     spill=(r-g>70)&(b-g>70)&(alpha>0)&(alpha<255)
     rgba[...,1][spill]=((r[spill]+b[spill])//2).clip(0,255).astype(np.uint8)
     return rgba
+def keyout_matte(im,tol=45,band=3,spill=12,hole=120,tint=35):
+    """٦٫٩٦ — قطعٌ أنظف للبورتريهات (tools/build-avatars.py): صورة → RGBA.  keyout() كما هي لبقيّة الأدوات.
+    ١ الخلفيّة: ما قرب من لون الحافّة الوسيط (فرقٌ < tol) شفّاف — ومعه «الثقوب»: كلّ مكوّنٍ متّصل أرجوانيّته min(R,B)−G > hole
+      وفيه نواةٌ ساطعةٌ صريحة (> hole+40 وR,B > 150): فراغٌ بين الأصابع أو خصل الشعر أو ذراع النظّارة مظلَّلٌ فلا يقع في tol.
+      لكلّ ثقبٍ لونُ خلفيّته (وسيطه المظلَّل) لا لون الحافّة.
+    ٢ الداخل الأبعد من band بكسلًا صلبٌ كما رُسم. شريط الحافّة: الألفا من أرجوانيّة البكسل مصحَّحةً بأرجوانيّة أقرب لونٍ داخليّ
+      (الذهبيّ والبشرة سالبان — بدونها يُقدَّر الألفا زائدًا فتبقى هالةٌ وردية)، ثمّ يُنزع لون الخلفيّة المجاورة (unmix).
+    ٣ الصبغة (tint): ما قرب من الخلفيّة (≤ band+spill) وكان مزيجًا صريحًا من لونٍ نظيفٍ مجاور والأرجوانيّ (بقيّةٌ < tint عن خطّ
+      المزج) يُعاد إلى لونه — أطراف التاج والإطار الذهبيّ والبشرة. ما ليس مزيجًا (قماشٌ أرجوانيّ حقيقيّ، عدسةٌ بنفسجيّة) لا يُمسّ.
+    ٤ ثمّ يُطفأ ما بقي من انعكاس الأرجوانيّ على بعد spill بكسلًا ويتلاشى إلى الداخل."""
+    if _nd is None:raise RuntimeError('keyout_matte تحتاج scipy: pip install scipy')
+    C=np.asarray(im.convert('RGB')).astype(np.float32);H,W=C.shape[:2]
+    brd=np.concatenate([C[:8].reshape(-1,3),C[-8:].reshape(-1,3),C[:,:8].reshape(-1,3),C[:,-8:].reshape(-1,3)])
+    Kc=np.median(brd,axis=0);bg0=np.abs(C-Kc).sum(2)<tol
+    m=np.minimum(C[...,0],C[...,2])-C[...,1]
+    Km=np.broadcast_to(Kc,C.shape).copy();bg=bg0.copy()
+    if hole>0:
+        lab,_=_nd.label((m>hole)&~bg0);core=(m>hole+40)&(np.minimum(C[...,0],C[...,2])>150)
+        for j in np.unique(lab[core&(lab>0)]):
+            s=lab==j;Km[s]=np.median(C[s],axis=0);bg|=s
+    dist,(by,bx)=_nd.distance_transform_edt(~bg,return_indices=True)
+    Kn=Km[by,bx];mK=np.maximum(1.0,np.minimum(Kn[...,0],Kn[...,2])-Kn[...,1])
+    inner=(~bg)&(dist>band);edge=(~bg)&~inner
+    _,(iy,ix)=_nd.distance_transform_edt(~inner,return_indices=True);mF=np.minimum(m[iy,ix],0)
+    A=np.ones((H,W),np.float32);A[bg]=0;A[edge]=np.clip((mK-m)/np.maximum(1,mK-mF),0,1)[edge];A[A<.04]=0
+    F=C.copy();sel=edge&(A>0);aa=A[sel][:,None];F[sel]=np.clip((C[sel]-(1-aa)*Kn[sel])/aa,0,255)
+    if tint>0 and spill>0:
+        clean=(~bg)&(dist>band+1)&(m<8);_,(ry,rx)=_nd.distance_transform_edt(~clean,return_indices=True)
+        z=np.where((~bg)&(dist<=band+spill));Rc=C[ry[z],rx[z]];Kz=Kn[z];Fz=F[z];d=Kz-Rc
+        s=((Fz-Rc)*d).sum(1)/np.maximum(1,(d*d).sum(1));res=np.sqrt(((Fz-(Rc+s[:,None]*d))**2).sum(1))
+        s=(s*((s>.03)&(s<.9)&(res<tint))*np.clip(1.5-1.5*(dist[z]-band)/spill,0,1))[:,None]
+        F[z]=np.where(s>0,np.clip((Fz-s*Kz)/np.maximum(.1,1-s),0,255),Fz)
+    if spill>0:
+        w=np.clip(1-(dist-band)/spill,0,1)*(~bg);red=np.clip(np.minimum(F[...,0],F[...,2])-F[...,1],0,None)*w
+        F[...,0]-=red;F[...,2]-=red;F=np.clip(F,0,255)
+    return np.dstack([F.astype(np.uint8),(A*255+.5).astype(np.uint8)])
 def components(alpha,min_px=400,thresh=40,gap=14):
     """مكوّنات متّصلة فوق عتبة الشفافيّة → صناديق (y0,x0,y1,x1,px)، مع دمج المتجاورة"""
     mask=alpha>thresh

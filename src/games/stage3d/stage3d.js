@@ -123,7 +123,9 @@ function vb3dTexGlow(){return vb3dTex('glow',128,128,(g,w,h)=>{const gr=g.create
 /* ── مظهر كل لاعب من أفاتار ملفّه الشخصي: بشرة، شعر وقصّته، عينان، فم، لحية، إكسسوار — الشخصية المجسّمة هي صورته نفسها ── */
 function vb3dAvatarOf(i,model){if(i===model.me)return S.av||AV_DEFAULT;if(model.avs&&model.avs[i])return model.avs[i];return avFromSeed(model.names[i]||'لاعب')}
 function vb3dLook(i,model){
- const me=i===model.me,nm=model.names[i]||'لاعب',av=vb3dAvatarOf(i,model),f=!me&&VB3_FEMALE.has(nm),h=hashStr(nm+'|3d');
+ const me=i===model.me,nm=model.names[i]||'لاعب',av0=vb3dAvatarOf(i,model),h=hashStr(nm+'|3d');
+ /* ٦٫٩٦ — من اختار بورتريهًا مرسومًا يجلس بجنسه وملامحه (لا جسدٌ ملتحٍ لبورتريه امرأة)؛ وإلّا فكما كان */
+ const pp=av0&&avPicOk(av0.pic)?AV_PICS_AV.find(p=>p.k===av0.pic):null,av=pp&&pp.v?Object.assign({},av0,pp.v):av0,f=pp?pp.g==='f':(!me&&VB3_FEMALE.has(nm));
  const id=(k,v)=>((AV[k][v]||AV[k][0]).id);
  return {f,me,host:i===model.host,skin:(Number.isInteger(av.skin)&&AV.skin[av.skin])||AV.skin[0],hair:(Number.isInteger(av.hair)&&AV.hair[av.hair])||AV.hair[0],hs:f?'none':id('hairStyle',av.hairStyle),eyes:id('eyes',av.eyes),mouth:id('mouth',av.mouth),
   beard:f?'none':id('beard',av.beard),acc:id('acc',av.acc),thobe:f?'#1A1A22':VB3_COL.thobe[h%8],shayla:VB3_COL.shayla[(h>>5)%5],cushion:VB3_COL.cushion[(i+(h>>7))%5],h:h};

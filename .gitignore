@@ -18,4 +18,7 @@ art/scenes/vn-*.png
 .s-*.png
 .icons-*.png
 .art-*.png
+# الشخصيّات المرسومة (٦٫٩٦): قصاصات tools/build-avatars.py ومعايناتها ناتجُ بناء — يُلتزم ما يضمّنه في اللعبة فقط
+art/avatars/cut/
+art/avatars/_*.png
 __pycache__/
