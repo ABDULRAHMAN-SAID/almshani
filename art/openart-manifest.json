@@ -202,5 +202,17 @@
   "historyId": "LDbhvQc8EdO5ypGu0R6l",
   "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790277208115_a732d0fb.png",
   "prompt": "Uno hub key art: fan of cards over navy/gold table in majlis"
+ },
+ {
+  "path": "art/road/platforms",
+  "historyId": "SoFzvhAQ0CTxNF1gh5Zv",
+  "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790324243714_300a4950.png",
+  "prompt": "10 Clash-Royale-style two-pad trophy-road platforms (one per arena) on magenta, 5x2"
+ },
+ {
+  "path": "art/road/props",
+  "historyId": "8qpm1zTD3r1j2I9x8N4T",
+  "url": "https://cdn.openart.ai/openart-ai/production/2026-09/create-image/AbqjK4YsUZye3wxxEkcU/gpt-image-2.5-sunburst-1_1790324253649_012fcdd9.png",
+  "prompt": "20 small Arabian 3D props (two per arena) on magenta, 5x4"
  }
 ]

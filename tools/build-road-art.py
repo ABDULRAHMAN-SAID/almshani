@@ -20,6 +20,8 @@ if '--src' in sys.argv:SRC=os.path.abspath(sys.argv[sys.argv.index('--src')+1])
 EXT=('.png','.webp','.jpg','.jpeg')
 DIO=(700,625,84)     # عرض × ارتفاع × جودة — نسبة .rdDio (1.12) وضعف عرضه الأقصى (350)
 SLAB=(820,322,82)    # نسبة .rdSl (2.55)
+PLAT=(760,380,82)    # ٧٫٠٦: منصّة الصفّ بقطعتيها (٢:١)
+PROP=(240,240,84)    # ٧٫٠٦: مجسّم زينةٍ على قطعة
 def find(name):
     for e in EXT:
         p=os.path.join(SRC,name+e)
@@ -37,12 +39,12 @@ def uri(im,q):
 def cut_one(path):
     """مجسّمٌ واحد: كلّ ما ليس أرجوانيًّا — المكوّنات كلّها معًا (القاعدة والديكور المنفصل)"""
     rgba=keyout(Image.open(path));im=Image.fromarray(rgba);return im
-def cut_grid(path,n):
+def cut_grid(path,n,name='slabs.png'):
     rgba=keyout(Image.open(path));bx=grid_order(components(rgba[...,3],min_px=3000,gap=10))
-    if len(bx)!=n:sys.exit('✗ slabs.png: وُجد %d شكلًا والمتوقّع %d (صفّان × خمس على خلفيّة #FF00FF بفراغٍ بينها)'%(len(bx),n))
+    if len(bx)!=n:sys.exit('✗ %s: وُجد %d شكلًا والمتوقّع %d (شبكة على خلفيّة #FF00FF بفراغٍ بينها)'%(name,len(bx),n))
     return [Image.fromarray(rgba[b[0]:b[2]+1,b[1]:b[3]+1]) for b in bx]
 def put(s,name,items):
-    body='const %s={%s};   // ⟦road-art:%s⟧ %s — tools/build-road-art.py\n'%(name,','.join('%d:%r'%(i,u) for i,u in sorted(items.items())),'dio' if name=='ARENA_DIO' else 'slab','مجسّمات الساحات' if name=='ARENA_DIO' else 'منصّة لكلّ ساحة')
+    body='const %s={%s};   // ⟦road-art:%s⟧ %s — tools/build-road-art.py\n'%(name,','.join('%d:%r'%(i,u) for i,u in sorted(items.items())),{'ARENA_DIO':'dio','SLAB_IMG':'slab','ROAD_PLAT':'plat','ROAD_PROP':'prop'}[name],{'ARENA_DIO':'مجسّمات الساحات','SLAB_IMG':'منصّة لكلّ ساحة','ROAD_PLAT':'منصّة الصفّ بقطعتين لكلّ ساحة','ROAD_PROP':'مجسّما زينةٍ لكلّ ساحة'}[name])
     pat=re.compile(r'const %s=\{[^\n]*\n'%name);n=len(pat.findall(s))
     if n!=1:sys.exit('✗ %s: موجود %d مرّة في اللعبة (المتوقّع 1) — هل طُبّق طريق الكؤوس المجسّم (road3d)؟'%(name,n))
     return pat.sub(lambda m:body,s,count=1)
@@ -57,6 +59,18 @@ def main():
         for i,t in enumerate(cut_grid(p,10)):
             t=fit(t,*SLAB[:2]);u,n=uri(t,SLAB[2]);slab[i]=u;total+=n;prev.append(t)
         rep.append('slabs ×10 %dKB'%(sum(len(v) for v in slab.values())*3//4//1024))
+    # ٧٫٠٦ — منصّات الطريق ذات القطعتين (platforms.png: ٥×٢) ومجسّمات الزينة (props.png: ٥×٤، صفّان للمجسّم الأوّل لكلّ ساحة ثمّ صفّان للثاني)
+    plat={};prop={}
+    p=find('platforms')
+    if p:
+        for i,t in enumerate(cut_grid(p,10,'platforms.png')):
+            t=fit(t,*PLAT[:2]);u,n=uri(t,PLAT[2]);plat[i]=u;total+=n;prev.append(t)
+        rep.append('platforms ×10 %dKB'%(sum(len(v) for v in plat.values())*3//4//1024))
+    p=find('props')
+    if p:
+        for i,t in enumerate(cut_grid(p,20,'props.png')):
+            t=fit(t,*PROP[:2],pad=.02);u,n=uri(t,PROP[2]);prop[i]=u;total+=n;prev.append(t)
+        rep.append('props ×20 %dKB'%(sum(len(v) for v in prop.values())*3//4//1024))
     if not rep:sys.exit('لا صور في art/road — ضع dio-01..10.png و/أو slabs.png (خلفيّة #FF00FF) ثمّ أعد التشغيل')
     try:preview([x.resize((x.width//2,x.height//2)) for x in prev],os.path.join(SRC,'_preview.png'),cols=5)
     except Exception as e:rep.append('(المعاينة: %s)'%e)
@@ -64,6 +78,8 @@ def main():
     s=open(GAME,encoding='utf-8').read();orig=s
     if dio:s=put(s,'ARENA_DIO',dio)
     if slab:s=put(s,'SLAB_IMG',slab)
+    if plat:s=put(s,'ROAD_PLAT',plat)
+    if prop:s=put(s,'ROAD_PROP',prop)
     if dry or s==orig:print('(لم يُكتب شيء)' if dry else '(لا تغيير)');return
     open(GAME,'w',encoding='utf-8').write(s);print('✓ كُتب',GAME,'— شغّل الآن: node tools/splash-total.cjs')
 if __name__=='__main__':main()
