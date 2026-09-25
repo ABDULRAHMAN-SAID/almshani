@@ -21,10 +21,13 @@ const HTML=path.join(ROOT,'tahaddi','index.html');
    (لاتينيّة أساسيّة + « » · × + العربيّة وأشكالها + علامات الترقيم العامّة + € −) — ٩٣ك بدل ١٢٧ك. */
 const SUBSETS=[
  {fam:'Cairo',w:'400 900',f:'cairo-400-900.woff2'},
- {fam:'Baloo Bhaijaan 2',w:'700 800',f:'baloobhaijaan2-700-800.woff2'}
+ {fam:'Baloo Bhaijaan 2',w:'700 800',f:'baloobhaijaan2-700-800.woff2'},
+ /* ٧٫١٦ — «الكتابة كبيرة ومرعبة وسيّئة»: العناوين والأزرار والأسماء بخطّ El Messiri (فاخرٌ مقروء، بحروفٍ عربيّة فقط عبر unicode-range)
+    والأرقام واللاتينيّة تسقط إلى Cairo بأرقامٍ متساوية العرض — فلا يعود عيب ٦٫٩٦ (أرقامٌ رفيعة يهتزّ عدّها) */
+ {fam:'Tahaddi Messiri',w:'400 700',f:'elmessiri-ar-400-700.woff2',r:'U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF,U+200C-200F'}
 ];
 
-let css='/* خطّا Cairo وBaloo Bhaijaan 2 — SIL Open Font License 1.1 — مضمَّنان كي تعمل اللعبة والتطبيق دون اتصال */\n';
+let css='/* خطوط Cairo وBaloo Bhaijaan 2 وEl Messiri — SIL Open Font License 1.1 — مضمَّنة كي تعمل اللعبة والتطبيق دون اتصال */\n';
 let bytes=0;
 for(const s of SUBSETS){
  const p=path.join(DIR,s.f);
