@@ -2603,7 +2603,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0011017481" data-head="0001107429" aria-hidden="true">
+<div id="ld" data-total="0011017609" data-head="0001107429" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -24450,6 +24450,9 @@ function arenaScr(){
  const t=TR(),tr=t.tr|0,ix=trArenaIx(tr),A=ARENAS[ix],nx=trNext(tr),lo=TR_ARENA[ix];
  const gl=trGoal(tr),pct=gl?Math.min(100,Math.round((tr-lo)/(gl-lo)*100)):100,ready=trRoadReady(),keep=_keepY!=null;   // ٦٫٩٦: عودةٌ من شاشة المكافأة (أو refresh) → الموجّه يعيد موضع التمرير ولا نقفز
  go(`<div class="scr on arV">${tbar('الكؤوس والساحات')}
+ <!-- ٧٫٠٤: الطريق يُقرأ من الأسفل إلى الأعلى (الساحة ١ في القاع) — فبطاقة ساحتك وشرح الكؤوس في القاع أيضًا لا فوق الساحة ١٠ -->
+ ${trRoadCR(ix)}
+ <div class="sl" style="display:flex;align-items:center">ساحتك الآن${ready?`<span class="arReady">${ready} جاهزة</span>`:''}</div>
  <div class="arHero arHv" style="--g:${A.g};--f:${A.f};--s1:${A.s1};--s2:${A.s2}">
   <div class="arHeroRays"></div>
   ${(()=>{const pc=arPicCls(ix),dio=arDioSrc(ix);return (pc||dio)?`<div class="arHvPic ${pc}">${dio?`<img class="arHvDio" src="${dio}" alt="">`:''}<span class="hmArNo"><s>الساحة</s><b>${ix+1}</b></span></div>`:''})()}
@@ -24460,8 +24463,6 @@ function arenaScr(){
    <div class="arBarL"><span><bdi class="nowrap">${lo.toLocaleString('en-US')}</bdi></span><span>${nx?'<bdi class="nowrap">'+nx.toLocaleString('en-US')+'</bdi> — '+esc(ARENAS[ix+1].n):gl?'<bdi class="nowrap">'+gl.toLocaleString('en-US')+'</bdi> — طريق الأساطير':'أتممت طريق الأساطير'}</span></div></div>
   <div class="arHvSt"><span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
  </div>
- <div class="sl" style="display:flex;align-items:center">طريق الكؤوس${ready?`<span class="arReady">${ready} جاهزة</span>`:''}</div>
- ${trRoadCR(ix)}
  <div class="sl">كيف تُحسب الكؤوس؟</div>
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> (${esc(ARENAS[ARENAS.length-1].n)}) يعود إلى <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.<br>${ico('crown',13)} بعد آخر الساحات يمتدّ طريق الأساطير بجوائزه حتّى <bdi class="nowrap">${TR_ROAD_END.toLocaleString('en-US')}</bdi> كأس، وآخره صندوقٌ أسطوريّ.</div>
  <div class="trvOkW"><button class="rbtn" onclick="back()"><span>موافق</span></button></div>
@@ -24666,7 +24667,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.04';
+const APP_VER='7.05';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
