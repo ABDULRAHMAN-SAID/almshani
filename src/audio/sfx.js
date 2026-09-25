@@ -208,8 +208,31 @@ var SFX=(function(){
   return true;
  }
 
+ /* ٧٫٠٤ — «أصوات الضغط مستفزّة ولا تحمل هويّة اللعبة»: خشبٌ ووتر بدل الصفّارة (كانت ٨٨٠ هرتز جيبيّة عارية).
+    wood(): طقّة خشبٍ كقطعة كيرم تُوضع على اللوح — جزئيّان بنسبة قضيبٍ خشبيّ (١ : ٢٫٧٦) يخمدان في ٥٠ م.ث، ونفَسٌ قصير.
+    pluck(): نقرة وترٍ كالعود — مثلّثٌ عبر مرشّحٍ ينغلق سريعًا (يلمع ثمّ يدفأ) وجيبٌ بثُمانيةٍ تحته. التنقّل صاعد (ري ← لا)،
+    والرجوع هابط (لا ← ري). كلّها خافتة (أعلاها ٠٫٠٦) ولا موجة مربّعة */
+ function wood(f,t0,g){
+  var c=ac();if(!c)return;
+  [[f,1,0.05],[f*2.76,0.32,0.024]].forEach(function(q){var o=c.createOscillator(),v=c.createGain();o.type='sine';o.frequency.setValueAtTime(q[0],t0);o.frequency.exponentialRampToValueAtTime(q[0]*0.95,t0+q[2]);
+   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.003);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);v.connect(c.destination);o.start(t0);o.stop(t0+q[2]+0.02)});
+  noise(t0,0.01,g*0.3,3800);
+ }
+ function pluck(f,t0,g,d){
+  var c=ac();if(!c)return;d=d||0.32;
+  var o=c.createOscillator(),lp=c.createBiquadFilter(),v=c.createGain();
+  o.type='triangle';o.frequency.setValueAtTime(f,t0);
+  lp.type='lowpass';lp.Q.value=0.7;lp.frequency.setValueAtTime(f*8,t0);lp.frequency.exponentialRampToValueAtTime(f*1.4,t0+d*0.6);
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.004);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  o.connect(lp);lp.connect(v);v.connect(c.destination);o.start(t0);o.stop(t0+d+0.03);
+  var s2=c.createOscillator(),sv=c.createGain();s2.type='sine';s2.frequency.setValueAtTime(f/2,t0);
+  sv.gain.setValueAtTime(0.0001,t0);sv.gain.exponentialRampToValueAtTime(g*0.45,t0+0.006);sv.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.8);
+  s2.connect(sv);sv.connect(c.destination);s2.start(t0);s2.stop(t0+d);
+ }
  var LIB={
-  tap:   function(t){tone(880,t,0.045,'sine',0.07)},
+  tap:   function(t){wood(610*(0.97+Math.random()*0.06),t,0.055)},
+  nav:   function(t){pluck(293.66,t,0.05,0.34);pluck(440,t+0.05,0.028,0.28)},
+  back:  function(t){pluck(440,t,0.034,0.24);pluck(293.66,t+0.05,0.045,0.32)},
   ok:    function(t){tone(660,t,0.09,'triangle',0.15);tone(990,t+0.08,0.15,'triangle',0.15)},
   bad:   function(t){tone(230,t,0.2,'sawtooth',0.10,150)},
   /* ٦٫٩٧ — «صوتٌ غبيّ على شاشة الفوز»: الفوز وترٌ دافئ من أربع نغماتٍ (مثلّث + جيبٍ أخفض بثُمانية) تتفتّح في ٢٠٠ مللي ثانية
@@ -227,7 +250,7 @@ var SFX=(function(){
   pot:   function(t,o){sample('carrom','pot',t,{v:10,gain:0.9})},
   hit:   function(t,o){sample('carrom','hit',t,o)},
   wall:  function(t,o){sample('carrom','wall',t,o)},
-  coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)},
+  coin:  function(t){tone(1568,t,0.07,'sine',0.05);tone(2093,t+0.05,0.16,'sine',0.045);noise(t,0.012,0.012,7000)},   // ٧٫٠٤: رنّة ذهب لا موجة مربّعة
   /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
   tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},
   tickHot:function(t){noise(t,0.022,0.115,7000);tone(2050,t,0.034,'square',0.062,1500)},

@@ -2332,6 +2332,24 @@ body .rbtn:disabled{opacity:.5;cursor:default}
  border:1px solid #DADCE0;font-weight:800}
 .auG:active{filter:brightness(.96)}
 .auFoot{margin-top:16px;padding-bottom:6px}
+.scr.on.auWrap.auV2{position:relative;overflow:hidden;margin:-14px -14px -20px;padding:0 16px calc(18px + env(safe-area-inset-bottom,0px));min-height:100dvh;justify-content:flex-end;background:#0B1530}
+.auV2 .auBg{position:absolute;inset:0;background-size:cover;background-position:center 30%;background-color:#0B1530}
+.auV2 .auBg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,22,.35) 0%,rgba(6,10,22,.1) 30%,rgba(6,10,22,.55) 58%,#0B1530 82%)}
+.auV2 .auTop{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:max(18px,env(safe-area-inset-top,0px)) 0 0}
+.auV2 .auLogo{width:clamp(130px,40vw,176px);height:clamp(130px,40vw,176px);filter:drop-shadow(0 8px 18px rgba(0,0,0,.6))}
+.auV2 .auDio{width:min(86%,360px);aspect-ratio:1.12;object-fit:contain;margin-top:-6px;will-change:transform;animation:crFloat 5s ease-in-out infinite}
+.auV2 .auCard{position:relative;z-index:1;margin-top:-18px;padding:18px 16px 14px;border-radius:20px;background:linear-gradient(180deg,rgba(24,40,90,.96),rgba(11,21,48,.98));border:1.5px solid #E8B23A;box-shadow:0 18px 40px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,233,168,.25)}
+.auV2 .auC{position:absolute;width:18px;height:18px;border:2px solid #FFE9A8;pointer-events:none}
+.auV2 .auC.tl{top:6px;left:6px;border-right:0;border-bottom:0;border-radius:6px 0 0 0}.auV2 .auC.tr{top:6px;right:6px;border-left:0;border-bottom:0;border-radius:0 6px 0 0}
+.auV2 .auC.bl{bottom:6px;left:6px;border-right:0;border-top:0;border-radius:0 0 0 6px}.auV2 .auC.br{bottom:6px;right:6px;border-left:0;border-top:0;border-radius:0 0 6px 0}
+.auV2 .auT{margin-top:0;text-align:center;font-family:var(--fd);font-size:clamp(22px,6.4vw,27px);font-weight:700;color:#FFE9A8;text-shadow:0 2px 0 #3A2406}
+.auV2 .auS{text-align:center;color:#C9D2EA}
+.auV2 .auBox{margin-top:0;padding-top:14px}
+.auV2 .auFoot{position:relative;z-index:1;text-align:center}
+.auV2 .auX{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:6px 14px;border-radius:12px;border:1px solid rgba(232,178,58,.45);background:rgba(6,10,22,.55);color:#E6D3A6;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.auV2 .auDio{animation:none}}
+@media (max-height:760px){.auV2 .auLogo{width:108px;height:108px}.auV2 .auDio{width:min(64%,250px)}.auV2 .auCard{padding-top:14px}.auV2 .auS{font-size:11.5px;margin-top:4px}}
+@media (max-height:660px){.auV2 .auDio{width:min(50%,200px);margin-top:-10px}.auV2 .auS{display:none}.auV2 .auBox{padding-top:10px}}
 .auLegal{font-size:10.5px;color:var(--mut);text-align:center;margin-top:12px;line-height:1.7}
 .auLegal b{display:inline-block;color:var(--gold);cursor:pointer;padding:11px 6px;margin:-11px 0}
 .xfCode{margin-top:14px;text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:30px;font-weight:900;
@@ -2585,7 +2603,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0011011996" data-head="0001104827" aria-hidden="true">
+<div id="ld" data-total="0011017481" data-head="0001107429" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -17045,8 +17063,31 @@ var SFX=(function(){
   return true;
  }
 
+ /* ٧٫٠٤ — «أصوات الضغط مستفزّة ولا تحمل هويّة اللعبة»: خشبٌ ووتر بدل الصفّارة (كانت ٨٨٠ هرتز جيبيّة عارية).
+    wood(): طقّة خشبٍ كقطعة كيرم تُوضع على اللوح — جزئيّان بنسبة قضيبٍ خشبيّ (١ : ٢٫٧٦) يخمدان في ٥٠ م.ث، ونفَسٌ قصير.
+    pluck(): نقرة وترٍ كالعود — مثلّثٌ عبر مرشّحٍ ينغلق سريعًا (يلمع ثمّ يدفأ) وجيبٌ بثُمانيةٍ تحته. التنقّل صاعد (ري ← لا)،
+    والرجوع هابط (لا ← ري). كلّها خافتة (أعلاها ٠٫٠٦) ولا موجة مربّعة */
+ function wood(f,t0,g){
+  var c=ac();if(!c)return;
+  [[f,1,0.05],[f*2.76,0.32,0.024]].forEach(function(q){var o=c.createOscillator(),v=c.createGain();o.type='sine';o.frequency.setValueAtTime(q[0],t0);o.frequency.exponentialRampToValueAtTime(q[0]*0.95,t0+q[2]);
+   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.003);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);v.connect(c.destination);o.start(t0);o.stop(t0+q[2]+0.02)});
+  noise(t0,0.01,g*0.3,3800);
+ }
+ function pluck(f,t0,g,d){
+  var c=ac();if(!c)return;d=d||0.32;
+  var o=c.createOscillator(),lp=c.createBiquadFilter(),v=c.createGain();
+  o.type='triangle';o.frequency.setValueAtTime(f,t0);
+  lp.type='lowpass';lp.Q.value=0.7;lp.frequency.setValueAtTime(f*8,t0);lp.frequency.exponentialRampToValueAtTime(f*1.4,t0+d*0.6);
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.004);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  o.connect(lp);lp.connect(v);v.connect(c.destination);o.start(t0);o.stop(t0+d+0.03);
+  var s2=c.createOscillator(),sv=c.createGain();s2.type='sine';s2.frequency.setValueAtTime(f/2,t0);
+  sv.gain.setValueAtTime(0.0001,t0);sv.gain.exponentialRampToValueAtTime(g*0.45,t0+0.006);sv.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.8);
+  s2.connect(sv);sv.connect(c.destination);s2.start(t0);s2.stop(t0+d);
+ }
  var LIB={
-  tap:   function(t){tone(880,t,0.045,'sine',0.07)},
+  tap:   function(t){wood(610*(0.97+Math.random()*0.06),t,0.055)},
+  nav:   function(t){pluck(293.66,t,0.05,0.34);pluck(440,t+0.05,0.028,0.28)},
+  back:  function(t){pluck(440,t,0.034,0.24);pluck(293.66,t+0.05,0.045,0.32)},
   ok:    function(t){tone(660,t,0.09,'triangle',0.15);tone(990,t+0.08,0.15,'triangle',0.15)},
   bad:   function(t){tone(230,t,0.2,'sawtooth',0.10,150)},
   /* ٦٫٩٧ — «صوتٌ غبيّ على شاشة الفوز»: الفوز وترٌ دافئ من أربع نغماتٍ (مثلّث + جيبٍ أخفض بثُمانية) تتفتّح في ٢٠٠ مللي ثانية
@@ -17064,7 +17105,7 @@ var SFX=(function(){
   pot:   function(t,o){sample('carrom','pot',t,{v:10,gain:0.9})},
   hit:   function(t,o){sample('carrom','hit',t,o)},
   wall:  function(t,o){sample('carrom','wall',t,o)},
-  coin:  function(t){tone(1320,t,0.06,'square',0.05);tone(1760,t+0.06,0.13,'square',0.05)},
+  coin:  function(t){tone(1568,t,0.07,'sine',0.05);tone(2093,t+0.05,0.16,'sine',0.045);noise(t,0.012,0.012,7000)},   // ٧٫٠٤: رنّة ذهب لا موجة مربّعة
   /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
   tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},
   tickHot:function(t){noise(t,0.022,0.115,7000);tone(2050,t,0.034,'square',0.062,1500)},
@@ -20636,14 +20677,20 @@ function authKeep(m){
 }
 let AU={busy:0,msg:'',err:0};
 function auSign(){try{return (window.NET&&NET.state().signIn)||null}catch(e){return null}}
+/* ٧٫٠٤ — «صفحة الدخول غبية جدًّا»: كانت شعارًا صغيرًا وفراغًا داكنًا وحقلًا في القاع. الآن مدخل اللعبة كأوّل شاشةٍ في
+   كلاش رويال: لوحة الساحة الأولى تملأ الخلفيّة، مجسّمها يطفو، الشعار فوقه، ثمّ لوحةٌ كحليّة بإطارٍ ذهبيّ فيها البريد و«ابدأ اللعب» */
 function authScr(){
- const sg=auSign();
- go(`<div class="scr on auWrap">
+ const sg=auSign(),pc=arPicCls(0),dio=arDioSrc(0);
+ go(`<div class="scr on auWrap auV2">
+ <div class="auBg ${pc}"></div>
  <div class="auTop">
   <div class="flt2 auLogo"></div>
+  ${dio?`<img class="auDio" src="${dio}" alt="">`:''}
+ </div>
+ <div class="auCard">
+  <i class="auC tl"></i><i class="auC tr"></i><i class="auC bl"></i><i class="auC br"></i>
   <div class="auT">${T('أهلًا بك في تحدّي')}</div>
   <div class="auS">${T('ادخل ببريدك — بلا كلمة مرور ولا رمز. حسابك يتبع بريدك فيعود على أي جهاز.')}</div>
- </div>
  <div class="auBox">
   <input class="fin auMail" id="auMail" type="email" inputmode="email" autocomplete="email"
    name="email" enterkeyhint="go" maxlength="80" placeholder="name@mail.com"
@@ -20651,15 +20698,15 @@ function authScr(){
    onkeydown="if(event.key==='Enter'){event.preventDefault();auGo()}">
   <div class="auHint${AU.err?' bad':''}" id="auHint">${esc(AU.msg||T('اضغط الحقل واختر بريدك من هاتفك'))}</div>
   <button class="rbtn" id="auGo" ${AU.busy?'disabled':''} onclick="auGo()">
-   <span>${AU.busy?T('لحظة…'):T('دخول')}</span></button>
+   <span>${AU.busy?T('لحظة…'):T('ابدأ اللعب')}</span></button>
   ${sg&&sg.google?`<div class="auOr"><i></i><span>${T('أو')}</span><i></i></div>
   <button class="btn g auG" onclick="auGoogle()">${gBrand()} ${T('المتابعة بحساب Google')}</button>`:''}
  </div>
  <div class="auFoot">
-  <button class="btn g" onclick="push('xferScr')">${T('عندي رمز نقل من جهازي القديم')}</button>
+  <button class="auX" onclick="push('xferScr')">${ico('reset',15)} ${T('عندي رمز نقل من جهازي القديم')}</button>
   <div class="auLegal">${T('بالدخول أنت توافق على')}
    <b onclick="push('legalScr')">${T('الشروط والخصوصية')}</b></div>
- </div></div>`);
+ </div></div></div>`);
  setTimeout(()=>{const el=document.getElementById('auMail');if(el&&!(S.email||'').trim())el.focus()},140);
 }
 /** شعار Google الرسميّ — رسمه لا يُغيَّر ولا يُستبدل بأيقونة اللعبة */
@@ -20678,7 +20725,7 @@ function auHint(msg,bad){
 function auBusy(on){
  AU.busy=on?1:0;
  const b=document.getElementById('auGo');
- if(b){b.disabled=!!on;b.innerHTML='<span>'+T(on?'لحظة…':'دخول')+'</span>'}
+ if(b){b.disabled=!!on;b.innerHTML='<span>'+T(on?'لحظة…':'ابدأ اللعب')+'</span>'}
 }
 /** الدخول: بريد صالح ⇒ داخل. وما عدا ذلك يُقال سببه بوضوح */
 async function auGo(){
@@ -20967,7 +21014,10 @@ if(window.VOICE){
 if(window.SFX){
  SFX.init({enabled:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.sfx},haptic:()=>{const o=(S&&S.opt)||DEF_OPT;return !!o.haptic}});
  document.addEventListener('pointerdown',()=>SFX.unlock(),{passive:true});
- document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.target.closest('button,.btn,.rbtn,.nvi,.fc,.li[onclick],.tapName');if(t)SFX.fx('tap')},true);
+ /* ٧٫٠٤: لكلّ لمسةٍ صوتها — الرجوع وترٌ هابط، فتح شاشةٍ أو تبويبٍ وترٌ صاعد، وما عداهما طقّة خشب */
+ document.addEventListener('click',e=>{const t=e.target&&e.target.closest&&e.target.closest('button,.btn,.rbtn,.nvi,.fc,.li[onclick],.tapName,[role=button]');if(!t)return;
+  const oc=t.getAttribute('onclick')||'';
+  SFX.fx(/(^|[^.\w])back\(|Router\.back|history\.back/.test(oc)||t.classList.contains('bk')?'back':(t.classList.contains('nvi')||/(^|[^\w])(push|tab|resetNav)\(/.test(oc))?'nav':'tap')},true);
 }
 
 function setScr(){
@@ -24616,7 +24666,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.03';
+const APP_VER='7.04';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
