@@ -2585,7 +2585,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0011002458" data-head="0001104827" aria-hidden="true">
+<div id="ld" data-total="0011011996" data-head="0001104827" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -24258,13 +24258,50 @@ function arBgCls(a){try{if(typeof ARENA_BG==='undefined'||!ARENA_BG[a])return ''
 function arDioSrc(a){try{return (typeof ARENA_DIO!=='undefined'&&ARENA_DIO[a])?artSrc('~dio:'+a,ARENA_DIO[a]):null}catch(e){return null}}
 /** ٧٫٠٢ — منصّة كلّ ساحة (SLAB_IMG من OpenArt): جوائز الساحة تقف عليها كما في طريق كلاش رويال — فئة CSS تُحقن مرّة */
 function slabCls(a){try{if(typeof SLAB_IMG==='undefined'||!SLAB_IMG[a])return '';if(!document.getElementById('slabCss')){const st=document.createElement('style');st.id='slabCss';
-  st.textContent=Object.keys(SLAB_IMG).map(k=>`.slab${k} .trvArt{background-image:url(${SLAB_IMG[k]})!important}`).join('\n');document.head.appendChild(st)}return ' slab slab'+a}catch(e){return ''}}
+  st.textContent=Object.keys(SLAB_IMG).map(k=>`.slab${k} .trvArt,.slab${k} .crvSlab{background-image:url(${SLAB_IMG[k]})!important}`).join('\n');document.head.appendChild(st)}return ' slab slab'+a}catch(e){return ''}}
 function arPicSrc(a){try{return (typeof ARENA_BG!=='undefined'&&ARENA_BG[a])?artSrc('~arbg:'+a,ARENA_BG[a]):null}catch(e){return null}}
 function arPicCls(a){try{if(typeof ARENA_BG==='undefined'||!ARENA_BG[a])return '';if(!document.getElementById('arPicCss')){const st=document.createElement('style');st.id='arPicCss';
   st.textContent=Object.keys(ARENA_BG).map(k=>`.arPic${k}{background-image:url(${ARENA_BG[k]})}`).join('\n');document.head.appendChild(st)}return 'arPic'+a}catch(e){return ''}}
 function trvTog(i){const el=document.getElementById('trvA'+i);if(!el)return;const pl=el.querySelector('.trvPl');const stuck=pl&&pl.getBoundingClientRect().top<=Math.max(8,parseFloat(getComputedStyle(pl).top)||0)+1&&el.getBoundingClientRect().top<0;
  const on=el.classList.toggle('open');if(on)_trvOpen.add(i);else _trvOpen.delete(i);if(pl)pl.setAttribute('aria-expanded',on?'true':'false');
  if(!on&&stuck)window.scrollTo(0,Math.max(0,window.scrollY+el.getBoundingClientRect().top-8))}   // ٦٫٩٦: طيّ اللوحة الملتصقة يعيد القسم إلى الشاشة
+/* ٧٫٠٣ — «التصميم ما زال ضعيفًا، راجع الفيديو»: طريق الكؤوس كما في فيديو كلاش رويال الذي أرسله المالك، إطارًا إطارًا —
+   لا ألواح داكنة ولا أقسامٌ مطويّة: شبكة معيّنات تملأ الشاشة، كلّ جائزةٍ بطاقةٌ مربّعة واقفة على منصّة الساحة (بمادّتها)،
+   رقم الكأس صغيرٌ على الحافّة، وتحت جوائز كلّ ساحةٍ مجسّمُها كبيرًا ثمّ اسمها ثمّ لافتةٌ برقمها وعتبتها وثلاث جواهر.
+   الاستلام بلمس البطاقة الجاهزة (تتوهّج وتقفز). الترتيب من الأعلى إلى الأدنى كالفيديو */
+function trRoadCR(ix){
+ const t=TR(),tr=t.tr|0,road=trRoad();
+ let nextTr=null,youTr=null;
+ for(const m of road){if(nextTr==null&&trRoadState(m)==='lock')nextTr=m.tr;if(m.tr<=tr)youTr=m.tr}
+ const gA=trGoal(tr);
+ const pin=`<div class="crvYou"><span class="crvYouL"></span><span class="crvYouP">${trIco('trophy',16)}<bdi dir="ltr">${tr.toLocaleString('en-US')}</bdi><s>أنت هنا</s></span>${nextTr!=null&&nextTr!==gA?`<em>بقي ${trvCups(Math.max(0,nextTr-tr))} للمكافأة التالية</em>`:''}${gA!=null?`<em>بقي ${trvCups(Math.max(0,gA-tr))} ${trNext(tr)!=null?'للساحة التالية':'لنهاية طريق الأساطير'}</em>`:''}</div>`;
+ const qty=r=>r.t==='coins'?r.v.toLocaleString('en-US'):r.t==='gems'?String(r.v):r.t==='skc'?'×'+r.v:'';
+ const N=ARENAS.length,out=[];
+ for(let a=N-1;a>=0;a--){
+  const A=ARENAS[a],lo=TR_ARENA[a],hi=a<N-1?TR_ARENA[a+1]:Infinity,rel=a===ix?'cur':a<ix?'past':'fut';
+  const ms=road.filter(m=>m.tr>=lo&&m.tr<hi).sort((x,y)=>y.tr-x.tr);
+  const rows=ms.map(m=>{const s0=trRoadState(m),st=s0==='lock'&&m.tr===nextTr?'next':s0,r=m.r,q=qty(r);
+   return `${m.tr===youTr?pin:''}<div class="crvM ${st}${r.t==='chest'?' big':''}" data-tr="${m.tr}">
+    <bdi class="crvTr" dir="ltr">${m.tr.toLocaleString('en-US')}</bdi>
+    <div class="crvRow"><span class="crvSlab"></span>
+     <div class="crvCard"${st==='ready'?` role="button" aria-label="استلم ${esc(trRoadLbl(r))}" onclick="trClaim(${m.tr})"`:''}><span class="crvArt">${trRoadArt(r)}</span>${q?`<b class="crvQ">${q}</b>`:''}${st==='done'?`<i class="crvOk">${ico('check',13,'#fff')}</i>`:(st==='lock'||st==='next')?`<i class="crvLk">${ico('lock',10,'#FFE9A8')}</i>`:''}</div>
+     <span class="crvLbl">${st==='ready'?'<s class="rd">المس لتستلم</s>':st==='next'?'<s>التالية</s>':''}${trRoadLbl(r)}</span>
+    </div></div>`}).join('');
+  const dio=arDioSrc(a);
+  out.push(`<section class="crvA ${rel}${slabCls(a)}" id="trvA${a}" style="--g:${A.g};--f:${A.f}">
+   <div class="crvL">${rows}${a===0&&youTr==null?pin:''}</div>
+   <div class="crvH">
+    ${dio?`<img class="crvDio" src="${dio}" alt="" loading="lazy">`:`<span class="crvEm">${tierEmblem(a,120)}</span>`}
+    ${rel==='fut'?`<span class="crvHLk">${ico('lock',14,'#FFE9A8')} تُفتح عند <bdi>${lo.toLocaleString('en-US')}</bdi> كأس</span>`:rel==='cur'?'<span class="crvHLk cur">ساحتك الآن</span>':''}
+    <div class="crvNm">${esc(A.n)}</div>
+    <div class="crvPill"><span class="crvNo"><b>${a+1}</b></span><s>الساحة</s><span class="crvTh">${trIco('trophy',20)}<bdi dir="ltr">${lo.toLocaleString('en-US')}</bdi></span></div>
+    <div class="crvGems"><i></i><i></i><i></i></div>
+    ${trvUnChips(a,rel)}
+   </div>
+  </section>`);
+ }
+ return `<div class="trv crv">${out.join('')}</div>`;
+}
 function trRoadV(ix){
  const t=TR(),tr=t.tr|0,road=trRoad(),gate=TR_ARENA[t.gate|0]||0;
  let nextTr=null,youTr=null;
@@ -24374,7 +24411,7 @@ function arenaScr(){
   <div class="arHvSt"><span>${ico('swords',12)} الانتصارات <bdi>${(t.w|0).toLocaleString('en-US')}</bdi> · الخسائر <bdi>${(t.l|0).toLocaleString('en-US')}</bdi></span><span>${ico('up',12)} الأعلى <bdi>${(t.best|0).toLocaleString('en-US')}</bdi></span><span>${ico('shield',12)} البوّابة <bdi>${(TR_ARENA[t.gate|0]||0).toLocaleString('en-US')}</bdi></span></div>
  </div>
  <div class="sl" style="display:flex;align-items:center">طريق الكؤوس${ready?`<span class="arReady">${ready} جاهزة</span>`:''}</div>
- ${trRoadV(ix)}
+ ${trRoadCR(ix)}
  <div class="sl">كيف تُحسب الكؤوس؟</div>
  <div class="note" style="text-align:start;line-height:1.9">${ico('trophy',13)} الفوز أونلاين يمنح 30 كأسًا تقريبًا: من 22 إن كان خصمك أدنى منك إلى 38 إن كان أعلى — والخسارة بعكس ذلك، والتعادل لا يغيّر شيئًا.<br>${ico('shield',13)} من بلغ ساحةً لا يهبط تحت عتبتها مهما خسر.<br>${ico('bulb',13)} ضدّ الآليّ تُحسب الكؤوس في الساحات الثلاث الأولى فقط (حتّى ${TR_BOT_CAP.toLocaleString('en-US')})، والغرف الخاصّة ودّيّة بلا كؤوس.<br>${ico('timer',13)} مع كلّ شهرٍ جديد: من تجاوز <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> (${esc(ARENAS[ARENAS.length-1].n)}) يعود إلى <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> ونصف ما فوقها، ويُكافأ على أعلى ساحةٍ بلغها.<br>${ico('crown',13)} بعد آخر الساحات يمتدّ طريق الأساطير بجوائزه حتّى <bdi class="nowrap">${TR_ROAD_END.toLocaleString('en-US')}</bdi> كأس، وآخره صندوقٌ أسطوريّ.</div>
  <div class="trvOkW"><button class="rbtn" onclick="back()"><span>موافق</span></button></div>
@@ -24386,7 +24423,7 @@ function arenaScr(){
     محفوظًا (عودةٌ من شاشة المكافأة بعد الاستلام: الشاشة تبقى مكانها). النبض على زرٍّ واحد فقط لا على كلّ الجاهز */
 function trvAfterDraw(keep){
  const vis=q=>[...document.querySelectorAll(q)].find(x=>x.offsetParent!==null);   // ٦٫٩٦: الظاهر فقط — لا عنصر داخل ساحةٍ مطويّة
- const el=vis('.trv .trvM.ready')||vis('.trv .trvM.next')||vis('.trv .trvYou');
+ const el=vis('.trv .trvM.ready,.crv .crvM.ready')||vis('.trv .trvM.next,.crv .crvM.next')||vis('.trv .trvYou,.crv .crvYou');
  if(!el)return;el.classList.add('hot');
  document.querySelectorAll('.trv .trvA.open').forEach(x=>{const i=+x.id.replace('trvA','');if(i>=0)_trvOpen.add(i)});
  if(keep)return;
@@ -24579,7 +24616,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.02';
+const APP_VER='7.03';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25450,6 +25487,55 @@ body .trvA:not(.open){padding-bottom:8px}
 body .trvBg{position:absolute;inset:0;border-radius:20px;overflow:hidden;background:radial-gradient(70% 46% at 50% 0%,rgba(var(--f),.32),transparent 70%),linear-gradient(180deg,var(--s1),var(--s2) 62%);background-size:cover;background-position:center;border:1px solid rgba(var(--f),.3);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 16px 36px -18px rgba(0,0,0,.9)}
 body .trvBg::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px),repeating-linear-gradient(-45deg,rgba(255,255,255,.03) 0 2px,transparent 2px 24px)}
 body .trvA.fut .trvBg{opacity:.5}
+body .scr.arV{background:radial-gradient(120% 50% at 50% 0%,rgba(52,86,178,.4),transparent 62%),repeating-linear-gradient(45deg,rgba(232,178,58,.075) 0 2px,transparent 2px 40px),repeating-linear-gradient(-45deg,rgba(232,178,58,.075) 0 2px,transparent 2px 40px),linear-gradient(180deg,#12275C 0%,#0D1B45 45%,#0B1530 100%)}
+body .crv{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+body .crvA{position:relative;display:flex;flex-direction:column}
+body .crvL{display:flex;flex-direction:column}
+body .crvM{position:relative;height:118px;display:flex;align-items:flex-end;justify-content:center}
+body .crvTr{position:absolute;left:0;top:46%;font-family:var(--fd);font-size:13px;font-weight:700;color:#EEF3FF;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 #000,0 0 6px rgba(0,0,0,.85)}
+body .crvRow{position:relative;width:min(250px,calc(100% - 60px));height:100%;margin-left:48px}
+body .crvSlab{position:absolute;left:0;right:0;bottom:4px;aspect-ratio:2.55;background:linear-gradient(180deg,#2A3E78,#15234D) center/100% 100% no-repeat;border-radius:10px}
+body .crvA.slab .crvSlab{background-color:transparent;border-radius:0}
+body .crvCard{position:absolute;left:50%;bottom:44px;width:70px;height:72px;margin-left:-35px;border-radius:13px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#FFFDF5 0%,#F1E3BD 100%);border:3px solid #E8B23A;box-shadow:0 5px 0 #8A6210,0 10px 16px rgba(0,0,0,.55),inset 0 2px 0 #fff}
+body .crvM.big .crvCard{width:84px;height:84px;margin-left:-42px}
+body .crvArt{display:flex;align-items:center;justify-content:center;transform:scale(.92)}
+body .crvArt .arMArt{margin:0;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
+body .crvQ{position:absolute;left:0;right:0;bottom:-3px;text-align:center;font-family:var(--fd);font-size:15px;font-weight:700;color:#fff;line-height:1;font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #1A1206,1px 0 0 #1A1206,-1px 0 0 #1A1206,0 -1px 0 #1A1206}
+body .crvOk{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#5BE08F,#1F9A55);border:2px solid #fff;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+body .crvLk{position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:#0E1A40;border:1.5px solid #E8B23A}
+body .crvM.done .crvCard{filter:saturate(.35) brightness(.8)}
+body .crvM.ready .crvCard{cursor:pointer;box-shadow:0 5px 0 #8A6210,0 0 0 3px #FFE9A8,0 0 26px rgba(255,214,110,.95)}
+body .crvM.ready.hot .crvCard{animation:crvHop 1.5s ease-in-out infinite;will-change:transform}   /* ٧٫٠٣: تقفز الأقرب وحدها — ٢٩ بطاقةً تقفز معًا كانت تُسقط التمرير إلى ٥٦ إطارًا مع الإبطاء ×٤ */
+@keyframes crvHop{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+body .crvM.next .crvCard{box-shadow:0 5px 0 #8A6210,0 0 0 2px rgba(255,233,168,.7),0 10px 16px rgba(0,0,0,.55)}
+body .crvLbl{position:absolute;left:4px;right:4px;bottom:8px;display:flex;flex-direction:column;align-items:center;text-align:center;font-size:10.5px;font-weight:800;line-height:1.25;color:#FFF3D0;text-shadow:0 1px 2px #000,0 0 4px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body .crvLbl s{text-decoration:none;font-size:9.5px;color:#FFE9A8}
+body .crvLbl s.rd{color:#7CF0A8}
+body .crvA.fut .crvM{opacity:.82}
+body .crvH{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 0 26px}
+body .crvDio{width:min(80%,330px);aspect-ratio:1.12;object-fit:contain}
+body .crvEm{display:grid;place-items:center;height:150px}
+body .crvA.fut .crvDio{opacity:.6}
+body .crvHLk{margin-top:-26px;position:relative;z-index:1;display:inline-flex;align-items:center;gap:5px;padding:3px 12px;border-radius:12px;font-size:11.5px;font-weight:800;color:#FFE9A8;background:rgba(6,10,22,.82);border:1px solid rgba(232,178,58,.6)}
+body .crvHLk.cur{color:#1A1206;background:linear-gradient(180deg,#FFE9A8,#D9A93C);border-color:#FFF3C8}
+body .crvNm{font-family:var(--fd);font-size:clamp(22px,6.6vw,28px);font-weight:700;color:#fff;line-height:1.2;text-shadow:0 2px 0 #1A1206,0 0 12px rgba(0,0,0,.75);text-align:center}
+body .crvPill{display:flex;align-items:center;gap:8px;min-width:min(78%,300px);padding:4px 16px 4px 5px;border-radius:24px;background:linear-gradient(180deg,#2C4BA6 0%,#18307A 100%);border:2px solid #E8B23A;box-shadow:0 5px 0 #0A1636,0 10px 18px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.25)}
+body .crvNo{width:38px;height:38px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 50% 35%,#FFF3C8,#E8B23A 60%,#9A6A12);border:2px solid #FFF1C4;box-shadow:0 2px 4px rgba(0,0,0,.5)}
+body .crvNo b{font-family:var(--fd);font-size:19px;font-weight:700;color:#2A1B00}
+body .crvPill>s{text-decoration:none;font-size:12px;font-weight:800;color:#CFE0FF}
+body .crvTh{margin-inline-start:auto;display:inline-flex;align-items:center;gap:5px}
+body .crvTh bdi{font-family:var(--fd);font-size:21px;font-weight:700;color:#FFE9A8;font-variant-numeric:tabular-nums;text-shadow:0 2px 0 #3A2406}
+body .crvGems{display:flex;gap:7px;margin-top:4px}
+body .crvGems i{width:10px;height:10px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#FFF3C8,#E8B23A);box-shadow:0 0 6px rgba(255,214,110,.6)}
+body .crvGems i:nth-child(odd){background:linear-gradient(135deg,#E7C6FF,#9B5CF0);box-shadow:0 0 6px rgba(170,110,255,.6)}
+body .crvH .trvUn{margin-top:8px}
+body .crvYou{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;margin:10px 0 12px}
+body .crvYouL{position:absolute;left:0;right:0;top:15px;height:2px;background:linear-gradient(90deg,transparent,#FFE9A8 20%,#FFE9A8 80%,transparent)}
+body .crvYouP{position:relative;display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:16px;background:linear-gradient(180deg,#FFF3C8,#D9A93C);color:#2A1B00;font-weight:900;box-shadow:0 3px 0 #8A6210}
+body .crvYouP bdi{font-family:var(--fd);font-size:17px}
+body .crvYouP s{text-decoration:none;font-size:11px}
+body .crvYou em{font-style:normal;font-size:11px;font-weight:800;color:#E6ECFF;background:rgba(6,10,22,.7);padding:2px 10px;border-radius:10px}
+@media (prefers-reduced-motion:reduce){body .crvM.ready.hot .crvCard{animation:none}}
 body .trvPic{position:relative;display:block;height:clamp(120px,36vw,175px);margin:8px 2px 2px;border-radius:14px;overflow:hidden;background-size:cover;background-position:center 58%;border:1px solid rgba(var(--f),.55);box-shadow:0 10px 22px -12px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,244,214,.15);cursor:pointer}
 body .trvPicSh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,10,22,0) 55%,rgba(6,10,22,.6))}
 body .trvPic.hasDio{height:clamp(170px,50vw,230px)}
