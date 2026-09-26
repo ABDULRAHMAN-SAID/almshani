@@ -34,6 +34,63 @@ var SFX=(function(){
   var c=ac();
   if(c&&c.state==='suspended'){try{c.resume().catch(function(){})}catch(e){}}
  }
+ /* ═══ ٧٫٢٠ — «الأصوات ضعيفة سيّئة» ═══
+    كانت أصوات الواجهة موجاتٍ عارية بشدّة ٠٫٠٣–٠٫١ (أخفض من أصوات اللوح بـ٢٠–٢٦ dB) تذهب إلى السمّاعة مباشرة.
+    صار لها سلسلة صوتٍ حقيقيّة: حافلةٌ رئيسيّة بضاغطٍ يحدّ القمم، وقاعةُ صدى مولَّدة (استجابةٌ نبضيّة ستيريو ١٫٨ث)،
+    ونماذج آلات: وترٌ منقور بخوارزميّة كاربلس–سترونغ (عود وقانون)، أجراسٌ بتعديل التردّد، نحاسٌ بثلاثة مناشير متباعدة
+    عبر مرشّحٍ يتفتّح، طبلةٌ تيمباني بطبقةٍ تهبط، صنجٌ يتنفّس، وخشبٌ ومعدن للنقرات والعملات.
+    تسجيلات اللوح الحقيقيّة تمرّ خارج الضاغط كما هي (RAW) فلا تتغيّر ديناميكيّتها */
+ var RV=0;
+ function BUS(c){
+  if(c.__tb)return c.__tb;
+  var master=c.createGain();master.gain.value=0.92;master.connect(c.destination);
+  var comp=c.createDynamicsCompressor();comp.threshold.value=-14;comp.knee.value=8;comp.ratio.value=5;comp.attack.value=0.004;comp.release.value=0.18;comp.connect(master);
+  var dry=c.createGain();dry.gain.value=1;dry.connect(comp);
+  var wet=c.createGain();wet.gain.value=1;
+  try{var cv=c.createConvolver(),sr=c.sampleRate,n=Math.floor(sr*1.8),ir=c.createBuffer(2,n,sr);
+   for(var ch=0;ch<2;ch++){var d=ir.getChannelData(ch),lp=0,lp2=0;for(var k=0;k<n;k++){var tt=k/sr,w=Math.random()*2-1,on=(tt<0.012?tt/0.012:1);lp=lp*0.93+w*0.07;lp2=lp2*0.93+lp*0.07;   // قاعةٌ داكنة: الجسم الطويل منخفض، واللمعان قصير
+     d[k]=on*(lp2*6*Math.exp(-tt/0.5)+w*0.22*Math.exp(-tt/0.09))}
+    for(var r=0;r<6;r++){var at=Math.floor(sr*(0.011+r*0.013+ch*0.004));if(at<n)d[at]+=0.5*Math.pow(0.7,r)*(r%2?-1:1)}}
+   cv.buffer=ir;var rg=c.createGain();rg.gain.value=0.55;wet.connect(cv);cv.connect(rg);rg.connect(comp)}catch(e){}
+  c.__tb={dry:dry,wet:wet,raw:master};return c.__tb;
+ }
+ function RAW(c){return BUS(c).raw}
+ function route(node,c,send){var b=BUS(c);node.connect(b.dry);var sv=send==null?RV:send;if(sv>0){var s=c.createGain();s.gain.value=sv;node.connect(s);s.connect(b.wet)}}
+ var KS={};
+ /* وترٌ منقور (كاربلس–سترونغ): دفعةُ ضجيجٍ في خطّ تأخيرٍ طوله دورةٌ واحدة، يُعاد متوسّطها فيخمد كالوتر الحقيقيّ */
+ function ksBuf(c,f,d,br){var sr=c.sampleRate,key=sr+':'+Math.round(f*10)+':'+d+':'+br;if(KS[key])return KS[key];
+  var N=Math.max(2,Math.round(sr/f)),n=Math.floor(sr*d),b=c.createBuffer(1,n,sr),y=b.getChannelData(0),prev=0;
+  for(var i=0;i<N&&i<n;i++){var w=Math.random()*2-1;prev=prev*(1-br)+w*br;y[i]=prev}
+  var rho=Math.pow(0.001,1/(f*d));for(i=N;i<n;i++)y[i]=rho*0.5*(y[i-N]+y[i-N-1<0?0:i-N-1]);
+  var pk=0;for(i=0;i<n;i++)pk=Math.max(pk,Math.abs(y[i]));var fo=Math.floor(sr*0.006);for(i=0;i<n;i++){y[i]/=pk||1;if(i>n-fo)y[i]*=(n-i)/fo}
+  KS[key]=b;return b}
+ function kpluck(f,t0,g,d,br,body){var c=ac();if(!c)return;var s=c.createBufferSource(),v=c.createGain();s.buffer=ksBuf(c,f,d||0.9,br||0.5);v.gain.value=g;
+  if(body){var pk=c.createBiquadFilter();pk.type='peaking';pk.frequency.value=body;pk.Q.value=1.2;pk.gain.value=5;s.connect(pk);pk.connect(v)}else s.connect(v);route(v,c);s.start(t0)}
+ /* جرسٌ بتعديل التردّد: حاملٌ ومعدِّلٌ بنسبة ١ : ٣٫٥ — بريقٌ معدنيّ يخمد ويصفو */
+ function bell(f,t0,g,d){var c=ac();if(!c)return;d=d||0.9;var car=c.createOscillator(),mod=c.createOscillator(),mg=c.createGain(),v=c.createGain();
+  car.frequency.value=f;mod.frequency.value=f*3.5;mg.gain.setValueAtTime(f*2.4,t0);mg.gain.exponentialRampToValueAtTime(f*0.05,t0+d);mod.connect(mg);mg.connect(car.frequency);
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.003);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);car.connect(v);route(v,c);
+  car.start(t0);mod.start(t0);car.stop(t0+d+0.05);mod.stop(t0+d+0.05)}
+ /* نحاس: ثلاثة مناشير متباعدة ±٧ سنت عبر مرشّحٍ يتفتّح ثمّ يدفأ */
+ function brass(f,t0,d,g){var c=ac();if(!c)return;var lp=c.createBiquadFilter(),v=c.createGain();lp.type='lowpass';lp.Q.value=1.1;
+  lp.frequency.setValueAtTime(420,t0);lp.frequency.exponentialRampToValueAtTime(Math.min(5200,f*9),t0+0.07);lp.frequency.exponentialRampToValueAtTime(Math.min(2600,f*4.5),t0+Math.max(0.12,d));
+  v.gain.setValueAtTime(0.0001,t0);v.gain.linearRampToValueAtTime(g,t0+0.035);v.gain.setValueAtTime(g*0.85,t0+Math.max(0.05,d-0.08));v.gain.exponentialRampToValueAtTime(0.0001,t0+d+0.28);
+  [-7,0,7].forEach(function(ct){var o=c.createOscillator();o.type='sawtooth';o.frequency.value=f;o.detune.value=ct;o.connect(lp);o.start(t0);o.stop(t0+d+0.32)});lp.connect(v);route(v,c)}
+ function timp(t0,f,g){var c=ac();if(!c)return;var o=c.createOscillator(),v=c.createGain();o.type='sine';o.frequency.setValueAtTime(f*1.25,t0);o.frequency.exponentialRampToValueAtTime(f,t0+0.12);
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.006);v.gain.exponentialRampToValueAtTime(0.0001,t0+1.1);o.connect(v);route(v,c);o.start(t0);o.stop(t0+1.2);noise(t0,0.09,g*0.5,500)}
+ var NB2=null;function nbuf(c){if(NB2&&NB2.sampleRate===c.sampleRate)return NB2;var n=c.sampleRate*2,b=c.createBuffer(1,n,c.sampleRate),d=b.getChannelData(0);for(var i=0;i<n;i++)d[i]=Math.random()*2-1;NB2=b;return b}
+ function cymbal(t0,d,g,swell){var c=ac();if(!c)return;var s=c.createBufferSource(),hp=c.createBiquadFilter(),v=c.createGain();s.buffer=nbuf(c);hp.type='highpass';hp.frequency.value=6500;
+  v.gain.setValueAtTime(0.0001,t0);if(swell)v.gain.exponentialRampToValueAtTime(g,t0+swell);else v.gain.exponentialRampToValueAtTime(g,t0+0.005);v.gain.exponentialRampToValueAtTime(0.0001,t0+(swell||0)+d);
+  s.connect(hp);hp.connect(v);route(v,c);s.start(t0);s.stop(t0+(swell||0)+d+0.05)}
+ function whoosh(t0,d,g,f0,f1){var c=ac();if(!c)return;var s=c.createBufferSource(),bp=c.createBiquadFilter(),v=c.createGain();s.buffer=nbuf(c);bp.type='bandpass';bp.Q.value=1.4;bp.frequency.setValueAtTime(f0,t0);bp.frequency.exponentialRampToValueAtTime(f1,t0+d);
+  v.gain.setValueAtTime(0.0001,t0);v.gain.linearRampToValueAtTime(g,t0+d*0.7);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);s.connect(bp);bp.connect(v);route(v,c);s.start(t0);s.stop(t0+d+0.05)}
+ /* معدن: عملةٌ ترنّ — جزئيّاتٌ غير متناسقة تخمد بسرعاتٍ مختلفة */
+ function clink(t0,g,k){var c=ac();if(!c)return;k=k||1;[[2380,1,0.22],[3320,0.7,0.16],[5150,0.45,0.1],[7040,0.25,0.06]].forEach(function(q){var o=c.createOscillator(),v=c.createGain();o.frequency.value=q[0]*k;
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.002);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);route(v,c);o.start(t0);o.stop(t0+q[2]+0.02)});noise(t0,0.008,g*0.4,9000)}
+ function creak(t0,d,g){var c=ac();if(!c)return;var o=c.createOscillator(),bp=c.createBiquadFilter(),v=c.createGain(),lfo=c.createOscillator(),lg=c.createGain();o.type='sawtooth';o.frequency.value=70;
+  lfo.frequency.value=23;lg.gain.value=28;lfo.connect(lg);lg.connect(o.frequency);bp.type='bandpass';bp.Q.value=6;bp.frequency.setValueAtTime(700,t0);bp.frequency.exponentialRampToValueAtTime(1500,t0+d);
+  v.gain.setValueAtTime(0.0001,t0);v.gain.linearRampToValueAtTime(g,t0+0.05);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);o.connect(bp);bp.connect(v);route(v,c);o.start(t0);lfo.start(t0);o.stop(t0+d+0.05);lfo.stop(t0+d+0.05)}
+ function withRV(x,f){var p=RV;RV=x;try{f()}finally{RV=p}}
  /* نغمة واحدة: تردّد، بداية، مدّة، شكل الموجة، شدّة، وانزلاق اختياري إلى تردّد آخر */
  function tone(f,t0,d,type,g,slide){
   var c=ac();if(!c)return;
@@ -44,7 +101,7 @@ var SFX=(function(){
   v.gain.setValueAtTime(0.0001,t0);
   v.gain.exponentialRampToValueAtTime(g||0.18,t0+0.012);
   v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
-  o.connect(v);v.connect(c.destination);
+  o.connect(v);route(v,c);
   o.start(t0);o.stop(t0+d+0.03);
  }
  /* ٦٫٩٧ — نغمةٌ دافئة: مذبذبٌ عبر مرشّحٍ منخفضٍ ليّن، هجومٌ ناعم (٣٠ مللي ثانية) وذيلٌ طويل — لنداءَي الفوز والخسارة */
@@ -58,7 +115,7 @@ var SFX=(function(){
   v.gain.linearRampToValueAtTime(g,t0+0.03);
   v.gain.setValueAtTime(g,t0+Math.max(0.03,d-rel));
   v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
-  o.connect(lp);lp.connect(v);v.connect(c.destination);
+  o.connect(lp);lp.connect(v);route(v,c);
   o.start(t0);o.stop(t0+d+0.05);
  }
  var noiseBuf=null;
@@ -74,7 +131,7 @@ var SFX=(function(){
   s.buffer=noiseBuf;f.type='lowpass';f.frequency.value=cut||1800;
   v.gain.setValueAtTime(g||0.2,t0);
   v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
-  s.connect(f);f.connect(v);v.connect(c.destination);
+  s.connect(f);f.connect(v);route(v,c);
   s.start(t0);s.stop(t0+d+0.02);
  }
  /* ── زحف الخشب (٦٫٤٣) ──
@@ -118,7 +175,7 @@ var SFX=(function(){
     f.type='bandpass';f.frequency.value=2400;f.Q.value=0.6;   // التسجيل الحقيقيّ: طاقة الانزلاق بين ١٫٤ و٥٫٥ ك.هرتز
    }
    g.gain.value=0.0001;
-   src.connect(f);f.connect(g);g.connect(c.destination);
+   src.connect(f);f.connect(g);g.connect(RAW(c));
    try{real?src.start(0,rs[0][0]):src.start()}catch(e){return false}
    SL={src:src,f:f,g:g,real:real};
   }
@@ -152,7 +209,7 @@ var SFX=(function(){
   if(!MV){
    var src=c.createBufferSource(),g=c.createGain();
    src.buffer=SPR.carrom.buf;src.loop=true;src.loopStart=rs[0][0];src.loopEnd=rs[0][0]+rs[0][1]-0.002;
-   g.gain.value=0.0001;src.connect(g);g.connect(c.destination);
+   g.gain.value=0.0001;src.connect(g);g.connect(RAW(c));
    try{src.start(0,rs[0][0]+Math.random()*(rs[0][1]-0.3))}catch(e){return false}
    MV={src:src,g:g};
   }
@@ -203,7 +260,7 @@ var SFX=(function(){
   vol.gain.setValueAtTime(g*0.9,t0);
   vol.gain.setValueAtTime(g*0.9,Math.max(t0,end-0.006));
   vol.gain.linearRampToValueAtTime(0,end);
-  src.connect(vol);vol.connect(c.destination);
+  src.connect(vol);vol.connect(RAW(c));
   try{src.start(t0,seg[0],dur)}catch(e){return false}
   return true;
  }
@@ -215,7 +272,7 @@ var SFX=(function(){
  function wood(f,t0,g){
   var c=ac();if(!c)return;
   [[f,1,0.05],[f*2.76,0.32,0.024]].forEach(function(q){var o=c.createOscillator(),v=c.createGain();o.type='sine';o.frequency.setValueAtTime(q[0],t0);o.frequency.exponentialRampToValueAtTime(q[0]*0.95,t0+q[2]);
-   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.003);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);v.connect(c.destination);o.start(t0);o.stop(t0+q[2]+0.02)});
+   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.003);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);route(v,c);o.start(t0);o.stop(t0+q[2]+0.02)});
   noise(t0,0.01,g*0.3,3800);
  }
  function pluck(f,t0,g,d){
@@ -224,21 +281,29 @@ var SFX=(function(){
   o.type='triangle';o.frequency.setValueAtTime(f,t0);
   lp.type='lowpass';lp.Q.value=0.7;lp.frequency.setValueAtTime(f*8,t0);lp.frequency.exponentialRampToValueAtTime(f*1.4,t0+d*0.6);
   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.004);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
-  o.connect(lp);lp.connect(v);v.connect(c.destination);o.start(t0);o.stop(t0+d+0.03);
+  o.connect(lp);lp.connect(v);route(v,c);o.start(t0);o.stop(t0+d+0.03);
   var s2=c.createOscillator(),sv=c.createGain();s2.type='sine';s2.frequency.setValueAtTime(f/2,t0);
   sv.gain.setValueAtTime(0.0001,t0);sv.gain.exponentialRampToValueAtTime(g*0.45,t0+0.006);sv.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.8);
-  s2.connect(sv);sv.connect(c.destination);s2.start(t0);s2.stop(t0+d);
+  s2.connect(sv);route(sv,c);s2.start(t0);s2.stop(t0+d);
  }
+ var D4=293.66,A4=440,D5=587.33,Fs5=739.99,A5=880;
  var LIB={
-  tap:   function(t){wood(610*(0.97+Math.random()*0.06),t,0.055)},
-  nav:   function(t){pluck(293.66,t,0.05,0.34);pluck(440,t+0.05,0.028,0.28)},
-  back:  function(t){pluck(440,t,0.034,0.24);pluck(293.66,t+0.05,0.045,0.32)},
-  ok:    function(t){tone(660,t,0.09,'triangle',0.15);tone(990,t+0.08,0.15,'triangle',0.15)},
-  bad:   function(t){tone(230,t,0.2,'sawtooth',0.10,150)},
-  /* ٦٫٩٧ — «صوتٌ غبيّ على شاشة الفوز»: الفوز وترٌ دافئ من أربع نغماتٍ (مثلّث + جيبٍ أخفض بثُمانية) تتفتّح في ٢٠٠ مللي ثانية
-     بذيلِ ٣٠٠ ومرشّحٍ ناعم، وبريقٌ عالٍ خافت. الخسارة نغمتان جيبيّتان هابطتان بهدوءٍ وذيلٍ طويل. لا سلّم ألعاب الثمانية بت */
-  win:   function(t){noise(t,0.35,0.025,700);[[523,0],[659,0.06],[784,0.12],[1047,0.2]].forEach(function(n){pad(n[0],t+n[1],1.0-n[1],'triangle',0.065,0.3,2600);pad(n[0]/2,t+n[1],1.0-n[1],'sine',0.045,0.3,1600)});pad(2093,t+0.32,0.7,'sine',0.022,0.35,3400)},
-  lose:  function(t){pad(330,t,0.75,'sine',0.085,0.55,1400);pad(262,t+0.24,1.05,'sine',0.08,0.75,1200);pad(131,t+0.24,1.05,'sine',0.03,0.75,900)},
+  /* نقرة الواجهة: خشبٌ دافئ بجسمٍ منخفض — تُسمع ولا تزعج */
+  tap:   function(t){wood(720*(0.97+Math.random()*0.06),t,0.42);tone(165,t,0.07,'sine',0.2)},
+  /* التنقّل والرجوع: نقرتا عود (كاربلس–سترونغ بجسمٍ خشبيّ عند ٢٦٠ هرتز) صاعدة أو هابطة */
+  nav:   function(t){withRV(0.16,function(){kpluck(D4,t,0.42,0.7,0.45,260);kpluck(A4,t+0.06,0.3,0.6,0.5,260)})},
+  back:  function(t){withRV(0.16,function(){kpluck(A4,t,0.3,0.55,0.5,260);kpluck(D4,t+0.06,0.4,0.7,0.45,260)})},
+  ok:    function(t){withRV(0.22,function(){bell(1318.5,t,0.22,0.55);bell(1760,t+0.07,0.2,0.7);kpluck(A5,t,0.18,0.5,0.7)})},
+  bad:   function(t){withRV(0.18,function(){timp(t,82,0.35);kpluck(220,t+0.02,0.34,0.6,0.35,240);kpluck(207.65,t+0.16,0.3,0.8,0.35,240)})},
+  /* الفوز: طبلةٌ ونحاسٌ بضربتين ثمّ وترٌ ممتدّ، صنجٌ يتنفّس، وقانونٌ يصعد، وأجراسٌ في آخره */
+  win:   function(t){withRV(0.3,function(){timp(t,73.4,0.55);
+    [[t,0.16],[t+0.2,0.16]].forEach(function(q){[D4,Fs5/2,A4].forEach(function(f){brass(f,q[0],q[1],0.085)})});
+    [D4,Fs5/2,A4,D5].forEach(function(f){brass(f,t+0.42,1.05,0.08)});timp(t+0.42,98,0.5);cymbal(t+0.4,0.95,0.085,0.03);
+    [D5,Fs5,A5,1174.7,1480].forEach(function(f,i){kpluck(f,t+0.5+i*0.065,0.26,0.9,0.75)});
+    bell(1760,t+0.95,0.14,1.1);bell(2349,t+1.08,0.11,1.1)})},
+  /* الخسارة: طبلةٌ خافتة وعودٌ يهبط على نهاوند، ووترٌ منخفضٌ دافئ — حزنٌ نبيل لا صفّارة */
+  lose:  function(t){withRV(0.32,function(){timp(t,65.4,0.4);[A4,392,349.23,D4].forEach(function(f,i){kpluck(f,t+0.08+i*0.2,0.34,1.0,0.35,250)});
+    pad(146.83,t+0.86,1.4,'triangle',0.12,0.9,900);pad(174.61,t+0.86,1.4,'triangle',0.08,0.9,900);pad(220,t+0.86,1.4,'sine',0.06,0.9,1200)})},
   /* أصوات الكيرم: العيّنة أوّلًا، والتركيب احتياطٌ إن لم تُحمَّل بعد */
   /* الإطلاق: نقرة الإصبع تكاد لا تُسمع في الواقع — همسةٌ خافتة، والطقّة الحقيقيّة عند أوّل اصطدام */
   /* الأصليّ: صوت الإطلاق في التسجيل بعلوّ الطقّات نفسها — يُشغَّل بمستواه المسجَّل */
@@ -250,22 +315,22 @@ var SFX=(function(){
   pot:   function(t,o){sample('carrom','pot',t,{v:10,gain:0.9})},
   hit:   function(t,o){sample('carrom','hit',t,o)},
   wall:  function(t,o){sample('carrom','wall',t,o)},
-  coin:  function(t){tone(1568,t,0.07,'sine',0.05);tone(2093,t+0.05,0.16,'sine',0.045);noise(t,0.012,0.012,7000)},   // ٧٫٠٤: رنّة ذهب لا موجة مربّعة
-  /* 5.88: عدّاد العشر الثواني الأخيرة — «طي» جافّة قصيرة كعقرب ساعة، لا نغمة موسيقيّة */
-  tick:  function(t){noise(t,0.018,0.080,5200);tone(1500,t,0.028,'square',0.042,1180)},
-  tickHot:function(t){noise(t,0.022,0.115,7000);tone(2050,t,0.034,'square',0.062,1500)},
-  timeUp:function(t){tone(300,t,0.34,'triangle',0.16,120);noise(t,0.09,0.10,1200)},
-  /* ٦٫٩٣ — «حتّى الصوت لمّا تحصل على صندوق ما يحسّسك إنّها لعبة»: أصوات لعبةٍ فاخرة لا صفّارات —
-     صندوقٌ يرتطم وينفتح ويلمع، مكافأةٌ تُكشف بنغمةٍ زجاجيّة ترتفع مع الندرة، عدّادٌ يطقّ، إشعارٌ يرنّ رنّتين،
-     كأسٌ تُحتسب، وساحةٌ تُفتح بجملةٍ صاعدة. كلّها من tone/noise فلا ملفّات تُنتظر */
-  chest: function(t){noise(t,0.16,0.05,900);tone(140,t,0.14,'sine',0.12,90);   // ٦٫٩٧: ارتطامٌ ثمّ لمعانٌ هادئ — بلا صفّارتَي موجةٍ مربّعة
-   [880,1175,1568,2093].forEach(function(f,i){pad(f,t+0.3+i*0.09,0.34,'triangle',0.055,0.22,3600)});pad(2093,t+0.62,0.6,'sine',0.035,0.4,4200)},
-  reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[1047,1319,1568,2093][Math.min(3,r)];noise(t,0.05,0.012,6000);tone(f,t,0.18,'triangle',0.09);tone(f*2,t+0.02,0.25,'sine',0.045)},
-  rare:  function(t){[523,659,784,1047,1319].forEach(function(f,i){tone(f,t+i*0.07,0.5,'triangle',0.09)});tone(2093,t+0.35,0.6,'sine',0.05)},
-  tally: function(t){tone(1400*(0.95+Math.random()*0.1),t,0.02,'sine',0.03)},   // ٦٫٩٧: طقّةٌ جيبيّة ناعمة لا صفّارة
-  notif: function(t){tone(1568,t,0.09,'sine',0.08);tone(2093,t+0.09,0.16,'sine',0.07)},
-  trophy:function(t){tone(1319,t,0.08,'triangle',0.08);tone(1760,t+0.08,0.2,'triangle',0.08)},
-  arena: function(t){[392,523,659,784].forEach(function(f,i){tone(f,t+i*0.12,0.42,'triangle',0.11)});[784,1047,1319].forEach(function(f,i){tone(f,t+0.5+i*0.1,0.5,'sine',0.06)})}
+  coin:  function(t){withRV(0.12,function(){clink(t,0.26,1);clink(t+0.045,0.18,1.07)})},
+  /* عدّاد الثواني: طقّة خشبٍ جافّة كعقرب ساعةٍ قديمة، والساخنة أعلى وأحدّ */
+  tick:  function(t){wood(1700,t,0.2)},
+  tickHot:function(t){wood(2300,t,0.28);tone(1150,t,0.05,'triangle',0.08)},
+  timeUp:function(t){withRV(0.25,function(){timp(t,65.4,0.5);brass(146.83,t,0.4,0.09);brass(138.59,t+0.18,0.5,0.08)})},
+  /* الصندوق: صريرُ غطاءٍ خشبيّ، ارتطام، هبّةُ ضوء، وأجراسٌ تتفتّح */
+  chest: function(t){withRV(0.35,function(){creak(t,0.32,0.16);timp(t+0.3,110,0.42);whoosh(t+0.28,0.55,0.16,500,4200);
+   [1174.7,1480,1760,2349].forEach(function(f,i){bell(f,t+0.44+i*0.08,0.16,0.9)});cymbal(t+0.4,0.7,0.045,0.08)})},
+  reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[880,1046.5,1318.5,1760][Math.min(3,r)];withRV(0.28,function(){whoosh(t,0.22,0.1,1200,5000);bell(f,t+0.12,0.24,0.9);kpluck(f,t+0.12,0.22,0.9,0.75);if(r>=2)bell(f*1.5,t+0.2,0.14,1.0)})},
+  rare:  function(t){withRV(0.34,function(){timp(t,98,0.45);[D5,Fs5,A5,1174.7,1480].forEach(function(f,i){bell(f,t+i*0.07,0.18,1.1);kpluck(f,t+i*0.07,0.16,0.8,0.75)});[D4,Fs5/2,A4].forEach(function(f){brass(f,t+0.36,0.9,0.07)});cymbal(t+0.34,0.85,0.07,0.04)})},
+  tally: function(t){clink(t,0.1,0.95+Math.random()*0.1)},
+  notif: function(t){withRV(0.25,function(){bell(1568,t,0.18,0.6);bell(2093,t+0.09,0.16,0.8)})},
+  trophy:function(t){withRV(0.25,function(){brass(D5,t,0.14,0.08);brass(A5,t+0.12,0.35,0.08);bell(1760,t+0.12,0.14,0.8)})},
+  /* ساحةٌ جديدة: موكبٌ نحاسيّ (ري – صول – لا – ري) بطبولٍ وصنجٍ وأجراس */
+  arena: function(t){withRV(0.35,function(){var ch=[[D4,Fs5/2,A4],[392,493.88,D5],[A4,554.37,659.25],[D5,Fs5,A5]];ch.forEach(function(c3,i){timp(t+i*0.3,i===3?73.4:98,0.45);c3.forEach(function(f){brass(f,t+i*0.3,i===3?1.2:0.24,0.07)})});
+   cymbal(t+0.88,1.05,0.09,0.04);[1174.7,1480,1760,2349].forEach(function(f,i){bell(f,t+1.0+i*0.07,0.13,1.1)})})}
  };
  var HAPT={ok:[20],bad:[40,30,40],win:[30,40,30,40,80],lose:[70],strike:15,pot:[15,20,15],hit:[7],chest:[18,30,18],reveal:[10],rare:[20,40,60],arena:[30,40,30,40,80],notif:[12],trophy:[15]};
 
@@ -293,7 +358,9 @@ var SFX=(function(){
  function available(){return !!AC()}
  function hapticAvailable(){return !!(W&&W.navigator&&typeof W.navigator.vibrate==='function')}
 
- return {init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,move:move,style:style,available:available,hapticAvailable:hapticAvailable,
+ /* للقياس: يرسم صوتًا في سياقٍ غير متّصل ويعيد العيّنات */
+ function render(k,opt,dur){var off=new OfflineAudioContext(2,Math.ceil(44100*(dur||3)),44100),prev=ctx;ctx=off;try{LIB[k](0.02,opt||null)}catch(e){}ctx=prev;return off.startRendering()}
+ return {render:render,init:init,unlock:unlock,play:play,haptic:vibe,fx:fx,loadSprite:loadSprite,slide:slide,move:move,style:style,available:available,hapticAvailable:hapticAvailable,
   _names:Object.keys(LIB)};
 })();
 if(typeof module!=='undefined'&&module.exports)module.exports=SFX;
