@@ -22,7 +22,7 @@
 /* ⟦/fonts⟧ */</style>
 <style>
 :root{--bg:#080B14;--surf:#0F1524;--card:#161D30;--elev:#1F2740;
---pur:#7B4FE0;--gold:#E8B23A;--ok:#2ECC71;--no:#E24B4A;--warn:#EF9F27;--info:#378ADD;--gem:#B76CF0;
+--pur:#C9901F;--gold:#E8B23A;--ok:#2ECC71;--no:#E24B4A;--warn:#EF9F27;--info:#378ADD;--gem:#B76CF0;
 --tx:#E9EDF5;--tx2:#CDD5E6;--mut:#AAB5CF;--bd:#2C3758;
 /* سُلّم التصميم — نصف قطر وفسحة وظلّ ونصّ: قيمة واحدة لكلّ دور */
 --r1:10px;--r2:14px;--r3:18px;--r4:24px;
@@ -101,7 +101,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);overflo
 /* بلاطات الألعاب ثلاثية الأبعاد */
 .gTile{display:flex;align-items:center;gap:12px;padding:12px 13px;margin-bottom:11px;border-radius:17px;
  cursor:pointer;position:relative;overflow:hidden;
- background:linear-gradient(168deg,#243055,#0E1526 65%);border:1px solid #3B2F5C;
+ background:linear-gradient(168deg,#243055,#0E1526 65%);border:1px solid #5A4520;
  box-shadow:0 8px 20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07);
  transition:transform .18s,box-shadow .18s}
 .gTile::after{content:'';position:absolute;top:0;bottom:0;width:38%;left:-40%;pointer-events:none;
@@ -553,7 +553,7 @@ body:has(#rmScr.unoScr) #arena::after{content:'';position:absolute;left:0;right:
 .rmGameNow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:13px;margin-bottom:12px;background:rgba(6,9,17,.6);border:1px solid var(--bd)}
 .rmGameNow .art{width:38px;height:38px;line-height:0}.rmGameNow .art svg{width:100%;height:100%}
 .rmTop{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:15px;margin-bottom:4px;
- background:linear-gradient(168deg,#241A3E,#120B22);border:1px solid #3B2F5C}
+ background:linear-gradient(168deg,#241A3E,#120B22);border:1px solid #5A4520}
 /* بيت النادي */
 .clubBan{position:relative;display:flex;align-items:center;gap:12px;padding:14px 15px;margin-bottom:12px;
  border-radius:18px;overflow:hidden;background:linear-gradient(168deg,#1C2540,#0B1020);
@@ -648,7 +648,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 @keyframes rkFloat{0%,100%{transform:translateY(0) rotate(-1.2deg)}50%{transform:translateY(-3px) rotate(1.2deg)}}
 @keyframes rkShine{0%,55%{background-position:120% 0}100%{background-position:-40% 0}}
 @media (prefers-reduced-motion:reduce){.rkEmb.big{animation:none}.rkEmb.big::after{display:none}}
-.btn{width:100%;background:linear-gradient(145deg,#8B5CF0,#5B2FB8);color:#fff;border:none;
+.btn{width:100%;background:linear-gradient(145deg,#E8B23A,#8A5A10);color:#fff;border:none;
  border-radius:14px;padding:15px;font-family:inherit;font-size:16px;font-weight:800;cursor:pointer;
  transition:transform .1s;box-shadow:0 4px 14px rgba(123,79,224,.35)}
 .btn:active{filter:brightness(1.15)}
@@ -697,7 +697,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
  display:flex;align-items:center;justify-content:center}
 #mw{position:relative;width:100%;height:640px;margin-top:2px}
 #ms{position:absolute;inset:0;width:100%;height:100%}
-.mapbg{border-radius:18px;overflow:hidden;border:1px solid #3B2F5C;
+.mapbg{border-radius:18px;overflow:hidden;border:1px solid #5A4520;
  background:
   radial-gradient(rgba(255,255,255,.055) 1px,transparent 1.4px),
   linear-gradient(180deg,#151C33,#0B1020 55%,#080B14);
@@ -864,7 +864,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .dbOpt.ok{border-color:var(--ok);color:var(--ok);background:rgba(46,204,113,.14)}
 .dbOpt.bad{opacity:.4;pointer-events:none}
 /* المسرح: خلفية بجوّ، مقاعد بحالاتها، سجلّ أحداث، وشريط فعل لاصق */
-.vbStage{position:relative;height:214px;border-radius:18px;overflow:hidden;border:1.5px solid #3B2F5C;margin-bottom:12px;background:#0B1020;
+.vbStage{position:relative;height:214px;border-radius:18px;overflow:hidden;border:1.5px solid #5A4520;margin-bottom:12px;background:#0B1020;
  box-shadow:0 10px 26px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}
 .vbBg{position:absolute;inset:0;width:100%;height:100%;display:block;transition:filter .7s}
 .vbFurn{pointer-events:none}
@@ -1031,7 +1031,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .vbMsg>svg,.vbMsg>span{flex-shrink:0;border-radius:50%}
 .vbMsg .vbBub{border-radius:14px 14px 14px 4px}
 .vbMsg.me{flex-direction:row-reverse;margin-inline-start:auto}
-.vbMsg.me .vbBub{background:linear-gradient(160deg,#2A2260,#1B1640);border-color:#5B2FB8;border-radius:14px 14px 4px 14px}
+.vbMsg.me .vbBub{background:linear-gradient(160deg,#2A2260,#1B1640);border-color:#8A5A10;border-radius:14px 14px 4px 14px}
 .vbMsg.q .vbBub{border-color:rgba(232,178,58,.5)}
 .vbMsg .vbBub b{display:block;font-size:11px;color:var(--gold);margin-bottom:2px}
 .vbV{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--tx2);padding-inline-start:6px}
@@ -1158,7 +1158,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 @media (max-width:359px){.vbScene.is3d .vbSeat{width:60px}.vbScene.is3d .vbNm{font-size:11px}}
 .vb3dBub{position:absolute;transform:translateX(-50%);max-width:170px;background:rgba(250,246,236,.97);color:#1B1408;font-size:11.5px;font-weight:700;line-height:1.45;padding:6px 10px 7px;border-radius:12px;border:1px solid rgba(232,178,58,.6);box-shadow:0 4px 12px rgba(0,0,0,.45);pointer-events:none;z-index:6;animation:pop .22s ease;text-align:center}
 .vb3dBub::after{content:'';position:absolute;left:50%;bottom:-6px;width:10px;height:10px;background:inherit;border-inline-end:1px solid rgba(232,178,58,.6);border-bottom:1px solid rgba(232,178,58,.6);transform:translateX(-50%) rotate(45deg)}
-.vb3dBub.me{background:#2A2260;color:#F2F4F8;border-color:#5B2FB8}
+.vb3dBub.me{background:#2A2260;color:#F2F4F8;border-color:#8A5A10}
 .vb3dBub>b{display:block;font-size:11px;font-weight:900;color:#8A5A10;margin-bottom:2px}
 .vb3dBub.me>b{color:#E8B23A}
 .vb3dBub.out{opacity:0;transition:opacity .3s}
@@ -1459,7 +1459,7 @@ svg.ico{filter:drop-shadow(0 1px 1px rgba(0,0,0,.55))}
 .qop2.ok2 .qop2i{background:linear-gradient(170deg,#12402A,#0C2A1C)}
 .qop2.no2 .qop2i{background:linear-gradient(170deg,#402015,#2A0F0C)}
 .qop2n{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
- font-size:11px;font-weight:900;flex-shrink:0;background:linear-gradient(145deg,#8B5CF0,#4A2C9B);color:#fff}
+ font-size:11px;font-weight:900;flex-shrink:0;background:linear-gradient(145deg,#E8B23A,#8A5A10);color:#fff}
 .qop2.ok2 .qop2n{background:linear-gradient(145deg,#5DE39A,#1D8A4E)}
 .qop2.no2 .qop2n{background:linear-gradient(145deg,#E87A78,#8A241D)}
 .qop2t{flex:1;font-size:14.5px;font-weight:600}
@@ -1632,6 +1632,8 @@ input.est::-moz-range-thumb{width:22px;height:22px;border-radius:50%;
  background:linear-gradient(100deg,rgba(255,255,255,0) 32%,rgba(255,246,216,.6) 50%,rgba(255,255,255,0) 68%);background-size:220% 100%;
  animation:ebigSheen 3.4s ease-in-out infinite}
 .ebig.ebLive{filter:none}.ebLive+.ebigS{display:none}
+/* ٧٫٢١: في شبكة التعبيرات عشرات اللمعات تعيد رسم خلفيّتها كلّ إطار — الصورة الصغيرة ساكنة، واللمعة للكبيرة فقط */
+.ebig.sm+.ebigS{display:none}
 @keyframes ebigSheen{0%,15%{background-position:140% 0}65%,100%{background-position:-140% 0}}
 /* ═══ زر التعبيرات أسفل اليسار — كلاش ستايل ═══ */
 .efab{position:fixed;left:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:42;
@@ -2104,7 +2106,7 @@ body .szTop .szCell.p{padding:0 10px 8px;justify-content:flex-start}
 body .szPen{position:relative;width:min(100%,156px);padding:8px 10px 17px;text-align:center;color:#1A1206;background:repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 1px,transparent 1px 10px),repeating-linear-gradient(-45deg,rgba(255,255,255,.09) 0 1px,transparent 1px 10px),linear-gradient(180deg,#FFF3D0 0%,#F0CF7A 16%,#D9AE4E 52%,#B98A2E 84%,#D6B05C 100%);clip-path:polygon(0 0,100% 0,100% calc(100% - 11px),50% 100%,0 calc(100% - 11px))}
 body .szPen>div:first-child{margin:0 auto;box-shadow:0 2px 0 #6E4E12,inset 0 1px 0 rgba(255,244,214,.1)}
 body .szPenT{font-family:var(--fd);font-size:12.5px;font-weight:700;margin-top:3px;text-shadow:0 1px 0 rgba(255,246,220,.6)}
-body .szUp{display:block;width:100%;margin-top:6px;border:0;border-radius:12px;padding:7px 10px;font-family:var(--fd);font-size:16px;font-weight:700;color:#fff;cursor:pointer;background:linear-gradient(180deg,#6BE69A,#2ECC71 45%,#1D8A4E);box-shadow:0 3px 0 #12603A,0 8px 16px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.45);text-shadow:0 1px 1px rgba(0,60,20,.5)}
+body .szUp{display:block;width:100%;margin-top:6px;border:0;border-radius:12px;padding:7px 10px;font-family:var(--fd);font-size:16px;font-weight:700;font-family:'Tahaddi Bold','Cairo',sans-serif;color:#2A1A04;cursor:pointer;background:linear-gradient(180deg,#FFF1C2,#F2C54E 40%,#D69A22 70%,#B07A1C);box-shadow:0 3px 0 #7A5210,0 8px 16px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.7);text-shadow:0 1px 0 rgba(255,240,200,.6)}
 body .szUp:active{box-shadow:0 1px 0 #12603A,0 4px 10px rgba(0,0,0,.35);transform:translateY(2px)}
 body .szPenP{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;font-size:11px;font-weight:800;margin-top:5px;color:#4A3208}
 body .szPenP .usd{font-size:11px}
@@ -2136,7 +2138,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 
 /* ═══ المتجر الدولاري التجريبي ═══ */
 .gpkg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin-bottom:6px}
-.gpk{position:relative;background:linear-gradient(170deg,#1E1834,#120E22);border:1px solid #3B2F5C;
+.gpk{position:relative;background:linear-gradient(170deg,#1E1834,#120E22);border:1px solid #5A4520;
  border-radius:14px;padding:14px 10px 12px;text-align:center;cursor:pointer;
  box-shadow:0 4px 0 #0A0F1D;transition:transform .12s}
 .gpk:active{filter:brightness(1.15)}
@@ -2665,7 +2667,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0014251070" data-head="0001303478" aria-hidden="true">
+<div id="ld" data-total="0014265582" data-head="0001303692" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -2698,7 +2700,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
   if(ready&&pct>=1){finish();return}requestAnimationFrame(step)}
  function finish(){done=1;var hold=Math.max(0,1400-(now()-t0));setTimeout(function(){L.classList.add('out');setTimeout(function(){try{L.remove()}catch(e){}},700)},hold)}
  var rot=setInterval(function(){if(done||failed){clearInterval(rot);return}tip.classList.add('f');setTimeout(function(){ti=(ti+1)%TIPS.length;tip.innerHTML=TIPS[ti];tip.classList.remove('f')},350)},3200);
- window.__LD={ready:function(){ready=1;unfail()},ver:function(v){var e=document.getElementById('ldVer');if(e)e.textContent='v'+v},fail:fail};
+ window.__LD={ready:function(){ready=1;unfail()},ver:function(v){var e=document.getElementById('ldVer');if(e)e.textContent='الإصدار '+v},fail:fail};
  /* احتياط: اكتمل الملفّ ولم يستدعِ التطبيقُ ready — السكربت أخفق قبل الإقلاع. لا نكشف صفحةً فارغة بل نعرض زرّ إعادة المحاولة
     (وإن كانت الصفحة في الخلفيّة فالرسم متوقّف لا فاشل: نعيد الفحص حين تعود) */
  window.addEventListener('load',function(){var chk=function(){if(ready||done)return;if(document.hidden){setTimeout(chk,3000);return}fail('تعذّر تشغيل اللعبة')};setTimeout(chk,6000)});
@@ -2720,9 +2722,9 @@ arab:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><li
 football:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#1E6B3D"/><stop offset="1" stop-color="#08200F"/></linearGradient> <linearGradient id="lite" x1="0" y1="0" x2="1" y2="0"> <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".22"/> <stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs> <rect width="300" height="170" fill="url(#g3)"/> <g opacity=".13" fill="#fff"><rect y="0" width="300" height="21"/><rect y="42" width="300" height="21"/> <rect y="84" width="300" height="21"/><rect y="126" width="300" height="21"/></g> <circle cx="150" cy="85" r="40" fill="none" stroke="#fff" stroke-width="1.5" opacity=".5"/> <line x1="150" y1="0" x2="150" y2="170" stroke="#fff" stroke-width="1.5" opacity=".5"/> <rect x="0" y="48" width="38" height="74" fill="none" stroke="#fff" stroke-width="1.3" opacity=".45"/> <rect x="262" y="48" width="38" height="74" fill="none" stroke="#fff" stroke-width="1.3" opacity=".45"/> <!-- كشاف الملعب يمسح --> <rect class="sweep" x="0" y="0" width="70" height="170" fill="url(#lite)"/> <!-- الكرة تدور وتطفو --> <g class="flt"><g class="spin" style="transform-origin:150px 85px"> <circle cx="150" cy="85" r="15" fill="#fff"/> <path d="M150 72 L158 79 L155 89 L145 89 L142 79 Z" fill="#08200F"/> <path d="M150 72 L150 66 M158 79 L164 76 M142 79 L136 76 M155 89 L158 95 M145 89 L142 95" stroke="#08200F" stroke-width="1.6"/></g></g> </svg>',
 religion:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"> <stop offset="0" stop-color="#14514A"/><stop offset="1" stop-color="#05130F"/></linearGradient> <pattern id="p4" width="28" height="28" patternUnits="userSpaceOnUse"> <path d="M14 1 L27 14 L14 27 L1 14 Z" fill="none" stroke="#5DCAA5" stroke-width=".55" opacity=".3"/> <path d="M14 6 L22 14 L14 22 L6 14 Z" fill="none" stroke="#E8B23A" stroke-width=".4" opacity=".26"/></pattern> <radialGradient id="moon"><stop offset="0" stop-color="#FFE9B8" stop-opacity=".8"/> <stop offset="1" stop-color="#E8B23A" stop-opacity="0"/></radialGradient></defs> <rect width="300" height="170" fill="url(#g4)"/> <g class="spin" style="transform-origin:150px 85px"><rect x="-50" y="-50" width="400" height="270" fill="url(#p4)"/></g> <g class="twk"><circle cx="52" cy="30" r="1.5" fill="#fff"/></g> <g class="twk d2"><circle cx="248" cy="24" r="1.8" fill="#fff"/></g> <g class="twk d3"><circle cx="196" cy="46" r="1.3" fill="#fff"/></g> <g class="twk d5"><circle cx="88" cy="52" r="1.4" fill="#fff"/></g> <!-- المسجد --> <path d="M104 152 L104 106 Q104 78 150 78 Q196 78 196 106 L196 152 Z" fill="#0C2A26" opacity=".9"/> <path d="M104 106 Q150 60 196 106" fill="#E8B23A" opacity=".42"/> <!-- الهلال يتوهج --> <g class="flt2"><circle cx="150" cy="42" r="16" fill="url(#moon)" class="puls"/> <rect x="148.5" y="46" width="3" height="22" fill="#E8B23A" opacity=".75"/> <circle cx="150" cy="40" r="6.5" fill="#E8B23A"/><circle cx="153" cy="38.5" r="5.2" fill="#0C2A26"/></g> <!-- مئذنتان --> <path d="M56 152 L56 92 Q56 82 65 82 Q74 82 74 92 L74 152 Z" fill="#E8B23A" opacity=".26"/> <path d="M226 152 L226 92 Q226 82 235 82 Q244 82 244 92 L244 152 Z" fill="#E8B23A" opacity=".26"/> <rect y="150" width="300" height="20" fill="#04100D" opacity=".85"/> </svg>',
 animals:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g5" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#8A6420"/><stop offset=".5" stop-color="#3A5628"/> <stop offset="1" stop-color="#0B1707"/></linearGradient> <radialGradient id="sun"><stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#E8B23A" stop-opacity="0"/></radialGradient></defs> <rect width="300" height="170" fill="url(#g5)"/> <circle cx="236" cy="42" r="30" fill="url(#sun)" class="puls"/> <circle cx="236" cy="42" r="15" fill="#E8B23A" opacity=".65"/> <!-- طيور تعبر --> <g class="drift"><path d="M300 34 q4-4 8 0 q4-4 8 0" stroke="#0B1707" stroke-width="1.4" fill="none" opacity=".65"/> <path d="M330 46 q3.5-3.5 7 0 q3.5-3.5 7 0" stroke="#0B1707" stroke-width="1.2" fill="none" opacity=".5"/> <path d="M356 28 q3-3 6 0 q3-3 6 0" stroke="#0B1707" stroke-width="1" fill="none" opacity=".45"/></g> <!-- تلال --> <path d="M0 128 Q45 106 92 124 Q140 142 178 122 Q222 100 262 120 Q284 130 300 122 L300 170 L0 170 Z" fill="#132009" opacity=".92"/> <!-- أسد --> <g class="bob" fill="#080F04" opacity=".95"> <path d="M52 128 Q52 112 64 112 L86 112 Q98 112 98 126 L98 142 L91 142 L91 131 L79 131 L79 142 L72 142 L72 131 L60 131 L60 142 L52 142 Z"/> <circle cx="46" cy="112" r="11"/><path d="M40 104 l-4-7 8 2 z"/><path d="M52 104 l4-7 -8 2 z"/> <path d="M98 114 l9-9 5 7 -9 6 z"/></g> <!-- زرافة --> <g class="sway" style="transform-origin:212px 150px" fill="#080F04" opacity=".9"> <path d="M204 150 L204 92 Q204 82 212 82 Q220 82 220 92 L220 112 Q220 122 230 122 L244 122 L244 150 Z"/> <circle cx="212" cy="76" r="7.5"/><path d="M206 71 L202 62 M218 71 L222 62" stroke="#080F04" stroke-width="2.6"/></g> <!-- يراعات --> <circle cx="118" cy="118" r="1.6" fill="#FFE9B8" class="twk"/> <circle cx="152" cy="106" r="1.3" fill="#FFE9B8" class="twk d2"/> <circle cx="176" cy="126" r="1.5" fill="#FFE9B8" class="twk d4"/> <circle cx="134" cy="136" r="1.2" fill="#FFE9B8" class="twk d3"/> </svg>',
-science:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g6" x1="0" y1="0" x2="1" y2="1"> <stop offset="0" stop-color="#1E3470"/><stop offset="1" stop-color="#070C1C"/></linearGradient> <radialGradient id="nuc"><stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#E8B23A" stop-opacity="0"/></radialGradient></defs> <rect width="300" height="170" fill="url(#g6)"/> <g class="twk"><circle cx="34" cy="28" r="1.4" fill="#fff"/></g> <g class="twk d2"><circle cx="272" cy="36" r="1.7" fill="#fff"/></g> <g class="twk d4"><circle cx="26" cy="140" r="1.3" fill="#fff"/></g> <g class="twk d1"><circle cx="278" cy="132" r="1.5" fill="#fff"/></g> <!-- ثلاثة مدارات بسرعات مختلفة --> <g class="spin" style="transform-origin:150px 85px"> <ellipse cx="150" cy="85" rx="72" ry="27" fill="none" stroke="#5DCAA5" stroke-width="1.3" opacity=".55"/> <circle cx="222" cy="85" r="4.5" fill="#5DCAA5"/></g> <g class="spinB" style="transform-origin:150px 85px"> <ellipse cx="150" cy="85" rx="72" ry="27" fill="none" stroke="#7B4FE0" stroke-width="1.3" opacity=".55" transform="rotate(60 150 85)"/><circle cx="114" cy="23" r="4.5" fill="#7B4FE0"/></g> <g class="spin" style="transform-origin:150px 85px;animation-duration:16s"> <ellipse cx="150" cy="85" rx="72" ry="27" fill="none" stroke="#378ADD" stroke-width="1.3" opacity=".55" transform="rotate(120 150 85)"/><circle cx="114" cy="147" r="4.5" fill="#378ADD"/></g> <circle cx="150" cy="85" r="20" fill="url(#nuc)" class="puls"/> <circle cx="150" cy="85" r="9" fill="#E8B23A" opacity=".9"/> </svg>',
+science:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g6" x1="0" y1="0" x2="1" y2="1"> <stop offset="0" stop-color="#1E3470"/><stop offset="1" stop-color="#070C1C"/></linearGradient> <radialGradient id="nuc"><stop offset="0" stop-color="#FFD98A"/><stop offset="1" stop-color="#E8B23A" stop-opacity="0"/></radialGradient></defs> <rect width="300" height="170" fill="url(#g6)"/> <g class="twk"><circle cx="34" cy="28" r="1.4" fill="#fff"/></g> <g class="twk d2"><circle cx="272" cy="36" r="1.7" fill="#fff"/></g> <g class="twk d4"><circle cx="26" cy="140" r="1.3" fill="#fff"/></g> <g class="twk d1"><circle cx="278" cy="132" r="1.5" fill="#fff"/></g> <!-- ثلاثة مدارات بسرعات مختلفة --> <g class="spin" style="transform-origin:150px 85px"> <ellipse cx="150" cy="85" rx="72" ry="27" fill="none" stroke="#5DCAA5" stroke-width="1.3" opacity=".55"/> <circle cx="222" cy="85" r="4.5" fill="#5DCAA5"/></g> <g class="spinB" style="transform-origin:150px 85px"> <ellipse cx="150" cy="85" rx="72" ry="27" fill="none" stroke="#C9901F" stroke-width="1.3" opacity=".55" transform="rotate(60 150 85)"/><circle cx="114" cy="23" r="4.5" fill="#C9901F"/></g> <g class="spin" style="transform-origin:150px 85px;animation-duration:16s"> <ellipse cx="150" cy="85" rx="72" ry="27" fill="none" stroke="#378ADD" stroke-width="1.3" opacity=".55" transform="rotate(120 150 85)"/><circle cx="114" cy="147" r="4.5" fill="#378ADD"/></g> <circle cx="150" cy="85" r="20" fill="url(#nuc)" class="puls"/> <circle cx="150" cy="85" r="9" fill="#E8B23A" opacity=".9"/> </svg>',
 geography:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g7" x1="0" y1="0" x2="0" y2="1"> <stop offset="0" stop-color="#105A6E"/><stop offset="1" stop-color="#04141A"/></linearGradient> <clipPath id="cg"><circle cx="150" cy="76" r="46"/></clipPath></defs> <rect width="300" height="170" fill="url(#g7)"/> <g class="twk"><circle cx="44" cy="26" r="1.4" fill="#fff"/></g> <g class="twk d3"><circle cx="258" cy="32" r="1.6" fill="#fff"/></g> <!-- الكرة الأرضية تدور --> <circle cx="150" cy="76" r="46" fill="#0A2E3A" opacity=".85"/> <g clip-path="url(#cg)"> <g class="drift" style="animation-duration:30s"> <path d="M110 56 Q128 48 144 58 Q156 68 144 76 Q126 80 116 68 Z" fill="#2ECC71" opacity=".6"/> <path d="M158 88 Q176 82 184 94 Q188 106 172 110 Q158 104 158 88 Z" fill="#2ECC71" opacity=".55"/> <path d="M196 52 Q212 48 218 58 Q214 68 202 66 Z" fill="#2ECC71" opacity=".5"/> <path d="M260 56 Q278 48 294 58 Q306 68 294 76 Q276 80 266 68 Z" fill="#2ECC71" opacity=".6"/> <path d="M308 88 Q326 82 334 94 Q338 106 322 110 Q308 104 308 88 Z" fill="#2ECC71" opacity=".55"/> <path d="M346 52 Q362 48 368 58 Q364 68 352 66 Z" fill="#2ECC71" opacity=".5"/></g></g> <circle cx="150" cy="76" r="46" fill="none" stroke="#5DCAA5" stroke-width="1.4" opacity=".65"/> <ellipse cx="150" cy="76" rx="46" ry="17" fill="none" stroke="#5DCAA5" stroke-width=".8" opacity=".4"/> <ellipse cx="150" cy="76" rx="17" ry="46" fill="none" stroke="#5DCAA5" stroke-width=".8" opacity=".4"/> <line x1="104" y1="76" x2="196" y2="76" stroke="#5DCAA5" stroke-width=".8" opacity=".4"/> <!-- جبال وموج --> <path d="M0 148 L28 116 L48 140 L70 106 L94 148 Z" fill="#082630" opacity=".9"/> <path d="M300 148 L272 112 L250 142 L228 116 L208 148 Z" fill="#082630" opacity=".9"/> <path d="M0 150 Q40 142 80 150 T160 150 T240 150 T320 150 L320 170 L0 170 Z" fill="#0C3D4C" opacity=".8" class="flt"/> </svg>',
-puzzles:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g8" x1="0" y1="0" x2="1" y2="1"> <stop offset="0" stop-color="#523175"/><stop offset="1" stop-color="#0E0918"/></linearGradient> <radialGradient id="syn"><stop offset="0" stop-color="#E8B23A" stop-opacity=".85"/> <stop offset="1" stop-color="#E8B23A" stop-opacity="0"/></radialGradient></defs> <rect width="300" height="170" fill="url(#g8)"/> <!-- دماغ بمشابك تومض --> <path d="M92 122 Q74 122 74 104 Q60 100 62 84 Q50 72 64 60 Q64 42 82 42 Q92 28 108 34 Q122 24 134 38 Q150 38 150 56 L150 122 Z" fill="none" stroke="#E8B23A" stroke-width="1.6" opacity=".7"/> <path d="M102 56 L102 106 M120 46 L120 116 M88 72 L136 72 M88 92 L136 92" stroke="#E8B23A" stroke-width=".85" opacity=".4"/> <circle cx="102" cy="72" r="9" fill="url(#syn)" class="puls"/> <circle cx="120" cy="92" r="9" fill="url(#syn)" class="puls d2"/> <circle cx="136" cy="56" r="7" fill="url(#syn)" class="puls d4"/> <circle cx="88" cy="98" r="7" fill="url(#syn)" class="puls d1"/> <!-- شبكة أرقام --> <g opacity=".6"> <g class="flt"><rect x="190" y="48" width="30" height="30" rx="5" fill="none" stroke="#7B4FE0" stroke-width="1.4"/> <text x="205" y="69" font-size="17" fill="#7B4FE0" text-anchor="middle" font-family="sans-serif">1</text></g> <g class="flt d1"><rect x="230" y="48" width="30" height="30" rx="5" fill="none" stroke="#7B4FE0" stroke-width="1.4"/> <text x="245" y="69" font-size="17" fill="#7B4FE0" text-anchor="middle" font-family="sans-serif">2</text></g> <g class="flt d2"><rect x="190" y="88" width="30" height="30" rx="5" fill="none" stroke="#7B4FE0" stroke-width="1.4"/> <text x="205" y="109" font-size="17" fill="#7B4FE0" text-anchor="middle" font-family="sans-serif">3</text></g> <g class="flt2 d3"><rect x="230" y="88" width="30" height="30" rx="5" fill="#E8B23A" opacity=".3"/> <text x="245" y="109" font-size="17" fill="#E8B23A" text-anchor="middle" font-family="sans-serif">؟</text></g></g> </svg>'
+puzzles:'<svg viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice"> <defs><linearGradient id="g8" x1="0" y1="0" x2="1" y2="1"> <stop offset="0" stop-color="#523175"/><stop offset="1" stop-color="#0E0918"/></linearGradient> <radialGradient id="syn"><stop offset="0" stop-color="#E8B23A" stop-opacity=".85"/> <stop offset="1" stop-color="#E8B23A" stop-opacity="0"/></radialGradient></defs> <rect width="300" height="170" fill="url(#g8)"/> <!-- دماغ بمشابك تومض --> <path d="M92 122 Q74 122 74 104 Q60 100 62 84 Q50 72 64 60 Q64 42 82 42 Q92 28 108 34 Q122 24 134 38 Q150 38 150 56 L150 122 Z" fill="none" stroke="#E8B23A" stroke-width="1.6" opacity=".7"/> <path d="M102 56 L102 106 M120 46 L120 116 M88 72 L136 72 M88 92 L136 92" stroke="#E8B23A" stroke-width=".85" opacity=".4"/> <circle cx="102" cy="72" r="9" fill="url(#syn)" class="puls"/> <circle cx="120" cy="92" r="9" fill="url(#syn)" class="puls d2"/> <circle cx="136" cy="56" r="7" fill="url(#syn)" class="puls d4"/> <circle cx="88" cy="98" r="7" fill="url(#syn)" class="puls d1"/> <!-- شبكة أرقام --> <g opacity=".6"> <g class="flt"><rect x="190" y="48" width="30" height="30" rx="5" fill="none" stroke="#C9901F" stroke-width="1.4"/> <text x="205" y="69" font-size="17" fill="#C9901F" text-anchor="middle" font-family="sans-serif">1</text></g> <g class="flt d1"><rect x="230" y="48" width="30" height="30" rx="5" fill="none" stroke="#C9901F" stroke-width="1.4"/> <text x="245" y="69" font-size="17" fill="#C9901F" text-anchor="middle" font-family="sans-serif">2</text></g> <g class="flt d2"><rect x="190" y="88" width="30" height="30" rx="5" fill="none" stroke="#C9901F" stroke-width="1.4"/> <text x="205" y="109" font-size="17" fill="#C9901F" text-anchor="middle" font-family="sans-serif">3</text></g> <g class="flt2 d3"><rect x="230" y="88" width="30" height="30" rx="5" fill="#E8B23A" opacity=".3"/> <text x="245" y="109" font-size="17" fill="#E8B23A" text-anchor="middle" font-family="sans-serif">؟</text></g></g> </svg>'
 };
 const Q=[{"n":"rel_1","t":"في أي مدينة وُلد النبي محمد ﷺ؟","o":["مكة المكرمة","الطائف","المدينة المنورة","جدة"],"c":0,"d":1,"e":"وُلد ﷺ في مكة عام الفيل."},
 {"n":"ar_1","t":"إلى أي مدينة كانت الهجرة النبوية؟","o":["المدينة المنورة","دمشق","مكة المكرمة","القدس"],"c":0,"d":1,"e":"هاجر ﷺ من مكة إلى المدينة (يثرب)."},
@@ -14438,16 +14440,16 @@ trophy:`<path d="M7 3 L17 3 L17 9 A5 5 0 0 1 7 9 Z" fill="#E8B23A"/>
  <path d="M9 4.5 L11 4.5 L10 8 Z" fill="#F5D98A" opacity=".7"/>`,
 medal:`<circle cx="12" cy="14.5" r="6.5" fill="#E8B23A"/><circle cx="12" cy="14.5" r="4.3" fill="#F5D98A"/>
  <path d="M12 11.4 L13 13.5 L15.3 13.7 L13.6 15.2 L14.2 17.5 L12 16.3 L9.8 17.5 L10.4 15.2 L8.7 13.7 L11 13.5 Z" fill="#B8821A"/>
- <path d="M8 2 L11 8.5 L8.5 9.5 L6 3.5 Z M16 2 L13 8.5 L15.5 9.5 L18 3.5 Z" fill="#7B4FE0"/>`,
+ <path d="M8 2 L11 8.5 L8.5 9.5 L6 3.5 Z M16 2 L13 8.5 L15.5 9.5 L18 3.5 Z" fill="#C9901F"/>`,
 crown:`<path d="M3 18 L4.5 7 L9 12 L12 4.5 L15 12 L19.5 7 L21 18 Z" fill="#E8B23A"/>
  <rect x="3" y="17.5" width="18" height="3" rx="1" fill="#B8821A"/>
  <circle cx="12" cy="9.5" r="1.6" fill="#5AC8F5"/>`,
 // ── البطاقات والمجموعة ──
-cards:`<rect x="3" y="6" width="11" height="15" rx="2" fill="#4A2C9B" transform="rotate(-9 8.5 13.5)"/>
+cards:`<rect x="3" y="6" width="11" height="15" rx="2" fill="#8A5A10" transform="rotate(-9 8.5 13.5)"/>
  <rect x="7" y="4.5" width="11" height="15" rx="2" fill="#6B3FD0"/>
- <rect x="11" y="6" width="11" height="15" rx="2" fill="#8B5CF0" transform="rotate(9 16.5 13.5)"/>
+ <rect x="11" y="6" width="11" height="15" rx="2" fill="#E8B23A" transform="rotate(9 16.5 13.5)"/>
  <circle cx="16.5" cy="13" r="2.6" fill="#EEDCFF" opacity=".85"/>`,
-deck:`<rect x="4" y="4" width="7" height="7" rx="1.5" fill="#8B5CF0"/>
+deck:`<rect x="4" y="4" width="7" height="7" rx="1.5" fill="#E8B23A"/>
  <rect x="13" y="4" width="7" height="7" rx="1.5" fill="#6B3FD0"/>
  <rect x="4" y="13" width="7" height="7" rx="1.5" fill="#6B3FD0"/>
  <rect x="13" y="13" width="7" height="7" rx="1.5" fill="#E8B23A"/>`,
@@ -14569,7 +14571,7 @@ dice:`<rect x="3.5" y="3.5" width="17" height="17" rx="3.5" fill="#EF9F27"/>
  <circle cx="8" cy="8" r="1.8" fill="#1A1206"/><circle cx="16" cy="8" r="1.8" fill="#1A1206"/>
  <circle cx="12" cy="12" r="1.8" fill="#1A1206"/>
  <circle cx="8" cy="16" r="1.8" fill="#1A1206"/><circle cx="16" cy="16" r="1.8" fill="#1A1206"/>`,
-orb:`<circle cx="12" cy="12" r="8.5" fill="#4A2C9B"/>
+orb:`<circle cx="12" cy="12" r="8.5" fill="#8A5A10"/>
  <circle cx="12" cy="12" r="8.5" fill="none" stroke="#B76CF0" stroke-width="1.4"/>
  <ellipse cx="9.5" cy="9" rx="3" ry="2.2" fill="#EEDCFF" opacity=".5" transform="rotate(-30 9.5 9)"/>
  <circle cx="6" cy="4.5" r="1.3" fill="#B76CF0"/><circle cx="19" cy="6" r="1" fill="#B76CF0"/>`,
@@ -14581,8 +14583,8 @@ scroll:`<path d="M5 3.5 L19 3.5 A2 2 0 0 1 21 5.5 L21 18.5 A2 2 0 0 1 19 20.5 L5
 book:`<path d="M3.5 4 Q8 2.5 12 4.5 L12 20 Q8 18 3.5 19.5 Z" fill="#5DCAA5"/>
  <path d="M20.5 4 Q16 2.5 12 4.5 L12 20 Q16 18 20.5 19.5 Z" fill="#2E9E7E"/>
  <path d="M12 4.5 L12 20" stroke="#0E1526" stroke-width="1.2"/>`,
-cap:`<path d="M12 3 L23 8 L12 13 L1 8 Z" fill="#7B4FE0"/>
- <path d="M6 10.5 L6 16 Q12 19.5 18 16 L18 10.5 L12 13.3 Z" fill="#4A2C9B"/>
+cap:`<path d="M12 3 L23 8 L12 13 L1 8 Z" fill="#C9901F"/>
+ <path d="M6 10.5 L6 16 Q12 19.5 18 16 L18 10.5 L12 13.3 Z" fill="#8A5A10"/>
  <path d="M22 8.5 L22 15" stroke="#E8B23A" stroke-width="1.4" stroke-linecap="round"/>
  <circle cx="22" cy="16" r="1.6" fill="#E8B23A"/>`,
 ticket:`<path d="M2.5 6.5 L21.5 6.5 L21.5 10 A2 2 0 0 0 21.5 14 L21.5 17.5 L2.5 17.5 L2.5 14 A2 2 0 0 0 2.5 10 Z" fill="#B76CF0"/>
@@ -14774,20 +14776,20 @@ var ICO2=(function(){
   RD(2.1,10.2,2.2,4.8,1,'steel')+RD(19.7,10.2,2.2,4.8,1,'steel');
 
  /* ── علامات ووظائف: رموز عارية بسماكة واحدة ── */
- I.check=S('M4.8 12.6 L9.6 17.4 L19.2 6.8',B('green'),3);
+ I.check=S('M4.8 12.6 L9.6 17.4 L19.2 6.8',B('gold'),3);
  I.cross=S('M6.6 6.6 L17.4 17.4 M17.4 6.6 L6.6 17.4',B('red'),3);
- I.info=OC(12,12,9.2,B('blue'),2)+CC(12,7.5,1.4,B('blue'))+RC(10.7,10.4,2.6,7.1,1.3,B('blue'));
- I.plus=S('M12 5.2 V18.8 M5.2 12 H18.8',B('green'),3);
+ I.info=OC(12,12,9.2,B('gold'),2)+CC(12,7.5,1.4,B('gold'))+RC(10.7,10.4,2.6,7.1,1.3,B('gold'));
+ I.plus=S('M12 5.2 V18.8 M5.2 12 H18.8',B('gold'),3);
  I.up=S('M12 19.2 V6.2 M6 12.2 L12 6.2 L18 12.2',B('gold'),2.8);
  I.down=S('M12 4.8 V17.8 M6 11.8 L12 17.8 L18 11.8',B('gold'),2.8);
  I.back=S('M19 12 H5.4 M11.4 5.6 L5 12 L11.4 18.4',B('gold'),2.8);
  I.next=S('M5 12 H18.6 M12.6 5.6 L19 12 L12.6 18.4',B('gold'),2.8);
- I.export=S('M12 15.2 V4.4 M7.6 8.8 L12 4.4 L16.4 8.8',B('blue'),2.6)+S('M4.8 14.4 V19.2 H19.2 V14.4',B('blue'),2.6);
+ I.export=S('M12 15.2 V4.4 M7.6 8.8 L12 4.4 L16.4 8.8',B('gold'),2.6)+S('M4.8 14.4 V19.2 H19.2 V14.4',B('gold'),2.6);
  I.reset=S('M12 3.8 A8.2 8.2 0 1 1 4.9 7.9',B('gold'),2.7)+PG('12,1.1 12,6.5 15.8,3.8',B('gold'));
  I.play=PG('8.4,5.2 19.4,12 8.4,18.8',B('gold'));
  I.pause=R(7.2,5.2,3.7,13.6,1.5,'gold')+R(13.1,5.2,3.7,13.6,1.5,'gold');
  I.menu=S('M4.6 7.2 H19.4 M4.6 12 H19.4 M4.6 16.8 H19.4',B('gold'),2.6);
- I.list=CC(18.6,7.2,1.5,B('blue'))+CC(18.6,12,1.5,B('blue'))+CC(18.6,16.8,1.5,B('blue'))+
+ I.list=CC(18.6,7.2,1.5,B('gold'))+CC(18.6,12,1.5,B('gold'))+CC(18.6,16.8,1.5,B('gold'))+
   S('M4.8 7.2 H14.6 M4.8 12 H14.6 M4.8 16.8 H14.6',B('blue'),2.2);
  I.x2=TX('×2',12,16.6,12.4,B('purple'));
  I.counter=R(2.6,6.4,18.8,11,2.3,'steel')+RC(4.4,8.2,15.2,7.4,1.4,'#0F1523')+TX('003',12,14.6,6.6,B('gold'));
@@ -15411,7 +15413,7 @@ const EMO_ART={
 crown:{b:['#F0C25A','#A87518'],a:'<path d="M8.5 40 Q24 33 39.5 40 L39.5 46 L8.5 46 Z" fill="#B83A3A"/><circle cx="13" cy="42.5" r="1.4" fill="#fff"/><circle cx="18.5" cy="41" r="1.4" fill="#fff"/><circle cx="24" cy="40.4" r="1.4" fill="#fff"/><circle cx="29.5" cy="41" r="1.4" fill="#fff"/><circle cx="35" cy="42.5" r="1.4" fill="#fff"/><path d="M11 15 L13 5.5 L18.5 10.5 L24 3.5 L29.5 10.5 L35 5.5 L37 15 Z" fill="#E8B23A" stroke="#A87518" stroke-width="1"/><rect x="10.6" y="14" width="26.8" height="3.6" rx="1.6" fill="#C08C18"/><circle cx="24" cy="15.8" r="1.6" fill="#E8485E"/><circle cx="17" cy="15.8" r="1.3" fill="#2ECC71"/><circle cx="31" cy="15.8" r="1.3" fill="#378ADD"/><circle cx="13" cy="5.5" r="1.4" fill="#FFE9A8"/><circle cx="24" cy="3.5" r="1.6" fill="#FFE9A8"/><circle cx="35" cy="5.5" r="1.4" fill="#FFE9A8"/><path d="M14.5 23.5 Q17.5 25.5 20.5 23.5" stroke="#232733" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="30.5" cy="24" r="4.6" fill="#CFE8F5" opacity=".45" stroke="#E8B23A" stroke-width="1.6"/><circle cx="30.5" cy="24" r="1.9" fill="#232733"/><path d="M33.8 27.6 L36 31.5" stroke="#E8B23A" stroke-width="1.2"/><path d="M23.5 30.5 Q19 28.5 15.5 30.5 Q13.8 31.4 13 29.8 M24.5 30.5 Q29 28.5 32.5 30.5 Q34.2 31.4 35 29.8" stroke="#4A2F1A" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M20.5 34.5 Q24 36.8 27.5 34.5" stroke="#8A4A3A" stroke-width="2.2" fill="none" stroke-linecap="round"/>'},
 brain:{b:['#C08AF0','#7B3FC8'],a:'<ellipse cx="24" cy="8.5" rx="11" ry="7" fill="#E2A8F0" opacity=".22"/><path d="M23.5 3.5 Q17 3.5 16.5 8 Q13 9 14.5 12.5 L23.5 13.5 Z" fill="#E2A8F0" stroke="#8A4ACF" stroke-width=".9"/><path d="M24.5 3.5 Q31 3.5 31.5 8 Q35 9 33.5 12.5 L24.5 13.5 Z" fill="#D18AE8" stroke="#8A4ACF" stroke-width=".9"/><path d="M19 6 Q21 7 20 9.5 M28.5 6 Q27 7.5 28 9.5" stroke="#8A4ACF" stroke-width=".8" fill="none"/><path d="M23 14.5 L25.4 14.5 L23.8 17 L26 17" stroke="#FFE9A8" stroke-width="1.4" fill="none" stroke-linecap="round"/><circle cx="17" cy="24" r="5" fill="#fff" opacity=".14" stroke="#232733" stroke-width="1.8"/><circle cx="31" cy="24" r="5" fill="#fff" opacity=".14" stroke="#232733" stroke-width="1.8"/><path d="M22 24 L26 24 M12 24 L9.5 22.5 M36 24 L38.5 22.5" stroke="#232733" stroke-width="1.8"/><circle cx="17" cy="24.5" r="1.9" fill="#232733"/><circle cx="31" cy="24.5" r="1.9" fill="#232733"/><path d="M18.5 33.5 Q24 37 29.5 33" stroke="#8A4A3A" stroke-width="2.4" fill="none" stroke-linecap="round"/><text x="9" y="38" font-size="6.5" font-weight="900" fill="#FFE9A8" opacity=".9">٢+٢</text><text x="36" y="38" font-size="7" font-weight="900" fill="#FFE9A8" opacity=".85">٤</text>'},
 fire:{b:['#F0A24E','#B4441E'],a:'<path d="M24 2.5 C19 8.5 22 11.5 19 14.5 C16 11 16.5 8.5 16.5 8.5 C11.5 12.5 9.5 16.5 9.5 19.5 L38.5 19.5 C38.5 13.5 32 8.5 24 2.5 Z" fill="#E2554A"/><path d="M24 6.5 C21 11 23 13 20.5 15.5 C18.5 13 19 11 19 11 C15.5 14 14 16.5 14 19 L34 19 C34 14.5 29 10.5 24 6.5 Z" fill="#EF9F27"/><path d="M24 11 C22.5 13.5 23.5 15 22 17 C21 15.5 21.2 14 21.2 14 C19 16 18.5 17.5 18.5 19 L29.5 19 C29.5 16 27 13.5 24 11 Z" fill="#FFE9A8"/><path d="M13.5 20.5 L21 22.5 M34.5 20.5 L27 22.5" stroke="#232733" stroke-width="2.6" stroke-linecap="round"/><circle cx="17.5" cy="25.5" r="2.3" fill="#232733"/><circle cx="30.5" cy="25.5" r="2.3" fill="#232733"/><circle cx="18.2" cy="24.8" r=".8" fill="#fff"/><circle cx="31.2" cy="24.8" r=".8" fill="#fff"/><path d="M17 32 Q24 38 31 32 Z" fill="#5E2126"/><path d="M18.4 32.7 Q24 34.4 29.6 32.7 L29.2 34.6 Q24 36 18.8 34.6 Z" fill="#fff"/><circle cx="7" cy="26" r="1.3" fill="#FFE9A8" opacity=".85"/><circle cx="41.5" cy="24" r="1.1" fill="#FFC864" opacity=".8"/><circle cx="39.5" cy="33" r="1" fill="#FFE9A8" opacity=".7"/>'},
-wizard:{b:['#8A6AE8','#4A2C9B'],a:'<path d="M13 17.5 Q21.5 15.5 23 5 Q23.6 2.5 26.5 2 Q25 4.2 25.5 6.2 Q27.5 15.5 35 17.5 L35.5 19.5 L12.5 19.5 Z" fill="#4A2C9B" stroke="#372073" stroke-width="1"/><rect x="12.5" y="17.6" width="23" height="3.4" rx="1.6" fill="#E8B23A"/><path d="M19 10.5 l.8 1.7 1.7 .8 -1.7 .8 -.8 1.7 -.8 -1.7 -1.7 -.8 1.7 -.8 Z" fill="#FFE9A8"/><path d="M28.5 7 a2.6 2.6 0 1 0 2.4 3.6 a2 2 0 1 1 -2.4 -3.6" fill="#FFE9A8"/><path d="M13.5 23 Q17.5 21 21 22.6" stroke="#EDEFF5" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M34.5 23 Q30.5 21 27 22.6" stroke="#EDEFF5" stroke-width="2.8" fill="none" stroke-linecap="round"/><circle cx="17.5" cy="25.5" r="2" fill="#232733"/><circle cx="30.5" cy="25.5" r="2" fill="#232733"/><path d="M12.5 28 Q12 40 24 43.5 Q36 40 35.5 28 Q31 31.5 24 30.5 Q17 31.5 12.5 28 Z" fill="#EDEFF5" stroke="#C9CFDD" stroke-width=".8"/><path d="M18.5 30.5 Q24 33.5 29.5 30.5" stroke="#C9CFDD" stroke-width="1.4" fill="none"/><ellipse cx="24" cy="34" rx="2.4" ry="1.5" fill="#5E2126"/><path d="M36.5 36.5 L42.5 30.5" stroke="#8A5A2E" stroke-width="2" stroke-linecap="round"/><path d="M43 27.5 l.8 1.8 1.8 .8 -1.8 .8 -.8 1.8 -.8 -1.8 -1.8 -.8 1.8 -.8 Z" fill="#FFE9A8"/>'},
+wizard:{b:['#8A6AE8','#8A5A10'],a:'<path d="M13 17.5 Q21.5 15.5 23 5 Q23.6 2.5 26.5 2 Q25 4.2 25.5 6.2 Q27.5 15.5 35 17.5 L35.5 19.5 L12.5 19.5 Z" fill="#8A5A10" stroke="#372073" stroke-width="1"/><rect x="12.5" y="17.6" width="23" height="3.4" rx="1.6" fill="#E8B23A"/><path d="M19 10.5 l.8 1.7 1.7 .8 -1.7 .8 -.8 1.7 -.8 -1.7 -1.7 -.8 1.7 -.8 Z" fill="#FFE9A8"/><path d="M28.5 7 a2.6 2.6 0 1 0 2.4 3.6 a2 2 0 1 1 -2.4 -3.6" fill="#FFE9A8"/><path d="M13.5 23 Q17.5 21 21 22.6" stroke="#EDEFF5" stroke-width="2.8" fill="none" stroke-linecap="round"/><path d="M34.5 23 Q30.5 21 27 22.6" stroke="#EDEFF5" stroke-width="2.8" fill="none" stroke-linecap="round"/><circle cx="17.5" cy="25.5" r="2" fill="#232733"/><circle cx="30.5" cy="25.5" r="2" fill="#232733"/><path d="M12.5 28 Q12 40 24 43.5 Q36 40 35.5 28 Q31 31.5 24 30.5 Q17 31.5 12.5 28 Z" fill="#EDEFF5" stroke="#C9CFDD" stroke-width=".8"/><path d="M18.5 30.5 Q24 33.5 29.5 30.5" stroke="#C9CFDD" stroke-width="1.4" fill="none"/><ellipse cx="24" cy="34" rx="2.4" ry="1.5" fill="#5E2126"/><path d="M36.5 36.5 L42.5 30.5" stroke="#8A5A2E" stroke-width="2" stroke-linecap="round"/><path d="M43 27.5 l.8 1.8 1.8 .8 -1.8 .8 -.8 1.8 -.8 -1.8 -1.8 -.8 1.8 -.8 Z" fill="#FFE9A8"/>'},
 pirate:{b:['#D87850','#943820'],a:'<path d="M9.5 17 Q11 7.5 24 7 Q37 7.5 38.5 17 L38.5 19.5 Q24 15.5 9.5 19.5 Z" fill="#B83A3A"/><circle cx="15" cy="12.5" r=".9" fill="#fff"/><circle cx="21" cy="10.5" r=".9" fill="#fff"/><circle cx="27" cy="10.5" r=".9" fill="#fff"/><circle cx="33" cy="12.5" r=".9" fill="#fff"/><path d="M38.5 15 Q43 14 44.2 17.5 Q41.8 17.5 40.8 19.5 Q39.8 17 38.5 18.5 Z" fill="#B83A3A"/><path d="M9.5 18.5 L38.5 22.5" stroke="#232733" stroke-width="1.8"/><ellipse cx="17.5" cy="23" rx="5" ry="4.4" fill="#232733"/><path d="M14.5 21 Q17 19.8 20 20.8" stroke="#4A5568" stroke-width="1" fill="none"/><path d="M26.5 18.5 L35 17" stroke="#232733" stroke-width="2.6" stroke-linecap="round"/><circle cx="30.5" cy="23" r="2.3" fill="#232733"/><circle cx="31.3" cy="22.2" r=".8" fill="#fff"/><path d="M15.5 30 Q24 34 32.5 30 Q31 38.5 24 38.5 Q17 38.5 15.5 30 Z" fill="#5E2126"/><path d="M17 30.8 Q24 33 31 30.8 L30.6 33.4 Q24 35.2 17.4 33.4 Z" fill="#fff"/><rect x="25.8" y="31.4" width="3" height="2.6" rx=".6" fill="#E8B23A"/><circle cx="9" cy="28" r="2.2" fill="none" stroke="#E8B23A" stroke-width="1.6"/><path d="M33 27 L36.5 31 M33.6 28.6 L35.2 27.4 M34.6 29.8 L36.2 28.6" stroke="#A85A48" stroke-width="1.1"/>'},
 champion:{b:['#4ED88A','#188A50'],a:'<path d="M9.5 15.5 Q24 10 38.5 15.5 L38.5 19 Q24 13.5 9.5 19 Z" fill="#E8B23A"/><circle cx="24" cy="14.8" r="1.7" fill="#B83A3A"/><g fill="#3E9E5D"><ellipse cx="8.5" cy="22" rx="3.4" ry="1.7" transform="rotate(-52 8.5 22)"/><ellipse cx="7.5" cy="27" rx="3.4" ry="1.7" transform="rotate(-78 7.5 27)"/><ellipse cx="8.5" cy="32" rx="3.2" ry="1.6" transform="rotate(-104 8.5 32)"/><ellipse cx="39.5" cy="22" rx="3.4" ry="1.7" transform="rotate(52 39.5 22)"/><ellipse cx="40.5" cy="27" rx="3.4" ry="1.7" transform="rotate(78 40.5 27)"/><ellipse cx="39.5" cy="32" rx="3.2" ry="1.6" transform="rotate(104 39.5 32)"/></g><path d="M13 21.5 L21 22.5 M35 21.5 L27 22.5" stroke="#232733" stroke-width="2.8" stroke-linecap="round"/><circle cx="17.5" cy="25.5" r="2.3" fill="#232733"/><circle cx="30.5" cy="25.5" r="2.3" fill="#232733"/><circle cx="18.2" cy="24.8" r=".8" fill="#fff"/><circle cx="31.2" cy="24.8" r=".8" fill="#fff"/><path d="M17.5 30.5 Q24 35.5 30.5 30.5 Z" fill="#5E2126"/><path d="M18.8 31.1 Q24 32.6 29.2 31.1 L28.9 32.8 Q24 34 19.1 32.8 Z" fill="#fff"/><path d="M20.5 38.5 L24 42.5 L27.5 38.5 L27.5 36 L20.5 36 Z" fill="#B83A3A"/><circle cx="24" cy="42.8" r="3.2" fill="#E8B23A" stroke="#C08C18" stroke-width="1"/><text x="24" y="45" font-size="5" font-weight="900" fill="#7A5510" text-anchor="middle">١</text>'},
 cat:{b:['#5A4898','#241A48'],full:1,a:'<circle cx="9" cy="9" r=".9" fill="#fff" opacity=".6"/><circle cx="40" cy="11" r=".7" fill="#fff" opacity=".5"/><circle cx="42" cy="38" r=".8" fill="#fff" opacity=".45"/><path class="an" style="animation:sway 1.6s ease-in-out infinite" d="M35 39 Q43 35 41 27" stroke="#8A93B8" stroke-width="3.4" fill="none" stroke-linecap="round"/><g class="an" style="animation:emRock .85s ease-in-out infinite"><path d="M12 14 L14.5 4.5 L21 10.5 Z" fill="#8A93B8"/><path d="M36 14 L33.5 4.5 L27 10.5 Z" fill="#8A93B8"/><path d="M14 12.2 L15.3 7.5 L18.8 10.6 Z" fill="#F0A8C0"/><path d="M34 12.2 L32.7 7.5 L29.2 10.6 Z" fill="#F0A8C0"/><circle cx="24" cy="22" r="14" fill="#9BA6C9"/><ellipse cx="24" cy="27" rx="8.5" ry="6" fill="#E6EAF5"/><path d="M20 9.5 L20 13 M24 8.6 L24 12.6 M28 9.5 L28 13" stroke="#6E7899" stroke-width="1.7" stroke-linecap="round"/><path d="M15.5 20 Q18.5 16.6 21.5 20" stroke="#232733" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M26.5 20 Q29.5 16.6 32.5 20" stroke="#232733" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M22.6 24.2 L25.4 24.2 L24 26.2 Z" fill="#F0A8C0"/><path d="M18.5 27.5 Q24 33.5 29.5 27.5 Z" fill="#5E2126"/><path d="M19.8 28 Q24 29.6 28.2 28 L28 29.4 Q24 30.6 20 29.4 Z" fill="#fff"/><path d="M20.5 27.8 L21.6 30 L22.7 27.9 Z" fill="#fff"/><path d="M8 22 L14 23 M8 26 L14 26 M40 22 L34 23 M40 26 L34 26" stroke="#DDE2F0" stroke-width="1.1" stroke-linecap="round"/></g><path class="an" style="animation:emTear .85s ease-in-out infinite" d="M9.5 20 q3 4 0 6.4 q-3 -2.4 0 -6.4" fill="#5AC8F5"/><path class="an" style="animation:emTear .85s ease-in-out infinite .4s" d="M38.5 20 q-3 4 0 6.4 q3 -2.4 0 -6.4" fill="#5AC8F5"/><g class="an" style="animation:emPoint .85s ease-in-out infinite"><ellipse cx="24" cy="41.5" rx="5" ry="3.6" fill="#9BA6C9"/><path d="M20.7 40 L20.7 43 M23.4 39.4 L23.4 43.4 M26.1 40 L26.1 43" stroke="#6E7899" stroke-width="1.1"/></g>'},
@@ -16254,12 +16256,12 @@ function caA3Stop(){if(!_caA3)return;try{if(_caA3.w)_caA3.w.terminate();else if(
 function caA3Fit(){if(!_caA3)return;const r=caA3Rect();if(r){const z=caA3Size();_caA3.post({t:'resize',W:z.W,H:z.H,rect:r})}}
 /* يُرسم فقط والساحة ظاهرة، والنتيجة غير معروضة، والتطبيق في المقدّمة */
 let _caA3Obs=null;
-function caA3Sync(){if(!_caA3)return;const el=document.getElementById('arena');const on=!!(el&&el.classList.contains('on')&&el.contains(_caA3.cv))&&!document.hidden&&!document.body.classList.contains('caOver');
+function caA3Sync(){if(!_caA3)return;const el=document.getElementById('arena');const on=!!(el&&el.classList.contains('on')&&el.contains(_caA3.cv))&&!document.hidden&&!document.body.classList.contains('caOver')&&!!document.getElementById('caC');   // ٧٫٢١: خارج المباراة (المركز والخيارات) صورةٌ ثابتة من الساحة — لا رسم كلّ إطار
  if(el&&!el.contains(_caA3.cv)){caA3Stop();return}if(on!==_caA3.run){_caA3.run=on;_caA3.post({t:on?'resume':'pause'})}}
 function caA3Watch(){if(_caA3Obs)return;try{_caA3Obs=new MutationObserver(caA3Sync);const el=document.getElementById('arena');_caA3Obs.observe(el,{attributes:true,attributeFilter:['class'],childList:true});_caA3Obs.observe(document.body,{attributes:true,attributeFilter:['class']});
  document.addEventListener('visibilitychange',caA3Sync);window.addEventListener('resize',()=>setTimeout(caA3Fit,120));
  /* أثناء حركة القطع تنزل الساحة إلى نصف معدّلها فيبقى المعالج للّعب */
- let bz=false;setInterval(()=>{if(!_caA3||_caA3.kind!=='w')return;const b=typeof _ca!=='undefined'&&!!(_ca&&_ca.sim);if(b!==bz){bz=b;_caA3.post({t:'busy',on:b})}},200)}catch(e){}}
+ let bz=false;setInterval(()=>{try{if(!_caA3)return;caA3Sync();if(!_caA3||_caA3.kind!=='w')return;const b=typeof _ca!=='undefined'&&!!(_ca&&_ca.sim);if(b!==bz){bz=b;_caA3.post({t:'busy',on:b})}}catch(e){}},200)}catch(e){}}
 function caArenaVenue(ix){
  const A=ARENAS[ix]||ARENAS[0];let bg='';try{if(typeof ARENA_BG!=='undefined'&&ARENA_BG[ix])bg=artSrc('~arbg:'+ix,ARENA_BG[ix])}catch(e){}
  if(!bg)return null;
@@ -16316,7 +16318,7 @@ function robotArt(mood){
   '<circle cx="18" cy="27" r="3.4" fill="#0A0F1C"/><circle cx="30" cy="27" r="3.4" fill="#0A0F1C"/>';
  return `<svg viewBox="0 0 48 48" width="100%" height="100%">
  <defs><linearGradient id="rgHead" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0" stop-color="#7B4FE0"/><stop offset="1" stop-color="#4A2C9B"/></linearGradient>
+  <stop offset="0" stop-color="#C9901F"/><stop offset="1" stop-color="#8A5A10"/></linearGradient>
   <linearGradient id="rgBody" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="#2A3550"/><stop offset="1" stop-color="#161D30"/></linearGradient></defs>
  <rect x="16" y="4" width="2.4" height="8" fill="#68738E"/>
@@ -16622,7 +16624,7 @@ function avatarSVG(cfg,size){
 
 /** صورة الملف الشخصي: ميدالية تعبير مختارة أو الشخصية المرسومة */
 const FRAMES=[
- {k:'s4',n:'إطار أرشيف الزمن',css:'linear-gradient(135deg,#5AC8F5,#7B4FE0 45%,#5AC8F5 90%)'},
+ {k:'s4',n:'إطار أرشيف الزمن',css:'linear-gradient(135deg,#5AC8F5,#C9901F 45%,#5AC8F5 90%)'},
  {k:'royal',n:'إطار التاج الملكي',css:'linear-gradient(135deg,#FFE9A8,#B8871E 40%,#FFD75E 70%,#8A6210)'}
 ];
 /** شخصية مرسومة ثابتة تُشتقّ من الاسم: كل خصم وكل عضو له وجهه، لا وجه تعبير جاهز */
@@ -16798,7 +16800,7 @@ var RankCore=(function(){
  /** اسم الرتبة كما يراه اللاعب: عربي بأرقام رومانية — سياسة واحدة في المشروع كلّه */
  function rankName(p){
   var t=tierOf(p);
-  return t.div===0 ? t.ar : t.ar+' '+['','I','II','III'][p.div];
+  return t.div===0 ? t.ar : t.ar+' '+['','1','2','3'][p.div];
  }
  /** الإتقان يعكس الوقت والإنجاز، والرتبة تعكس المهارة — لا يُخلطان */
  function masteryLevel(xp){return Math.max(1,Math.floor(Math.sqrt((xp||0)/40))+1)}
@@ -18008,7 +18010,7 @@ var Billing=(function(){
  }
  var AR={
   cancelled:'ألغيت عملية الشراء — لم يُخصم شيء',
-  no_provider:'الشراء بالمال متاح من داخل تطبيق تحدّي على App Store وGoogle Play فقط',
+  no_provider:'الشراء بالمال متاح من داخل تطبيق تحدّي على متجر آبل ومتجر جوجل فقط',
   offline:'لا اتصال بخادم تحدّي — لن يُخصم شيء',
   unknown_product:'منتج غير معروف',
   already_used:'هذا الإيصال استُخدم في حساب آخر من قبل',
@@ -18251,10 +18253,10 @@ function netBoot(){
  if(typeof NET==='undefined')return;
  const acc=S.account||{};
  NET.on('resultFinal',m=>{if(m&&m.profile&&m.profile.gameId)netAdoptProfile(m.profile.gameId,m.profile,m.status)});
- NET.on('state',()=>{const el=document.getElementById('netLine');if(el)el.innerHTML=netLine()});
+ NET.on('state',()=>{const el=document.getElementById('netLine');if(el){const h=netLine();el.innerHTML=h;el.hidden=!h}});
  // عودة الاتصال: نُعلم اللاعب، وإن كان ضيفًا في غرفة حيّة طلب من المضيف إعادة بثّ الوضع
  NET.on('reconnect',r=>{
-  try{toast(r&&r.resumed?'عاد الاتصال — تابع من حيث توقّفت':'عاد الاتصال بالخادم')}catch(e){}
+  try{toast(r&&r.resumed?'عاد الاتصال — تابع من حيث توقّفت':'عاد الاتصال بالإنترنت')}catch(e){}
   try{if(RM&&RM.code){RM.msg='';if(document.getElementById('rmScr'))roomDraw()}}catch(e){}   // يزول تنبيه الانقطاع
   try{if(RM&&RM.code&&RM.code!=='SOLO'&&!RM.host&&RM.me)rmSend({t:'sync',by:RM.me})}catch(e){}
  });
@@ -18295,11 +18297,11 @@ function netSaveCloud(blob,t){
 }
 /** سطر الحالة في «المزيد» — صادق عن الوضع الحقيقي */
 function netLine(){
- if(typeof NET==='undefined')return 'نسخة محلية: كل شيء على هذا الجهاز.';
+ if(typeof NET==='undefined')return '';
  const st=NET.state();
- if(st.mode==='server')return st.connected?`${ico('check',12)} متصل بخادم تحدّي · حسابك <b dir="ltr">${st.id}</b> · الرتب والحفظ عند الخادم`:`${ico('info',12)} انقطع الاتصال بالخادم — تُعاد المحاولة تلقائيًا`;
- if(st.mode==='artifact')return `${ico('info',12)} نسخة claude.ai: الغرف تعمل عبر الرابط، ولا خادم — الرتب والحفظ على هذا الجهاز`;
- return `${ico('info',12)} نسخة محلية: كل شيء على هذا الجهاز`;
+ if(st.mode==='server')return st.connected?`${ico('check',12)} متصل بخادم تحدّي · حسابك <b dir="ltr">${st.id}</b> · الرتب والحفظ عند الخادم`:`${ico('info',12)} انقطع الاتصال بالإنترنت — تُعاد المحاولة تلقائيًا`;
+ if(st.mode==='artifact')return '';
+ return '';   // ٧٫٢١ — الفحص الشامل: سطرٌ تقنيّ عن «النسخة المحلية» كان يظهر للاعب — لا يُكتب إلّا الاتصال الحقيقيّ
 }
 
 /** إعادة ضبط ليّنة عند بداية موسم: نزول درجتين لا هبوط إلى برونزي */
@@ -19079,7 +19081,7 @@ function introDraw(){
  <div style="font-size:17px;font-weight:900">${rv.n}
   <span style="font-size:11px;background:var(--elev);color:var(--tx2);padding:2px 7px;border-radius:7px;font-weight:800;vertical-align:middle">منافس آلي</span></div>
  <div style="font-size:11.5px;color:var(--gold);font-weight:700;margin-top:2px">${rv.t}</div>
- <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">${t.ar} ${['III','II','I'][r.div]||''}</div>
+ <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">${t.ar} ${['3','2','1'][r.div]||''}</div>
  <div onclick="introProfile()" style="font-size:12px;color:var(--info,#5AC8F5);font-weight:800;margin-top:5px;cursor:pointer;display:inline-flex;align-items:center;min-height:36px;padding:0 6px">${ico('user',11)} عرض الملف الكامل ›</div>
  </div>
  <div class="vsx" style="font-size:19px">ضد</div>
@@ -19439,7 +19441,7 @@ function mEnd(){
 // ═══════════ رسم البطاقة بلغة اللعبة ═══════════
 const RCOL={common:{a:'#3E8C5A',b:'#1D4A30',g:'#5DCAA5'},
             rare  :{a:'#3E7FC4',b:'#1B3E6B',g:'#5AC8F5'},
-            epic  :{a:'#8B5CF0',b:'#4A2C9B',g:'#B76CF0'},
+            epic  :{a:'#E8B23A',b:'#8A5A10',g:'#B76CF0'},
             legendary:{a:'#E8B23A',b:'#8A5E12',g:'#FFE9A8'}};
 
 /* ═══ 5.90: تعريفات التدرّج مرّة واحدة للمستند كلّه ═══
@@ -19743,7 +19745,7 @@ const LEGAL={
   {h:'الخلاصة في ثلاثة أسطر',p:[
    'لا نطلب بريدًا ولا كلمة مرور ولا رقم هاتف ولا موقعك الجغرافي.',
    'لا إعلانات ولا متتبّعات ولا تحليلات طرف ثالث داخل اللعبة.',
-   'لا نرى بطاقتك البنكية أبدًا — الدفع كلّه داخل App Store أو Google Play.']},
+   'لا نرى بطاقتك البنكية أبدًا — الدفع كلّه داخل متجر آبل أو متجر جوجل.']},
   {h:'ما الذي نحفظه',p:[
    'اسم العرض الذي تختاره (حرفان إلى أربعة عشر حرفًا).',
    'معرّف حساب ورمز دخول يولّدهما الخادم عشوائيًا — لا يرتبطان بهويتك خارج اللعبة.',
@@ -19785,7 +19787,7 @@ const LEGAL={
   {h:'المشتريات',p:[
    'كل ما يُشترى عناصر افتراضية داخل اللعبة: جواهر وعملات وجوكرات وتجميليات وتذكرة موسم. لا تُباع إجابات ولا فوز.',
    'العناصر الافتراضية لا قيمة نقدية لها خارج اللعبة ولا تُصرف مالًا.',
-   'الاسترداد يخضع لسياسة App Store أو Google Play وحدهما — منهما يُطلب لا منّا.',
+   'الاسترداد يخضع لسياسة متجر آبل أو متجر جوجل وحدهما — منهما يُطلب لا منّا.',
    'تذكرة الموسم تُفعَّل للموسم الجاري وتعود على أجهزتك بحسابك عبر «استعادة المشتريات».']},
   {h:'استمرار الخدمة',p:[
    'قد تتوقّف الخدمة الأونلاين أو تتغيّر ميزاتها. نسخة اللعب على جهازك تبقى تعمل بما فيها من ألعاب محلّية.',
@@ -19853,11 +19855,11 @@ function frInviteText(){
  return `العب معي في تحدّي.${c?`\nرمز صداقتي: ${c}`:''}${u?`\n${u}`:''}`;
 }
 function frShareMe(){
- if(!frMyCode())return toast('يظهر رمزك بعد الاتصال بالخادم');
+ if(!frMyCode())return toast('يظهر رمزك بعد الاتصال بالإنترنت');
  shareOut(frInviteText(),'دعوة إلى تحدّي');
 }
 function frCopyCode(){
- const c=frMyCode();if(!c)return toast('يظهر رمزك بعد الاتصال بالخادم');
+ const c=frMyCode();if(!c)return toast('يظهر رمزك بعد الاتصال بالإنترنت');
  copyOut(c,'نُسخ رمزك '+c);
 }
 function frAv(a){return a&&typeof a==='object'?avatarSVG(a,34):personArt('لاعب',34)}
@@ -19869,7 +19871,7 @@ async function frLoad(){
 }
 function frPaint(){if(Router.current()&&Router.current().fn==='friendsScr')friendsScr(1)}
 async function frDo(fn,id,okMsg){
- if(!netOnline())return toast('يحتاج اتصالًا بالخادم');
+ if(!netOnline())return toast('يحتاج اتصالًا بالإنترنت');
  try{const r=await fn(id);FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];toast(okMsg);frPaint()}
  catch(e){toast(e&&e.message?e.message:'تعذّر التنفيذ')}
 }
@@ -19896,7 +19898,7 @@ function pcDraw(){
    ${pcStat('مباريات',p.matches!=null?p.matches:(p.played!=null?p.played:'—'))}
    ${pcStat('انتصارات',p.wins!=null?p.wins:'—')}
    ${pcStat('ألعاب مصنّفة',rk||'—')}</div>`
-  :`<div class="note" style="margin-top:10px">${PCARD.load?'يُحمّل السجلّ…':(PCARD.id&&netOnline()?'لا سجلّ ظاهر لهذا اللاعب':'السجلّ يحتاج اتصالًا بالخادم')}</div>`;
+  :`<div class="note" style="margin-top:10px">${PCARD.load?'يُحمّل السجلّ…':(PCARD.id&&netOnline()?'لا سجلّ ظاهر لهذا اللاعب':'السجلّ يحتاج اتصالًا بالإنترنت')}</div>`;
  let act='';
  if(!PCARD.id)act='<div class="note" style="margin-top:10px">هذا أنت</div>';
  else if(friend)act=`<button class="rbtn" onclick="closeSheet();dmOpen('${PCARD.id}',${JSON.stringify(PCARD.name)})"><span>${ico('chat',14)} محادثة خاصّة</span></button>
@@ -19906,15 +19908,15 @@ function pcDraw(){
  else act=`<button class="rbtn" onclick="pcAdd()"><span>${ico('plus',14)} إضافة صديق</span></button>
    <div class="note" style="margin-top:8px">الدردشة الخاصّة تُفتح بعد قبوله الطلب</div>`;
  vbSheet(`<div class="shh"><div class="vbShAv">${PCARD.av?avatarSVG(PCARD.av,54):(PCARD.id?personArt(PCARD.name,54):avatarArt(54))}</div>
-  <div><div class="t">${esc(PCARD.name)}</div><div class="d">${PCARD.id?'#'+esc(PCARD.id):'أنت'}</div></div></div>
+  <div><div class="t">${esc(PCARD.name)}</div><div class="d">${PCARD.id?'لاعب':'أنت'}</div></div></div>
   ${stats}
   <div style="margin-top:12px">${act}</div>`);
 }
 function pcAfter(msg){return r=>{FR.f=r.friends||[];FR.in=r.reqIn||[];FR.out=r.reqOut||[];toast(msg);pcDraw();if(typeof frPaint==='function')frPaint()}}
 function pcErr(e){toast(e&&e.message?e.message:'تعذّر التنفيذ')}
-function pcAdd(){if(!netOnline())return toast('يحتاج اتصالًا بالخادم');NET.friendAdd(PCARD.id).then(pcAfter('أُرسل الطلب')).catch(pcErr)}
-function pcAccept(){if(!netOnline())return toast('يحتاج اتصالًا بالخادم');NET.friendAccept(PCARD.id).then(pcAfter('صرتما صديقين')).catch(pcErr)}
-function pcUnfriend(){if(!netOnline())return toast('يحتاج اتصالًا بالخادم');NET.friendRemove(PCARD.id).then(pcAfter('أُزيل من الأصدقاء')).catch(pcErr)}
+function pcAdd(){if(!netOnline())return toast('يحتاج اتصالًا بالإنترنت');NET.friendAdd(PCARD.id).then(pcAfter('أُرسل الطلب')).catch(pcErr)}
+function pcAccept(){if(!netOnline())return toast('يحتاج اتصالًا بالإنترنت');NET.friendAccept(PCARD.id).then(pcAfter('صرتما صديقين')).catch(pcErr)}
+function pcUnfriend(){if(!netOnline())return toast('يحتاج اتصالًا بالإنترنت');NET.friendRemove(PCARD.id).then(pcAfter('أُزيل من الأصدقاء')).catch(pcErr)}
 
 /* ═══ الدردشة الخاصّة — بين الأصدقاء وحدهم ═══ */
 var DM={id:null,name:'',msgs:[],load:0};
@@ -19928,8 +19930,7 @@ function dmOpen(id,name){DM={id:id,name:String(name||'صديق').slice(0,18),msg
 function dmScr(){
  if(!DM.id){   // فُتحت بلا صديق مختار: حالة صادقة لا شاشة بيضاء
   return go(`<div class="scr on">${tb('محادثة خاصّة')}
-  <div class="note" style="margin-top:14px">اختر صديقًا لتبدأ محادثة — الدردشة الخاصّة بين الأصدقاء وحدهم.</div>
-  <button class="rbtn" style="margin-top:12px" onclick="push('friendsScr')"><span>${ico('group',14)} أصدقائي</span></button></div>`);
+  ${emptyCard('group','اختر صديقًا لتبدأ','الدردشة الخاصّة بين الأصدقاء وحدهم — افتح قائمة أصدقائك واختر من تحادثه.',`<button class="rbtn" onclick="push('friendsScr')"><span>${ico('group',14)} أصدقائي</span></button>`)}</div>`);
  }
  go(`<div class="scr on">${tb('محادثة — '+esc(DM.name))}
  <div class="dmBox" id="dmBox"><div class="note">يُحمّل…</div></div>
@@ -19939,15 +19940,15 @@ function dmScr(){
  dmLoad();
 }
 function dmLoad(){
- if(!netOnline()){DM.load=0;return dmPaint('الدردشة الخاصّة تحتاج اتصالًا بالخادم')}
+ if(!netOnline()){DM.load=0;return dmPaint('الدردشة الخاصّة تحتاج اتصالًا بالإنترنت')}
  const want=DM.id;
  NET.dmThread(want).then(r=>{if(DM.id!==want)return;DM.msgs=r.msgs||[];DM.load=0;dmPaint()})
   .catch(e=>{DM.load=0;dmPaint(e&&e.message?e.message:'تعذّر جلب المحادثة')});
 }
 function dmPaint(err){
  const el=document.getElementById('dmBox');if(!el)return;
- if(err)return el.innerHTML='<div class="note">'+esc(err)+'</div>';
- if(!DM.msgs.length)return el.innerHTML='<div class="note">لا رسائل بعد — ابدأ أنت</div>';
+ if(err)return el.innerHTML=emptyCard('group','المحادثة غير متاحة الآن',esc(err));
+ if(!DM.msgs.length)return el.innerHTML=emptyCard('group','لا رسائل بعد','ابدأ أنت — اكتب تحيّتك في الأسفل.');
  el.innerHTML=DM.msgs.map(m=>`<div class="dmM${m.o?' me':''}"><span>${esc(m.m)}</span><i>${esc(dmHm(m.at))}</i></div>`).join('');
  el.scrollTop=el.scrollHeight;
 }
@@ -19955,7 +19956,7 @@ function dmHm(t){const d=new Date(t||Date.now());return String(d.getHours()).pad
 function dmSend(){
  const el=document.getElementById('dmTx');const v=el?el.value.trim():'';
  if(!v)return;
- if(!netOnline())return toast('يحتاج اتصالًا بالخادم');
+ if(!netOnline())return toast('يحتاج اتصالًا بالإنترنت');
  if(el)el.value='';
  const want=DM.id;
  NET.dm(want,v).then(r=>{if(DM.id!==want)return;DM.msgs=r.msgs||[];dmPaint()})
@@ -19981,7 +19982,7 @@ function frAddMet(id){frDo(NET.friendAdd,id,'أُرسل الطلب')}
 function frAccept(id){frDo(NET.friendAccept,id,'صرتما صديقين')}
 function frRemove(id){frDo(NET.friendRemove,id,'أُزيل')}
 function frCopyId(){
- const id=frMyId();if(!id)return toast('لا معرّف قبل الاتصال بالخادم');
+ const id=frMyId();if(!id)return toast('لا معرّف قبل الاتصال بالإنترنت');
  try{if(navigator.clipboard&&navigator.clipboard.writeText)
   return navigator.clipboard.writeText(id).then(()=>toast('نُسخ معرّفك '+ico('check',14)),()=>toast('معرّفك: '+id))}catch(e){}
  toast('معرّفك: '+id);
@@ -20005,8 +20006,8 @@ function friendsScr(keep){
    <button class="rbtn sm" onclick="frShareMe()"><span>${ico('web',13)} شارك رمزك</span></button>
    <button class="btn g sm" onclick="frCopyCode()">${ico('scroll',13)} نسخ</button></div>
   <div class="note" style="margin-top:9px">${code?'قل هذا الرمز لمن تريد أن يضيفك — ستّة محارف لا أكثر.'
-   :'يظهر رمزك بعد الاتصال بالخادم.'}</div>
-  <div class="frIdSm" dir="ltr" onclick="frCopyId()">${id?esc(id):'—'}</div>
+   :'يظهر رمزك بعد الاتصال بالإنترنت.'}</div>
+  ${id?`<div class="frIdSm" dir="ltr" onclick="frCopyId()">${esc(id)}</div>`:''}
  </div>
  <div class="li" style="margin-bottom:10px"><div style="padding:2px">
   <div class="mtl" style="font-size:13px;margin-bottom:6px">أضف صديقًا برمزه</div>
@@ -20016,14 +20017,14 @@ function friendsScr(keep){
    <button class="rbtn sm" onclick="frAdd()"><span>${ico('plus',13)} إضافة</span></button></div>
   <div class="note" style="margin-top:7px">الرمز ستّة محارف. ويقبل الحقل المعرّف الطويل أيضًا.</div>
  </div></div>
- <button class="rbtn" style="margin-bottom:10px" onclick="push('chalScr')"><span>${ico('swords',14)} تحدِّ صديقًا في الأسئلة</span></button>
- ${!on?`<div class="note" style="margin-bottom:10px">${ico('info',13)} الأصدقاء يحتاجون اتصالًا بالخادم. اتصل ثم عد.</div>`:''}
+ ${gOff('knowledge')?'':`<button class="rbtn" style="margin-bottom:10px" onclick="push('chalScr')"><span>${ico('swords',14)} تحدِّ صديقًا في الأسئلة</span></button>`}
+ ${!on?`<div class="note" style="margin-bottom:10px">${ico('info',13)} الأصدقاء يحتاجون اتصالًا بالإنترنت. اتصل ثم عد.</div>`:''}
  ${FR.in.length?`<div class="frSec">طلبات وصلتك (${FR.in.length})</div>
   ${FR.in.map(o=>frRow(o,`<button class="rbtn sm" onclick="frAccept('${esc(o.id)}')"><span>${ico('check',13)} قبول</span></button>
    <button class="rbtn sm gh" onclick="frRemove('${esc(o.id)}')"><span>${ico('cross',13)}</span></button>`)).join('')}`:''}
  <div class="frSec">أصدقائي (${FR.f.length})</div>
  ${FR.f.length?FR.f.map(o=>frRow(o,`<button class="rbtn sm gh" onclick="frRemove('${esc(o.id)}')"><span>${ico('cross',13)}</span></button>`)).join('')
-  :`<div class="note">لا أصدقاء بعد — أضف بالمعرّف، أو من «لاعبون قابلتهم» بالأسفل.</div>`}
+  :emptyCard('group','لا أصدقاء بعد','أضفهم برمز الصداقة، أو من «لاعبون قابلتهم» بالأسفل.')}
  ${FR.out.length?`<div class="frSec">طلبات أرسلتها (${FR.out.length})</div>
   ${FR.out.map(o=>frRow(o,`<button class="rbtn sm gh" onclick="frRemove('${esc(o.id)}')"><span>${ico('cross',13)} إلغاء</span></button>`)).join('')}`:''}
  <div class="frSec">لاعبون قابلتهم</div>
@@ -20179,7 +20180,7 @@ const EN={
  'خزانة':'Cabinet',
  'حذف الحساب':'Delete account',
  'تحدي الخصم':'Challenge the opponent',
- 'شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من Google Play وApp Store':'Test purchase — no real money is charged. At launch, prices show in your currency from Google Play and the App Store',
+ 'شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من متجر جوجل ومتجر آبل':'Test purchase — no real money is charged. At launch, prices show in your currency from Google Play and the App Store',
  'في مافيا ضد الذكاء الاصطناعي: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي':'In Mafia and Out of the Loop versus the computer: they read the discussion, understand what you type and reply themselves — needs a connection; without one their local mind runs',
  'الآليون هنا يفكّرون بذكاء اصطناعي: يقرؤون النقاش كلّه ويفهمون ما تكتبه ويردّون بأنفسهم':'The bots here think with AI: they read the whole discussion, understand what you type and reply themselves',
  'الآليون يعملون بعقلهم المحلي الآن — الذكاء الاصطناعي يحتاج اتصالًا بخادم مضبوط أو نسخة الأرتيفاكت':'The bots run on their local mind now — AI needs a configured server or the artifact build',
@@ -20322,7 +20323,7 @@ const EN={
  'حرفان على الأقل':'At least two characters',
  'اختر اسمًا جديدًا':'Pick a new name',
  'اسم العرض الذي تختاره (حرفان إلى أربعة عشر حرفًا).':'The display name you choose (two to fourteen characters).',
- 'أهلًا بك في تحدي':'Welcome to Tahaddi',
+ 'أهلًا بك في تحدّي':'Welcome to Tahaddi',
  'عالم من المعرفة والمنافسة ينتظرك.':'A world of knowledge and competition awaits.',
  'جاهز لأول تحدٍ؟':'Ready for your first challenge?',
  'جولة قصيرة ستعرّفك على أساسيات اللعب.':'A short round to teach you the basics.',
@@ -20447,7 +20448,7 @@ const EN={
  'دقّة وسرعة وقرارات صائبة':'Accuracy, speed and sound decisions',
  'أقصى صعوبة':'Maximum difficulty',
  'درجة واحدة · 100 نقطة لكل درجة':'One tier · 100 points per tier',
- 'ثلاث درجات: III ثم II ثم I · 100 نقطة لكل درجة':'Three tiers: III then II then I · 100 points per tier',
+ 'ثلاث درجات: 3 ثم 2 ثم 1 · 100 نقطة لكل درجة':'Three tiers: III then II then I · 100 points per tier',
  'نسبة الفوز':'Win rate',
  'الانتصارات':'Wins',
  'أفضل سلسلة':'Best streak',
@@ -20627,8 +20628,8 @@ const EN={
  'أنهِ جولة أسئلة كاملة بلا أي خطأ':'Finish a full quiz round with no mistakes',
  'أنهِ جولتين من ليلة العائلة':'Finish two family-night rounds',
  'أنهِ 3 جولات من ليلة العائلة':'Finish 3 family-night rounds',
- 'افز بجولة أونو':'Win an uno round',
- 'افز بجولتين في أي لعبة':'Win two rounds in any game',
+ 'فُز بجولة أونو':'Win an uno round',
+ 'فُز بجولتين في أي لعبة':'Win two rounds in any game',
  'أدخل 5 قطع في الكيرم':'Pocket 5 carrom pieces',
  'أدخل 10 قطع في الكيرم':'Pocket 10 carrom pieces',
  'العب 15 بطاقة أونو':'Play 15 uno cards',
@@ -20687,7 +20688,7 @@ const EN={
  'لاعبون قابلتهم':'Players you met',
  'أعطِ معرّفك لمن تريد أن يضيفك، أو أضفه أنت بمعرّفه.':'Give your ID to whoever should add you, or add them by theirs.',
  'من تلعب معهم في الغرف الأونلاين يظهرون هنا لتضيفهم بلمسة.':'People you play with in online rooms appear here to add with one tap.',
- 'الأصدقاء يحتاجون اتصالًا بالخادم. اتصل ثم عد.':'Friends need a server connection. Connect and come back.',
+ 'الأصدقاء يحتاجون اتصالًا بالإنترنت. اتصل ثم عد.':'Friends need a server connection. Connect and come back.',
  'التعبيرات':'Emotes',
  'واجهة التعبيرات':'Emote panel',
  'المفضلة':'Favourites',
@@ -20806,7 +20807,7 @@ const EN={
  'لا يُحذف يدويًا':'Not deleted by hand',
  'بلا تنبيه':'No alert',
  'ما يخصّني فقط':'Only what concerns me',
- 'حذف الحساب من داخل التطبيق مطلوب من Google Play وApp Store':'In-app account deletion is required by Google Play and the App Store',
+ 'حذف الحساب من داخل التطبيق مطلوب من متجر جوجل ومتجر آبل':'In-app account deletion is required by Google Play and the App Store',
  'تصدير بياناتك: الإعدادات، ثم البيانات، ثم «تصدير بياناتي».':'Export your data: Settings, then Data, then “Export my data”.',
  'في هذه النسخة المحلية استخدم':'In this local build, use',
  'اللعب من عدة هواتف يعمل عند فتح اللعبة من':'Playing from several phones works when the game is opened from',
@@ -21280,7 +21281,7 @@ function recSend(){
  const el=document.getElementById('recMail');
  const v=(el?el.value:'').trim().toLowerCase();
  if(!MAIL_RE.test(v)){REC.msg='بريد إلكتروني غير صحيح';return recScr()}
- if(!netOnline()){REC.msg='تحتاج اتصالًا بالخادم';return recScr()}
+ if(!netOnline()){REC.msg='تحتاج اتصالًا بالإنترنت';return recScr()}
  REC.email=v;REC.msg='';recBusy(1);
  NET.authStart(v).then(m=>{REC.mask=m.to||v;REC.sent=1;REC.msg='';recBusy(0)})
   .catch(e=>{REC.msg=(e&&e.message)||'تعذّر إرسال الرمز';recBusy(0)});
@@ -21342,7 +21343,7 @@ async function xferGo(){
  if(XF.busy)return;
  const el=document.getElementById('xfIn'),c=String(el?el.value:'').trim().toUpperCase();
  if(c.length!==8)return toast(T('الرمز ثمانية أحرف'));
- if(!(typeof netOnline==='function'&&netOnline()&&window.NET))return toast(T('النقل يحتاج اتصالًا بالخادم'));
+ if(!(typeof netOnline==='function'&&netOnline()&&window.NET))return toast(T('النقل يحتاج اتصالًا بالإنترنت'));
  XF.busy=1;xferScr();
  try{
   const m=await NET.xferUse(c);
@@ -21361,7 +21362,7 @@ async function xferGo(){
 }
 /** على الجهاز القديم: يولّد الرمز ويعرضه مع عدّاد */
 async function xferMake(){
- if(!(typeof netOnline==='function'&&netOnline()&&window.NET))return toast(T('يحتاج اتصالًا بالخادم'));
+ if(!(typeof netOnline==='function'&&netOnline()&&window.NET))return toast(T('يحتاج اتصالًا بالإنترنت'));
  try{
   const m=await NET.xferNew();
   XF.code=m.code;XF.exp=m.exp||Date.now()+600000;
@@ -21545,10 +21546,10 @@ function setSection(k){
   tgl('aiBots','آليون بذكاء اصطناعي','في مافيا ضد الذكاء الاصطناعي: يقرؤون النقاش ويفهمون ما تكتبه ويردّون بأنفسهم — يحتاج اتصالًا، وبدونه يعمل عقلهم المحلي');
  if(SEC==='sound')body=tgl('sfx','المؤثرات الصوتية','نقرات وإصابات ونتائج وضربات الكيرم — مركّبة داخل اللعبة')+
   tgl('music','موسيقى الخلفية','لحن هادئ يبدأ مع اللعبة ويخفت داخل المباريات — مركّب داخل اللعبة بلا ملفّ صوت')+
-  tgl('shout','الصيحات','جملة تقولها في اللعب — تُسمع بصوت الجهاز الحقيقيّ')+
+  tgl('shout','الصيحات','جملة تقولها في اللعب — تُسمع بصوتٍ حقيقيّ')+
   `<div class="note">${(window.VOICE&&VOICE.hasSpeech())
     ?'الصيحات تُقال بصوت جهازك العربيّ الحقيقيّ'
-    :'لا يوجد صوت عربيّ في هذا الجهاز الآن، فتظهر الصيحة مكتوبةً بلا صوت. ثبّت «النطق من Google» واختر العربية من إعدادات الهاتف'}</div>`+
+    :'لا يوجد صوت عربيّ في هذا الجهاز الآن، فتظهر الصيحة مكتوبةً بلا صوت. ثبّت «محرّك النطق من جوجل» واختر العربية من إعدادات الهاتف'}</div>`+
   `<div class="li" style="cursor:pointer" onclick="shoutTry()"><div class="lr">
    <div class="lb"><div class="lt">جرّب صيحة</div><div class="ls">اسمع كيف يخرج صوتك قبل أن تقولها في مباراة</div></div>
    <span style="color:var(--gold)">${ico('sound',18)}</span></div></div>
@@ -21573,11 +21574,11 @@ function setSection(k){
    <div class="ls">لا يمكن التراجع — يُحذف كل شيء</div></div></div>
    <button class="btn g" style="margin-top:9px;color:var(--no);border-color:var(--no)"
     onclick="push('delAsk')">حذف الحساب</button></div>
-  <div class="note">حذف الحساب من داخل التطبيق مطلوب من Google Play وApp Store</div>`;
+  <div class="note">حذف الحساب من داخل التطبيق مطلوب من متجر جوجل ومتجر آبل</div>`;
  if(SEC==='about')body=`
   <div class="orn"><div class="in">${ornCorners()}
   <div style="text-align:center;padding:8px 0">
-  <div class="mtl" style="font-size:22px">تحدي</div>
+  <div class="mtl" style="font-size:22px">تحدّي</div>
   <div style="font-size:12px;color:var(--gold);margin-top:2px">عالم المعرفة</div>
   <div style="font-size:11.5px;color:var(--tx2);margin-top:9px">الإصدار ${APP_VER}</div>
   <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">${Q.length} سؤالًا</div>
@@ -21656,7 +21657,7 @@ function delAsk(){
  <div class="btns"><button class="rbtn" onclick="back()"><span>إلغاء</span></button>
  <button class="btn g" style="color:var(--no);border-color:var(--no)"
   onclick="doDelete()">تأكيد الحذف</button></div></div>
- <div class="note">في التطبيق الفعلي يُرسل الطلب للخادم وتُمحى البيانات خلال 30 يومًا</div></div>`);
+ <div class="note">يُحذف حسابك وكلّ بياناته نهائيًّا خلال ٣٠ يومًا</div></div>`);
 }
 function doDelete(){
  wipeSave();
@@ -21748,8 +21749,8 @@ const GEM_ART={
   <defs><radialGradient id="sg"><stop offset="0" stop-color="#C89BF5" stop-opacity=".5"/>
    <stop offset="1" stop-color="#8B4FD9" stop-opacity="0"/></radialGradient></defs>
   <ellipse cx="60" cy="58" rx="52" ry="42" fill="url(#sg)" class="puls"/>
-  <path d="M14 92 L44 34 L56 58 L60 92 Z" fill="#7B4FE0" opacity=".38"/>
-  <path d="M60 92 L68 40 L106 92 Z" fill="#4A2C9B" opacity=".45"/>
+  <path d="M14 92 L44 34 L56 58 L60 92 Z" fill="#C9901F" opacity=".38"/>
+  <path d="M60 92 L68 40 L106 92 Z" fill="#8A5A10" opacity=".45"/>
   ${gem(60,30,1.5,0)}
   ${gem(44,48,1.35,-14)}${gem(76,48,1.35,14)}
   ${gem(30,66,1.25,-22)}${gem(60,62,1.3,4)}${gem(90,66,1.25,22)}
@@ -21835,7 +21836,7 @@ function shopScr(){
  ${ECON.gemPacks.map(p=>packTile({
    art:packArt('gem',p.art,p.gems),n:p.n,amount:p.gems,cur:'gem',tag:p.tag,
    price:usdTxt(p.usd),id:p.id,buy:`buyGemPack('${p.id}')`})).join('')}</div>
- <div class="note">شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من <bdi>Google Play</bdi> · <bdi>App Store</bdi></div>
+ <div class="note">شراء تجريبي — لا يُخصم مال حقيقي. عند الإطلاق تُعرض الأسعار بعملتك من متجر جوجل · متجر آبل</div>
 
  ${banner('العملات')}
  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
@@ -21948,7 +21949,7 @@ function oddsScr(key){
   <span style="font-weight:800">${v}%</span></div>`).join('')||
  '<div style="font-size:12px;color:var(--mut)">لا مكافآت خاصة في هذا الصندوق</div>'}</div>
  </div></div>
- <div class="note">هذه النسب الحالية وتتحدث تلقائيًا عند تعديلها من لوحة الإدارة</div></div>`);
+ <div class="note">هذه نسب الظهور الحاليّة لكلّ صندوق</div></div>`);
 }
 function buyChest(key){
  const c=ECON.chests[key];
@@ -22244,15 +22245,18 @@ function curBar(){
 const BN_DEFS='<defs><linearGradient id="bnG" x1="0" y1="0" x2="0" y2="1">'+
  '<stop offset="0" stop-color="#F0C25A"/><stop offset=".5" stop-color="#E8B23A"/>'+
  '<stop offset="1" stop-color="#A87518"/></linearGradient></defs>';
+/* ٧٫٢١ — الفحص الشامل: «فُز بـ10 مباراة»، «8 نسخة»، «10 ساعة» — المعدود يتبع العدد: من ٣ إلى ١٠ جمعًا، ومن ١١ مفردًا */
+const AR_CNT={'مباراة':['مباريات','مباراة'],'مباريات':['مباريات','مباراةً'],'مرّة':['مرّات','مرّة'],'قطعة':['قطع','قطعة'],'تعبيرًا':['تعبيرات','تعبيرًا'],'أصدقاء':['أصدقاء','صديقًا'],
+ 'مهمّة':['مهامّ','مهمّة'],'مواسم':['مواسم','موسمًا'],'كأس':['كؤوس','كأس'],'يومًا':['أيام','يومًا'],'جيوس':['جيوس','جيسًا'],'صندوق':['صناديق','صندوق'],'انتصارات':['انتصارات','انتصارًا'],
+ 'نسخة':['نسخ','نسخة'],'ساعة':['ساعات','ساعة'],'دقيقة':['دقائق','دقيقة'],'نقطة':['نقاط','نقطة'],'عملة':['عملات','عملة'],'جوهرة':['جواهر','جوهرة'],'لاعبين':['لاعبين','لاعبًا']};
+function arCnt(n,w){const f=AR_CNT[w];if(!f)return w;const k=Math.abs(n|0)%100,m=Math.abs(n|0);return (m>=3&&m<=10)||(k>=3&&k<=10&&m>100)?f[0]:(m===0?f[0]:f[1])}
+function arAgree(tpl,n){const N=(+n).toLocaleString('en-US');return String(tpl).replace(/\{n\}(\s+)([^\s،.]+)/,(m,sp,w)=>N+sp+arCnt(n,w)).replace('{n}',N).replace('أيام متتاليًا','أيام متتالية')}
+/* ٧٫٢١ — حالة فارغة مصمَّمة: وسامٌ ذهبيّ وعنوانٌ وسطرٌ وزرّ — بدل سطر ملاحظةٍ ضائعٍ في صفحةٍ فارغة */
+function emptyCard(ic,t,sub,btn){return `<div class="emS"><i class="soRays"></i><div class="emI">${ico(ic,34)}</div><div class="emT">${t}</div>${sub?`<div class="emD">${sub}</div>`:''}${btn||''}</div>`}
 function banner(t){
- cgDefsAdd(BN_DEFS);   // 5.90: كان المعرّف مفتاحه عدد حروف العنوان — لافتتان بالطول نفسه تتصادمان
- return `<div style="margin:20px 0 12px;position:relative;height:34px">
- <svg viewBox="0 0 300 34" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%">
-  <path d="M14 4 L286 4 L296 17 L286 30 L14 30 L4 17 Z" fill="url(#bnG)"/>
-  <path d="M14 4 L286 4 L296 17 L286 30 L14 30 L4 17 Z" fill="none" stroke="#FFE9A8" stroke-width="1" opacity=".55"/>
- </svg>
- <div style="position:relative;text-align:center;line-height:34px;font-size:14.5px;
-  font-weight:900;color:#15100A">${t}</div></div>`;
+ /* ٧٫٢١ — الفحص الشامل: اللافتة كانت تُملأ بتدرّجٍ SVG مشترك (#bnG) يغيب عن بعض الشاشات فتظهر إطارًا فارغًا ونصًّا داكنًا على
+    الكحليّ لا يُقرأ — صارت ذهبًا مرسومًا بـ CSS لا يعتمد على شيء */
+ return `<div class="bnr"><span>${t}</span></div>`;
 }
 /** بطاقة حزمة — الرسم فوق، الكمية وسط، السعر أسفل */
 /* ٦٫٩٢ — رزم الجواهر والعملات بصورٍ حقيقيّة: جوهرةٌ واحدة للصغيرة، وتتكاثر مع حجم الرزمة */
@@ -22309,7 +22313,7 @@ function shopHeaderOld(){
  <defs><linearGradient id="shHd" x1="0" y1="0" x2="0" y2="1">
   <stop offset="0" stop-color="#2A1D45"/><stop offset="1" stop-color="#120B22"/></linearGradient></defs>
  <rect width="300" height="64" fill="url(#shHd)"/>
- <path d="M150 6 L120 30 L150 58 L180 30 Z" fill="#7B4FE0" opacity=".22"/>
+ <path d="M150 6 L120 30 L150 58 L180 30 Z" fill="#C9901F" opacity=".22"/>
  <circle cx="60" cy="18" r="2" fill="#E8B23A" opacity=".7"/>
  <circle cx="240" cy="46" r="2.4" fill="#B76CF0" opacity=".6"/>
  <circle cx="270" cy="14" r="1.6" fill="#E8B23A" opacity=".8"/>
@@ -22331,7 +22335,7 @@ function welcomeScr(){
  <div class="flt2" style="width:200px;height:200px;background-image:var(--logo);
   background-size:contain;background-repeat:no-repeat;background-position:center;
   filter:drop-shadow(0 8px 24px rgba(232,178,58,.3))"></div>
-  <div style="font-size:19px;font-weight:800;margin-top:22px">${T('أهلًا بك في تحدي')}</div>
+  <div style="font-size:19px;font-weight:800;margin-top:22px">${T('أهلًا بك في تحدّي')}</div>
  <div style="font-size:13.5px;color:var(--tx2);margin-top:7px">${T('عالم من المعرفة والمنافسة ينتظرك.')}</div>
  <div style="width:100%;margin-top:auto;padding-top:40px">
  <button class="rbtn" onclick="push('askTut')"><span>${T('ابدأ')}</span></button></div></div>`);
@@ -23154,7 +23158,7 @@ function drawChain(st){
  <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center">
  ${st.grid.map((g,i)=>{
   const picked=!!g.by,bad=g.by==='meX'||g.by==='oppX';
-  const col=bad?'#E24B4A':g.by==='me'?'#2ECC71':g.by==='opp'?'#378ADD':'#3B2F5C';
+  const col=bad?'#E24B4A':g.by==='me'?'#2ECC71':g.by==='opp'?'#378ADD':'#5A4520';
   return `<button onclick="chainPick(${i})" ${picked||st.turn!=='me'||st.winner?'disabled':''}
    style="padding:9px 13px;border-radius:11px;font-size:12px;font-weight:800;cursor:pointer;
    font-family:inherit;border:1.5px solid ${col};
@@ -23562,8 +23566,8 @@ function drawMap(st){
  return `<div class="qbox"><div class="qboxi" style="font-size:15px">${st.d.q}</div></div>
  <div class="mapwrap"><svg id="msvg" viewBox="0 0 360 180" onclick="mapTap(event)">
   <rect x="0" y="0" width="360" height="180" fill="#0C1322"/>
-  ${[30,60,90,120,150].map(y=>`<line x1="0" y1="${y}" x2="360" y2="${y}" stroke="#7B4FE0" stroke-opacity=".08"/>`).join('')}
-  ${[60,120,180,240,300].map(x=>`<line x1="${x}" y1="0" x2="${x}" y2="180" stroke="#7B4FE0" stroke-opacity=".08"/>`).join('')}
+  ${[30,60,90,120,150].map(y=>`<line x1="0" y1="${y}" x2="360" y2="${y}" stroke="#C9901F" stroke-opacity=".08"/>`).join('')}
+  ${[60,120,180,240,300].map(x=>`<line x1="${x}" y1="0" x2="${x}" y2="180" stroke="#C9901F" stroke-opacity=".08"/>`).join('')}
   ${WORLD_PATHS.map(p=>`<path d="${p}" fill="#1F2740" stroke="#3A4668" stroke-width="1.2"/>`).join('')}
   ${M.ans&&st.pin?`<line x1="${mapXY(st.pin.lat,st.pin.lon).x}" y1="${mapXY(st.pin.lat,st.pin.lon).y}"
     x2="${ansPin.x}" y2="${ansPin.y}" stroke="#E24B4A" stroke-width="1" stroke-dasharray="3 2"/>`:''}
@@ -23743,12 +23747,12 @@ function playCss(){
  '.plWrap{padding-bottom:18px}',
  '.plSec{margin-top:20px}',
  '.plSecT{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:900;color:#E4E9F6;margin-bottom:10px}',
- '.plSecT .mo{margin-inline-start:auto;font-size:12px;font-weight:800;color:#A98BF0;cursor:pointer;display:inline-flex;align-items:center;min-height:36px;padding:0 8px}',
+ '.plSecT .mo{margin-inline-start:auto;font-size:12px;font-weight:800;color:#E8C77A;cursor:pointer;display:inline-flex;align-items:center;min-height:36px;padding:0 8px}',
 
  /* شريط الحالة */
  '.plBar{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:16px;',
  ' background:linear-gradient(160deg,#18203C,#0B1122);border:1px solid #2A3358}',
- '.plBar .av{border-radius:50%;padding:2px;background:linear-gradient(145deg,#8B5CF0,#4A2C9B);cursor:pointer;flex-shrink:0}',
+ '.plBar .av{border-radius:50%;padding:2px;background:linear-gradient(145deg,#E8B23A,#8A5A10);cursor:pointer;flex-shrink:0}',
  '.plBar .nm{font-size:13.5px;font-weight:900;line-height:1.25}',
  '.plBar .lv{font-size:11px;color:#8B96B6;margin-top:2px}',
  '.plBar .cch{font-size:11px}',
@@ -23807,7 +23811,7 @@ function playCss(){
  '.plRow .bd{flex:1;min-width:0;display:block}',
  '.plRow .t{display:block;font-size:14px;font-weight:900}',
  '.plRow .s{display:block;font-size:11.5px;color:#8F9BBC;margin-top:3px;line-height:1.5}',
- '.plRow .go{margin-inline-start:auto;color:var(--ac,#8B5CF0);flex-shrink:0}',
+ '.plRow .go{margin-inline-start:auto;color:var(--ac,#E8B23A);flex-shrink:0}',
  '.plMini{display:flex;gap:6px;margin-top:10px}',
  '.plMini span{width:32px;height:32px;border-radius:9px;overflow:hidden;background:#0A1022;border:1px solid #2A3358;flex-shrink:0}',
  '.plMini span svg{width:100%;height:100%;display:block}',
@@ -24011,7 +24015,7 @@ function plRow(icon,t,s,call,acc,extra){
  return `<button class="plRow" style="--ac:${acc};--acs:${clRGBA(acc,.14)}" onclick="${call}">
   <span class="ic">${icon}</span>
   <span class="bd"><span class="t">${esc(t)}</span><span class="s">${esc(s)}</span>${extra||''}</span>
-  <span class="go">${chev('var(--ac,#8B5CF0)',16)}</span></button>`;
+  <span class="go">${chev('var(--ac,#E8B23A)',16)}</span></button>`;
 }
 
 /** مهام اليوم — تُخفى إن أُنجزت كلّها */
@@ -24259,16 +24263,16 @@ function lkQueue(){let n=0;const t=setInterval(()=>{n++;if(document.querySelecto
 /* الجوائز على ثلاث فئات (ص ١٥٠/٤٥٠/١٠٠٠ · م ١٠٠/٣٠٠/٧٠٠ · ن ٥٠/١٥٠/٤٠٠) — مجموعها ٢٥٬٥٠٠ عملة و٤٠٩ جواهر: قرابة عشرين سلّم اثني عشر، لا منجم */
 const ACH2=[
  {k:'a_play',s:'battle',n:'ابن المجلس',d:'العب {n} مباراة كيرم',t:[10,100,500],c:[100,300,700],g:[2,5,10],i:'swords'},
- {k:'a_win',s:'battle',n:'صائد الانتصارات',d:'افز بـ{n} مباراة',t:[10,100,500],c:[150,450,1000],g:[3,8,15],i:'trophy'},
- {k:'a_streak',s:'battle',n:'لا يُوقَف',d:'افز بـ{n} مباريات متتالية دون خسارة',t:[3,7,15],c:[150,450,1000],g:[3,8,15],e:'fire',i:'flame'},
- {k:'a_perfect',s:'battle',n:'اللوح النظيف',d:'افز {n} مرّة قبل أن يُدخل خصمك قطعةً واحدة',t:[1,10,50],c:[100,300,700],g:[2,5,10],i:'shield'},
- {k:'a_crown3',s:'battle',n:'ثلاثيّ التيجان',d:'افز بثلاثة تيجان {n} مرّة',t:[5,50,300],c:[50,150,400],g:[1,3,6],i:'crown'},
- {k:'a_fast',s:'battle',n:'البرق',d:'افز في أقلّ من ثلاث دقائق {n} مرّة',t:[1,10,50],c:[50,150,400],g:[1,3,6],i:'timer'},
+ {k:'a_win',s:'battle',n:'صائد الانتصارات',d:'فُز بـ{n} مباراة',t:[10,100,500],c:[150,450,1000],g:[3,8,15],i:'trophy'},
+ {k:'a_streak',s:'battle',n:'لا يُوقَف',d:'فُز بـ{n} مباريات متتالية دون خسارة',t:[3,7,15],c:[150,450,1000],g:[3,8,15],e:'fire',i:'flame'},
+ {k:'a_perfect',s:'battle',n:'اللوح النظيف',d:'فُز {n} مرّة قبل أن يُدخل خصمك قطعةً واحدة',t:[1,10,50],c:[100,300,700],g:[2,5,10],i:'shield'},
+ {k:'a_crown3',s:'battle',n:'ثلاثيّ التيجان',d:'فُز بثلاثة تيجان {n} مرّة',t:[5,50,300],c:[50,150,400],g:[1,3,6],i:'crown'},
+ {k:'a_fast',s:'battle',n:'البرق',d:'فُز في أقلّ من ثلاث دقائق {n} مرّة',t:[1,10,50],c:[50,150,400],g:[1,3,6],i:'timer'},
  {k:'a_pot',s:'skill',n:'سيّد الجيوب',d:'أدخل {n} قطعة',t:[100,1000,5000],c:[100,300,700],g:[2,5,10],i:'target'},
  {k:'a_run',s:'skill',n:'الدور الذهبيّ',d:'أدخل خمس قطعٍ متتالية في دورٍ واحد {n} مرّة',t:[1,10,50],c:[150,450,1000],g:[3,8,15],e:'striker',i:'star'},
  {k:'a_multi',s:'skill',n:'ضربة مزدوجة',d:'أدخل قطعتين فأكثر بضربةٍ واحدة {n} مرّة',t:[10,100,500],c:[50,150,400],g:[1,3,6],i:'sparkle'},
  {k:'a_queen',s:'skill',n:'تاج الملكة',d:'غطِّ الملكة {n} مرّة',t:[5,50,250],c:[50,150,400],g:[1,3,6],i:'gem'},
- {k:'a_nofoul',s:'skill',n:'يدٌ ثابتة',d:'افز {n} مرّة بلا خطأ ضاربٍ واحد',t:[1,20,100],c:[100,300,700],g:[2,5,10],i:'check'},
+ {k:'a_nofoul',s:'skill',n:'يدٌ ثابتة',d:'فُز {n} مرّة بلا خطأ ضاربٍ واحد',t:[1,20,100],c:[100,300,700],g:[2,5,10],i:'check'},
  {k:'a_arena',s:'road',n:'طريق المجد',d:'بلغ الساحة رقم {n}',t:[3,6,10],c:[150,450,1000],g:[3,8,15],i:'map',calc:()=>trArenaIx(TR().best|0)+1},
  {k:'a_tr',s:'road',n:'جامع الكؤوس',d:'اجمع {n} كأس',t:[1000,2500,4000],c:[150,450,1000],g:[3,8,15],e:'sheikh',i:'trophy',calc:()=>TR().best|0},
  {k:'a_ch12',s:'road',n:'بطل الاثني عشر',d:'بلغ {n} انتصارات في تحدٍّ واحد',t:[4,8,12],c:[150,450,1000],g:[3,8,15],e:'trophy',i:'medal',calc:()=>CH12().best|0},
@@ -24280,12 +24284,12 @@ const ACH2=[
  {k:'a_mast',s:'coll',n:'الأستاذ',d:'أكمل {n} مهمّة إتقان',t:[3,12,36],c:[50,150,400],g:[1,3,6],i:'book',calc:()=>{let n=0;const M=S.skM||{};for(const k in M)n+=((M[k]||{}).cl||[]).length;return n}},
  {k:'a_friend',s:'social',n:'دائرة الأصدقاء',d:'أضف {n} أصدقاء',t:[1,5,20],c:[50,150,400],g:[1,3,6],i:'friends',calc:()=>(typeof FR!=='undefined'&&FR.f?FR.f.length:0)},
  {k:'a_room',s:'social',n:'ليلة الأصدقاء',d:'العب {n} مباراة في غرفةٍ خاصّة',t:[5,25,100],c:[50,150,400],g:[1,3,6],i:'door'},
- {k:'a_clan',s:'social',n:'فارس النادي',d:'افز بـ{n} مباراة وأنت عضوٌ في نادٍ',t:[1,25,100],c:[50,150,400],g:[1,3,6],i:'shield'},
+ {k:'a_clan',s:'social',n:'فارس النادي',d:'فُز بـ{n} مباراة وأنت عضوٌ في نادٍ',t:[1,25,100],c:[50,150,400],g:[1,3,6],i:'shield'},
  {k:'a_emote',s:'social',n:'صاحب النكتة',d:'أرسل {n} تعبيرًا في المباريات',t:[25,250,1000],c:[50,150,400],g:[1,3,6],i:'sparkle'},
  {k:'a_days',s:'social',n:'المواظب',d:'ادخل اللعبة {n} يومًا متتاليًا',t:[7,30,100],c:[100,300,700],g:[2,5,10],i:'timer'},
 ];
 const ACH_SEC=[['battle','المعارك'],['skill','المهارة'],['road','الكؤوس والتحدّي'],['coll','المجموعة'],['social','المجلس']];
-const ACH_RN=['','I','II','III'];
+const ACH_RN=['','1','2','3'];
 function achVal(a){let v=(S.ach&&S.ach[a.k])|0;if(a.calc){try{v=Math.max(v,a.calc()|0)}catch(e){}}return v}
 function achTier(a,v){let t=0;for(let i=0;i<3;i++)if(v>=a.t[i])t=i+1;return t}
 function achCl(k){return ((S.achCl||{})[k])|0}
@@ -24365,10 +24369,10 @@ function achMedalsRow(){const m=achMedals();return `<div class="pfMed" onclick="
    الجيس (عملات، نسخٌ منه، جواهر). العدّ في skMastAdd وحدها: من ضربتك أنت بالجيس المجهَّز، ومن نتيجة المباراة. */
 const SK_MAST=[
  {i:0,tier:1,k:'pot',need:25,n:'أدخل 25 قطعة',rw:{t:'coins',v:150}},
- {i:1,tier:1,k:'win',need:5,n:'افز بـ 5 مباريات',rw:{t:'skc',v:3}},
+ {i:1,tier:1,k:'win',need:5,n:'فُز بـ 5 مباريات',rw:{t:'skc',v:3}},
  {i:2,tier:2,k:'q',need:5,n:'أدخل الملكة 5 مرّات',rw:{t:'gems',v:10}},
  {i:3,tier:2,k:'pot',need:100,n:'أدخل 100 قطعة',rw:{t:'coins',v:400}},
- {i:4,tier:3,k:'win',need:20,n:'افز بـ 20 مباراة',rw:{t:'skc',v:6}},
+ {i:4,tier:3,k:'win',need:20,n:'فُز بـ 20 مباراة',rw:{t:'skc',v:6}},
  {i:5,tier:3,k:'pot',need:300,n:'أدخل 300 قطعة',rw:{t:'gems',v:30}}];
 function SKM(k){if(!S.skM||typeof S.skM!=='object')S.skM={};const m=S.skM[k]||(S.skM[k]={pot:0,q:0,win:0,m:0,cl:[]});if(!Array.isArray(m.cl))m.cl=[];return m}
 function skMastAdd(k,d){if(!k||!d)return;const m=SKM(k);for(const f of ['pot','q','win','m'])if(d[f])m[f]=(m[f]|0)+(d[f]|0);try{saveState()}catch(e){}}
@@ -24418,7 +24422,7 @@ function mgUseWild(k){
  const need=Math.max(0,TL_UPC[L-1]-skCp(k)),have=mgWild(rr),use=Math.min(need,have);
  if(!use){toast(need?'لا جوكر من هذه الندرة':'النسخ مكتملة — رقِّ الجيس');return}
  MG()[rr]-=use;S.skCp=S.skCp||{};S.skCp[k]=(S.skCp[k]||0)+use;try{saveState()}catch(e){}
- try{buyFx(mgWildImg(rr,42),'+'+use+' '+T('نسخة'),tlNm('sk',k))}catch(e){toast('+'+use+' نسخة')}
+ try{buyFx(mgWildImg(rr,42),'+'+use+' '+T('نسخة'),tlNm('sk',k))}catch(e){toast('+'+use+' '+arCnt(use,'نسخة'))}
  tlTab('sk');try{skSync();skPresence()}catch(e){}   // ٦٫٩٦: خانة الورقة وشارتا «غيّر» و«الجيوس» تتحدّث في مكانها
 }
 function mgUseBook(k){
@@ -24446,7 +24450,7 @@ function trSeasonRwCheck(){
  if(document.querySelector('.vchOv,.aruOv,.qvov'))return false;
  r.seen=1;try{saveState()}catch(e){}
  const A=ARENAS[r.arena|0]||ARENAS[0];
- const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
+ const ov=document.createElement('div');ov.className='aruOv';try{const c=Router.current&&Router.current();if(c&&c.fn)ov.dataset.fn=String(c.fn)}catch(e){}ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
  ov.classList.add('sea');
  ov.innerHTML=`<div class="aruRays"></div><div class="aruT">انتهى الموسم — مكافأتك</div><div class="aruEm">${tierEmblem(r.arena|0,140)}</div><div class="aruN">${esc(A.n)}</div>
   <div class="aruS">مكافأة الموسم على أعلى ساحةٍ بلغتها: <b>${(r.coins|0).toLocaleString('en-US')}</b> عملة و<b>${r.gems|0}</b> جوهرة أُضيفت إلى حسابك.${r.from>r.to?`<br>كؤوسك فوق <bdi class="nowrap">${TR_LEG.toLocaleString('en-US')}</bdi> أُعيدت من <bdi class="nowrap">${r.from.toLocaleString('en-US')}</bdi> إلى <bdi class="nowrap">${r.to.toLocaleString('en-US')}</bdi> — الموسم الجديد يبدأ.`:''}</div>
@@ -24794,7 +24798,7 @@ function trRoadCR(ix){
    const qn=r.t==='coins'||r.t==='gems'?String(r.v):r.t==='skc'?'×'+r.v:'';
    const face=`<span class="cbIn t-${r.t}"><span class="crvArt">${ART?crvRewArt(r,a):trRoadArt(r)}</span>${qn?`<b class="cbQ"><bdi dir="ltr">${qn}</bdi></b>`:''}</span>`;
    return `${m.tr===youTr?pin:''}<div class="crvM ${st} crvS${side.toUpperCase()}${r.t==='chest'?' wh'+(WH[r.k]||'b'):''}" data-tr="${m.tr}"${r.t==='chest'?` style="--sd:-${((m.tr/25|0)%7*.37).toFixed(2)}s"`:''}>
-    <bdi class="crvTr" dir="ltr">${a>0&&m.tr===lo?'':m.tr}</bdi>
+    <bdi class="crvTr" dir="ltr">${m.tr}</bdi>
     <div class="crvPlat${plat?' art':''}">${plat?`<img class="crvPlatImg" src="${plat}" alt="" loading="lazy">`:`<span class="cbBoard"></span><span class="cbFlag"></span>`}
      <span class="crvProp">${pv?`<img src="${pv}" alt="" loading="lazy">`:ART?crvPropArt(a,pk):`<img src="${crvPropSrc(a,pk)}" alt="" loading="lazy">${fl?'<i class="crvFl"></i>':''}`}</span>
     </div>
@@ -24993,7 +24997,7 @@ function arenaUpFx(ix){
  try{arOfferMake(ix)}catch(e){}
  const A=ARENAS[ix]||ARENAS[0];document.querySelectorAll('.aruOv').forEach(x=>x.remove());
  let mig=0;try{const t=TR();if(t.migUp){mig=1;delete t.migUp;saveState()}}catch(e){}   // ٦٫٩٦: ارتقاءٌ بالعتبات الجديدة
- const ov=document.createElement('div');ov.className='aruOv';ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
+ const ov=document.createElement('div');ov.className='aruOv';try{const c=Router.current&&Router.current();if(c&&c.fn)ov.dataset.fn=String(c.fn)}catch(e){}ov.style.setProperty('--f',A.f);ov.style.setProperty('--g',A.g);
  ov.innerHTML=`<div class="aruRays"></div><div class="aruT">ساحة جديدة</div><div class="aruEm">${arDioSrc(ix)?`<img class="aruDio" src="${arDioSrc(ix)}" alt="">`:arPicCls(ix)?`<div class="aruPic ${arPicCls(ix)}"></div>`:tierEmblem(ix,innerHeight<640?92:innerHeight<760?120:150)}</div><div class="aruN">${esc(A.n)}</div>
   <div class="aruS">بلغت <bdi class="nowrap">${TR_ARENA[ix].toLocaleString('en-US')}</bdi> كأس — ومن الآن لا تهبط تحتها.<br>${ix<ARENAS.length-1?'الساحة التالية: <b>'+esc(ARENAS[ix+1].n)+'</b> عند <bdi class="nowrap">'+TR_ARENA[ix+1].toLocaleString('en-US')+'</bdi> كأس':'آخر الساحات — وطريق الأساطير يمتدّ بجوائزه حتّى <bdi class="nowrap">'+TR_ROAD_END.toLocaleString('en-US')+'</bdi> كأس'}</div>
   ${mig?'<div class="aruMig">تجدّدت عتبات الساحات — فارتقيت إلى ساحةٍ أعلى</div>':''}
@@ -25135,7 +25139,7 @@ function bcFmt(s){
 const bcSkipCost=s=>{const m=Math.ceil(s/60);return m<=60?Math.max(1,Math.ceil(m/10)):6+Math.ceil((m-60)/60)*6}; // جوهرة لكلّ ١٠ دقائق حتّى ساعة، ثمّ ٦ لكلّ ساعة (١٢ س = ٧٢)
 function bcTap(i){
  const bc=BC(),c=bc[i];
- if(!c){toast(`${ico('swords',13)} افز بمباراة أونلاين ليسقط صندوق هنا`);return}
+ if(!c){toast(`${ico('swords',13)} فُز بمباراة أونلاين ليسقط صندوق هنا`);return}
  const ch=ECON.chests[c.k];
  if(c.st==='unlock'){
   const left=Math.max(0,Math.ceil((c.doneAt-Date.now())/1000));
@@ -25167,7 +25171,7 @@ function chestArt(k){
  const pal={
   knowledge:{b1:'#8A5A2B',b2:'#5C3A18',lid:'#A06A34',band:'#C9A15E',lock:'#E8C25A',glow:''},
   rival:{b1:'#3E5F8A',b2:'#22344E',lid:'#4A76AC',band:'#9FC3EA',lock:'#D7E7FA',glow:''},
-  elite:{b1:'#6B3FA0',b2:'#3A2260',lid:'#8251C4',band:'#C9A6F5',lock:'#E8D6FF',glow:'#B76CF0'},
+  elite:{b1:'#6B3FA0',b2:'#3A2260',lid:'#8251C4',band:'#FFE9A8',lock:'#E8D6FF',glow:'#B76CF0'},
   legend:{b1:'#C99A2E',b2:'#8A6210',lid:'#E8C25A',band:'#FFE9A8',lock:'#FFF7DD',glow:'#FFD75E'}
  }[k];
  return `<svg viewBox="0 0 40 34" style="width:100%;height:auto;overflow:visible">
@@ -25190,7 +25194,7 @@ function chestArt(k){
 function battleChestRow(bare){
  const bc=BC();
  return (bare?'':`<div class="sl" style="margin:14px 0 4px;display:flex;align-items:center;gap:7px">صناديق المعارك
-  <span style="font-size:11px;color:var(--tx2);font-weight:700">افز أونلاين ليسقط صندوق — القادم: ${BC_LABEL[bcNext(1)[0]]||'عادي'}</span></div>`)+`
+  <span style="font-size:11px;color:var(--tx2);font-weight:700">فُز أونلاين ليسقط صندوق — القادم: ${BC_LABEL[bcNext(1)[0]]||'عادي'}</span></div>`)+`
  <div id="bcRow" style="display:flex;gap:8px">
  ${bc.map((c,i)=>{
   if(!c)return `<div class="bcSlot empty" onclick="bcTap(${i})">
@@ -25227,7 +25231,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.20';
+const APP_VER='7.21';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -25239,7 +25243,7 @@ function EV(){
 const EVT_POOL={
  general:[
   {k:'p3', get n(){return gOff('knowledge')&&gOff('uno')?'العب 3 مباريات كيرم اليوم':'العب 3 جولات اليوم — أسئلة أو كيرم أو أونو'}, need:3, of:e=>e.plays+(e.carrom||0)+(e.uno||0), r:{t:'gems',v:20}, ri:'gem', rn:'20 جوهرة'},
-  {k:'w2', n:'افز بجولتين في أي لعبة', need:2, of:e=>e.wins+(e.carromWin||0)+(e.unoWin||0), r:{t:'gems',v:30}, ri:'gem', rn:'30 جوهرة'}],
+  {k:'w2', n:'فُز بجولتين في أي لعبة', need:2, of:e=>e.wins+(e.carromWin||0)+(e.unoWin||0), r:{t:'gems',v:30}, ri:'gem', rn:'30 جوهرة'}],
  quiz:[
   {k:'c20',n:'أجب 20 إجابة صحيحة',            need:20,of:e=>e.correct,   r:{t:'coins',v:2500},ri:'coin', rn:'2500 عملة'},
   {k:'s5', n:'حقق سلسلة 5 إجابات في جولة',    need:1, of:e=>e.bestStreak>=5?1:0, r:{t:'gems',v:40}, ri:'flame', rn:'40 جوهرة'},
@@ -25247,10 +25251,10 @@ const EVT_POOL={
   {k:'h1', n:'استخدم قدرة مساعدة في جولة أسئلة', need:1, of:e=>e.helper,    r:{t:'gems',v:15},  ri:'bulb',  rn:'15 جوهرة'}],
  carrom:[
   {k:'kp5',n:'أدخل 5 قطع في الكيرم',          need:5, of:e=>e.carromPot||0, r:{t:'coins',v:1500},ri:'coin', rn:'1500 عملة'},
-  {k:'kw1',n:'افز بمباراة كيرم',               need:1, of:e=>e.carromWin||0, r:{t:'gems',v:35},  ri:'gem',  rn:'35 جوهرة'},
+  {k:'kw1',n:'فُز بمباراة كيرم',               need:1, of:e=>e.carromWin||0, r:{t:'gems',v:35},  ri:'gem',  rn:'35 جوهرة'},
   {k:'kg2',n:'العب مباراتي كيرم',              need:2, of:e=>e.carrom||0,    r:{t:'coins',v:1200},ri:'coin', rn:'1200 عملة'}],
  uno:[
-  {k:'uw1',n:'افز بجولة أونو',                 need:1, of:e=>e.unoWin||0,    r:{t:'gems',v:35},  ri:'gem',  rn:'35 جوهرة'},
+  {k:'uw1',n:'فُز بجولة أونو',                 need:1, of:e=>e.unoWin||0,    r:{t:'gems',v:35},  ri:'gem',  rn:'35 جوهرة'},
   {k:'uc15',n:'العب 15 بطاقة أونو',            need:15,of:e=>e.unoCards||0,  r:{t:'coins',v:1200},ri:'coin', rn:'1200 عملة'},
   {k:'ug2',n:'العب جولتي أونو',                need:2, of:e=>e.uno||0,       r:{t:'coins',v:1000},ri:'coin', rn:'1000 عملة'}]
 };
@@ -25279,7 +25283,7 @@ function evtParty(){try{const e=EV();e.party=(e.party||0)+1;trk('party_round');s
 function evtLeft(){
  const now=new Date(),mid=new Date(now);mid.setHours(24,0,0,0);
  const h=Math.floor((mid-now)/3600000),m=Math.floor((mid-now)%3600000/60000);
- return h>0?`${h} ساعة و ${m} دقيقة`:`${m} دقيقة`;
+ return h>0?`${h} ${arCnt(h,'ساعة')} و ${m} ${arCnt(m,'دقيقة')}`:`${m} ${arCnt(m,'دقيقة')}`;
 }
 /** ما تبقّى من اليوم مختصرًا — لشارة ضيّقة لا تتّسع لجملة كاملة */
 function evtLeftShort(){
@@ -25535,7 +25539,7 @@ function seasonScr(keep){
 function moreScr(){
  const r=S.ranked||defaultRanked();
  go(`<div class="scr on">${tb('المزيد')}
- <div class="wb" id="netLine" style="margin-bottom:10px;text-align:right">${netLine()}</div>
+ <div class="wb" id="netLine" style="margin-bottom:10px;text-align:right" ${netLine()?"":"hidden"}>${netLine()}</div>
  <div class="orn"><div class="in">${ornCorners()}
  <div style="display:flex;align-items:center;gap:12px">
  <div style="border-radius:50%;padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518);cursor:pointer"
@@ -26510,7 +26514,7 @@ body .aruUnI i{font-style:normal;font-weight:800;font-size:11px;color:#F1F4FA;li
 body .aruS b{color:var(--g);font-weight:800}
 body .aruMig{position:relative;font-size:11.5px;font-weight:800;color:#FFE9A8;padding:5px 12px;border-radius:10px;background:rgba(232,178,58,.12);border:1px solid rgba(232,178,58,.35);animation:aruPop .4s .72s ease both}
 @media (max-height:640px){body .aruOv{gap:6px;padding:14px 18px}body .aruN{font-size:26px}body .aruS{line-height:1.6}body .aruUnI{padding:7px 5px 6px}body .aruUnI .unPv{width:32px;height:32px}body .aruB{margin-top:4px;gap:7px}}
-body .aruB{position:relative;margin-top:8px;display:flex;flex-direction:column;gap:9px;width:min(80vw,300px);animation:aruPop .4s .85s ease both}
+body .aruB{position:relative;margin-top:8px;display:flex;flex-direction:column;gap:9px;width:min(80vw,300px);animation:aruPop .35s .45s ease both}
 body .lvBig{position:static;width:120px;height:120px;min-width:0;border-radius:50%;font-size:52px;font-family:var(--fd);font-weight:700;display:grid;place-items:center;padding:0}
 /* ٧٫١٢ — هويّة تحدّي في طريق الكؤوس بدل أزرق كلاش رويال: لافتة كحليّة بإطارٍ ذهبيّ، أزرارٌ ذهبٌ مصقول، شريطٌ سفليّ كحليّ بخيطٍ ذهبيّ */
 html body .crvBan::before{background:linear-gradient(180deg,#FFF1C2 0,#F2C95A 22%,#D9A233 55%,#9A6814 100%)}
@@ -26571,6 +26575,11 @@ html body .scr.plCR .hmCur u{font-size:14px;font-weight:800;text-shadow:0 1px 1p
 html body .scr.plCR .crTr b{font-size:19px;text-shadow:0 1px 2px rgba(0,0,0,.6)}
 html body .scr.plCR .crRoad{font-family:var(--fd);font-size:13px;font-weight:700;text-shadow:none}
 html body .scr.plCR .crPr span{font-family:var(--fd);font-size:13px;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.7)}
+/* ٧٫٢١ — الفحص الشامل: على الهواتف القصيرة (٧٨٠ نقطة وأقلّ) كان صفّ صناديق المعارك تحت شريط التنقّل — المشهد يصغر بطول الشاشة لا بعرضها،
+   فتبقى الصناديق ظاهرةً فوق الشريط كما في كلاش رويال */
+@media (max-height:1000px){html body .plCR .crSt{gap:5px;padding-bottom:10px}html body .plCR .crSt+.plSec{margin-top:6px}
+ html body .scr.plCR .crStage{width:min(104%,460px,max(200px,calc((100dvh - 560px) * 1.12)));margin-top:-6px}html body .scr.plCR .crBattle{height:58px;margin-top:4px}}
+@media (max-height:700px){html body .scr.plCR .crBan b{font-size:20px}}
 /* عناوين الشاشات: ذهبٌ متدرّج بحجمٍ معتدل */
 html body .tbar h2{font-family:var(--fd);font-size:21px;font-weight:700;color:transparent;background:linear-gradient(180deg,#FFF6D6,#F2C75C 55%,#C38A26);-webkit-background-clip:text;background-clip:text;text-shadow:none;filter:drop-shadow(0 1px 0 rgba(0,0,0,.5))}
 
@@ -26603,6 +26612,10 @@ html body .caStage .pCard .caRnd{width:40px;height:40px;background:radial-gradie
 /* ٧٫١٦ — الإشعار كان يخرج أسفل الوسط فيغطّي «العب» و«ابدأ» وصفّ الصناديق: صار ينزل من الأعلى تحت الشريط كإشعارات كلاش رويال */
 html body .tst{top:calc(env(safe-area-inset-top,0px) + 62px);bottom:auto!important;transform:translate(-50%,-10px);max-width:min(88%,360px)}
 html body .tst.on{transform:translate(-50%,0)}
+/* ٧٫٢١: الإشعار سطرٌ مدمج فوق الشريط العلويّ نفسه (لا يغطّي عنوان الشاشة ولا محتواها)، سطران على الأكثر */
+html body .tst{top:calc(env(safe-area-inset-top,0px) + 6px);padding:8px 14px;font-size:12.5px;line-height:1.45;border-radius:12px;max-width:min(92%,380px);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+html body .tst>span{display:inline!important}
+html body .tst .rico{width:16px!important;height:16px!important;vertical-align:-3px}
 /* ٧٫١٦ — سطر حالة اللاعب في اللوحة سطرٌ واحد: «دورك» تبقى، والتلميح «اسحب وأفلت» يغيب حيث يضيق فلا ينقصّ نصفه */
 html body .caStage .pCard .pSub{-webkit-line-clamp:1;white-space:nowrap;display:block;text-overflow:ellipsis}
 @media (max-width:400px){html body .caStage .pCard .pSub .pH{display:none}}
@@ -26741,6 +26754,85 @@ html body .crvOk2:active{transform:translateY(3px);box-shadow:0 1px 0 #6E4E12,0 
 /* الأسعار وما في داخل الأزرار: الخطّ الثقيل نفسه */
 html body :is(.btn *,.prc,.prc *,.rbtn>span *){font-family:'Tahaddi Bold','Cairo',sans-serif!important;font-weight:800!important}
 html body .prc{color:#1B1204!important;font-size:15px!important;text-shadow:0 1px 0 rgba(255,246,214,.6)}
+.bnr{position:relative;margin:20px 0 12px;height:36px;display:flex;align-items:center;justify-content:center;
+ clip-path:polygon(14px 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,14px 100%,0 50%);
+ background:radial-gradient(120% 90% at 50% -10%,rgba(255,255,255,.5),rgba(255,255,255,0) 55%),linear-gradient(180deg,#FFEDB4 0%,#F5CB60 42%,#DBA436 74%,#B37A1B 100%)}
+.bnr span{font-family:'Tahaddi Bold','Cairo',sans-serif;font-size:15px;font-weight:800;color:#1B1204;text-shadow:0 1px 0 rgba(255,246,214,.6)}
+/* ٧٫٢١ — الفحص الشامل: زخرفتا العنوان كانتا تلتفّان إلى سطرٍ ثانٍ (العنوان الطويل، أو العنوان بسطرٍ فرعيّ) فتبدو الترويسة مائلة —
+   العنوان سطرٌ واحد، الزخرفتان أنحف على الشاشات الضيّقة، وحين يكون تحت العنوان سطرٌ فرعيّ يُكتفى بالخطّ الذهبيّ أسفل الترويسة */
+html body .tbar h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+html body .tbar h2 small{display:block;white-space:normal}
+html body .tbar h2:has(small)::before,html body .tbar h2:has(small)::after{display:none}
+@media (max-width:420px){html body .tbar h2::before,html body .tbar h2::after{width:22px;background-size:auto 100%;background-position:center}html body .tbar h2::before{margin-inline-end:6px}html body .tbar h2::after{margin-inline-start:6px}}
+.qvIc{width:54px;height:54px;margin:0 auto 6px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#24397F,#0B1530);box-shadow:0 0 0 2px #E8B23A,0 6px 14px rgba(0,0,0,.5)}
+.qvIc.bad{box-shadow:0 0 0 2px #D8474A,0 6px 14px rgba(0,0,0,.5)}
+html body .btn.qvDanger{background:linear-gradient(180deg,#3A0E12,#240609)!important;border:1.5px solid #D8474A!important;color:#FFD9D6!important;-webkit-text-fill-color:#FFD9D6!important;text-shadow:none!important;box-shadow:none!important}
+/* ═══ ٧٫٢١ — الفحص الشامل: الألوان الخارجة عن الهويّة ═══
+   صناديق المعلومات كانت زرقاء بإطارٍ سماويّ في ٢٩ شاشة، وزرّ «+» بجانب العملات أخضر، ورابط «الاحتمالات» بنفسجيّ، وترس الإعدادات
+   في المباراة مربّعٌ أزرق، والمفتاح المطفأ لا يكاد يُرى — كلّها كحليٌّ وذهب */
+html body .wb{background:linear-gradient(180deg,rgba(22,34,72,.9),rgba(12,20,46,.9));border:1px solid rgba(232,178,58,.32);color:#E3E7F0;box-shadow:inset 0 1px 0 rgba(255,233,168,.08)}
+html body .wb .rico:first-child{filter:sepia(1) saturate(3) hue-rotate(-12deg) brightness(1.05)}
+html body .sandbox{background:rgba(232,178,58,.1);border-color:rgba(232,178,58,.4);color:#F2E1B0}
+html body .plCR .hmCur .pl,html body .hmCur .pl{background:linear-gradient(180deg,#FFEDB4,#E8B23A 55%,#B37A1B);border:2px solid #6E4A0E;color:#2A1A04;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}
+html body .plSecT .mo{color:#E8C77A}
+html body .caGear{border-radius:50%!important;background:radial-gradient(circle at 35% 30%,#24397F,#0B1530)!important;border:2px solid #E8B23A!important;box-shadow:0 4px 10px rgba(0,0,0,.5)!important;color:#FFE9A8}
+html body .sw{background:#0E1834;box-shadow:inset 0 0 0 1.5px rgba(232,178,58,.45)}
+html body .sw::after{background:#C9CFDE;box-shadow:0 1px 3px rgba(0,0,0,.5)}
+html body .sw.on{background:linear-gradient(180deg,#F5CB60,#C9901F);box-shadow:inset 0 0 0 1.5px #8A5A10}
+html body .sw.on::after{background:#FFF8E6}
+/* طريق الكؤوس: الدرع في وسط كلّ رفّ كان فارغًا والرقم رماديًّا صغيرًا في الهامش — الرقم على الدرع نفسه بذهبٍ واضح، والدرع كحليّ بحافّةٍ ذهبيّة */
+html body .crvM>.crvTr{left:57.4%;top:47%;transform:translate(-50%,-50%);z-index:4;font-family:'Tahaddi Bold','Cairo',sans-serif;font-size:clamp(12px,3.9cqw,17px);font-weight:800;color:#FFE9A8;
+ text-shadow:0 1px 0 #3A2303,0 0 6px rgba(0,0,0,.6);letter-spacing:0}
+html body .crvM.next>.crvTr,html body .crvM.ready>.crvTr{color:#FFF6D6;text-shadow:0 1px 0 #3A2303,0 0 10px rgba(255,214,110,.8)}
+html body .cbFlag{background:linear-gradient(90deg,#F0C14E,#B0761A)}
+html body .cbFlag::after{background:linear-gradient(180deg,#1C2E62,#0E1A3D)}
+html body .cbFlag::before{background:linear-gradient(180deg,#FFE9A8,#C9901F)}
+/* طريق الكؤوس: «استلم» كانت شريحةً خضراء تغطّي أسفل الجائزة — صارت ذهبيّة وتحت البطاقة */
+html body .crvGet{bottom:-19px;padding:3px 12px;font-family:'Tahaddi Bold','Cairo',sans-serif;font-size:11.5px;font-weight:800;color:#1B1204;background:linear-gradient(180deg,#FFEDB4,#F5CB60 45%,#DBA436 75%,#B37A1B);border:1.5px solid #6E4A0E;box-shadow:0 2px 0 #6E4E12,0 0 10px rgba(255,214,110,.55)}
+.lbHero{position:relative;overflow:hidden;isolation:isolate;border-radius:24px;padding:18px 14px 16px;margin-bottom:12px;
+ background:radial-gradient(70% 70% at 50% 0%,rgba(255,214,120,.24),rgba(255,214,120,0) 70%),linear-gradient(180deg,#15244E,#0C1733 60%,#08102A);border:1.5px solid rgba(232,178,58,.8);box-shadow:0 14px 30px rgba(0,0,0,.55),inset 0 0 0 4px rgba(11,21,48,.9),inset 0 0 0 5px rgba(232,178,58,.35)}
+.lbHero .soRays{top:32%}
+.lbMe{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.lbEm{filter:drop-shadow(0 8px 14px rgba(0,0,0,.55))}
+.lbNm{font-family:var(--fd);font-size:19px;font-weight:600;color:#FFE9A8;margin-top:4px}
+.lbRk{font-size:13px;font-weight:700}
+.lbSt2{display:flex;gap:8px;margin-top:10px}
+.lbSt2 span{display:flex;flex-direction:column;align-items:center;min-width:70px;padding:6px 8px;border-radius:12px;background:rgba(6,10,26,.6);border:1px solid rgba(232,178,58,.3);font-size:11px;color:#AFC0E0}
+.lbSt2 b{font-family:'Tahaddi Bold','Cairo',sans-serif;font-size:17px;font-weight:800;color:#FFE9A8}
+.lbPod{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:center;gap:6px;margin:0 auto 12px;max-width:260px}
+.lbSt{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:6px;border-radius:10px 10px 0 0;
+ background:linear-gradient(180deg,#1C2C58,#0E1A3D);border:1px solid rgba(232,178,58,.45);border-bottom:0}
+.lbSt.s1{height:62px}.lbSt.s2{height:46px}.lbSt.s3{height:36px}
+.lbSt b{font-family:var(--fd);font-size:20px;font-weight:600;color:#E8B23A;line-height:1}
+.lbSt s{text-decoration:none;font-size:10px;color:#8FA0C4;margin-top:2px}
+.lbNote{display:flex;gap:7px;align-items:flex-start;font-size:12.5px;line-height:1.7;color:#C9D3EA;padding:10px 12px;border-radius:14px;background:rgba(12,20,46,.7);border:1px solid rgba(232,178,58,.25)}
+.msHd{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:12px;border-radius:20px;background:radial-gradient(80% 120% at 85% 0%,rgba(255,214,120,.2),rgba(255,214,120,0) 60%),linear-gradient(180deg,#15244E,#0B1530);border:1.5px solid rgba(232,178,58,.75);box-shadow:0 10px 22px rgba(0,0,0,.45),inset 0 0 0 3px rgba(11,21,48,.9),inset 0 0 0 4px rgba(232,178,58,.3)}
+.msHdI{width:54px;height:54px;flex:0 0 54px;border-radius:50%;display:grid;place-items:center;color:#2A1A04;background:radial-gradient(circle at 35% 30%,#FFF3C4,#E8B23A 55%,#8A5A12);box-shadow:0 4px 10px rgba(0,0,0,.5),inset 0 -3px 5px rgba(0,0,0,.25)}
+.msHd b{display:block;font-family:var(--fd);font-size:22px;font-weight:600;color:#FFE9A8;direction:ltr;text-align:right;unicode-bidi:isolate}
+.msHd span{font-size:12.5px;color:#C9D3EA}
+.msC{display:flex;align-items:center;gap:11px;padding:12px;margin-bottom:9px;border-radius:16px;background:linear-gradient(180deg,#132247,#0C1733);border:1px solid rgba(232,178,58,.28)}
+.msC.rd{border-color:#E8B23A;box-shadow:0 0 0 1px rgba(232,178,58,.45),0 8px 18px rgba(232,178,58,.14)}
+.msC.cl{opacity:.62}
+.msI{width:44px;height:44px;flex:0 0 44px;border-radius:13px;display:grid;place-items:center;color:#E8B23A;background:linear-gradient(180deg,#1E3162,#0E1A3D);border:1px solid rgba(232,178,58,.5)}
+.msB{flex:1;min-width:0}
+.msT{font-size:14.5px;font-weight:600;color:#F4F6FB;line-height:1.4}
+.msP{position:relative;height:16px;margin-top:7px;border-radius:9px;background:#070D22;border:1px solid rgba(232,178,58,.25);overflow:hidden}
+.msP i{position:absolute;inset:0 0 0 auto;border-radius:9px;background:linear-gradient(180deg,#FFE9A8,#E8B23A 55%,#B07A1C)}
+.msP s{position:absolute;inset:0;display:grid;place-items:center;text-decoration:none;font-size:10.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000;direction:ltr}
+.msR{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.msR span{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 7px;border-radius:999px;background:rgba(6,10,26,.6);border:1px solid rgba(232,178,58,.22);font-size:11px;color:#C9D3EA}
+.msR b{font-weight:700;color:#FFE9A8}
+.msGet{width:auto!important;flex:0 0 auto;padding:8px 14px!important;font-size:13px!important}
+.msOk{width:34px;height:34px;flex:0 0 34px;border-radius:50%;display:grid;place-items:center;color:#0B1530;background:linear-gradient(180deg,#FFE9A8,#E8B23A)}
+.emS{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;padding:26px 18px 20px;margin:10px 0;border-radius:22px;background:radial-gradient(70% 60% at 50% 0%,rgba(255,214,120,.2),rgba(255,214,120,0) 70%),linear-gradient(180deg,#15244E,#0B1530);border:1.5px solid rgba(232,178,58,.7);box-shadow:0 12px 26px rgba(0,0,0,.5),inset 0 0 0 3px rgba(11,21,48,.9),inset 0 0 0 4px rgba(232,178,58,.3)}
+.emS .soRays{top:62px;width:220px;height:220px;margin:-110px 0 0 -110px}
+.emI{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;color:#2A1A04;background:radial-gradient(circle at 35% 30%,#FFF3C4,#E8B23A 55%,#8A5A12);box-shadow:0 6px 14px rgba(0,0,0,.5),inset 0 -4px 6px rgba(0,0,0,.25),0 0 0 3px rgba(11,21,48,.9),0 0 0 4.5px rgba(232,178,58,.6)}
+.emT{font-family:var(--fd);font-size:18px;font-weight:600;color:#FFE9A8;margin-top:6px}
+.emD{font-size:13px;line-height:1.7;color:#C9D3EA;max-width:280px}
+.emS .rbtn{margin-top:10px;width:auto;min-width:170px}
+html body .msR{flex-wrap:nowrap;gap:5px}html body .msR span{font-size:10.5px;padding:2px 7px 2px 6px;white-space:nowrap}
+html body :is(.rbtn,.btn.gd,.gbtn,.szUp,.msGet,.msOk) svg.ico:is([data-ico=plus],[data-ico=info],[data-ico=check]) *{stroke:#3A2605;fill:none}
+.msP s{line-height:1}.lbSt s{line-height:1.2;margin-top:4px}
 @media (prefers-reduced-motion:reduce){.arHeroRays,.aruRays,.aruEm,.hmRoadDot,.arM.ready{animation:none!important}}
 `;
 (function(){try{const st=document.createElement('style');st.id='luxCss';st.textContent=LUX_CSS;document.head.appendChild(st)}catch(e){}})();
@@ -27397,7 +27489,7 @@ const MODE_ART={
   <path d="M26 41.5 a2.6 2.2 0 0 0 4 0" stroke="#0B1020" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>`,
  clubs:`<svg viewBox="0 0 56 56"><defs>
   <linearGradient id="maLg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#8A6210"/></linearGradient>
-  <radialGradient id="maLp" cx=".35" cy=".25" r="1.1"><stop offset="0" stop-color="#8B5CF0"/><stop offset="1" stop-color="#311B52"/></radialGradient></defs>
+  <radialGradient id="maLp" cx=".35" cy=".25" r="1.1"><stop offset="0" stop-color="#E8B23A"/><stop offset="1" stop-color="#311B52"/></radialGradient></defs>
   <path d="M6 21 a24 28 0 0 0 5 21 M50 21 a24 28 0 0 1 -5 21" stroke="url(#maLg)" stroke-width="2" fill="none" stroke-linecap="round"/>
   <path d="M4.5 15 l2.4 3.4 M51.5 15 l-2.4 3.4 M3 26 l3 1.8 M53 26 l-3 1.8" stroke="url(#maLg)" stroke-width="1.7" stroke-linecap="round"/>
   <path d="M28 51 C16.5 46 11.5 38 11.5 25 L11.5 11.5 C18 9 23.8 7.6 28 7 C32.2 7.6 38 9 44.5 11.5 L44.5 25 C44.5 38 39.5 46 28 51 Z"
@@ -27435,7 +27527,7 @@ function playModesScr(){
     const un=isUnlocked(m.k), u=UNLOCKS.find(x=>x.k===m.k);
     return `<div onclick="${un?m.go:`toast('${lockTxt(u)}')`}"
      style="cursor:pointer;position:relative;background:linear-gradient(168deg,#1C2540,#0E1526);
-     border:1px solid ${un?'#3B2F5C':'#28324E'};border-radius:14px;padding:${m.big?'16px':'13px'};
+     border:1px solid ${un?'#5A4520':'#28324E'};border-radius:14px;padding:${m.big?'16px':'13px'};
      text-align:center">
      <div class="modeart" style="width:${m.big?58:48}px;height:${m.big?58:48}px;margin:0 auto;
       ${un?'':'filter:grayscale(.75) brightness(.6)'}">${MODE_ART[m.k]}</div>
@@ -27896,9 +27988,9 @@ async function mmScr(g,mode){
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">تأكد من الإنترنت ثم أعد المحاولة، أو العب ضد الذكاء الاصطناعي ريثما تعود الشبكة.</div>
    <button class="rbtn" style="margin-top:16px" onclick="netRetryThen('mmScr',{g:'${g}',mode:'${mode||'casual'}'})"><span>${ico('reset',14)} إعادة المحاولة</span></button>`
    :`<div class="mtl" style="font-size:17px;margin-top:10px">البحث غير متاح هنا</div>
-   <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
-    اللعب مع لاعبين حقيقيين يحتاج فتح اللعبة من <b>رابط اللعبة المنشور</b>.<br>
-    يمكنك اللعب ضد الذكاء الاصطناعي الآن.</div>`}
+   <div style="font-size:12.5px;color:var(--tx2);line-height:1.9;margin-top:9px">
+    البحث عن خصومٍ حقيقيّين يفتح قريبًا.<br>
+    العب ضد الذكاء الاصطناعي الآن واجمع كؤوسك.</div>`}
    ${SOLO_OK[g]?`<button class="rbtn" style="margin-top:16px" onclick="push('soloScr','${g}')"><span>${ico('robot',13)} العب ضد الذكاء الاصطناعي</span></button>`:''}
   </div></div></div></div>`);
   return;
@@ -27998,8 +28090,8 @@ async function roomScr(game){
    <button class="btn g" style="margin-top:9px" onclick="ptWay='pass';Router.settle('partyScr')">العب بتمرير الجوال الآن</button>`
    :`<div class="mtl" style="font-size:17px;margin-top:10px">غرف الكود غير متاحة هنا</div>
    <div style="font-size:12px;color:var(--tx2);line-height:1.9;margin-top:9px">
-    اللعب من عدة هواتف يعمل عند فتح اللعبة من <b>رابط اللعبة المنشور</b> ومشاركته مع من سيلعب معك.<br>
-    في هذه النسخة المحلية استخدم <b>تمرير الجوال</b>.</div>
+    غرف الأصدقاء بالكود تفتح قريبًا.<br>
+    العب الآن على هاتفٍ واحد بـ<b>تمرير الجوال</b>.</div>
    <button class="rbtn" style="margin-top:16px" onclick="ptWay='pass';Router.settle('partyScr')"><span>العب بتمرير الجوال</span></button>`}
   </div></div></div></div>`);
   return;
@@ -28332,7 +28424,7 @@ function rmShareCode(){if(!RM.code||RM.code==='SOLO')return;shareOut(rmInviteTex
 /** ورقة الأصدقاء: من تختاره تصله الدعوة رسالةً خاصّة — يقرأ الكود ويدخل من رابطه */
 function rmInvite(){
  if(!RM.code||RM.code==='SOLO')return;
- if(!netOnline())return toast('الدعوة بالدردشة تحتاج اتصالًا بالخادم');
+ if(!netOnline())return toast('الدعوة بالدردشة تحتاج اتصالًا بالإنترنت');
  const paint=()=>{
   const list=(FR&&FR.f)||[];
   vbSheet(`<div class="shh"><div class="c" style="background:rgba(232,178,58,.16);border-color:var(--gold);color:var(--gold)">${ico('group',16)}</div>
@@ -28796,7 +28888,7 @@ function rmDraw(R){
    <span class="mtl" style="font-size:16px">ارسم: ${RM.word}</span>
    <span class="cch" id="rmT" style="margin-inline-start:auto;color:var(--warn)">${RM.secs||75}</span></div>
   <canvas id="rmC" width="300" height="300" style="width:100%;aspect-ratio:1;border-radius:16px;
-   border:2px solid #3B2F5C;touch-action:none;background:#fff;cursor:crosshair"></canvas>
+   border:2px solid #5A4520;touch-action:none;background:#fff;cursor:crosshair"></canvas>
   <div style="display:flex;gap:6px;margin-top:9px;align-items:center;justify-content:center" id="rmCols">
   ${PD_COLORS.map((c,i)=>`<span onclick="RM.ci=${i};document.querySelectorAll('#rmCols span').forEach(x=>x.style.outline='none');this.style.outline='3px solid #FFE9A8'"
    style="width:36px;height:36px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
@@ -28812,7 +28904,7 @@ function rmDraw(R){
   return `<div class="sl" style="margin:12px 0 9px;text-align:center">صوّت لأفضل رسمة «${RM.word}» (غير رسمتك)</div>
   <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
   ${RM.players.map(p=>p.peer===RM.me?'':`<div onclick="rmVote('${p.peer}')"
-   style="cursor:pointer;border:2px solid ${myVote===p.peer?'var(--gold)':'#3B2F5C'};border-radius:14px;overflow:hidden;background:#fff">
+   style="cursor:pointer;border:2px solid ${myVote===p.peer?'var(--gold)':'#5A4520'};border-radius:14px;overflow:hidden;background:#fff">
    <canvas class="rmArt" data-p="${p.peer}" width="300" height="300" style="width:100%;display:block"></canvas>
    <div style="text-align:center;font-size:11.5px;font-weight:800;padding:5px;background:var(--surf)">
     ${p.name}${tally[p.peer]?` — ${tally[p.peer]} صوت`:''}</div></div>`).join('')}
@@ -28824,7 +28916,7 @@ function rmDraw(R){
   return `<div style="text-align:center;font-size:12.5px;color:var(--tx2);margin-bottom:10px">الكلمة: <b class="mtl" style="font-size:15px">${RM.word}</b></div>
   ${(RM.res.rank||[]).map((r,i)=>`<div class="li" style="margin-bottom:9px;${i===0?'border-color:var(--gold)':''}"><div class="lr">
    <span style="font-size:24px;flex-shrink:0">${i===0?ico('medal',20,'#E8B23A'):i===1?ico('medal',20,'#C0C7D6'):i===2?ico('medal',20,'#B87333'):(i+1)+'.'}</span>
-   <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #3B2F5C;background:#fff">
+   <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #5A4520;background:#fff">
     <canvas class="rmArt" data-p="${r.p}" width="300" height="300" style="width:100%;height:100%"></canvas></div>
    <div class="lb"><div class="lt">${nm(r.p)}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
    </div></div>`).join('')}
@@ -38815,7 +38907,7 @@ function vbReact(k){
  else if(q[1]==='لا أوافق'&&last)mfApplyHuman({m:[last.tg],intent:'defend',claim:null,confess:false});
  else if(q[1]==='مثير للاشتباه'){const sp=[...VB.feed].reverse().find(m=>m.k==='b'&&m.i!==0&&mfAliveI(m.i));if(sp){VB.notes=VB.notes||{};if(!VB.notes[sp.i])VB.notes[sp.i]='sus';vbSeats();vbNotesRender()}}
 }
-function vbSheet(html){$('sht').innerHTML='<div class="hnd"></div>'+html;$('sbg').classList.add('on')}
+function vbSheet(html){try{window.fxClear&&fxClear()}catch(e){}$('sht').innerHTML='<div class="hnd"></div>'+html;$('sbg').classList.add('on')}
 /** «أشكّ فيه»: يختار لاعبًا فيُسجَّل مشتبهًا في ملاحظاتي؛ في المافيا يُقال للمدينة أثناء النقاش */
 function vbSuspect(){
  const list=VB.names.map((_,i)=>i).filter(i=>i!==0&&(VB.g!=='mafia'||mfAliveI(i)));
@@ -39784,7 +39876,7 @@ function dbRound(){
  go(`<div class="scr on">${vbHead('الذكاء الاصطناعي يرسم')}
  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--tx2)">
   <span>اللوحة ${VB.i+1} من ${VB.rounds.length}</span><span class="mtl" style="font-size:14px" id="dbPts">${VB.total} نقطة</span></div>
- <canvas id="dbc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;border:2px solid #3B2F5C;background:#fff;display:block"></canvas>
+ <canvas id="dbc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;border:2px solid #5A4520;background:#fff;display:block"></canvas>
  <div class="dbBar"><i id="dbBar"></i></div>
  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin:6px 0 8px"><span>الخطأ يخصم 15</span><span id="dbAvail">100 نقطة إن خمّنت الآن</span></div>
  <div class="vbGrid">${VB.opts.map((w,k)=>`<button class="btn g dbOpt" id="dbo${k}" onclick="dbGuess(${k})">${esc(w)}</button>`).join('')}</div>
@@ -39930,7 +40022,7 @@ const GAME_ART={
    fill="url(#gdP)" stroke="#7A4E1E" stroke-width="2.5"/>
   <circle cx="34" cy="38" r="6" fill="#E24B4A"/><circle cx="54" cy="30" r="6" fill="#378ADD"/>
   <circle cx="70" cy="44" r="6" fill="#2ECC71"/><circle cx="66" cy="64" r="6" fill="#B76CF0"/>
-  <path d="M22 84 L38 68 l8 8 -16 16 z" fill="#C9A6F5" stroke="#5B2FB8" stroke-width="2"/>
+  <path d="M22 84 L38 68 l8 8 -16 16 z" fill="#FFE9A8" stroke="#8A5A10" stroke-width="2"/>
   <path d="M18 88 l4-6 6 4 z" fill="#FFE9A8"/>
  </svg>`
 };
@@ -40006,7 +40098,7 @@ const GAME_META={
 };
 function ghRange(a,b,unit){return a===b?(a===2?'لاعبان':a+' '+unit):a+' - '+b+' '+unit}
 /** حبّة معلومات — أي مدى رقمي فيها يُعزل ليُقرأ تصاعديًا داخل النصّ العربي */
-function ghPill(icon,t){return '<span class="ghPill">'+icon+'<span>'+String(t).replace(/(\d+) - (\d+)/g,'<bdi dir="ltr">$1 - $2</bdi>')+'</span></span>'}
+function ghPill(icon,t){return '<span class="ghPill">'+icon+'<span>'+String(t).replace(/(\d+) - (\d+)/g,'$1 إلى $2')+'</span></span>'}   // ٧٫٢١: «٤ - ٢» كانت تُقرأ مقلوبة — «٢ إلى ٤»
 function ghChev(){return '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M14.5 5.5 L8 12 L14.5 18.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'}
 
 function hubCss(){
@@ -40049,7 +40141,7 @@ function hubCss(){
  '.ghHero .art svg{width:100%;height:100%;display:block}',
  '.ghHero .bd{flex:1;min-width:0}',
  '.ghHero .nm{font-size:23px;font-weight:900;line-height:1.15;color:#F7F8FC}',
- '.ghHero .ty{font-size:12px;font-weight:800;color:#B79BFF;margin-top:3px}',
+ '.ghHero .ty{font-size:12px;font-weight:800;color:#E8C77A;margin-top:3px}',
  '.ghHero .ghPk{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:#9AA5C6;margin-top:8px}',
  '.ghHero .ghPk i{width:6px;height:6px;flex-shrink:0;transform:rotate(45deg);background:linear-gradient(135deg,#FFE9A8,#B8871E);',
  ' box-shadow:0 0 6px rgba(232,178,58,.7)}',
@@ -40105,7 +40197,7 @@ function hubCss(){
  ' background:rgba(8,12,28,.7);border:1px solid #2C3660;color:#C5CDE3;white-space:nowrap}',
  '.ghPill svg{flex-shrink:0}',
  '.ghPill.nr{color:#8F9BBC;border-style:dashed}',
- '.ghWay .go{color:var(--ac,#8B5CF0);flex-shrink:0;display:flex;filter:drop-shadow(0 0 6px var(--acs,transparent))}',
+ '.ghWay .go{color:var(--ac,#E8B23A);flex-shrink:0;display:flex;filter:drop-shadow(0 0 6px var(--acs,transparent))}',
  '.ghWay.off{opacity:.45;cursor:default}',
  '.ghNote{font-size:11px;color:#7E89A8;line-height:1.7;margin-top:4px;text-align:center}'
  ].join('\n');
@@ -40566,7 +40658,7 @@ function drawBoard(){
   <span class="mtl" style="font-size:15px">ارسم: ${PT.word}</span>
   <span id="pdT" class="cch" style="margin-inline-start:auto;color:var(--warn)">60 ث</span></div>
  <canvas id="pdc" width="600" height="600" style="width:100%;aspect-ratio:1;border-radius:16px;
-  border:2px solid #3B2F5C;touch-action:none;background:#fff;cursor:crosshair"></canvas>
+  border:2px solid #5A4520;touch-action:none;background:#fff;cursor:crosshair"></canvas>
  <div style="display:flex;gap:7px;margin-top:10px;align-items:center;justify-content:center" id="pdColors">
  ${PD_COLORS.map(c=>`<span onclick="PT.color='${c}';document.querySelectorAll('#pdColors span').forEach(x=>x.style.outline='none');this.style.outline='3px solid #FFE9A8'"
   style="width:36px;height:36px;border-radius:50%;background:${c};cursor:pointer;display:inline-block;
@@ -40610,7 +40702,7 @@ function drawVote(){
  <div class="sl" style="text-align:center">${esc(ptName(PT.vi))}: صوّت لأفضل رسمة «${PT.word}» (غير رسمتك)</div>
  <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
  ${PT.imgs.map((im,i)=>i===PT.vi?'':`<div onclick="PT.votes[${i}]++;PT.vi++;drawVote()"
-  style="cursor:pointer;border:2px solid #3B2F5C;border-radius:14px;overflow:hidden;background:#fff">
+  style="cursor:pointer;border:2px solid #5A4520;border-radius:14px;overflow:hidden;background:#fff">
   <img src="${im}" style="width:100%;display:block">
   <div style="text-align:center;font-size:11.5px;font-weight:800;padding:5px;background:var(--surf)">لوحة ${esc(ptName(i))}</div></div>`).join('')}
  </div></div>`);
@@ -40625,7 +40717,7 @@ function drawEnd(){
  ${tied>1?`<div class="note" style="margin-bottom:8px">${ico('scale',12)} تعادل في الصدارة بين ${tied} لوحات — الذهب للجميع</div>`:''}
  ${rank.map((r,pos)=>`<div class="li" style="margin-bottom:9px;${r.v===top?'border-color:var(--gold)':''}"><div class="lr">
   <span style="font-size:24px;flex-shrink:0">${r.v===top?ico('medal',20,'#E8B23A'):pos===1?ico('medal',20,'#C0C7D6'):pos===2?ico('medal',20,'#B87333'):(pos+1)+'.'}</span>
-  <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #3B2F5C;background:#fff">
+  <div style="width:74px;height:74px;flex-shrink:0;border-radius:11px;overflow:hidden;border:1.5px solid #5A4520;background:#fff">
    <img src="${r.im}" style="width:100%;height:100%;object-fit:cover"></div>
   <div class="lb"><div class="lt">${esc(ptName(r.i))}</div><div class="ls">${r.v} ${r.v===1?'صوت':'أصوات'}</div></div>
   </div></div>`).join('')}
@@ -40898,7 +40990,7 @@ function sgCss(){
  ' border:1px solid transparent;background:linear-gradient(160deg,#1A2247,#0E1430 55%,#0A0F22) padding-box,',
  '  linear-gradient(135deg,#9B6CF5,#3A4C86 60%,#E8B23A) border-box;',
  ' box-shadow:0 14px 34px -18px rgba(123,79,224,.7)}',
- '.sgCard .hd{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:900;color:#B79BFF}',
+ '.sgCard .hd{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:900;color:#E8C77A}',
  '.sgCard .hd b{color:#F7F8FC}',
  '.sgCard .q{font-size:18px;font-weight:900;line-height:1.55;margin-top:12px;color:#F7F8FC;text-wrap:balance}',
  '.sgCard .say{font-size:11.5px;color:#8F9BBC;margin-top:10px}',
@@ -40976,7 +41068,7 @@ function sgCss(){
 const CLUBS=[
  {id:'falcons',n:'صقور الجزيرة',i:'flame',c:'#E8B23A',m:'العلو للصقور',base:1450},
  {id:'scholars',n:'حرّاس المعرفة',i:'book',c:'#5AC8F5',m:'المعرفة قوة',base:1320},
- {id:'storm',n:'عاصفة الشمال',i:'energy',c:'#7B4FE0',m:'لا أحد يوقف العاصفة',base:1180},
+ {id:'storm',n:'عاصفة الشمال',i:'energy',c:'#C9901F',m:'لا أحد يوقف العاصفة',base:1180},
  {id:'pearls',n:'لآلئ الخليج',i:'star',c:'#2ECC71',m:'نلمع في كل تحدٍّ',base:1050},
  {id:'desert',n:'فرسان الصحراء',i:'swords',c:'#EF9F27',m:'الصبر مفتاح النصر',base:900},
  {id:'moon',n:'سهرة القمر',i:'sparkle',c:'#FF6B9D',m:'نلعب للمتعة أولًا',base:760}
@@ -40985,7 +41077,7 @@ const CLUB_POOL=['سلطان','نورة','المهندس','ريان','أثير',
 const CLUB_GOAL=800;
 const RANK_DEF=['القائد','نائب القائد','كبير الأعضاء','عضو','مبتدئ'];
 const CLUB_EMB=['flame','book','energy','star','swords','sparkle','crown','shield','globe','ball'];
-const CLUB_COL=['#E8B23A','#5AC8F5','#7B4FE0','#2ECC71','#EF9F27','#FF6B9D','#E24B4A','#5DCAA5'];
+const CLUB_COL=['#E8B23A','#5AC8F5','#C9901F','#2ECC71','#EF9F27','#FF6B9D','#E24B4A','#5DCAA5'];
 /* توافق: أندية البذرة تبقى مصدرًا للبحث والهجرة، وما عداها انتقل إلى نظام CLAN أدناه */
 function clubById(id){return CLUBS.find(c=>c.id===id)}
 function weekFrac(){return ((Date.now()/864e5+4)%7)/7}
@@ -41194,10 +41286,10 @@ function clanCss(){
 '.clHero{position:relative;overflow:hidden;border-radius:18px;padding:13px;margin-bottom:12px;',
 ' background:linear-gradient(150deg,#18223A,#11192B 60%,#070B16);border:1px solid #28324E}',
 '.clHero .gl{position:absolute;inset:0;pointer-events:none;opacity:.22;',
-' background:radial-gradient(120% 95% at 88% -12%,var(--clc,#8B5CF0),transparent 62%)}',
+' background:radial-gradient(120% 95% at 88% -12%,var(--clc,#E8B23A),transparent 62%)}',
 '.clHero .in{position:relative;z-index:1;display:flex;gap:11px;align-items:flex-start}',
 '.clCrest{width:56px;height:56px;flex-shrink:0;border-radius:16px;display:flex;align-items:center;',
-' justify-content:center;background:rgba(7,11,22,.62);border:1.5px solid var(--clc,#8B5CF0);color:var(--clc,#8B5CF0)}',
+' justify-content:center;background:rgba(7,11,22,.62);border:1.5px solid var(--clc,#E8B23A);color:var(--clc,#E8B23A)}',
 '.clHero .nm{font-size:18px;font-weight:900;line-height:1.25;word-break:break-word}',
 '.clHero .tg{font-size:11px;font-weight:800;color:#68738E;letter-spacing:.5px;direction:ltr;display:inline-block}',
 '.clHero .mt{font-size:11.5px;color:#A6AEC4;margin-top:3px;line-height:1.55;word-break:break-word}',
@@ -41211,7 +41303,7 @@ function clanCss(){
 '.clStat.sim{background:rgba(55,138,221,.12);border-color:rgba(55,138,221,.4);color:#7FB6EE}',
 '.clAnn{position:relative;background:rgba(139,92,240,.10);border:1px solid rgba(139,92,240,.38);',
 ' border-radius:13px;padding:10px 12px;margin-bottom:11px}',
-'.clAnn .t{font-size:11px;font-weight:900;color:#B99BF7;display:flex;align-items:center;gap:5px;margin-bottom:4px}',
+'.clAnn .t{font-size:11px;font-weight:900;color:#FFE9A8;display:flex;align-items:center;gap:5px;margin-bottom:4px}',
 '.clAnn .b{font-size:11.5px;line-height:1.7;color:#E8EBF2;word-break:break-word}',
 '.clAnn .w{font-size:11px;color:#68738E;margin-top:5px}',
 '.clQa{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-bottom:12px}',
@@ -41225,7 +41317,7 @@ function clanCss(){
 ' display:flex;align-items:center;justify-content:center}',
 '.clWk{background:#11192B;border:1px solid #28324E;border-radius:15px;padding:12px;margin-bottom:11px}',
 '.clWk .hd{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800}',
-'.clWk .vv{margin-inline-start:auto;font-size:11px;font-weight:900;color:#B99BF7}',
+'.clWk .vv{margin-inline-start:auto;font-size:11px;font-weight:900;color:#FFE9A8}',
 '.clWk .bar{height:10px;border-radius:8px;background:#070B16;border:1px solid #28324E;overflow:hidden;margin-top:9px}',
 '.clWk .bar>i{display:block;height:100%;border-radius:8px;transition:width .5s ease;',
 ' background:linear-gradient(90deg,#6E3FD4,#B76CF0)}',
@@ -41243,13 +41335,13 @@ function clanCss(){
 '.clRow .nm{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:5px;flex-wrap:wrap}',
 '.clRow .sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:3px;font-size:11px;color:#A6AEC4}',
 '.clRow .val{margin-inline-start:auto;text-align:center;flex-shrink:0;min-width:44px}',
-'.clRow .val b{display:block;font-size:12.5px;font-weight:900;color:#B99BF7}',
+'.clRow .val b{display:block;font-size:12.5px;font-weight:900;color:#FFE9A8}',
 '.clRow .val span{font-size:11px;color:#68738E}',
 '.clRow .ord{width:22px;text-align:center;font-size:12px;font-weight:900;color:#68738E;flex-shrink:0}',
 '.clRk{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:900;border-radius:7px;',
 ' padding:2px 7px;border:1px solid transparent;white-space:nowrap}',
 '.clRk.r0{background:linear-gradient(180deg,#FFE9A8,#C9921E);color:#4A3208;border-color:#B8871E}',
-'.clRk.r1{background:rgba(183,108,240,.18);color:#C9A6F5;border-color:rgba(183,108,240,.44)}',
+'.clRk.r1{background:rgba(183,108,240,.18);color:#FFE9A8;border-color:rgba(183,108,240,.44)}',
 '.clRk.r2{background:rgba(90,200,245,.14);color:#7BD3F7;border-color:rgba(90,200,245,.38)}',
 '.clRk.r3{background:#18223A;color:#A6AEC4;border-color:#28324E}',
 '.clDot{width:7px;height:7px;border-radius:50%;background:#4A5570;flex-shrink:0;display:inline-block}',
@@ -41261,7 +41353,7 @@ function clanCss(){
 '.clPod .rg{display:inline-block;border-radius:50%;padding:2px;border:2px solid #28324E;line-height:0}',
 '.clPod .p1 .rg{border-color:#E8B23A;box-shadow:0 0 12px rgba(232,178,58,.32)}',
 '.clPod .nm{font-size:11.5px;font-weight:800;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
-'.clPod .vl{font-size:11px;font-weight:900;color:#B99BF7}',
+'.clPod .vl{font-size:11px;font-weight:900;color:#FFE9A8}',
 '.clPod .bs{margin-top:6px;border-radius:10px 10px 0 0;background:linear-gradient(180deg,#1B2540,#11192B);',
 ' border:1px solid #28324E;border-bottom:none;font-size:13px;font-weight:900;color:#68738E}',
 '.clPod .p1 .bs{height:52px;line-height:52px}',
@@ -41280,7 +41372,7 @@ function clanCss(){
 '.clMsg.me{flex-direction:row-reverse}',
 '.clMsg .av{width:30px;height:30px;flex-shrink:0;cursor:pointer}',
 '.clMsg .bd{max-width:80%;min-width:0}',
-'.clMsg .who{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:900;color:#B99BF7;',
+'.clMsg .who{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:900;color:#FFE9A8;',
 ' margin-bottom:3px;cursor:pointer;min-height:20px}',
 '.clMsg.me .who{justify-content:flex-end}',
 '.clMsg .bub{background:#18223A;border:1px solid #28324E;border-radius:13px;padding:7px 10px;',
@@ -41296,7 +41388,7 @@ function clanCss(){
 ' color:inherit;background:#11192B;border:1px solid #28324E;border-radius:14px;padding:11px;',
 ' margin-bottom:8px;cursor:pointer}',
 '.clFind .cr{width:44px;height:44px;flex-shrink:0;border-radius:13px;display:flex;align-items:center;',
-' justify-content:center;background:rgba(7,11,22,.6);border:1.5px solid var(--clc,#8B5CF0);color:var(--clc,#8B5CF0)}',
+' justify-content:center;background:rgba(7,11,22,.6);border:1.5px solid var(--clc,#E8B23A);color:var(--clc,#E8B23A)}',
 '.clFind .bd{flex:1;min-width:0}',
 '.clFind .nm{font-size:13px;font-weight:800}',
 '.clFind .sub{font-size:11px;color:#A6AEC4;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}',
@@ -41326,7 +41418,7 @@ function clanCss(){
 '.clEmpty .s{font-size:11px;line-height:1.75;margin-bottom:14px}',
 '.clBot{font-size:11px;font-weight:800;background:#18223A;color:#A6AEC4;border:1px solid #28324E;',
 ' border-radius:5px;padding:1px 5px;white-space:nowrap}',
-'.clMeTag{font-size:11px;font-weight:900;color:#B99BF7;white-space:nowrap}',
+'.clMeTag{font-size:11px;font-weight:900;color:#FFE9A8;white-space:nowrap}',
 '.clTabs{display:flex;gap:6px;background:#0C1322;border:1px solid #28324E;border-radius:13px;',
 ' overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}',
 '.clTabs::-webkit-scrollbar{display:none}',
@@ -41338,7 +41430,7 @@ function clanCss(){
 '.clTab{flex:1;min-width:64px;text-align:center;font-size:11.5px;font-weight:800;color:#A6AEC4;',
 ' padding:8px 6px;border-radius:10px;cursor:pointer;white-space:nowrap;display:flex;',
 ' align-items:center;justify-content:center;gap:4px;min-height:44px}',
-'.clTab.on{background:linear-gradient(150deg,#8B5CF0,#5B2FB8);color:#fff}',
+'.clTab.on{background:linear-gradient(150deg,#E8B23A,#8A5A10);color:#fff}',
 '.clSep{height:1px;background:#1B2439;margin:14px 0}',
 '.clErr{text-align:center;padding:26px 18px}',
 '.clErr .t{font-size:13.5px;font-weight:800;color:#E24B4A;margin-bottom:6px}',
@@ -41348,8 +41440,8 @@ function clanCss(){
 ' font-size:12.5px;font-weight:700;color:#E8EBF2;background:#11192B;border:1px solid #28324E;',
 ' border-radius:12px;padding:11px 12px;cursor:pointer;min-height:44px}',
 '.clPick .rd{width:16px;height:16px;border-radius:50%;border:2px solid #4A5570;flex-shrink:0}',
-'.clPick.on{border-color:#8B5CF0;background:rgba(139,92,240,.10)}',
-'.clPick.on .rd{border-color:#8B5CF0;background:#8B5CF0;box-shadow:inset 0 0 0 3px #11192B}',
+'.clPick.on{border-color:#E8B23A;background:rgba(139,92,240,.10)}',
+'.clPick.on .rd{border-color:#E8B23A;background:#E8B23A;box-shadow:inset 0 0 0 3px #11192B}',
 '.clLock{opacity:.5}',
 '.clNote{font-size:11px;color:#68738E;line-height:1.7;text-align:center;margin-top:12px}'
  ].join('\n');
@@ -41370,8 +41462,8 @@ var CLAN_RK=[{k:'lead',ar:'القائد',i:'crown',c:'#E8B23A'},
 /* ستة عشر شعارًا — كلها مفاتيح موجودة فعلًا في ICO */
 var CLAN_EMB=['flame','shield','crown','star','swords','sparkle','globe','book',
               'energy','orb','scroll','flag','hammer','target','puzzle','medal'];
-/* ألوان الهوية — بلا #7B4FE0 وبلا الذهبي (الذهب محجوز لخمسة مواضع فقط) */
-var CLAN_COL=['#8B5CF0','#B76CF0','#8B3FD9','#5AC8F5','#378ADD','#2ECC71','#5DCAA5',
+/* ألوان الهوية — بلا #C9901F وبلا الذهبي (الذهب محجوز لخمسة مواضع فقط) */
+var CLAN_COL=['#E8B23A','#B76CF0','#8B3FD9','#5AC8F5','#378ADD','#2ECC71','#5DCAA5',
               '#EF9F27','#E24B4A','#FF6B9D','#C0C8D4','#CD7F32'];
 
 /* حُذفت البطاقات: الدعم صار بنسخ الجيس — ندرة الجيس (c/r/e/l) ↔ مفاتيح اقتصاد الدعم */
@@ -41632,7 +41724,7 @@ function clanOldRank(r){
  */
 function clanSafeColor(c){
  var up=String(c||'').toUpperCase(), i;
- if(up==='#7B4FE0')return '#8B5CF0';                  // اللون المحذوف من اللوحة ← بنفسجي الهوية
+ if(up==='#C9901F')return '#E8B23A';                  // اللون المحذوف من اللوحة ← بنفسجي الهوية
  if(up==='#E8B23A'||up==='#FFE9A8')return '#EF9F27';  // الذهبي ← برتقالي قريب منه
  for(i=0;i<CLAN_COL.length;i++)if(CLAN_COL[i].toUpperCase()===up)return CLAN_COL[i];
  return CLAN_COL[clanHash32(up)%CLAN_COL.length];     // بديل ثابت لا عشوائي
@@ -42869,7 +42961,7 @@ Object.assign(CLAN,{
    A.dayReq=(A.dayReq|0)+1;
    A.wkCap=A.wkCap||{};if(rar==='epic')A.wkCap.epic=1;
    CLAN.cool('dr:'+uid,EC.REQ_COOL);
-   K.chat.push({id:CLAN._id('m'),uid:uid,n:an,k:'dr',tx:'طلب دعم: '+need+' نسخة',
+   K.chat.push({id:CLAN._id('m'),uid:uid,n:an,k:'dr',tx:'طلب دعم: '+need+' '+arCnt(need,'نسخة'),
     at:now,del:0,ref:id});
    if(K.chat.length>140)K.chat=K.chat.slice(-140);
    return {res:{id:id,need:need}};
@@ -43052,7 +43144,7 @@ function clPin(){
     وقد تكون محاكاة فردية أصلًا — فادّعاء «غرفة حيّة» للنادي كذب. النادي محلي دائمًا. */
 function clSynced(){return false}
 function clScopeChip(){
- return `<span class="clubChip">${ico('save',11)} محلي على جهازك</span>`;
+ return '';
 }
 
 /* ─────────── السلطة: can للعرض · act للتنفيذ ─────────── */
@@ -43246,8 +43338,8 @@ function clJoinTxt(jt){
 function clStatCell(icoN,val,label,col){
  return `<div style="flex:1;min-width:92px;background:var(--surf);border:1px solid var(--bd);
   border-radius:12px;padding:9px 7px;text-align:center">
-  <div style="color:${col||'var(--tx2)'}">${ico(icoN,14)}</div>
-  <div style="font-size:13px;font-weight:900;margin-top:3px;color:${col||'var(--tx)'}">${val}</div>
+  <div style="color:#E8B23A">${ico(icoN,14)}</div>
+  <div style="font-size:13px;font-weight:800;margin-top:3px;color:#FFE9A8">${val}</div>
   <div style="font-size:11px;color:var(--tx2);margin-top:2px">${label}</div></div>`;
 }
 function clSimNote(tx){
@@ -43269,7 +43361,7 @@ function clTabsBar(active){
    font-size:11.5px;font-weight:800;padding:9px 3px;border-radius:11px;min-height:44px;
    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
    color:${on?'#fff':'var(--tx2)'};border:1px solid ${on?'var(--pur)':'var(--bd)'};
-   background:${on?'linear-gradient(145deg,#8B5CF0,#5B2FB8)':'linear-gradient(168deg,#1C2540,#0E1526)'}">
+   background:${on?'linear-gradient(145deg,#E8B23A,#8A5A10)':'linear-gradient(168deg,#1C2540,#0E1526)'}">
    ${ico(t[2],14)}<span>${t[1]}</span></div>`}).join('')}</div>`;
 }
 function clTabGo(k){
@@ -43333,7 +43425,7 @@ function clAnimSvg(k,s,fill){
 var _clScN=0;
 /** مشهد الحيوان خلف بطاقة الهوية: سماء وقمر وكثبان وظلّ الحيوان على الأفق */
 function clAnimScene(k,col,gold){
- var a=CL_ANIM[clAnim(k)||'falcon'], id='sc'+(++_clScN), c=col||'#8B5CF0';
+ var a=CL_ANIM[clAnim(k)||'falcon'], id='sc'+(++_clScN), c=col||'#E8B23A';
  var bc=gold?'#F5C542':'#0A0718', bo=gold?'1':'.92';
  var stars='';
  var SX=[18,40,66,92,120,150,178,206,232,262],SY=[14,30,10,38,18,8,34,16,26,12];
@@ -43371,7 +43463,7 @@ function clAnimPick(cur,call,col){
  return '<div class="clAnimG">'+clEmbList().map(function(k){
   var a=CL_ANIM[k]; if(!a)return '';
   return '<div class="clAnimT'+(cur===k?' on':'')+'" onclick="'+call+"('"+k+"')"+'">'+
-   '<div class="sc">'+clAnimScene(k,col||'#8B5CF0',1)+'</div>'+
+   '<div class="sc">'+clAnimScene(k,col||'#E8B23A',1)+'</div>'+
    '<div class="nm">'+a.ar+'</div>'+
    (cur===k?'<div class="ck"></div>':'')+'</div>';
  }).join('')+'</div>';
@@ -43380,7 +43472,7 @@ function clAnimPick(cur,call,col){
 
 /** لون النادي إلى rgba — لتلوين الهالات والحدود من لون واحد */
 function clRGBA(hex,a){
- var h=String(hex||'#8B5CF0').replace('#','');
+ var h=String(hex||'#E8B23A').replace('#','');
  if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
  var r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
  if(isNaN(r)||isNaN(g)||isNaN(b)){r=139;g=92;b=240}
@@ -43458,7 +43550,7 @@ function clanCss2(){
  '.clSecT{display:inline-flex;align-items:center;gap:7px;padding:9px 15px 13px;font-size:12.5px;font-weight:900;',
  ' color:#EDF0F8;background:linear-gradient(155deg,#202B54,#131B36);border:1.5px solid #3A4670;',
  ' border-radius:13px 13px 0 0;clip-path:polygon(0 0,100% 0,100% 100%,17px 100%)}',
- '.clSecT>span{color:var(--ac,#8B5CF0);display:flex}',
+ '.clSecT>span{color:var(--ac,#E8B23A);display:flex}',
  '.clSecB{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;padding:8px 13px;min-height:38px;',
  ' font-size:11px;font-weight:900;color:#C3A8FA;background:rgba(139,92,240,.13);',
  ' border:1.5px solid rgba(139,92,240,.6);border-radius:12px;cursor:pointer;font-family:inherit}',
@@ -43502,7 +43594,7 @@ function clanCss2(){
  '.clChatR .hd{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:900}',
  '.clChatR .tm{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:#8B96B6}',
  '.clChatR .ms{font-size:11.5px;color:#B4BEDA;margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
- '.clChatR .ch{color:#8B5CF0;flex-shrink:0}',
+ '.clChatR .ch{color:#E8B23A;flex-shrink:0}',
  '.clEmpty{text-align:center;color:#8B96B6;font-size:11px;line-height:1.8;padding:4px 0}',
  '.clEmpty .bg{display:block;margin-bottom:7px;opacity:.7;line-height:1}',
 
@@ -43536,7 +43628,7 @@ function clanCss2(){
 var _clCrestN=0;
 /** شعار النادي — درع مرسوم بالكامل يتلوّن بلون النادي، بلا صور خارجية */
 function clCrest(col,icoN,sz){
- var s=sz||96, id='cr'+(++_clCrestN), c=col||'#8B5CF0';
+ var s=sz||96, id='cr'+(++_clCrestN), c=col||'#E8B23A';
  return '<svg viewBox="0 0 100 126" width="'+s+'" height="'+Math.round(s*1.26)+
   '" style="display:block;flex-shrink:0;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55))" aria-hidden="true">'+
   '<defs>'+
@@ -43570,13 +43662,14 @@ function clHeroArt(){
 }
 
 function clStatTile(icoN,val,label,acc,dot){
+ acc='#E8B23A';   // ٧٫٢١: أرقام النادي ذهبيّة كلّها — لا أخضر ووردي وأزرق في صفٍّ واحد
  return '<div class="clSt2" style="--ac:'+acc+'">'+
   '<div class="ic">'+(icoN.length<=3?'<span style="font-size:18px;line-height:1">'+icoN+'</span>':ico(icoN,17))+'</div>'+
   '<div class="v">'+val+'</div>'+
   '<div class="l">'+(dot?'<i class="dt"></i>':'')+esc(label)+'</div></div>';
 }
 function clSecHead(t,icoN,acc,btn){
- return '<div class="clSecH"><span class="clSecT" style="--ac:'+(acc||'#8B5CF0')+'">'+
+ return '<div class="clSecH"><span class="clSecT" style="--ac:'+(acc||'#E8B23A')+'">'+
   '<span style="font-size:15px;line-height:1">'+icoN+'</span>'+esc(t)+'</span>'+(btn||'')+'</div>';
 }
 function clActBtn(icoN,t,sub,call,acc){
@@ -43594,7 +43687,7 @@ function clubHome(){
    aria-label="${gear?'إعدادات النادي':'رجوع'}">${ico(gear?'gear':'back',18)}</button>
   <div class="clHdrP"><i class="clHdrT"></i><h2>النادي</h2><i class="dm"></i></div></div>`;
  clScreen('clubHome',null,head,()=>{
-  const c=cl3C(),col=c.col||'#8B5CF0';
+  const c=cl3C(),col=c.col||'#E8B23A';
   const n=clCount(),cap=clCap();
   const meM=clMem(S.uid)||{};
   const onList=clMemAll().filter(cl3On).sort((a,b)=>clRkIx(a.r)-clRkIx(b.r));
@@ -43623,7 +43716,6 @@ function clubHome(){
       <span class="clPil${n>=cap?' full':''}">${ico('group',13)} ${cl3Num(n)}/${cl3Num(cap)} عضوًا</span>
       <span class="clPil">${ico('timer',13)} ${esc(clJoinTxt(c.jt))}</span>
       <span class="clPil">${ico('globe',13)} اللغة ${esc(c.lang||'العربية')}</span>
-      <span class="clPil">${ico('info',12)} محلي على جهازك</span>
      </div></div></div></div>`;
 
   // ② بلاطات الأرقام
@@ -43633,7 +43725,7 @@ function clubHome(){
    ${clStatTile(ico('heart',20),cl3Num(donWk),'دعم الأسبوع','#F0567F')}
    ${clStatTile(ico('medal',20),evN?(Math.round(evW/evN*100)+'%'):'—','فوز الفعاليات','#E8B23A')}
    ${clStatTile(ico('group',20),cl3Num(onList.length),'المتصلون','#3FCF7F',1)}</div>
-   <div class="clDisc"><span>${ico('info',13)}</span><div>الخانات التي تظهر «—» لم تُسجَّل بعد على هذا الجهاز: لا خادم يرتّب الأندية عالميًا ولا سجلّ فعاليات سابق.</div></div>`;
+`;
 
   // ③ عن النادي
   h+=`<div class="clSecW">
@@ -43649,9 +43741,9 @@ function clubHome(){
      </div></div></div></div>`;
 
   // ④ الإعلان المثبّت
-  h+=`<div class="clSecW">${clSecHead('الإعلان المثبّت',ico('flag',20),'#8B5CF0')}`;
+  h+=`<div class="clSecW">${clSecHead('الإعلان المثبّت',ico('flag',20),'#E8B23A')}`;
   h+=pin
-   ?`<div class="clPan" style="border-color:${clRGBA('#8B5CF0',.5)};background:linear-gradient(165deg,rgba(139,92,240,.14),#090E1F)">
+   ?`<div class="clPan" style="border-color:${clRGBA('#E8B23A',.5)};background:linear-gradient(165deg,rgba(139,92,240,.14),#090E1F)">
      <div style="font-size:12px;line-height:1.85">${esc(pin.tx)}</div>
      <div style="font-size:11px;color:#8B96B6;margin-top:8px">${pin.byN?clNameTap(pin.by,pin.byN):'الإدارة'}${pin.at?' · '+esc(clSafeAgo(pin.at)):''}</div></div></div>`
    :`<div class="clPan dash"><div class="clEmpty"><span class="bg" style="font-size:26px">${ico('sound',22)}</span>
@@ -43659,7 +43751,7 @@ function clubHome(){
 
   // ⑤ أربعة إجراءات
   h+=`<div class="clActs">
-   ${clActBtn(ico('gift',20),'طلب دعم','اطلب المساعدة',"push('clRequestSupportScr')",'#8B5CF0')}
+   ${clActBtn(ico('gift',20),'طلب دعم','اطلب المساعدة',"push('clRequestSupportScr')",'#E8B23A')}
    ${clActBtn(ico('swords',20),'تحدٍّ ودي','واجهة التحديات','clFriendly()','#E8B23A')}
    ${clActBtn(ico('heart',20),'الداعمون','من دعم النادي',"push('clDonorsScr')",'#F0567F')}
    ${clActBtn(ico('trophy',20),'المنافسات','شارك واربح',"push('clEventsScr')",'#F08A2E')}</div>`;
@@ -43671,7 +43763,7 @@ function clubHome(){
      <span class="t"><span style="font-size:15px;line-height:1">${ico('target',11)}</span> هدف الأسبوع</span>
      <span class="v">${cl3Num(tot)}/${cl3Num(goal)}</span></div>
     <div class="clBar"><i style="width:${pc}%;background:${done
-      ?'linear-gradient(90deg,#C9921E,#FFE9A8)':'linear-gradient(90deg,#5B2FB8,#A97BFF)'}"></i></div>
+      ?'linear-gradient(90deg,#C9921E,#FFE9A8)':'linear-gradient(90deg,#8A5A10,#A97BFF)'}"></i></div>
     <div class="clGoalF">
      <span>مساهمتك: <b style="color:#4C9AF0">${cl3Num(mine)}</b> نقطة</span>
      ${done
@@ -43685,7 +43777,7 @@ function clubHome(){
 
   // ⑦ الدردشة
   h+=`<div class="clSecW">
-   ${clSecHead('الدردشة',ico('scroll',20),'#8B5CF0',`<button class="clSecB" onclick="push('clChatScr')">${ico('scroll',13)} فتح الدردشة</button>`)}
+   ${clSecHead('الدردشة',ico('scroll',20),'#E8B23A',`<button class="clSecB" onclick="push('clChatScr')">${ico('scroll',13)} فتح الدردشة</button>`)}
    <div class="clPan">`;
   if(chat.length){
    h+=chat.map((x,i)=>{
@@ -43944,8 +44036,7 @@ function clMemberScr(uid){
    ${clStatCell('chart',ps.wr+'%','نسبة الفوز','var(--pur)')}
    ${clStatCell('flame',cl3Num(ps.streak),'أفضل سلسلة','#EF9F27')}
    ${clStatCell(ps.fav?ps.fav.i:'map',ps.fav?esc(ps.fav.n):'—','الفئة المفضلة',ps.fav?ps.fav.c:'var(--tx2)')}</div>
-   ${ps.sim?clSimNote('هذا العضو محاكى على جهازك — إحصائيات لعبه مولَّدة محليًا وثابتة له، وليست من خادم.')
-    :clSimNote('هذه أرقامك أنت من حالة اللعب المحفوظة على هذا الجهاز.')}`;
+`;
 
   // إحصائيات النادي
   h+=clSecTitle('إحصائيات النادي');
@@ -44142,7 +44233,7 @@ function clInfoScr(){
     <span class="lt" style="font-size:12.5px">${ico('shield',14)} المستوى ${cl3Num(lv)}${max?' — الأقصى':''}</span>
     <span style="margin-inline-start:auto;font-size:11px;font-weight:900;color:var(--info)">${cl3Num(xp)}${max?'':' / '+cl3Num(need)}</span></div>
    <div class="pbf" style="margin-top:8px;background:var(--elev)">
-    <div class="pbi"><i style="width:${pc}%;background:linear-gradient(90deg,#5B2FB8,#8B5CF0)"></i></div></div>
+    <div class="pbi"><i style="width:${pc}%;background:linear-gradient(90deg,#8A5A10,#E8B23A)"></i></div></div>
    <div class="ls" style="margin-top:6px">${max?'بلغ النادي أعلى مستوى — السعة 50 عضوًا.'
      :'الخبرة تأتي من كل نقطة نادٍ موجبة، والسعة ترتفع مع المستوى وحده.'}</div></div>`;
 
@@ -44237,7 +44328,7 @@ function clAdminLogScr(){
    days[ix[k]].rows.push(e);
   });
   let h=`<div class="wb" style="text-align:start">${ico('info',13)}
-   السجل مكتوب على هذا الجهاز وحده، بسقف ${cl3Num(200)} إجراء، ولا يوجد زر لحذفه.</div>`;
+   يحفظ السجلّ آخر ${cl3Num(200)} إجراء، ولا يُحذف.</div>`;
   h+=days.map(g=>`<div class="sl">${clLogDay(g.at)}</div>
    ${g.rows.map(e=>`<div class="rr" style="align-items:flex-start;padding:10px 11px">
     <span style="font-size:11px;font-weight:900;color:var(--tx2);flex-shrink:0;padding-top:2px">${clHM(e.at)}</span>
@@ -44259,7 +44350,7 @@ function clMoreItems(){
   {k:'set',n:'الإعدادات',d:'الهوية والانضمام والصلاحيات والرتب',i:'gear',scr:'clSettingsScr',act:'editIdentity',minR:1},
   {k:'notif',n:'تنبيهاتي',d:'ما يصلك من النادي داخل التطبيق',i:'bell',scr:'clMyNotifScr'},
   {k:'ban',n:'المحظورون',d:'من مُنع من العودة ولماذا',i:'flag',scr:'clBannedScr',act:'ban',minR:1},
-  {k:'search',n:'البحث عن نادٍ',d:'تصفّح الأندية الموجودة على هذا الجهاز',i:'search',scr:'clSearchScr'}
+  {k:'search',n:'البحث عن نادٍ',d:'تصفّح الأندية وانضمّ إلى أحدها',i:'search',scr:'clSearchScr'}
  ];
 }
 function clMoreMinRank(it){
@@ -44380,8 +44471,8 @@ function clTierList(){try{if(typeof TIERS!=='undefined'&&TIERS&&TIERS.length)ret
 function clEmbList(){try{if(typeof CLAN_EMB!=='undefined'&&CLAN_EMB&&CLAN_EMB.length)return CLAN_EMB}catch(e){}
  return ['flame','book','energy','star','swords','sparkle','crown','shield','globe','ball']}
 function clColList(){try{if(typeof CLAN_COL!=='undefined'&&CLAN_COL&&CLAN_COL.length)return CLAN_COL}catch(e){}
- return ['#8B5CF0','#5AC8F5','#2ECC71','#EF9F27','#FF6B9D','#E24B4A','#5DCAA5','#B76CF0']}
-function clSafeCol(c){return /^#[0-9A-Fa-f]{6}$/.test(String(c||''))?String(c):'#8B5CF0'}
+ return ['#E8B23A','#5AC8F5','#2ECC71','#EF9F27','#FF6B9D','#E24B4A','#5DCAA5','#B76CF0']}
+function clSafeCol(c){return /^#[0-9A-Fa-f]{6}$/.test(String(c||''))?String(c):'#E8B23A'}
 function clSafeIco(i){return clEmbList().indexOf(i)>=0?i:clEmbList()[0]}
 function clNewAnim(k){clNewPick('i',clSafeIco(k))}
 function clEdAnim(k){clEdPick('i',clSafeIco(k))}
@@ -44392,7 +44483,7 @@ function clMyTier(){return (S.ranked&&S.ranked.tier!=null)?S.ranked.tier:0}
 function clRkChip(r){
  const nm=esc(cl4RankName(r));
  const st=r===0?'background:linear-gradient(180deg,#FFE9A8,#C9921E);color:#4A3208'
-  :r===1?'background:#B76CF033;color:#C9A6F5;border:1px solid #B76CF066'
+  :r===1?'background:#B76CF033;color:#FFE9A8;border:1px solid #B76CF066'
   :r===2?'background:#5AC8F522;color:#7BD3F7;border:1px solid #5AC8F555'
   :'background:var(--elev);color:var(--tx2);border:1px solid var(--bd)';
  return `<span class="rkBadge" style="${st}">${r===0?ico('crown',10)+' ':''}${nm}</span>`;
@@ -44408,7 +44499,7 @@ function cl4Bar(pc){
  return pc>=100
   ?`<div class="pbf"><div class="pbi"><i style="width:100%"></i></div></div>`
   :`<div style="height:9px;border-radius:7px;background:var(--elev);border:1px solid var(--bd);overflow:hidden">
-    <i style="display:block;height:100%;width:${pc}%;border-radius:7px;background:linear-gradient(90deg,#B76CF0,#8B5CF0)"></i></div>`;
+    <i style="display:block;height:100%;width:${pc}%;border-radius:7px;background:linear-gradient(90deg,#B76CF0,#E8B23A)"></i></div>`;
 }
 function clWarn(msg){return msg?`<div class="wb" style="text-align:start;border-color:rgba(232,178,58,.35);background:rgba(232,178,58,.08)">
  ${ico('info',13)} ${esc(msg)}</div>`:''}
@@ -44517,7 +44608,8 @@ function cl4Open(tk){
 /* ═══════════ ١ · طلبات الانضمام ═══════════ */
 function clRequestsScr(rid){
  if(!cl4Gate('طلبات الانضمام',clRequestsScr,1))return;
- if(!cl4Can('accept')&&!cl4Can('reject'))return clDenied('طلبات الانضمام',cl4MinR('accept'));
+ /* ٧٫٢١ — الفحص الشامل: cl4Can يحتاج هدفًا (قبول من؟) فكان يرفض القائد نفسه عند فتح الشاشة — فتح الشاشة بالرتبة وحدها */
+ if(clMyR()>Math.min(cl4MinR('accept'),cl4MinR('reject')))return clDenied('طلبات الانضمام',cl4MinR('accept'));
  if(rid)return clReqProfile(rid);
  clFresh();
  const jr=(S.clan.jr||[]).slice().sort((a,b)=>(b.at||0)-(a.at||0));
@@ -44525,8 +44617,7 @@ function clRequestsScr(rid){
  const done=jr.filter(x=>x.st!=='pend');
  const canA=cl4Can('accept'),canR=cl4Can('reject');
  clGo(`<div class="scr on">${tbar('طلبات الانضمام',pend.length?cl4Num(pend.length)+' طلب بانتظارك':'لا طلبات معلّقة')}
- <div class="wb" style="text-align:start">${ico('info',13)} افتح ملف اللاعب قبل القبول — لا قبول أعمى.
- بيانات الطلب محفوظة على هذا الجهاز فقط ولا خادم يتحقّق منها.</div>
+ <div class="wb" style="text-align:start">${ico('info',13)} افتح ملف اللاعب قبل القبول.</div>
  ${pend.length?pend.map(r=>clReqCard(r,canA,canR)).join('')
   :cl4Empty('group','لا طلبات معلّقة','حين يطلب لاعب الانضمام تظهر بطاقته هنا كاملة قبل أي قرار')}
  ${done.length?`<div class="sl">طلبات منتهية أو معالَجة · ${cl4Num(done.length)}</div>
@@ -44676,7 +44767,7 @@ function clBannedScr(tab){
   <div class="fc ${tab==='mute'?'on':''}" onclick="clBanTab('mute')">${ico('mute',13)} المكتومون · ${cl4Num(muted.length)}</div>
  </div>
  ${body}
- ${clNote('القائمتان محليتان على هذا الجهاز — لا خادم يشاركهما مع لاعبين آخرين.')}
+
  </div>`);
 }
 /* تبديل التبويب يحدّث وسيط NAV أيضًا، وإلا أعاد back() وCLAN.repaint التبويب الأول */
@@ -44742,7 +44833,7 @@ function clTransferScr(){
  ${heir?`
  <div class="li" style="margin-top:14px;border-color:var(--pur);background:rgba(139,92,240,.08);text-align:center;padding:18px 14px">
   <div style="font-size:15px;font-weight:900;line-height:2">
-   ستصبح أنت <span style="color:#C9A6F5">${esc(cl4RankName(1))}</span><br>وسيصبح
+   ستصبح أنت <span style="color:#FFE9A8">${esc(cl4RankName(1))}</span><br>وسيصبح
    <span>${esc(heir.n||'العضو')}</span> ${clRkChip(0)}</div>
   <div class="ls" style="margin-top:9px">تنتقل إليه كل صلاحيات القائد: الصلاحيات وتسمية الرتب ونقل القيادة وحلّ النادي.</div>
  </div>
@@ -45117,9 +45208,8 @@ function clCreateScr(){
  if(!_clNew)_clNew={n:'',desc:'',i:EM[0],col:CO[0],jt:'req',minTr:0,minLv:1,ff:0,lang:'ar',ctry:CL_CTRY[0][0]};
  const v=_clNew;
  clGo(`<div class="scr on">${tbar('إنشاء نادٍ','تصير قائده')}
- ${clWarn(clWhy('create',{}))}
- <div class="wb" style="text-align:start">${ico('crown',13)} كقائد تملك الصلاحيات كلها: الرتب والهوية والانضمام والمنافسات.
- ناديك يُنشأ على هذا الجهاز — لا خادم ولا دليل أندية عالمي، ولن يجده لاعبون آخرون.</div>
+ ${clWarn(clWhy('create',{n:'نادي'}))}   <!-- ٧٫٢١: الاسم يُفحص عند الإنشاء لا قبل الكتابة -->
+ <div class="wb" style="text-align:start">${ico('crown',13)} كقائد تملك الصلاحيات كلها: الرتب والهوية والانضمام والمنافسات.</div>
  <div style="font-size:11px;font-weight:800;color:var(--tx2);margin:12px 0 5px">اسم النادي</div>
  <input class="fin" maxlength="22" value="${clAttr(v.n)}" placeholder="مثال: صقور ${clAttr(S.name||'اللاعب')}"
   oninput="clNewSet('n',this.value)">
@@ -45245,9 +45335,7 @@ function clSearchScr(){
  if(f.sup)res=res.filter(c=>f.sup==='hot'?!!c.sup:!c.sup);
  if(f.ev)res=res.filter(c=>f.ev==='hot'?!!c.ev:!c.ev);
  res.sort((a,b)=>b.lvC-a.lvC||b.mem.length-a.mem.length);
- clGo(`<div class="scr on">${tbar('ابحث عن نادٍ',cl4Num(res.length)+' نادٍ مطابق')}
- <div class="wb" style="text-align:start">${ico('info',13)} <b>هذه أندية بذرة محلية على جهازك وأعضاؤها آليون.</b>
- لا يوجد خادم ولا دليل أندية عالمي، وأندية اللاعبين الحقيقيين ليست جزءًا من هذه النسخة.</div>
+ clGo(`<div class="scr on">${tbar('ابحث عن نادٍ',cl4Num(res.length)+' '+((res.length>=3&&res.length<=10)?'أندية مطابقة':'ناديًا مطابقًا'))}
  <input class="fin" id="clSq" placeholder="ابحث بالاسم أو #الوسم" value="${clAttr(f.q)}"
   oninput="clFq(this.value)" style="margin-bottom:10px">
  ${clFRow('اللغة','lang',[['','الكل']].concat(CL_LANGS))}
@@ -45518,13 +45606,13 @@ function clUi5Css(){
 .clRow.me{flex-direction:row-reverse}
 .clBub{max-width:80%;background:var(--card);border:1px solid var(--bd);border-radius:13px;
  padding:8px 10px;position:relative;-webkit-user-select:none;user-select:none;cursor:pointer}
-.clRow.me .clBub{background:#20183C;border-color:#3B2F5C}
+.clRow.me .clBub{background:#20183C;border-color:#5A4520}
 /* اسم العضو هدف لمس كامل — لأنّ كل اسم يفتح صفحته */
 .clNm{font-size:11px;font-weight:900;color:#7BD3F7;margin-bottom:3px;min-height:34px;padding-block:4px;
  display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap;cursor:pointer}
 .clTap{display:inline-flex;align-items:center;min-height:34px;padding-block:3px}
 .rr .lt{display:inline-flex;align-items:center;min-height:30px}
-.clRow.me .clNm{color:#C9A6F5}
+.clRow.me .clNm{color:#FFE9A8}
 .clTx{font-size:12px;line-height:1.65;color:var(--tx);word-break:break-word;white-space:pre-wrap}
 .clAt{font-size:11px;color:var(--mut);margin-top:4px}
 .clTag{font-size:11px;background:var(--elev);color:var(--tx2);padding:1px 5px;border-radius:5px;font-weight:800}
@@ -45542,11 +45630,11 @@ function clUi5Css(){
  font-size:16px;cursor:pointer;flex-shrink:0;padding:0}
 .clDots{background:transparent;border:none;color:var(--tx2);min-width:44px;height:44px;
  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0}
-.clSend{background:linear-gradient(145deg,#8B5CF0,#5B2FB8);border:none;color:#fff;border-radius:11px;
+.clSend{background:linear-gradient(145deg,#E8B23A,#8A5A10);border:none;color:#fff;border-radius:11px;
  min-width:52px;height:44px;font-weight:900;font-size:11.5px;cursor:pointer;flex-shrink:0;font-family:inherit}
 .clSend:disabled,.clCmp input:disabled{opacity:.45}
 .clBar{height:8px;border-radius:6px;background:#0A0F1C;border:1px solid var(--bd);overflow:hidden}
-.clBar>i{display:block;height:100%;background:linear-gradient(90deg,#5B2FB8,#B76CF0)}
+.clBar>i{display:block;height:100%;background:linear-gradient(90deg,#8A5A10,#B76CF0)}
 .clOk{font-size:11px;font-weight:900;color:#5DE39A}
 .clTb{display:flex;gap:7px;margin:2px 0 14px}
 .clTab{flex:1;text-align:center;font-size:11px;font-weight:900;padding:14px 4px;border-radius:11px;
@@ -45554,6 +45642,13 @@ function clUi5Css(){
 .clTab.on{background:var(--elev);color:var(--tx);border-color:var(--pur)}
 .clPod{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:4px 0 16px}
 .clPodC{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;max-width:33%}
+/* ٧٫٢١ — الفحص الشامل: الاسم كان يُقصّ من أعلاه وتغطّيه شارة «آلي»، والمنصّات فارغة — الاسم سطرٌ كامل، الشارة تحته، والمرتبة على المنصّة */
+.clPodN{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;max-width:100%;padding:2px 4px}
+.clPodN b{font-size:13px;font-weight:700;line-height:1.5;color:#F2E9D2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.clPodN .clTag{position:static;margin:0;transform:none}
+.clPodV{font-size:13px;font-weight:800;color:#FFE9A8}
+.clPodB{display:flex;align-items:flex-start;justify-content:center;padding-top:6px;border:1px solid rgba(232,178,58,.35);border-bottom:0}
+.clPodB i{font-style:normal;font-family:var(--fd);font-size:22px;font-weight:600;color:#E8B23A;text-shadow:0 1px 0 rgba(0,0,0,.5)}
 .clPodB{width:100%;border-radius:11px 11px 0 0;background:linear-gradient(180deg,#18223A,#11192B);
  border:1px solid var(--bd);border-bottom:none;display:flex;align-items:center;justify-content:center}`;
  document.head.appendChild(st);
@@ -45657,7 +45752,7 @@ function clNoUnit(t,fname){clErrScr(t,fname,'وحدة النادي لم تُحم
 function clSkThumb(k,size){
  const s=size||40;
  const it=clSkOf(k);
- const R=(typeof RCOL!=='undefined'&&it&&RCOL[clSkRar(k)])||{g:'#8B5CF0'};
+ const R=(typeof RCOL!=='undefined'&&it&&RCOL[clSkRar(k)])||{g:'#E8B23A'};
  let art='';
  try{if(it&&typeof skImg==='function')art=skImg(String(k),Math.round(s*.82))||''}catch(e){art=''}
  if(!art)art=ico('ball',Math.round(s*.55));
@@ -45683,13 +45778,10 @@ function clChatScr(){
   const pin=clPinned();
   const rep=CL_REPLY?clFindMsg(clArg(CL_REPLY)):null;
   go(`<div class="scr on">${tbar('دردشة '+esc(c.n),`${clN(on)} حاضرًا · ${clN(Object.keys(S.clan.mem||{}).length)} عضوًا`)}
- <div class="wb" style="text-align:start">${ico('info',13)} <b>محلي</b> — الدردشة على جهازك وحده:
- لا خادم ولا إشعارات هاتف ولا وصول لأجهزة الآخرين. الأعضاء المحاكون موسومون بـ«آلي»،
- و«${clN(on)} حاضرًا» تقدير من آخر نشاط مسجّل على هذا الجهاز لا حضور حقيقي.</div>
- ${pin?`<div class="li" style="border-color:#3B2F5C;background:var(--elev);margin-bottom:9px">
+ ${pin?`<div class="li" style="border-color:#5A4520;background:var(--elev);margin-bottom:9px">
   <div class="lr" style="align-items:flex-start">
    <span style="color:var(--pur);flex-shrink:0">${ico('flag',15)}</span>
-   <div class="lb"><div style="font-size:11px;font-weight:900;color:#C9A6F5">رسالة مثبّتة</div>
+   <div class="lb"><div style="font-size:11px;font-weight:900;color:#FFE9A8">رسالة مثبّتة</div>
     <div class="clTx" style="margin-top:3px">${esc(pin.tx)}</div>
     ${pin.uid?`<div style="margin-top:4px">${clNameHtml(pin.uid,pin.n)}</div>`:''}</div>
    ${clShow('unpin',{},pin.uid)?`<button class="clIb" style="min-width:36px;height:36px" onclick="clUnpin()">${ico('cross',13)}</button>`:''}
@@ -45700,7 +45792,7 @@ function clChatScr(){
   :`<div class="note">لا رسائل بعد — كن أول من يكتب لناديك</div>`}</div>
  ${rep?`<div class="li" style="margin:9px 0 0;padding:8px 10px;border-color:var(--pur)">
   <div class="lr"><div class="lb">
-   <div style="font-size:11px;font-weight:900;color:#C9A6F5">ترد على ${esc(rep.n||'')}</div>
+   <div style="font-size:11px;font-weight:900;color:#FFE9A8">ترد على ${esc(rep.n||'')}</div>
    <div class="ls">${esc(clShort(rep).slice(0,70))}</div></div>
    <button class="clIb" style="min-width:36px;height:36px" onclick="clReplyClear()">${ico('cross',13)}</button>
   </div></div>`:''}
@@ -46015,11 +46107,11 @@ function clDrCard(d,ctx,mid){
  else if(!clShow('dr.fill',{id:d.id},d.uid))act=`<span class="ls">${ico('lock',11)} التبرّع غير متاح لك</span>`;
  else act=`<button class="btn g" style="width:auto;padding:7px 14px;font-size:11.5px;${copies<g.give?'opacity:.5':''}"
    onclick="clDrFill('${id}','${c2}')">${ico('plus',12)} دعم (${clN(g.give)})</button>`;
- return `<div class="li" style="border-color:#3B2F5C;margin-bottom:9px">
+ return `<div class="li" style="border-color:#5A4520;margin-bottom:9px">
  <div class="lr" style="align-items:flex-start">
   ${clSkThumb(d.k,44)}
   <div class="lb">
-   <div style="font-size:11px;font-weight:900;color:#C9A6F5">${ico('gift',11)} طلب دعم</div>
+   <div style="font-size:11px;font-weight:900;color:#FFE9A8">${ico('gift',11)} طلب دعم</div>
    <div style="margin-top:2px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
     ${clNameHtml(d.uid,d.n)}<span class="clAt">${ago(d.at)}</span></div>
    <div class="lt" style="font-size:12.5px;margin-top:4px">${esc(clSkName(d.k))}
@@ -46028,9 +46120,9 @@ function clDrCard(d,ctx,mid){
  <div style="margin-top:9px">
   <div class="clBar"><i style="width:${pc}%"></i></div>
   <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
-   <span style="font-size:11px;font-weight:900;color:#C9A6F5">${clN(g.got)}/${clN(g.need)} نسخة</span>
+   <span style="font-size:11px;font-weight:900;color:#FFE9A8">${clN(g.got)}/${clN(g.need)} نسخة</span>
    ${left>0&&!done?`<span class="clAt">${ico('timer',10)} يبقى ${dur(left)}</span>`:''}
-   ${!mine&&!done?`<span class="clAt">لديك ${clN(copies)} نسخة</span>`:''}
+   ${!mine&&!done?`<span class="clAt">لديك ${clN(copies)} ${arCnt(copies,'نسخة')}</span>`:''}
    <span style="margin-inline-start:auto">${act}</span></div>
  </div></div>`;
 }
@@ -46051,7 +46143,7 @@ function clDrFill(safe,ctx){
    const r=CLAN.act(S.uid,'dr.fill',{id:fresh.id});
    if(!r||!r.ok){toast(esc((r&&r.err)||'تعذّر التبرّع'));return}
    const v=(r&&typeof r.v==='number')?r.v:clGive(fresh).give;
-   buyFx(ico('gift',15),'تبرّعت بـ'+clN(v)+' نسخة','شكرًا لك — سُجّل التبرّع لناديك');
+   buyFx(ico('gift',15),'تبرّعت بـ'+clN(v)+' '+arCnt(v,'نسخة'),'شكرًا لك — سُجّل التبرّع لناديك');
    if(window.FX&&FX.correct)FX.correct(2);
    refresh(ctx==='chat'?clChatScr:clSupportScr);
   });
@@ -46060,9 +46152,9 @@ function clDrFill(safe,ctx){
 /* ═══════════ ٣) بطاقة التحدي الودي — صادقة في وجهها ═══════════ */
 function clChalCard(m,mid){
  const mine=m.uid===S.uid;
- return `<div class="li" style="border-color:#3B2F5C;margin-bottom:9px">
+ return `<div class="li" style="border-color:#5A4520;margin-bottom:9px">
  <div class="lr" style="align-items:flex-start">
-  <span style="color:#C9A6F5;flex-shrink:0">${ico('swords',22)}</span>
+  <span style="color:#FFE9A8;flex-shrink:0">${ico('swords',22)}</span>
   <div class="lb">
    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
     ${clNameHtml(m.uid,m.n)}<span class="clAt">${ago(m.at)}</span></div>
@@ -46118,10 +46210,9 @@ function clRequestSupportScr(){
    .filter(x=>x[1]!=='l'&&(typeof tlArenaOkItem!=='function'||tlArenaOkItem('sk',x[0])));
   let h=`<div class="scr on">${tbar('طلب دعم','تطلب من أعضاء ناديك نسخ جيس')}
  <div class="wb" style="text-align:start">${ico('info',13)} تظهر هنا <b>جيوس ساحتك</b> — المملوكة والمقفلة معًا.
- لا تستلم النسخ إلا عند اكتمال الطلب دفعةً واحدة، ولك طلب مفتوح واحد.
- كل هذا محلي على جهازك — لا خادم ولا إشعار يصل أحدًا.</div>
+ لا تستلم النسخ إلا عند اكتمال الطلب دفعةً واحدة، ولك طلب مفتوح واحد.</div>
  <div class="li"><div class="lr">
-  <span style="color:#C9A6F5;flex-shrink:0">${ico('counter',18)}</span>
+  <span style="color:#FFE9A8;flex-shrink:0">${ico('counter',18)}</span>
   <div class="lb"><div class="lt" style="font-size:12.5px">طلباتك اليوم: ${clN(dayReq)}/${clN(dayMax)}</div>
    <div class="ls">مهلة ${dur(E.REQ_COOL||0)} بين طلب وآخر · الطلب يبقى مفتوحًا ${dur(E.REQ_TTL||0)}
     · الملحمي مرة كل أسبوع</div></div>
@@ -46149,7 +46240,7 @@ function clRequestSupportScr(){
    ['common','rare','epic'].forEach(r=>{
     const list=pool.filter(x=>clSkRar(x[0])===r);
     if(!list.length)return;
-    h+=`<div class="sl">${clRarAr(r)} — المطلوب ${clN(E.REQ_NEED[r]||0)} نسخة
+    h+=`<div class="sl">${clRarAr(r)} — المطلوب ${clN(E.REQ_NEED[r]||0)} ${arCnt(E.REQ_NEED[r]||0,'نسخة')}
      · حصة المتبرّع ${clN(E.FILL_STEP[r]||0)}</div>`;
     h+=list.map(x=>{
      const k=x[0],own=clSkOwn(k),lv=clSkLv(k),cp=clSkCp(k);
@@ -46157,7 +46248,7 @@ function clRequestSupportScr(){
      return `<div class="li" style="cursor:pointer" onclick="clDrAsk('${clArg(k)}')"><div class="lr">
       ${clSkThumb(k,42)}
       <div class="lb"><div class="lt" style="font-size:12.5px">${esc(clSkName(k))}</div>
-       <div class="ls">${st} · لديك ${clN(cp)} نسخة</div></div>
+       <div class="ls">${st} · لديك ${clN(cp)} ${arCnt(cp,'نسخة')}</div></div>
       <span style="color:var(--tx2)">›</span></div></div>`;
     }).join('');
    });
@@ -46220,7 +46311,7 @@ function clSupportScr(){
        <div style="margin-top:2px">${clNameHtml(d.uid,d.n)}</div></div>
       <span class="clOk">${ico('check',11)} مكتمل</span></div></div>`).join('');
   }
-  h+=`<div class="note">لوح محلي على جهازك — لا خادم ولا دليل أندية عالمي ولا إشعارات هاتف.</div></div>`;
+  h+=`</div>`;
   go(h);
   cl5Nav();
  }catch(e){clErrScr('لوح الدعم','clSupportScr',e)}
@@ -46268,13 +46359,11 @@ function clDonorsScr(){
       ${first?'padding:2px;background:linear-gradient(145deg,#FFE9A8,#A87518)':''}">
       ${m.uid===S.uid&&typeof avatarArt==='function'?avatarArt(first?50:42)
         :personArt(m.n||m.uid,first?50:42)}</div>
-     <div onclick="cl5Open('${clArg(m.uid)}')" style="cursor:pointer;font-size:12px;font-weight:900;padding:6px 4px;min-height:36px;min-width:44px;display:flex;flex-direction:column;justify-content:center;
-      text-align:center;line-height:1.3">${esc(m.n||'')}
-      ${m.bot?'<div><span class="clTag">آلي</span></div>':''}</div>
-     <div style="font-size:12px;font-weight:900;color:#C9A6F5">${clN(clDonVal(m))}</div>
-     <div class="clPodB" style="height:${HG[i]}px"></div></div>`}).join('')}</div>`;
+     <div class="clPodN" onclick="cl5Open('${clArg(m.uid)}')"><b>${esc(m.n||'')}</b>${m.bot?'<span class="clTag">آلي</span>':''}</div>
+     <div class="clPodV">${clN(clDonVal(m))}</div>
+     <div class="clPodB" style="height:${HG[i]}px"><i>${i+1}</i></div></div>`}).join('')}</div>`;
    h+=`<div class="sl" style="margin:4px 0 8px">بقية الداعمين</div>`;
-   h+=rest.length?rest.map((m,x)=>`<div class="li" style="margin-bottom:7px;${m.uid===S.uid?'border-color:#3B2F5C':''}">
+   h+=rest.length?rest.map((m,x)=>`<div class="li" style="margin-bottom:7px;${m.uid===S.uid?'border-color:#5A4520':''}">
     <div class="lr">
      <span style="width:22px;text-align:center;font-weight:900;font-size:12px;color:var(--tx2)">${clN(x+4)}</span>
      <div onclick="cl5Open('${clArg(m.uid)}')" style="width:34px;height:34px;flex-shrink:0;cursor:pointer">
@@ -46282,7 +46371,7 @@ function clDonorsScr(){
         :personArt(m.n||m.uid,34)}</div>
      <div class="lb">${clNameHtml(m.uid,m.n,'lt')}
       <div class="ls">${esc(CLAN.rankName(m.r))}</div></div>
-     <span style="font-weight:900;color:#C9A6F5;font-size:12.5px">${clN(clDonVal(m))}</span>
+     <span style="font-weight:900;color:#FFE9A8;font-size:12.5px">${clN(clDonVal(m))}</span>
     </div></div>`).join(''):`<div class="note">لا داعمين آخرين في هذه الفترة</div>`;
   }
   h+=`<div class="note">الأرقام نسخ جيس تبرّعت بها فعلًا داخل ناديك — تُحتسب محليًا على جهازك،
@@ -47187,7 +47276,7 @@ const NETS=[
  {id:'football',n:'كرة القدم',d:'بطولات وأساطير وأرقام',c:'#2ECC71',i:'ball'},
  {id:'religion',n:'الثقافة الإسلامية',d:'قرآن وسيرة وأساسيات',c:'#5DCAA5',i:'mosque'},
  {id:'animals',n:'الحيوانات',d:'عجائب المملكة الحيوانية',c:'#EF9F27',i:'paw'},
- {id:'science',n:'العلوم',d:'فيزياء وفضاء وجسم الإنسان',c:'#7B4FE0',i:'flask'},
+ {id:'science',n:'العلوم',d:'فيزياء وفضاء وجسم الإنسان',c:'#C9901F',i:'flask'},
  {id:'geography',n:'الجغرافيا',d:'دول وعواصم ومعالم',c:'#378ADD',i:'globe'},
  {id:'puzzles',n:'الذكاء والألغاز',d:'منطق وحساب وأنماط',c:'#B76CF0',i:'puzzle'}
 ];
@@ -47247,7 +47336,7 @@ const DC={1:'#2ECC71',2:'#378ADD',3:'#EF9F27',4:'#E24B4A',5:'#B76CF0'};
 const DL={1:'سهل',2:'متوسط',3:'صعب',4:'خبير',5:'أسطوري'};
 const DP={1:50,2:100,3:150,4:250,5:400};
 const RK=[['مبتدئ',0,'#8A93A8'],['متعلم',500,'#5DCAA5'],['باحث',1500,'#2ECC71'],['محلل',3500,'#378ADD'],
-['خبير',7000,'#1B6FC4'],['عبقري',13000,'#7B4FE0'],['سيد الشبكة',22000,'#B76CF0'],['حارس المعرفة',35000,'#EF9F27'],
+['خبير',7000,'#1B6FC4'],['عبقري',13000,'#C9901F'],['سيد الشبكة',22000,'#B76CF0'],['حارس المعرفة',35000,'#EF9F27'],
 ['أسطورة التحدي',55000,'#E8B23A'],['العقل الأخير',85000,'#E24B4A']];
 // لا تمديد وقت — القاعدة الثالثة من الدستور
 const PWR=[{k:`r2`,i:'scissors',l:`حذف إجابتين`,c:50},
@@ -47257,13 +47346,16 @@ const ACH=[{k:`first_win`,t:`أول فوز`,n:1,i:'trophy'},{k:`wins_10`,t:`عش
 {k:`boss`,t:`هزيمة أول حارس`,n:1,i:'shield'},{k:`net_done`,t:`إكمال شبكة`,n:1,i:'map'},
 {k:`stars_15`,t:`خمس عشرة نجمة`,n:15,i:'star'},{k:`no_help`,t:`فوز نظيف`,n:1,i:'gem'},
 {k:'all_cat',t:'موسوعي',n:8,i:'cap'}];
-const MIS=[{k:'ans20',t:'أجب عن 20 سؤالًا',n:20,co:40,xp:60,gm:0},
-{k:'win2',t:'اجتز عقدتين',n:2,co:60,xp:70,gm:1},
-{k:'star3',t:'اجمع 3 نجوم',n:3,co:70,xp:80,gm:1},
-{k:'hard5',t:'أجب عن 5 أسئلة صعبة',n:5,co:80,xp:90,gm:1},
-{k:'carrom_pot',t:'أدخل 10 قطع في الكيرم',n:10,co:80,xp:90,gm:1},
-{k:'uno_win',t:'افز بجولة أونو',n:1,co:70,xp:80,gm:1},
-{k:'party_round',t:'أنهِ 3 جولات من ليلة العائلة',n:3,co:60,xp:70,gm:1}];
+/* ٧٫٢١ — الفحص الشامل: كل مهمّة تعرف لعبتها؛ مهامّ الأسئلة والأونو كانت تظهر وهما مطفأتان فلا تكتمل أبدًا */
+const MIS=[{k:'ans20',t:'أجب عن 20 سؤالًا',n:20,co:40,xp:60,gm:0,g:'knowledge',i:'bulb'},
+{k:'win2',t:'اجتز عقدتين',n:2,co:60,xp:70,gm:1,g:'knowledge',i:'map'},
+{k:'star3',t:'اجمع 3 نجوم',n:3,co:70,xp:80,gm:1,g:'knowledge',i:'star'},
+{k:'hard5',t:'أجب عن 5 أسئلة صعبة',n:5,co:80,xp:90,gm:1,g:'knowledge',i:'flame'},
+{k:'carrom_pot',t:'أدخل 10 قطع في الكيرم',n:10,co:80,xp:90,gm:1,g:'carrom',i:'target'},
+{k:'carrom_win',t:'فُز بمباراتي كيرم',n:2,co:90,xp:100,gm:2,g:'carrom',i:'trophy'},
+{k:'uno_win',t:'فُز بجولة أونو',n:1,co:70,xp:80,gm:1,g:'uno',i:'cards'},
+{k:'party_round',t:'أنهِ 3 جولات من ليلة العائلة',n:3,co:60,xp:70,gm:1,g:'party',i:'swords'}];
+const misList=()=>MIS.filter(m=>!gOff(m.g));
 
 let S={name:defName(),email:'',lang:'ar',xp:0,coins:500,gems:12,hearts:5,badges:[],stars:{},best:{},av:null,tutDone:0,account:null,
  ranked:null,unlocked:{journey:1,quick:1},tutorial_completed:false,
@@ -47355,7 +47447,7 @@ function chalScr(keep){
  const body=`
  <div class="wb" style="text-align:start">${ico('info',13)}
   العب ثمانية أسئلة وأرسلها، ويلعب صديقك **نفسها** متى شاء. لا أحد ينتظر أحدًا.</div>
- ${!netOnline()?`<div class="note" style="margin-bottom:10px">${ico('info',13)} التحدّي يحتاج اتصالًا بالخادم.</div>`:''}
+ ${!netOnline()?`<div class="note" style="margin-bottom:10px">${ico('info',13)} التحدّي يحتاج اتصالًا بالإنترنت.</div>`:''}
  <button class="rbtn" onclick="chPick()"><span>${ico('swords',14)} تحدَّ صديقًا</span></button>
  ${due.length?`<div class="frSec">بانتظار ردّك (${due.length})</div>
   ${due.map(c=>row(c,`<button class="rbtn sm" onclick="chAccept('${esc(c.id)}')"><span>${ico('play',13)} العب</span></button>`)).join('')}`:''}
@@ -47371,7 +47463,7 @@ function chalScr(keep){
 }
 /** اختيار الصديق: من قائمتك وحدها — التحدّي بين الأصدقاء */
 function chPick(){
- if(!netOnline())return toast('التحدّي يحتاج اتصالًا بالخادم');
+ if(!netOnline())return toast('التحدّي يحتاج اتصالًا بالإنترنت');
  const paint=()=>{
   const fr=(FR&&FR.f)||[];
   vbSheet(`<div class="shh"><div class="c" style="background:rgba(232,178,58,.16);border-color:var(--gold);color:var(--gold)">${ico('swords',16)}</div>
@@ -47402,7 +47494,7 @@ function chAccept(id){
  const c=(CH.list||[]).find(x=>x.id===id);
  if(c)return chGo(c);
  // فُتح من إشعار قبل أن تُجلب القائمة — نجلبها ثم نكمل بدل أن نقول «لا يوجد»
- if(!netOnline())return toast('التحدّي يحتاج اتصالًا بالخادم');
+ if(!netOnline())return toast('التحدّي يحتاج اتصالًا بالإنترنت');
  NET.chalList().then(r=>{
   CH.list=r.list||[];
   const f=CH.list.find(x=>x.id===id);
@@ -47526,7 +47618,9 @@ function errClear(){ERR_LOG=[];errSave();refresh(errScrLog);toast('مُسح ال
 /* ٦٫٩٧ — على شاشة نتيجة الكيرم لا رسائل ولا رنّات تتراكب فوقها: تُحفظ وتُعرض تباعًا في الشاشة التالية.
    (ما يخرج من مشهد الصندوق أو إسقاط الحظّ حين يفتحهما اللاعب يظهر في حينه) */
 var _toastQ=[],_ceWas=false;
-function toastHold(){try{return RM.phase==='over'&&RM.game==='carrom'&&!!document.querySelector('.caEnd')&&!document.querySelector('.vchOv,.lkOv,.aruOv')}catch(e){return false}}
+function toastHold(){try{if(RM.phase==='over'&&RM.game==='carrom'&&!!document.querySelector('.caEnd')&&!document.querySelector('.vchOv,.lkOv,.aruOv'))return true;
+  /* ٧٫٢١: ولا رسائل فوق مباراةٍ جارية (كانت تغطّي لوحتي اللاعبين) — تُحفظ وتظهر بعدها */
+  return !!document.getElementById('caC')&&RM.phase!=='over'}catch(e){return false}}
 function toastFlush(){if(!_toastQ.length||toastHold())return;
  const ach=_toastQ.filter(a=>/إنجاز/.test(String(a[0]))),rest=_toastQ.filter(a=>!/إنجاز/.test(String(a[0])));_toastQ.length=0;   // ٦٫٩٦: الإنجازات سطرٌ واحد — لا يضيع منها شيء
  const q=rest.slice(0,ach.length?2:3);if(ach.length===1)q.push(ach[0]);else if(ach.length>1)q.push([ico('medal',13)+' '+ach.length+' إنجازاتٍ جديدة جاهزة للاستلام']);
@@ -47565,12 +47659,16 @@ const go=h=>{
     تغلق لوحة التعبير تحت إصبعه، فتقع اللمسة على ما تحتها. تبقى اللوحة ما دامت الشاشة نفسها تُحدَّث */
  const eb=document.querySelector('.ebar.fx');
  if(eb&&!(h.indexOf('id="rmScr"')>=0&&document.getElementById('rmScr')))eb.remove();
+ setTimeout(()=>{try{toastFlush()}catch(e){}},600);   // ٧٫٢١: ما حُبس أثناء المباراة يظهر بعدها
  const fr=(typeof Router!=='undefined'&&Router.current)?Router.current():null, still=!!fr&&fr===_goFrame;_goFrame=fr;
  /* ٦٫٨٣: الشاشة نفسها تُحدَّث — لا قفزة إلى الأعلى. و٦٫٨٦: «نفسها» تعني المعرّف نفسه أيضًا؛ شاشةٌ أخرى تُرسم بلا موجّه
     (من داخل تدفّق) تبدأ من الأعلى كما يجب */
  const oldScr=app.querySelector('.scr.on'), idM=/class="scr[^"]*"[^>]*id="([^"]+)"|id="([^"]+)"[^>]*class="scr/.exec(h.slice(0,400));
  const sig=h.slice(0,240), sameScr=oldScr&&oldScr.id?!!(idM&&(idM[1]||idM[2])===oldScr.id):sig===_goSig;_goSig=sig;   // بلا معرّف: رأس الشاشة (عنوانها) نفسه
  if(still&&sameScr&&_keepY==null&&window.scrollY>0)_keepY=window.scrollY;
+ if(!(still&&sameScr)){try{window.fxClear&&fxClear()}catch(e){}}
+ /* ٧٫٢١ — إعلان الساحة يُغلق حين تتغيّر الشاشة (زرّ الرجوع في الهاتف كان يتركه فوق الشاشة التالية)، ويبقى مع إعادة رسم الشاشة نفسها */
+ try{const ov=document.querySelector('.aruOv');if(ov&&fr&&ov.dataset.fn&&ov.dataset.fn!==String(fr.fn))ov.remove()}catch(e){}
  /* ٦٫٧٠ — «الفريم يقطع»: كلّ إعادة رسمٍ للغرفة (تغيّر الدور، وصول النتيجة، أوّل تصويبٍ للخصم) كانت تهدم لوحة الكيرم
     وتبني غيرها: مساحة رسمٍ جديدة ~١٠٢٠×١١٥٦ تُحجز وتُهيّأ ويُرفع اللوح إليها من جديد — مرّتين أو ثلاثًا في كلّ دور،
     وفي أثناء انزلاق الضارب. الآن تبقى اللوحة الحيّة نفسها (بحجمها ومستمعيها) ويُبنى ما حولها فقط. */
@@ -47641,7 +47739,7 @@ const NAVICO={
   <path d="M21 22 l.8 1.6 1.8.2 -1.3 1.2 .3 1.7 -1.6-.9 -1.6.9 .3-1.7 -1.3-1.2 1.8-.2 z" fill="url(#nvF_g)" opacity=".85"/></svg>`,
  nets:`<svg viewBox="0 0 32 32"><defs>
   <linearGradient id="nvA_g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFE9A8"/><stop offset="1" stop-color="#B8871E"/></linearGradient>
-  <radialGradient id="nvA_p" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#9B6CF5"/><stop offset="1" stop-color="#4A2C9B"/></radialGradient></defs>
+  <radialGradient id="nvA_p" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#9B6CF5"/><stop offset="1" stop-color="#8A5A10"/></radialGradient></defs>
   <path d="M16 4.5 L27 12.5 L22.8 25.5 L9.2 25.5 L5 12.5 Z" fill="none" stroke="url(#nvA_g)" stroke-width="1.7"/>
   <g stroke="url(#nvA_g)" stroke-width="1" opacity=".5">
    <line x1="16" y1="4.5" x2="16" y2="15.5"/><line x1="27" y1="12.5" x2="16" y2="15.5"/>
@@ -48264,18 +48362,19 @@ function done(){
 
 // ═══════════ شاشات ثانوية ═══════════
 function misScr(){
+ /* ٧٫٢١ — صفحة المهامّ بتصميمها: وسامٌ لكل مهمّة، شريط تقدّمٍ ذهبيّ، شارات الجوائز، والمنجزة تتقدّم للاستلام */
+ const L=misList().map(m=>{const p=Math.min(S.mis[m.k]||0,m.n),d=p>=m.n,cl=!!S.claimed[m.k];return {m,p,d,cl,o:cl?2:d?0:1}}).sort((a,b)=>a.o-b.o);
+ const done=L.filter(x=>x.cl).length;
  go(`<div class="scr on">${tb('المهام')}
- ${MIS.map(m=>{const p=Math.min(S.mis[m.k]||0,m.n),d=p>=m.n,cl=S.claimed[m.k];
- return `<div class="li" style="${d&&!cl?'border-color:var(--gold)':''}"><div class="lr">
- <div class="lb"><div class="lt">${m.t}</div></div>
- ${cl?`<span style="color:var(--ok);font-size:19px">${ico('check',14)}</span>`:
-  d?`<button class="btn gd" style="width:auto;padding:7px 15px;font-size:12.5px" onclick="claim('${m.k}')">استلام</button>`:
-  `<span style="font-size:12px;color:var(--mut)">${p}/${m.n}</span>`}</div>
- <div class="mb"><i style="width:${p/m.n*100}%;background:${d?'var(--gold)':'var(--pur)'}"></i></div>
- <div style="font-size:11.5px;color:var(--mut);margin-top:6px">${ico(`coin`,15)} ${m.co} · ${ico('up',14)} ${m.xp}${m.gm?` · ${ico(`gem`,15)} ${m.gm}`:''}</div></div>`}).join('')}
- <div class="note">المهام الأسبوعية والمواسم تعمل في التطبيق الكامل</div></div>`);
+ <div class="msHd"><div class="msHdI">${ico('list',30)}</div><div><b>${done} / ${L.length}</b><span>مهامّ منجزة — أنجزها واستلم جوائزها</span></div></div>
+ ${L.map(({m,p,d,cl})=>`<div class="msC${d&&!cl?' rd':''}${cl?' cl':''}"><div class="msI">${ico(m.i||'target',22)}</div>
+  <div class="msB"><div class="msT">${m.t}</div>
+   <div class="msP"><i style="width:${p/m.n*100}%"></i><s>${p} / ${m.n}</s></div>
+   <div class="msR"><span>${ico('coin',14)}<b>${m.co}</b></span><span>${ico('up',13)}<b>${m.xp}</b> خبرة</span>${m.gm?`<span>${ico('gem',14)}<b>${m.gm}</b></span>`:''}</div></div>
+  ${cl?`<div class="msOk">${ico('check',18)}</div>`:d?`<button class="btn gd msGet" onclick="claim('${m.k}')">استلام</button>`:''}</div>`).join('')}
+ </div>`);
 }
-function claim(k){const m=MIS.find(x=>x.k===k);S.claimed[k]=1;S.coins+=m.co;S.xp+=m.xp;S.gems+=m.gm||0;
+function claim(k){const m=MIS.find(x=>x.k===k);if(!m||S.claimed[k]||(S.mis[k]||0)<m.n)return;S.claimed[k]=1;S.coins+=m.co;S.xp+=m.xp;S.gems+=m.gm||0;
  toast(`+${m.co} عملة · +${m.xp} خبرة`);misScr()}
 
 function achScr(){
@@ -48284,7 +48383,7 @@ function achScr(){
  const row=a=>{const v=achVal(a),cl=achCl(a.k),t=achTier(a,v),nx=Math.min(cl,2),need=a.t[nx],pct=cl>=3?100:Math.min(100,Math.round(v/need*100)),rd=t>cl;
   return `<div class="acR${rd?' ready':''}${cl>=3?' done':''}"><div class="acM">${metalBadge(a.i,cl>=3?'gold':cl===2?'silver':'bronze',cl===0&&!rd)}</div>
    <div class="acB"><div class="acT"><span>${a.n}</span><span class="acSt">${[1,2,3].map(i=>`<i class="${i<=cl?'on':''}"></i>`).join('')}</span></div>
-   <div class="acD">${cl>=3?'اكتملت المراتب الثلاث':a.d.replace('{n}',need.toLocaleString('en-US'))}</div>
+   <div class="acD">${cl>=3?'اكتملت المراتب الثلاث':arAgree(a.d,need)}</div>
    <div class="acP"><i style="width:${pct}%"></i></div>
    <div class="acN">${cl>=3?v.toLocaleString('en-US'):numPair(Math.min(v,need),need)}${cl<3?' · '+a.c[nx].toLocaleString('en-US')+' عملة + '+a.g[nx]+' جوهرة':''}</div></div>
    ${rd?`<button class="acC" onclick="achClaim('${a.k}')">استلم</button>`:''}</div>`};
@@ -48362,10 +48461,12 @@ function buyFx(inner,big,sub){
 /* تأكيد عام قبل أي صرف جواهر/عملات */
 function confirmSheet(t,d,okTxt,ok){
  const ov=document.createElement('div');ov.className='qvov';
- ov.innerHTML=`<div class="qvbox"><div style="font-size:26px">${ico('info',24)}</div>
+ /* ٧٫٢١ — الفحص الشامل: الفعل المُتلِف (حذف، خروج، انسحاب) كان الزرّ الذهبيّ المغري و«إلغاء» ثانويًّا — صار الإلغاء الذهبيّ والمتلِف أحمرَ محدّدًا */
+ const bad=/حذف|احذف|امسح|خروج|اخرج|انسحب|انسحاب|غادر|مغادرة|إعادة الضبط/.test(String(t)+String(okTxt||''));
+ ov.innerHTML=`<div class="qvbox"><div class="qvIc${bad?' bad':''}">${ico(bad?'cross':'crown',22)}</div>
  <div class="qvt">${t}</div><div class="qvd">${d}</div>
- <button class="btn gd" id="qvy">${okTxt||'تأكيد'}</button>
- <button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button></div>`;
+ ${bad?`<button class="btn gd" id="qvn">إلغاء</button><button class="btn qvDanger" id="qvy" style="margin-top:9px">${okTxt||'تأكيد'}</button>`
+      :`<button class="btn gd" id="qvy">${okTxt||'تأكيد'}</button><button class="btn g" id="qvn" style="margin-top:9px">إلغاء</button>`}</div>`;
  document.body.appendChild(ov);
  ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()});
  ov.querySelector('#qvn').onclick=()=>ov.remove();
@@ -48377,7 +48478,7 @@ function paySheet(pid,after){
  const p=CATALOG.get(pid);if(!p)return;
  const name=p.n+(p.kind==='gems'?' — '+p.gems.toLocaleString('en-US')+' جوهرة':'');
  const st=(window.Billing?Billing.status():'no_store');
- const why=st==='no_server'?'الشراء يحتاج اتصالًا بخادم تحدّي — هذه نسخة محلية':'الشراء بالمال متاح من داخل تطبيق تحدّي على <bdi>Google Play</bdi> · <bdi>App Store</bdi>';
+ const why=st==='no_server'?'الشراء يحتاج اتصالًا بالإنترنت':'الشراء بالمال متاح من داخل تطبيق تحدّي على <bdi>Google Play</bdi> · <bdi>App Store</bdi>';
  const ov=document.createElement('div');ov.className='qvov';
  ov.innerHTML=`<div class="qvbox">
  <div style="font-size:26px">${ico('shop',24)}</div>
@@ -48449,16 +48550,21 @@ function lbScr(){
  const online=netOnline();
  const chips=GAME_DEFS.filter(g=>!gOff(g.id)).map(g=>`<div class="fc ${lbGame===g.id?'on':''}" onclick="lbGame='${g.id}';refresh(lbScr)">${g.ar}</div>`).join('');
  go(`<div class="scr on">${tb('لوحة الصدارة')}
- <div class="cr" style="margin-bottom:10px">${chips}</div>
- <div id="lbBody">${online?'<div class="wb">جارٍ التحميل من الخادم…</div>':lbLocal()}</div></div>`);
+ ${GAME_DEFS.filter(g=>!gOff(g.id)).length>1?`<div class="cr" style="margin-bottom:10px">${chips}</div>`:''}
+ <div id="lbBody">${online?'<div class="wb">جارٍ تحميل الترتيب…</div>':lbLocal()}</div></div>`);
  if(online)NET.leaderboard(lbGame,50).then(r=>{const el=$('lbBody');if(el)el.innerHTML=lbRows(r)})
-  .catch(()=>{const el=$('lbBody');if(el)el.innerHTML='<div class="wb">تعذّر الوصول إلى الخادم الآن.</div>'});
+  .catch(()=>{const el=$('lbBody');if(el)el.innerHTML=lbLocal()});
 }
 /** بلا خادم: لا ترتيب بين اللاعبين — نقولها ولا نخترع أسماء */
 function lbLocal(){
- const p=rankOf(lbGame);
- return `<div class="wb">لا خادم في هذه النسخة، فلا ترتيب بين اللاعبين. هذه رتبتك أنت في ${gameName(lbGame)}.</div>
- ${lbRow({name:S.name,tier:p.tier,div:p.div,rp:p.rp,wins:p.wins,losses:p.losses,placed:p.placed},null,true)}`;
+ /* ٧٫٢١ — الفحص الشامل: كانت الصفحة سطرًا واحدًا ومساحةً فارغة — صارت منصّة: رتبتك في الوسط بشعارها، ومنصّة المراكز الثلاثة تنتظر */
+ const p=rankOf(lbGame),t=TIERS[p.tier]||TIERS[0];
+ return `<div class="lbHero"><i class="soRays"></i>
+  <div class="lbPod">${[2,1,3].map(n=>`<div class="lbSt s${n}"><b>${n}</b><s>قريبًا</s></div>`).join('')}</div>
+  <div class="lbMe" onclick="push('profScr')"><div class="lbEm">${tierEmblem(p.tier,86)}</div>
+   <div class="lbNm">${esc(S.name||'أنت')}</div><div class="lbRk" style="color:${t.c}">${p.placed?rankName(p):'غير مصنّف'}</div>
+   <div class="lbSt2"><span><b>${p.placed?p.rp:'—'}</b>نقطة</span><span><b>${p.wins|0}</b>فوز</span><span><b>${p.losses|0}</b>خسارة</span></div></div></div>
+ <div class="lbNote">${ico('crown',14)} ترتيب اللاعبين في ${gameName(lbGame)} يظهر هنا حين يُفتح اللعب أونلاين — العب واجمع النقاط لتكون في الصدارة.</div>`;
 }
 function lbRow(u,rank,me){
  const m=rank===1?'#E8B23A':rank===2?'#C0C0C0':rank===3?'#CD7F32':null;
@@ -48469,10 +48575,10 @@ function lbRow(u,rank,me){
 }
 function lbRows(r){
  const me=NET.state().id;
- if(!r.rows.length)return `<div class="wb">لا مباريات مصنّفة في ${gameName(r.gameId)} بعد على هذا الخادم — كن أوّل من يلعب.</div>`;
+ if(!r.rows.length)return `<div class="wb">لا مباريات مصنّفة في ${gameName(r.gameId)} بعد — كن أوّل من يلعب.</div>`;
  let h=r.rows.map((u,i)=>lbRow(u,i+1,u.id===me)).join('');
  if(r.me&&r.me.rank>r.rows.length)h+=`<div class="sl" style="margin:10px 0 6px">ترتيبك</div>`+lbRow(r.me.row,r.me.rank,true);
- h+=`<div class="note" style="margin-top:10px">${ico('info',12)} لاعبو هذا الخادم · ${r.total} لاعبًا · الترتيب بالرتبة ثم الدرجة ثم النقاط</div>`;
+ h+=`<div class="note" style="margin-top:10px">${ico('info',12)} ${r.total} ${arCnt(r.total,'لاعبين')} · الترتيب بالرتبة ثم الدرجة ثم النقاط</div>`;
  return h;
 }
 // ═══════════ الملف الشخصي الاحترافي — لي وللخصوم ═══════════
@@ -48523,7 +48629,7 @@ const TIER_FLAVOR=['البداية — كل مباراة تعلّمك شيئًا
 function rankGuideScr(g){
  g=(typeof g==='string'&&gameDef(g)&&!gOff(g))?g:(gOff('knowledge')?'carrom':'knowledge');
  const p=rankOf(g),gm=gameDef(g);
- const divs=i=>TIERS[i].div===0?'درجة واحدة':'ثلاث درجات: III ثم II ثم I';
+ const divs=i=>TIERS[i].div===0?'درجة واحدة':'ثلاث درجات: 3 ثم 2 ثم 1';
  const left=Math.max(0,5-(p.placementDone||0));
  go(`<div class="scr on">${tb('دليل التصنيف',gm?gm.ar:'')}
  <div class="orn"><div class="in">${ornCorners()}
@@ -48626,7 +48732,7 @@ function profHero(p,o){
    ${p.noStats?'':`<div class="pfTier">${tierEmblem(p.tierIx|0,34)}</div>`}</div>
   <div class="pfNm">${esc(p.name||'لاعب')}${p.bot?'<span class="pfTag">لاعب آلي</span>':''}</div>
   <div class="pfTl"><i></i><span>${esc(p.title||'')}</span><i></i></div>
-  ${p.noStats?'':`<div class="pfRk" style="color:${t.c}">${t.ar}${t.div?' '+(['','I','II','III'][p.div]||''):''}</div>`}
+  ${p.noStats?'':`<div class="pfRk" style="color:${t.c}">${t.ar}${t.div?' '+(['','1','2','3'][p.div]||''):''}</div>`}
   ${p.tr!=null?`<div class="pfTr">${ico('trophy',16)}<b>${(+p.tr).toLocaleString('en-US')}</b>· ${esc(trArena(+p.tr).n)}</div>`:''}
   ${fire?`<div class="pfFire">${ico('flame',15,'#FFB347')}<span>على نار — ${fireTxt(p.curStreak|0)}</span></div>`:''}
   ${p.me&&!o.sheet&&!p.noStats?achMedalsRow():''}
@@ -48662,7 +48768,7 @@ function profileView(p,backCall){
   border:1.5px solid ${t.c}55;border-radius:14px;padding:12px">
   <div style="flex-shrink:0">${tierEmblem(p.tierIx,80)}</div>
   <div style="flex:1;min-width:0">
-   <div style="font-size:15px;font-weight:900;color:${t.c}">${t.ar}${t.div?' '+(['','I','II','III'][p.div]||''):''}</div>
+   <div style="font-size:15px;font-weight:900;color:${t.c}">${t.ar}${t.div?' '+(['','1','2','3'][p.div]||''):''}</div>
    <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">التقييم ${p.mmr.toLocaleString('en-US')}</div>
    <div class="pbf" style="margin-top:6px"><div class="pbi" style="height:7px">
     <i style="width:${Math.min(100,Math.round(p.rp/RP_PER_DIV*100))}%;background:linear-gradient(90deg,${t.c}CC,${t.c})"></i></div></div>
@@ -48859,6 +48965,8 @@ splash();
  const fc=document.createElement('canvas');fc.id='fxc';document.body.appendChild(fc);
  const fx=fc.getContext('2d');let P=[],_fxOn=false,_fxT=0;const FD=Math.min(DPR,1.5);   // ٦٫٩٦
  function fxKick(){if(!_fxOn){_fxOn=true;fc.style.display='';requestAnimationFrame(floop)}}   // ٦٫٩٦: يظهر مع أوّل جسيم
+ /* ٧٫٢١ — الفحص الشامل: غبار الاحتفال كان يبقى ثلاث ثوانٍ فوق الشاشة التالية ونوافذها (طبقته ٤٠٠) — يُمسح مع كلّ تبديل */
+ window.fxClear=function(){P.length=0};
  function frs(){fc.width=innerWidth*FD;fc.height=innerHeight*FD;fc.style.width=innerWidth+'px';fc.style.height=innerHeight+'px';fx.setTransform(FD,0,0,FD,0,0)}
  frs();addEventListener('resize',frs);
  fc.style.display='none';   // ٦٫٩٦: قماشٌ شفّاف نائم لا يُركَّب — كان يُنسخ للمركِّب كلّ إطار

@@ -11,7 +11,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 
 sec('الشكل');
 check('ثلاث ألعاب بتعريف ونموذج حساب (المافيا والرسم أُزيلا في ٦٫٢٦)',R.GAMES.length===3&&R.GAME_DEFS.every(g=>R.SCORE_MODELS[g.scoreModel]));
-check('الملفّ الجديد غير مصنّف وليس برونزيًا',!fresh().placed&&R.rankName(fresh())==='برونزي III'&&R.score(fresh())===-1);
+check('الملفّ الجديد غير مصنّف وليس برونزيًا',!fresh().placed&&R.rankName(fresh())==='برونزي 3'&&R.score(fresh())===-1);
 check('قمة الأساطير بلا درجة',R.rankName({tier:9,div:0})==='قمة الأساطير');
 
 sec('الأوضاع');
@@ -36,7 +36,7 @@ sec('النقاط والترقية والهبوط');
 {
  const p=fresh();p.placed=true;p.tier=2;p.div=2;p.rp=90;p.protect=0;
  const o=R.resolve(p,{gameId:'carrom',mode:'ranked',matchId:'w1',result:{won:true},opponents:[{mmr:1000}]});
- check('فوز بـ+24 من 90 يرقّي إلى ذهبي I ويمنح حماية',o.promoted&&p.tier===2&&p.div===1&&p.rp===14&&p.protect===1&&o.newName==='ذهبي I',JSON.stringify(o));
+ check('فوز بـ+24 من 90 يرقّي إلى ذهبي I ويمنح حماية',o.promoted&&p.tier===2&&p.div===1&&p.rp===14&&p.protect===1&&o.newName==='ذهبي 1',JSON.stringify(o));
  const d=R.resolve(p,{gameId:'carrom',mode:'ranked',matchId:'l1',result:{won:false},opponents:[{mmr:1000}]});
  check('خسارة بعد الترقية: الحماية تمتصّها (rp=0 بلا هبوط)',d.protected&&p.rp===0&&p.div===1&&p.protect===0);
  const d2=R.resolve(p,{gameId:'carrom',mode:'ranked',matchId:'l2',result:{won:false},opponents:[{mmr:1000}]});

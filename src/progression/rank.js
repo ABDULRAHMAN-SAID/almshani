@@ -53,7 +53,7 @@ var RankCore=(function(){
  /** اسم الرتبة كما يراه اللاعب: عربي بأرقام رومانية — سياسة واحدة في المشروع كلّه */
  function rankName(p){
   var t=tierOf(p);
-  return t.div===0 ? t.ar : t.ar+' '+['','I','II','III'][p.div];
+  return t.div===0 ? t.ar : t.ar+' '+['','1','2','3'][p.div];
  }
  /** الإتقان يعكس الوقت والإنجاز، والرتبة تعكس المهارة — لا يُخلطان */
  function masteryLevel(xp){return Math.max(1,Math.floor(Math.sqrt((xp||0)/40))+1)}
