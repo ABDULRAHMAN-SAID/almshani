@@ -2664,7 +2664,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0014171556" data-head="0001253015" aria-hidden="true">
+<div id="ld" data-total="0014178035" data-head="0001253015" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -25087,7 +25087,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.17';
+const APP_VER='7.18';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -26474,9 +26474,9 @@ html body .caStage .pCard.on .csAvW::before{content:'';position:absolute;inset:-
 @keyframes plGlow{0%,100%{opacity:.35;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
 /* ═══ ٧٫١٦ — صفحة خيارات اللعب: منصّة مواجهة ═══ */
 .segC .mdI{display:block;width:40px;height:32px;margin-bottom:2px}.segC .mdI svg{width:100%;height:100%;display:block}
-html body .scr.soX .sl{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0 10px;padding:0;font-family:var(--fd);font-size:16px;font-weight:700;color:#FFE9A8;border:0;background:none}
-html body .scr.soX .sl::before,html body .scr.soX .sl::after{content:'';position:static;display:block;flex:1 1 0;height:1.5px;width:auto;border-radius:2px;background:linear-gradient(90deg,rgba(232,178,58,0),rgba(232,178,58,.75));transform:none;box-shadow:none}
-html body .scr.soX .sl::after{background:linear-gradient(270deg,rgba(232,178,58,0),rgba(232,178,58,.75))}
+html body .scr:is(.soX,.ghX) .sl{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0 10px;padding:0;font-family:var(--fd);font-size:16px;font-weight:700;color:#FFE9A8;border:0;background:none}
+html body .scr:is(.soX,.ghX) .sl::before,html body .scr:is(.soX,.ghX) .sl::after{content:'';position:static;display:block;flex:1 1 0;height:1.5px;width:auto;border-radius:2px;background:linear-gradient(90deg,rgba(232,178,58,0),rgba(232,178,58,.75));transform:none;box-shadow:none}
+html body .scr:is(.soX,.ghX) .sl::after{background:linear-gradient(270deg,rgba(232,178,58,0),rgba(232,178,58,.75))}
 .soVs{position:relative;display:grid;grid-template-columns:1fr 70px 1fr;align-items:end;height:196px;margin:2px 0 6px;padding:0 4px 18px;border-radius:24px;overflow:hidden;isolation:isolate;
  background:radial-gradient(70% 90% at 50% 0%,rgba(255,214,120,.26),rgba(255,214,120,0) 70%),radial-gradient(90% 60% at 50% 110%,rgba(36,72,160,.55),rgba(36,72,160,0) 70%),linear-gradient(180deg,#15244E 0%,#0C1733 60%,#08102A 100%);
  border:1.5px solid rgba(232,178,58,.8);box-shadow:0 14px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,233,168,.35),inset 0 0 0 4px rgba(11,21,48,.9),inset 0 0 0 5px rgba(232,178,58,.35)}
@@ -26524,6 +26524,50 @@ html body .scr.soX .segC button:not(.on) .mdI,html body .scr.soX .segC button:no
 html body .scr.soX .soloNote{justify-content:center;text-align:center;opacity:.85}
 @media (max-width:370px){.soVs{height:182px;grid-template-columns:1fr 58px 1fr}.soAv{width:74px;height:74px}.soPd{top:54px;width:94px;margin-left:-47px}.soSide.soTh .soPd{top:72px}html body .soMid .soMd{width:48px;height:48px}.soD b{font-size:12.5px}.soD .soDc{height:50px}.soD .soDc svg{width:42px;height:50px}}
 @media (prefers-reduced-motion:reduce){.soRays{animation:none}}
+/* ═══ ٧٫١٦ — مركز اللعبة ═══ */
+.ghStage{position:relative;overflow:hidden;isolation:isolate;display:flex;flex-direction:column;align-items:center;padding:14px 12px 14px;margin:2px 0 12px;border-radius:24px;
+ background:radial-gradient(70% 80% at 50% 0%,rgba(255,214,120,.24),rgba(255,214,120,0) 70%),radial-gradient(90% 60% at 50% 115%,rgba(36,72,160,.5),rgba(36,72,160,0) 70%),linear-gradient(180deg,#15244E,#0C1733 60%,#08102A);
+ border:1.5px solid rgba(232,178,58,.8);box-shadow:0 14px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,233,168,.35),inset 0 0 0 4px rgba(11,21,48,.9),inset 0 0 0 5px rgba(232,178,58,.35)}
+.ghStage .soRays{top:38%}
+.ghBoard{position:relative;width:176px;height:150px;perspective:520px;display:flex;align-items:flex-start;justify-content:center}
+.ghBin{position:relative;z-index:1;width:138px;height:138px;transform:rotateX(24deg) rotateZ(-4deg);transform-origin:50% 80%;animation:ghFloat 5s ease-in-out infinite;will-change:transform}
+.ghBin svg,.ghBin img{width:100%!important;height:100%!important;display:block;filter:none}
+@keyframes ghFloat{0%,100%{transform:rotateX(24deg) rotateZ(-4deg) translateY(0)}50%{transform:rotateX(24deg) rotateZ(-2deg) translateY(-6px)}}
+.ghBpd{position:absolute;left:50%;bottom:0;width:176px;height:44px;margin-left:-88px;border-radius:50%;z-index:0;
+ background:radial-gradient(closest-side,#2B4590,#101C44 75%);border:2px solid #E8B23A;box-shadow:0 8px 0 -1px #6E4E12,0 14px 20px rgba(0,0,0,.6),0 0 26px rgba(232,178,58,.3),inset 0 3px 8px rgba(255,233,168,.25)}
+.ghMeta{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:10px}
+.ghTy{font-size:13px;font-weight:700;color:#E3CD98}
+.ghMeta .pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.ghMeta .ghPill{font-size:12px;padding:6px 12px;border-radius:12px;background:rgba(8,12,28,.7);border:1px solid rgba(232,178,58,.35);color:#E6EAF5}
+.ghDuo{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ghTile{display:flex;align-items:center;gap:9px;min-width:0;padding:10px 10px;border-radius:16px;cursor:pointer;text-align:start;font-family:inherit;color:inherit;
+ background:linear-gradient(180deg,#172447,#0C1531);border:1px solid rgba(232,178,58,.3);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 4px 10px rgba(0,0,0,.35)}
+.ghTile:active{transform:translateY(1px)}
+.ghMd{flex-shrink:0;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#24397F,#0B1530);box-shadow:0 0 0 1.5px #E8B23A,0 4px 8px rgba(0,0,0,.5)}
+.ghTb{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ghTb b{font-family:var(--fd);font-size:14.5px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ghTb s{text-decoration:none;font-size:11.5px;font-weight:700;color:#AFC0E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body .scr.ghX .ghWay.ghW2{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 12px;margin-bottom:12px;border-radius:22px;position:relative;overflow:hidden;
+ background:radial-gradient(80% 90% at 100% 0%,rgba(232,178,58,.16),rgba(232,178,58,0) 60%),linear-gradient(180deg,#172651,#0B1432);border:1.5px solid rgba(232,178,58,.45);box-shadow:0 12px 26px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,233,168,.2)}
+html body .scr.ghX .ghWay.ghW2.main{border-color:#E8B23A;box-shadow:0 12px 26px rgba(0,0,0,.5),0 0 22px rgba(232,178,58,.22),inset 0 1px 0 rgba(255,233,168,.35),inset 0 0 0 3px rgba(11,21,48,.8),inset 0 0 0 4px rgba(232,178,58,.35)}
+html body .scr.ghX .ghWay.ghW2.ai{background:radial-gradient(80% 90% at 100% 0%,rgba(111,162,255,.18),rgba(111,162,255,0) 60%),linear-gradient(180deg,#152450,#0A1330);border-color:rgba(160,190,255,.45)}
+.ghWa{position:relative;flex-shrink:0;width:84px;height:92px;display:flex;align-items:flex-start;justify-content:center}
+.ghWi{position:relative;z-index:1;width:74px;height:74px;display:block;line-height:0}
+.ghWi svg,.ghWi img{width:100%!important;height:100%!important;display:block}
+.ghWp{position:absolute;left:50%;bottom:2px;width:82px;height:24px;margin-left:-41px;border-radius:50%;background:radial-gradient(closest-side,#2B4590,#101C44 75%);border:1.5px solid #E8B23A;box-shadow:0 5px 0 -1px #6E4E12,0 8px 12px rgba(0,0,0,.55)}
+.ghWay.ai .ghWp{border-color:#9FBCFF;box-shadow:0 5px 0 -1px #2C4A8A,0 8px 12px rgba(0,0,0,.55)}
+html body .scr.ghX .ghW2 .t{font-family:var(--fd);font-size:18px;font-weight:700;line-height:1.25;background:linear-gradient(180deg,#FFF6D8,#F2C75A 60%,#C9901F);-webkit-background-clip:text;background-clip:text;color:transparent}
+html body .scr.ghX .ghW2.ai .t{background:linear-gradient(180deg,#FFFFFF,#CFE0FF 60%,#8FB2F0);-webkit-background-clip:text;background-clip:text}
+html body .scr.ghX .ghW2 .s{font-size:12px;color:#B8C4DF;margin-top:3px;line-height:1.45}
+html body .scr.ghX .ghW2 .pl{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+html body .scr.ghX .ghW2 .ghPill{font-size:11px;padding:4px 9px;border-radius:10px;background:rgba(6,10,26,.6);border:1px solid rgba(255,255,255,.12);color:#DDE3F2}
+.ghCta{display:inline-flex;align-items:center;gap:4px;margin-top:10px;padding:7px 14px 7px 10px;border-radius:12px;font-family:var(--fd);font-size:14px;font-weight:700;color:#3A2303;
+ background:linear-gradient(180deg,#FFEDB4,#F5CB60 45%,#DBA436 75%,#B37A1B);box-shadow:0 3px 0 #6E4E12,inset 0 1px 0 rgba(255,255,255,.7)}
+.ghCta svg{width:15px;height:15px}
+.ghWay.ai .ghCta{color:#0B1530;background:linear-gradient(180deg,#F4F8FF,#C9DBFF 45%,#93B3EE 80%,#6F90D0);box-shadow:0 3px 0 #2C4A8A,inset 0 1px 0 rgba(255,255,255,.8)}
+html body .scr.ghX .ghNote{text-align:center;font-size:12px;color:#9AA7C6;line-height:1.6;padding:0 8px}
+@media (max-width:370px){.ghWa{width:70px;height:80px}.ghWi{width:62px;height:62px}.ghWp{width:68px;margin-left:-34px}html body .scr.ghX .ghW2 .t{font-size:16.5px}.ghTile{gap:7px;padding:9px 8px}.ghMd{width:36px;height:36px}}
+@media (prefers-reduced-motion:reduce){.ghBin{animation:none}}
 html body .scr.soX .cr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
 html body .scr.soX .cr .fc{display:flex;align-items:center;justify-content:center;min-height:52px;margin:0;border-radius:16px;font-family:var(--fd);font-size:15px;font-weight:700;color:#C9D3EA;background:linear-gradient(180deg,#172447,#0C1531);border:1px solid rgba(232,178,58,.22);box-shadow:inset 0 1px 0 rgba(255,244,214,.08)}
 html body .scr.soX .cr .fc.on{color:#FFE9A8;border-color:#FFE9A8;background:radial-gradient(90% 70% at 50% 100%,rgba(232,178,58,.28),rgba(232,178,58,0)),linear-gradient(180deg,#1C2C58,#0E1A3D);box-shadow:0 0 0 1px rgba(255,233,168,.5),0 0 16px rgba(232,178,58,.25),inset 0 1px 0 rgba(255,244,214,.3)}
@@ -40006,37 +40050,33 @@ function gameHub(g){
  const pl=ghRange(def.minP,def.maxP,def.maxP>=11?'لاعبًا':'لاعبين');
  const noRp=ghPill('','بلا نقاط تصنيف').replace('class="ghPill"','class="ghPill nr"');
  const art=GAME_ART[def.rmKey]||HOME_ART.get('bulb')||ico(def.icon,64);
- go(`<div class="scr on">${ghBar(def.ar,m.tag||'')}
- <div class="ghHero">
-  <div class="row">
-   <div class="art">${art}</div>
-   <div class="bd">
-    <div class="nm">${esc(def.ar)}</div>
-    <div class="ty">${m.sub||m.type}</div>
-    <div class="pills">${ghPill(ico('group',13),pl)}${ghPill(ico('timer',13),m.time)}</div>
-   </div></div>
-  <button class="ghRank" onclick="push('gameRankScr','${def.id}')">
-   ${ico('medal',16,col)}
-   <span class="rt" style="color:${p.placed?col:'#8B96B6'}">${plRankTxt(p)}</span>
-   <span class="rp">${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV)+' نقطة':numPair(p.placementDone,5)+' مباريات تحديد'}</span>
-   <span class="go">${ghChev()}</span></button>
-  <button class="ghRank ghArena" onclick="push('arenaScr')">
-   ${ico('trophy',18)}
-   <span class="rt" style="color:${trArena().g}">${esc(trArena().n)}</span>
-   <span class="rp">${trHubTxt(trMine())}</span>
-   <span class="go">${ghChev()}</span></button>
-  ${g==='carrom'?skTileHTML({ctx:'hub'}):''}
-  ${g==='uno'?`<button class="ghRank urHubB" onclick="push('unoRulesScr')">${ico('book',18)}<span class="rt">القوانين</span><span class="rp">قوانين أونو الرسميّة — مصوّرةً ببطاقاتها</span><span class="go">${ghChev()}</span></button>`:''}
+ /* ٧٫١٦ — «وهذه ما تتعدّل؟»: مركز اللعبة صار منصّة: اللوح مائلٌ بثلاثيّة الأبعاد على قاعدةٍ ذهبيّة، والتصنيف والساحة وسامان
+    متجاوران، وطريقتا اللعب لوحتان كبيرتان لكلٍّ منهما زرّ فعلٍ واضح بدل السهم الصغير */
+ const trN=trMine(),A=trArena();
+ const way=(cls,art,t,sub,pills,call,cta)=>`<button class="ghWay ghW2 ${cls}" onclick="${call}">
+   <span class="ghWa"><i class="ghWp"></i><span class="ghWi">${art}</span></span>
+   <span class="bd"><span class="t">${esc(t)}</span><span class="s">${esc(sub)}</span>
+    <span class="pl">${pills.join('')}</span>
+    <span class="ghCta"><b>${cta}</b>${ghChev()}</span></span></button>`;
+ go(`<div class="scr on ghX">${ghBar(def.ar,m.tag||'')}
+ <div class="ghStage"><i class="soRays"></i>
+  <div class="ghBoard"><i class="ghBpd"></i><div class="ghBin">${art}</div></div>
+  <div class="ghMeta"><span class="ghTy">${m.sub||m.type}</span>
+   <div class="pills">${ghPill(ico('group',13),pl)}${ghPill(ico('timer',13),m.time)}</div></div>
  </div>
-
- <div class="ghSec"><i></i><b>${ico('crown',15)}</b><span>مع من تلعب؟</span><b>${ico('crown',15)}</b><i></i></div>
- ${ghWay('main',`<span class="art">${HOME_ART.get('trophy')}</span>`,'أونلاين ضدّ لاعب حقيقيّ','نبحث لك عن خصمٍ الآن — وفوزك يرفع تصنيفك',
-   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time),ghPill(ico('trophy',10),'جوائز ومكافآت')],
-   R.online||`push('mmScr',{g:'${g}',mode:'ranked'})`,'#E8B23A')}
- ${ghWay('',`<span class="art">${HOME_ART.get('robot')}</span>`,R.soloT||'ضدّ الذكاء الاصطناعي',R.soloS||'حسّن مهاراتك مع مستويات متعدّدة',
-   (R.soloPl||[['user','لاعب واحد'],['timer',m.bot||m.quick],['chart','مستويات متعدّدة']])
-     .map(q=>ghPill(ico(q[0],10),q[1])),
-   R.solo||`push('soloScr','${g}')`,'#2FC4A8')}
+ <div class="ghDuo">
+  <button class="ghTile" onclick="push('gameRankScr','${def.id}')"><i class="ghMd">${ico('medal',24,col)}</i>
+   <span class="ghTb"><b style="color:${p.placed?col:'#C9D3EA'}">${plRankTxt(p)}</b><s>${p.placed?numPair(Math.max(0,p.rp),RP_PER_DIV)+' نقطة':numPair(p.placementDone,5)+' مباريات تحديد'}</s></span></button>
+  <button class="ghTile" onclick="push('arenaScr')"><i class="ghMd">${ico('trophy',24)}</i>
+   <span class="ghTb"><b style="color:${A.g}">${esc(A.n)}</b><s><bdi class="nowrap">${trN.toLocaleString('en-US')}</bdi> كأس</s></span></button>
+ </div>
+ ${g==='carrom'?skTileHTML({ctx:'hub'}):''}
+ ${g==='uno'?`<button class="ghRank urHubB" onclick="push('unoRulesScr')">${ico('book',18)}<span class="rt">القوانين</span><span class="rp">قوانين أونو الرسميّة — مصوّرةً ببطاقاتها</span><span class="go">${ghChev()}</span></button>`:''}
+ <div class="sl">مع من تلعب؟</div>
+ ${way('main',HOME_ART.get('trophy'),'أونلاين ضدّ لاعب حقيقيّ','نبحث لك عن خصمٍ الآن — وفوزك يرفع تصنيفك',
+   [ghPill(ico('group',10),pl),ghPill(ico('timer',10),m.time)],R.online||`push('mmScr',{g:'${g}',mode:'ranked'})`,'ابحث عن خصم')}
+ ${way('ai',HOME_ART.get('robot'),R.soloT||'ضدّ الذكاء الاصطناعي',R.soloS||'حسّن مهاراتك مع مستويات متعدّدة',
+   (R.soloPl||[['user','لاعب واحد'],['timer',m.bot||m.quick]]).slice(0,2).map(q=>ghPill(ico(q[0],10),q[1])),R.solo||`push('soloScr','${g}')`,'اختر المستوى')}
  <div class="ghNote">الفوز على الذكاء الاصطناعي يمنح كؤوسًا حتى ١٠٠٠ كأس — وما بعدها من اللعب أونلاين وحده.</div>
  </div>`);
  if(g==='carrom')skTileDraw();
