@@ -2667,7 +2667,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0014272284" data-head="0001303692" aria-hidden="true">
+<div id="ld" data-total="0014280309" data-head="0001303692" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -16059,7 +16059,7 @@ const CA_FX=['sand','snow','gold','petal','crystal','petal','sand','ember','star
 function caArena3D(T,canvas,W,H,opt){
  opt=opt||{};const dpr=opt.dpr||1,ix=opt.ix|0;
  const TH=[
-  {k:'sand', gr:'ripple',g0:'#DDB074',g1:'#B98247',st:0xF0D3A2,st2:0xD9B17A,tr:0xE8B23A,ban:'#1E3572',sun:0xFFE0B0,si:2.6,sky:0xFFE2B8,gnd:0x6A4424,bg:0x3A2412,fog:0x8A5A30,fx:'sand',prop:'palm',ext:'tent'},
+  {k:'sand', gr:'ripple',g0:'#DDB074',g1:'#B98247',st:0xF0D3A2,st2:0xD9B17A,tr:0xE8B23A,ban:'#1E3572',sun:0xFFE0B0,si:2.6,sky:0xE8B47A,gnd:0x6A4424,bg:0x3A2412,fog:0x8A5A30,fx:'sand',prop:'palm',ext:'tent'},
   {k:'ice',  gr:'snow',  g0:'#E8F2FA',g1:'#A9C6DC',st:0xD8ECFA,st2:0x9CC0DA,tr:0xBFE3FF,ban:'#1E3572',sun:0xE6F2FF,si:2.2,sky:0xCFE6FF,gnd:0x3A5068,bg:0x14263A,fog:0x5C7C98,fx:'snow',prop:'pine',ext:'spire'},
   {k:'gold', gr:'tiles', g0:'#D8C08E',g1:'#A88A52',st:0xF4E4C0,st2:0xD6BE8A,tr:0xE8B23A,ban:'#6E1A1A',sun:0xFFE6B0,si:2.5,sky:0xFFE9C0,gnd:0x5A4020,bg:0x2A1E0C,fog:0x7A5A28,fx:'gold',prop:'column',ext:'statue'},
   {k:'garden',gr:'grass',g0:'#4E8A46',g1:'#2F5E2E',st:0xF2E6CE,st2:0xC9B48C,tr:0xE8B23A,ban:'#0F4438',sun:0xFFF0CC,si:2.4,sky:0xDFF2E0,gnd:0x234020,bg:0x0E2418,fog:0x3A6048,fx:'petal',prop:'cypress',ext:'fountain'},
@@ -16096,9 +16096,9 @@ function caArena3D(T,canvas,W,H,opt){
   noise(x,w,h,20)},6);
  const ground=new T.Mesh(new T.PlaneGeometry(90,90),new T.MeshLambertMaterial({map:groundT}));ground.rotation.x=-Math.PI/2;ground.position.y=-.6;ground.receiveShadow=true;sc.add(ground);
  /* ── مجموعات الأشكال الثابتة بألوان رؤوس (نداءات رسمٍ قليلة) ── */
- const groups={};const cast=new Set(['stone','gold','dark','wood','clay','leaf','ice','cloth']);
+ const groups={};const cast=new Set(['stone','gold','dark','wood','clay','leaf','ice','cloth']);let GB=groups,PAR=null;
  const add=(g,mat,col,m4)=>{g=g.index?g.toNonIndexed():g;g.applyMatrix4(m4);const n=g.attributes.position.count,c=new Float32Array(n*3),cc=new T.Color(col);
-  for(let i=0;i<n;i++){const v=.92+rnd()*.1;c[i*3]=cc.r*v;c[i*3+1]=cc.g*v;c[i*3+2]=cc.b*v}g.setAttribute('color',new T.Float32BufferAttribute(c,3));(groups[mat]=groups[mat]||[]).push(g)};
+  for(let i=0;i<n;i++){const v=.92+rnd()*.1;c[i*3]=cc.r*v;c[i*3+1]=cc.g*v;c[i*3+2]=cc.b*v}g.setAttribute('color',new T.Float32BufferAttribute(c,3));(GB[mat]=GB[mat]||[]).push(g)};
  const M=(x,y,z,rx,ry,rz,sx,sy,sz)=>{const o=new T.Object3D();o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,rz||0);o.scale.set(sx||1,sy||1,sz||1);o.updateMatrix();return o.matrix};
  const merge=list=>{let n=0;for(const g of list)n+=g.attributes.position.count;const P=new Float32Array(n*3),N=new Float32Array(n*3),C=new Float32Array(n*3),U=new Float32Array(n*2);let o=0;
   for(const g of list){g.computeVertexNormals();P.set(g.attributes.position.array,o*3);N.set(g.attributes.normal.array,o*3);C.set(g.attributes.color.array,o*3);o+=g.attributes.position.count}
@@ -16119,6 +16119,10 @@ function caArena3D(T,canvas,W,H,opt){
  /* درجاتٌ نحو اللاعب */
  for(let k=0;k<3;k++)add(new T.BoxGeometry(5-k*.2,.25,.9),'stone',th.st,M(0,-.2-k*.2,7.4+k*.85));
  /* ── القلعة البعيدة كاملةً فوق الرمل: سورٌ بشُرُفات، أربعة أبراج، حصنٌ أوسط شاهق برايته، وبوّابةٌ بشعار اللعبة — تُرى كلّها ═══ */
+ /* ٧٫٢٢ — «القلعة بعيدة تُرى كاملة»: كانت على الأرض في عمق ١٢٠ فتسقط خلف بطاقة الخصم ولا يظهر إلّا رأسها.
+    صارت مجموعةً مستقلّة على هضبةٍ رمليّة، يُحسب ارتفاعها وحجمها بعد كلّ تغيير مقاسٍ لتقع كاملةً في الفسحة الحقيقيّة
+    بين الشريط العلويّ وبطاقة الخصم على شاشة الهاتف (إسقاطٌ وبحثٌ ثنائيّ) — بعيدةً في الضباب، كاملةً بأبراجها ورايتها */
+ const castleG=new T.Group(),CB={};sc.add(castleG);GB=CB;PAR=castleG;
  const WZ=-120,WH=5;const CZ=WZ;
  const tower=(x,z,h,w)=>{w=w||3.6;if(th.ext==='spire'){add(new T.ConeGeometry(w*.55,h+5,6),'ice',0xDDF2FF,M(x,(h+5)/2-.6,z));add(new T.ConeGeometry(w*.3,h,6),'ice',0xB8DCF5,M(x+w*.45,h/2-.6,z+.6,0,0,.15));return}
   if(th.ext==='crystal'){for(let k=0;k<5;k++){const hh=h*(.5+rnd()*.7);add(new T.ConeGeometry(.8+rnd()*.7,hh,5),'glass',k%2?th.tr:0xBFE8FF,M(x+(rnd()-.5)*3,hh/2-.8,z+(rnd()-.5)*3,(rnd()-.5)*.4,rnd()*3,(rnd()-.5)*.4))}return}
@@ -16139,22 +16143,29 @@ function caArena3D(T,canvas,W,H,opt){
  add(new T.TorusGeometry(2.9,.5,8,20,Math.PI),'stone',th.st,M(0,4.6,CZ+1.5));add(new T.BoxGeometry(5.8,5.2,.4),'dark',0x1A0C06,M(0,1.9,CZ+1.3));add(new T.CircleGeometry(2.9,18,0,Math.PI),'dark',0x1A0C06,M(0,4.6,CZ+1.51));
  add(new T.TorusGeometry(2.9,.14,6,20,Math.PI),'gold',th.tr,M(0,4.6,CZ+2.05));
  {const sh=new T.Shape();for(let i=0;i<16;i++){const r=i%2?1.05:1.6,an=i/16*Math.PI*2;const X=Math.cos(an)*r,Y=Math.sin(an)*r;i?sh.lineTo(X,Y):sh.moveTo(X,Y)}add(new T.ExtrudeGeometry(sh,{depth:.3,bevelEnabled:false}),'gold',th.tr,M(0,9.2,CZ+1.95))}
+ /* الهضبة تحت القلعة: رملٌ ينحدر إلى الأسفل فلا تطفو مهما ارتفعت، وتلالٌ خلفها */
+ add(new T.SphereGeometry(60,40,14,0,Math.PI*2,0,Math.PI/2),'far',new T.Color(th.g0).getHex(),M(0,-24.6,CZ-6,0,0,0,1.9,.4,.62));   // كثيبٌ عريض تحت القلعة (لا مخروطٌ هندسيّ)
+ add(new T.SphereGeometry(60,40,14,0,Math.PI*2,0,Math.PI/2),'far',new T.Color(th.g1).getHex(),M(0,-40,CZ-4,0,0,0,2.6,.58,.9));
+ add(new T.SphereGeometry(40,24,8,0,Math.PI*2,0,Math.PI/2),'far',new T.Color(th.g1).getHex(),M(-38,-6,CZ-30,0,.4,0,1.3,.42,.8));
+ add(new T.SphereGeometry(44,24,8,0,Math.PI*2,0,Math.PI/2),'far',new T.Color(th.g1).getHex(),M(42,-6,CZ-34,0,-.3,0,1.3,.38,.8));
+ GB=groups;
  /* كثبانٌ بين اللاعب والقلعة */
  for(let i=0;i<22;i++){const x=(rnd()-.5)*120,z=-16-rnd()*95;if(Math.abs(x)<10)continue;add(new T.SphereGeometry(6+rnd()*6,16,6,0,Math.PI*2,0,Math.PI/2),'far',new T.Color(th.g0).getHex(),M(x,-1,z,0,rnd()*3,0,1.8,.16+rnd()*.12,1))}
  /* ── النار: مباخر يتراقص لهبها ── */
  const fireT=tex(64,128,(x)=>{const g=x.createRadialGradient(32,92,2,32,80,60);g.addColorStop(0,'rgba(255,250,220,1)');g.addColorStop(.25,'rgba(255,200,90,.95)');g.addColorStop(.55,'rgba(255,110,30,.55)');g.addColorStop(1,'rgba(255,60,0,0)');
   x.fillStyle=g;x.beginPath();x.moveTo(32,4);x.bezierCurveTo(60,50,58,110,32,124);x.bezierCurveTo(6,110,4,50,32,4);x.fill()});
  const haloT=tex(128,128,(x)=>{const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,190,90,.6)');g.addColorStop(1,'rgba(255,120,30,0)');x.fillStyle=g;x.fillRect(0,0,128,128)});
- const fires=[];const brazier=(x,y,z,s)=>{add(new T.CylinderGeometry(.22*s,.3*s,y+.6,8),'stone',th.st2,M(x,(y-.6)/2,z));add(new T.CylinderGeometry(.7*s,.3*s,.55*s,12),'gold',th.tr,M(x,y,z));
-  const ha=new T.Sprite(new T.SpriteMaterial({map:haloT,transparent:true,depthWrite:false,blending:T.AdditiveBlending,fog:false}));ha.position.set(x,y+.6*s,z);ha.scale.set(3.6*s,3.6*s,1);sc.add(ha);
-  const fl=[];for(let k=0;k<3;k++){const sp=new T.Sprite(new T.SpriteMaterial({map:fireT,transparent:true,depthWrite:false,blending:T.AdditiveBlending,fog:false}));sp.position.set(x+(k-1)*.12*s,y+.75*s,z);sp.scale.set(.9*s,1.8*s,1);sc.add(sp);fl.push(sp)}
-  const L=new T.PointLight(0xFFA040,4,7*s,1.8);L.position.set(x,y+1*s,z);sc.add(L);fires.push({L,fl,s,ha,ph:rnd()*9})};
+ const fires=[];const brazier=(x,y,z,s)=>{if(z<-60)GB=CB;add(new T.CylinderGeometry(.22*s,.3*s,y+.6,8),'stone',th.st2,M(x,(y-.6)/2,z));add(new T.CylinderGeometry(.7*s,.3*s,.55*s,12),'gold',th.tr,M(x,y,z));
+  const par=z<-60?castleG:sc,bk=GB;if(z<-60)GB=CB;
+  const ha=new T.Sprite(new T.SpriteMaterial({map:haloT,transparent:true,depthWrite:false,blending:T.AdditiveBlending,fog:false}));ha.position.set(x,y+.6*s,z);ha.scale.set(3.6*s,3.6*s,1);par.add(ha);
+  const fl=[];for(let k=0;k<3;k++){const sp=new T.Sprite(new T.SpriteMaterial({map:fireT,transparent:true,depthWrite:false,blending:T.AdditiveBlending,fog:false}));sp.position.set(x+(k-1)*.12*s,y+.75*s,z);sp.scale.set(.9*s,1.8*s,1);par.add(sp);fl.push(sp)}
+  const L=new T.PointLight(0xFFA040,4,7*s,1.8);L.position.set(x,y+1*s,z);par.add(L);fires.push({L,fl,s,ha,ph:rnd()*9});GB=bk};
  brazier(-6.5,1.4,WZ+3,2.8);brazier(6.5,1.4,WZ+3,2.8);brazier(-6.2,.7,-7.2,1);brazier(6.2,.7,-7.2,1);brazier(-5.6,.3,7.6,.75);brazier(5.6,.3,7.6,.75);
  /* ── الرايات: قماشٌ بلون الساحة ونجمةٍ ذهبيّة، يرفرف ── */
  const flagT=tex(128,256,(x)=>{const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,th.ban);g.addColorStop(1,'#0A0F24');x.fillStyle=g;x.fillRect(0,0,128,256);const tc='#'+new T.Color(th.tr).getHexString();
   x.fillStyle=tc;x.fillRect(0,0,128,10);x.fillRect(0,222,128,6);x.beginPath();x.moveTo(0,228);x.lineTo(64,256);x.lineTo(128,228);x.lineTo(128,256);x.lineTo(0,256);x.fill();star8(x,64,110,32,20);x.fill();x.fillStyle=th.ban;x.beginPath();x.arc(64,110,11,0,7);x.fill()});
  const flags=[];const flagM=new T.MeshStandardMaterial({map:flagT,side:T.DoubleSide,roughness:.85});
- for(const [x,y,z,w,h] of [[-8.5,WH-.2,WZ+1.1,2,3.6],[8.5,WH-.2,WZ+1.1,2,3.6],[-12.5,WH-.2,WZ+1.1,2,3.6],[12.5,WH-.2,WZ+1.1,2,3.6],[1.5,25,WZ-9,3,2.2]]){const g=new T.PlaneGeometry(w,h,5,10);g.translate(0,-h/2,0);const m=new T.Mesh(g,flagM);m.position.set(x,y,z+(y>9?0:0));sc.add(m);flags.push({m,base:Float32Array.from(g.attributes.position.array),h,ph:rnd()*6})}
+ for(const [x,y,z,w,h] of [[-8.5,WH-.2,WZ+1.1,2,3.6],[8.5,WH-.2,WZ+1.1,2,3.6],[-12.5,WH-.2,WZ+1.1,2,3.6],[12.5,WH-.2,WZ+1.1,2,3.6],[1.5,25,WZ-9,3,2.2]]){const g=new T.PlaneGeometry(w,h,5,10);g.translate(0,-h/2,0);const m=new T.Mesh(g,flagM);m.position.set(x,y,z);(z<-60?castleG:sc).add(m);flags.push({m,base:Float32Array.from(g.attributes.position.array),h,ph:rnd()*6})}
  /* ── دعائم الساحة: نخيل / صنوبر مثلّج / أعمدة / سرو / بلّور / قناديل / دروع ── */
  const sway=[];
  const leafT=tex(64,256,(x)=>{x.fillStyle='#3F7A33';x.beginPath();x.moveTo(32,0);for(let i=0;i<=20;i++){const y=i*12.8,w=Math.sin(i/20*Math.PI)*28;x.lineTo(32+w,y)}for(let i=20;i>=0;i--){const y=i*12.8,w=Math.sin(i/20*Math.PI)*28;x.lineTo(32-w,y)}x.fill();
@@ -16183,10 +16194,12 @@ function caArena3D(T,canvas,W,H,opt){
  const mats={stone:new T.MeshLambertMaterial({vertexColors:true,map:brickT}),gold:new T.MeshStandardMaterial({vertexColors:true,roughness:.3,metalness:.85,emissive:0x3A2204,emissiveIntensity:.3}),
   dark:new T.MeshBasicMaterial({vertexColors:true}),cloth:new T.MeshLambertMaterial({vertexColors:true,side:T.DoubleSide}),glow:new T.MeshBasicMaterial({vertexColors:true,fog:false}),clay:new T.MeshStandardMaterial({vertexColors:true,roughness:.8}),
   wood:new T.MeshLambertMaterial({vertexColors:true}),leaf:new T.MeshLambertMaterial({vertexColors:true}),ice:new T.MeshStandardMaterial({vertexColors:true,roughness:.25,metalness:.1}),
-  glass:new T.MeshStandardMaterial({vertexColors:true,roughness:.1,metalness:.2,emissive:new T.Color(th.tr),emissiveIntensity:.35,transparent:true,opacity:.9}),water:new T.MeshStandardMaterial({vertexColors:true,roughness:.05,metalness:.3}),far:new T.MeshLambertMaterial({vertexColors:true})};
+  glass:new T.MeshStandardMaterial({vertexColors:true,roughness:.1,metalness:.2,emissive:new T.Color(th.tr),emissiveIntensity:.35,transparent:true,opacity:.9}),water:new T.MeshStandardMaterial({vertexColors:true,roughness:.05,metalness:.3}),far:new T.MeshLambertMaterial({vertexColors:true,map:(()=>{const t=groundT.clone();t.needsUpdate=true;t.repeat.set(.3,.3);return t})()})};   // ٧٫٢٢: الكثبان بتموّج الرمل لا بلاستيكٌ أملس
  for(const k in groups){const m=new T.Mesh(merge(groups[k]),mats[k]);m.castShadow=cast.has(k);m.receiveShadow=k!=='glow'&&k!=='dark';sc.add(m)}
+ for(const k in CB){const m=new T.Mesh(merge(CB[k]),mats[k]);castleG.add(m)}   // القلعة بعيدة: بلا ظلٍّ مسقَط (خارج خريطة الظلّ أصلًا)
  /* ── ما وراء السور: تلالٌ بعيدة وسماءٌ متدرّجة ── */
- for(let i=0;i<9;i++){const x=-44+i*11+rnd()*5;add(new T.SphereGeometry(16+rnd()*8,12,6,0,Math.PI*2,0,Math.PI/2),'far',th.st2,M(x*3,-1.5,WZ-50-rnd()*30,0,0,0,1.5,.45+rnd()*.35,1))}
+ {const FB={};GB=FB;for(let i=0;i<9;i++){const x=-44+i*11+rnd()*5;add(new T.SphereGeometry(16+rnd()*8,16,6,0,Math.PI*2,0,Math.PI/2),'far',new T.Color(th.g1).lerp(new T.Color(th.fog),.35).getHex(),M(x*3,-1.5,WZ-60-rnd()*30,0,0,0,1.5,.45+rnd()*.35,1))}
+  GB=groups;const m=new T.Mesh(merge(FB.far),mats.far);castleG.add(m)}   // ٧٫٢٢: كانت هذه التلال تُضاف بعد الدمج فلا تُرسم أبدًا
  {const c=mkC(4,256),x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);const top=new T.Color(th.bg).lerp(new T.Color(0x000000),.2),mid=new T.Color(th.sky),hz=new T.Color(th.fog).lerp(new T.Color(th.sun),.5);
   g.addColorStop(0,'#'+top.getHexString());g.addColorStop(.36,'#'+mid.clone().lerp(top,.45).getHexString());g.addColorStop(.49,'#'+hz.getHexString());g.addColorStop(.52,'#'+new T.Color(th.fog).getHexString());g.addColorStop(1,'#'+new T.Color(th.fog).getHexString());x.fillStyle=g;x.fillRect(0,0,4,256);
   const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;sc.add(new T.Mesh(new T.SphereGeometry(400,24,16),new T.MeshBasicMaterial({map:t,side:T.BackSide,fog:false})))}
@@ -16196,6 +16209,29 @@ function caArena3D(T,canvas,W,H,opt){
  const dotT=tex(32,32,(x)=>{const g=x.createRadialGradient(16,16,0,16,16,16);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,32,32)});
  const FC={sand:0xF3D6A0,snow:0xFFFFFF,gold:0xFFE08A,petal:0xFFB0C8,crystal:0xA8E4FF,ember:0xFF9A40,star:0xFFD0F0,cloud:0xFFFFFF}[fx]||0xFFFFFF;
  const pts=new T.Points(pg,new T.PointsMaterial({size:fx==='cloud'?3.2:fx==='snow'?.28:.18,map:dotT,transparent:true,opacity:fx==='cloud'?.35:.8,depthWrite:false,color:FC,blending:fx==='ember'||fx==='star'||fx==='crystal'?T.AdditiveBlending:T.NormalBlending}));sc.add(pts);
+ /* ── ٧٫٢٢ العاصفة الرمليّة: حُجُبٌ من الغبار بضوضاءٍ متعدّدة الطبقات تنجرف بسرعاتٍ مختلفة على أعماقٍ مختلفة،
+    فتمرّ أمام القلعة وتكشفها — وهجُ شمسٍ خلفها، وخيوطُ ريحٍ قريبة. (الساحات الأخرى: ضبابٌ خفيف بلونها) ── */
+ const storm=fx==='sand';const veils=[];
+ {const vn=(w,h,oc)=>{const c=mkC(w,h),x=c.getContext('2d');const im=x.createImageData(w,h),d=im.data;
+   const L=[];for(let o=0;o<oc;o++){const gw=4<<o,gh=2<<o,g=new Float32Array((gw+1)*(gh+1));for(let i=0;i<g.length;i++)g[i]=rnd();L.push({gw,gh,g})}
+   const sm=t=>t*t*(3-2*t);
+   for(let yy=0;yy<h;yy++)for(let xx=0;xx<w;xx++){let v=0,a=.55,sum=0;for(const l of L){const fx2=xx/w*l.gw,fy=yy/h*l.gh,ix2=Math.floor(fx2),iy=Math.floor(fy),tx=sm(fx2-ix2),ty=sm(fy-iy),W1=l.gw+1;
+     const q=(i,j)=>l.g[((j%l.gh)*W1)+(i%l.gw)];v+=a*((q(ix2,iy)*(1-tx)+q(ix2+1,iy)*tx)*(1-ty)+(q(ix2,iy+1)*(1-tx)+q(ix2+1,iy+1)*tx)*ty);sum+=a;a*=.55}
+    v/=sum;const vy=Math.sin(yy/h*Math.PI);const al=Math.max(0,Math.min(1,(v-.42)*2.6))*vy;const i=(yy*w+xx)*4;d[i]=255;d[i+1]=236;d[i+2]=200;d[i+3]=al*255}
+   x.putImageData(im,0,0);const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;t.wrapS=T.RepeatWrapping;t.wrapT=T.ClampToEdgeWrapping;return t};
+  const vT=vn(256,64,5);const vc=new T.Color(storm?0xB98A52:th.fog).lerp(new T.Color(th.sun),storm?.12:.4);   // غبارٌ أغمق من السماء فيُرى
+  /* [عمق، ارتفاع المركز، نصف الارتفاع، العتمة، السرعة، في مجموعة القلعة؟] — ما يمرّ أمام القلعة يتبعها أينما وُضعت */
+  const layers=storm?[[-175,22,24,.75,.006,1],[-116,10,11,.72,.013,1],[-104,4,7,.6,.019,1],[-58,2.5,5,.42,.026,0],[-28,1.6,3,.26,.036,0]]:[[-175,20,20,.24,.004,1],[-110,6,8,.16,.006,1]];
+  for(const [z,y,hh,op,sp,inC] of layers){const m=new T.MeshBasicMaterial({map:vT.clone(),color:vc,transparent:true,opacity:op,depthWrite:false,fog:false});m.map.needsUpdate=true;m.map.repeat.set(inC?2.6:2,1);m.map.offset.x=rnd();
+   const pl=new T.Mesh(new T.PlaneGeometry(inC?300:Math.abs(z)*4.2,hh*2),m);pl.position.set(0,y,z);pl.renderOrder=2;(inC?castleG:sc).add(pl);veils.push({m,sp,pl,z,hh})}}
+ /* وهج الشمس خلف القلعة */
+ const sunG=new T.Sprite(new T.SpriteMaterial({map:tex(128,128,(x)=>{const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,248,225,1)');g.addColorStop(.18,'rgba(255,226,160,.85)');g.addColorStop(.45,'rgba(255,190,110,.28)');g.addColorStop(1,'rgba(255,170,90,0)');x.fillStyle=g;x.fillRect(0,0,128,128)}),transparent:true,depthWrite:false,fog:false,blending:T.AdditiveBlending,opacity:storm?.85:.55}));
+ sunG.scale.set(110,110,1);sunG.position.set(58,44,-260);sunG.material.opacity=storm?.6:.45;sunG.renderOrder=1;castleG.add(sunG);
+ /* خيوط الريح: ذرّاتٌ مستطيلة سريعة قرب الأرض */
+ const NS=storm?90:0,sp2=new Float32Array(NS*3);for(let i=0;i<NS;i++){sp2[i*3]=(rnd()-.5)*60;sp2[i*3+1]=rnd()*6-.4;sp2[i*3+2]=-8-rnd()*70}
+ const sgeo=new T.BufferGeometry();sgeo.setAttribute('position',new T.Float32BufferAttribute(sp2,3));
+ const streakT=tex(64,8,(x)=>{const g=x.createLinearGradient(0,0,64,0);g.addColorStop(0,'rgba(255,240,210,0)');g.addColorStop(.7,'rgba(255,240,210,.9)');g.addColorStop(1,'rgba(255,240,210,0)');x.fillStyle=g;x.fillRect(0,2,64,4)});
+ const streaks=NS?new T.Points(sgeo,new T.PointsMaterial({size:1.6,map:streakT,transparent:true,opacity:.5,depthWrite:false,color:0xF6DDB0})):null;if(streaks)sc.add(streaks);
  /* ── الإضاءة: شمسٌ بظلالٍ ناعمة ── */
  const sun=new T.DirectionalLight(th.sun,th.si);sun.position.set(-20,32,6);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);const sc2=sun.shadow.camera;sc2.left=-34;sc2.right=34;sc2.top=34;sc2.bottom=-34;sc2.far=110;sc2.near=1;sc2.far=70;sun.shadow.bias=-.0008;sun.shadow.radius=3;sc.add(sun);
  sc.add(new T.HemisphereLight(th.sky,th.gnd,1.1));
@@ -16204,10 +16240,21 @@ function caArena3D(T,canvas,W,H,opt){
  const place=(yaw,bob)=>{cam.aspect=W/H;const pitch=(opt.pitch||25)*Math.PI/180,f=cam.fov*Math.PI/180;
   const visW=10.6/rc.w,d=visW/(2*Math.tan(f/2)*cam.aspect);   // عرض اللوح (ومعه إطاره) يساوي عرض مستطيله
   const cx=Math.sin(yaw||0)*d*Math.cos(pitch);cam.position.set(cx,d*Math.sin(pitch)+(bob||0),d*Math.cos(pitch)*Math.cos(yaw||0));cam.lookAt(0,0,0);
-  const cy=rc.y+rc.h/2;cam.setViewOffset(W,H,0,(.5-cy)*H,W,H);cam.updateProjectionMatrix()};
- place(0,0);
+  const cy=rc.y+rc.h/2;cam.setViewOffset(W,H,0,(.5-cy)*H,W,H);cam.updateProjectionMatrix();cam.updateMatrixWorld()};
+ /* ٧٫٢٢: تُوضع القلعة في الفسحة الظاهرة (rc.bt أعلاها، rc.bb أسفلها — نسبةً من ارتفاع الشاشة) */
+ const vv=new T.Vector3(),fy=(y)=>{vv.set(0,y,CZ-9).project(cam);return (1-vv.y)/2};
+ const fitCastle=()=>{castleG.position.set(0,0,0);castleG.scale.set(1,1,1);
+  const bt=rc.bt,bb=rc.bb;if(!(bb>bt+.035))return;
+  const base=bb-.004,top=bt+.012;
+  let lo=-200,hi=300;for(let i=0;i<40;i++){const m=(lo+hi)/2;if(fy(m)>base)lo=m;else hi=m}const oy=(lo+hi)/2;   // الأسفل على الشاشة = y أصغر
+  const H0=26;let s0=.05,s1=6;for(let i=0;i<40;i++){const m=(s0+s1)/2;if(fy(oy+H0*m)>top)s0=m;else s1=m}const sc0=(s0+s1)/2;
+  castleG.position.set(0,oy-(-.6)*sc0,(CZ-9)*(1-sc0));castleG.scale.setScalar(sc0)};
+ const place0=place;
+ place(0,0);fitCastle();
  const tick=t=>{const s=t/1000;
   place(Math.sin(s*.13)*.035,Math.sin(s*.21)*.25);
+  for(const v of veils){v.m.map.offset.x=(v.m.map.offset.x+v.sp*.016)%1}
+  if(streaks){const a=sgeo.attributes.position.array;for(let i=0;i<NS;i++){const j=i*3;a[j]+=.55+(i%5)*.08;a[j+1]+=Math.sin(s*3+i)*.01;if(a[j]>30){a[j]=-30;a[j+1]=rnd()*6-.4}}sgeo.attributes.position.needsUpdate=true}
   for(const f of flags){const p=f.m.geometry.attributes.position;for(let i=0;i<p.count;i++){const bx=f.base[i*3],by=f.base[i*3+1],k=-by/f.h;p.setZ(i,Math.sin(s*3.2+bx*2.2+by*.9+f.ph)*.3*k+Math.sin(s*5.1+by*1.7)*.07*k);p.setX(i,bx+Math.sin(s*2.4+by*1.1+f.ph)*.07*k)}p.needsUpdate=true;f.m.geometry.computeVertexNormals()}
   for(const f of fires){const n=Math.sin(s*13+f.ph)*.5+Math.sin(s*23.7+f.ph*2)*.3+Math.sin(s*7.1)*.2;f.L.intensity=4+n*1.5;f.ha.material.opacity=.75+n*.2;f.fl.forEach((sp,k)=>{const q=Math.sin(s*(11+k*3)+f.ph+k)*.12;sp.scale.set((.9+q*.6)*f.s,(1.8+q+n*.2)*f.s,1);sp.material.opacity=.8+q})}
   for(const w of sway){w.o.rotation.z=Math.sin(s*.9+w.ph)*w.a;w.o.rotation.x=Math.sin(s*1.3+w.ph)*w.a*.6}
@@ -16219,7 +16266,7 @@ function caArena3D(T,canvas,W,H,opt){
    else{pa[j]+=.07;pa[j+1]+=Math.sin(s*2+i)*.003;pa[j+2]+=.015;if(pa[j]>18){pa[j]=-18;pa[j+2]=(rnd()-.5)*36-3}}}
   pg.attributes.position.needsUpdate=true;
   R.render(sc,cam)};
- return {tick,resize(w,h,r){W=w;H=h;if(r)Object.assign(rc,r);R.setSize(Math.round(W*dpr),Math.round(H*dpr),false);place(0,0)},dispose(){R.dispose()}};
+ return {tick,resize(w,h,r){W=w;H=h;if(r)Object.assign(rc,r);R.setSize(Math.round(W*dpr),Math.round(H*dpr),false);place(0,0);fitCastle()},dispose(){R.dispose()}};
 }
 let _caA3=null,_caA3Url='';
 function caA3Code(){if(_caA3Url)return _caA3Url;let src='';for(const sc of document.scripts){const t=sc.text;const i=t.indexOf('/* ⟦src:src/vendor/three-'+'global.js⟧ */\n');if(i<0)continue;const j=t.indexOf('/* ⟦src:',i+12);src=t.slice(i,j>0?j:undefined);break}
@@ -16233,7 +16280,8 @@ function caA3Code(){if(_caA3Url)return _caA3Url;let src='';for(const sc of docum
  return _caA3Url=URL.createObjectURL(new Blob(["const Q=[];onmessage=e=>Q.push(e);postMessage('alive');setTimeout(()=>{importScripts('"+lib+"');for(const e of Q)onmessage(e)},0);"],{type:'text/javascript'}))}
 /* مستطيل اللوح في الشاشة (نسبيًّا) — لتطابق منصّةُ الساحة اللوحَ الحقيقيّ */
 function caA3Rect(){try{const b=document.getElementById('caC');if(!b)return null;const r=b.getBoundingClientRect();if(r.width<50)return null;const W=Math.min(innerWidth,520),X0=(innerWidth-W)/2;
- return {x:(r.left-X0)/W,y:r.top/innerHeight,w:r.width/W,h:r.height/innerHeight}}catch(e){return null}}
+ const hb=document.querySelector('#app .caTbar'),pc=document.querySelector('#app .pCard.top');const bt=hb?hb.getBoundingClientRect().bottom/innerHeight:.08,bb=pc?pc.getBoundingClientRect().top/innerHeight:r.top/innerHeight;
+ return {x:(r.left-X0)/W,y:r.top/innerHeight,w:r.width/W,h:r.height/innerHeight,bt,bb}}catch(e){return null}}
 function caA3Size(){return {W:Math.min(innerWidth,520),H:innerHeight}}
 /* على الخيط الرئيسيّ إن مُنع العامل الخلفيّ (بعض المتصفّحات المضمَّنة): ٣٠ إطارًا، دقّةٌ أقلّ، ويسكت أثناء حركة القطع */
 function caA3Main(ix){try{const el=document.getElementById('arena'),bg=el&&el.querySelector('.caArBg');if(!bg)return;const cv=document.createElement('canvas');cv.className='caA3';bg.after(cv);
@@ -17533,15 +17581,31 @@ var SFX=(function(){
   sv.gain.setValueAtTime(0.0001,t0);sv.gain.exponentialRampToValueAtTime(g*0.45,t0+0.006);sv.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.8);
   s2.connect(sv);route(sv,c);s2.start(t0);s2.stop(t0+d);
  }
+ /* ٧٫٢٣ — من تسجيلَي كلاش رويال اللذين أرسلهما المالك (قيست لا تُنسخ): نقرات الواجهة فيهما «طَقّةٌ» نغميّة دافئة بين ٤٩٥ و٦٤٥ هرتز
+    تخمد في ٣٠–٤٠ م.ث وتتبدّل نبرتها قليلًا كلّ مرّة، ونقرات الاختيار «فقاعةٌ» تصعد نبرتها (٣٠٠ ← ٧٠٠ تقريبًا)، وكلّها أعلى من
+    موسيقى الخلفيّة بنحو ١٠ dB فقط. كانت نقراتنا أجراسًا وأوتارًا لامعة (١٫٣–٢٫٣ ك.هرتز) أعلى بكثير — فتُسمع حادّةً رخيصة */
+ function bloop(f0,f1,t0,g,d){var c=ac();if(!c)return;d=d||0.07;var o=c.createOscillator(),o2=c.createOscillator(),v=c.createGain(),v2=c.createGain(),lp=c.createBiquadFilter();
+  o.type='sine';o.frequency.setValueAtTime(f0,t0);o.frequency.exponentialRampToValueAtTime(f1,t0+d*0.55);
+  o2.type='triangle';o2.frequency.setValueAtTime(f0*2,t0);o2.frequency.exponentialRampToValueAtTime(f1*2,t0+d*0.55);
+  lp.type='lowpass';lp.frequency.value=2600;lp.Q.value=0.5;
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.004);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  v2.gain.setValueAtTime(0.0001,t0);v2.gain.exponentialRampToValueAtTime(g*0.22,t0+0.004);v2.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.6);
+  o.connect(v);o2.connect(v2);v.connect(lp);v2.connect(lp);route(lp,c);o.start(t0);o2.start(t0);o.stop(t0+d+0.03);o2.stop(t0+d+0.03)}
+ /* طَقّةٌ نغميّة (ماريمبا خشبيّة): جيبٌ أساسيّ وجزئيّ ×٤ يخمد أسرع، ولمسة هواءٍ قصيرة */
+ function tok(f,t0,g,d){var c=ac();if(!c)return;d=d||0.06;[[1,1,d],[3.93,0.18,d*0.35]].forEach(function(q){var o=c.createOscillator(),v=c.createGain();o.frequency.value=f*q[0];
+   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.002);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);route(v,c);o.start(t0);o.stop(t0+q[2]+0.02)});
+  noise(t0,0.006,g*0.12,2200)}
  var D4=293.66,A4=440,D5=587.33,Fs5=739.99,A5=880;
  var LIB={
   /* نقرة الواجهة: خشبٌ دافئ بجسمٍ منخفض — تُسمع ولا تزعج */
-  tap:   function(t){wood(720*(0.97+Math.random()*0.06),t,0.42);tone(165,t,0.07,'sine',0.2)},
-  /* التنقّل والرجوع: نقرتا عود (كاربلس–سترونغ بجسمٍ خشبيّ عند ٢٦٠ هرتز) صاعدة أو هابطة */
-  nav:   function(t){withRV(0.16,function(){kpluck(D4,t,0.42,0.7,0.45,260);kpluck(A4,t+0.06,0.3,0.6,0.5,260)})},
-  back:  function(t){withRV(0.16,function(){kpluck(A4,t,0.3,0.55,0.5,260);kpluck(D4,t+0.06,0.4,0.7,0.45,260)})},
-  ok:    function(t){withRV(0.22,function(){bell(1318.5,t,0.22,0.55);bell(1760,t+0.07,0.2,0.7);kpluck(A5,t,0.18,0.5,0.7)})},
-  bad:   function(t){withRV(0.18,function(){timp(t,82,0.35);kpluck(220,t+0.02,0.34,0.6,0.35,240);kpluck(207.65,t+0.16,0.3,0.8,0.35,240)})},
+  /* نقرة الواجهة: طَقّةٌ دافئة ٥٢٠–٦٢٠ هرتز تتبدّل قليلًا (كلاش رويال) */
+  tap:   function(t){tok(540+Math.random()*80,t,0.2,0.055)},
+  /* التنقّل: فقاعةٌ تصعد، والرجوع: تهبط */
+  nav:   function(t){withRV(0.08,function(){bloop(330,640,t,0.22,0.075)})},
+  back:  function(t){withRV(0.08,function(){bloop(560,300,t,0.2,0.075)})},
+  /* التأكيد: فقاعةٌ صاعدة ثمّ طَقّتان على خامسة (ري ← لا) — واضحةٌ بلا أجراسٍ حادّة */
+  ok:    function(t){withRV(0.14,function(){bloop(420,760,t,0.18,0.07);tok(D5,t+0.06,0.16,0.09);tok(A5,t+0.12,0.13,0.12)})},
+  bad:   function(t){withRV(0.18,function(){timp(t,82,0.3);bloop(420,230,t,0.2,0.12);tok(207.65,t+0.1,0.16,0.14)})},
   /* الفوز: طبلةٌ ونحاسٌ بضربتين ثمّ وترٌ ممتدّ، صنجٌ يتنفّس، وقانونٌ يصعد، وأجراسٌ في آخره */
   win:   function(t){withRV(0.26,function(){timp(t,73.4,0.5);
     [[t,0.15],[t+0.19,0.15]].forEach(function(q){[D4,Fs5/2,A4].forEach(function(f){brass(f,q[0],q[1],0.07)})});
@@ -17564,16 +17628,16 @@ var SFX=(function(){
   wall:  function(t,o){sample('carrom','wall',t,o)},
   coin:  function(t){withRV(0.12,function(){clink(t,0.26,1);clink(t+0.045,0.18,1.07)})},
   /* عدّاد الثواني: طقّة خشبٍ جافّة كعقرب ساعةٍ قديمة، والساخنة أعلى وأحدّ */
-  tick:  function(t){wood(1700,t,0.2)},
-  tickHot:function(t){wood(2300,t,0.28);tone(1150,t,0.05,'triangle',0.08)},
+  tick:  function(t){tok(600,t,0.14,0.045)},
+  tickHot:function(t){tok(880,t,0.2,0.05);tok(1320,t+0.004,0.06,0.03)},
   timeUp:function(t){withRV(0.25,function(){timp(t,65.4,0.5);brass(146.83,t,0.4,0.09);brass(138.59,t+0.18,0.5,0.08)})},
   /* الصندوق: صريرُ غطاءٍ خشبيّ، ارتطام، هبّةُ ضوء، وأجراسٌ تتفتّح */
   chest: function(t){withRV(0.35,function(){creak(t,0.32,0.16);timp(t+0.3,110,0.42);whoosh(t+0.28,0.55,0.16,500,4200);
    [1174.7,1480,1760,2349].forEach(function(f,i){bell(f,t+0.44+i*0.08,0.16,0.9)});cymbal(t+0.4,0.7,0.045,0.08)})},
   reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[880,1046.5,1318.5,1760][Math.min(3,r)];withRV(0.28,function(){whoosh(t,0.22,0.1,1200,5000);bell(f,t+0.12,0.24,0.9);kpluck(f,t+0.12,0.22,0.9,0.75);if(r>=2)bell(f*1.5,t+0.2,0.14,1.0)})},
   rare:  function(t){withRV(0.34,function(){timp(t,73.4,0.45);[D5,Fs5,A5,1174.7,1480].forEach(function(f,i){bell(f,t+i*0.07,0.18,1.1);kpluck(f,t+i*0.07,0.16,0.8,0.75)});[D4,Fs5/2,A4].forEach(function(f){brass(f,t+0.36,0.9,0.07)});cymbal(t+0.34,0.85,0.07,0.04)})},
-  tally: function(t){clink(t,0.1,0.95+Math.random()*0.1)},
-  notif: function(t){withRV(0.25,function(){bell(1568,t,0.18,0.6);bell(2093,t+0.09,0.16,0.8)})},
+  tally: function(t){tok(560+Math.random()*90,t,0.12,0.045)},
+  notif: function(t){withRV(0.2,function(){bloop(500,820,t,0.16,0.07);tok(A5,t+0.07,0.14,0.12);tok(1174.7,t+0.14,0.11,0.16)})},
   trophy:function(t){withRV(0.25,function(){brass(D5,t,0.14,0.08);brass(A5,t+0.12,0.35,0.08);bell(1760,t+0.12,0.14,0.8)})},
   /* ساحةٌ جديدة: موكبٌ نحاسيّ (ري – صول – لا – ري) بطبولٍ وصنجٍ وأجراس */
   arena: function(t){withRV(0.35,function(){var ch=[[D4,Fs5/2,A4],[392,493.88,D5],[A4,554.37,659.25],[D5,Fs5,A5]];ch.forEach(function(c3,i){timp(t+i*0.3,[73.4,98,110,73.4][i],0.45);c3.forEach(function(f){brass(f,t+i*0.3,i===3?1.2:0.24,0.07)})});
@@ -25246,7 +25310,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.22';
+const APP_VER='7.23';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,

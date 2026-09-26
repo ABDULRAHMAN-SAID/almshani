@@ -299,15 +299,31 @@ var SFX=(function(){
   sv.gain.setValueAtTime(0.0001,t0);sv.gain.exponentialRampToValueAtTime(g*0.45,t0+0.006);sv.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.8);
   s2.connect(sv);route(sv,c);s2.start(t0);s2.stop(t0+d);
  }
+ /* ٧٫٢٣ — من تسجيلَي كلاش رويال اللذين أرسلهما المالك (قيست لا تُنسخ): نقرات الواجهة فيهما «طَقّةٌ» نغميّة دافئة بين ٤٩٥ و٦٤٥ هرتز
+    تخمد في ٣٠–٤٠ م.ث وتتبدّل نبرتها قليلًا كلّ مرّة، ونقرات الاختيار «فقاعةٌ» تصعد نبرتها (٣٠٠ ← ٧٠٠ تقريبًا)، وكلّها أعلى من
+    موسيقى الخلفيّة بنحو ١٠ dB فقط. كانت نقراتنا أجراسًا وأوتارًا لامعة (١٫٣–٢٫٣ ك.هرتز) أعلى بكثير — فتُسمع حادّةً رخيصة */
+ function bloop(f0,f1,t0,g,d){var c=ac();if(!c)return;d=d||0.07;var o=c.createOscillator(),o2=c.createOscillator(),v=c.createGain(),v2=c.createGain(),lp=c.createBiquadFilter();
+  o.type='sine';o.frequency.setValueAtTime(f0,t0);o.frequency.exponentialRampToValueAtTime(f1,t0+d*0.55);
+  o2.type='triangle';o2.frequency.setValueAtTime(f0*2,t0);o2.frequency.exponentialRampToValueAtTime(f1*2,t0+d*0.55);
+  lp.type='lowpass';lp.frequency.value=2600;lp.Q.value=0.5;
+  v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g,t0+0.004);v.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+  v2.gain.setValueAtTime(0.0001,t0);v2.gain.exponentialRampToValueAtTime(g*0.22,t0+0.004);v2.gain.exponentialRampToValueAtTime(0.0001,t0+d*0.6);
+  o.connect(v);o2.connect(v2);v.connect(lp);v2.connect(lp);route(lp,c);o.start(t0);o2.start(t0);o.stop(t0+d+0.03);o2.stop(t0+d+0.03)}
+ /* طَقّةٌ نغميّة (ماريمبا خشبيّة): جيبٌ أساسيّ وجزئيّ ×٤ يخمد أسرع، ولمسة هواءٍ قصيرة */
+ function tok(f,t0,g,d){var c=ac();if(!c)return;d=d||0.06;[[1,1,d],[3.93,0.18,d*0.35]].forEach(function(q){var o=c.createOscillator(),v=c.createGain();o.frequency.value=f*q[0];
+   v.gain.setValueAtTime(0.0001,t0);v.gain.exponentialRampToValueAtTime(g*q[1],t0+0.002);v.gain.exponentialRampToValueAtTime(0.0001,t0+q[2]);o.connect(v);route(v,c);o.start(t0);o.stop(t0+q[2]+0.02)});
+  noise(t0,0.006,g*0.12,2200)}
  var D4=293.66,A4=440,D5=587.33,Fs5=739.99,A5=880;
  var LIB={
   /* نقرة الواجهة: خشبٌ دافئ بجسمٍ منخفض — تُسمع ولا تزعج */
-  tap:   function(t){wood(720*(0.97+Math.random()*0.06),t,0.42);tone(165,t,0.07,'sine',0.2)},
-  /* التنقّل والرجوع: نقرتا عود (كاربلس–سترونغ بجسمٍ خشبيّ عند ٢٦٠ هرتز) صاعدة أو هابطة */
-  nav:   function(t){withRV(0.16,function(){kpluck(D4,t,0.42,0.7,0.45,260);kpluck(A4,t+0.06,0.3,0.6,0.5,260)})},
-  back:  function(t){withRV(0.16,function(){kpluck(A4,t,0.3,0.55,0.5,260);kpluck(D4,t+0.06,0.4,0.7,0.45,260)})},
-  ok:    function(t){withRV(0.22,function(){bell(1318.5,t,0.22,0.55);bell(1760,t+0.07,0.2,0.7);kpluck(A5,t,0.18,0.5,0.7)})},
-  bad:   function(t){withRV(0.18,function(){timp(t,82,0.35);kpluck(220,t+0.02,0.34,0.6,0.35,240);kpluck(207.65,t+0.16,0.3,0.8,0.35,240)})},
+  /* نقرة الواجهة: طَقّةٌ دافئة ٥٢٠–٦٢٠ هرتز تتبدّل قليلًا (كلاش رويال) */
+  tap:   function(t){tok(540+Math.random()*80,t,0.2,0.055)},
+  /* التنقّل: فقاعةٌ تصعد، والرجوع: تهبط */
+  nav:   function(t){withRV(0.08,function(){bloop(330,640,t,0.22,0.075)})},
+  back:  function(t){withRV(0.08,function(){bloop(560,300,t,0.2,0.075)})},
+  /* التأكيد: فقاعةٌ صاعدة ثمّ طَقّتان على خامسة (ري ← لا) — واضحةٌ بلا أجراسٍ حادّة */
+  ok:    function(t){withRV(0.14,function(){bloop(420,760,t,0.18,0.07);tok(D5,t+0.06,0.16,0.09);tok(A5,t+0.12,0.13,0.12)})},
+  bad:   function(t){withRV(0.18,function(){timp(t,82,0.3);bloop(420,230,t,0.2,0.12);tok(207.65,t+0.1,0.16,0.14)})},
   /* الفوز: طبلةٌ ونحاسٌ بضربتين ثمّ وترٌ ممتدّ، صنجٌ يتنفّس، وقانونٌ يصعد، وأجراسٌ في آخره */
   win:   function(t){withRV(0.26,function(){timp(t,73.4,0.5);
     [[t,0.15],[t+0.19,0.15]].forEach(function(q){[D4,Fs5/2,A4].forEach(function(f){brass(f,q[0],q[1],0.07)})});
@@ -330,16 +346,16 @@ var SFX=(function(){
   wall:  function(t,o){sample('carrom','wall',t,o)},
   coin:  function(t){withRV(0.12,function(){clink(t,0.26,1);clink(t+0.045,0.18,1.07)})},
   /* عدّاد الثواني: طقّة خشبٍ جافّة كعقرب ساعةٍ قديمة، والساخنة أعلى وأحدّ */
-  tick:  function(t){wood(1700,t,0.2)},
-  tickHot:function(t){wood(2300,t,0.28);tone(1150,t,0.05,'triangle',0.08)},
+  tick:  function(t){tok(600,t,0.14,0.045)},
+  tickHot:function(t){tok(880,t,0.2,0.05);tok(1320,t+0.004,0.06,0.03)},
   timeUp:function(t){withRV(0.25,function(){timp(t,65.4,0.5);brass(146.83,t,0.4,0.09);brass(138.59,t+0.18,0.5,0.08)})},
   /* الصندوق: صريرُ غطاءٍ خشبيّ، ارتطام، هبّةُ ضوء، وأجراسٌ تتفتّح */
   chest: function(t){withRV(0.35,function(){creak(t,0.32,0.16);timp(t+0.3,110,0.42);whoosh(t+0.28,0.55,0.16,500,4200);
    [1174.7,1480,1760,2349].forEach(function(f,i){bell(f,t+0.44+i*0.08,0.16,0.9)});cymbal(t+0.4,0.7,0.045,0.08)})},
   reveal:function(t,o){var r=o&&o.r?o.r|0:0,f=[880,1046.5,1318.5,1760][Math.min(3,r)];withRV(0.28,function(){whoosh(t,0.22,0.1,1200,5000);bell(f,t+0.12,0.24,0.9);kpluck(f,t+0.12,0.22,0.9,0.75);if(r>=2)bell(f*1.5,t+0.2,0.14,1.0)})},
   rare:  function(t){withRV(0.34,function(){timp(t,73.4,0.45);[D5,Fs5,A5,1174.7,1480].forEach(function(f,i){bell(f,t+i*0.07,0.18,1.1);kpluck(f,t+i*0.07,0.16,0.8,0.75)});[D4,Fs5/2,A4].forEach(function(f){brass(f,t+0.36,0.9,0.07)});cymbal(t+0.34,0.85,0.07,0.04)})},
-  tally: function(t){clink(t,0.1,0.95+Math.random()*0.1)},
-  notif: function(t){withRV(0.25,function(){bell(1568,t,0.18,0.6);bell(2093,t+0.09,0.16,0.8)})},
+  tally: function(t){tok(560+Math.random()*90,t,0.12,0.045)},
+  notif: function(t){withRV(0.2,function(){bloop(500,820,t,0.16,0.07);tok(A5,t+0.07,0.14,0.12);tok(1174.7,t+0.14,0.11,0.16)})},
   trophy:function(t){withRV(0.25,function(){brass(D5,t,0.14,0.08);brass(A5,t+0.12,0.35,0.08);bell(1760,t+0.12,0.14,0.8)})},
   /* ساحةٌ جديدة: موكبٌ نحاسيّ (ري – صول – لا – ري) بطبولٍ وصنجٍ وأجراس */
   arena: function(t){withRV(0.35,function(){var ch=[[D4,Fs5/2,A4],[392,493.88,D5],[A4,554.37,659.25],[D5,Fs5,A5]];ch.forEach(function(c3,i){timp(t+i*0.3,[73.4,98,110,73.4][i],0.45);c3.forEach(function(f){brass(f,t+i*0.3,i===3?1.2:0.24,0.07)})});
