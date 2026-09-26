@@ -94,11 +94,13 @@ var Router=(function(){
   stack.push(frame(fn,arg,true)); applyBar(); arm();
  }
  function replace(fn,arg){
+  var g=guarded(fn,arg);if(g===null)return false;if(g!==fn){fn=g;arg=undefined}   // ٧٫٢٢: الحارس يسري على كلّ دخول لا على push وحده
   last.fn=null;
   if(stack.length)stack.pop();
   stack.push(frame(fn,arg)); render(fn,arg); arm();
  }
  function reset(fn,arg){
+  var g=guarded(fn,arg);if(g===null)return false;if(g!==fn){fn=g;arg=undefined}   // ٧٫٢٢: كان reset('home') يفتح شاشة الأسئلة المطفأة (زرّ «العودة للرئيسية» في شاشة الخطأ)
   last.fn=null;
   stack.length=0; stack.push(frame(fn,arg)); render(fn,arg); disarm();
  }
