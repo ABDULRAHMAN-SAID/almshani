@@ -2664,7 +2664,7 @@ body .rbtn:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
-<div id="ld" data-total="0014157893" data-head="0001253015" aria-hidden="true">
+<div id="ld" data-total="0014171556" data-head="0001253015" aria-hidden="true">
  <div class="ldPar" id="ldPar"><div class="ldArt"></div><div class="ldBeam"></div></div><div class="ldVig"></div>
  <div class="ldMotes"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
  <div class="ldLogo"></div>
@@ -25087,7 +25087,7 @@ function bcTick(){
 }
 
 // ── التحديات اليومية: ستة تحديات تتجدد كل يوم بجوائز يومية ──
-const APP_VER='7.16';
+const APP_VER='7.17';
 function EV(){
  const d=dayKey();
  if(!S.evt||S.evt.day!==d)S.evt={day:d,plays:0,wins:0,correct:0,bestStreak:0,perfect:0,helper:0,
@@ -26472,6 +26472,61 @@ html body .caStage .pCard.on .csAv{animation:none;position:relative;z-index:1}
 html body .caStage .pCard.on .csAvW::before{content:'';position:absolute;inset:-8px;border-radius:50%;pointer-events:none;z-index:0;
  background:radial-gradient(closest-side,rgba(255,214,120,0) 68%,rgba(255,214,120,.6) 82%,rgba(255,214,120,0) 100%);animation:plGlow 1.6s ease-in-out infinite;will-change:opacity,transform}
 @keyframes plGlow{0%,100%{opacity:.35;transform:scale(.95)}50%{opacity:1;transform:scale(1.05)}}
+/* ═══ ٧٫١٦ — صفحة خيارات اللعب: منصّة مواجهة ═══ */
+.segC .mdI{display:block;width:40px;height:32px;margin-bottom:2px}.segC .mdI svg{width:100%;height:100%;display:block}
+html body .scr.soX .sl{display:flex;align-items:center;justify-content:center;gap:10px;margin:18px 0 10px;padding:0;font-family:var(--fd);font-size:16px;font-weight:700;color:#FFE9A8;border:0;background:none}
+html body .scr.soX .sl::before,html body .scr.soX .sl::after{content:'';position:static;display:block;flex:1 1 0;height:1.5px;width:auto;border-radius:2px;background:linear-gradient(90deg,rgba(232,178,58,0),rgba(232,178,58,.75));transform:none;box-shadow:none}
+html body .scr.soX .sl::after{background:linear-gradient(270deg,rgba(232,178,58,0),rgba(232,178,58,.75))}
+.soVs{position:relative;display:grid;grid-template-columns:1fr 70px 1fr;align-items:end;height:196px;margin:2px 0 6px;padding:0 4px 18px;border-radius:24px;overflow:hidden;isolation:isolate;
+ background:radial-gradient(70% 90% at 50% 0%,rgba(255,214,120,.26),rgba(255,214,120,0) 70%),radial-gradient(90% 60% at 50% 110%,rgba(36,72,160,.55),rgba(36,72,160,0) 70%),linear-gradient(180deg,#15244E 0%,#0C1733 60%,#08102A 100%);
+ border:1.5px solid rgba(232,178,58,.8);box-shadow:0 14px 30px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,233,168,.35),inset 0 0 0 4px rgba(11,21,48,.9),inset 0 0 0 5px rgba(232,178,58,.35)}
+.soVs::after{content:'';position:absolute;left:0;right:0;bottom:0;height:62px;z-index:-1;background:linear-gradient(180deg,rgba(232,178,58,0),rgba(232,178,58,.12)),repeating-linear-gradient(90deg,rgba(232,178,58,.14) 0 1px,transparent 1px 34px);-webkit-mask:linear-gradient(180deg,transparent,#000);mask:linear-gradient(180deg,transparent,#000);transform:perspective(160px) rotateX(38deg);transform-origin:50% 100%}
+.soRays{position:absolute;left:50%;top:44%;width:300px;height:300px;margin:-150px 0 0 -150px;z-index:-1;border-radius:50%;opacity:.5;
+ background:repeating-conic-gradient(from 0deg,rgba(255,221,140,.22) 0 7deg,rgba(255,221,140,0) 7deg 22deg);-webkit-mask:radial-gradient(closest-side,#000 20%,transparent);mask:radial-gradient(closest-side,#000 20%,transparent);animation:soSpin 40s linear infinite;will-change:transform}
+@keyframes soSpin{to{transform:rotate(360deg)}}
+.soSide{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.soSide b{position:relative;z-index:2;margin-top:16px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--fd);font-size:16px;font-weight:700;line-height:1.25;
+ background:linear-gradient(180deg,#FFF6D8,#F2C75A 60%,#C9901F);-webkit-background-clip:text;background-clip:text;color:transparent}
+.soSide s{position:relative;z-index:2;text-decoration:none;font-size:11.5px;font-weight:700;color:#AFC0E0}
+.soPd{position:absolute;left:50%;top:62px;width:108px;height:34px;margin-left:-54px;border-radius:50%;z-index:0;
+ background:radial-gradient(closest-side,#2B4590,#101C44 75%);border:2px solid #E8B23A;box-shadow:0 7px 0 -1px #6E4E12,0 12px 18px rgba(0,0,0,.6),0 0 22px rgba(232,178,58,.3),inset 0 3px 6px rgba(255,233,168,.25)}
+.soSide.soTh .soPd{top:80px}
+.soAv{position:relative;z-index:1;width:84px;height:84px;border-radius:50%;padding:3px;background:conic-gradient(from 200deg,#FFF3C8,#E8B23A,#8A5A10,#F0C14E,#FFF3C8);box-shadow:0 8px 16px rgba(0,0,0,.6)}
+.soAv>*{width:100%!important;height:100%!important;border-radius:50%;display:block;overflow:hidden;background:#0B1530}
+.soCr{position:relative;z-index:1;height:100px;display:flex;align-items:flex-end}
+.soCr.pop{animation:soPop .42s cubic-bezier(.2,1.6,.4,1)}
+@keyframes soPop{0%{transform:scale(.6) translateY(10px);opacity:.3}100%{transform:none;opacity:1}}
+.soMid{align-self:center;display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:26px;position:relative;z-index:2}
+html body .soMid .soMd{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 28%,#FFF6D6,#F0C14E 45%,#9C6614 100%);
+ box-shadow:0 0 0 3px #0B1530,0 0 0 4.5px #E8B23A,0 10px 20px rgba(0,0,0,.6),inset 0 -4px 6px rgba(90,58,8,.45)}
+.soMd .rico,.soMd img,.soMd svg{width:30px!important;height:30px!important}
+.soMid em{font-style:normal;font-family:var(--fd);font-size:14px;font-weight:700;color:#FFE9A8;letter-spacing:.5px}
+.soDf{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.soDf.n3{grid-template-columns:repeat(3,1fr)}
+.soD{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px 9px;border-radius:16px;cursor:pointer;
+ background:linear-gradient(180deg,#172447,#0C1531);border:1px solid rgba(232,178,58,.22);box-shadow:inset 0 1px 0 rgba(255,244,214,.08),0 4px 10px rgba(0,0,0,.35);transition:transform .18s,box-shadow .18s,border-color .18s}
+.soD .soDc{display:block;height:57px;opacity:.72;transition:opacity .18s}
+.soD b{font-family:var(--fd);font-size:14px;font-weight:700;color:#C9D3EA;line-height:1.2}
+.soD.on{transform:translateY(-3px);border-color:#FFE9A8;background:radial-gradient(90% 70% at 50% 100%,rgba(232,178,58,.3),rgba(232,178,58,0)),linear-gradient(180deg,#1C2C58,#0E1A3D);
+ box-shadow:0 0 0 1px rgba(255,233,168,.5),0 10px 20px rgba(0,0,0,.5),0 0 18px rgba(232,178,58,.28),inset 0 1px 0 rgba(255,244,214,.3)}
+.soD.on .soDc{opacity:1}.soD.on b{color:#FFE9A8}
+.soD.on::after{content:'';position:absolute;top:-7px;left:50%;width:14px;height:14px;margin-left:-7px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#FFF3C8,#E8B23A);box-shadow:0 0 0 2px #0B1530}
+.soSay{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font-size:12.5px;font-weight:700;color:#E3CD98;text-align:center}
+.soSay .rico{width:14px!important;height:14px!important;flex-shrink:0}
+html body .scr.soX .segC button{border-radius:16px;background:linear-gradient(180deg,#172447,#0C1531);border:1px solid rgba(232,178,58,.22)}
+html body .scr.soX .segC button.on{border-color:#FFE9A8;background:radial-gradient(90% 70% at 50% 100%,rgba(232,178,58,.28),rgba(232,178,58,0)),linear-gradient(180deg,#1C2C58,#0E1A3D);box-shadow:0 0 0 1px rgba(255,233,168,.5),0 0 16px rgba(232,178,58,.25),inset 0 1px 0 rgba(255,244,214,.3)}
+html body .scr.soX .segC button b{font-family:var(--fd);font-size:15px;font-weight:700}
+html body .scr.soX .segC button span{font-size:11.5px;color:#AFC0E0}
+html body .scr.soX .segC button.on span{color:#E3CD98}
+html body .scr.soX .segC.soPl2 button{flex-direction:row;justify-content:flex-start;gap:10px;padding:10px 12px;text-align:start}
+.soTb{flex-shrink:0;display:block;width:44px;height:44px}.soTb svg{display:block}
+.soTx{display:flex;flex-direction:column;gap:2px;min-width:0}
+html body .scr.soX .segC button:not(.on) .mdI,html body .scr.soX .segC button:not(.on) .soTb{opacity:.7}
+html body .scr.soX .soloNote{justify-content:center;text-align:center;opacity:.85}
+@media (max-width:370px){.soVs{height:182px;grid-template-columns:1fr 58px 1fr}.soAv{width:74px;height:74px}.soPd{top:54px;width:94px;margin-left:-47px}.soSide.soTh .soPd{top:72px}html body .soMid .soMd{width:48px;height:48px}.soD b{font-size:12.5px}.soD .soDc{height:50px}.soD .soDc svg{width:42px;height:50px}}
+@media (prefers-reduced-motion:reduce){.soRays{animation:none}}
+html body .scr.soX .cr{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px}
+html body .scr.soX .cr .fc{display:flex;align-items:center;justify-content:center;min-height:52px;margin:0;border-radius:16px;font-family:var(--fd);font-size:15px;font-weight:700;color:#C9D3EA;background:linear-gradient(180deg,#172447,#0C1531);border:1px solid rgba(232,178,58,.22);box-shadow:inset 0 1px 0 rgba(255,244,214,.08)}
+html body .scr.soX .cr .fc.on{color:#FFE9A8;border-color:#FFE9A8;background:radial-gradient(90% 70% at 50% 100%,rgba(232,178,58,.28),rgba(232,178,58,0)),linear-gradient(180deg,#1C2C58,#0E1A3D);box-shadow:0 0 0 1px rgba(255,233,168,.5),0 0 16px rgba(232,178,58,.25),inset 0 1px 0 rgba(255,244,214,.3)}
 @media (prefers-reduced-motion:reduce){.arHeroRays,.aruRays,.aruEm,.hmRoadDot,.arM.ready{animation:none!important}}
 `;
 (function(){try{const st=document.createElement('style');st.id='luxCss';st.textContent=LUX_CSS;document.head.appendChild(st)}catch(e){}})();
@@ -28108,16 +28163,18 @@ function soloScr(g){
  if(RM.diff&&!diffsFor(g).some(d=>d[0]===RM.diff))RM.diff='hard';   // «مستحيل» للكيرم وحده
  setArena(vnKind(g),1);
  if(g==='carrom')caPrefetch();
- go(`<div class="scr on">${tb(T('ضد الذكاء الاصطناعي'))}
- <div class="gHero xs">${GAME_ART[g]||''}</div>
+ const d0=RM.diff||'mid';
+ go(`<div class="scr on soX" data-g="${g}">${tb(T('ضد الذكاء الاصطناعي'))}
+ ${soVsHTML(g,d0)}
  ${g==='carrom'?skTileHTML({sm:1,ctx:'solo'}):''}
  <div class="sl">${T('مستوى الخصم')}</div>
- <div class="dfRow">${diffsFor(g).map(([k,n,e],di)=>`<div class="dfC${(RM.diff||'mid')===k?' on':''}" onclick="RM.diff='${k}';uiPick(this);soloGoSync()">
-  <i class="dfLv">${[0,1,2,3].map(j=>`<em${j<=di?' class="f"':''}></em>`).join('')}</i><b>${T(n)}</b><u>${((DIFF_SAY[g]||{})[k])||''}</u></div>`).join('')}</div>
+ <div class="soDf n${diffsFor(g).length}">${diffsFor(g).map(([k,n])=>`<button class="soD${d0===k?' on':''}" data-d="${k}" onclick="RM.diff='${k}';uiPick(this);soloGoSync()">
+  <i class="soDc">${soCrest(k,48)}</i><b>${T(n)}</b></button>`).join('')}</div>
+ <div class="soSay" id="soSay">${ico('info',12)} <span>${((DIFF_SAY[g]||{})[d0])||''}</span></div>
  ${g==='uno'?`<div class="sl">عدد اللاعبين (أنت + الذكاء الاصطناعي)</div>
  <div class="cr">${[2,3,4].map(n=>`<div class="fc ${((RM.bots||1)+1)===n?'on':''}" onclick="RM.bots=${n-1};uiPick(this)">${n===2?'لاعبان':n+' لاعبين'}</div>`).join('')}</div>`:''}
  ${g==='carrom'?`<div class="sl">عدد اللاعبين</div>
- <div class="segC">${[[2,'لاعبان','وجهًا لوجه'],[4,'٤ لاعبين','فريقان — شريكك مقابلك']].map(([n,a,b])=>`<button class="${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};uiPick(this)"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
+ <div class="segC soPl2">${[[2,'لاعبان','وجهًا لوجه'],[4,'٤ لاعبين','فريقان متقابلان']].map(([n,a,b])=>`<button class="${(RM.caN||2)===n?'on':''}" onclick="RM.caN=${n};uiPick(this)"><i class="soTb">${soTable(n)}</i><span class="soTx"><b>${a}</b><span>${b}</span></span></button>`).join('')}</div>
  <div class="sl">الطور</div>
  ${caMdSeg("uiPick(this);caPtsVis()")}
 `:''}
@@ -30676,12 +30733,54 @@ const CA_TONE='rgb(220,180,134)';   // ٦٫٥٦ كان ٢٠٦،١٦٤،١٢٢ ع
 const wakeOn=(()=>{let lk=null,busy=false;const want=()=>{if(busy||lk||document.hidden)return;const w=navigator.wakeLock;if(!w||!w.request)return;busy=true;w.request('screen').then(l=>{lk=l;l.addEventListener('release',()=>{lk=null})}).catch(()=>{}).finally(()=>{busy=false})};
  try{document.addEventListener('visibilitychange',want);addEventListener('pointerdown',want,{passive:true});want()}catch(e){}return want})();
 function uiPick(el){const p=el&&el.parentElement;if(!p)return;for(const c of p.children)c.classList.toggle('on',c===el)}
-function soloGoSync(){const e=document.querySelector('.soloGo .goDiff');if(e)e.textContent=T((DIFF_P[RM.diff||'mid']||DIFF_P.mid).n)}
+function soloGoSync(){const d=RM.diff||'mid',e=document.querySelector('.soloGo .goDiff');if(e)e.textContent=T((DIFF_P[d]||DIFF_P.mid).n);
+ /* ٧٫١٦ — المنصّة تتبدّل مع المستوى: الشعار واسمه ومدى مستوى الخصم ووصفه */
+ try{const sc=document.querySelector('.soX');if(!sc)return;const g=sc.dataset.g;
+  const c=document.getElementById('soCrest');if(c){c.innerHTML=soCrest(d,84);c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop')}
+  const n=document.getElementById('soOpN');if(n)n.textContent=T((DIFF_P[d]||DIFF_P.mid).n);
+  const l=document.getElementById('soOpL');if(l)l.textContent=soLvTxt(d);
+  const y=document.querySelector('#soSay span');if(y)y.textContent=((DIFF_SAY[g]||{})[d])||''}catch(x){}}
+/* ٧٫١٦ — «صفحة خيارات اللعب منظرها قديم»: صارت منصّة مواجهة — أنت ضدّ شعار المستوى على قاعدتين ذهبيّتين،
+   والمستويات شعاراتٌ مطليّة بالمينا (زمرّد، ياقوت أزرق، جمشت، ياقوت أحمر) بنجومها، والعدد طاولةٌ صغيرة بمقاعدها، والطور برسمته */
+const SO_TIER={easy:['#3FC486','#1B7A4E','#0B3F28',1],mid:['#5B9BFF','#2459C4','#0E2A66',2],hard:['#B77CFF','#6C35C2','#2E1060',3],imp:['#FF6B6B','#C4262F','#5A0A10',4]};
+let _soId=0;
+function soStar(cx,cy,r){let q='';for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;q+=(cx+Math.cos(a)*rr).toFixed(1)+','+(cy+Math.sin(a)*rr).toFixed(1)+' '}return q}
+function soCrest(k,px){const t=SO_TIER[k]||SO_TIER.mid,id='sc'+(++_soId),n=t[3];
+ const P={1:[[50,58,17]],2:[[37,58,12],[63,58,12]],3:[[50,44,11],[35,66,11],[65,66,11]],4:[[37,46,10],[63,46,10],[37,70,10],[63,70,10]]}[n];
+ const sh='M50 6 L90 19 V52 C90 79 72 96 50 105 C28 96 10 79 10 52 V19 Z';
+ return `<svg viewBox="0 0 100 118" width="${px}" height="${Math.round(px*1.18)}" aria-hidden="true"><defs>
+  <linearGradient id="${id}r" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF3C8"/><stop offset=".35" stop-color="#F0C14E"/><stop offset=".7" stop-color="#B0761A"/><stop offset="1" stop-color="#E8B23A"/></linearGradient>
+  <radialGradient id="${id}e" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="${t[0]}"/><stop offset=".55" stop-color="${t[1]}"/><stop offset="1" stop-color="${t[2]}"/></radialGradient>
+  <linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF6D6"/><stop offset=".6" stop-color="#F2C650"/><stop offset="1" stop-color="#B98424"/></linearGradient></defs>
+  <ellipse cx="50" cy="112" rx="30" ry="5" fill="rgba(0,0,0,.45)"/>
+  <path d="${sh}" fill="url(#${id}r)" stroke="#5A3A08" stroke-width="1.2"/>
+  <path d="${sh}" transform="translate(50 56) scale(.8) translate(-50 -56)" fill="url(#${id}e)" stroke="#3A2303" stroke-opacity=".55" stroke-width="1.4"/>
+  <path d="M50 17 L78 26 V40 C62 34 38 34 22 40 V26 Z" fill="#fff" opacity=".16"/>
+  ${P.map(([x,y,r])=>`<polygon points="${soStar(x,y+1.5,r)}" fill="rgba(0,0,0,.35)"/><polygon points="${soStar(x,y,r)}" fill="url(#${id}s)" stroke="#6E4A0E" stroke-width=".8"/>`).join('')}
+  ${k==='imp'?`<path d="M30 12 L36 0 L43 8 L50 -3 L57 8 L64 0 L70 12 Z" transform="translate(0 4)" fill="url(#${id}s)" stroke="#6E4A0E" stroke-width="1"/>`:''}
+ </svg>`}
+function soLvTxt(d){const R={easy:[2,6],mid:[7,14],hard:[15,24],imp:[25,40]}[d]||[7,14];return 'مستوى '+R[0]+' إلى '+R[1]}
+function soVsHTML(g,d){
+ return `<div class="soVs"><i class="soRays"></i>
+  <div class="soSide soMe"><i class="soPd"></i><div class="soAv">${avatarArt(76)}</div><b>${esc(S.name||'أنت')}</b><s>مستوى ${lvl(S.xp||0)}</s></div>
+  <div class="soMid"><i class="soMd">${ico('swords',26)}</i><em>ضدّ</em></div>
+  <div class="soSide soTh"><i class="soPd"></i><div class="soCr" id="soCrest">${soCrest(d,84)}</div><b id="soOpN">${T((DIFF_P[d]||DIFF_P.mid).n)}</b><s id="soOpL">${soLvTxt(d)}</s></div></div>`}
+function soTable(n){const seat=(x,y,c)=>`<circle cx="${x}" cy="${y}" r="5.2" fill="${c}" stroke="#0B1530" stroke-width="1.6"/>`;
+ const G='#FFD66E',B='#6FA2FF';
+ return `<svg viewBox="0 0 48 48" width="44" height="44" aria-hidden="true"><rect x="7" y="7" width="34" height="34" rx="4" fill="#E2B878" stroke="#E8B23A" stroke-width="2.2"/>
+  <rect x="11" y="11" width="26" height="26" rx="1.5" fill="none" stroke="#9B6A2E" stroke-width=".9"/><circle cx="24" cy="24" r="5" fill="none" stroke="#9B6A2E" stroke-width=".9"/><circle cx="24" cy="24" r="1.8" fill="#C4262F"/>
+  ${[[11,11],[37,11],[11,37],[37,37]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="2.2" fill="#2A1A08"/>`).join('')}
+  ${seat(24,45,G)}${seat(24,3,n===4?G:B)}${n===4?seat(3,24,B)+seat(45,24,B):''}</svg>`}
+function caMdIco(k){const coin=(x,y,c,r)=>`<circle cx="${x}" cy="${y+1.4}" r="${r}" fill="rgba(0,0,0,.4)"/><circle cx="${x}" cy="${y}" r="${r}" fill="${c}" stroke="rgba(0,0,0,.45)" stroke-width=".8"/><circle cx="${x}" cy="${y}" r="${r*.6}" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".8"/>`;
+ if(k==='classic')return `<svg viewBox="0 0 40 32" aria-hidden="true">${coin(12,13,'#F1E6CE',8)}${coin(28,13,'#2A2A2E',8)}${coin(20,21,'#D2323A',7.5)}</svg>`;
+ if(k==='disc')return `<svg viewBox="0 0 40 32" aria-hidden="true">${coin(12,16,'#F1E6CE',8.5)}${coin(28,16,'#2A2A2E',8.5)}</svg>`;
+ if(k==='pts')return `<svg viewBox="0 0 40 32" aria-hidden="true">${coin(20,16,'#E8B23A',11)}<polygon points="${soStar(20,16,6.5)}" fill="#FFF3C8"/></svg>`;
+ return `<svg viewBox="0 0 40 32" aria-hidden="true"><path d="M12 5 H28 V11 C28 18 24 21 20 21 C16 21 12 18 12 11 Z" fill="#F0C14E" stroke="#8A5A10" stroke-width="1"/><path d="M12 8 H7 C7 14 10 15 13 15 M28 8 H33 C33 14 30 15 27 15" fill="none" stroke="#E8B23A" stroke-width="2"/><rect x="18" y="21" width="4" height="4" fill="#C9951F"/><rect x="13" y="25" width="14" height="4" rx="1" fill="#B0761A"/></svg>`}
 function caPtsVis(){const r=document.querySelector('.segC.ptsT');if(r)r.hidden=RM.caMd!=='pts'}
 function caMdSeg(after){
  const md=RM.caMd||'classic', T=RM.caPtsT===120?120:160;
  return `<div class="segC m4">${[['classic','كلاسيكيّ','قطع لونك ثمّ الملكة'],['disc','ديسك بول','قطع لونك — بلا ملكة'],['pts','حاصد النقاط','<span class="ptsKey"><i><s class="w"></s>٢٠</i><i><s class="b"></s>١٠</i><i><s class="q"></s>٥٠</i></span>'],['icf','بطولة','٢٥ نقطة أو ٨ ألواح']].map(([k,a,b])=>
-  `<button class="${md===k?'on':''}" onclick="RM.caMd='${k}';try{localStorage.setItem('caMd','${k}')}catch(e){};${after}"><b>${a}</b><span>${b}</span></button>`).join('')}</div>
+  `<button class="${md===k?'on':''}" data-md="${k}" onclick="RM.caMd='${k}';try{localStorage.setItem('caMd','${k}')}catch(e){};${after}"><i class="mdI">${caMdIco(k)}</i><b>${a}</b><span>${b}</span></button>`).join('')}</div>
  <div class="segC ptsT"${md==='pts'?'':' hidden'}>${[120,160].map(n=>`<button class="${T===n?'on':''}" onclick="RM.caPtsT=${n};try{localStorage.setItem('caPtsT','${n}')}catch(e){};${after}"><b>${arN(n)} نقطة</b></button>`).join('')}</div>`;
 }
 try{const m=localStorage.getItem('caMd');RM.caMd=/^(pts|disc|icf)$/.test(m||'')?m:'classic';RM.caPtsT=localStorage.getItem('caPtsT')==='120'?120:160}catch(e){}
